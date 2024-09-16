@@ -11,7 +11,7 @@
       USE PARAMS, ONLY                   :  DELBAN
 
       INTEGER(LONG), PARAMETER, PRIVATE :: SUBR_BEGEND = BANDIT_BEGEND
-
+      include "BANDIT_BLOCK_DATA.fi"
 ! Notes:
 ! ------
 
