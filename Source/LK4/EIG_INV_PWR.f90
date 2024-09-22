@@ -25,7 +25,9 @@
 ! End MIT license text.                                                                                      
 
        SUBROUTINE EIG_INV_PWR
-  
+      #ifdef MKLDSS
+         use mkl_dss   
+      #endif MKLDSS  
 ! Solves for eigenvalues and eigenvectors when method is INV. Code is only valid for the 1st eigenval/vec. Inverse Power is an
 ! iterative method
  
@@ -35,15 +37,16 @@
                                          NTERM_KMSMs, NTERM_MLL, NUM_EIGENS, NVEC, SOL_NAME, WARN_ERR
       USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC, TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  BAILOUT, EPSIL, KLLRAT, MXITERI, SOLLIB, SPARSE_FLAVOR, SPARSTOR, SUPINFO, SUPWARN
+      USE PARAMS, ONLY                :  BAILOUT, EPSIL, KLLRAT, MXITERI, SOLLIB, SPARSE_FLAVOR, SPARSTOR, SUPINFO, SUPWARN !, CRS_CSS
       USE SUBR_BEGEND_LEVELS, ONLY    :  EIG_INV_PWR_BEGEND
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
       USE MODEL_STUF, ONLY            :  EIG_N2, EIG_SIGMA
       USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_KLLD, J_KLLD, KLLD, I_MLL, J_MLL, MLL,                               &
                                          I_KMSM, I2_KMSM, J_KMSM, KMSM, I_KMSMs, I2_KMSMs, J_KMSMs, KMSMs 
       USE SPARSE_MATRICES, ONLY       :  SYM_KLL, SYM_KLLD, SYM_MLL
-      USE LAPACK_LIN_EQN_DPB
+      USE LAPACK_LIN_EQN_DPB 
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
+      USE SuperLU_STUF, ONLY          :  SLU_FACTORS
  
       USE EIG_INV_PWR_USE_IFs
 
@@ -73,6 +76,14 @@
                                                            ! KMSM will not be equilibrated so set these to zero
       REAL(DOUBLE)                    :: PERCENT_CHANGE    ! % change in eigenvalue estimate between two successive iterations
       REAL(DOUBLE)                    :: RCOND             ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
+
+      #ifdef MKLDSS
+      !DSS REAL
+      TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER perm(1) ! DSS VAR   
+      INTEGER :: dsserror
+      REAL(DOUBLE),allocatable        :: SOLN(:),rhs(:)       ! Solution
+      #endif MKLDSS 
 
       INTRINSIC                       :: MIN
 
@@ -148,6 +159,44 @@
 
             INFO = 0
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KMSM', NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, INFO )
+
+      #ifdef MKLDSS
+         ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED           
+            
+            ! IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
+                
+            WRITE(*,*) "Intel MKL Direct Sparse Solver Factoring"
+                       
+            ! Initialize the solver.
+                allocate(SOLN(ndofl),rhs(ndofl) )
+                dsserror = DSS_CREATE(handle, MKL_DSS_DEFAULTS)
+                
+                IF (dsserror /= MKL_DSS_SUCCESS)  stop 'DSS error in initializing :' 
+                iNFO = dsserror
+            
+            ! Define the non-zero structure of the matrix.
+                IF (SPARSTOR == 'SYM   ') THEN
+                    dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_SYMMETRIC, I_KMSM  , NDOFL, NDOFL, J_KMSM, NTERM_KMSM) !using KMSM  
+                ELSE
+                    dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_NON_SYMMETRIC, I_KMSM  , NDOFL, NDOFL, J_KMSM, NTERM_KMSM) !using KMSM    
+                ENDIF    
+                
+                        
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in non zero defining:'
+                perm(1) = 0
+                
+                !reorder
+                dsserror = DSS_REORDER(handle, MKL_DSS_DEFAULTS, perm)
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in reordering :' 
+                
+                
+                ! Factor the matrix. 
+                dsserror = DSS_FACTOR_REAL(handle, MKL_DSS_DEFAULTS, KMSM) !using KMSM
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in Factoring:' 
+      #endif MKLDSS
 
          ELSE
 
@@ -229,6 +278,26 @@ iters:DO
                ELSE
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KLL' , NDOFL, NTERM_KLL , I_KLL , J_KLL , KLL , ITER_NUM, MVEC, INFO )
                ENDIF
+      #ifdef MKLDSS
+            ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN
+                   
+                    ! IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
+                    DO I=1,NDOFL
+                         RHS(i) = MVEC(I,1)
+                    ENDDO 
+                    
+                    dsserror = DSS_SOLVE_REAL (handle, MKL_DSS_DEFAULTS ,rhs , 1, SOLN)
+                    INFO = dsserror
+                    IF (dsserror /= MKL_DSS_SUCCESS) then 
+                        stop 'DSS error in Solving :'
+                    else
+                      DO I=1,NDOFL
+                         MVEC(I,1) = SOLN(I)
+                      ENDDO 
+                    write (F06,9902)  'KMSM','EIG_INV_PWR'
+9902                FORMAT(' DSS FACTORIZATION OF MATRIX ', A, ' SUCCEEDED IN SUBR ', A)
+                    endif         
+      #endif MKLDSS
 
             ELSE
 
@@ -333,6 +402,34 @@ iters:DO
          MODE_NUM(I) = I
       ENDDO
 
+!added
+
+       FreeS:IF (SOLLIB == 'SPARSE  ') THEN  
+
+         IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+             INFO = 0
+             CALL C_FORTRAN_DGSSV( 3, NDOFL, NTERM_KMSM, 1, KMSM , I_KMSM , J_KMSM , MVEC, NDOFL, SLU_FACTORS, INFO )
+
+            IF (INFO .EQ. 0) THEN
+               WRITE (*,*) 'SUPERLU STORAGE FREED'
+            ELSE
+               WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', INFO
+            ENDIF
+
+      #ifdef MKLDSS
+         ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
+
+                ! Deallocate solver storage and various local arrays.
+                dsserror = DSS_DELETE(handle, MKL_DSS_DEFAULTS)
+                deallocate(SOLN,rhs)
+                IF (dsserror /= MKL_DSS_SUCCESS) STOP 'DSS error in CLEARING :' 
+         ENDIF
+      #endif MKLDSS
+      ENDIF FreeS        
+      
+
+
+!added
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages         
       WRITE(SC1,32345,ADVANCE='NO') '       Deallocate KMSM'
       CALL DEALLOCATE_SPARSE_MAT ( 'KMSM' )
