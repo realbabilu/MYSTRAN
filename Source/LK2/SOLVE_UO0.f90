@@ -25,7 +25,9 @@
 ! End MIT license text.                                                                                      
  
       SUBROUTINE SOLVE_UO0
-
+      #ifdef MKLDSS
+         use mkl_dss   
+      #endif MKLDSS
 ! Solves KOO*UO0 = PO for matrix UO0 
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -34,7 +36,7 @@
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  SOLVE_UO0_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  PRTUO0, SOLLIB, SPARSE_FLAVOR
+      USE PARAMS, ONLY                :  PRTUO0, SOLLIB, SPARSE_FLAVOR, CRS_CCS
       USE SPARSE_MATRICES, ONLY       :  I_PO, J_PO, PO, I_KOO, J_KOO, KOO
       USE COL_VECS, ONLY              :  UO0_COL
       USE LAPACK_LIN_EQN_DPB
@@ -58,6 +60,14 @@
       REAL(DOUBLE)                    :: NULL_SCALE_FACS(NDOFO)
                                                            ! LAPACK_S values not used so null this vector
       REAL(DOUBLE)                    :: INOUT_COL(NDOFO)  ! Temp variable for one col of load matrix PO
+
+      #ifdef MKLDSS
+      TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER perm(1) ! DSS VAR
+      INTEGER :: dsserror
+      REAL(DOUBLE),allocatable        :: SOLN(:)       ! Solution
+      #endif MKLDSS
+
 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
@@ -119,6 +129,26 @@
 
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KOO', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, J, INOUT_COL, INFO )
+
+      #ifdef MKLDSS
+               elseIF (SPARSE_FLAVOR(1:3) == 'DSS') THEN
+                    IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
+                    allocate(SOLN(NDOFO))
+                    
+                    dsserror = DSS_SOLVE_REAL(handle, MKL_DSS_DEFAULTS ,INOUT_COL ,1, SOLN)
+                    INFO = dsserror
+                    IF (dsserror /= MKL_DSS_SUCCESS) then 
+                        stop 'DSS error in Solving :'
+                    else
+                      DO I=1,NDOFO
+                         INOUT_COL(I) = SOLN(I)
+                      ENDDO
+                      deallocate(SOLN)
+                    write (F06,9902)  'KOO','solve_Goa'
+9902                FORMAT(' DSS FACTORIZATION OF MATRIX ', A, ' SUCCEEDED IN SUBR ', A)
+                    endif  
+      #endif MKLDSS                     
+
 
                ELSE
 

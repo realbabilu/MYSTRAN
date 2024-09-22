@@ -25,6 +25,9 @@
 ! End MIT license text.                                                                                      
 
       SUBROUTINE REDUCE_KFF_TO_KAA ( PART_VEC_F_AO )
+      #ifdef MKLDSS
+         use mkl_dss   
+      #endif MKLDSS
  
 ! Call routines to reduce the KFF linear stiffness matrix from the F-set to the A, O-sets
  
@@ -37,7 +40,7 @@
       USE IOUNT1, ONLY                :  ERR, F04, F06, L2E, LINK2E, L2E_MSG, SC1, WRT_LOG
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, KOO_SDIA, NDOFF, NDOFA, NDOFO, NTERM_KFF,       &
                                          NTERM_KAA, NTERM_KAO, NTERM_KOO, NTERM_GOA
-      USE PARAMS, ONLY                :  KOORAT, MATSPARS, SOLLIB, SPARSTOR, SPARSE_FLAVOR, RCONDK
+      USE PARAMS, ONLY                :  KOORAT, MATSPARS, SOLLIB, SPARSTOR, SPARSE_FLAVOR, RCONDK, CRS_CCS 
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  REDUCE_KFF_TO_KAA_BEGEND
       USE CONSTANTS_1, ONLY           :  ONE 
@@ -89,6 +92,13 @@
       REAL(DOUBLE)                    :: RCOND               ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
       REAL(DOUBLE)                    :: SMALL               ! A number used in filtering out small numbers from a full matrix
  
+      #ifdef MKLDSS
+      TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER perm(1) ! DSS VAR
+      INTEGER :: dsserror
+      REAL(DOUBLE),allocatable        :: SOLN(:)!NDOFo)       ! Solution
+      #endif MKLDSS  
+
       INTRINSIC                       :: DABS
 
 ! **********************************************************************************************************************************
@@ -171,6 +181,42 @@
 
                INFO = 0
                CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KOO', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, INFO )
+
+      #ifdef MKLDSS
+         ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED           
+            
+            IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
+                
+            WRITE(*,*) "Intel MKL Direct Sparse Solver Factoring"
+                       
+            IF (SPARSTOR == 'SYM   ') STOP 'SYM NOT YET'
+             
+            ! Initialize the solver.
+                dsserror = DSS_CREATE(handle, MKL_DSS_DEFAULTS)
+                
+                IF (dsserror /= MKL_DSS_SUCCESS)  stop 'DSS error in initializing :' 
+                iNFO = dsserror
+            
+            ! Define the non-zero structure of the matrix.
+                dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_NON_SYMMETRIC, I_KOO  , NDOFO, NDOFO, J_KOO, NTERM_KOO) !using KMSM
+                        
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in non zero defining:'
+                perm(1) = 0
+                
+                !reorder
+                dsserror = DSS_REORDER(handle, MKL_DSS_DEFAULTS, perm)
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in reordering :' 
+                
+                
+                ! Factor the matrix. 
+                dsserror = DSS_FACTOR_REAL(handle, MKL_DSS_DEFAULTS, KOO) !using KMSM
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in Factoring:' 
+               
+      #endif MKLDSS               
+
 
             ELSE
 

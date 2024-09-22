@@ -26,6 +26,9 @@
 
  
       SUBROUTINE SOLVE_GOA
+      #ifdef MKLDSS
+         use mkl_dss   
+      #endif MKLDSS
 
 ! Solves the sustem of equations: KOO*GOA = -KAO' for matrix GOA which is used in the reduction of the F set stiffness, mass and
 ! load matrices from the F-set to the A, O_sets
@@ -34,7 +37,7 @@
       USE IOUNT1, ONLY                :  FILE_NAM_MAXLEN, WRT_LOG, ERR, F04, F06, SCR
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FACTORED_MATRIX, FATAL_ERR, KOO_SDIA, NDOFA, NDOFO, NTERM_GOA, NTERM_KOO,   &
                                          NTERM_KAO
-      USE PARAMS, ONLY                :  EPSIL, PRTGOA
+      USE PARAMS, ONLY                :  EPSIL, PRTGOA, CRS_CCS
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  SOLVE_GOA_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
@@ -71,6 +74,13 @@
       REAL(DOUBLE)                    :: INOUT_COL(NDOFO)  ! A column of KAO'
       REAL(DOUBLE)                    :: KOO_SCALE_FACS(NDOFO)
                                                            ! KOO scale facs. KOO will not be equilibrated so these are set to 1.0
+
+      #ifdef MKLDSS
+      TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER perm(1) ! DSS VAR
+      INTEGER :: dsserror
+      REAL(DOUBLE),allocatable        :: SOLN(:)       ! Solution
+      #endif MKLDSS 
  
       INTRINSIC                       :: DABS
 
@@ -147,6 +157,25 @@
 
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KOO', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, J, INOUT_COL, INFO )
+
+      #ifdef MKLDSS
+               elseIF (SPARSE_FLAVOR(1:3) == 'DSS') THEN
+                    IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
+                    allocate( SOLN(NDOFO))       ! Solution
+                    dsserror = DSS_SOLVE_REAL(handle, MKL_DSS_DEFAULTS ,INOUT_COL ,1, SOLN)
+                    INFO = dsserror
+                    IF (dsserror /= MKL_DSS_SUCCESS) then 
+                        stop 'DSS error in Solving :'
+                    else
+                      DO I=1,NDOFO
+                         INOUT_COL(I) = SOLN(I)
+                      ENDDO 
+                    deallocate( SOLN)       ! Solution  
+                    write (F06,9902)  'KOO','solve_Goa'
+9902                FORMAT(' DSS FACTORIZATION OF MATRIX ', A, ' SUCCEEDED IN SUBR ', A)
+                    endif 
+      #endif MKLDSS    
+
 
                ELSE
 
