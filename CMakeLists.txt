@@ -16,7 +16,7 @@ enable_language(Fortran)
 
 
 # basic compiler and output options
-set(CMAKE_SOURCE_DIR "${PROJECT_SOURCE_DIR}/Stage4")
+set(CMAKE_SOURCE_DIR "${PROJECT_SOURCE_DIR}/Source")
 set(PROJECT_BINARY_DIR "${PROJECT_SOURCE_DIR}/Binaries")
 if(MKLDSS)
 set(CMAKE_FLAGS " -fpp -DMKLDSS -c -fbacktrace")
