@@ -25,7 +25,9 @@
 ! End MIT license text.                                                                                      
  
       SUBROUTINE SOLVE_DLR
-
+      #ifdef MKLDSS
+         use mkl_dss   
+      #endif MKLDSS
 ! Solves KLL*DLR = -KLR for matrix DLR. However, we will use rows of KRL instead of cols of KLR in the solution.
  
 ! For a description of Craig-Bamptom analyses, see Appendix D to the MYSTRAN User's Referance Manual
@@ -35,12 +37,14 @@
       USE IOUNT1, ONLY                :  FILE_NAM_MAXLEN, WRT_ERR, WRT_LOG, ERR, F04, F06, SCR
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FACTORED_MATRIX, FATAL_ERR, KLL_SDIA, NDOFR, NDOFL, NTERM_DLR, NTERM_KLL,   &
                                          NTERM_KRL
-      USE PARAMS, ONLY                :  EPSIL, PRTDLR, SOLLIB, SPARSE_FLAVOR, SPARSTOR, NOCOUNTS
+      USE PARAMS, ONLY                :  EPSIL, PRTDLR, SOLLIB, SPARSE_FLAVOR, SPARSTOR, NOCOUNTS, CRS_CCS
       USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC, TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  SOLVE_DLR_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE SPARSE_MATRICES, ONLY       :  I2_DLR, I_DLR, J_DLR, DLR, I_DLRt, I2_DLRt, J_DLRt, DLRt, I_KRL, J_KRL, KRL,              &
-                                         I_KLL, I2_KLL, J_KLL, KLL 
+                                         I_KLL, I2_KLL, J_KLL, KLL
+      USE SuperLU_STUF, ONLY          :  SLU_FACTORS
+ 
                                          
       USE LAPACK_LIN_EQN_DPB
 
@@ -78,6 +82,16 @@
       REAL(DOUBLE)                    :: K_INORM           ! Inf norm of KLL matrix (det in  subr COND_NUM)
       REAL(DOUBLE)                    :: RCOND             ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
  
+      #ifdef MKLDSS
+      !DSS REAL
+      TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER perm(1) ! DSS VAR     
+      !INTEGER buff(bufLen) ! DSS VAR
+      INTEGER :: dsserror
+      REAL(DOUBLE),allocatable        :: SOLN(:)       ! Solution
+      #endif MKLDSS
+      
+
       INTRINSIC                       :: DABS
       
       allocate(EQUIL_SCALE_FACS(NDOFL) , DLR_COL(NDOFL) , INOUT_COL(NDOFL) , stat=memerror )
@@ -118,6 +132,42 @@
 
             INFO = 0
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, INFO )
+
+      #ifdef MKLDSS
+         ELSEIF (SPARSE_FLAVOR(1:3) == 'DSS') THEN
+                IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET in DSS'
+                allocate( SOLN(NDOFL))       ! Solution
+                INFO = 0
+                ! Initialize the solver.
+                dsserror = DSS_CREATE(handle, MKL_DSS_DEFAULTS)
+                
+                
+                IF (dsserror /= MKL_DSS_SUCCESS)  stop 'DSS error in initializing :' 
+                INFO = dsserror
+                IF      (SPARSTOR == 'SYM   ') THEN
+                    dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_SYMMETRIC, I_KLL  , NDOFL, NDOFL, J_KLL , NTERM_KLL) !using KLL 
+                ELSE
+                    dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_NON_SYMMETRIC, I_KLL  , NDOFL, NDOFL, J_KLL , NTERM_KLL) !using KLL           
+                ENDIF
+
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in non zero defining:'
+                perm(1) = 0
+             
+                                
+                !reorder
+                dsserror = DSS_REORDER(handle, MKL_DSS_DEFAULTS, perm)
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in reordering :' 
+                
+                
+                !factor
+                dsserror = DSS_FACTOR_REAL(handle, MKL_DSS_DEFAULTS, KLL) !using KLL
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in Factoring:' 
+         #endif MKLDSS
+                
+
 
          ELSE
 
@@ -198,6 +248,22 @@
 
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, J, INOUT_COL, INFO )
+      #ifdef MKLDSS
+               ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
+                  INFO = 0       
+                    
+                  dsserror = DSS_SOLVE_REAL(handle, MKL_DSS_DEFAULTS ,INOUT_COL ,1, SOLN)
+                  INFO = dsserror
+                  IF (dsserror /= MKL_DSS_SUCCESS) then 
+                     stop 'DSS error in Solving :'
+                  else
+                    DO I=1,NDOFL
+                        INOUT_COL(I) = SOLN(I)
+                    ENDDO 
+                    write (F06,9902)  'KLL','LINK3'
+9902                FORMAT(' DSS FACTORIZATION OF MATRIX ', A, ' SUCCEEDED IN SUBR ', A)
+                  endif    
+      #endif MKLDSS
 
                ELSE
 
@@ -263,6 +329,31 @@
             CALL WRITE_SPARSE_CRS ( 'CB BOUNDARY MODE MATRIX DLR', 'L ', 'R ', NTERM_DLR, NDOFL, I_DLR, J_DLR, DLR )
          ENDIF
       ENDIF
+
+! clearing---added
+
+      IF (SOLLIB == 'SPARSE  ') THEN
+               IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+                   INFO = 0
+                   CALL C_FORTRAN_DGSSV( 3, NDOFL, NTERM_KLL, 1, KLL , I_KLL , J_KLL , INOUT_COL, NDOFL, SLU_FACTORS, INFO )
+                   IF (INFO .EQ. 0) THEN
+                       WRITE (*,*) 'SUPERLU STORAGE FREED'
+                   ELSE
+                       WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', INFO
+                   ENDIF
+      #ifdef MKLDSS                    
+               ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN 
+                    dsserror = DSS_DELETE(handle, MKL_DSS_DEFAULTS) !clearing
+                    deallocate( SOLN)       ! Solution
+                    IF (dsserror /= MKL_DSS_SUCCESS) STOP 'DSS error in CLEARING :' 
+               ENDIF
+      #endif MKLDSS
+      ENDIF
+      
+               
+                   
+                   
+                   
 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN

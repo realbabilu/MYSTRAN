@@ -25,7 +25,9 @@
 ! End MIT license text.                                                                                      
  
       SUBROUTINE SOLVE_PHIZL1 ( NTERM_CRS3 )
-
+      #ifdef MKLDSS
+         use mkl_dss   
+      #endif MKLDSS
 
 ! Solves KLL*PHIZL1 = CRS3 for PHIZL1   where CRS3 = (MLR + MLL*DLR).
  
@@ -37,14 +39,14 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FACTORED_MATRIX, FATAL_ERR, KLL_SDIA, NDOFR, NDOFL, NTERM_DLR,              &
                                          NTERM_PHIZL1, NTERM_KLL, NTERM_KLLs
       USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC, TSEC
-      USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSE_FLAVOR, SPARSTOR, NOCOUNTS
+      USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSE_FLAVOR, SPARSTOR, NOCOUNTS,CRS_CCS
       USE SUBR_BEGEND_LEVELS, ONLY    :  SOLVE_PHIZL1_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE SCRATCH_MATRICES, ONLY      :  I_CRS3, J_CRS3, CRS3
       USE SPARSE_MATRICES, ONLY       :  I2_PHIZL1, I_PHIZL1, J_PHIZL1, PHIZL1, I2_PHIZL1t, I_PHIZL1t, J_PHIZL1t, PHIZL1t,         &
                                          I_KLL, I2_KLL, J_KLL, KLL, I_KLLs, I2_KLLs, J_KLLs, KLLs
       USE LAPACK_LIN_EQN_DPB
-
+      USE SuperLU_STUF, ONLY          :  SLU_FACTORS
       USE SOLVE_PHIZL1_USE_IFs
 
       IMPLICIT NONE
@@ -81,6 +83,14 @@
       REAL(DOUBLE)                    :: PHIZL1_COL(NDOFL)   ! A column of PHIZL1   solved for herein
       REAL(DOUBLE)                    :: RCOND             ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
  
+      #ifdef MKLDSS
+      !DSS REAL
+      TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER perm(1) ! DSS VAR
+      INTEGER :: dsserror
+      REAL(DOUBLE),allocatable        :: SOLN(:)       ! Solution      
+      #endif MKLDSS
+
       INTRINSIC                       :: DABS
 
 ! **********************************************************************************************************************************
@@ -92,6 +102,81 @@
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
+! added
+
+! **********************************************************************************************************************************      
+      DEB_PRT(1) = 64
+      DEB_PRT(2) = 65
+      
+      IF      (SOLLIB == 'BANDED  ') THEN
+        INFO  = 0
+        EQUED = 'N'  
+        CALL SYM_MAT_DECOMP_LAPACK ( SUBR_NAME, 'KLL', 'L ', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, 'Y', 'N', 'N', 'N', DEB_PRT, &
+          EQUED, KLL_SDIA, K_INORM, RCOND, EQUIL_SCALE_FACS, INFO )
+        IF (EQUED == 'Y') THEN                         ! If EQUED == 'Y' then error. We don't want KLL equilibrated
+               WRITE(ERR,6001) SUBR_NAME, EQUED
+               WRITE(F06,6001) SUBR_NAME, EQUED
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+        ENDIF
+        
+      ELSE IF (SOLLIB == 'SPARSE  ') THEN     
+          
+          IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+              
+              CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, INFO )
+          #ifdef MKLDSS    
+          ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN
+              
+                IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET in DSS'
+                allocate( SOLN(NDOFL))       ! Solution
+                ! Initialize the solver.
+                dsserror = DSS_CREATE(handle, MKL_DSS_DEFAULTS)
+                
+                IF (dsserror /= MKL_DSS_SUCCESS)  stop 'DSS error in initializing :' 
+                INFO = dsserror
+                IF      (SPARSTOR == 'SYM   ') THEN
+                    dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_SYMMETRIC, I_KLL  , NDOFL, NDOFL, J_KLL , NTERM_KLL) !using KLL 
+                ELSE
+                    dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_NON_SYMMETRIC, I_KLL  , NDOFL, NDOFL, J_KLL , NTERM_KLL) !using KLL  
+                ENDIF
+                
+        
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in non zero defining:'
+                perm(1) = 0
+
+                !reorder
+                dsserror = DSS_REORDER(handle, MKL_DSS_DEFAULTS, perm)
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in reordering :' 
+                
+                
+                ! Factor the matrix. 
+                dsserror = DSS_FACTOR_REAL(handle, MKL_DSS_DEFAULTS, KLL) !using KLL
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in Factoring:' 
+            #endif MKLDSS
+            ELSE
+
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,9991) SUBR_NAME, 'SPARSE_FLAVOR'
+            WRITE(F06,9991) SUBR_NAME, 'SPARSE_FLAVOR'
+            CALL OUTA_HERE ( 'Y' )                
+                
+            ENDIF
+
+        ELSE
+
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,9991) SUBR_NAME, 'SOLLIB'
+         WRITE(F06,9991) SUBR_NAME, 'SOLLIB'
+         CALL OUTA_HERE ( 'Y' )
+              
+        ENDIF             
+
+! **********************************************************************************************************************************            
+
 
 ! Solve for PHIZL1  
 
@@ -149,6 +234,24 @@
 
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, J, INOUT_COL, INFO )
+      #ifdef MKLDSS
+               ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN
+                   
+                    IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
+                    dsserror = DSS_SOLVE_REAL(handle, MKL_DSS_DEFAULTS ,INOUT_COL ,1, SOLN)
+                    INFO = dsserror
+                    IF (dsserror /= MKL_DSS_SUCCESS) then 
+                        stop 'DSS error in Solving :'
+                    else
+                      DO I=1,NDOFL
+                         INOUT_COL(I) = SOLN(I)
+                      ENDDO 
+                    write (F06,9902)  'KLL','SOLVE_PHIZL1'
+9902                FORMAT(' DSS FACTORIZATION OF MATRIX ', A, ' SUCCEEDED IN SUBR ', A)
+                    endif         
+               
+      #endif MKLDSS
+
                ELSE
 
                   FATAL_ERR = FATAL_ERR + 1
@@ -180,6 +283,29 @@
   
       ENDDO
   
+FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the storage allocated inside SuperLU
+
+         IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+             INFO = 0
+             CALL C_FORTRAN_DGSSV( 3, NDOFL, NTERM_KLL, 1, KLL , I_KLL , J_KLL , INOUT_COL, NDOFL, SLU_FACTORS, INFO )
+
+            IF (INFO .EQ. 0) THEN
+               WRITE (*,*) 'SUPERLU STORAGE FREED'
+            ELSE
+               WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', INFO
+            ENDIF
+      #ifdef MKLDSS
+         ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
+                deallocate( SOLN)       ! Solution
+                ! Deallocate solver storage and various local arrays.
+                dsserror = DSS_DELETE(handle, MKL_DSS_DEFAULTS)
+                IF (dsserror /= MKL_DSS_SUCCESS) STOP 'DSS error in CLEARING :'
+      #endif MKLDSS 
+         ENDIF
+
+      ENDIF FreeS  
+
+
       call deallocate_sparse_mat ( 'KLLs' )
 
 ! The PHIZL1 data in SCRATCH-991 is written one col at a time for PHIZL1. Therefore it is rows of PHIZL1t
