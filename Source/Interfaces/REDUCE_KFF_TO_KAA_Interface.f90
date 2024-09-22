@@ -29,13 +29,15 @@
    INTERFACE
 
       SUBROUTINE REDUCE_KFF_TO_KAA ( PART_VEC_F_AO )
-
+      !#ifdef MKLDSS
+      !  use mkl_dss  
+      !#endif
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F04, F06, L2E, LINK2E, L2E_MSG, SC1, WRT_LOG
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, KOO_SDIA, NDOFF, NDOFA, NDOFO, NTERM_KFF,       &
                                          NTERM_KAA, NTERM_KAO, NTERM_KOO, NTERM_GOA
-      USE PARAMS, ONLY                :  KOORAT, MATSPARS, SOLLIB, SPARSTOR, SPARSE_FLAVOR, RCONDK
+      USE PARAMS, ONLY                :  KOORAT, MATSPARS, SOLLIB, SPARSTOR, SPARSE_FLAVOR, RCONDK, CRS_CCS
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  REDUCE_KFF_TO_KAA_BEGEND
       USE CONSTANTS_1, ONLY           :  ONE 
@@ -57,7 +59,14 @@
       INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = REDUCE_KFF_TO_KAA_BEGEND
 
       REAL(DOUBLE)                    :: SMALL               ! A number used in filtering out small numbers from a full matrix
- 
+      
+      !#ifdef MKLDSS
+      !  TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      !  INTEGER perm(1) ! DSS VAR
+      !  INTEGER :: dsserror
+      !#endif
+
+
       END SUBROUTINE REDUCE_KFF_TO_KAA
 
    END INTERFACE

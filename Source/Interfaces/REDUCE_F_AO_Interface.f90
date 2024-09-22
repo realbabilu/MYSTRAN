@@ -39,7 +39,7 @@
                                          NTERM_KFFD, NTERM_KAAD, NTERM_KAOD, NTERM_KOOD,                                           &
                                          NTERM_MFF , NTERM_MAA , NTERM_MAO , NTERM_MOO ,                                           &
                                          NTERM_PF  , NTERM_PA  , NTERM_PO  , NTERM_GOA
-      USE PARAMS, ONLY                :  EQCHK_OUTPUT, MATSPARS, PRTSTIFD, PRTSTIFF, PRTMASS, PRTFOR, SOLLIB, SPARSE_FLAVOR
+      USE PARAMS, ONLY                :  EQCHK_OUTPUT, MATSPARS, PRTSTIFD, PRTSTIFF, PRTMASS, PRTFOR, SOLLIB, SPARSE_FLAVOR, CRS_CCS
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC, TSEC
       USE DOF_TABLES, ONLY            :  TDOFI
