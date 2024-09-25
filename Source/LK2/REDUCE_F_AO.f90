@@ -27,7 +27,7 @@
       SUBROUTINE REDUCE_F_AO
       #ifdef MKLDSS
       use mkl_dss
-      #ifdef MKLDSS   
+      #endif    
 
 ! Call routines to reduce stiffness, mass, loads from F-set to A, O-sets
  
