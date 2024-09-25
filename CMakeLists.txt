@@ -61,13 +61,13 @@ if(WIN32 AND ((CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM") OR (CMAKE_Fortran_COMPI
     # Set release flags for Intel compiler dndebug problem and stack overflow 
 
     if(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
-    set(CMAKE_C_FLAGS_RELEASE "/Ox /arch:COFFEELAKE /tune:coffeelake /Qm64 /F200000000")
-    set(CMAKE_CXX_FLAGS_RELEASE "/Ox /QaxCOFFEELAKE /arch:COFFEELAKE /tune:coffeelake /Qm64 /Qpar /heap-arrays:0 /F200000000")
-    set(CMAKE_Fortran_FLAGS_RELEASE "/Ox /QaxCOFFEELAKE /arch:COFFEELAKE /tune:coffeelake /Qm64 /Qpar /heap-arrays:0 /F200000000")
+    set(CMAKE_C_FLAGS_RELEASE "/Ox /Qaxhaswell /arch:haswell /tune:haswell /Qm64  /F200000000 -traceback")
+    set(CMAKE_CXX_FLAGS_RELEASE "/Ox /Qaxhaswell /arch:haswell /tune:haswell /Qm64 /F200000000 -traceback")
+    set(CMAKE_Fortran_FLAGS_RELEASE "/Ox /Qaxhaswell /arch:haswell /tune:haswell /Qm64  /F200000000 -traceback")
     else()
-    set(CMAKE_C_FLAGS_DEBUG "  /Qm64  /heap-arrays:0 /F200000000")
-    set(CMAKE_CXX_FLAGS_DEBUG " /Qm64  /heap-arrays:0 /F200000000")
-    set(CMAKE_Fortran_FLAGS_DEBUG " /Qm64 /heap-arrays:0 /F200000000")
+    set(CMAKE_C_FLAGS_DEBUG "  /Qm64  /heap-arrays:0 /F200000000 -traceback")
+    set(CMAKE_CXX_FLAGS_DEBUG " /Qm64  /heap-arrays:0 /F200000000 -traceback")
+    set(CMAKE_Fortran_FLAGS_DEBUG " /Qm64 /heap-arrays:0 /F200000000 -traceback")
     endif(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
 endif()
 
@@ -288,14 +288,6 @@ set(MODULES_ALL_FILES
   ${USE_IFs_FILES} ${Interfaces_FILES} ${Modules_FILES}
   ${Modules_LAPACK_FILES} ${Modules_ARPACK_FILES}
 )
-# Remove specific file if BLAS_FOUND is true
-if (BLAS_FOUND)
-  message(STATUS "BLAS Unresolved_Externals_Problem removed")
-  list(REMOVE_ITEM MODULES_ALL_FILES "${Modules_DIR}/LAPACK/Unresolved_Externals_Problem.f")
-  file(GLOB_RECURSE Unresolved_Externals_FILES "${Modules_DIR}/LAPACK/Unresolved_Externals_Problem/*.f*")
-  list(REMOVE_ITEM MODULES_ALL_FILES ${Unresolved_Externals_FILES})
-endif(BLAS_FOUND)
-# Built modules
 add_library(MODULES OBJECT ${MODULES_ALL_FILES})
 
 # collect modules
