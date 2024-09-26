@@ -31,12 +31,12 @@ Extract the superlu in c:\mystran\Superlu,
 Make sure SRC folder and Fortran folder and Cmakelists.txt, Makefiles in the c:\mystran\Superlu
 
 Open Command Line Intel OneApi x64 Enviroment.
-1. Go to c:\mystran folder by type **"cd c:\mystran"** enter
+1. Go to c:\mystran folder by type **`cd c:\mystran`** enter
 2. just type run.bat enter for automatically built
-3. Alternatively, make build folder by type **mkdir build** enter
-4. Go to build folder by **"Cd build"** enter
-5. For using DSS PARDISO and Intel MKL BLAS type  **cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=TRUE  ..** in single line
-6. Alternatively,  **cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"CMAKE_BUILD_TYPE=RELEASE" ..**
+3. Alternatively, make build folder by type **`mkdir build`** enter
+4. Go to build folder by **`Cd build`** enter
+5. For using DSS PARDISO and Intel MKL BLAS type  **`cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=TRUE  ..`** in single line
+6. Alternatively,  **`cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"CMAKE_BUILD_TYPE=RELEASE" ..`**
 7. The binaries will be at c:\mystran\binaries
 
 ### Steps for Windows (x86_64) using MSYS - CBLAS and internal BLAS
