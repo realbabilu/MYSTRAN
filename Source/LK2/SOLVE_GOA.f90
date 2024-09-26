@@ -26,6 +26,9 @@
 
  
       SUBROUTINE SOLVE_GOA
+      #ifdef MKLDSS
+         use mkl_dss   
+      #endif MKLDSS
 
 ! Solves the sustem of equations: KOO*GOA = -KAO' for matrix GOA which is used in the reduction of the F set stiffness, mass and
 ! load matrices from the F-set to the A, O_sets
@@ -34,7 +37,7 @@
       USE IOUNT1, ONLY                :  FILE_NAM_MAXLEN, WRT_LOG, ERR, F04, F06, SCR
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FACTORED_MATRIX, FATAL_ERR, KOO_SDIA, NDOFA, NDOFO, NTERM_GOA, NTERM_KOO,   &
                                          NTERM_KAO
-      USE PARAMS, ONLY                :  EPSIL, PRTGOA
+      USE PARAMS, ONLY                :  EPSIL, PRTGOA, CRS_CCS
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  SOLVE_GOA_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
@@ -48,6 +51,10 @@
       USE SOLVE_GOA_USE_IFs
 
       IMPLICIT NONE
+
+      #ifdef MKLDSS
+      include 'mkl_pardiso.fi'
+      #endif MKLDSS
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'SOLVE_GOA'
@@ -67,12 +74,30 @@
       INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = SOLVE_GOA_BEGEND
 
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare real zero
-      REAL(DOUBLE)                    :: GOA_COL(NDOFO)    ! A column of GOA solved for herein
-      REAL(DOUBLE)                    :: INOUT_COL(NDOFO)  ! A column of KAO'
-      REAL(DOUBLE)                    :: KOO_SCALE_FACS(NDOFO)
+      REAL(DOUBLE),allocatable                    :: GOA_COL(:)!(NDOFO)    ! A column of GOA solved for herein
+      REAL(DOUBLE),allocatable                    :: INOUT_COL(:)!(NDOFO)  ! A column of KAO'
+      REAL(DOUBLE),allocatable                    :: KOO_SCALE_FACS(:)!(NDOFO)
                                                            ! KOO scale facs. KOO will not be equilibrated so these are set to 1.0
+
+      #ifdef MKLDSS
+      TYPE(MKL_DSS_HANDLE)            :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER                         :: perm(1) ! DSS VAR
+      INTEGER                         :: dsserror
+      REAL(DOUBLE),allocatable        :: SOLN(:)       ! Solution
+      ! pardiso var
+      INTEGER                         :: pardisoerror
+      TYPE(MKL_PARDISO_HANDLE)           pt(64)
+      !.. All other variables
+      INTEGER                         :: maxfct, mnum, mtype, phase, msglvl
+      INTEGER                         :: iparm(64)
+      INTEGER                         :: idum(1)
+      REAL*8                          :: ddum(1)
+      
+      #endif MKLDSS 
  
       INTRINSIC                       :: DABS
+
+      allocate(GOA_COL(NDOFO) , INOUT_COL(NDOFO)  , KOO_SCALE_FACS(NDOFO))
 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
@@ -147,6 +172,81 @@
 
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KOO', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, J, INOUT_COL, INFO )
+
+      #ifdef MKLDSS
+               elseIF (SPARSE_FLAVOR(1:3) == 'DSS') THEN
+                    IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
+                    allocate( SOLN(NDOFO))       ! Solution
+                    dsserror = DSS_SOLVE_REAL(handle, MKL_DSS_DEFAULTS ,INOUT_COL ,1, SOLN)
+                    INFO = dsserror
+                    IF (dsserror /= MKL_DSS_SUCCESS) then 
+                        stop 'DSS error in Solving :'
+                    else
+                      DO I=1,NDOFO
+                         INOUT_COL(I) = SOLN(I)
+                      ENDDO 
+                    deallocate( SOLN)       ! Solution  
+                    write (F06,9902)  'KOO','solve_Goa'
+9902                FORMAT(' DSS SOLVING OF MATRIX ', A, ' SUCCEEDED IN SUBR ', A)
+                    endif 
+                    
+               ELSEIF  (SPARSE_FLAVOR(1:7) == 'PARDISO') THEN
+             
+                   WRITE(*,*) "Intel MKL Pardiso"
+                   IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
+                   allocate( SOLN(NDOFO))       ! Solution 
+                   DO i = 1, 64
+                 
+                       iparm(i) = 0
+             
+                   END DO!pardiso STARTED !iparm[64] This array is used to pass various parameters 
+              
+             
+                    iparm(1) = 1 ! no solver default
+                    iparm(2) = 2 ! fill-in reordering from METIS
+                    iparm(3) = 1 ! numbers of processors       
+                    iparm(4) = 0 ! no iterative-direct algorithm
+                    iparm(5) = 0 ! no user fill-in reducing permutation
+                    iparm(6) = 0 ! solution on the first n components of x
+                    iparm(7) = 0 ! not in use
+                    iparm(8) = 9 ! numbers of iterative refinement steps
+                    iparm(9) = 0 ! not in use
+                    iparm(10) = 13 ! perturb the pivot elements with 1E-13
+                    iparm(11) = 1 ! use nonsymmetric permutation and scaling MPS
+                    iparm(12) = 0 ! not in use
+                    iparm(13) = 1 ! maximum weighted matching algorithm is ON
+                    iparm(14) = 0 ! Output: number of perturbed pivots
+                    iparm(15) = 0 ! not in use
+                    iparm(16) = 0 ! not in use
+                    iparm(17) = 0 ! not in use
+                    iparm(18) = -1 ! Output: number of nonzeros in the factor LU
+                    iparm(19) = -1 ! Output: Mflops for LU factorization
+                    iparm(20) = 0 ! Output: Numbers of CG Iterations
+                    pardisoerror = 0 ! initialize error flag
+             
+                    msglvl = 0 ! print statistical information 1=on 0=off        
+                    maxfct = 1 ! Maximal number of factors in memory >0  Generally used value is 1 
+                    mnum = 1 !The number of matrix (from 1 to maxfct) to solve; 
+
+                   
+                   !.. Back substitution and iterative refinement
+                   iparm(8) = 2 ! max numbers of iterative refinement steps
+                   phase = 33 ! only factorization
+                   soln = 0.d0
+                   CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFO, KOO, I_KOO, J_KOO, idum, 1, iparm, msglvl,INOUT_COL, SOLN, pardisoerror)    
+    
+                
+                   IF (pardisoerror /= 0) then  
+                    stop 'Pardiso error in Solving : '
+                   else
+                    DO I=1,NDOFO
+                        INOUT_COL(I) = SOLN(I)   
+                    ENDDO
+                    deallocate( SOLN)       ! Solution   
+                   endif        
+                    
+      #endif MKLDSS    
+
 
                ELSE
 
@@ -242,6 +342,8 @@
          WRITE(F04,9002) SUBR_NAME,TSEC
  9002    FORMAT(1X,A,' END  ',F10.3)
       ENDIF
+
+      deallocate   (GOA_COL , INOUT_COL  , KOO_SCALE_FACS)
 
       RETURN
 

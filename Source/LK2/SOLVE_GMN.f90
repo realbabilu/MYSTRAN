@@ -25,7 +25,7 @@
 ! End MIT license text.                                                                                      
 
       SUBROUTINE SOLVE_GMN ( PART_VEC_G_NM, PART_VEC_M )
- 
+
 ! Solves the sustem of equations: RMM*GMN = -RMN for matrix GMN which is used in the reduction of the G set stiffness, mass and
 ! load matrices from the G-set to the N, M_sets. If RMM is diagonal, a simple algorithm is used. If it is not, routines
 ! are called to do the decomp of RMM and the forward-backward substitution (FBS) to obtain GMN
@@ -33,7 +33,7 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F04, F06, SCR, L2A, LINK2A, L2A_MSG, SC1, WRT_LOG
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NDOFG, NDOFM, NTERM_RMG, NTERM_RMN, NTERM_RMM, NTERM_GMN
-      USE PARAMS, ONLY                :  EPSIL, PRTRMG, PRTGMN, SOLLIB, SPARSE_FLAVOR, SUPINFO
+      USE PARAMS, ONLY                :  EPSIL, PRTRMG, PRTGMN, SOLLIB, SPARSE_FLAVOR, SUPINFO,CRS_CCS
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ONE
       USE SUBR_BEGEND_LEVELS, ONLY    :  SOLVE_GMN_BEGEND
@@ -44,7 +44,7 @@
       USE SOLVE_GMN_USE_IFs
 
       IMPLICIT NONE
-               
+  
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'SOLVE_GMN'
       CHARACTER(  1*BYTE)             :: CLOSE_IT            ! Input to subr READ_MATRIX_i. 'Y'/'N' whether to close a file or not 
@@ -63,6 +63,20 @@
       INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = SOLVE_GMN_BEGEND + 1
 
       REAL(DOUBLE)                    :: EPS1                ! A small number to compare real zero
+      
+      #ifdef MKLDSS
+
+      include 'mkl_pardiso.fi'
+      ! pardiso var
+      INTEGER :: pardisoerror
+      TYPE(MKL_PARDISO_HANDLE) pt(64)
+      !.. All other variables
+      INTEGER maxfct, mnum, mtype, phase, msglvl
+      INTEGER iparm(64)
+      INTEGER idum(1)
+      REAL*8  ddum(1)
+      #endif MKLDSS                 
+
  
       INTRINSIC                       :: DABS
 
@@ -274,14 +288,16 @@
 ! ##################################################################################################################################
  
       SUBROUTINE SOLVE_GMN_SOLVER
-
+      #ifdef MKLDSS
+      use mkl_dss
+      #endif MKLDSS
 ! Solves RMM x GMN = -RMN for matrix GMN using unsymmetric decomp from LAPACK 
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE IOUNT1, ONLY                :  FILE_NAM_MAXLEN, WRT_ERR, WRT_LOG, ERR, F04, F06
       USE SCONTR, ONLY                :  NDOFG, NDOFM, NDOFN, NTERM_GMN, NTERM_RMM, NTERM_RMN, BLNK_SUB_NAM
-      USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSE_FLAVOR, NOCOUNTS
+      USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSE_FLAVOR, NOCOUNTS,CRS_CCS,SPARSTOR
       USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC, TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  SOLVE_GMN_BEGEND
       USE SPARSE_MATRICES, ONLY       :  I_RMN, J_RMN, RMN, I_RMM, J_RMM, RMM, I2_GMN, I_GMN, J_GMN, GMN
@@ -310,21 +326,52 @@
  
       INTEGER(LONG)                   :: COMPV             ! Component number (1-6) of a grid DOF
       INTEGER(LONG)                   :: GRIDV             ! Grid number
-      INTEGER(LONG)                   :: I,J,K             ! DO loop indices or counters
+      INTEGER(LONG)                   :: I,J,K, memerror   ! DO loop indices or counters
       INTEGER(LONG)                   :: INFO      = 0     ! Output from factorization routines
-      INTEGER(LONG)                   :: IPIV(NDOFM)       ! Pivot indices from factorization of RMM
+      INTEGER(LONG),allocatable       :: IPIV(:)!(NDOFM)       ! Pivot indices from factorization of RMM
+
       INTEGER(LONG)                   :: IOCHK             ! IOSTAT error number when opening a file
       INTEGER(LONG)                   :: NRHS              ! No. of RHS's in solving (RMM)*(GMN) = -RMN
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to. Input to subr UNFORMATTED_OPEN  
       INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = SOLVE_GMN_BEGEND + 1
 
       REAL(DOUBLE)                    :: BETA              ! Multiple for rhs for use in subr FBS
-      REAL(DOUBLE)                    :: DUM_COL(NDOFM)    ! Temp variable used in SuperLU
+      REAL(DOUBLE),allocatable        :: DUM_COL(:)!(NDOFM)    ! Temp variable used in SuperLU
+
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare real zero
-      REAL(DOUBLE)                    :: GMN_COL(NDOFM)    ! A column of GMN solved for herein
-      REAL(DOUBLE)                    :: RMN_COL(NDOFM)    ! A column of RMN. The solution for GMN_COL is from RMM*GMN_COL = RMN_COL
+      REAL(DOUBLE),allocatable        :: GMN_COL(:)!(NDOFM)    ! A column of GMN solved for herein
+
+      REAL(DOUBLE),allocatable        :: RMN_COL(:)!(NDOFM)    ! A column of RMN. The solution for GMN_COL is from RMM*GMN_COL = RMN_COL
+
+      #ifdef MKLDSS
+      !DSS REAL
+      TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER perm(1) ! DSS VAR
+
+!     INTEGER buff(bufLen) ! DSS VAR
+      INTEGER :: dsserror
+      REAL(DOUBLE),allocatable        :: RHS(:)        ! RHS
+      REAL(DOUBLE),allocatable        :: SOLN(:)       ! Solution
+      
+      
+      !converted CRS
+      integer :: nnz, num_rows, num_cols,check
+      real*8, allocatable :: values(:)
+      integer, allocatable :: row_ptr(:), col_index(:)
+      #endif MKLDSS
+
+
 
       INTRINSIC                       :: DABS
+
+      allocate(IPIV(NDOFM))
+      allocate(DUM_COL(NDOFM),GMN_COL(NDOFM),RMN_COL(NDOFM),stat=memerror)
+      if (memerror.ne.0) stop 'Error when allocating memory in solve_gmn'
+      
+      #ifdef MKLDSS
+      if (.not.allocated(soln)) allocate( soln (num_rows),stat=memerror)       ! Solution
+      if (memerror.ne.0) stop 'ERROR in allocating DSS solution in solve gmn'
+      #endif MKLDSS
 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
@@ -384,6 +431,144 @@
             CALL ALLOCATE_SCR_CCS_MAT ( 'CCS1', NDOFM, NTERM_RMM, SUBR_NAME )
             CALL SPARSE_CRS_SPARSE_CCS ( NDOFM, NDOFM, NTERM_RMM, 'RMM', I_RMM, J_RMM, RMM, 'CCS1', J_CCS1, I_CCS1, CCS1, 'Y')
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'RMM', NDOFM, NTERM_RMM, J_CCS1, I_CCS1, CCS1, SLU_INFO )
+
+      #ifdef MKLDSS
+         ELSEIF ((SPARSE_FLAVOR(1:7) == 'PARDISO').or.(SPARSE_FLAVOR(1:3) == 'DSS')) THEN
+   
+                         
+             DO I=1,NDOFM                                        ! dum_col unneeded
+                DUM_COL(I) = ZERO                                          
+             ENDDO 
+
+            CALL ALLOCATE_FULL_MAT  ( 'RMM_FULL', NDOFM, NDOFM, SUBR_NAME )
+            CALL SPARSE_CRS_TO_FULL ( 'RMM       ', NTERM_RMM, NDOFM, NDOFM, SYM_RMM, I_RMM, J_RMM, RMM, RMM_FULL )
+                                                           ! Perform factorization of RMM_FULL matrix.
+            !my true cRS that compatible to DSS / pardiso
+            ! Determine the number of non-zero elements
+   
+            nnz = 0 !init
+            num_rows = NDOFM
+            num_cols = NDOFM
+            
+            do i = 1, num_rows
+                do j = 1, num_cols
+                    if (RMM_FULL(i, j) /= 0.0d0 ) then
+                        nnz = nnz + 1
+                    end if
+                end do
+            end do
+            
+            ! someday rmm_full will be saved to file, remove rmm_full from memory to be read one per one to save the memory
+            ! Allocate arrays for CSR format
+            allocate(values(nnz))
+            allocate(row_ptr(num_rows + 1))
+            allocate(col_index(nnz))
+            
+            ! Convert dense matrix to CSR format compatible to PARDISO / DSS
+            nnz = 0
+            row_ptr(1) = 1
+            do i = 1, num_rows
+                do j = 1, num_cols
+                    if (RMM_FULL(i, j) /= 0.0d0 ) then
+                        nnz = nnz + 1
+                        values(nnz) = RMM_FULL(i, j)
+                        col_index(nnz) = j
+                    end if
+                end do
+                row_ptr(i + 1) = nnz + 1
+            end do
+            !no need rmm_full
+            CALL DEALLOCATE_FULL_MAT ( 'RMM_FULL' ) ! RMM_FULL not needed now we have compatible crs in values,row_ptr,col_index
+
+            if (SPARSE_FLAVOR(1:3) == 'DSS') then
+            
+                ! Initialize the solver. 
+                dsserror = DSS_CREATE(handle, MKL_DSS_DEFAULTS)
+                IF (dsserror /= MKL_DSS_SUCCESS)  stop 'DSS error in initializing :' 
+                SLU_INFO = dsserror
+                
+            
+                ! Define the non-zero structure of the matrix.
+                dsserror = dss_define_structure    (handle, MKL_DSS_NON_SYMMETRIC, row_ptr, num_rows, num_rows, col_index, nnz)
+                SLU_INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in non zero defining:'
+                          
+                !reorder
+                perm(1) = 0
+                dsserror = DSS_REORDER(handle, MKL_DSS_DEFAULTS, perm)
+                SLU_INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in reordering :' 
+                     
+                ! Factor the matrix. 
+                dsserror = DSS_FACTOR_REAL(handle, MKL_DSS_DEFAULTS, values) 
+                SLU_INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in Factoring:' 
+                
+            else !pardiso
+                             
+                DO i = 1, 64
+                 iparm(i) = 0 
+                END DO
+                iparm(1) = 1 ! no solver default
+                iparm(2) = 2 ! fill-in reordering from METIS
+                iparm(3) = 1 ! numbers of processors       
+                iparm(4) = 0 ! no iterative-direct algorithm
+                iparm(5) = 0 ! no user fill-in reducing permutation
+                iparm(6) = 0 ! solution on the first n components of x
+                iparm(7) = 0 ! not in use
+                iparm(8) = 9 ! numbers of iterative refinement steps
+                iparm(9) = 0 ! not in use
+                iparm(10) = 13 ! perturb the pivot elements with 1E-13
+                iparm(11) = 1 ! use nonsymmetric permutation and scaling MPS
+                iparm(12) = 0 ! not in use
+                iparm(13) = 1 ! maximum weighted matching algorithm is ON
+                iparm(14) = 0 ! Output: number of perturbed pivots
+                iparm(15) = 0 ! not in use
+                iparm(16) = 0 ! not in use
+                iparm(17) = 0 ! not in use
+                iparm(18) = -1 ! Output: number of nonzeros in the factor LU
+                iparm(19) = -1 ! Output: Mflops for LU factorization
+                iparm(20) = 0 ! Output: Numbers of CG Iterations
+                pardisoerror = 0 ! initialize error flag
+                msglvl = 0 ! print statistical information 1=on 0=off          
+                maxfct = 1 ! Maximal number of factors in memory >0  Generally used value is 1 
+                mnum = 1 !The number of matrix (from 1 to maxfct) to solve; 
+                mtype = 11 ! real unsymmetric 
+
+            
+                DO i = 1, 64
+                    pt(i)%DUMMY = 0
+                END DO
+
+                perm(1) = 0             !perm[n]
+
+                phase = 11 ! only reordering and symbolic factorization
+             
+                CALL pardiso (pt, maxfct, mnum, mtype, phase,NDOFM,values, row_ptr,col_index , idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
+
+                IF (pardisoerror .NE. 0) THEN              
+                    WRITE(*,*) 'The following Pardiso ERROR was detected: ', pardisoerror
+                    WRITE(err,*) 'The following Pardiso ERROR was detected: ', pardisoerror       
+                    STOP 1      
+                END IF
+           
+                !WRITE(*,*) 'Number of nonzeros in factors = ',iparm(18)
+                !WRITE(*,*) 'Number of factorization MFLOPS = ',iparm(19)
+
+                !.. Factorization.
+                phase = 22 ! only factorization
+                CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFM, values, row_ptr,col_index,idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
+
+                !WRITE(*,*) 'Factorization completed ... '
+                IF (pardisoerror .NE. 0) THEN
+                    WRITE(*,*) 'The following Pardiso  ERROR was detected: ', pardisoerror
+                    WRITE(err,*) 'The following Pardiso ERROR was detected: ', pardisoerror
+                    STOP 1
+                END IF
+                
+            endif
+      #endif MKLDSS             
+
 
          ELSE
 
@@ -469,6 +654,45 @@
                   SLU_INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'RMM', NDOFM, NTERM_RMM, J_CCS1, I_CCS1, CCS1, J, RMN_COL, SLU_INFO )
 
+      #ifdef MKLDSS
+               ELSEIF (SPARSE_FLAVOR(1:7) == 'PARDISO')  THEN
+                   SLU_INFO = 0
+                   
+                    !.. Back substitution and iterative refinement
+                
+                   iparm(8) = 2 ! max numbers of iterative refinement steps
+                   phase = 33 ! only factorization            
+                   soln = 0.d0
+                   CALL pardiso (pt, maxfct, mnum, mtype, phase, ndofm, values, row_ptr,col_index, idum, 1, iparm, msglvl,RMN_COL, SOLN, pardisoerror)    
+    
+                IF (pardisoerror /= 0) then 
+                    stop 'Pardiso error in Solving : '
+                else
+                      
+                    DO I=1,NDOFm
+                        RMN_COL(I) = SOLN(I)
+                    ENDDO    
+                endif    
+                
+               ELSEIF (SPARSE_FLAVOR(1:3) == 'DSS') THEN
+                   
+                   SLU_INFO = 0       
+                    ! Solve the system
+                    ! rhs should be filled with the values from RMN_COL, and the solution will be stored in the solution array      
+                   dsserror = DSS_SOLVE_REAL(handle, MKL_DSS_DEFAULTS ,RMN_COL ,1, SOLN)
+                    
+                   SLU_INFO = dsserror
+                    
+                    IF (dsserror /= MKL_DSS_SUCCESS) then 
+                        stop 'DSS error in Solving :'
+                    else
+                      DO I=1,NDOFm
+                         RMN_COL(I) = SOLN(I)
+                      ENDDO                  
+                    endif 
+                   
+      #endif MKLDSS
+
                ELSE
 
                   FATAL_ERR = FATAL_ERR + 1
@@ -522,6 +746,31 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
                WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', SLU_INFO
             ENDIF
 
+      #ifdef MKLDSS
+         ELSEIF  (SPARSE_FLAVOR(1:7) == 'PARDISO')  THEN  !DSS STARTED
+                
+             ! Deallocate solver storage and various local arrays.
+             dsserror = DSS_DELETE(handle, MKL_DSS_DEFAULTS)
+             deallocate(values)                
+             deallocate(row_ptr)                      
+             deallocate(col_index)                 
+             deallocate(soln)
+
+         ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
+    
+             !.. Termination and release of memory 
+             ! Deallocate solver storage and various local arrays.
+                
+            dsserror = DSS_DELETE(handle, MKL_DSS_DEFAULTS)   
+            deallocate(values)                
+            deallocate(row_ptr)                  
+            deallocate(col_index)            
+            deallocate(soln)
+            IF (dsserror /= MKL_DSS_SUCCESS) STOP 'DSS error in CLEARING :' 
+      #endif MKLDSS
+ 
+
+
          ENDIF
 
       ENDIF FreeS
@@ -570,7 +819,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
          WRITE(F04,9002) SUBR_NAME,TSEC
  9002    FORMAT(1X,A,' END  ',F10.3)
       ENDIF
-
+      deallocate(IPIV,DUM_COL,GMN_COL,RMN_COL)
       RETURN
 
 ! **********************************************************************************************************************************

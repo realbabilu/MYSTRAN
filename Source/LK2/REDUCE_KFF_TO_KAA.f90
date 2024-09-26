@@ -25,6 +25,9 @@
 ! End MIT license text.                                                                                      
 
       SUBROUTINE REDUCE_KFF_TO_KAA ( PART_VEC_F_AO )
+      #ifdef MKLDSS
+         use mkl_dss   
+      #endif MKLDSS
  
 ! Call routines to reduce the KFF linear stiffness matrix from the F-set to the A, O-sets
  
@@ -37,7 +40,7 @@
       USE IOUNT1, ONLY                :  ERR, F04, F06, L2E, LINK2E, L2E_MSG, SC1, WRT_LOG
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, KOO_SDIA, NDOFF, NDOFA, NDOFO, NTERM_KFF,       &
                                          NTERM_KAA, NTERM_KAO, NTERM_KOO, NTERM_GOA
-      USE PARAMS, ONLY                :  KOORAT, MATSPARS, SOLLIB, SPARSTOR, SPARSE_FLAVOR, RCONDK
+      USE PARAMS, ONLY                :  KOORAT, MATSPARS, SOLLIB, SPARSTOR, SPARSE_FLAVOR, RCONDK, CRS_CCS 
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  REDUCE_KFF_TO_KAA_BEGEND
       USE CONSTANTS_1, ONLY           :  ONE 
@@ -47,10 +50,13 @@
                                          
       USE SPARSE_MATRICES, ONLY       :  SYM_GOA, SYM_KFF, SYM_KAA, SYM_KAO, SYM_KOO
       USE SCRATCH_MATRICES
- 
+      USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO 
       USE REDUCE_KFF_TO_KAA_USE_IFs
 
       IMPLICIT NONE
+      #ifdef MKLDSS
+      include 'mkl_pardiso.fi'
+      #endif MKLDSS
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'REDUCE_KFF_TO_KAA'
@@ -83,14 +89,31 @@
       REAL(DOUBLE)                    :: BETA  = ONE         ! Scalar multiplier for matrix
       REAL(DOUBLE)                    :: K_INORM             ! Inf norm of KOO matrix
 
-      REAL(DOUBLE)                    :: KOO_SCALE_FACS(NDOFO)
+      REAL(DOUBLE), allocatable       :: KOO_SCALE_FACS(:)!(NDOFO)
                                                              ! KOO equilibration scale factors
 
       REAL(DOUBLE)                    :: RCOND               ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
       REAL(DOUBLE)                    :: SMALL               ! A number used in filtering out small numbers from a full matrix
  
+      #ifdef MKLDSS
+      TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER perm(1) ! DSS VAR
+      INTEGER :: dsserror
+      REAL(DOUBLE),allocatable        :: SOLN(:)!NDOFo)       ! Solution
+      
+      ! pardiso var
+      INTEGER                         :: pardisoerror
+      TYPE(MKL_PARDISO_HANDLE)           pt(64)
+      !.. All other variables
+      INTEGER                         :: maxfct, mnum, mtype, phase, msglvl
+      INTEGER                         :: iparm(64)
+      INTEGER                         :: idum(1)
+      REAL*8                          :: ddum(1)
+      #endif MKLDSS  
+
       INTRINSIC                       :: DABS
 
+      allocate(KOO_SCALE_FACS(NDOFO))
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
          CALL OURTIM
@@ -171,6 +194,112 @@
 
                INFO = 0
                CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KOO', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, INFO )
+
+      #ifdef MKLDSS
+         ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED           
+            
+            IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
+                
+            WRITE(*,*) "Intel MKL Direct Sparse Solver Factoring"
+                       
+            IF (SPARSTOR == 'SYM   ') STOP 'SYM NOT YET'
+             
+            ! Initialize the solver.
+                dsserror = DSS_CREATE(handle, MKL_DSS_DEFAULTS)
+                
+                IF (dsserror /= MKL_DSS_SUCCESS)  stop 'DSS error in initializing :' 
+                iNFO = dsserror
+            
+            ! Define the non-zero structure of the matrix.
+                dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_NON_SYMMETRIC, I_KOO  , NDOFO, NDOFO, J_KOO, NTERM_KOO) !using KMSM
+                        
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in non zero defining:'
+                perm(1) = 0
+                
+                !reorder
+                dsserror = DSS_REORDER(handle, MKL_DSS_DEFAULTS, perm)
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in reordering :' 
+                
+                
+                ! Factor the matrix. 
+                dsserror = DSS_FACTOR_REAL(handle, MKL_DSS_DEFAULTS, KOO) !using KMSM
+                INFO = dsserror
+                IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in Factoring:' 
+                 
+         ELSEIF  (SPARSE_FLAVOR(1:7) == 'PARDISO') THEN
+             WRITE(*,*) "Intel MKL Pardiso"
+             IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'            
+             DO i = 1, 64
+                 iparm(i) = 0
+             END DO!pardiso STARTED !iparm[64] This array is used to pass various parameters 
+              
+             
+                    iparm(1) = 1 ! no solver default
+                    iparm(2) = 2 ! fill-in reordering from METIS
+                    iparm(3) = 1 ! numbers of processors       
+                    iparm(4) = 0 ! no iterative-direct algorithm
+                    iparm(5) = 0 ! no user fill-in reducing permutation
+                    iparm(6) = 0 ! solution on the first n components of x
+                    iparm(7) = 0 ! not in use
+                    iparm(8) = 9 ! numbers of iterative refinement steps
+                    iparm(9) = 0 ! not in use
+                    iparm(10) = 13 ! perturb the pivot elements with 1E-13
+                    iparm(11) = 1 ! use nonsymmetric permutation and scaling MPS
+                    iparm(12) = 0 ! not in use
+                    iparm(13) = 1 ! maximum weighted matching algorithm is ON
+                    iparm(14) = 0 ! Output: number of perturbed pivots
+                    iparm(15) = 0 ! not in use
+                    iparm(16) = 0 ! not in use
+                    iparm(17) = 0 ! not in use
+                    iparm(18) = -1 ! Output: number of nonzeros in the factor LU
+                    iparm(19) = -1 ! Output: Mflops for LU factorization
+                    iparm(20) = 0 ! Output: Numbers of CG Iterations
+                    pardisoerror = 0 ! initialize error flag
+             
+                    msglvl = 0 ! print statistical information 1=on 0=off        
+                    maxfct = 1 ! Maximal number of factors in memory >0  Generally used value is 1 
+                    mnum = 1 !The number of matrix (from 1 to maxfct) to solve; 
+             
+                    IF      (SPARSTOR == 'SYM   ') THEN
+                        mtype = 1 ! real symmetric
+                    ELSE
+                        mtype = 11 ! real unsymmetric 
+                    ENDIF
+             
+        
+                    DO i = 1, 64         
+                        pt(i)%DUMMY = 0
+                    END DO
+             
+                    perm(1) = 0             !perm[n]
+             
+                    phase = 11 ! only reordering and symbolic factorization         
+                    CALL pardiso (pt, maxfct, mnum, mtype, phase,NDOFO,KOO, I_KOO,J_KOO , idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
+        
+             
+                    IF (pardisoerror .NE. 0) THEN
+                 
+                        WRITE(*,*) 'The following Pardiso ERROR was detected:', pardisoerror
+                        WRITE(err,*) 'The following Pardiso ERROR was detected: ', pardisoerror
+                        STOP 1
+             
+                    END IF
+    
+                    !.. Factorization.             
+                    phase = 22 ! only factorization
+             
+                    CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFO, KOO,I_KOO,J_KOO,idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
+                    IF (pardisoerror .NE. 0) THEN
+                        WRITE(*,*) 'The following Pardiso  ERROR was detected: ', pardisoerror
+                        WRITE(err,*) 'The following Pardiso ERROR was detected: ', pardisoerror
+                        STOP 1
+                    END IF       
+ 
+             
+      #endif MKLDSS               
+
 
             ELSE
 
@@ -354,7 +483,39 @@
          CALL OUTA_HERE ( 'Y' )
 
       ENDIF
+! better free
+      
+      FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the storage allocated inside SuperLU
 
+         IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+
+            CALL C_FORTRAN_DGSSV( 3, NDOFo, NTERM_KOO, 1, KOO , I_KOO , J_KOO , ddum, NDOFo, SLU_FACTORS, SLU_INFO )
+
+            IF (SLU_INFO .EQ. 0) THEN
+               WRITE (*,*) 'SUPERLU STORAGE FREED'
+            ELSE
+               WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', SLU_INFO
+            ENDIF
+      #ifdef MKLDSS
+         ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
+
+                ! Deallocate solver storage and various local arrays.
+                dsserror = DSS_DELETE(handle, MKL_DSS_DEFAULTS)
+                deallocate(SOLN)  
+                IF (dsserror /= MKL_DSS_SUCCESS) STOP 'DSS error in CLEARING :' 
+                
+         ELSEIF  (SPARSE_FLAVOR(1:7) == 'PARDISO') THEN  !DSS STARTED
+
+             !.. Termination and release of memory
+            phase = -1 ! release internal memory
+            CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFo, ddum, idum,  idum, idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
+            deallocate(  SOLN)       ! Solution   
+      #endif MKLDSS
+
+         ENDIF
+
+      ENDIF FreeS
+      deallocate(KOO_SCALE_FACS)
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
          CALL OURTIM

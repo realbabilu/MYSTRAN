@@ -25,7 +25,10 @@
 ! End MIT license text.                                                                                      
 
       SUBROUTINE REDUCE_F_AO
- 
+      #ifdef MKLDSS
+      use mkl_dss
+      #endif    
+
 ! Call routines to reduce stiffness, mass, loads from F-set to A, O-sets
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -53,6 +56,10 @@
       USE REDUCE_F_AO_USE_IFs
 
       IMPLICIT NONE
+      
+      #ifdef MKLDSS
+      include 'mkl_pardiso.fi'
+      #endif MKLDSS
                
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'REDUCE_F_AO'
@@ -61,19 +68,39 @@
  
       INTEGER(LONG)                   :: A_SET_COL           ! Col no. in array TDOFI where the A-set is (from subr TDOF_COL_NUM)
       INTEGER(LONG)                   :: A_SET_DOF           ! A-set DOF number
-      INTEGER(LONG)                   :: DO_WHICH_CODE_FRAG    ! 1 or 2 depending on which seg of code to run (depends on BUCKLING)
-      INTEGER(LONG)                   :: I,J                 ! DO loop indices
-      INTEGER(LONG)                   :: PART_VEC_F_AO(NDOFF)! Partitioning vector (G set into N and M sets) 
-      INTEGER(LONG)                   :: PART_VEC_SUB(NSUB)  ! Partitioning vector (1's for all subcases) 
+      INTEGER(LONG)                   :: DO_WHICH_CODE_FRAG  ! 1 or 2 depending on which seg of code to run (depends on BUCKLING)
+      INTEGER(LONG)                   :: I,J, memerror       ! DO loop indices
+      INTEGER(LONG),allocatable       :: PART_VEC_F_AO(:)!(NDOFF)! Partitioning vector (G set into N and M sets) 
+      INTEGER(LONG),allocatable       :: PART_VEC_SUB(:)!(NSUB)  ! Partitioning vector (1's for all subcases) 
       INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = REDUCE_F_AO_BEGEND
-
-      REAL(DOUBLE)                    :: DUM_COL(NDOFO)      ! Temp variable used in SuperLU
-      REAL(DOUBLE)                    :: KAA_DIAG(NDOFA)     ! Diagonal terms from KAA
+      REAL(DOUBLE),allocatable        :: DUM_COL(:)!(NDOFO)      ! Temp variable used in SuperLU
+      REAL(DOUBLE),allocatable                    :: KAA_DIAG(:)!(NDOFA)     ! Diagonal terms from KAA
       REAL(DOUBLE)                    :: KAA_MAX_DIAG        ! Max diag term  from KAA
-      REAL(DOUBLE)                    :: KAAD_DIAG(NDOFA)    ! Diagonal terms from KAAD
+      REAL(DOUBLE),allocatable        :: KAAD_DIAG(:)!(NDOFA)    ! Diagonal terms from KAAD
       REAL(DOUBLE)                    :: KAAD_MAX_DIAG       ! Max diag term  from KAAD
+      
+      #ifdef MKLDSS
+
+      TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
+      INTEGER perm(1) ! DSS VAR
+      INTEGER                         :: dsserror
+      REAL(DOUBLE),allocatable        :: SOLN(:)!NDOFo)       ! Solution
+      
+      ! pardiso var
+      INTEGER                         :: pardisoerror
+      TYPE(MKL_PARDISO_HANDLE)           pt(64)
+      !.. All other variables
+      INTEGER                         :: maxfct, mnum, mtype, phase, msglvl
+      INTEGER                         :: iparm(64)
+      INTEGER                         :: idum(1)
+      REAL*8                          :: ddum(1)
+      #endif MKLDSS      
 
       INTRINSIC                       :: DABS
+
+      allocate(PART_VEC_F_AO(NDOFF) , PART_VEC_SUB(NSUB) , DUM_COL(NDOFO) , KAA_DIAG(NDOFA)  , KAAD_DIAG(NDOFA) ,stat = memerror)
+      if (memerror.ne.0) stop 'error allocating memory at reduce f_ao'
+      allocate(SOLN(NDOFo))
 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
@@ -169,6 +196,26 @@ FreeS:      IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free th
                   ELSE
                      WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', SLU_INFO
                   ENDIF
+             #ifdef MKLDSS
+                ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
+
+                 DO J=1,NDOFO                                         ! Need a null col of loads when SuperLU is called to factor KLL
+                    DUM_COL(J) = ZERO                                  ! (only because it appears in the calling list)
+                 ENDDO
+
+                ! Deallocate solver storage and various local arrays.
+                     dsserror = DSS_DELETE(handle, MKL_DSS_DEFAULTS)
+                     IF (dsserror /= MKL_DSS_SUCCESS) STOP 'DSS error in CLEARING'
+                
+                 ELSEIF  (SPARSE_FLAVOR(1:7) == 'PARDISO') THEN  !DSS STARTED
+                 DO J=1,NDOFO                                         ! Need a null col of loads when SuperLU is called to factor KLL
+                    DUM_COL(J) = ZERO                                  ! (only because it appears in the calling list)
+                 ENDDO
+                 !.. Termination and release of memory
+                 phase = -1 ! release internal memory
+                 CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFO , ddum, idum,  idum, idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
+                  
+             #endif MKLDSS
 
                ENDIF
 
@@ -461,7 +508,8 @@ FreeS:      IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free th
          WRITE(F04,9002) SUBR_NAME,TSEC
  9002    FORMAT(1X,A,' END  ',F10.3)
       ENDIF
-
+      deallocate(PART_VEC_F_AO , PART_VEC_SUB , DUM_COL , KAA_DIAG  , KAAD_DIAG )
+      deallocate(SOLN)
       RETURN
 
 ! **********************************************************************************************************************************

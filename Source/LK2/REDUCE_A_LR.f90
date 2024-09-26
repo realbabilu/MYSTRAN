@@ -72,15 +72,18 @@
       INTEGER(LONG)                   :: DO_WHICH_CODE_FRAG    ! 1 or 2 depending on which seg of code to run (depends on BUCKLING)
       INTEGER(LONG)                   :: L_SET_COL             ! Col no. in array TDOFI where the F-set is (from subr TDOF_COL_NUM)
       INTEGER(LONG)                   :: L_SET_DOF             ! F-set DOF number
-      INTEGER(LONG)                   :: I,J                   ! DO loop indices               
-      INTEGER(LONG)                   :: PART_VEC_A_LR(NDOFA)  ! Partitioning vector (N set into F and S sets) 
-      INTEGER(LONG)                   :: PART_VEC_SUB(NSUB)    ! Partitioning vector (1's for all subcases) 
+      INTEGER(LONG)                   :: I,J,memerror                   ! DO loop indices               
+      INTEGER(LONG), allocatable      :: PART_VEC_A_LR(:)!(NDOFA)  ! Partitioning vector (N set into F and S sets) 
+      INTEGER(LONG), allocatable      :: PART_VEC_SUB(:)!(NSUB)    ! Partitioning vector (1's for all subcases) 
       INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = REDUCE_A_LR_BEGEND
 
-      REAL(DOUBLE)                    :: KLL_DIAG(NDOFL)       ! Diagonal terms from KLL
+      REAL(DOUBLE), allocatable       :: KLL_DIAG(:)!(NDOFL)       ! Diagonal terms from KLL
       REAL(DOUBLE)                    :: KLL_MAX_DIAG          ! Max diag term from  KLL
-      REAL(DOUBLE)                    :: KLLD_DIAG(NDOFL)      ! Diagonal terms from KLLD
+      REAL(DOUBLE), allocatable       :: KLLD_DIAG(:)!(NDOFL)      ! Diagonal terms from KLLD
       REAL(DOUBLE)                    :: KLLD_MAX_DIAG         ! Max diag term from  KLLD
+
+      allocate(PART_VEC_A_LR (NDOFA) , PART_VEC_SUB(NSUB) ,  KLL_DIAG(NDOFL) , KLLD_DIAG(NDOFL) ,stat = memerror)
+      if (memerror.ne.0) stop 'error allocating memory at reduce a_lr'
 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
@@ -491,7 +494,7 @@
          WRITE(F04,9002) SUBR_NAME,TSEC
  9002    FORMAT(1X,A,' END  ',F10.3)
       ENDIF
-
+      deallocate(PART_VEC_A_LR , PART_VEC_SUB ,  KLL_DIAG , KLLD_DIAG )
       RETURN
 
 ! **********************************************************************************************************************************
