@@ -36,8 +36,22 @@ Open Command Line Intel OneApi x64 Enviroment.
 3. Alternatively, make build folder by type **`mkdir build`** enter
 4. Go to build folder by **`Cd build`** enter
 5. For using DSS PARDISO and Intel MKL BLAS type  **`cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=TRUE  ..`** in single line
-6. Alternatively,  **`cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"CMAKE_BUILD_TYPE=RELEASE" ..`**
-7. The binaries will be at c:\mystran\binaries
+6. Alternatively,  **`cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"CMAKE_BUILD_TYPE=RELEASE" ..`** for using just Superlu
+7. run with **`jom /j 12`** for 12 threads or whatever your cpu capable, alternatively just **`nmake`** for single threads compiling
+8. The binaries will be at **`c:\mystran\binaries`**
+
+### Steps for Windows (x86_64) using Intelone CMAKE for Visual Studio Enviromental Debug\Release
+Install Intel OneAPI and VS Studio as above, Download also superlu first extract at coressponding folder as above.
+pen Command Line Intel OneApi x64 Enviroment.
+1. Go to c:\mystran folder by type **`cd c:\mystran`** enter
+3. make build folder by type **`mkdir build`** enter
+4. make build folder **binaries** by type **`mkdir binaries`** enter
+5. Go to binaries folder by **`Cd binaries`** enter
+6. Create folder Release by type **`mkdir Release`** and debug **`mkdir Debug`**
+7. Go back to folder build **`Cd ..\build`** enter
+8. type **`cmake -G "Visual Studio 2022"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=TRUE  ..`** in single line for VS 2022 for using Pardiso and DSS
+9. alternatively, type **`cmake -G "Visual Studio 2022"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=false  ..`** in single line for VS 2022 for not using DSS Pardiso
+
 
 ### Steps for Windows (x86_64) using MSYS - CBLAS and internal BLAS
 
