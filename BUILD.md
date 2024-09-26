@@ -1,6 +1,6 @@
 # Building MYSTRAN from source
 
-###### Last updated 2023-12-18.
+###### Last updated 2024-09-26.
 
 ## Setting up a build environment
 
@@ -10,7 +10,36 @@ proper build environment (i.e. toolchain and required programs/libraries).
 You can skip this part if you've done it already (or if you really know what
 you're doing).
 
-### Steps for Windows (x86_64)
+### Steps for Windows (x86_64) using Intelone CMAKE using IntelMKL Oneapi 
+First, download and install MS Visual Studio Community
+(https://visualstudio.microsoft.com/downloads/).
+Second, download IntelOneAPI Basekit for C++ compiling with MKL and IntelOneAPI HPCkit for fortran compiling
+(https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html)
+(https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit-download.html)
+Better to have all compiler and VS installed in drive c: otherwise some nerd setvars editing needed.
+Download jom.exe put in c:\windows folder for faster compiling 
+(https://github.com/qt-labs/jom)
+
+Download superlu, preferably 5.3
+https://github.com/xiaoyeli/superlu/archive/refs/tags/v5.3.0.zip
+The latest version should be done but need some arguments for not compiling Metis and GTK for simplicity.
+https://github.com/xiaoyeli/superlu
+
+Extract the main mystran zipped to folder like c:\mystran, 
+Make sure Source and Cmakelists.txt folder in c:\mystran\Source 
+Extract the superlu in c:\mystran\Superlu, 
+Make sure SRC folder and Fortran folder and Cmakelists.txt, Makefiles in the c:\mystran\Superlu
+
+Open Command Line Intel OneApi x64 Enviroment.
+1. Go to c:\mystran folder by type **"cd c:\mystran"** enter
+2. just type run.bat enter for automatically built
+3. Alternatively, make build folder by type **mkdir build** enter
+4. Go to build folder by **"Cd build"** enter
+5. For using DSS PARDISO and Intel MKL BLAS type  **cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=TRUE  ..** in single line
+6. Alternatively,  **cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"CMAKE_BUILD_TYPE=RELEASE" ..**
+7. The binaries will be at c:\mystran\binaries
+
+### Steps for Windows (x86_64) using MSYS - CBLAS and internal BLAS
 
 First, download and install MSYS2 from the
 [official site](https://www.msys2.org/).
@@ -20,10 +49,10 @@ Open the MSYS2 terminal and run the following commands:
   1. **`pacman -Syu`**
 This updates repository information and installed packages, and might require
 you close and reopen MSYS2 terminals.
-  1. **`pacman -S mingw-w64-x86_64-gcc-fortran mingw-w64-x86_64-cmake mingw-w64-x86_64-make git`**
+  2. **`pacman -S mingw-w64-x86_64-gcc-fortran mingw-w64-x86_64-cmake mingw-w64-x86_64-make git`**
 This installs the required compilers (the GNU C and Fortran compilers), CMake
 itself, and `git`.
-  1. **`export PATH="/mingw64/bin:$PATH"`**
+  3. **`export PATH="/mingw64/bin:$PATH"`**
 This makes the MinGW toolchain programs (such as `make` and the compilers)
 visible so CMake can find them more easily. Note that this command's effects
 are lost when you reopen the terminal, so you might want to append it to your
