@@ -35,7 +35,7 @@
       USE IOUNT1, ONLY                :  FILE_NAM_MAXLEN, WRT_LOG, ERR, F04, F06, SCR
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FACTORED_MATRIX, FATAL_ERR, KOO_SDIA, NDOFA, NDOFO, NTERM_GOA, NTERM_KOO,   &
                                          NTERM_KAO
-      USE PARAMS, ONLY                :  EPSIL, PRTGOA
+      USE PARAMS, ONLY                :  EPSIL, PRTGOA, CRS_CCS
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  SOLVE_GOA_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE

@@ -37,7 +37,7 @@
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  SOLVE_UO0_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  PRTUO0, SOLLIB, SPARSE_FLAVOR
+      USE PARAMS, ONLY                :  PRTUO0, SOLLIB, SPARSE_FLAVOR, CRS_CCS
       USE SPARSE_MATRICES, ONLY       :  I_PO, J_PO, PO, I_KOO, J_KOO, KOO
       USE COL_VECS, ONLY              :  UO0_COL
       USE LAPACK_LIN_EQN_DPB
