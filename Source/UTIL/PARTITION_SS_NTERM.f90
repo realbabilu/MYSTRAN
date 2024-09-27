@@ -116,7 +116,8 @@
          WRITE(F04,9001) SUBR_NAME,TSEC,MAT_A_NAME,MAT_B_NAME
  9001    FORMAT(1X,A,' BEGN ',F10.3,' Input matrix is ',A,'. Determine memory to allocate to sparse arrays for partition ',A)
       ENDIF
-      allocate( B_COL_NUM_ARRAY(NCOL_A),  B_ROW_NUM_ARRAY(NROW_A),  ROW_AT_COLJ_BEG(NCOL_A), ROW_AT_COLJ_END(NCOL_A), stat=memerror )
+      allocate( B_COL_NUM_ARRAY(NCOL_A),  B_ROW_NUM_ARRAY(NROW_A),  ROW_AT_COLJ_BEG(NCOL_A), & 
+               ROW_AT_COLJ_END(NCOL_A), stat=memerror )
       if (memerror.ne.0) stop 'Error allocating memory at PARTITION_SS_NTERM'
 ! **********************************************************************************************************************************
 ! Initialize outputs
