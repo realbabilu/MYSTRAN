@@ -25,9 +25,9 @@
 ! End MIT license text.                                                                                      
  
       SUBROUTINE LINK3
-      #ifdef MKLDSS
+#ifdef MKLDSS
       use mkl_dss  
-      #endif
+#endif
 ! LINK 3 solves the equation KLL*UL = PL where KLL, UL, PL are the L-set stiffness matrix, displs and loads. It solves the equation
 ! using one of three methods. For each method the solution is obtained in a 2 step process: (1) the KLL matrix is decomposed into
 ! triangular factors and (2) UL is solved for by forward-backward substitution (FBS). The 3 methods are:
@@ -60,9 +60,9 @@
                       
       IMPLICIT NONE
       
-      #ifdef MKLDSS
+#ifdef MKLDSS
       include 'mkl_pardiso.fi'
-      #endif MKLDSS
+#endif MKLDSS
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'LINK3'
@@ -99,13 +99,11 @@
  
       INTRINSIC                       :: DABS
 
-      #ifdef MKLDSS 
+#ifdef MKLDSS 
       !DSS REAL
       INTEGER(LONG)                   :: NUM_KLL_DIAG_ZEROS  ! Number of zeros on the diag of KLL
       TYPE(MKL_DSS_HANDLE)            :: handle ! Allocate storage for the solver handle.      !DSS var
-      INTEGER                         :: perm(1) ! DSS VAR
-      integer                         :: KLLSused
-      
+      INTEGER                         :: perm(1) ! DSS VAR      
       INTEGER                         :: dsserror
       REAL(DOUBLE),allocatable        :: SOLN(:)       ! Solution
       ! pardiso var
@@ -116,7 +114,7 @@
       INTEGER                         :: iparm(64)
       INTEGER                         :: idum(1)
       REAL*8                          :: ddum(1)
-      #endif MKLDSS
+#endif MKLDSS
 
 
 !***********************************************************************************************************************************
@@ -127,10 +125,10 @@
       allocate(EQUIL_SCALE_FACS(NDOFL),DUM_COL(NDOFL),stat=memerror)
       if (memerror.ne.0) stop 'error in allocating EQUIL_SCALE_FACS in link3'
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
       allocate( SOLN(NDOFL),stat=memerror)       ! Solution  
       if (memerror.ne.0) stop 'ERROR in allocating solution in link3'
-      #endif MKLDSS
+#endif MKLDSS
 
 ! Set time initializing parameters
 
@@ -224,7 +222,7 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
 
             SLU_INFO = 0
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, SLU_INFO )
-      #ifdef MKLDSS
+#ifdef MKLDSS
 
          ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
             
@@ -238,7 +236,7 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
             WRITE(*,*) "Intel MKL Direct Sparse Solver Factoring"
                        
             IF      (SPARSTOR == 'SYM   ') THEN
-            KLLSused = 0
+      
             ! Initialize the solver.
                 dsserror = DSS_CREATE(handle, MKL_DSS_DEFAULTS)
                 
@@ -256,16 +254,6 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
                 IF (dsserror /= MKL_DSS_SUCCESS) stop 'DSS error in Factoring:' 
             
             ELSE    
-             !ALT1 convert to KLLs symmetry
-             !KLLSused = 1
-             !CALL SPARSE_MAT_DIAG_ZEROS ( 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, NUM_KLL_DIAG_ZEROS ) !get NUM_KLL_DIAG_ZEROS 
-             !NTERM_KLLs = (NTERM_KLL  + (NDOFL - NUM_KLL_DIAG_ZEROS))/2
-             !CALL ALLOCATE_SPARSE_MAT ( 'KLLs', NDOFL, NTERM_KLLs, SUBR_NAME )    
-             !CALL CRS_NONSYM_TO_CRS_SYM ( 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, 'KLLs', NTERM_KLLs, I_KLLs, J_KLLs, KLLs )
-             
-             !ALT2 just use nonsymmetry KLL
-              KLLSused = 0
-             
             ! Initialize the solver.
                 dsserror = DSS_CREATE(handle, MKL_DSS_DEFAULTS)
                 
@@ -273,11 +261,8 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
                 SLU_INFO = dsserror
             
             ! Define the non-zero structure of the matrix.
-               !alt1
-               ! dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_SYMMETRIC, I_KLLs  , NDOFL, NDOFL, J_KLLs , NTERM_KLLs) !using KLLS
-                                ! DSS_DEFINE_STRUCTURE ( HANDLE, MKL_DSS__SYMMETRIC, I_MAT    , NROWS, NROWS, J_MAT  , NTERMS ) 
-                
-               !alt2
+             
+                !alt2
                 dsserror =  DSS_DEFINE_STRUCTURE  (handle, MKL_DSS_NON_SYMMETRIC, I_KLL  , NDOFL, NDOFL, J_KLL , NTERM_KLL) !using KLL
                 !         error = DSS_DEFINE_STRUCTURE(handle, MKL_DSS_NON_SYMMETRIC, rowIndex=I_KLL,  nRows=NDOFL, nCols=NDOFL, columns=J_KLL , nNonZeros=NTERM_KLL)
                         
@@ -293,9 +278,7 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
                 
                 
                 ! Factor the matrix. 
-                !alt1
-                !dsserror = DSS_FACTOR_REAL(handle, MKL_DSS_DEFAULTS, KLLs) !using KLLs
-                
+     
                 !alt2
                 dsserror = DSS_FACTOR_REAL(handle, MKL_DSS_DEFAULTS, KLL) !using KLL
                 SLU_INFO = dsserror
@@ -455,7 +438,7 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
                  STOP 1
         
              END IF
-      #endif MKLDSS
+#endif
 
 
          ELSE
@@ -531,7 +514,7 @@ Solve:DO ISUB = 1,NSUB
                SLU_INFO = 0
                CALL FBS_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, ISUB, DUM_COL, SLU_INFO )
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
             ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
                 
                SLU_INFO = 0       
@@ -582,7 +565,7 @@ Solve:DO ISUB = 1,NSUB
                 endif
                 
                 
-      #endif MKLDSS
+#endif
 
             ELSE
 
@@ -651,7 +634,7 @@ Solve:DO ISUB = 1,NSUB
 
          CALL DEALLOCATE_COL_VEC  ( 'UL_COL' )
          CALL DEALLOCATE_COL_VEC  ( 'PL_COL' )
-         IF (kllsused.eq.1) CALL DEALLOCATE_SPARSE_MAT ( 'KLLs' )
+        
 
       ENDDO Solve
 
@@ -670,7 +653,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
             ELSE
                WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', SLU_INFO
             ENDIF
-      #ifdef MKLDSS
+#ifdef MKLDSS
          ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
 
             DO J=1,NDOFL                                         ! Need a null col of loads when SuperLU is called to factor KLL
@@ -690,7 +673,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
             phase = -1 ! release internal memory
             CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFL, ddum, idum,  idum, idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
             deallocate(  SOLN)       ! Solution   
-      #endif MKLDSS
+#endif
 
          ENDIF
 
