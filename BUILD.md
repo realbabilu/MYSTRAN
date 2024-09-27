@@ -92,6 +92,7 @@ If your distribution doesn't ship CMake 3.18+ yet, check if your distro has a
 some sort of testing/unstable channel before attempting to
 [install it manually](https://cmake.org/install/).
 
+
 For WSL (Linux for Windows)
 ===========================
 Mystran won't work with Ubuntu 20.04, hasn't been tested on 22.04 and should work on 24.04 (what we're testing).
@@ -110,6 +111,42 @@ apt install gcc g++ gfortran make cmake git
 ```
 
 ---
+### Steps for Linux in WSL or any
+A. Using AOCL Clang and Flang with OpenBLAS
+1. `sudo apt-get update` to get updated apt library
+2. `sudo apt install ./aocc-compiler-4.2.0_1_amd64.deb` to get aocc compiler optimized for Ryzen
+3. `sudo apt install ./aocl-linux-aocc-4.2.0_1_amd64.deb` to BLIS a CBLAS optimized for Ryzen
+4. Get CMAKE with `sudo apt install cmake g++ make`
+5. Get Git by `sudo apt install git`
+6. Prepare enviroment for AOCC AOCL
+   `cd /opt/AMD`
+   `cd aocc-compiler-4.2.0/`
+   `sudo ./install.sh`
+   `source /opt/AMD/setenv_AOCC.sh`
+   `which clang`
+   `clang -v`
+   `cd /opt/AMD/aocl/aocl-linux-aocc-4.2.0/aocc`
+   `sudo ./set_aocl_interface_symlink.sh`
+7. Get OpenBLAS compiled   
+   `sudo apt-cache search openblas`
+   `sudo apt -y install libopenblas0-pthread` for x86 Openblas
+   `sudo apt -y install libopenblas64-0-pthread` for x64 Openblas
+8.  create mystran folder and `git clone https://github.com/realbabilu/MYSTRAN` or any version mystran you want
+9.  create build folder and go to build folder, create mystran without DSS Pardiso using Openblas
+   'cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  .. -D"TPL_ENABLE_BLAS=TRUE"  -D"BLAS_LIBRARIES:PATH=/usr/lib/x86_64-linux-gnu/openblas64-pthread/libopenblas64.so.0" -D"CMAKE_FORTRAN_COMPILER=flang" -D"CMAKE_C_COMPILER=clang" -D"CMAKE_CXX_COMPILER=clang"' 
+
+B. Using gcc and gfortran with OpenBLAS 
+1. Do point 1 above, to update apt-get
+2. get gcc`sudo apt install gcc` 
+3. get gfortran `sudo apt install gfortran`
+4. get cmake like above
+5. get git like above
+6. get Openblas like point 7.
+7. create mystran folder then `git clone https://github.com/realbabilu/MYSTRAN` or any version mystran you want
+8. create build folder and go to build folder, create mystran without DSS Pardiso using Openblas
+    `cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  .. -DMKLDSS=off -D"TPL_ENABLE_BLAS=TRUE"  -D"BLAS_LIBRARIES:PATH=/usr/lib/x86_64-linux-gnu/openblas64-pthread/libopenblas64.so.0"`
+ 
+
 
 ## Building MYSTRAN
 
