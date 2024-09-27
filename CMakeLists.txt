@@ -4,7 +4,7 @@
 # added some compatibility with Windows compiler Intel and GCC equation
 # win intel with mkl   : cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"CMAKE_BUILD_TYPE=RELEASE" ..
 # win gcc with openblas: cmake -G "MinGW Makefiles" -D"CMAKE_MAKE_PROGRAM:PATH=c:\gcc\bin\make.exe" -DWIN32=TRUE -D"CMAKE_Fortran_COMPILER:PATH=c:\gcc\bin\gfortran.exe" -D"TPL_ENABLE_BLAS=TRUE" -D"TPL_BLAS_LIBRARIES:PATH=c:\gcc\openblas\libopenblas.DLL" -D"BLAS_LIBRARIES:PATH=c:\gcc\openblas\libopenblas.DLL" -D"CMAKE_BUILD_TYPE=RELEASE" -DBLA_VENDOR=OpenBlas  ..
-# linux gcc with openblas: cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  ..  
+# linux gcc with openblas:   cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  .. -DMKLDSS=off -D"TPL_ENABLE_BLAS=TRUE"  -D"BLAS_LIBRARIES:PATH=/usr/lib/x86_64-linux-gnu/openblas64-pthread/libopenblas64.so.0"
 # built with DSSMKL PARDISO: cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" .. -DMKLDSS=TRUE  
 
 # set up basic project info
@@ -14,22 +14,10 @@ include(CheckFunctionExists)
 project(Mystran)
 enable_language(Fortran)
 
-
 # basic compiler and output options
 set(CMAKE_SOURCE_DIR "${PROJECT_SOURCE_DIR}/Source")
 set(PROJECT_BINARY_DIR "${PROJECT_SOURCE_DIR}/Binaries")
-if(MKLDSS)
-set(CMAKE_FLAGS " -fpp -DMKLDSS -c -fbacktrace")
-endif()
 # set(CMAKE_BUILD_TYPE Debug)
-
-# Include MKL headers
-if(DEFINED ENV{MKLROOT})
-    include_directories($ENV{MKLROOT}/include)
-    set(MKL_INCLUDE_DIR "$ENV{MKLROOT}/include")
-else()
-    message(FATAL_ERROR "MKLROOT environment variable is not set.")
-endif()
 
 
 # set some dirs
@@ -38,6 +26,14 @@ set(CMAKE_Fortran_MODULE_DIRECTORY "${PROJECT_BINARY_DIR}/mod")
 include_directories( "${CMAKE_SOURCE_DIR}/INCLUDE") 
 # Add include path for MKL
 if(MKLDSS)
+# Include MKL headers
+if(DEFINED ENV{MKLROOT})
+    include_directories($ENV{MKLROOT}/include)
+    set(MKL_INCLUDE_DIR "$ENV{MKLROOT}/include")
+else()
+    message(FATAL_ERROR "MKLROOT environment variable is not set.")
+endif()
+
 include_directories($ENV{MKLROOT}/include)
 endif()
 
@@ -59,12 +55,21 @@ endif()
 if(WIN32)
   if(WIN32 AND ((CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM") OR (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel") OR (CMAKE_C_COMPILER_ID STREQUAL "Intel")))
    set(RECOMMENDED_MAKE "nmake")
-  else() 
+   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpp")
+   if(MKLDSS)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DMKLDSS")
+   endif()
+  else()
    #mustbe gfortran gcc
    set(RECOMMENDED_MAKE "mingw32-make")
+   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp")
   endif()
 else()
   set(RECOMMENDED_MAKE "make")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp -Mbackslash")
+  if(MKLDSS)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp -DMKLDSS -Mbackslash")
+   endif()
 endif()
 
 #correct cmake linking with windows intel compiler to use lib instead icx 
@@ -75,7 +80,7 @@ if(WIN32 AND ((CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM") OR (CMAKE_Fortran_COMPI
     set(CMAKE_AR "lib.exe")
     set(CMAKE_CXX_CREATE_STATIC_LIBRARY "<CMAKE_AR> /OUT:<TARGET> <OBJECTS>")
     set(CMAKE_C_CREATE_STATIC_LIBRARY "<CMAKE_AR> /OUT:<TARGET> <OBJECTS>")
-    if(MKLDSS)  
+    if(MKLDSS)
       set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpp -DMKLDSS")
     else()
       set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpp")
@@ -347,7 +352,7 @@ endif(BLAS_FOUND)
 add_library(MODULES OBJECT ${MODULES_ALL_FILES})
 
 # collect modules
-list(APPEND modules_names ARPACK BANDIT LK1 LK2 LK3 LK4 LK5 LK6 LK9 EMG)
+list(APPEND modules_names ARPACK LK1 LK2 LK3 LK4 LK5 LK6 LK9 EMG)
 foreach (modname IN LISTS modules_names)
   file(GLOB_RECURSE TMP_MOD_FILES "${CMAKE_SOURCE_DIR}/${modname}/*.f*")
   add_library(${modname} OBJECT ${TMP_MOD_FILES} ${TMP_MOD_FILES_PP})
