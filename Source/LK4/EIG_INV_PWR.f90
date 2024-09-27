@@ -25,9 +25,9 @@
 ! End MIT license text.                                                                                      
 
        SUBROUTINE EIG_INV_PWR
-      #ifdef MKLDSS
+#ifdef MKLDSS
          use mkl_dss   
-      #endif MKLDSS  
+#endif MKLDSS  
 ! Solves for eigenvalues and eigenvectors when method is INV. Code is only valid for the 1st eigenval/vec. Inverse Power is an
 ! iterative method
  
@@ -52,9 +52,9 @@
 
       IMPLICIT NONE
       
-      #ifdef MKLDSS
+#ifdef MKLDSS
       include 'mkl_pardiso.fi'
-      #endif MKLDSS
+#endif MKLDSS
   
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'EIG_INV_PWR'
@@ -81,7 +81,7 @@
       REAL(DOUBLE)                    :: PERCENT_CHANGE    ! % change in eigenvalue estimate between two successive iterations
       REAL(DOUBLE)                    :: RCOND             ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
       !DSS REAL
       TYPE(MKL_DSS_HANDLE)            :: handle ! Allocate storage for the solver handle.      !DSS var
       INTEGER                         :: perm(1) ! DSS VAR   
@@ -95,7 +95,7 @@
       INTEGER                         :: iparm(64)
       INTEGER                         :: idum(1)
       REAL*8                          :: ddum(1)
-      #endif MKLDSS 
+#endif
 
       INTRINSIC                       :: MIN
 
@@ -172,7 +172,7 @@
             INFO = 0
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KMSM', NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, INFO )
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
          ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED           
             
             ! IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
@@ -285,7 +285,7 @@
                 
                 
                 
-      #endif MKLDSS
+#endif
 
          ELSE
 
@@ -367,7 +367,7 @@ iters:DO
                ELSE
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KLL' , NDOFL, NTERM_KLL , I_KLL , J_KLL , KLL , ITER_NUM, MVEC, INFO )
                ENDIF
-      #ifdef MKLDSS
+#ifdef MKLDSS
             ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN
                    
                IF (SOL_NAME(1:8) == 'BUCKLING') THEN 
@@ -562,7 +562,7 @@ iters:DO
 !----  
                 endif
                 
-      #endif MKLDSS
+#endif
 
             ELSE
 
@@ -681,7 +681,7 @@ iters:DO
                WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', INFO
             ENDIF
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
          ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
 
                 ! Deallocate solver storage and various local arrays.
@@ -693,8 +693,9 @@ iters:DO
              phase = -1 ! release internal memory
              CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFL, ddum, idum,  idum, idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
              deallocate(  SOLN,rhs)       ! Solution 
-         ENDIF
-      #endif MKLDSS
+         
+#endif
+        ENDIF
       ENDIF FreeS        
       
 
