@@ -24,12 +24,12 @@
                                                                                                         
 ! End MIT license text.                                                                                      
 
-      BLOCK DATA BANDIT_BLOCK_DATA2 !renamed because not used
+      BLOCK DATA BANDIT_BLOCK_DATA
 
 ! BANDIT file unit nos: IOU6,IOU7,IOU8,IOU9,IOU10,IOU11,IOU12,IOU13,IOU14,IOU15,IOU16,IOU17,IOU18,IOU19,IOU20 defined in DATA stmt
 
 ! **********************************************************************************************************************************
-      COMMON /ALPHA2/ MA(26),NUM(10),MB(4)
+      COMMON /ALPHA/ MA(26),NUM(10),MB(4)
 
       INTEGER  MA ,NUM ,MB
 
@@ -62,7 +62,7 @@
 ! **********************************************************************************************************************************
 ! I/O files
 
-      COMMON /IOUNIT2/IOU5 ,IOU6 , IOU7 ,IOU8  ,IOU9  ,IOU10, IOU11, IOU12, IOU13, IOU14, IOU15, IOU16, IOU17, IOU18, IOU19, IOU20
+      COMMON /IOUNIT/IOU5 ,IOU6 , IOU7 ,IOU8  ,IOU9  ,IOU10, IOU11, IOU12, IOU13, IOU14, IOU15, IOU16, IOU17, IOU18, IOU19, IOU20
 
       INTEGER        IOU5 ,IOU6 , IOU7 ,IOU8  ,IOU9  ,IOU10, IOU11, IOU12, IOU13, IOU14, IOU15, IOU16, IOU17, IOU18, IOU19, IOU20
 
@@ -101,7 +101,7 @@
 !      (e.g., CELAS1 or CPENTA), set   LESSOK=.TRUE.   in subroutine ELTYPE.
 ! For long-field cards, set LEN=2 in ELTYPE.
 
-      COMMON /ELEM2/ NTYPE, VYPE(160), TYPE(160), WYPE(160), ME(160), NELEM(160),MDIM
+      COMMON /ELEM/ NTYPE, VYPE(160), TYPE(160), WYPE(160), ME(160), NELEM(160),MDIM
       
       INTEGER vype, TYPE, WYPE
       INTEGER  NTYPE  ,ME     ,NELEM  ,MDIM
@@ -230,4 +230,4 @@
 !    NCON = Number of connections per element (see subroutine ELTYPE)
 !    IFLD = Field number of first connection.
 
-      END BLOCK DATA BANDIT_BLOCK_DATA2
+      END BLOCK DATA BANDIT_BLOCK_DATA
