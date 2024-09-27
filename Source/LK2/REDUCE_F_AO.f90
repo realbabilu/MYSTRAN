@@ -25,9 +25,9 @@
 ! End MIT license text.                                                                                      
 
       SUBROUTINE REDUCE_F_AO
-      #ifdef MKLDSS
+#ifdef MKLDSS
       use mkl_dss
-      #endif    
+#endif    
 
 ! Call routines to reduce stiffness, mass, loads from F-set to A, O-sets
  
@@ -57,9 +57,9 @@
 
       IMPLICIT NONE
       
-      #ifdef MKLDSS
+#ifdef MKLDSS
       include 'mkl_pardiso.fi'
-      #endif MKLDSS
+#endif
                
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'REDUCE_F_AO'
@@ -79,7 +79,7 @@
       REAL(DOUBLE),allocatable        :: KAAD_DIAG(:)!(NDOFA)    ! Diagonal terms from KAAD
       REAL(DOUBLE)                    :: KAAD_MAX_DIAG       ! Max diag term  from KAAD
       
-      #ifdef MKLDSS
+#ifdef MKLDSS
 
       TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
       INTEGER perm(1) ! DSS VAR
@@ -94,14 +94,16 @@
       INTEGER                         :: iparm(64)
       INTEGER                         :: idum(1)
       REAL*8                          :: ddum(1)
-      #endif MKLDSS      
+#endif    
 
       INTRINSIC                       :: DABS
 
       allocate(PART_VEC_F_AO(NDOFF) , PART_VEC_SUB(NSUB) , DUM_COL(NDOFO) , KAA_DIAG(NDOFA)  , KAAD_DIAG(NDOFA) ,stat = memerror)
       if (memerror.ne.0) stop 'error allocating memory at reduce f_ao'
-      allocate(SOLN(NDOFo))
 
+#ifdef MKLDSS
+      allocate(SOLN(NDOFo))
+#endif
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
          CALL OURTIM
@@ -196,7 +198,7 @@ FreeS:      IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free th
                   ELSE
                      WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', SLU_INFO
                   ENDIF
-             #ifdef MKLDSS
+#ifdef MKLDSS
                 ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
 
                  DO J=1,NDOFO                                         ! Need a null col of loads when SuperLU is called to factor KLL
@@ -215,7 +217,7 @@ FreeS:      IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free th
                  phase = -1 ! release internal memory
                  CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFO , ddum, idum,  idum, idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
                   
-             #endif MKLDSS
+#endif
 
                ENDIF
 
@@ -509,7 +511,9 @@ FreeS:      IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free th
  9002    FORMAT(1X,A,' END  ',F10.3)
       ENDIF
       deallocate(PART_VEC_F_AO , PART_VEC_SUB , DUM_COL , KAA_DIAG  , KAAD_DIAG )
+#ifdef MKLDSS
       deallocate(SOLN)
+#endif
       RETURN
 
 ! **********************************************************************************************************************************

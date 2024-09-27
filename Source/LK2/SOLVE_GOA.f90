@@ -26,9 +26,9 @@
 
  
       SUBROUTINE SOLVE_GOA
-      #ifdef MKLDSS
+#ifdef MKLDSS
          use mkl_dss   
-      #endif MKLDSS
+#endif
 
 ! Solves the sustem of equations: KOO*GOA = -KAO' for matrix GOA which is used in the reduction of the F set stiffness, mass and
 ! load matrices from the F-set to the A, O_sets
@@ -52,9 +52,9 @@
 
       IMPLICIT NONE
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
       include 'mkl_pardiso.fi'
-      #endif MKLDSS
+#endif
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'SOLVE_GOA'
@@ -79,7 +79,7 @@
       REAL(DOUBLE),allocatable                    :: KOO_SCALE_FACS(:)!(NDOFO)
                                                            ! KOO scale facs. KOO will not be equilibrated so these are set to 1.0
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
       TYPE(MKL_DSS_HANDLE)            :: handle ! Allocate storage for the solver handle.      !DSS var
       INTEGER                         :: perm(1) ! DSS VAR
       INTEGER                         :: dsserror
@@ -93,7 +93,7 @@
       INTEGER                         :: idum(1)
       REAL*8                          :: ddum(1)
       
-      #endif MKLDSS 
+#endif
  
       INTRINSIC                       :: DABS
 
@@ -173,7 +173,7 @@
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KOO', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, J, INOUT_COL, INFO )
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
                elseIF (SPARSE_FLAVOR(1:3) == 'DSS') THEN
                     IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
                     allocate( SOLN(NDOFO))       ! Solution
@@ -245,7 +245,7 @@
                     deallocate( SOLN)       ! Solution   
                    endif        
                     
-      #endif MKLDSS    
+#endif
 
 
                ELSE

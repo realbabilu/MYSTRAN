@@ -25,9 +25,9 @@
 ! End MIT license text.                                                                                      
  
       SUBROUTINE SOLVE_UO0
-      #ifdef MKLDSS
+#ifdef MKLDSS
          use mkl_dss   
-      #endif MKLDSS
+#endif
 ! Solves KOO*UO0 = PO for matrix UO0 
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -46,9 +46,9 @@
       USE SOLVE_UO0_USE_IFs
 
       IMPLICIT NONE
-      #ifdef MKLDSS
+#ifdef MKLDSS
       include 'mkl_pardiso.fi'
-      #endif MKLDSS
+#endif
  
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'SOLVE_UO0'
@@ -64,7 +64,7 @@
                                                            ! LAPACK_S values not used so null this vector
       REAL(DOUBLE)                    :: INOUT_COL(NDOFO)  ! Temp variable for one col of load matrix PO
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
       TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
       INTEGER perm(1) ! DSS VAR
       INTEGER :: dsserror
@@ -77,7 +77,7 @@
       INTEGER                         :: iparm(64)
       INTEGER                         :: idum(1)
       REAL*8                          :: ddum(1)
-      #endif MKLDSS
+#endif
 
 
 ! **********************************************************************************************************************************
@@ -141,7 +141,7 @@
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KOO', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, J, INOUT_COL, INFO )
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
                elseIF (SPARSE_FLAVOR(1:3) == 'DSS') THEN
                     IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
                     allocate(SOLN(NDOFO))
@@ -214,7 +214,7 @@
                     deallocate( SOLN)       ! Solution   
                    endif        
                            
-      #endif MKLDSS                     
+#endif
 
 
                ELSE

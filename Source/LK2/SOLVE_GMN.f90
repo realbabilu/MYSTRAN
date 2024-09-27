@@ -63,9 +63,8 @@
       INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = SOLVE_GMN_BEGEND + 1
 
       REAL(DOUBLE)                    :: EPS1                ! A small number to compare real zero
-      
-      #ifdef MKLDSS
-
+     
+#ifdef MKLDSS
       include 'mkl_pardiso.fi'
       ! pardiso var
       INTEGER :: pardisoerror
@@ -75,7 +74,7 @@
       INTEGER iparm(64)
       INTEGER idum(1)
       REAL*8  ddum(1)
-      #endif MKLDSS                 
+#endif         
 
  
       INTRINSIC                       :: DABS
@@ -288,9 +287,9 @@
 ! ##################################################################################################################################
  
       SUBROUTINE SOLVE_GMN_SOLVER
-      #ifdef MKLDSS
+#ifdef MKLDSS
       use mkl_dss
-      #endif MKLDSS
+#endif
 ! Solves RMM x GMN = -RMN for matrix GMN using unsymmetric decomp from LAPACK 
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -343,7 +342,7 @@
 
       REAL(DOUBLE),allocatable        :: RMN_COL(:)!(NDOFM)    ! A column of RMN. The solution for GMN_COL is from RMM*GMN_COL = RMN_COL
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
       !DSS REAL
       TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
       INTEGER perm(1) ! DSS VAR
@@ -358,7 +357,7 @@
       integer :: nnz, num_rows, num_cols,check
       real*8, allocatable :: values(:)
       integer, allocatable :: row_ptr(:), col_index(:)
-      #endif MKLDSS
+#endif
 
 
 
@@ -368,10 +367,10 @@
       allocate(DUM_COL(NDOFM),GMN_COL(NDOFM),RMN_COL(NDOFM),stat=memerror)
       if (memerror.ne.0) stop 'Error when allocating memory in solve_gmn'
       
-      #ifdef MKLDSS
+#ifdef MKLDSS
       if (.not.allocated(soln)) allocate( soln (num_rows),stat=memerror)       ! Solution
       if (memerror.ne.0) stop 'ERROR in allocating DSS solution in solve gmn'
-      #endif MKLDSS
+#endif MKLDSS
 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
@@ -432,7 +431,7 @@
             CALL SPARSE_CRS_SPARSE_CCS ( NDOFM, NDOFM, NTERM_RMM, 'RMM', I_RMM, J_RMM, RMM, 'CCS1', J_CCS1, I_CCS1, CCS1, 'Y')
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'RMM', NDOFM, NTERM_RMM, J_CCS1, I_CCS1, CCS1, SLU_INFO )
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
          ELSEIF ((SPARSE_FLAVOR(1:7) == 'PARDISO').or.(SPARSE_FLAVOR(1:3) == 'DSS')) THEN
    
                          
@@ -567,7 +566,7 @@
                 END IF
                 
             endif
-      #endif MKLDSS             
+#endif
 
 
          ELSE
@@ -654,7 +653,7 @@
                   SLU_INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'RMM', NDOFM, NTERM_RMM, J_CCS1, I_CCS1, CCS1, J, RMN_COL, SLU_INFO )
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
                ELSEIF (SPARSE_FLAVOR(1:7) == 'PARDISO')  THEN
                    SLU_INFO = 0
                    
@@ -691,7 +690,7 @@
                       ENDDO                  
                     endif 
                    
-      #endif MKLDSS
+#endif
 
                ELSE
 
@@ -746,7 +745,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
                WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', SLU_INFO
             ENDIF
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
          ELSEIF  (SPARSE_FLAVOR(1:7) == 'PARDISO')  THEN  !DSS STARTED
                 
              ! Deallocate solver storage and various local arrays.
@@ -767,7 +766,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
             deallocate(col_index)            
             deallocate(soln)
             IF (dsserror /= MKL_DSS_SUCCESS) STOP 'DSS error in CLEARING :' 
-      #endif MKLDSS
+#endif MKLDSS
  
 
 

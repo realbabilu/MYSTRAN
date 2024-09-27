@@ -92,9 +92,10 @@
       ! ensure output units are set
       OUNT(1) = ERR
       OUNT(2) = F06
-      allocate( PART_VEC_F(NDOFF) ,PART_VEC_N_FS(NDOFN) ,PART_VEC_S(NDOFS) ,PART_VEC_S_SzSe(NDOFS), PART_VEC_SUB(NSUB),stat=memerror   )
+      allocate( PART_VEC_F(NDOFF) ,PART_VEC_N_FS(NDOFN) ,PART_VEC_S(NDOFS) ,PART_VEC_S_SzSe(NDOFS), &
+              PART_VEC_SUB(NSUB), stat=memerror)
       if (memerror.ne.0) stop 'error allocating memory part_vec at reduce_n_fs'
-      allocate(KFF_DIAG(NDOFF),stat=memerror )
+      allocate(KFF_DIAG(NDOFF),stat=memerror)
       if (memerror.ne.0) stop 'error allocating memory kff_diag at reduce_n_fs'
 
 ! **********************************************************************************************************************************

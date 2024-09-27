@@ -25,9 +25,9 @@
 ! End MIT license text.                                                                                      
 
       SUBROUTINE REDUCE_KFF_TO_KAA ( PART_VEC_F_AO )
-      #ifdef MKLDSS
+#ifdef MKLDSS
          use mkl_dss   
-      #endif MKLDSS
+#endif
  
 ! Call routines to reduce the KFF linear stiffness matrix from the F-set to the A, O-sets
  
@@ -54,9 +54,9 @@
       USE REDUCE_KFF_TO_KAA_USE_IFs
 
       IMPLICIT NONE
-      #ifdef MKLDSS
+#ifdef MKLDSS
       include 'mkl_pardiso.fi'
-      #endif MKLDSS
+#endif
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'REDUCE_KFF_TO_KAA'
@@ -95,7 +95,7 @@
       REAL(DOUBLE)                    :: RCOND               ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
       REAL(DOUBLE)                    :: SMALL               ! A number used in filtering out small numbers from a full matrix
  
-      #ifdef MKLDSS
+#ifdef MKLDSS
       TYPE(MKL_DSS_HANDLE) :: handle ! Allocate storage for the solver handle.      !DSS var
       INTEGER perm(1) ! DSS VAR
       INTEGER :: dsserror
@@ -109,7 +109,7 @@
       INTEGER                         :: iparm(64)
       INTEGER                         :: idum(1)
       REAL*8                          :: ddum(1)
-      #endif MKLDSS  
+#endif
 
       INTRINSIC                       :: DABS
 
@@ -195,7 +195,7 @@
                INFO = 0
                CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KOO', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, INFO )
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
          ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED           
             
             IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
@@ -298,7 +298,7 @@
                     END IF       
  
              
-      #endif MKLDSS               
+#endif
 
 
             ELSE
@@ -489,14 +489,14 @@
 
          IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
 
-            CALL C_FORTRAN_DGSSV( 3, NDOFo, NTERM_KOO, 1, KOO , I_KOO , J_KOO , ddum, NDOFo, SLU_FACTORS, SLU_INFO )
+            CALL C_FORTRAN_DGSSV( 3, NDOFo, NTERM_KOO, 1, KOO , I_KOO , J_KOO , KOO_SCALE_FACS, NDOFo, SLU_FACTORS, SLU_INFO )
 
             IF (SLU_INFO .EQ. 0) THEN
                WRITE (*,*) 'SUPERLU STORAGE FREED'
             ELSE
                WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', SLU_INFO
             ENDIF
-      #ifdef MKLDSS
+#ifdef MKLDSS
          ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
 
                 ! Deallocate solver storage and various local arrays.
@@ -510,7 +510,7 @@
             phase = -1 ! release internal memory
             CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFo, ddum, idum,  idum, idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)
             deallocate(  SOLN)       ! Solution   
-      #endif MKLDSS
+#endif MKLDSS
 
          ENDIF
 
