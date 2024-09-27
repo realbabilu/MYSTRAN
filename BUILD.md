@@ -52,14 +52,22 @@ pen Command Line Intel OneApi x64 Enviroment.
 8. type **`cmake -G "Visual Studio 2022"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=TRUE  ..`** in single line for VS 2022 for using Pardiso and DSS
 9. alternatively, type **`cmake -G "Visual Studio 2022"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=false  ..`** in single line for VS 2022 for not using DSS Pardiso
 
+## Steps for Windows (x86_64) using gcc native equation.com with OpenBLAS
+1. Get equation.com gcc install at c:\gcc (http://www.equation.com/servlet/equation.cmd?fa=fortran)
+2. Get openblas binary extract at c:\gcc\openblas (https://github.com/OpenMathLib/OpenBLAS/releases)
+3. Download and Extract cmake zip (https://cmake.org/download/) put bin into c:\gcc\bin and share c:\gcc\share
+4. Get recommended superlu v5.3 (https://github.com/xiaoyeli/superlu/archive/refs/tags/v5.3.0.zip)
+   put extracted SRC and FORTRAN and main files in superlu folder
+5. go inside mystran folder `cd MYSTRAN` using command line
+6. Build build folder `mkdir build` and go inside `cd build`
+7. type `cmake -G "MinGW Makefiles" -D"CMAKE_MAKE_PROGRAM:PATH=c:\gcc\bin\make.exe" -DWIN32=TRUE -D"CMAKE_Fortran_COMPILER:PATH=c:\gcc\bin\gfortran.exe" -D"TPL_ENABLE_BLAS=TRUE" -D"TPL_BLAS_LIBRARIES:PATH=c:\gcc\openblas\libopenblas.DLL" -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"BLAS_LIBRARIES:PATH=c:\gcc\openblas\libopenblas.DLL" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DBLA_VENDOR=OpenBlas ..`
 
 ### Steps for Windows (x86_64) using MSYS - CBLAS and internal BLAS
 
 First, download and install MSYS2 from the
 [official site](https://www.msys2.org/).
 
-Open the MSYS2 terminal and run the following commands:
-
+Open the MSYS2-mingw64 terminal and run the following commands:
   1. **`pacman -Syu`**
 This updates repository information and installed packages, and might require
 you close and reopen MSYS2 terminals.
@@ -111,8 +119,8 @@ apt install gcc g++ gfortran make cmake git
 ```
 
 ---
-### Steps for Linux in WSL or any
-A. Using AOCL Clang and Flang with OpenBLAS
+### Steps for Linux in WSL 24.0 LTS or Ubuntu latest
+**A. Using AOCL Clang and Flang with OpenBLAS**
 1. `sudo apt-get update` to get updated apt library
 2. `sudo apt install ./aocc-compiler-4.2.0_1_amd64.deb` to get aocc compiler optimized for Ryzen
 3. `sudo apt install ./aocl-linux-aocc-4.2.0_1_amd64.deb` to BLIS a CBLAS optimized for Ryzen
@@ -135,7 +143,7 @@ A. Using AOCL Clang and Flang with OpenBLAS
 9.  create build folder and go to build folder, create mystran without DSS Pardiso using Openblas
    'cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  .. -D"TPL_ENABLE_BLAS=TRUE"  -D"BLAS_LIBRARIES:PATH=/usr/lib/x86_64-linux-gnu/openblas64-pthread/libopenblas64.so.0" -D"CMAKE_FORTRAN_COMPILER=flang" -D"CMAKE_C_COMPILER=clang" -D"CMAKE_CXX_COMPILER=clang"' 
 
-B. Using gcc and gfortran with OpenBLAS 
+**B. Using gcc and gfortran with OpenBLAS** 
 1. Do point 1 above, to update apt-get
 2. get gcc`sudo apt install gcc` 
 3. get gfortran `sudo apt install gfortran`
@@ -146,8 +154,6 @@ B. Using gcc and gfortran with OpenBLAS
 8. create build folder and go to build folder, create mystran without DSS Pardiso using Openblas
     `cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  .. -DMKLDSS=off -D"TPL_ENABLE_BLAS=TRUE"  -D"BLAS_LIBRARIES:PATH=/usr/lib/x86_64-linux-gnu/openblas64-pthread/libopenblas64.so.0"`
  
-
-
 ## Building MYSTRAN
 
 If your build environment is already set up, building MYSTRAN is quite
