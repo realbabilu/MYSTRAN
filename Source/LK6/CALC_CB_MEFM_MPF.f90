@@ -69,7 +69,8 @@
       REAL(DOUBLE),allocatable        :: MPFi(:,:)!(1,NDOFR)           ! i-th row of MPF
       REAL(DOUBLE),allocatable        :: MPFit(:,:)!(NDOFR,1)          ! MPFi'
       
-      allocate ( DUM1(NDOFR,6), MEFW_MAT_RR(NDOFR,NDOFR),MEFW_DIAG_NR(NVEC,NDOFR),MPFt(NDOFR,NVEC),MPFi(1,NDOFR), MPFit(NDOFR,1),stat=memerror)
+      allocate ( DUM1(NDOFR,6), MEFW_MAT_RR(NDOFR,NDOFR),MEFW_DIAG_NR(NVEC,NDOFR),MPFt(NDOFR,NVEC), &
+               MPFi(1,NDOFR), MPFit(NDOFR,1),stat=memerror)
       if (memerror.ne.0) stop 'error allocating memory at CALC_CB_MEFM_MPF'  
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
