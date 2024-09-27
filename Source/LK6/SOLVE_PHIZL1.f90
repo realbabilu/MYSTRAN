@@ -25,9 +25,9 @@
 ! End MIT license text.                                                                                      
  
       SUBROUTINE SOLVE_PHIZL1 ( NTERM_CRS3 )
-      #ifdef MKLDSS
+#ifdef MKLDSS
          use mkl_dss   
-      #endif MKLDSS
+#endif 
 
 ! Solves KLL*PHIZL1 = CRS3 for PHIZL1   where CRS3 = (MLR + MLL*DLR).
  
@@ -50,9 +50,9 @@
       USE SOLVE_PHIZL1_USE_IFs
 
       IMPLICIT NONE
-      #ifdef MKLDSS
+#ifdef MKLDSS
       include 'mkl_pardiso.fi'
-      #endif MKLDSS
+#endif 
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'SOLVE_PHIZL1  '
@@ -86,7 +86,7 @@
       REAL(DOUBLE),allocatable        :: PHIZL1_COL(:)!(NDOFL)   ! A column of PHIZL1   solved for herein
       REAL(DOUBLE)                    :: RCOND             ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
  
-      #ifdef MKLDSS
+#ifdef MKLDSS
       !DSS REAL
       TYPE(MKL_DSS_HANDLE)            :: handle ! Allocate storage for the solver handle.      !DSS var
       INTEGER                         :: perm(1) ! DSS VAR
@@ -102,7 +102,7 @@
       INTEGER                         :: iparm(64)
       INTEGER                         :: idum(1)
       REAL*8                          :: ddum(1)
-      #endif MKLDSS
+#endif
 
       INTRINSIC                       :: DABS
 
@@ -139,7 +139,7 @@
           IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
               
               CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, INFO )
-          #ifdef MKLDSS    
+#ifdef MKLDSS    
           ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN
               
                 IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET in DSS'
@@ -323,7 +323,7 @@
                  STOP 1
         
              END IF   
-            #endif MKLDSS
+#endif
             ELSE
 
             FATAL_ERR = FATAL_ERR + 1
@@ -401,7 +401,7 @@
 
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, J, INOUT_COL, INFO )
-      #ifdef MKLDSS
+#ifdef MKLDSS
                ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN
                    
                     IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET'
@@ -444,7 +444,7 @@
 9903                FORMAT(' PARDISO FACTORIZATION OF MATRIX ', A, ' SUCCEEDED IN SUBR ', A)
                     
                 endif 
-      #endif MKLDSS
+#endif MKLDSS
 
                ELSE
 
@@ -488,7 +488,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
             ELSE
                WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', INFO
             ENDIF
-      #ifdef MKLDSS
+#ifdef MKLDSS
          ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
                 deallocate( SOLN)       ! Solution
                 ! Deallocate solver storage and various local arrays.
@@ -502,7 +502,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
                    deallocate(  SOLN)       ! SolutionENDIF
                
                 
-      #endif MKLDSS 
+#endif MKLDSS 
          ENDIF
 
       ENDIF FreeS  

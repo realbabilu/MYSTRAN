@@ -25,9 +25,9 @@
 ! End MIT license text.                                                                                      
  
       SUBROUTINE SOLVE_DLR
-      #ifdef MKLDSS
+#ifdef MKLDSS
          use mkl_dss   
-      #endif MKLDSS
+#endif 
 ! Solves KLL*DLR = -KLR for matrix DLR. However, we will use rows of KRL instead of cols of KLR in the solution.
  
 ! For a description of Craig-Bamptom analyses, see Appendix D to the MYSTRAN User's Referance Manual
@@ -52,9 +52,9 @@
 
       IMPLICIT NONE
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
       include 'mkl_pardiso.fi'
-      #endif MKLDSS
+#endif 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'SOLVE_DLR'
       CHARACTER(  1*BYTE)             :: CLOSE_IT          ! Input to subr READ_MATRIX_i. 'Y'/'N' whether to close a file or not 
@@ -85,7 +85,7 @@
       REAL(DOUBLE)                    :: K_INORM           ! Inf norm of KLL matrix (det in  subr COND_NUM)
       REAL(DOUBLE)                    :: RCOND             ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
  
-      #ifdef MKLDSS
+#ifdef MKLDSS
       !DSS REAL
       TYPE(MKL_DSS_HANDLE)            :: handle ! Allocate storage for the solver handle.      !DSS var
       INTEGER                         :: perm(1) ! DSS VAR     
@@ -101,7 +101,7 @@
       INTEGER                         :: iparm(64)
       INTEGER                         :: idum(1)
       REAL*8                          :: ddum(1)
-      #endif MKLDSS
+#endif
       
 
       INTRINSIC                       :: DABS
@@ -145,7 +145,7 @@
             INFO = 0
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, INFO )
 
-      #ifdef MKLDSS
+#ifdef MKLDSS
          ELSEIF (SPARSE_FLAVOR(1:3) == 'DSS') THEN
                 IF (CRS_CCS == 'CCS') STOP 'CCS NOT YET in DSS'
                 allocate( SOLN(NDOFL))       ! Solution
@@ -331,7 +331,7 @@
              END IF   
           
              
-         #endif MKLDSS
+#endif
                 
 
 
@@ -414,7 +414,7 @@
 
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, J, INOUT_COL, INFO )
-      #ifdef MKLDSS
+#ifdef MKLDSS
                ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN  !DSS STARTED
                   INFO = 0       
                     
@@ -459,7 +459,7 @@
                 endif              
  
                   
-      #endif MKLDSS
+#endif
 
                ELSE
 
@@ -537,7 +537,7 @@
                    ELSE
                        WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', INFO
                    ENDIF
-      #ifdef MKLDSS                    
+#ifdef MKLDSS                    
                ELSEIF  (SPARSE_FLAVOR(1:3) == 'DSS') THEN 
                     dsserror = DSS_DELETE(handle, MKL_DSS_DEFAULTS) !clearing
                     deallocate( SOLN)       ! Solution
@@ -548,10 +548,11 @@
                    phase = -1 ! release internal memory          
                    CALL pardiso (pt, maxfct, mnum, mtype, phase, NDOFL, ddum, idum,  idum, idum, 1, iparm, msglvl, ddum, ddum, pardisoerror)        
                    deallocate(  SOLN)       ! SolutionENDIF
-               endif     
+               
             
-      #endif MKLDSS
-      ENDIF
+#endif
+               ENDIF
+	ENDIF
       
                
                    
