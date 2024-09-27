@@ -2824,12 +2824,12 @@
                   CALL LEFT_ADJ_BDFLD ( CHRPARM )
                   IF      (CHRPARM(1:7) == 'SUPERLU') THEN
                      SPARSE_FLAVOR = 'SUPERLU '
-                  #ifdef MKLDSS
+#ifdef MKLDSS
                   ELSEIF      (CHRPARM(1:3) == 'DSS') THEN
                      SPARSE_FLAVOR = 'DSS     '   
                   ELSEIF      (CHRPARM(1:7) == 'PARDISO') THEN
                      SPARSE_FLAVOR = 'PARDISO'      
-                  #endif MKLDSS
+#endif
                   ELSE
                      WARN_ERR = WARN_ERR + 1
                      WRITE(ERR,101) CARD
