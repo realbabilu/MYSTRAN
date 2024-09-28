@@ -52,7 +52,7 @@ pen Command Line Intel OneApi x64 Enviroment.
 8. type **`cmake -G "Visual Studio 2022"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=TRUE  ..`** in single line for VS 2022 for using Pardiso and DSS
 9. alternatively, type **`cmake -G "Visual Studio 2022"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DMKLDSS=false  ..`** in single line for VS 2022 for not using DSS Pardiso
 
-## Steps for Windows (x86_64) using gcc native equation.com with OpenBLAS
+## Steps for Windows (x86_64) using gcc equation.com with OpenBLAS
 1. Get equation.com gcc install at c:\gcc (http://www.equation.com/servlet/equation.cmd?fa=fortran)
 2. Get openblas binary extract at c:\gcc\openblas (https://github.com/OpenMathLib/OpenBLAS/releases)
 3. Download and Extract cmake zip (https://cmake.org/download/) put bin into c:\gcc\bin and share c:\gcc\share
@@ -130,18 +130,19 @@ apt install gcc g++ gfortran make cmake git
    `cd /opt/AMD`
    `cd aocc-compiler-4.2.0/`
    `sudo ./install.sh`
-   `source /opt/AMD/setenv_AOCC.sh`
+   `source /opt/AMD/setenv_AOCC.sh`   This must be done every boot to get AOCC enviroment bash
    `which clang`
    `clang -v`
    `cd /opt/AMD/aocl/aocl-linux-aocc-4.2.0/aocc`
    `sudo ./set_aocl_interface_symlink.sh`
-7. Get OpenBLAS compiled   
+7. Get OpenBLAS compiled, (note: AOCL BLIS doesnt have ILAENV DSTRS)    
    `sudo apt-cache search openblas`
    `sudo apt -y install libopenblas0-pthread` for x86 Openblas
    `sudo apt -y install libopenblas64-0-pthread` for x64 Openblas
 8.  create mystran folder and `git clone https://github.com/realbabilu/MYSTRAN` or any version mystran you want
-9.  create build folder and go to build folder, create mystran without DSS Pardiso using Openblas
+9.  create build folder and go to build folder, create mystran without DSS Pardiso using Openblas, the location openBLAS should be given
    'cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  .. -D"TPL_ENABLE_BLAS=TRUE"  -D"BLAS_LIBRARIES:PATH=/usr/lib/x86_64-linux-gnu/openblas64-pthread/libopenblas64.so.0" -D"CMAKE_FORTRAN_COMPILER=flang" -D"CMAKE_C_COMPILER=clang" -D"CMAKE_CXX_COMPILER=clang"' 
+
 
 **B. Using gcc and gfortran with OpenBLAS** 
 1. Do point 1 above, to update apt-get
@@ -153,6 +154,26 @@ apt install gcc g++ gfortran make cmake git
 7. create mystran folder then `git clone https://github.com/realbabilu/MYSTRAN` or any version mystran you want
 8. create build folder and go to build folder, create mystran without DSS Pardiso using Openblas
     `cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  .. -DMKLDSS=off -D"TPL_ENABLE_BLAS=TRUE"  -D"BLAS_LIBRARIES:PATH=/usr/lib/x86_64-linux-gnu/openblas64-pthread/libopenblas64.so.0"`
+   
+**C. Using Intel OneAPI compiler and Intel MKL**
+1. get Intel Compiler Basekit and HPCkit in intel website 
+  [https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html]
+  [https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit-download.html]
+2. Install
+   `wget https://registrationcenter-download.intel.com/..../l_BaseKit_p_<ver>_offline.sh`
+   `sudo sh ./l_BaseKit_p<ver>_offline.sh -a  --cli`
+   `wget https://registrationcenter-download.intel.com/..../l_HPCKit_p_2024.2.1.79_offline.sh`
+   `sudo sh ./l_HPCKit_p_<ver>_offline.sh -a  --cli` 
+3. init enviroment `source /opt/intel/oneapi/setvars.sh`
+4. create mystran folder then `git clone https://github.com/realbabilu/MYSTRAN` or any version mystran you want
+5. copy cmake intel mkl modules to cmake modules (note:check version)
+   'cp /opt/intel/oneapi/mkl/latest/lib/cmake/mkl/ /usr/share/cmake-3.28/Modules*   
+7. create build folder and go to build folder,
+   To create mystran without DSS Pardiso using Intel MKL BLAS
+   `cmake -G "Unix Makefiles"  -D"CMAKE_FORTRAN_COMPILER=ifx" -D"CMAKE_C_COMPILER=icx" -D"CMAKE_CXX_COMPILER=icx"  -D"TPL_ENABLE_BLAS=TRUE" .. -DBLA_VENDOR=Intel10_64lp`
+   or
+   `cmake -G "Unix Makefiles"  -D"CMAKE_FORTRAN_COMPILER=ifx" -D"CMAKE_C_COMPILER=icx" -D"CMAKE_CXX_COMPILER=icx"  -D"TPL_ENABLE_BLAS=TRUE" .. -DBLA_VENDOR=Intel10_64lp -DBLAS_LIBRARIES:PATH=/opt/intel/oneapi/mkl/latest/lib/libmkl_rt.so`
+   To create mystran with DSS Pardiso using Intel MKL BLAS add argument  `-DMKLDSS=true` 
  
 ## Building MYSTRAN
 
