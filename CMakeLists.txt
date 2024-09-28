@@ -5,14 +5,15 @@
 # win intel with mkl   : cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"CMAKE_BUILD_TYPE=RELEASE" ..
 # win gcc with openblas: cmake -G "MinGW Makefiles" -D"CMAKE_MAKE_PROGRAM:PATH=c:\gcc\bin\make.exe" -DWIN32=TRUE -D"CMAKE_Fortran_COMPILER:PATH=c:\gcc\bin\gfortran.exe" -D"TPL_ENABLE_BLAS=TRUE" -D"TPL_BLAS_LIBRARIES:PATH=c:\gcc\openblas\libopenblas.DLL" -D"BLAS_LIBRARIES:PATH=c:\gcc\openblas\libopenblas.DLL" -D"CMAKE_BUILD_TYPE=RELEASE" -DBLA_VENDOR=OpenBlas  ..
 # linux gcc with openblas:   cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  .. -DMKLDSS=off -D"TPL_ENABLE_BLAS=TRUE"  -D"BLAS_LIBRARIES:PATH=/usr/lib/x86_64-linux-gnu/openblas64-pthread/libopenblas64.so.0"
+# linux aocc flang with openblas: cmake -G "Unix Makefiles" -DBLA_VENDOR=OpenBLAS  .. -D"TPL_ENABLE_BLAS=TRUE"  -D"BLAS_LIBRARIES:PATH=/usr/lib/x86_64-linux-gnu/openblas64-pthread/libopenblas64.so.0" -D"CMAKE_FORTRAN_COMPILER=flang" -D"CMAKE_C_COMPILER=clang" -D"CMAKE_CXX_COMPILER=clang"
+
 # built with DSSMKL PARDISO: cmake -G "NMake Makefiles JOM"  -D"CMAKE_FORTRAN_COMPILER=ifort.exe" -D"CMAKE_C_COMPILER=icx.exe" -D"CMAKE_CXX_COMPILER=icx.exe"  -D"TPL_ENABLE_BLAS=TRUE" -DBLA_VENDOR=Intel10_64lp -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" .. -DMKLDSS=TRUE  
 
 # set up basic project info
 cmake_minimum_required(VERSION 3.18)
 include(CheckFunctionExists)
 
-project(Mystran)
-enable_language(Fortran)
+project(Mystran  LANGUAGES C CXX Fortran)
 
 # basic compiler and output options
 set(CMAKE_SOURCE_DIR "${PROJECT_SOURCE_DIR}/Source")
@@ -26,6 +27,7 @@ set(CMAKE_Fortran_MODULE_DIRECTORY "${PROJECT_BINARY_DIR}/mod")
 include_directories( "${CMAKE_SOURCE_DIR}/INCLUDE") 
 # Add include path for MKL
 if(MKLDSS)
+message(STATUS "DSS and Pardiso Intel MKL Oneapi included")
 # Include MKL headers
 if(DEFINED ENV{MKLROOT})
     include_directories($ENV{MKLROOT}/include)
@@ -51,6 +53,8 @@ if(NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
   set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
 endif()
 
+
+
 # recommend the appropriate make command
 if(WIN32)
   if(WIN32 AND ((CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM") OR (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel") OR (CMAKE_C_COMPILER_ID STREQUAL "Intel")))
@@ -60,15 +64,24 @@ if(WIN32)
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DMKLDSS")
    endif()
   else()
-   #mustbe gfortran gcc
+   #mustbe gfortran gcc?
    set(RECOMMENDED_MAKE "mingw32-make")
    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp")
   endif()
 else()
   set(RECOMMENDED_MAKE "make")
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp -Mbackslash")
+  message(STATUS "using F: ${CMAKE_FORTRAN_COMPILER} ")
+  # Check if we're using the Flang compiler on a Linux platform
+  if(CMAKE_FORTRAN_COMPILER STREQUAL "flang" AND UNIX)
+    message(STATUS "Using Flang compiler on Linux - need backlash fix")
+    # Add the -Mbackslash argument for Flang
+    add_compile_options(-Mbackslash)
+    set(CMAKE_Fortran_FLAGS"${CMAKE_Fortran_FLAGS} -Mbackslash")
+  endif()
+
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp")
   if(MKLDSS)
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp -DMKLDSS -Mbackslash")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp -DMKLDSS")
    endif()
 endif()
 
@@ -94,7 +107,7 @@ if(WIN32 AND ((CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM") OR (CMAKE_Fortran_COMPI
     if(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
      set(CMAKE_C_FLAGS_RELEASE "/Ox /arch:haswell /tune:haswell /Qm64 -traceback")
      set(CMAKE_CXX_FLAGS_RELEASE "/Ox /Qaxhaswell /arch:haswell /tune:haswell /Qm64-traceback")
-     if(MKLDSS)  
+     if(MKLDSS)
       set(CMAKE_Fortran_FLAGS_RELEASE "/fpp -DMKLDSS /Ox /Qaxhaswell /arch:haswell /tune:haswell /Qm64  -traceback")
      else()
       set(CMAKE_Fortran_FLAGS_RELEASE "/fpp /Ox /Qaxhaswell /arch:haswell /tune:haswell /Qm64-traceback")
@@ -112,11 +125,14 @@ endif()
 #check blas vendor if given
 if(DEFINED BLA_VENDOR)
   set(USE_EXTERNAL_BLAS ON)
+   message (STATUS "BLA_VENDOR stated, use external BLAS")
 else()
   set(USE_EXTERNAL_BLAS OFF)
   message (STATUS "BLA_VENDOR not stated, use internal BLAS" )
   set(enable_internal_blaslib ON)  # Enable this to use the internal BLAS library
 endif()
+
+
 
 if (enable_internal_blaslib)
   set(USE_EXTERNAL_BLAS OFF)
@@ -133,44 +149,88 @@ option(TPL_BLAS_LIBRARIES "List of absolute paths to blas libraries [].")
 # try to find BLAS
 #--------------------- BLAS ---------------------
 if(NOT enable_internal_blaslib)
-
-
   if (TPL_BLAS_LIBRARIES)
+    message(STATUS "LAST TPL_BLAS_LIBRARIES ENVIRO ${TPL_BLAS_LIBRARIES}")
+    set(BLAS_LIBRARIES ${TPL_BLAS_LIBRARIES})
     set(BLAS_FOUND TRUE)
     message(STATUS "Using user-specified BLAS libraries: ${TPL_BLAS_LIBRARIES}")
   else()
-    find_package(BLAS REQUIRED)
-    if(BLAS_FOUND)
-      message(STATUS "Found BLAS: ${BLAS_LIBRARIES}")
-    else()
-      message(FATAL_ERROR "BLAS not found! Please install a BLAS library or use the internal BLAS.")
-    endif()
-    
+    message(STATUS "Detect BLA VENDOR")
     if(${BLA_VENDOR} MATCHES "OpenBLAS")
-    
-    
       set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
         if(UNIX AND NOT APPLE)
-        # in Linux, find cmake OpenBLAS is missing  so manually set the path to OpenBLAS
-        set(TPL_BLAS_LIBRARIES "/usr/lib/x86_64-linux-gnu/libopenblas.so")
-        set(BLAS_FOUND TRUE)
-        message(STATUS "Manually set BLAS library: ${TPL_BLAS_LIBRARIES}")
-        else()
-        find_package(OpenBLAS REQUIRED)
-        endif()
-    elseif(${BLA_VENDOR} MATCHES "Intel10_64lp" OR ${BLA_VENDOR} MATCHES "Intel")
-      find_package(LAPACK REQUIRED)
+          # in Linux, find cmake OpenBLAS is missing  so manually set the path to OpenBLAS
+          if (NOT DEFINED BLAS_LIBRARIES)
+            message(STATUS "OpenBLAS cant be find, please use manually -DTPL_BLAS_LIBRARIES=dir")
+            message(STATUS "Please use locate libopenblas64.so")
+            #message(STATUS "BLAS library given manually: ${TPL_BLAS_LIBRARIES}")
+            set(USE_EXTERNAL_BLAS OFF)
+            message (STATUS "BLA_VENDOR not stated, use internal BLAS" )
+            set(enable_internal_blaslib ON)  # Enable this to use the internal BLAS library
+
+          else()
+           # find_package(OpenBLAS REQUIRED)
+            if (NOT EXISTS ${BLAS_LIBRARIES})
+             set(enable_internal_blaslib ON)
+             message(STATUS "Using internal blas because libopenblas stated not found")
+            endif()
+          endif()
+         elseif(WIN32)
+         if (NOT DEFINED BLAS LIBRARIES)
+            message(STATUS "OpenBLAS must be given manually -DTPL_BLAS_LIBRARIES=dir")
+            set(USE_EXTERNAL_BLAS OFF)
+            message (STATUS "BLA_VENDOR not stated, use internal BLAS" )
+            set(enable_internal_blaslib ON)  # Enable this to use the internal BLAS library
+         else()
+            message(STATUS "OpenBLAS is given  manually: ${TPL_BLAS_LIBRARIES}")
+            if (NOT EXISTS ${BLAS_LIBRARIES})
+               set(enable_internal_blaslib ON)
+               message(STATUS "Using internal blas because libopenblas stated not found")
+            endif()  
+         endif ()
+       endif()
+
+    elseif(${BLA_VENDOR} MATCHES "Intel10_64lp" OR ${BLA_VENDOR} MATCHES "Intel10_64ilp")
+       message(STATUS "BLAS MKL") 
+
+       if (UNIX)
+       message(STATUS "UNIX")
+         find_package(LAPACK REQUIRED)
+         if (NOT DEFINED BLAS_LIBRARIES)
+         # Check if the variable blas_libraries is define
+           # If not defined, set it to the desired value
+           messsage (STATUS "Try manually set to libmkl_rt.so")
+           set (BLAS_LIBRARIES "/opt/intel/mkl/latest/lib/libmkl_rt.so")
+         endif()
+
+         # Optionally print the value for debugging
+           message(STATUS "blas_libraries is set to: ${BLAS_LIBRARIES}")
+       endif()
+
+      if ( (WIN32)  AND ( NOT DEFINED TPL_BLAS_LIBRARIES) )
+       message(STATUS "Windows MKL linking")
+      endif()
     endif()
 
-    if (BLAS_FOUND)
+    if ((BLAS_FOUND) OR  (NOT enable_internal_blaslib))
+
       set(TPL_BLAS_LIBRARIES "${BLAS_LIBRARIES}" CACHE FILEPATH
           "Set from FindBLAS.cmake BLAS_LIBRARIES." FORCE)
+
     else()
       set(enable_internal_blaslib TRUE)
       set(USE_EXTERNAL_BLAS OFF)
     endif()
   endif()
-endif()
+    if (NOT enable_internal_blaslib)
+     find_package(BLAS REQUIRED)
+     if(BLAS_FOUND)
+      message(STATUS "Found BLAS: ${BLAS_LIBRARIES}")
+     else()
+      message(FATAL_ERROR "BLAS not found! Please install a BLAS library or use the internal BLAS.")
+     endif()
+    endif()
+  endif()
 
 if(BLAS_FOUND)
   message(STATUS "Using TPL_BLAS_LIBRARIES='${TPL_BLAS_LIBRARIES}'")
@@ -185,7 +245,7 @@ else()
 endif()
 
 message(STATUS "Disabled support for METIS.")
-set(TPL_ENABLE_METISLIB FALSE)  
+set(TPL_ENABLE_METISLIB FALSE)
 set(METIS_FOUND FALSE)
 
 
