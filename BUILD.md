@@ -62,7 +62,7 @@ pen Command Line Intel OneApi x64 Enviroment.
 6. Build build folder `mkdir build` and go inside `cd build`
 7. type `cmake -G "MinGW Makefiles" -D"CMAKE_MAKE_PROGRAM:PATH=c:\gcc\bin\make.exe" -DWIN32=TRUE -D"CMAKE_Fortran_COMPILER:PATH=c:\gcc\bin\gfortran.exe" -D"TPL_ENABLE_BLAS=TRUE" -D"TPL_BLAS_LIBRARIES:PATH=c:\gcc\openblas\libopenblas.DLL" -D"USE_XSDK_DEFAULTS_DEFAULT=TRUE" -D"BLAS_LIBRARIES:PATH=c:\gcc\openblas\libopenblas.DLL" -D"XSDK_ENABLE_Fortran=TRUE" -D"CMAKE_BUILD_TYPE=RELEASE" -DBLA_VENDOR=OpenBlas ..`
 
-### Steps for Windows (x86_64) using MSYS - CBLAS and internal BLAS
+### Steps for Windows (x86_64) using MSYS - CBLAS and internal BLAS or OpenBLAS
 
 First, download and install MSYS2 from the
 [official site](https://www.msys2.org/).
@@ -80,7 +80,7 @@ visible so CMake can find them more easily. Note that this command's effects
 are lost when you reopen the terminal, so you might want to append it to your
 `~/.bashrc` to save time.
 
-  4. For openblas get with **`pacman -S mingw-w64-x86_64-openblas`**
+  4. For compile with OpenBLAS get with **`pacman -S mingw-w64-x86_64-openblas`**
   5. For compile with OpenBLAS :
      **`cmake -G "MinGW Makefiles"  -D"CMAKE_FORTRAN_COMPILER=gfortran" -D"CMAKE_C_COMPILER=gcc" -D"CMAKE_CXX_COMPILER=gcc"  -D"TPL_ENABLE_BLAS=TRUE" .. -DBLA_VENDOR=OpenBLAS -DBLAS_LIBRARIES:PATH=/mingw64/lib/libopenblas_64.dll.a  -DTPL_BLAS_LIBRARIES=/mingw64/lib/libopenblas_64.dll.a`
 **
