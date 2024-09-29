@@ -82,8 +82,7 @@ are lost when you reopen the terminal, so you might want to append it to your
 
   4. For compile with OpenBLAS get with **`pacman -S mingw-w64-x86_64-openblas`**
   5. For compile with OpenBLAS :
-     **`cmake -G "MinGW Makefiles"  -D"CMAKE_FORTRAN_COMPILER=gfortran" -D"CMAKE_C_COMPILER=gcc" -D"CMAKE_CXX_COMPILER=gcc"  -D"TPL_ENABLE_BLAS=TRUE" .. -DBLA_VENDOR=OpenBLAS -DBLAS_LIBRARIES:PATH=/mingw64/lib/libopenblas_64.dll.a  -DTPL_BLAS_LIBRARIES=/mingw64/lib/libopenblas_64.dll.a`
-**
+     **`cmake -G "MinGW Makefiles"  -D"CMAKE_FORTRAN_COMPILER=gfortran" -D"CMAKE_C_COMPILER=gcc" -D"CMAKE_CXX_COMPILER=gcc"  -D"TPL_ENABLE_BLAS=TRUE" .. -DBLA_VENDOR=OpenBLAS  -DTPL_BLAS_LIBRARIES=/mingw64/lib/libopenblas.a -DCMAKE_LIBRARY_PATH="C:/msys64/mingw64/lib"`**
   6. make with **`mingw32-make`**
 ### Steps for Linux (any)
 
