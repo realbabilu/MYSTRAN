@@ -80,6 +80,11 @@ visible so CMake can find them more easily. Note that this command's effects
 are lost when you reopen the terminal, so you might want to append it to your
 `~/.bashrc` to save time.
 
+  4. For openblas get with **`pacman -S mingw-w64-x86_64-openblas`**
+  5. For compile with OpenBLAS :
+     **`cmake -G "MinGW Makefiles"  -D"CMAKE_FORTRAN_COMPILER=gfortran" -D"CMAKE_C_COMPILER=gcc" -D"CMAKE_CXX_COMPILER=gcc"  -D"TPL_ENABLE_BLAS=TRUE" .. -DBLA_VENDOR=OpenBLAS -DBLAS_LIBRARIES:PATH=/mingw64/lib/libopenblas_64.dll.a  -DTPL_BLAS_LIBRARIES=/mingw64/lib/libopenblas_64.dll.a`
+**
+  6. make with **`mingw32-make`**
 ### Steps for Linux (any)
 
 Follow your distribution's steps to install the following programs/libraries:
