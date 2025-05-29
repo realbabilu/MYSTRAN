@@ -1,17 +1,25 @@
 # CMakeLists.txt for compiling MYSTRAN with gfortran in a GNU environment
 # based on an older CMakeLists.txt by ceanwang@gmail.com
 # made to work again by Bruno Borges Paschoalinoto (2020)
+# modified for AOCL BLIS support
+
+
 
 # set up basic project info
 cmake_minimum_required(VERSION 3.18)
-include(CheckFunctionExists)
-
-project(Mystran)
+include(CheckFortranFunctionExists)
+project(MYSTRAN Fortran C CXX)
 enable_language(Fortran)
+
+# Set up link libraries for function checks
+if(WIN32)
+  set(CMAKE_REQUIRED_LIBRARIES "${TPL_BLAS_LIBRARIES}")
+endif()
+
+
 
 # basic compiler and output options
 set(CMAKE_SOURCE_DIR "${PROJECT_SOURCE_DIR}/Source")
-set(BLAS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/BLAS")
 set(PROJECT_BINARY_DIR "${PROJECT_SOURCE_DIR}/Binaries")
 set(CMAKE_FLAGS "-c -fbacktrace")
 # set(CMAKE_BUILD_TYPE Debug)
@@ -58,6 +66,7 @@ endif()
 
 # check for SuperLU
 set(SUPERLU_DIR "${PROJECT_SOURCE_DIR}/superlu")
+include_directories("${SUPERLU_DIR}/SRC")
 if(NOT EXISTS "${SUPERLU_DIR}/CMakeLists.txt")
   message(
     FATAL_ERROR
@@ -65,16 +74,25 @@ if(NOT EXISTS "${SUPERLU_DIR}/CMakeLists.txt")
   )
 endif()
 
-# set some SuperLU settings
-set(enable_examples OFF)
-set(enable_tests OFF)
-#set(enable_internal_blaslib "yes")
+# Set AOCL BLIS paths and configuration
+set(AOCL_BLIS_LIB "C:/Program Files/AMD/AOCL-Windows/amd-blis/lib/LP64/AOCL-LibBlis-Win-MT-dll.lib")
+set(AOCL_FLAME_LIB "C:/Program Files/AMD/AOCL-Windows/amd-libflame/lib/LP64/AOCL-LibFlame-Win-MT-dll.lib")
+set(AOCL_UTILS_LIB "C:/Program Files/AMD/AOCL-Windows/amd-utils/lib/libaoclutils.lib")
 
+set(AOCL_BLIS_DLL "C:/Program Files/AMD/AOCL-Windows/amd-blis/lib/LP64/AOCL-LibBlis-Win-MT-dll.dll")
+set(AOCL_FLAME_DLL "C:/Program Files/AMD/AOCL-Windows/amd-libflame/lib/LP64/AOCL-LibFlame-Win-MT-dll.dll")
+set(AOCL_UTILS_DLL "C:/Program Files/AMD/AOCL-Windows/amd-utils/lib/libaoclutils.dll")
+set(AOCL_OMP_DLL "C:/gcc/AOCL_omp/libiomp5md.dll")
 
-# include & build it
-include_directories("${SUPERLU_DIR}/SRC")
-add_subdirectory(${SUPERLU_DIR})
+set(TPL_BLAS_LIBRARIES "${AOCL_BLIS_LIB};${AOCL_FLAME_LIB};${AOCL_UTILS_LIB}" CACHE STRING "AOCL BLIS libraries" FORCE)
+set(enable_internal_blaslib OFF CACHE BOOL "Use internal BLAS library" FORCE)
+set(USE_VENDOR_BLAS ON CACHE BOOL "Use vendor BLAS" FORCE)
 
+# Copy AOCL DLLs to binary directory
+file(COPY "${AOCL_BLIS_DLL}" DESTINATION ${PROJECT_BINARY_DIR})
+file(COPY "${AOCL_FLAME_DLL}" DESTINATION ${PROJECT_BINARY_DIR})
+file(COPY "${AOCL_UTILS_DLL}" DESTINATION ${PROJECT_BINARY_DIR})
+file(COPY "${AOCL_OMP_DLL}" DESTINATION ${PROJECT_BINARY_DIR})
 
 # f2c stuff
 set(F2C_DIR "${PROJECT_SOURCE_DIR}/f2c")
@@ -145,45 +163,61 @@ if (WIN32)
   add_definitions(-DUSE_CLOCK -DMSDOS)
 endif()
 
-
 # set some extra vars for MSYS builds to make the binary portable
 if (WIN32)
   set(CMAKE_EXE_LINKER_FLAGS "-static")
 endif()
 
-# collect all fortran source files
-file(GLOB_RECURSE ALL_FORTRAN_FILES "${CMAKE_SOURCE_DIR}/*.f*")
+# build the SuperLU (and CBLAS if needed) static libs!
+add_subdirectory(${SUPERLU_DIR})
 
-# same BLAS-finding subroutine as SuperLU
-if(NOT enable_internal_blaslib)
-  if (TPL_BLAS_LIBRARIES)
-    set(BLAS_FOUND TRUE)
-  else()
-    find_package(BLAS)
-    if (BLAS_FOUND)
-      set(TPL_BLAS_LIBRARIES "${BLAS_LIBRARIES}" CACHE FILEPATH
-        "Set from FindBLAS.cmake BLAS_LIBRARIES." FORCE)
-    endif()
-  endif()
+# collect modules and interfaces into a module called MODULES
+# the overuse of the word MODULE is brain-twisting, but bear with me
+set(Modules_DIR "${CMAKE_SOURCE_DIR}/Modules")
+file(GLOB_RECURSE Modules_ARPACK_FILES "${Modules_DIR}/ARPACK/*.f*")
+file(GLOB_RECURSE Modules_LAPACK_FILES "${Modules_DIR}/LAPACK/*.f*")
+file(GLOB_RECURSE Modules_BANDIT_FILES "${Modules_DIR}/BANDIT/*.f*")
+file(GLOB_RECURSE Modules_FILES "${Modules_DIR}/*.f*")
+file(GLOB_RECURSE Interfaces_FILES "${CMAKE_SOURCE_DIR}/Interfaces/*.f*")
+file(GLOB_RECURSE USE_IFs_FILES "${CMAKE_SOURCE_DIR}/USE_IFs/*.f*")
+# MODULES_ALL_FILES shall contain all the sources for the base modules lib
+set(
+  MODULES_ALL_FILES ${USE_IFs_FILES} ${Interfaces_FILES} ${Modules_FILES}
+  ${Modules_LAPACK_FILES} ${Modules_ARPACK_FILES}
+)
+add_library(MODULES OBJECT ${MODULES_ALL_FILES})
+
+# collect modules
+list(APPEND modules_names ARPACK LK1 LK2 LK3 LK4 LK5 LK6 LK9 EMG)
+foreach (modname IN LISTS modules_names)
+  file(GLOB_RECURSE TMP_MOD_FILES "${CMAKE_SOURCE_DIR}/${modname}/*.f*")
+  add_library(${modname} OBJECT ${TMP_MOD_FILES} ${TMP_MOD_FILES_PP})
+  target_link_libraries(${modname} MODULES)
+endforeach()
+
+# add the DGSSV C module from SuperLU and link it against AOCL BLIS
+add_library(dgssv "${SUPERLU_DIR}/FORTRAN/c_fortran_dgssv.c")
+if(WIN32)
+  target_link_libraries(dgssv ${TPL_BLAS_LIBRARIES})
+else()
+  target_link_libraries(dgssv blas)
 endif()
 
-if (NOT BLAS_FOUND)
-  message(STATUS "BLAS not found, building local BLAS")
+# if (and only if) SuperLU is compiled with its internal CBLAS, some subrs will
+# be missing, so we compile our own.
+# first, we check for the missing subroutines
+if(NOT USE_VENDOR_BLAS)
   list(
     APPEND blas_fns dgemm dgemv dlamch dlanst dscal dsteqr dsterf dswap dtrsm
     dtrtri ilaenv lsame xerbla
   )
   foreach (fname IN LISTS blas_fns)
-    #message(STATUS "Checking for BLAS subr ${fname}")
-    check_function_exists("${fname}" BLAS_FN_EXISTS)
-    set(BLAS_FN_EXISTS CACHE "1" STRING)
+    check_fortran_function_exists(${fname} BLAS_FN_EXISTS)
     if (NOT BLAS_FN_EXISTS)
-      #message(STATUS "BLAS subr ${fname} not found")
       string(TOUPPER ${fname} fname_upper)
-      list(APPEND missing_blas_src "${BLAS_SOURCE_DIR}/${fname_upper}.f")
+      list(APPEND missing_blas_src "${PROJECT_SOURCE_DIR}/BLAS/${fname_upper}.f")
       list(APPEND missing_blas_fns ${fname})
     endif()
-    unset(BLAS_FN_EXISTS CACHE)
   endforeach()
   # if any subroutines have bene found, create an inner blas library
   list(LENGTH missing_blas_fns MISSING_FNS_TOTAL)
@@ -199,41 +233,39 @@ if (NOT BLAS_FOUND)
         "BLAS subr ${missing_blas_fns} is absent and will be built locally."
       )
     endif()
+    add_library(my_blas OBJECT ${missing_blas_src})
+    target_link_libraries(my_blas MODULES)
   endif()
-else()
-  message(STATUS "Using system BLAS (${TPL_BLAS_LIBRARIES})")
 endif()
-
 
 # prepare the main executable, linked against the specifics and the m
 # it appears utils used to be a module, but that is no longer the case?
-# file(GLOB UTIL_FILES "${CMAKE_SOURCE_DIR}/UTIL/*.f*")
-# file(GLOB MAIN_FILES "${CMAKE_SOURCE_DIR}/MAIN/*.[fF]*")
-add_executable(
-  mystran
-  ${ALL_FORTRAN_FILES}
-  ${missing_blas_src}
-  "${SUPERLU_DIR}/FORTRAN/c_fortran_dgssv.c"
-)
-#target_link_libraries(mystran MODULES ${modules_names})
-target_link_libraries(mystran superlu f2c)
-#if (MISSING_FNS_TOTAL GREATER 0)
-#  target_link_libraries(mystran my_blas)
-#endif()
+file(GLOB_RECURSE UTIL_FILES "${CMAKE_SOURCE_DIR}/UTIL/*.f*")
+file(GLOB_RECURSE MAIN_FILES "${CMAKE_SOURCE_DIR}/MAIN/*.[fF]*")
+add_executable(mystran ${MAIN_FILES} ${MODULES_ALL_FILES} ${UTIL_FILES})
+target_link_libraries(mystran ${modules_names})
+if(WIN32)
+  target_link_libraries(mystran dgssv superlu f2c ${TPL_BLAS_LIBRARIES})
+else()
+  target_link_libraries(mystran dgssv superlu f2c blas)
+endif()
+if (MISSING_FNS_TOTAL GREATER 0)
+  target_link_libraries(mystran my_blas)
+endif()
 set_target_properties(
-  mystran PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
+  mystran PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
+  OUTPUT_NAME "mystran_aocl"
 )
 if (CMAKE_COMPILER_IS_GNUCC)
-  set(CMAKE_Fortran_FLAGS "-Wall -Wextra \
-    -Wno-unused-variable -Wno-unused-label -Wno-unused-parameter -Wno-tabs \
-    -Wno-compare-reals -Wno-character-truncation -Wno-unused-dummy-argument \
-    -Wmaybe-uninitialized -Wrealloc-lhs -fcheck=all")
+  target_compile_options(
+    mystran PRIVATE
+    -Wall -Wextra
+    -Wno-unused-variable -Wno-unused-label -Wno-unused-parameter -Wno-tabs
+    -Wno-compare-reals -Wno-character-truncation -Wno-unused-dummy-argument
+    -Wmaybe-uninitialized -Wrealloc-lhs -fcheck=all
+  )
 endif()
 
 # issue a couple messages about compilation
-include(ProcessorCount)
-ProcessorCount(NCPU)
-message(STATUS "You can now compile MYSTRAN with `cmake --build .`")
-if (NOT NCPU EQUAL 0)
-  message(STATUS "Compile faster by passing the -j${NCPU} flag.")
-endif()
+include(ProcessorCount) 
