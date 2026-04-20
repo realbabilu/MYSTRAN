@@ -26,13 +26,13 @@
  
       SUBROUTINE OFP3_ELFE_1D ( JVEC, FEMAP_SET_ID, ITE, OT4_EROW )
 
-! Processes element engr force output requests for 1D (ELAS, BUSH, ROD, BAR) elements for one subcase. Results go into array OGEL
+! Processes element engr force output requests for 1D (ELAS, BUSH, ROD, BAR, BEAM) elements for one subcase. Results go into array OGEL
 ! for later output in LINK9
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_BUG, WRT_LOG, ERR, F04, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ELOUT_ELFE_BIT, FATAL_ERR, IBIT, INT_SC_NUM, MBUG, MOGEL,&
-                                         NELE, NCBAR, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCROD, SOL_NAME
+                                         NELE, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCROD, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  OFP3_ELFE_1D_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, HALF
@@ -80,7 +80,7 @@
       REAL(DOUBLE)                    :: DUM22(3)          ! Intermediate matrix in a calc
       REAL(DOUBLE)                    :: DUM31(3)          ! Intermediate matrix in a calc
       REAL(DOUBLE)                    :: DUM32(3)          ! Intermediate matrix in a calc
-      REAL(DOUBLE)                    :: EEF(6)            ! Element engineering force for BUSH
+      REAL(DOUBLE)                    :: EEF(6) = ZERO     ! Element engineering force for BUSH
       REAL(DOUBLE)                    :: DX,DY,DZ          ! Offset dist1
       REAL(DOUBLE)                    :: FORCES(12)        ! Forces at the grid points
       REAL(DOUBLE)                    :: LENGTH
@@ -116,7 +116,8 @@
       OPT(2) = 'Y'                                         ! OPT(2) is for calc of PTE
       OPT(3) = 'Y'                                         ! OPT(3) is for calc of SEi, STEi
       OPT(4) = 'Y'                                         ! OPT(4) is for calc of KE-linear
-      OPT(5) = 'N'                                         ! OPT(5) is for calc of PPE
+!*** ADDED bt CODEX -- 2026-04-20 -- FOR BEAM DSB ***
+      OPT(5) = 'Y'                                         ! OPT(5) is for calc of PPE so distributed-load fixed-end forces are recovered
       OPT(6) = 'N'                                         ! OPT(6) is for calc of KE-diff stiff
 
       FORCE_ITEM(1) = 'M1a: Mom Plane1 EndA'
@@ -136,8 +137,8 @@
  
       DO I=1,METYPE
          DO J=1,NELE
-            IF ((ETYPE(J)(1:3) == 'BAR') .OR. (ETYPE(J)(1:4) == 'BUSH') .OR. (ETYPE(J)(1:4) == 'ELAS') .OR.                        &
-                (ETYPE(J)(1:3) == 'ROD'))THEN
+            IF ((ETYPE(J)(1:3) == 'BAR') .OR. (ETYPE(J)(1:4) == 'BEAM') .OR. (ETYPE(J)(1:4) == 'BUSH') .OR.                       &
+                (ETYPE(J)(1:4) == 'ELAS') .OR. (ETYPE(J)(1:3) == 'ROD'))THEN
                IF (ETYPE(J) == ELMTYP(I)) THEN
                   ELOUT_ELFE = IAND(ELOUT(J,INT_SC_NUM),IBIT(ELOUT_ELFE_BIT))
                   IF (ELOUT_ELFE > 0) THEN
@@ -165,8 +166,8 @@ reqs2:DO I=1,METYPE
 elems_2: DO J = 1,NELE
             EID   = EDAT(EPNT(J))
             TYPE  = ETYPE(J)
-            IF ((ETYPE(J)(1:3) == 'BAR') .OR. (ETYPE(J)(1:4) == 'BUSH') .OR. (ETYPE(J)(1:4) == 'ELAS') .OR.                        &
-                (ETYPE(J)(1:3) == 'ROD'))THEN
+            IF ((ETYPE(J)(1:3) == 'BAR') .OR. (ETYPE(J)(1:4) == 'BEAM') .OR. (ETYPE(J)(1:4) == 'BUSH') .OR.                       &
+                (ETYPE(J)(1:4) == 'ELAS') .OR. (ETYPE(J)(1:3) == 'ROD'))THEN
 
                IF (ETYPE(J) == ELMTYP(I)) THEN
                   DO K=0,MBUG-1
@@ -287,12 +288,13 @@ elems_2: DO J = 1,NELE
                         OGEL(NUM_OGEL,8) = -PEL(4)         ! T   (torque for ROD)
                      !end rod
 !                    ---------------------------------------------------------------------------------------------------------------
-                     ELSE IF (ETYPE(J)(1:3) == 'BAR') THEN
-                        LENGTH = ELEM_LEN_AB
-                        OGEL(NUM_OGEL,1) = -PEL(6)                 ! M1a (bending moment, plane 1, end a for BAR)
-                        OGEL(NUM_OGEL,2) =  PEL(5)                 ! M2a (bending moment, plane 2, end a for BAR)
-                        OGEL(NUM_OGEL,3) = -PEL(6) + PEL(2)*LENGTH ! M1b (bending moment, plane 1, end b for BAR)
-                        OGEL(NUM_OGEL,4) =  PEL(5) + PEL(3)*LENGTH ! M2b (bending moment, plane 2, end b for BAR)
+!*** ADDED bt CODEX -- 2026-04-19 -- FOR BEAM DSB ***
+                     ELSE IF ((ETYPE(J)(1:3) == 'BAR') .OR. (ETYPE(J)(1:4) == 'BEAM')) THEN
+!*** ADDED bt CODEX -- 2026-04-20 -- FOR BEAM DSB ***
+                        OGEL(NUM_OGEL,1) = -PEL( 6)                ! M1a (bending moment, plane 1, end a for BAR/BEAM)
+                        OGEL(NUM_OGEL,2) =  PEL( 5)                ! M2a (bending moment, plane 2, end a for BAR/BEAM)
+                        OGEL(NUM_OGEL,3) = -PEL(12)                ! M1b (bending moment, plane 1, end b for BAR/BEAM)
+                        OGEL(NUM_OGEL,4) =  PEL(11)                ! M2b (bending moment, plane 2, end b for BAR/BEAM)
                         OGEL(NUM_OGEL,5) = -PEL(2)                 ! V1  (plane 1 shear for BAR)
                         OGEL(NUM_OGEL,6) = -PEL(3)                 ! V2  (plane 2 shear for BAR)
                         OGEL(NUM_OGEL,7) = -PEL(1)                 ! Fx  (axial force for BAR)
@@ -331,7 +333,7 @@ elems_2: DO J = 1,NELE
                            ENDDO
                         ENDIF
 
-                        IF (ETYPE(J)(1:3) == 'BAR') THEN
+                        IF ((ETYPE(J)(1:3) == 'BAR') .OR. (ETYPE(J)(1:4) == 'BEAM')) THEN
                            DO K=1,8
                               OT4_EROW = OT4_EROW + 1
                               OTM_ELFE(OT4_EROW,JVEC) = OGEL(NUM_OGEL,K)
@@ -339,13 +341,6 @@ elems_2: DO J = 1,NELE
                                  WRITE(TXT_ELFE(OT4_EROW), 9192) OT4_EROW, OT4_DESCRIPTOR, TYPE, EID, FORCE_ITEM(K)
                               ENDIF
                            ENDDO
-                        ENDIF
-
-                        IF (ETYPE(J)(1:4) == 'BEAM') THEN
-                           FATAL_ERR = FATAL_ERR + 1
-                           WRITE(ERR,963) SUBR_NAME, ETYPE(J)
-                           WRITE(ERR,963) SUBR_NAME, ETYPE(J)
-
                         ENDIF
 
                      ENDIF
@@ -388,12 +383,13 @@ elems_2: DO J = 1,NELE
       IF (WRITE_NEU .AND. (ANY_ELFE_OUTPUT > 0)) THEN
 
 ! bar    ---------------------------------------------------------------------------------------------------------------------------
+!*** ADDED bt CODEX -- 2026-04-19 -- FOR BEAM DSB ***
          NUM_FROWS= 0
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCBAR, 8, SUBR_NAME )
-         DO J=1,NELE                                       ! Write out BAR engineering forces
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCBAR+NCBEAM, 8, SUBR_NAME )
+         DO J=1,NELE                                       ! Write out BAR/BEAM engineering forces
             EID   = EDAT(EPNT(J))
             TYPE  = ETYPE(J)
-            IF (ETYPE(J)(1:3) == 'BAR') THEN
+            IF ((ETYPE(J)(1:3) == 'BAR') .OR. (ETYPE(J)(1:4) == 'BEAM')) THEN
                NUM_FROWS= NUM_FROWS+ 1
                DO K=0,MBUG-1
                   WRT_BUG(K) = 0
@@ -405,13 +401,13 @@ elems_2: DO J = 1,NELE
                   IERROR = IERROR + 1
                   CYCLE
                ENDIF
-               LENGTH = ELEM_LEN_AB
                CALL ELMDIS
                CALL CALC_ELEM_NODE_FORCES
-               FEMAP_EL_VECS(NUM_FROWS,1) = -PEL(6)                 ! M1a (bending moment, plane 1, end a for BAR)
-               FEMAP_EL_VECS(NUM_FROWS,2) = -PEL(6) + PEL(2)*LENGTH ! M1b (bending moment, plane 1, end b for BAR)
-               FEMAP_EL_VECS(NUM_FROWS,3) =  PEL(5)                 ! M2a (bending moment, plane 2, end a for BAR)
-               FEMAP_EL_VECS(NUM_FROWS,4) =  PEL(5) + PEL(3)*LENGTH ! M2b (bending moment, plane 2, end b for BAR)
+!*** ADDED bt CODEX -- 2026-04-20 -- FOR BEAM DSB ***
+               FEMAP_EL_VECS(NUM_FROWS,1) = -PEL( 6)                ! M1a (bending moment, plane 1, end a for BAR/BEAM)
+               FEMAP_EL_VECS(NUM_FROWS,2) = -PEL(12)                ! M1b (bending moment, plane 1, end b for BAR/BEAM)
+               FEMAP_EL_VECS(NUM_FROWS,3) =  PEL( 5)                ! M2a (bending moment, plane 2, end a for BAR/BEAM)
+               FEMAP_EL_VECS(NUM_FROWS,4) =  PEL(11)                ! M2b (bending moment, plane 2, end b for BAR/BEAM)
                FEMAP_EL_VECS(NUM_FROWS,5) = -PEL(2)                 ! V1  (plane 1 shear for BAR)
                FEMAP_EL_VECS(NUM_FROWS,6) = -PEL(3)                 ! V2  (plane 2 shear for BAR)
                FEMAP_EL_VECS(NUM_FROWS,7) = -PEL(1)                 ! Fx  (axial force for BAR or ROD)
@@ -419,7 +415,7 @@ elems_2: DO J = 1,NELE
             ENDIF            
          ENDDO
          IF (NUM_FROWS > 0) THEN
-            CALL WRITE_FEMAP_ELFO_VECS ( 'BAR     ', NUM_FROWS, FEMAP_SET_ID )
+            CALL WRITE_FEMAP_ELFO_VECS ( 'BEAM    ', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
 

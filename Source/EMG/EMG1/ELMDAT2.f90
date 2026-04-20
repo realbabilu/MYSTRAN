@@ -33,7 +33,7 @@
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
       USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, F04
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, LPDAT, MPRESS, MDT, MTDAT_TEMPRB, NSUB, NTSUB 
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, LPDAT, MPDAT_PLOAD1, MPRESS, MDT, MTDAT_TEMPRB, NSUB, NTSUB 
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  ELMDAT_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, QUARTER, THIRD
@@ -130,7 +130,23 @@
                ENDDO
             ENDDO 
 
-            IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
+            IF ((TYPE == 'BAR     ') .OR. (TYPE == 'BART    ') .OR. (TYPE == 'BEAM    ')) THEN
+
+               IF (PTYPE(INT_ELEM_ID) == '2') THEN
+
+                  DO I=1,NSUB
+                     IPPN = PPNT(INT_ELEM_ID,I)
+                     IF (IPPN /= 0) THEN
+!*** ADDED bt CODEX -- 2026-04-20 -- FOR BEAM DSB ***
+                        DO J=1,MPDAT_PLOAD1
+                           PRESS(J,I) = PDATA(IPPN+J-1)
+                        ENDDO
+                     ENDIF
+                  ENDDO
+
+               ENDIF
+
+            ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
 
                IF      (PTYPE(INT_ELEM_ID) == '1') THEN
 

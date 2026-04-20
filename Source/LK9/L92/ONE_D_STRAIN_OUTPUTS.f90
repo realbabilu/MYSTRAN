@@ -77,10 +77,17 @@
  9001    FORMAT(1X,A,' BEGN ',F10.3)
       ENDIF
       WRITE_NEU = (PRTNEU == 'Y')
+      MS1  = ZERO
+      MS2  = ZERO
+      MS3  = ZERO
+      MSP1 = ' '
+      MSP2 = ' '
+      MSP3 = ' '
 ! **********************************************************************************************************************************
 ! Calc engineering strains from array STRAIN and put into array OGEL
  
-      IF      (TYPE == 'BAR     ') THEN                    ! BAR1 elements
+!*** ADDED bt CODEX -- 2026-04-19 -- FOR BEAM DSB ***
+      IF      ((TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ')) THEN
          ! TODO: not validated
          C1 = ZS(1)
          C2 = ZS(2)

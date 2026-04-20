@@ -41,7 +41,7 @@
       USE PARAMS, ONLY                :  SUPWARN
       USE SUBR_BEGEND_LEVELS, ONLY    :  PRESSURE_DATA_PROC_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE MODEL_STUF, ONLY            :  LOAD_SIDS, LOAD_FACS, SUBLOD, PDATA, PPNT, PLOAD4_3D_DATA, PTYPE
+      USE MODEL_STUF, ONLY            :  ESORT1, LOAD_SIDS, LOAD_FACS, SUBLOD, PDATA, PPNT, PLOAD4_3D_DATA, PTYPE
  
       USE PRESSURE_DATA_PROC_USE_IFs
 
@@ -54,6 +54,8 @@
       CHARACTER( 1*BYTE)              :: FOUND             ! Indicator on whether we found something we were looking for
       CHARACTER(LEN=JCARD_LEN)        :: JCARD(10)         ! The 10 fields of characters in CARD
       CHARACTER( 8*BYTE)              :: NAME              ! Card name (PLOAD1,2 or 4)
+      CHARACTER( 8*BYTE)              :: PLOAD1_SCALE      ! PLOAD1 scale keyword
+      CHARACTER( 8*BYTE)              :: PLOAD1_TYPE       ! PLOAD1 load direction keyword
       CHARACTER( 6*BYTE)              :: PLATE_OR_SOLID    ! 'PLATE' or 'SOLID' element designation from PLOAD4 entries
       CHARACTER( 8*BYTE)              :: TOKEN             ! The 1st 8 characters from a JCARD
       CHARACTER( 8*BYTE)              :: TOKTYP            ! Variable to test whether "THRU" option was used on B.D. PLOAD2 card
@@ -82,7 +84,10 @@
       REAL(DOUBLE)                    :: SCALE             ! Scale factor from a LOAD Bulk Data card
       REAL(DOUBLE)                    :: RPDAT             ! Real pressure value read from file LINK1Q
       REAL(DOUBLE)                    :: RPDAT1            ! Real pressure value read from file LINK1Q
+      REAL(DOUBLE)                    :: RPDAT2            ! 2nd real pressure value read from file LINK1Q
       REAL(DOUBLE)                    :: RSID(LLOADC+1)    ! Array of load magnitudes (for LSID set ID's) needed for one S/C
+      REAL(DOUBLE)                    :: X1                ! PLOAD1 start fraction/location
+      REAL(DOUBLE)                    :: X2                ! PLOAD1 end fraction/location
 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
@@ -106,8 +111,6 @@
       ENDDO
 
 isubc:DO I=1,NSUB                                          ! Loop through the S/C's
- 
-         NPDAT = 0                                         ! 09/21/21: Init NPDAT before each S/C. Otherwise can get error 1523
 
          IF (SUBLOD(I,1) == 0) THEN                        ! If no load for this S/C, CYCLE
             CYCLE isubc
@@ -152,8 +155,6 @@ pcards:  DO J=1,NPCARD                                     ! Process elem pressu
                CYCLE pcards                                 ! Ignore record if not for PLOAD1 or PLOAD2
             ENDIF
  
-            IPPNT = NPDAT + 1                              ! Set index for pointer array, PPNT
- 
             READ(JCARD(2),'(I8)') SETID                    ! Get pressure load SID
  
             FOUND = 'N'                                    ! (2-b- ii). Scan through LSID to find set that matches SETID read.
@@ -170,7 +171,7 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
             ENDIF
 
 ! Put pressure data into PDATA
-            IF ((NPDAT + NFIELD) > LPDAT) THEN             ! Check for overflow in PDATA
+            IF (((NAME(1:6) /= 'PLOAD1') .AND. ((NPDAT + NFIELD) > LPDAT))) THEN
                WRITE(ERR,1523) SUBR_NAME,LPDAT
                WRITE(F06,1523) SUBR_NAME,LPDAT
                FATAL_ERR = FATAL_ERR + 1
@@ -179,15 +180,139 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
  
                                                            ! Set the field number where we expect to find the 1st pressure value
             IF      ((NAME(1:7) == 'PLOAD1 ') .OR. (NAME(1:7) == 'PLOAD1*')) THEN
-               Write(err,'(a,a)') ' *ERROR     : Code not written for PLOAD1 processing in subr ', subr_name
-               Write(f06,'(a,a)') ' *ERROR     : Code not written for PLOAD1 processing in subr ', subr_name
-               fatal_err = fatal_err + 1
-               call outa_here ( 'Y' )
+!*** ADDED bt CODEX -- 2026-04-20 -- FOR BEAM DSB ***
+               CALL LEFT_ADJ_BDFLD ( JCARD(4) )
+               CALL LEFT_ADJ_BDFLD ( JCARD(5) )
+               PLOAD1_TYPE  = JCARD(4)(1:8)
+               PLOAD1_SCALE = JCARD(5)(1:8)
+               IF (PLOAD1_SCALE == ' ') PLOAD1_SCALE = 'FR'
+
+               READ(JCARD(3),'(I8)') EID
+               CALL GET_ARRAY_ROW_NUM ( 'ESORT1', SUBR_NAME, NELE, ESORT1, EID, IELEM )
+               IF (IELEM == -1) THEN
+                  WRITE(ERR,1530) EID, SETID
+                  WRITE(F06,1530) EID, SETID
+                  FATAL_ERR = FATAL_ERR + 1
+                  EL_PRES_ERR = EL_PRES_ERR + 1
+                  CYCLE pcards
+               ENDIF
+
+               READ(JCARD(6),'(F16.0)') X1
+               READ(JCARD(7),'(F16.0)') RPDAT
+               READ(JCARD(8),'(F16.0)') X2
+               READ(JCARD(9),'(F16.0)') RPDAT2
+
+               IF (PLOAD1_SCALE /= 'FR') THEN
+                  WRITE(ERR,1524) TRIM(PLOAD1_SCALE), EID, SETID
+                  WRITE(F06,1524) TRIM(PLOAD1_SCALE), EID, SETID
+                  FATAL_ERR = FATAL_ERR + 1
+                  EL_PRES_ERR = EL_PRES_ERR + 1
+                  CYCLE pcards
+               ENDIF
+               IF ((X1 < -1.0D-12) .OR. (X1 > ONE + 1.0D-12) .OR. (X2 < -1.0D-12) .OR. (X2 > ONE + 1.0D-12)) THEN
+                  WRITE(ERR,1525) EID, SETID, X1, X2
+                  WRITE(F06,1525) EID, SETID, X1, X2
+                  FATAL_ERR = FATAL_ERR + 1
+                  EL_PRES_ERR = EL_PRES_ERR + 1
+                  CYCLE pcards
+               ENDIF
+               IF (X2 < X1 - 1.0D-12) THEN
+                  WRITE(ERR,1526) EID, SETID, X1, X2
+                  WRITE(F06,1526) EID, SETID, X1, X2
+                  FATAL_ERR = FATAL_ERR + 1
+                  EL_PRES_ERR = EL_PRES_ERR + 1
+                  CYCLE pcards
+               ENDIF
+
+               CALL PLOAD1_PUT ( IELEM, I, IPPNT, EL_REDUNDANT_PRES, EL_PRES_ERR )
+               IF (IPPNT == 0) CYCLE pcards
+
+               IF ((PLOAD1_TYPE == 'FY') .OR. (PLOAD1_TYPE == 'FYE') .OR. (PLOAD1_TYPE == 'Y')) THEN
+                  IF (PDATA(IPPNT+2) >= ZERO) THEN
+                     WRITE(ERR,1528) EID, SETID, 'FYE/FY/Y'
+                     WRITE(F06,1528) EID, SETID, 'FYE/FY/Y'
+                     FATAL_ERR = FATAL_ERR + 1
+                     EL_PRES_ERR = EL_PRES_ERR + 1
+                     CYCLE pcards
+                  ENDIF
+                  PDATA(IPPNT  ) = SCALE*RPDAT
+                  PDATA(IPPNT+1) = SCALE*RPDAT2
+                  PDATA(IPPNT+2) = X1
+                  PDATA(IPPNT+3) = X2
+               ELSE IF ((PLOAD1_TYPE == 'FZ') .OR. (PLOAD1_TYPE == 'FZE') .OR. (PLOAD1_TYPE == 'Z')) THEN
+                  IF (PDATA(IPPNT+6) >= ZERO) THEN
+                     WRITE(ERR,1528) EID, SETID, 'FZE/FZ/Z'
+                     WRITE(F06,1528) EID, SETID, 'FZE/FZ/Z'
+                     FATAL_ERR = FATAL_ERR + 1
+                     EL_PRES_ERR = EL_PRES_ERR + 1
+                     CYCLE pcards
+                  ENDIF
+                  PDATA(IPPNT+4) = SCALE*RPDAT
+                  PDATA(IPPNT+5) = SCALE*RPDAT2
+                  PDATA(IPPNT+6) = X1
+                  PDATA(IPPNT+7) = X2
+               ELSE IF (PLOAD1_TYPE == 'FXE') THEN
+                  IF (PDATA(IPPNT+10) >= ZERO) THEN
+                     WRITE(ERR,1528) EID, SETID, 'FXE'
+                     WRITE(F06,1528) EID, SETID, 'FXE'
+                     FATAL_ERR = FATAL_ERR + 1
+                     EL_PRES_ERR = EL_PRES_ERR + 1
+                     CYCLE pcards
+                  ENDIF
+                  PDATA(IPPNT+8 ) = SCALE*RPDAT
+                  PDATA(IPPNT+9 ) = SCALE*RPDAT2
+                  PDATA(IPPNT+10) = X1
+                  PDATA(IPPNT+11) = X2
+               ELSE IF (PLOAD1_TYPE == 'MXE') THEN
+                  IF (PDATA(IPPNT+14) >= ZERO) THEN
+                     WRITE(ERR,1528) EID, SETID, 'MXE'
+                     WRITE(F06,1528) EID, SETID, 'MXE'
+                     FATAL_ERR = FATAL_ERR + 1
+                     EL_PRES_ERR = EL_PRES_ERR + 1
+                     CYCLE pcards
+                  ENDIF
+                  PDATA(IPPNT+12) = SCALE*RPDAT
+                  PDATA(IPPNT+13) = SCALE*RPDAT2
+                  PDATA(IPPNT+14) = X1
+                  PDATA(IPPNT+15) = X2
+               ELSE IF (PLOAD1_TYPE == 'MYE') THEN
+                  IF (PDATA(IPPNT+18) >= ZERO) THEN
+                     WRITE(ERR,1528) EID, SETID, 'MYE'
+                     WRITE(F06,1528) EID, SETID, 'MYE'
+                     FATAL_ERR = FATAL_ERR + 1
+                     EL_PRES_ERR = EL_PRES_ERR + 1
+                     CYCLE pcards
+                  ENDIF
+                  PDATA(IPPNT+16) = SCALE*RPDAT
+                  PDATA(IPPNT+17) = SCALE*RPDAT2
+                  PDATA(IPPNT+18) = X1
+                  PDATA(IPPNT+19) = X2
+               ELSE IF (PLOAD1_TYPE == 'MZE') THEN
+                  IF (PDATA(IPPNT+22) >= ZERO) THEN
+                     WRITE(ERR,1528) EID, SETID, 'MZE'
+                     WRITE(F06,1528) EID, SETID, 'MZE'
+                     FATAL_ERR = FATAL_ERR + 1
+                     EL_PRES_ERR = EL_PRES_ERR + 1
+                     CYCLE pcards
+                  ENDIF
+                  PDATA(IPPNT+20) = SCALE*RPDAT
+                  PDATA(IPPNT+21) = SCALE*RPDAT2
+                  PDATA(IPPNT+22) = X1
+                  PDATA(IPPNT+23) = X2
+               ELSE
+                  WRITE(ERR,1527) TRIM(PLOAD1_TYPE), EID, SETID
+                  WRITE(F06,1527) TRIM(PLOAD1_TYPE), EID, SETID
+                  FATAL_ERR = FATAL_ERR + 1
+                  EL_PRES_ERR = EL_PRES_ERR + 1
+                  CYCLE pcards
+               ENDIF
             ELSE IF ((NAME(1:7) == 'PLOAD2 ') .OR. (NAME(1:7) == 'PLOAD2*')) THEN
+               IPPNT = NPDAT + 1                           ! Set index for pointer array, PPNT
                NPDAT = NPDAT + 1
                READ(JCARD(3),'(F16.0)') RPDAT
                PDATA(NPDAT) = SCALE*RPDAT               
             ELSE IF ((NAME(1:7) == 'PLOAD4 ') .OR. (NAME(1:7) == 'PLOAD4*')) THEN
+               IPPNT = NPDAT + 1                           ! Set index for pointer array, PPNT
                NPDAT = NPDAT + 1
                READ(JCARD(K+3),'(F16.0)') RPDAT1
                PDATA(NPDAT) = SCALE*RPDAT1
@@ -205,7 +330,10 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
 ! Process EID's. First check for the 2 options on specifying elem data. For PLOAD2, either all data are EID's or THRU option is used
 !                For PLOAD4, either "THRU" is used or there is only 1 EID
  
-            IF      (NAME(1:6) == 'PLOAD2') THEN
+            IF      (NAME(1:6) == 'PLOAD1') THEN
+               CYCLE pcards
+
+            ELSE IF (NAME(1:6) == 'PLOAD2') THEN
                TOKEN = JCARD(5)(1:8)                       ! Only send the 1st 8 chars of this JCARD. It has been left justified
             ELSE IF (NAME(1:6) == 'PLOAD4') THEN
                TOKEN = JCARD(8)(1:8)
@@ -357,9 +485,80 @@ k_do6:            DO K=EID1,EID2
  1523 FORMAT(' *ERROR  1523: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' TOO MUCH ELEMENT PRESSURE DATA. MAX IS LPDAT = ',I8)
 
+ 1524 FORMAT(' *ERROR      : PLOAD1 SCALE "',A,'" ON ELEMENT ',I8,' IN LOAD SET ',I8,' IS NOT SUPPORTED. USE FR FOR V1')
+
+ 1525 FORMAT(' *ERROR      : PLOAD1 ON ELEMENT ',I8,' IN LOAD SET ',I8,                                                   &
+                    ' HAS X1/X2 OUT OF RANGE [0,1]. INPUT WAS ',1ES12.4,', ',1ES12.4)
+
+ 1526 FORMAT(' *ERROR      : PLOAD1 ON ELEMENT ',I8,' IN LOAD SET ',I8,                                                   &
+                    ' HAS X2 < X1. INPUT WAS X1=',1ES12.4,' X2=',1ES12.4)
+
+ 1527 FORMAT(' *ERROR      : PLOAD1 TYPE "',A,'" ON ELEMENT ',I8,' IN LOAD SET ',I8,                                    &
+                    ' IS NOT SUPPORTED. USE FYE/FZE/FXE/MXE/MYE/MZE (legacy FY/FZ and Y/Z also accepted)')
+
+ 1528 FORMAT(' *ERROR      : PLOAD1 ON ELEMENT ',I8,' IN LOAD SET ',I8,' HAS MORE THAN ONE ',A,' entry in one subcase. ',         &
+                    'CURRENT IMPLEMENTATION ALLOWS ONE ENTRY PER COMPONENT/PER ELEMENT/PER SUBCASE')
+
+ 1530 FORMAT(' *ERROR  1520: ELEMENT ',I8,' ON PLOADi ',I8,' DOES NOT EXIST OR IS OF WRONG TYPE FOR THE PRESSURE CARD:')
+
 ! ##################################################################################################################################
  
       CONTAINS
+
+      SUBROUTINE PLOAD1_PUT ( IELEM, JSUB, IPPNT, EL_REDUNDANT_PRES, EL_PRES_ERR )
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
+      USE IOUNT1, ONLY                :  ERR, F06
+      USE SCONTR, ONLY                :  FATAL_ERR, WARN_ERR
+      USE MODEL_STUF, ONLY            :  ESORT1, PDATA, PPNT, PTYPE
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), INTENT(IN)       :: IELEM
+      INTEGER(LONG), INTENT(IN)       :: JSUB
+      INTEGER(LONG), INTENT(OUT)      :: IPPNT
+      INTEGER(LONG), INTENT(INOUT)    :: EL_REDUNDANT_PRES
+      INTEGER(LONG), INTENT(INOUT)    :: EL_PRES_ERR
+
+      IF (PPNT(IELEM,JSUB) == 0) THEN
+         IPPNT = NPDAT + 1
+         IF ((NPDAT + MPDAT_PLOAD1) > LPDAT) THEN
+            WRITE(ERR,1531) SUBR_NAME,LPDAT
+            WRITE(F06,1531) SUBR_NAME,LPDAT
+            FATAL_ERR = FATAL_ERR + 1
+            CALL OUTA_HERE ( 'Y' )
+         ENDIF
+         NPDAT = NPDAT + MPDAT_PLOAD1
+         DO K=0,MPDAT_PLOAD1-1
+            PDATA(IPPNT+K) = ZERO
+         ENDDO
+         PDATA(IPPNT+ 2) = -ONE
+         PDATA(IPPNT+ 6) = -ONE
+         PDATA(IPPNT+10) = -ONE
+         PDATA(IPPNT+14) = -ONE
+         PDATA(IPPNT+18) = -ONE
+         PDATA(IPPNT+22) = -ONE
+         PPNT(IELEM,JSUB) = IPPNT
+         PTYPE(IELEM)     = '2'
+      ELSE
+         IPPNT = PPNT(IELEM,JSUB)
+         IF (PTYPE(IELEM) /= '2') THEN
+            WRITE(ERR,1532) ESORT1(IELEM), JSUB, PTYPE(IELEM)
+            WRITE(F06,1532) ESORT1(IELEM), JSUB, PTYPE(IELEM)
+            FATAL_ERR = FATAL_ERR + 1
+            EL_PRES_ERR = EL_PRES_ERR + 1
+            IPPNT = 0
+            RETURN
+         ENDIF
+      ENDIF
+
+ 1531 FORMAT(' *ERROR  1523: PROGRAMMING ERROR IN SUBROUTINE ',A,                                                             &
+                    /,14X,' TOO MUCH ELEMENT PRESSURE DATA. MAX IS LPDAT = ',I8)
+
+ 1532 FORMAT(' *ERROR      : ELEMENT ',I8,' IN INTERNAL SUBCASE ',I8,                                                        &
+                    ' HAS INCOMPATIBLE MIXED PLOAD TYPES. EXISTING PTYPE = ',A1)
+
+      END SUBROUTINE PLOAD1_PUT
  
 ! Change log (changes following completion of Version 1.02 on 05/01/03)
 
@@ -460,10 +659,12 @@ k_do6:            DO K=EID1,EID2
       RETURN
 
 ! **********************************************************************************************************************************
- 1520 FORMAT(' *ERROR  1520: ELEMENT ',I8,' ON PLOAD2 ',I8,' DOES NOT EXIST OR IS OF WRONG TYPE FOR THE PRESSURE CARD:')
+ 1520 FORMAT(' *ERROR  1520: ELEMENT ',I8,' ON PLOADi ',I8,' DOES NOT EXIST OR IS OF WRONG TYPE FOR THE PRESSURE CARD:')
 
  1521 FORMAT(' *WARNING    : FOR INTERNAL SUBCASE NUMBER ',I8,' ELEMENT ',I8,' HAS PRESSURE DEFINED MORE THAN ONCE.',              &
                            ' LAST VALUE IN INPUT DECK WILL BE USED')
+
+ 1528 FORMAT(' *ERROR      : ELEMENT ',I8,' IN INTERNAL SUBCASE ',I8,' HAS INCOMPATIBLE MIXED PLOAD TYPES. EXISTING PTYPE = ',A1)
 
  1522 FORMAT(/,' PROCESSING TERMINATED DUE TO ABOVE PRESSURE DATA ERRORS')
 
