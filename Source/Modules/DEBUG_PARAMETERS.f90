@@ -1,28 +1,28 @@
 ! ##################################################################################################################################
-! Begin MIT license text.
+! Begin MIT license text.                                                                                    
 ! _______________________________________________________________________________________________________
-
-! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)
-
-! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+                                                                                                         
+! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)                                              
+                                                                                                         
+! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and      
 ! associated documentation files (the "Software"), to deal in the Software without restriction, including
 ! without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
-! the following conditions:
-
-! The above copyright notice and this permission notice shall be included in all copies or substantial
-! portions of the Software and documentation.
-
-! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-! THE SOFTWARE.
+! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to   
+! the following conditions:                                                                              
+                                                                                                         
+! The above copyright notice and this permission notice shall be included in all copies or substantial   
+! portions of the Software and documentation.                                                                              
+                                                                                                         
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS                                
+! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,                            
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE                            
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                                 
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                          
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN                              
+! THE SOFTWARE.                                                                                          
 ! _______________________________________________________________________________________________________
-
-! End MIT license text.
+                                                                                                        
+! End MIT license text.                                                                                      
 
       MODULE DEBUG_PARAMETERS
 
@@ -48,49 +48,49 @@
 !        DEBUG   5  = 1 print Gauss quadriture formula abscissa's and weights calculated in subr ORDER
 !        DEBUG   6  = 1 print some quad element data to BUG file (over and above what is printed with C.C ELDATA command)
 !                   = 2 print some hexa element data to BUG file (over and above what is printed with C.C ELDATA command)
-!        DEBUG   7  = 1 print arrays ESORT1, ESORT2, EPNT and ETYPE in subr ELESORT before/after sorting elements
+!        DEBUG   7  = 1 print arrays ESORT1, ESORT2, EPNT and ETYPE in subr ELESORT before/after sorting elements 
 !        DEBUG   8  = 1 print grid temperature data in subr TEMPERATURE_DATA_PROC
 !                   = 2 print elem temperature data in subr TEMPERATURE_DATA_PROC
 !                   = 3 print both grid and elem temperature data in subr TEMPERATURE_DATA_PROC
 !        DEBUG   9  > 0 print debug info in subr PINFLG (pin flag processing for elements)
 
 !        DEBUG  10  = 11 or 33 prints data on algorithm to create arrays STFKEY, STFPNT, STFCOL, STF at end of subr ESP
-!                   = 12 or 32 prints detailed data on algorithm to create arrays STFKEY, STFPNT, STFCOL, STF in subr SPARSE
-!                   = 13 or 33 also prints template of nonzero terms in K in subr ESP if PARAM SETLKTK = 1 or 2
+!                   = 12 or 32 prints detailed data on algorithm to create arrays STFKEY, STFPNT, STFCOL, STF in subr SPARSE 
+!                   = 13 or 33 also prints template of nonzero terms in K in subr ESP if PARAM SETLKTK = 1 or 2 
 !                   = 21 or 33 prints data on algorithm to create arrays EMSKEY, EMSPNT, EMSCOL, EMS at end of subr ESP
-!                   = 22 or 32 prints detailed data on algorithm to create arrays EMSKEY, EMSPNT, EMSCOL, EMS in subr SPARSE
+!                   = 22 or 32 prints detailed data on algorithm to create arrays EMSKEY, EMSPNT, EMSCOL, EMS in subr SPARSE 
 
 !        DEBUG  11  = 1 print individual 6x6 r.b. displ matrices in basic and global coords for each grid (subr RB_DISP_MATRIX_PROC)
 !                   = 2 print ngrid by 6 rigid body displ matrix in global coords for the model
 !                   = 3 print both
 
 !        DEBUG  12  = 1 Use BAR K1 and K2 shear factors in calculating stiffness matrix when I12 /= 0 as well as when I12 = 0
-!        DEBUG  13  = 1 print GRID_SEQ and INV_GRID_SEQ table
-!        DEBUG  14  = 1 print matrices generated in the rigid element generation subr's
+!        DEBUG  13  = 1 print GRID_SEQ and INV_GRID_SEQ table   
+!        DEBUG  14  = 1 print matrices generated in the rigid element generation subr's  
 !        DEBUG  15  = 1 print concentrated mass data in subrs CONM2_PROC_1 and CONM2_PROC_2
 !        DEBUG  16  = 1 use static equivalent instead of work equivalent pressure loads in subrs QPLT1, TPLT2
-
+ 
 !        DEBUG  17  > 0 print some diagnostic info in subr KGG_SINGULARITY_PROC for grids that have AUTOSPC'd components
 !                   > 1 do above for all grids (not just ones that have AUTOSPC's)
 
 !        DEBUG  18  > 0 print diagnostics in subr QMEM1 regarding checks on the BMEAN matrix satisfying R.B. motion
-!        DEBUG  19  = 1 print output from subr STOKEN (which, among other uses, processes Case Control SET cards)
+!        DEBUG  19  = 1 print output from subr STOKEN (which, among other uses, processes Case Control SET cards)   
 
 !        DEBUG  20  = 1 bypass the simple solution for GMN when RMM is diagonal. Use subr SOLVE_GMN instead
-
+ 
 !        DEBUG  21  = 0 In subr STIFF_MAT_EQUIL_CHK use MATMULT_SFF to multiply stiffness matrix times rigid body displs
 !                   = 1 In subr STIFF_MAT_EQUIL_CHK use DSBMV       to multiply stiffness matrix times rigid body displs
 
 !        DEBUG  22  = 1 print RBMAT in subr STIFF_MAT_EQUIL_CHK
 !        DEBUG  23  > 0 do equil checks on stiffness matrix even though model has SPOINT's
-!        DEBUG  24  = 1 or 3 print KFSe matrix, 2 or 3 print KSSe matrix in subrs REDUCE_N_FS, REDUCE_PN_TO_PF
+!        DEBUG  24  = 1 or 3 print KFSe matrix, 2 or 3 print KSSe matrix in subrs REDUCE_N_FS, REDUCE_PN_TO_PF      
 !        DEBUG  25  = 1 or 3 print PFYS matrix, 2 or 3 print QSYS matrix in subrs REDUCE_N_FS, REDUCE_PN_TO_PF
 !        DEBUG  26  = 1 print YSe matrix (S-set enforcorced displs) in REDUCE_N_FS
 !        DEBUG  27    Not used
 !        DEBUG  28    Not used
 !        DEBUG  29    Not used
 
-!        DEBUG  30    Not used
+!        DEBUG  30    Not used  
 !        DEBUG  31  = 1 print KLL stiff matrix in subr LINK3
 !        DEBUG  32  = 1 print PL load matrix in subr LINK3
 !        DEBUG  33  = 1 print UL displ matrix
@@ -98,7 +98,7 @@
 !                     2 or 3 print ABAND equil'd in LINK3
 !        DEBUG  35    Not used
 !        DEBUG  36  = 1 print grid 6x6 mass for every grid in LINK2
-!        DEBUG  37    Not used
+!        DEBUG  37    Not used   
 !        DEBUG  38    Not used
 !        DEBUG  39    Not used
 
@@ -141,6 +141,10 @@
 !        DEBUG  67    Not used
 !        DEBUG  80  > 0 print LAPACK_S scale factors, in subr EQUILIBRATE, used to equilibrate the stiffness matrices
 
+!        DEBUG  81  = 1 print data from subr MATADD_SSS_NTERM
+!                     2 print data from subr MATADD_SSS
+!                     3 print data from both subrs
+ 
 !        DEBUG  82  = 1 print data from subr MATMULT_SFF
 
 !        DEBUG  83  = 1 print data from subr MATMULT_SFS_NTERM
@@ -181,6 +185,8 @@
 !        DEBUG 106  > 0 write info on all files in subr WRITE_ALLOC_MEM_TABLE (if 0 only write for those arrays that have memory
 !                       allocated to them
 
+!        DEBUG 107  > 0 write allocated memory in F04 file with 6 decimal points (3 if DEBUG(107) = 0)
+
 !        DEBUG 108  > 0 write EDAT table
 
 !        DEBUG 109  > 0 write debug info in subr ELMDIS
@@ -211,6 +217,8 @@
 !        DEBUG 177  > 0 print BAR, ROD margins of safety whether or not they would otherwise be
 
 !        DEBUG 178  > 0 print G-set differential stiffness matrix
+!        DEBUG 203  > 0 print BAR/CBEAM section-property and bending-plane mapping diagnostics in BAR1/BEAM
+!        DEBUG 204  > 0 print CBAR/CBEAM local-axis construction diagnostics in ELMGM1 (VX, V13, TE)
 
 !        DEBUG 179  = 1 print blank space at beg of lines of output for CUSERIN entries in the F06 file
 
@@ -266,6 +274,10 @@
 !        DEBUG 198  > 0 write debug info in subr QPLT3
 
 !        DEBUG 199  > 0 check matrix times its inverse = identity matrix in
+
+!        DEBUG 200  > 0 write problem answers (displs, etc) to filename.ANS as well as to filename.F06 (where filename is the name
+!                       of the DAT data deck submitted to MYSTRAN. This feature is generally only useful to the author when
+!                       performing checkout of test problem answers
 
 !        DEBUG 201 /= 0 allow SOL = BUCKLING or DIFFEREN to run even if some elements are not coded for these soln's
 
