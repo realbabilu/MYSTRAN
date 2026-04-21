@@ -1,46 +1,47 @@
 ! ##################################################################################################################################
-! Begin MIT license text.
+! Begin MIT license text.                                                                                    
 ! _______________________________________________________________________________________________________
-
-! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)
-
-! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+                                                                                                         
+! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)                                              
+                                                                                                         
+! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and      
 ! associated documentation files (the "Software"), to deal in the Software without restriction, including
 ! without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
-! the following conditions:
-
-! The above copyright notice and this permission notice shall be included in all copies or substantial
-! portions of the Software and documentation.
-
-! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-! THE SOFTWARE.
+! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to   
+! the following conditions:                                                                              
+                                                                                                         
+! The above copyright notice and this permission notice shall be included in all copies or substantial   
+! portions of the Software and documentation.                                                                              
+                                                                                                         
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS                                
+! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,                            
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE                            
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                                 
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                          
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN                              
+! THE SOFTWARE.                                                                                          
 ! _______________________________________________________________________________________________________
-
-! End MIT license text.
-
+                                                                                                        
+! End MIT license text.                                                                                      
+  
       SUBROUTINE BD_PBEAM ( CARD, LARGE_FLD_INP )
-
+  
 ! Processes PBEAM Bulk Data Cards.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
+      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06
       USE PARAMS, ONLY                :  EPSIL
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, BEAMTOR, FATAL_ERR, IERRFL, JCARD_LEN, JF, LPBEAM, NPBEAM
       USE CONSTANTS_1, ONLY           :  ZERO
       USE TIMDAT, ONLY                :  TSEC
+      USE SUBR_BEGEND_LEVELS, ONLY    :  BD_PBEAM_BEGEND
       USE MODEL_STUF, ONLY            :  PBEAM, RPBEAM
       USE PARAMS, ONLY                :  SUPINFO
-
+ 
       USE BD_PBEAM_USE_IFs
 
       IMPLICIT NONE
-
+ 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME   =   'BD_PBEAM'
       CHARACTER(LEN=*), INTENT(INOUT) :: CARD               ! A Bulk Data card
       CHARACTER(LEN=*), INTENT(IN)    :: LARGE_FLD_INP     ! If 'Y', CARD is large field format
@@ -49,13 +50,13 @@
       CHARACTER(LEN(JCARD))           :: CHRINP             ! Character field read from CARD
       CHARACTER(LEN(JCARD))           :: ID                 ! Property ID for this PBEAM
       CHARACTER(LEN(JCARD))           :: NAME               ! Char name for output error purposes
-
+ 
       INTEGER(LONG)                   :: ICONT       = 0    ! Indicator of whether a cont card exists. Output from subr NEXTC
       INTEGER(LONG)                   :: IERR        = 0    ! Error indicator
       INTEGER(LONG)                   :: J                  ! DO loop index
       INTEGER(LONG)                   :: MATERIAL_ID = 0    ! Material ID (field 3 of this property card)
       INTEGER(LONG)                   :: PROPERTY_ID = 0    ! Property ID (field 2 of this property card)
-
+      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = BD_PBEAM_BEGEND
 
       REAL(DOUBLE)                    :: AREA_A      = ZERO ! Cross sectional area at end A
       REAL(DOUBLE)                    :: I1_A        = ZERO ! Moment of inertia, plane 1 at end A
@@ -71,11 +72,16 @@
       REAL(DOUBLE)                    :: JTOR        = ZERO ! Torsional constantr at any location along beam
       REAL(DOUBLE)                    :: NSM         = ZERO ! Nonstructural mass at any location along beam
 
-
+! **********************************************************************************************************************************
+      IF (WRT_LOG >= SUBR_BEGEND) THEN
+         CALL OURTIM
+         WRITE(F04,9001) SUBR_NAME,TSEC
+ 9001    FORMAT(1X,A,' BEGN ',F10.3)
+      ENDIF
 
 ! **********************************************************************************************************************************
 ! PBEAM Bulk Data Card routine
-
+ 
 !  FIELD          ITEM                                                ARRAY ELEMENT
 !  -----          ----                                             ------------------
 !    2      Property ID                                 PID          PBEAM(npbeam, 1)
@@ -139,11 +145,11 @@
 
 
 ! Make JCARD from CARD
-
+ 
       CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
 
 ! Increment NPBEAM
-
+ 
       NPBEAM = NPBEAM + 1
 
 ! Read and check data on parent card
@@ -159,16 +165,16 @@
                WRITE(F06,1145) JCARD(1),PROPERTY_ID
                EXIT
              ENDIF
-         ENDDO
+         ENDDO   
          PBEAM(NPBEAM,1) = PROPERTY_ID
       ENDIF
-
+ 
       CALL I4FLD ( JCARD(3), JF(3), MATERIAL_ID )          ! Read material ID and enter into array PBEAM
       IF (IERRFL(3) == 'N') THEN
          IF (MATERIAL_ID <= 0) THEN
             FATAL_ERR = FATAL_ERR + 1
-            WRITE(ERR,1192) JF(3), JCARD(1), JCARD(2), ' > 0 ', MATERIAL_ID
-            WRITE(F06,1192) JF(3), JCARD(1), JCARD(2), ' > 0 ', MATERIAL_ID
+            WRITE(ERR,1192) JF(3), JCARD(1), JCARD(2), ' > 0 ', MATERIAL_ID 
+            WRITE(F06,1192) JF(3), JCARD(1), JCARD(2), ' > 0 ', MATERIAL_ID 
          ELSE
             PBEAM(NPBEAM,2) = MATERIAL_ID
          ENDIF
@@ -178,26 +184,32 @@
          CALL R8FLD ( JCARD(J+3), JF(J+3), RPBEAM(NPBEAM,J) )
       ENDDO
       IF (IERRFL(4)  == 'N') THEN
-         AREA_A = RPBEAM(NPBEAM,1)
-      ENDIF
+         AREA_A = RPBEAM(NPBEAM,1)   
+      ENDIF   
       IF (IERRFL(5)  == 'N') THEN
-         I1_A   = RPBEAM(NPBEAM,2)
-      ENDIF
+         I1_A   = RPBEAM(NPBEAM,2)   
+      ENDIF   
       IF (IERRFL(6)  == 'N') THEN
          I2_A   = RPBEAM(NPBEAM,3)
-      ENDIF
+      ENDIF   
       IF (IERRFL(7)  == 'N') THEN
          I12_A  = RPBEAM(NPBEAM,4)
-      ENDIF
+      ENDIF   
       IF (IERRFL(8)  == 'N') THEN
          JTOR_A = RPBEAM(NPBEAM,5)
-      ENDIF
+      ENDIF   
       IF (IERRFL(9)  == 'N') THEN
          NSM_A  = RPBEAM(NPBEAM,6)
-      ENDIF
-
+      ENDIF   
+ 
 ! Call subr to check sensibility of I1, I2, I12 combinations
 
+!*** ADDED bt CODEX -- 2026-04-20 -- FOR BEAM DSB ***
+! CHECK_BAR_MOIs must receive end-A inertias read from fields 5-7.
+! Without this explicit assignment, stale locals can overwrite RPBEAM(2:4).
+      I1  = I1_A
+      I2  = I2_A
+      I12 = I12_A
       CALL CHECK_BAR_MOIs ( 'PBEAM', ID, I1, I2, I12, IERR )
       RPBEAM(NPBEAM,2) = I1
       RPBEAM(NPBEAM,3) = I2
@@ -207,7 +219,7 @@
       ENDIF
 
 ! Read and check data on mandatory 2nd card (needed even if all fields are blank since 3rd cont is mandatory):
-
+ 
       IF (LARGE_FLD_INP == 'N') THEN
          CALL NEXTC  ( CARD, ICONT, IERR )
       ELSE
@@ -218,7 +230,7 @@
       IF (ICONT == 1) THEN
          DO J = 7,14                                       ! Read real property values in fields 2-9 of 2nd card
             CALL R8FLD ( JCARD(J-5), JF(J-5), RPBEAM(NPBEAM,J) )
-         ENDDO
+         ENDDO   
          CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )  ! Make sure that there are no imbedded blanks in fields 2-9
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
       ELSE
@@ -228,7 +240,7 @@
       ENDIF
 
 ! Read and check data on mandatory 3rd card:
-
+ 
       IF (LARGE_FLD_INP == 'N') THEN
          CALL NEXTC  ( CARD, ICONT, IERR )
       ELSE
@@ -248,7 +260,7 @@
          ELSE
             FATAL_ERR = FATAL_ERR + 1
             WRITE(ERR,1167) JF(2), NAME, ID, CHRINP
-            WRITE(F06,1167) JF(2), NAME, ID, CHRINP
+            WRITE(F06,1167) JF(2), NAME, ID, CHRINP 
          ENDIF
 
          CALL R8FLD ( JCARD(3), JF(2), RPBEAM(NPBEAM,15) ) ! X/XB at next section along BEAM
@@ -328,7 +340,7 @@
       ENDIF
 
 ! Read and check data on optional 4th card:
-
+ 
       IF (LARGE_FLD_INP == 'N') THEN
          CALL NEXTC  ( CARD, ICONT, IERR )
       ELSE
@@ -339,13 +351,13 @@
       IF (ICONT == 1) THEN
          DO J = 22,29                                      ! Read real property values in fields 2-9 of 2nd card
             CALL R8FLD ( JCARD(J-20), JF(J-20), RPBEAM(NPBEAM,J) )
-         ENDDO
+         ENDDO   
          CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )  ! Make sure that there are no imbedded blanks in fields 2-9
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
       ENDIF
 
 ! Read and check data on optional 5th card:
-
+ 
       IF (LARGE_FLD_INP == 'N') THEN
          CALL NEXTC  ( CARD, ICONT, IERR )
       ELSE
@@ -356,13 +368,13 @@
       IF (ICONT == 1) THEN
          DO J = 30,37                                      ! Read real property values in fields 2-9 of 2nd card
             CALL R8FLD ( JCARD(J-28), JF(J-28), RPBEAM(NPBEAM,J) )
-         ENDDO
+         ENDDO   
          CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )  ! Make sure that there are no imbedded blanks in fields 2-9
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
       ENDIF
 
 ! Read and check data on optional 6th card:
-
+ 
       IF (LARGE_FLD_INP == 'N') THEN
          CALL NEXTC  ( CARD, ICONT, IERR )
       ELSE
@@ -373,12 +385,17 @@
       IF (ICONT == 1) THEN
          DO J = 38,45                                      ! Read real property values in fields 2-9 of 2nd card
             CALL R8FLD ( JCARD(J-36), JF(J-36), RPBEAM(NPBEAM,J) )
-         ENDDO
+         ENDDO   
          CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )  ! Make sure that there are no imbedded blanks in fields 2-9
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
       ENDIF
 
-
+! **********************************************************************************************************************************
+      IF (WRT_LOG >= SUBR_BEGEND) THEN
+         CALL OURTIM
+         WRITE(F04,9002) SUBR_NAME,TSEC
+ 9002    FORMAT(1X,A,' END  ',F10.3)
+      ENDIF
 
       RETURN
 
@@ -386,7 +403,7 @@
  1136 FORMAT(' *ERROR  1136: REQUIRED CONTINUATION FOR ',A,' ID = ',A,' MISSING')
 
  1145 FORMAT(' *ERROR  1145: DUPLICATE ',A,' ENTRY WITH ID = ',I8)
-
+ 
  1167 FORMAT(' *ERROR  1167: INCORRECT VALUE IN FIELD ',I2,' OF ',A,A,' = ',A,' MUST BE "YES", "YESA" OR "NO"')
 
  1192 FORMAT(' *ERROR  1192: ID IN FIELD ',I3,' OF ',A,A,' MUST BE ',A,' BUT IS = ',I8)
