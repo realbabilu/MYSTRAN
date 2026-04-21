@@ -1,39 +1,40 @@
 ! ##################################################################################################################################
-! Begin MIT license text.
+! Begin MIT license text.                                                                                    
 ! _______________________________________________________________________________________________________
-
-! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)
-
-! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+                                                                                                         
+! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)                                              
+                                                                                                         
+! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and      
 ! associated documentation files (the "Software"), to deal in the Software without restriction, including
 ! without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
-! the following conditions:
-
-! The above copyright notice and this permission notice shall be included in all copies or substantial
-! portions of the Software and documentation.
-
-! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-! THE SOFTWARE.
+! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to   
+! the following conditions:                                                                              
+                                                                                                         
+! The above copyright notice and this permission notice shall be included in all copies or substantial   
+! portions of the Software and documentation.                                                                              
+                                                                                                         
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS                                
+! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,                            
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE                            
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                                 
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                          
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN                              
+! THE SOFTWARE.                                                                                          
 ! _______________________________________________________________________________________________________
-
-! End MIT license text.
-
+                                                                                                        
+! End MIT license text.                                                                                      
+  
       SUBROUTINE BD_PARAM ( CARD )
-
+  
 ! Processes PARAM Bulk Data Cards
-
+ 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
+      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06
 
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ECHO, FATAL_ERR, IERRFL, JCARD_LEN, JF, MEPSIL, MPBARLU, NUM_USETSTR,       &
                                          WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
+      USE SUBR_BEGEND_LEVELS, ONLY    :  BD_PARAM_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE MACHINE_PARAMS, ONLY        :  MACH_PREC
       USE DOF_TABLES, ONLY            :  TSET_CHR_LEN
@@ -41,7 +42,7 @@
       USE PARAMS, ONLY                :  ARP_TOL         , ART_KED         , ART_ROT_KED     , ART_TRAN_KED    ,                   &
                                          ART_MASS        , ART_ROT_MASS    , ART_TRAN_MASS   , AUTOSPC         , AUTOSPC_NSET    , &
                                          AUTOSPC_RAT     , AUTOSPC_INFO    , AUTOSPC_SPCF    , BAILOUT         , CRS_CCS         , &
-                                         CBMIN3          , CBMIN4          , CBMIN4T         , CHKGRDS         ,                   &
+                                         CBMIN3          , CBMIN4          , CBMIN4T         , CBEAMBRN        , CHKGRDS         , &
                                          CUSERIN         , CUSERIN_EID     , CUSERIN_IN4     , CUSERIN_PID     , CUSERIN_SPNT_ID , &
                                          CUSERIN_XSET    , CUSERIN_COMPTYP , DARPACK         ,                                     &
                                          DELBAN          , EIGESTL         , EIGNORM2        , ELFORCEN        , EPSERR          , &
@@ -49,7 +50,7 @@
                                          EPSIL           , EMP0_PAUSE      , ESP0_PAUSE      , F06_COL_START   ,                   &
                                          GRDPNT          , GRDPNT_IN       , GRIDSEQ         , HEXAXIS         ,                   &
                                          IORQ1M          , IORQ1S          , IORQ1B          , IORQ2B          , IORQ2T          , &
-                                         ITMAX           , KLLRAT          , KOORAT          ,                   MATSPARS        , &
+                                         ITMAX           , KLLRAT          , KOORAT          , LANCMETH        , MATSPARS        , &
                                          MEMAFAC         , MIN4TRED        , MXALLOCA        , MAXRATIO        ,                   &
                                          MEFMCORD        , MEFMLOC         , MEFMGRID        ,                                     &
                                          MPFOUT          , MXITERI         , MXITERL         , OTMSKIP         , POST            , &
@@ -69,20 +70,19 @@
                                          THRESHK         , THRESHK_LAP     , TINY            ,                                     &
                                          TSTM_DEF        , USR_JCT         , USR_LTERM_KGG   , USR_LTERM_MGG   , WINAMEM         , &
                                          WTMASS          , K6ROT,                                                                  &
-                                         PRTALL          , PRTF06          , PRTNEU          , PRTOP2          ,                   &
-                                         SPIENV6         , SPIENV7         , SPIENV8         , SLU_NTHR
-
+                                         PRTALL          , PRTANS          , PRTF06          , PRTNEU          , PRTOP2
+ 
       USE BD_PARAM_USE_IFs
 
       IMPLICIT NONE
-
+ 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'BD_PARAM'
       CHARACTER(LEN=*), INTENT(IN)    :: CARD              ! A Bulk Data card
       CHARACTER(LEN=JCARD_LEN)        :: JCARD(10)         ! The 10 fields of 8 characters making up CARD
       CHARACTER(LEN(JCARD))           :: CHRPARM           ! A char value read from a PARAM Bulk Data card
       CHARACTER(15*BYTE)              :: PARNAM            ! The name of a parameter
       CHARACTER(8*BYTE)               :: PARAM_NAME        ! The name of a parameter
-
+ 
       INTEGER(LONG)                   :: I4PARM    = 0     ! A value read from input file that should be an integer value
       INTEGER(LONG)                   :: I4PARMI(5)        ! Values read from input file that should be an integer value
       INTEGER(LONG)                   :: LOWER             ! Lower allowable value for an integer parameter
@@ -90,27 +90,32 @@
       INTEGER(LONG)                   :: IERR      = 0     ! Local error indicator
       INTEGER(LONG)                   :: II                ! An index in array EPSIL
       INTEGER(LONG)                   :: UPPER             ! Upper allowable value for an integer parameter
-
-
+      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = BD_PARAM_BEGEND
+  
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare real zero
-      REAL(DOUBLE)                    :: R8PARM            ! A value read from input file that should be a real value
-
+      REAL(DOUBLE)                    :: R8PARM            ! A value read from input file that should be a real value            
+  
       INTRINSIC                       :: DABS
 
-
+! **********************************************************************************************************************************
+      IF (WRT_LOG >= SUBR_BEGEND) THEN
+         CALL OURTIM
+         WRITE(F04,9001) SUBR_NAME,TSEC
+ 9001    FORMAT(1X,A,' BEGN ',F10.3)
+      ENDIF
 
 ! **********************************************************************************************************************************
 ! PARAM Bulk Data Card routine
-
+ 
       EPS1 = EPSIL(1)
 
 ! Check for PARAM cards. If PARAM name is not legal, write warning
-
+  
 ! Make JCARD from CARD
-
+ 
       CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
       PARAM_NAME = JCARD(2)
-
+ 
 
       ! ARP_TOL is the variable TOL used in ARPACK routines to decide convergence.
       ! NOTE: if a value of -1. is input on a PARAM ARP_TOL entry, then the Lanczos algorithm will use machine precision for ARP_TOL
@@ -130,7 +135,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! ART_KED is used to add artificial differential stiffness terms to translation and/or rotation DOF's in the element KED matrix
 ! (to make sure there are no zero's on diag of element KED matrices)
 
@@ -248,7 +253,7 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,6,7,8,9 )! Issue warning if fields 6-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
-! AUTOSPC = 'Y' causes  MYSTRAN to SPC DOF's
+! AUTOSPC = 'Y' causes  MYSTRAN to SPC DOF's 
 
       ELSE IF (JCARD(2)(1:8) == 'AUTOSPC ') THEN
          PARNAM = 'AUTOSPC '
@@ -397,7 +402,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! CBMIN4 is a parameter for the Mindlin (thick) quad plate element (CQUAD4).
 ! It is used in calculating PHISQ, a scalar multiple of the transverse shear stiff
 
@@ -417,7 +422,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 
       ! CBMIN4T is a parameter for the Mindlin (thick) quad plate element (CQUAD4).
       ! It is used in calculating PHISQ, a scalar multiple of the transverse shear stiff
@@ -437,6 +442,33 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
+      ! CBEAMBRN controls CBEAM bending branch:
+      !   0 = default DSB/Timoshenko (shear-flexible), 1 = Bernoulli limit (phi1=phi2=0)
+      ELSE IF (JCARD(2)(1:8) == 'CBEAMBRN') THEN
+         PARNAM = 'CBEAMBRN'
+         CALL I4FLD ( JCARD(3), JF(3), I4PARM )
+         IF (IERRFL(3) == 'N') THEN
+            LOWER = 0
+            UPPER = 1
+            IF ((I4PARM >= LOWER) .AND. (I4PARM <= UPPER)) THEN
+               CBEAMBRN = I4PARM
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1196) PARNAM,LOWER,UPPER,JCARD(3),CBEAMBRN
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1196) PARNAM,LOWER,UPPER,JCARD(3),CBEAMBRN
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
+         CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
+ 
       ! CHKGRDS tells whether to call GET_ELEM_AGRID_BGRID to make sure
       ! all grids on elem connection entries are defined
       ELSE IF (JCARD(2)(1:8) == 'CHKGRDS ') THEN
@@ -457,12 +489,12 @@
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'CRS or CCS',CHRPARM,CRS_CCS
+               WRITE(ERR,1189) PARNAM,'CRS or CCS',CHRPARM,CRS_CCS 
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'CRS or CCS',CHRPARM,CRS_CCS
+                  WRITE(F06,1189) PARNAM,'CRS or CCS',CHRPARM,CRS_CCS 
                ENDIF
             ENDIF
          ENDIF
@@ -565,7 +597,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+  
 
       ! DELBAN, where if it is 1, delete the bandit files left over, if 0, don't.
       ELSE IF (JCARD(2)(1:8) == 'DELBAN  ') THEN
@@ -582,7 +614,7 @@
          ENDIF
 
 
-
+         
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
@@ -611,7 +643,7 @@
       ELSE IF (JCARD(2)(1:8) == 'EIGNORM2') THEN
          PARNAM = 'EIGNORM2'
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, EIGNORM2)
-
+  
 ! ELFORCEN changes default from global to local or basic coords for calculating element nodal forces in LINK9
 
       ELSE IF (JCARD(2)(1:8) == 'ELFORCEN') THEN
@@ -673,19 +705,19 @@
                      WRITE(F06,101) CARD
                   ENDIF
                   WRITE(F06,1149) MEPSIL
-               ENDIF
+               ENDIF 
             ENDIF
          ENDIF
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,5,6,7,8,9 )! Issue warning if fields 5-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! EQCHECK requests that an equilibrium check be made of the stiffness matrices
 
       ELSE IF (JCARD(2)(1:8) == 'EQCHECK ') THEN
          EQCHK_REF_GRID = 0                                ! Reset default value to zero from what it was set in module PARAMS so we
-!                                                            can set DEFAULT grid to basic origin if user asks for equil check
+!                                                            can set DEFAULT grid to basic origin if user asks for equil check 
          CALL I4FLD ( JCARD(3), JF(3), I4PARM )
          PARNAM = 'EQCHK_REF_GRID'
          IF (IERRFL(3) == 'N') THEN
@@ -737,7 +769,7 @@
                   ENDIF
                ENDIF
             ENDIF
-         ENDDO
+         ENDDO 
 
          IF (JCARD(9)(1:) /= ' ') THEN
             PARNAM = 'EQCHK_TINY'
@@ -778,7 +810,7 @@
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,5,6,7,8,9 )! Make sure that there are no imbedded blanks in field 3-7
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+  
 ! F06COL is the 1st col in F06 file for output data to begin. If it is not > 2, then
 ! output will be written with each main header centered on one another
 
@@ -813,10 +845,16 @@
          PARNAM = 'PRTALL  '
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, PRTALL)
          IF (PRTALL == 'Y') THEN
+             PRTANS = 'Y'
              PRTF06 = 'Y'
              PRTNEU = 'Y'
              PRTOP2 = 'Y'
          ENDIF
+
+      ! PRTANS writes all outputs for the ans file regardless of other flags besides PRTALL
+      ELSE IF ((PARAM_NAME(1:8) == 'PRTANS  ') .OR. (PARAM_NAME(1:8) == 'ANS     ')) THEN
+         PARNAM = 'PRTANS  '
+         CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, PRTANS)
 
       ! PRTOP2 writes all outputs for the f06 file regardless of other flags besides PRTALL
       ELSE IF ((PARAM_NAME(1:8) == 'PRTF06  ') .OR. (PARAM_NAME(1:8) == 'F06     ')) THEN
@@ -858,7 +896,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+  
 ! GRIDSEQ specifies the grid point sequencing method
 
       ELSE IF (JCARD(2)(1:8) == 'GRIDSEQ ') THEN
@@ -1000,7 +1038,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! IORQ1B defines the Gaussian integration order for bending stresses for Kirchoff (thin) isoparam quad plate elems in subr QPLT1
 
       ELSE IF (JCARD(2)(1:8) == 'IORQ1B  ') THEN
@@ -1019,7 +1057,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! IORQ2B defines the Gaussian integration order for bending stresses for Mindlin (thick) isoparam quad plate elems in subr QPLT2
 
       ELSE IF (JCARD(2)(1:8) == 'IORQ2B  ') THEN
@@ -1038,7 +1076,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! IORQ2T defines the Gaussian integ order for transv shear stresses for Mindlin (thick) isoparam quad plate elems in subr QPLT2
 
       ELSE IF (JCARD(2)(1:8) == 'IORQ2T  ') THEN
@@ -1057,7 +1095,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! ITMAX is max iterations used in refining the soln when LAPACK is used in LINK8
 
       ELSE IF (JCARD(2)(1:8) == 'ITMAX   ') THEN
@@ -1082,18 +1120,44 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+  
 ! KLLRAT tells whether to calculate max ratio of matrix diagonal to factor diagonal
 
       ELSE IF (JCARD(2)(1:8) == 'KLLRAT  ') THEN
          PARNAM = 'KLLRAT  '
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, KLLRAT)
-
+  
 ! KOORAT tells whether to calculate max ratio of matrix diagonal to factor diagonal
 
       ELSE IF (JCARD(2)(1:8) == 'KOORAT  ') THEN
          PARNAM = 'KOORAT  '
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, KOORAT)
+  
+! LANCMETH sets the method to be used for Lanczos eigen extraction
+
+      ELSE IF (JCARD(2)(1:8) == 'LANCMETH') THEN
+         PARNAM = 'LANCMETH'
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      (CHRPARM == 'ARPACK  ') THEN
+               LANCMETH = 'ARPACK'
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'ARPACK',CHRPARM,SOLLIB
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'ARPACK',CHRPARM,SOLLIB
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
+         CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
 ! MATSPARS Sets whether to use sparse matrix add and multiply routines for situations where the matrices are in any sparse format.
 ! If 'Y', use sparse routines. If 'N', use full matrix routines in place of all sparse routines
@@ -1101,7 +1165,7 @@
       ELSE IF (JCARD(2)(1:8) == 'MATSPARS') THEN
          PARNAM = 'MATSPARS'
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, MATSPARS)
-
+  
 ! MXALLOCA defines the max allowable attempts when attempting to allocate an array before quiting with a fatal error
 
       ELSE IF (JCARD(2)(1:8) == 'MXALLOCA') THEN
@@ -1139,7 +1203,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! MEFMCORD is the coordinate system for output of modal effective masses
 
       ELSE IF (JCARD(2)(1:8) == 'MEFMCORD') THEN
@@ -1222,7 +1286,7 @@
             CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,5,6,7,8,9 )
             CALL CRDERR ( CARD )
          ENDIF
-
+  
 ! MEMAFAC is a factor to multiply the size request of memory to be allocated when looping to find an allowable amount of
 ! memory to allocate. Used when the initial request for memory (in subrs ESP or EMP) cannot be met and we know that the request
 ! is prpbably on the high side.
@@ -1243,7 +1307,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! MIN4TRED sets the method for how the 5th node of the MIN4T element is reduced out (to get a 4 node quad element)
 
       ELSE IF (JCARD(2)(1:8) == 'MIN4TRED') THEN
@@ -1272,7 +1336,7 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
-! MPFOUT
+! MPFOUT 
 
       ELSE IF (JCARD(2)(1:8) == 'MPFOUT  ') THEN
          PARNAM = 'MPFOUT  '
@@ -1405,7 +1469,7 @@
       ELSE IF (JCARD(2)(1:8) == 'PBARLSHR') THEN
          PARNAM = 'PBARLSHR'
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, PBARLSHR)
-
+  
 ! PCOMPEQ Indicator to write equiv PSHELL, MAT2 to F06 for PCOMP's
 
       ELSE IF (JCARD(2)(1:8) == 'PCOMPEQ ') THEN
@@ -1451,7 +1515,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! PCHSPC1 decides whether to write text file of SPC1's based on the G.P. singularity processor results.
 ! SPC1SID is the set ID (if not entered, then default value in module PARAMS will be used).
 
@@ -1590,7 +1654,7 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
-! PRTCGLTM prints the CB matrix
+! PRTCGLTM prints the CB matrix 
 
       ELSE IF (JCARD(2)(1:8) == 'PRTCGLTM') THEN
          PARNAM = 'PRTCGLTM'
@@ -1750,7 +1814,7 @@
                   ENDIF
                ENDIF
             ENDIF
-         ENDDO
+         ENDDO 
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,5,6,7,0,0 )! Make sure that there are no imbedded blanks in field 3-7
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,0,0,8,9 )! Issue warning if fields 8-9 not blank
@@ -1837,7 +1901,7 @@
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
 
-      ! PRTIFLTM prints the CB matrix
+      ! PRTIFLTM prints the CB matrix 
       ELSE IF (JCARD(2)(1:8) == 'PRTIFLTM') THEN
          PARNAM = 'PRTIFLTM '
          CALL I4FLD ( JCARD(3), JF(3), I4PARM )
@@ -1913,7 +1977,7 @@
                   ENDIF
                ENDIF
             ENDIF
-         ENDDO
+         ENDDO 
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,5,6,7,0,0 )! Make sure that there are no imbedded blanks in field 3-7
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,0,0,8,9 )! Issue warning if fields 8-9 not blank
@@ -1942,14 +2006,14 @@
                   ENDIF
                ENDIF
             ENDIF
-         ENDDO
+         ENDDO 
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,5,6,7,0,0 )! Make sure that there are no imbedded blanks in field 3-7
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,0,0,8,9 )! Issue warning if fields 8-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
 
-      ! PRTMXX prints the CB matrix
+      ! PRTMXX prints the CB matrix 
       ELSE IF (JCARD(2)(1:8) == 'PRTMXX  ') THEN
          PARNAM = 'PRTMXX  '
          CALL I4FLD ( JCARD(3), JF(3), I4PARM )
@@ -1972,7 +2036,7 @@
          ENDIF
 
 
-      ! PRTOU4 prints the CB matrix
+      ! PRTOU4 prints the CB matrix 
       ELSE IF (JCARD(2)(1:8) == 'PRTOU4  ') THEN
          PARNAM = 'PRTOU4  '
          CALL I4FLD ( JCARD(3), JF(3), I4PARM )
@@ -2025,7 +2089,7 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
-! PRTPHIZL prints the CB matrix
+! PRTPHIZL prints the CB matrix 
 
       ELSE IF (JCARD(2)(1:8) == 'PRTPHIZL') THEN
          PARNAM = 'PRTPHIZL'
@@ -2210,7 +2274,7 @@
                   ENDIF
                ENDIF
             ENDIF
-         ENDDO
+         ENDDO 
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,5,6,7,0,0 )! Make sure that there are no imbedded blanks in field 3-7
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,0,0,8,9 )! Issue warning if fields 8-9 not blank
@@ -2239,7 +2303,7 @@
                   ENDIF
                ENDIF
             ENDIF
-         ENDDO
+         ENDDO 
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,5,6,7,0,0 )! Make sure that there are no imbedded blanks in field 3-7
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,0,0,8,9 )! Issue warning if fields 8-9 not blank
@@ -2478,13 +2542,13 @@
                      WRITE(F06,1179) I4PARM,PARNAM,JF(5)
                   ENDIF
                ENDIF
-            ENDIF
+            ENDIF  
          ENDIF
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,5,0,0,0,0 )! Make sure that there are no imbedded blanks in fields 3-5
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,6,7,8,9 )! Issue warning if fields 6-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+  
 ! SETLKTM parameter gives the option number for how LTERM_MGG is calculated
 
       ELSE IF (JCARD(2)(1:8) == 'SETLKTM ') THEN
@@ -2538,7 +2602,7 @@
                      WRITE(F06,1179) I4PARM,PARNAM,JF(5)
                   ENDIF
                ENDIF
-            ENDIF
+            ENDIF  
          ENDIF
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,5,0,0,0,0 )! Make sure that there are no imbedded blanks in fields 3-5
@@ -2675,9 +2739,9 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+  
 ! STR_CID defines output coord sys for elem stress/strain/engr force (if it is not to be elem local sys).
-! STR_CID can be 0 (basic coord system) or an actual coord system ID (i.e. one defined on a Bulk data CORDij entry)
+! STR_CID can be 0 (basic coord system) or an actual coord system ID (i.e. one defined on a Bulk data CORDij entry) 
 
       ELSE IF (JCARD(2)(1:8) == 'STR_CID ') THEN
          PARNAM = 'STR_CID'
@@ -2748,7 +2812,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! TSTM_DEF changes default value of TS/TM (ratio of shear to membrane thickness) for PSHELL's
 
       ELSE IF (JCARD(2)(1:8) == 'TSTM_DEF') THEN
@@ -2767,7 +2831,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! USETPRT is not currently a MYSTRAN PARAM but MYSTRAN will automatically respond with USETPRT = 0 if there are any USETSTR entries
 ! USETSEL is not currently a MYSTRAN PARAM but MYSTRAN will automatically respond with USETSEL = 0 if there are any USETSTR entries
 
@@ -2796,7 +2860,7 @@ do_i:    DO I=1,JCARD_LEN
          IF (IERR == 0) THEN
             CALL LOAD_USETSTR_TABLE ( CHRPARM(1:2), JCARD(2) )
          ENDIF
-
+  
 ! USR_JCT is a user supplied value for JCT - used in sort routines
 
       ELSE IF (JCARD(2)(1:8) == 'USR_JCT ') THEN
@@ -2841,7 +2905,7 @@ do_i:    DO I=1,JCARD_LEN
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
 ! WTMASS multiplies the mass matrix (after the grid pt wgt generator) by the real WTMASS value
 
       ELSE IF (JCARD(2)(1:8) == 'WTMASS  ') THEN
@@ -2867,7 +2931,7 @@ do_i:    DO I=1,JCARD_LEN
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
-
+         
 ! K6ROT is a small stiffness added to the drilling dof of 5-dof shells.
 
       ELSE IF (JCARD(2)(1:8) == 'K6ROT   ') THEN
@@ -2903,60 +2967,8 @@ do_i:    DO I=1,JCARD_LEN
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+         
          !WRITE(*,*) 'K6ROT = ', K6ROT
-
-! This guard is necessary since the SLU_SET_* subroutines are only present when
-! linking against SuperLU_MT. That's why this file is .F90 and not .f90. Sorry!
-#ifdef USE_SUPERLU_MT
-      ! SuperLU_MT memory growth factors
-      ELSE IF (JCARD(2)(1:7) == 'SPIENV6') THEN
-         PARNAM = 'SPIENV6 '
-         CALL I4FLD ( JCARD(3), JF(3), I4PARM )
-         IF (IERRFL(3) == 'N') THEN
-            SPIENV6 = I4PARM
-            CALL SLU_SET_MEMFAC(6, SPIENV6)
-         ENDIF
-         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
-         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
-         CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
-      ! SuperLU_MT memory growth factors
-      ELSE IF (JCARD(2)(1:7) == 'SPIENV7') THEN
-         PARNAM = 'SPIENV7 '
-         CALL I4FLD ( JCARD(3), JF(3), I4PARM )
-         IF (IERRFL(3) == 'N') THEN
-            SPIENV7 = I4PARM
-            CALL SLU_SET_MEMFAC(7, SPIENV7)
-         ENDIF
-         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
-         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
-         CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
-      ! SuperLU_MT memory growth factors
-      ELSE IF (JCARD(2)(1:7) == 'SPIENV8') THEN
-         PARNAM = 'SPIENV8 '
-         CALL I4FLD ( JCARD(3), JF(3), I4PARM )
-         IF (IERRFL(3) == 'N') THEN
-            SPIENV8 = I4PARM
-            CALL SLU_SET_MEMFAC(8, SPIENV8)
-         ENDIF
-         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
-         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
-         CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
-      ! SuperLU_MT number of threads
-      ELSE IF (JCARD(2)(1:8) == 'SLU_NTHR') THEN
-         PARNAM = 'SLU_NTHR'
-         CALL I4FLD ( JCARD(3), JF(3), I4PARM )
-         IF (IERRFL(3) == 'N') THEN
-            SLU_NTHR = I4PARM
-            CALL SLU_SET_NTHR(SLU_NTHR)
-         ENDIF
-         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
-         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
-         CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-#endif
 
 ! PARAM parameter name not recognized
 
@@ -2972,10 +2984,15 @@ do_i:    DO I=1,JCARD_LEN
             WRITE(F06,1171) JCARD(2)
          ENDIF
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
-
+ 
       ENDIF
 
-
+! **********************************************************************************************************************************
+      IF (WRT_LOG >= SUBR_BEGEND) THEN
+         CALL OURTIM
+         WRITE(F04,9002) SUBR_NAME,TSEC
+ 9002    FORMAT(1X,A,' END  ',F10.3)
+      ENDIF
 
       RETURN
 
@@ -2988,7 +3005,7 @@ do_i:    DO I=1,JCARD_LEN
   104 FORMAT(' *WARNING    : USE OF ":" SEPERATOR FOR THE PARAM USETSTR BULK DATA ENTRY NOT ALLOWED. ENTRY HAD "',A,'" IN FIELD 3')
 
   106 FORMAT(" *WARNING    : PARAMETER K6ROT SHOULD NOT BE SET TO ZERO SAVE FOR DEBUGGING.")
-
+  
  1110 FORMAT(' *ERROR  1110: PARAMETER NAMED ',A,' MUST BE >= ',I2,' AND <= ',I2,' BUT INPUT VALUE IS: ',A)
 
  1146 FORMAT(' *INFORMATION: PARAMETER ',A,' CHANGED FROM ',I8,' TO ',I8,/)
@@ -3004,17 +3021,17 @@ do_i:    DO I=1,JCARD_LEN
  1172 FORMAT(' *WARNING    : PARAMETER NAMED ',A,' MUST BE ',A,' BUT INPUT VALUE IS: ',I8,'. DEFAULT VALUE ',I8,' WILL BE USED')
 
  1173 FORMAT(' *ERROR  1173: PARAMETER NAMED ',A,' MUST BE ',A,' BUT INPUT VALUE IS ',1ES13.6)
-
+   
  1178 FORMAT(' *WARNING    : VALUE = ',A,' FOR PARAMETER ',A,' INPUT IN FIELD ',I3,' IS INCORRECT. SHOULD BE "PAUSE".'             &
                     ,/,14X,' MYSTRAN WLL BE PAUSE''d AFTER SUBROUTINE ',A,' FOR USER INPUT OF LTERM_KGG')
 
  1179 FORMAT(' *ERROR  1179: VALUE = ',I8,' FOR DEBUG PARAMETER ',A,' INPUT IN FIELD ',I3,' MUST BE >= 0')
 
  1189 FORMAT(' *WARNING    : PARAMETER NAMED ',A,' MUST BE ',A,' BUT INPUT VALUE IS: ',A,'. DEFAULT VALUE = ',A,' WILL BE USED')
-
+   
  1196 FORMAT(' *WARNING    : PARAMETER NAMED ',A,' MUST BE >= ',I2,' AND <= ',I2,' BUT INPUT VALUE IS: ',A,'. DEFAULT VALUE = ',   &
                              I8,' WILL BE USED')
-
+   
  1197 FORMAT(' >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',&
              '>>>>>>>>>>>>>>>>>',/,                                                                                             &
              ' *WARNING    : PARAMETER ',A15,' SHOULD NOT BE CHANGED FROM "SYM" TO "NONSYM". WRONG ANSWERS WILL PROBABLY RESULT',/,&
@@ -3023,15 +3040,15 @@ do_i:    DO I=1,JCARD_LEN
 
  1198 FORMAT("*WARNING    : THE K6ROT PARAMETER IS AN EXPERIMENTAL FEATURE. WHEN IN DOUBT, SET IT TO ZERO.",/)
 ! ##################################################################################################################################
-
+ 
       CONTAINS
-
+ 
 ! ##################################################################################################################################
-
+ 
       SUBROUTINE YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, VALUE)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
       IMPLICIT NONE
-
+ 
       CHARACTER(LEN=*), INTENT(IN)         :: CARD              ! A Bulk Data card
       CHARACTER(LEN=JCARD_LEN), INTENT(IN) :: JCARD(10)         ! The 10 fields of 8 characters making up CARD
       CHARACTER(15*BYTE), INTENT(IN)       :: PARNAM            ! The name  of the parameter
@@ -3071,13 +3088,13 @@ do_i:    DO I=1,JCARD_LEN
       SUBROUTINE LOAD_USETSTR_TABLE ( DOF_SET_NAME, PARNAM )
      ! Formulates a table that shows which of the DOF sets (G, M, N, SA, SB, SG, SZ, SE, S, F, O, S, R, L, U1, U2) that have been
      ! requested for output. The table has 2 columns. Col 1 has the DOF set names and col 2 has a 1 if that set was requested for
-     ! output or 0 otherwise.
+     ! output or 0 otherwise. 
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
       USE DOF_TABLES, ONLY            :  USETSTR_TABLE
 
       IMPLICIT NONE
-
+ 
       CHARACTER(LEN=*), INTENT(IN)    :: DOF_SET_NAME
       CHARACTER(LEN=*), INTENT(IN)    :: PARNAM
       CHARACTER( 1*BYTE)              :: DOF_SET_NAME_FOUND
