@@ -377,8 +377,9 @@
 ! Element pressure data
 ! ----------------------
 
-      CHARACTER( 1*BYTE), ALLOCATABLE :: PTYPE(:)            ! NELE x 1 array of how many pressures there are in PDATA for an elem.
-!                                                              ('6' for PLOAD1, '1' for PLOAD2, and '3' or '4' for PLOAD4)
+      CHARACTER( 1*BYTE), ALLOCATABLE :: PTYPE(:)            ! NELE x 1 array identifying the PDATA layout for an elem.
+  !                                                              ('2' for beam/bar PLOAD1 local component data, '1' for PLOAD2,
+!                                                               and '3' or '4' for PLOAD4)
 
       INTEGER(LONG), ALLOCATABLE      :: PPNT(:,:)           ! NELE x 1 array of pointers to where in PDATA the elem pressure data
 !                                                              begins for an element
@@ -1626,6 +1627,8 @@
 !                                                              for output to the E L E M  N O D A L   F O R C E S
 
       REAL(DOUBLE) , ALLOCATABLE      :: PRESS(:,:)          ! Elem pressure data for the current elem for all subcases
+  !                                                              For BAR/BART/BEAM and PTYPE='2' each component uses 4 rows:
+  !                                                              [P1,P2,X1,X2] for local y, z, x-force, x-moment, y-moment, z-moment
 
       REAL(DOUBLE) , ALLOCATABLE      :: PTE(:,:)            ! Elem thermal loads for the current elem for all subcases
 

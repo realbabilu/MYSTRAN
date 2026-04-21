@@ -1,63 +1,64 @@
 ! ##################################################################################################################################
-! Begin MIT license text.
+! Begin MIT license text.                                                                                    
 ! _______________________________________________________________________________________________________
-
-! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)
-
-! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+                                                                                                         
+! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)                                              
+                                                                                                         
+! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and      
 ! associated documentation files (the "Software"), to deal in the Software without restriction, including
 ! without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
-! the following conditions:
-
-! The above copyright notice and this permission notice shall be included in all copies or substantial
-! portions of the Software and documentation.
-
-! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-! THE SOFTWARE.
+! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to   
+! the following conditions:                                                                              
+                                                                                                         
+! The above copyright notice and this permission notice shall be included in all copies or substantial   
+! portions of the Software and documentation.                                                                              
+                                                                                                         
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS                                
+! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,                            
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE                            
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                                 
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                          
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN                              
+! THE SOFTWARE.                                                                                          
 ! _______________________________________________________________________________________________________
-
-! End MIT license text.
-
+                                                                                                        
+! End MIT license text.                                                                                      
+ 
       SUBROUTINE BAR1 ( OPT, L, AREA, I1, I2, JTOR, SCOEFF, K1, K2, I12, E, G, ALPHA, TREF )
-
+ 
 ! Calculates, for 1-D BAR element
 
 !  1) PTE       = element thermal load vectors         , if OPT(2) = 'Y'
 !  2) SEi, STEi = element stress data recovery matrices, if OPT(3) = 'Y'
 !  3) KE        = element linear stiffness matrix      , if OPT(6) = 'N' (i.e. always calc KE linear unless OPT(6) = 'Y')
 !  4) KED       = element differen stiff matrix        , if OPT(6) = 'Y'
-
+  
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
-      USE SCONTR, ONLY                :  FATAL_ERR, NTSUB, BLNK_SUB_NAM, SOL_NAME
+      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06
+      USE SCONTR, ONLY                :  FATAL_ERR, NSUB, NTSUB, BLNK_SUB_NAM, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
+      USE SUBR_BEGEND_LEVELS, ONLY    :  BAR1_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, TEN, TWELVE
       USE DEBUG_PARAMETERS
       USE PARAMS, ONLY                :  EPSIL, ART_KED, ART_ROT_KED, ART_TRAN_KED
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  ELDOF, DOFPIN, DT, EID, NUM_EMG_FATAL_ERRS, KE, KED, PEL, PTE, SE1, SE2, STE1, STE2, TYPE,&
-                                         UEL
+      USE MODEL_STUF, ONLY            :  ELDOF, DOFPIN, DT, EID, NUM_EMG_FATAL_ERRS, KE, KED, PEL, PPE, PRESS, PTE, SE1, SE2,      &
+                                         STE1, STE2, TYPE, UEL
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-
+ 
       USE BAR1_USE_IFs
 
-      IMPLICIT NONE
-
+      IMPLICIT NONE 
+ 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'BAR1'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)            ! 'Y'/'N' flags for whether to calc certain elem matrices
 
       INTEGER(LONG)                   :: I,J               ! DO loop induces
       INTEGER(LONG)                   :: IERROR            ! Local error indicator
       INTEGER(LONG)                   :: NUM_PFLAG_DOFS    ! The number of pin flagged DOF's for this element
-
-
+      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = BAR1_BEGEND
+  
       REAL(DOUBLE) , INTENT(IN)       :: ALPHA             ! Coefficient of thermal expansion
       REAL(DOUBLE) , INTENT(IN)       :: AREA              ! Cross-sectional area
       REAL(DOUBLE) , INTENT(IN)       :: E                 ! Youngs modulus
@@ -115,7 +116,22 @@
       REAL(DOUBLE)                    :: S12(3,6)          ! Intermediate matrix used in calculating SE1 stress matrix
       REAL(DOUBLE)                    :: S21(3,6)          ! Intermediate matrix used in calculating SE2 stress matrix
       REAL(DOUBLE)                    :: S22(3,6)          ! Intermediate matrix used in calculating SE2 stress matrix
-      REAL(DOUBLE)                    :: TBAR              ! Average elem temperature
+      REAL(DOUBLE)                    :: TBAR              ! Average elem temperature 
+      REAL(DOUBLE)                    :: N1
+      REAL(DOUBLE)                    :: N2
+      REAL(DOUBLE)                    :: N3
+      REAL(DOUBLE)                    :: N4
+      REAL(DOUBLE)                    :: P1
+      REAL(DOUBLE)                    :: P2
+      REAL(DOUBLE)                    :: PC
+      REAL(DOUBLE)                    :: QT
+      REAL(DOUBLE)                    :: WGT
+      REAL(DOUBLE)                    :: X1L
+      REAL(DOUBLE)                    :: X2L
+      REAL(DOUBLE)                    :: XI
+      REAL(DOUBLE)                    :: XI_GAUSS(3)
+      REAL(DOUBLE)                    :: XI_SCALE
+      REAL(DOUBLE)                    :: XI_WGT(3)
 
 ! The following are used for the differential stiffness matrix calc. See NASTRAN Prog's Manual (COSMIC 1972) page 4.87.30
 
@@ -128,10 +144,15 @@
       REAL(DOUBLE)                    :: Fx                ! Axial force (also Fx, in NASTRAN Prog Man differ stiff)
 
       INTRINSIC DABS
-
+ 
        REAL(DOUBLE)                    :: TPRIME(5,NTSUB)   ! Matrix where each col has the 5 temperature/gradients for the BAR elem
 
-
+! **********************************************************************************************************************************
+      IF (WRT_LOG >= SUBR_BEGEND) THEN
+         CALL OURTIM
+         WRITE(F04,9001) SUBR_NAME,TSEC
+ 9001    FORMAT(1X,A,' BEGN ',F10.3)
+      ENDIF
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
@@ -144,7 +165,7 @@
             KE(I,J) = ZERO
          ENDDO
       ENDDO
-
+ 
       G1   = K1*AREA*G
       G2   = K2*AREA*G
       R0   = TWELVE*E/(L*L*L)
@@ -156,7 +177,7 @@
 
 ! If I12 > 0 then R1, R2 remain as is. If I12 = 0 then R1, R2 depend on G1 and G2. Quit if R1D or R2D = 0.
 ! If DEBUG(12) = 1, then use R1 and R2 from below even when I12 = 0
-
+  
       IERROR = 0
       IF ((DABS(I12) <= EPS1) .OR. (DEBUG(12) == 1)) THEN
          IF (DABS(G1) >= EPS1) THEN
@@ -188,7 +209,7 @@
 ! Return if IERROR > 0
 
       IF (IERROR > 0) RETURN
-
+  
 ! Calc intermediate variables
 
       DELTA1 = I2/DEN
@@ -208,10 +229,10 @@
       C02    = L*L/THREE
       C03    = C02/TWO
       IF (DEBUG(203) > 0) CALL DEBUG_BAR1 ( 2 )
+  
+! Generate KE 
 
-! Generate KE
-
-      KE( 1, 1) = RA                                       ! A-A partition of KE
+      KE( 1, 1) = RA                                       ! A-A partition of KE 
       KE( 2, 2) = R1
       KE( 2, 3) = BETA
       KE( 2, 5) =-C01*BETA
@@ -243,7 +264,7 @@
       KE( 6,11) =-C03*BETA
       KE( 6,12) = K3T
 
-      KE( 7, 7) = RA                                       ! B-B partition of KE
+      KE( 7, 7) = RA                                       ! B-B partition of KE 
       KE( 8, 8) = R1
       KE( 8, 9) = BETA
       KE( 8,11) = C01*BETA
@@ -255,7 +276,7 @@
       KE(11,11) = K2T
       KE(11,12) =-C02*BETA
       KE(12,12) = K1T
-
+ 
       DO I=2,12                                            ! Set lower triangular partition of KE using symmetry
          DO J=1,I-1
             KE(I,J) = KE(J,I)
@@ -264,39 +285,39 @@
 
 ! Process Pin Flags. NUM_PFLAG_DOFS is a count of the total number of DOF pin flagged. DOFPIN(i) generated in ELMDAT is an
 ! integer array of the DOF numbers of the pin flagged DOF.
-
+  
       NUM_PFLAG_DOFS = 0
       DO I=1,12
          IF (DOFPIN(I) > 0) THEN
             NUM_PFLAG_DOFS = NUM_PFLAG_DOFS + 1
          ENDIF
-      ENDDO
+      ENDDO 
       IF (NUM_PFLAG_DOFS /= 0) THEN
          CALL PINFLG ( NUM_PFLAG_DOFS )
       ENDIF
-
+ 
       DO I=1,6                                             ! Upper left partition of KE is KAA. Need this for calc'ing PTE, SEi
          DO J=1,6
             KAA(I,J) = KE(I,J)
-         ENDDO
-      ENDDO
+         ENDDO 
+      ENDDO 
 
       DO I=1,6                                             ! Upper right partition of KE is KAB. Need this for calculating SEi
          DO J=7,12
             KAB(I,J-6) = KE(I,J)
-         ENDDO
-      ENDDO
+         ENDDO 
+      ENDDO 
 
       DO I=7,12                                            ! Lower left partition of KE is KBA. Need this for calculating PTE
          DO J=1,6
             KBA(I-6,J) = KE(I,J)
-         ENDDO
-      ENDDO
+         ENDDO 
+      ENDDO 
 
 ! The following matrices are needed if either OPT(2) or OPT(3) or OPT(6) is called for
 
       IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(6) == 'Y')) THEN
-         IF (NTSUB > 0) THEN
+         IF (NTSUB > 0) THEN                          
 
             DO J=1,NTSUB
                TBAR        = (DT(1,J) + DT(2,J))/TWO
@@ -312,8 +333,8 @@
       ENDIF
 
 ! **********************************************************************************************************************************
-! Determine element thermal loads.
-
+! Determine element thermal loads. 
+ 
 !     IF ((OPT(2) == 'Y') .OR. (OPT(6) == 'Y')) THEN
 
          IF (NTSUB > 0) THEN
@@ -321,8 +342,8 @@
             DO I=1,6
                DO J=1,5
                   ABAR(I,J) = ZERO
-               ENDDO
-            ENDDO
+               ENDDO 
+            ENDDO 
 
             ABAR(1,1) =  ONE
             ABAR(2,2) =  DELTA1*I1*L/SIX
@@ -346,7 +367,7 @@
                DO J=1,5
                   ABAR(I,J) = -ALPHA*L*ABAR(I,J)
                ENDDO
-            ENDDO
+            ENDDO 
 
             CALL MATMULT_FFF ( KAA, ABAR, 6, 6, 5, BTA )
             CALL MATMULT_FFF ( KBA, ABAR, 6, 6, 5, BTB )
@@ -365,8 +386,182 @@
 !     ENDIF
 
 ! **********************************************************************************************************************************
-! Calculate SE matrices for stress data recovery.
+! Determine element load vector PPE from local beam-axis PLOAD1 data:
+! each component uses [P1,P2,X1,X2], where X values are fractional [0,1].
+! X1 = X2 is treated as concentrated-in-element.
 
+      IF (OPT(5) == 'Y') THEN
+         XI_GAUSS(1) = -0.774596669241483D0
+         XI_GAUSS(2) =  ZERO
+         XI_GAUSS(3) =  0.774596669241483D0
+         XI_WGT(1)   =  0.555555555555556D0
+         XI_WGT(2)   =  0.888888888888889D0
+         XI_WGT(3)   =  0.555555555555556D0
+
+         DO J=1,NSUB
+!*** ADDED bt CODEX -- 2026-04-20 -- FOR BEAM DSB ***
+ ! Local y component
+            P1  = PRESS(1,J)
+            P2  = PRESS(2,J)
+            X1L = PRESS(3,J)
+            X2L = PRESS(4,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
+                  N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
+                  N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
+                  N4 = L*(-X1L*X1L + X1L*X1L*X1L)
+                  PPE( 2,J) = PPE( 2,J) + PC*N1
+                  PPE( 6,J) = PPE( 6,J) + PC*N2
+                  PPE( 8,J) = PPE( 8,J) + PC*N3
+                  PPE(12,J) = PPE(12,J) + PC*N4
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
+                     N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
+                     N3 = THREE*XI*XI - TWO*XI*XI*XI
+                     N4 = L*(-XI*XI + XI*XI*XI)
+                     PPE( 2,J) = PPE( 2,J) + QT*L*WGT*XI_SCALE*N1
+                     PPE( 6,J) = PPE( 6,J) + QT*L*WGT*XI_SCALE*N2
+                     PPE( 8,J) = PPE( 8,J) + QT*L*WGT*XI_SCALE*N3
+                     PPE(12,J) = PPE(12,J) + QT*L*WGT*XI_SCALE*N4
+                  ENDDO
+               ENDIF
+            ENDIF
+
+ ! Local z component
+            P1  = PRESS(5,J)
+            P2  = PRESS(6,J)
+            X1L = PRESS(7,J)
+            X2L = PRESS(8,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
+                  N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
+                  N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
+                  N4 = L*(-X1L*X1L + X1L*X1L*X1L)
+                  PPE( 3,J) = PPE( 3,J) + PC*N1
+                  PPE( 5,J) = PPE( 5,J) - PC*N2
+                  PPE( 9,J) = PPE( 9,J) + PC*N3
+                  PPE(11,J) = PPE(11,J) - PC*N4
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
+                     N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
+                     N3 = THREE*XI*XI - TWO*XI*XI*XI
+                     N4 = L*(-XI*XI + XI*XI*XI)
+                     PPE( 3,J) = PPE( 3,J) + QT*L*WGT*XI_SCALE*N1
+                     PPE( 5,J) = PPE( 5,J) - QT*L*WGT*XI_SCALE*N2
+                     PPE( 9,J) = PPE( 9,J) + QT*L*WGT*XI_SCALE*N3
+                     PPE(11,J) = PPE(11,J) - QT*L*WGT*XI_SCALE*N4
+                  ENDDO
+               ENDIF
+            ENDIF
+
+ ! Local x-force component
+            P1  = PRESS(9 ,J)
+            P2  = PRESS(10,J)
+            X1L = PRESS(11,J)
+            X2L = PRESS(12,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  PPE( 1,J) = PPE( 1,J) + PC*(ONE - X1L)
+                  PPE( 7,J) = PPE( 7,J) + PC*X1L
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     PPE( 1,J) = PPE( 1,J) + QT*L*WGT*XI_SCALE*(ONE - XI)
+                     PPE( 7,J) = PPE( 7,J) + QT*L*WGT*XI_SCALE*XI
+                  ENDDO
+               ENDIF
+            ENDIF
+
+ ! Local x-moment component
+            P1  = PRESS(13,J)
+            P2  = PRESS(14,J)
+            X1L = PRESS(15,J)
+            X2L = PRESS(16,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  PPE( 4,J) = PPE( 4,J) + PC*(ONE - X1L)
+                  PPE(10,J) = PPE(10,J) + PC*X1L
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     PPE( 4,J) = PPE( 4,J) + QT*L*WGT*XI_SCALE*(ONE - XI)
+                     PPE(10,J) = PPE(10,J) + QT*L*WGT*XI_SCALE*XI
+                  ENDDO
+               ENDIF
+            ENDIF
+
+ ! Local y-moment component
+            P1  = PRESS(17,J)
+            P2  = PRESS(18,J)
+            X1L = PRESS(19,J)
+            X2L = PRESS(20,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  PPE( 5,J) = PPE( 5,J) + PC*(ONE - X1L)
+                  PPE(11,J) = PPE(11,J) + PC*X1L
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     PPE( 5,J) = PPE( 5,J) + QT*L*WGT*XI_SCALE*(ONE - XI)
+                     PPE(11,J) = PPE(11,J) + QT*L*WGT*XI_SCALE*XI
+                  ENDDO
+               ENDIF
+            ENDIF
+
+ ! Local z-moment component
+            P1  = PRESS(21,J)
+            P2  = PRESS(22,J)
+            X1L = PRESS(23,J)
+            X2L = PRESS(24,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  PPE( 6,J) = PPE( 6,J) + PC*(ONE - X1L)
+                  PPE(12,J) = PPE(12,J) + PC*X1L
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     PPE( 6,J) = PPE( 6,J) + QT*L*WGT*XI_SCALE*(ONE - XI)
+                     PPE(12,J) = PPE(12,J) + QT*L*WGT*XI_SCALE*XI
+                  ENDDO
+               ENDIF
+            ENDIF
+         ENDDO
+
+      ENDIF
+
+! **********************************************************************************************************************************
+! Calculate SE matrices for stress data recovery.
+ 
 !     IF ((OPT(3) == 'Y') .OR. (OPT(6) == 'Y')) THEN
 
          DO I=1,3
@@ -447,7 +642,7 @@
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
 
          CALL ELMDIS
-
+   
                                                            ! Calc BAR forces
          CALL CALC_ELEM_NODE_FORCES
          M1a = -PEL(6)                                     ! M1a (bending moment, plane 1, end a for BAR) - NASTRAN Maz
@@ -556,7 +751,12 @@
 
       ENDIF
 
-
+! **********************************************************************************************************************************
+      IF (WRT_LOG >= SUBR_BEGEND) THEN
+         CALL OURTIM
+         WRITE(F04,9002) SUBR_NAME,TSEC
+ 9002    FORMAT(1X,A,' END  ',F10.3)
+      ENDIF
 
       RETURN
 
@@ -575,15 +775,15 @@
 
 
 ! ##################################################################################################################################
-
+ 
       CONTAINS
-
+ 
 ! ##################################################################################################################################
 
       SUBROUTINE DEBUG_BAR1 (WHAT)
 
       USE PENTIUM_II_KIND
-      USE IOUNT1, ONLY                :  ERR, F06
+      USE IOUNT1, ONLY                :  ERR, F04, F06
 
       IMPLICIT NONE
 

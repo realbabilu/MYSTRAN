@@ -29,14 +29,15 @@
       ! Writes blocks of element stresses for one subcase and one element type for elements that do not have PCOMP properties, including
       ! all 1-D, 2-D, 3-D elements.
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, OP2
+      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ANS, ERR, F04, F06, OP2
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, BARTOR, INT_SC_NUM, MAX_NUM_STR, NDOFR, NUM_CB_DOFS,             &
                                          NVEC, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
-      USE PARAMS, ONLY                :  STR_CID
+      USE PARAMS, ONLY                :  PRTANS
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
+      USE SUBR_BEGEND_LEVELS, ONLY    :  WRITE_ELEM_STRESSES_BEGEND
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE MODEL_STUF, ONLY            :  ELEM_ONAME, ELMTYP, LABEL, SCNUM, STITLE, TITLE, TYPE
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, STRE_OUT
@@ -67,7 +68,7 @@
       INTEGER(LONG)                   :: I,J,L             ! DO loop indices
       INTEGER(LONG)                   :: K                 ! Counter
       INTEGER(LONG)                   :: NCOLS             ! Num of cols to write out
-
+      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = WRITE_ELEM_STRESSES_BEGEND
 
       REAL(DOUBLE)                    :: ABS_ANS(11)       ! Max ABS for all element output
       REAL(DOUBLE)                    :: MAX_ANS(11)       ! Max for all element output
@@ -81,7 +82,7 @@
       INTEGER(LONG)                   :: ANALYSIS_CODE          ! static/modal/time/etc. flag
       INTEGER(LONG)                   :: ELEMENT_TYPE           ! the OP2 flag for the element
       LOGICAL                         :: FIELD_5_INT_FLAG       ! flag to trigger FIELD5_INT_MODE vs. FIELD5_FLOAT_TIME_FREQ
-      LOGICAL                         :: WRITE_F06, WRITE_OP2   ! flag
+      LOGICAL                         :: WRITE_F06, WRITE_OP2, WRITE_ANS   ! flag
       INTEGER(LONG)                   :: FIELD5_INT_MODE        ! int value for field 5
       REAL(DOUBLE)                    :: FIELD5_FLOAT_TIME_FREQ ! float value for field 5
       REAL(DOUBLE)                    :: FIELD6_EIGENVALUE      ! float value for field 6
@@ -101,7 +102,12 @@
       INTEGER(LONG)                   :: CID              ! coordinate system
       CHARACTER(4*BYTE)               :: CEN_WORD         ! the word "CEN/" (we need to cast the length)
 
-
+! **********************************************************************************************************************************
+      IF (WRT_LOG >= SUBR_BEGEND) THEN
+         CALL OURTIM
+         WRITE(F04,9001) SUBR_NAME,TSEC
+ 9001    FORMAT(1X,A,' BEGN ',F10.3)
+      ENDIF
 
 ! **********************************************************************************************************************************
       ! Initialize
@@ -139,11 +145,16 @@
       FIELD6_EIGENVALUE = 0.0
       WRITE_F06 = (STRE_OUT(1:1) == 'Y')
       WRITE_OP2 = (STRE_OUT(2:2) == 'Y')
+      WRITE_ANS = (PRTANS == 'Y')
 
       IF (IHEADER == 'Y') THEN
          IF (WRITE_F06) THEN
              WRITE(F06,*)
              WRITE(F06,*)
+         ENDIF
+         IF (WRITE_ANS) THEN
+             WRITE(ANS,*)
+             WRITE(ANS,*)
          ENDIF
          ! -- F06 header: OUTPUT FOR SUBCASE, EIGENVECTOR or CRAIG-BAMPTON DOF
          ISUBCASE_INDEX = 0
@@ -153,11 +164,13 @@
             FIELD5_INT_MODE = 1  ! temp
             FIELD5_INT_MODE = SCNUM(JSUB)
             IF (WRITE_F06) WRITE(F06,101) SCNUM(JSUB)
+            IF (WRITE_ANS) WRITE(ANS,101) SCNUM(JSUB)
          ELSE IF (SOL_NAME(1:8) == 'NLSTATIC') THEN
             ISUBCASE_INDEX = 1  ! statics
             ANALYSIS_CODE = 10
             FIELD5_INT_MODE = SCNUM(JSUB)
             IF (WRITE_F06) WRITE(F06,101) SCNUM(JSUB)
+            IF (WRITE_ANS) WRITE(ANS,101) SCNUM(JSUB)
 
          ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
             ISUBCASE_INDEX = 1  ! statics
@@ -178,6 +191,7 @@
             FIELD5_INT_MODE = JSUB
             ! FIELD6_EIGENVALUE = ????
             IF (WRITE_F06) WRITE(F06,102) JSUB
+            IF (WRITE_ANS) WRITE(ANS,102) JSUB
 
          ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
             ISUBCASE_INDEX = 1  ! modes
@@ -200,6 +214,15 @@
                ENDIF
             ENDIF  ! write f06
 
+            IF (WRITE_ANS) THEN
+               IF (JSUB <= NDOFR) THEN
+                  WRITE(ANS,103) JSUB, NUM_CB_DOFS, 'acceleration', BDY_GRID, BDY_COMP
+               ELSE IF ((JSUB > NDOFR) .AND. (JSUB <= NDOFR+NVEC)) THEN
+                  WRITE(ANS,104) JSUB, NUM_CB_DOFS, JSUB-NDOFR
+               ELSE
+                  WRITE(ANS,103) JSUB, NUM_CB_DOFS, 'displacement', BDY_GRID, BDY_COMP
+               ENDIF
+            ENDIF
          ENDIF
          ISUBCASE = SCNUM(ISUBCASE_INDEX)
 
@@ -209,170 +232,186 @@
          LABELI = LABEL(INT_SC_NUM)
 
          IF (WRITE_F06) THEN
-            IF (TITLE(INT_SC_NUM)(1:)  /= ' ') THEN
-               WRITE(F06,201) TITLE(INT_SC_NUM)
-            ENDIF
+             IF (TITLE(INT_SC_NUM)(1:)  /= ' ') THEN
+                 WRITE(F06,201) TITLE(INT_SC_NUM)
+             ENDIF
 
-            IF (STITLE(INT_SC_NUM)(1:) /= ' ') THEN
-               WRITE(F06,201) STITLE(INT_SC_NUM)
-            ENDIF
+             IF (STITLE(INT_SC_NUM)(1:) /= ' ') THEN
+                 WRITE(F06,201) STITLE(INT_SC_NUM)
+             ENDIF
 
-            IF (LABEL(INT_SC_NUM)(1:)  /= ' ') THEN
-               WRITE(F06,201) LABEL(INT_SC_NUM)
-            ENDIF
-            WRITE(F06,*)
-
-           ! -- F06 1st 2 header lines for stress output description
-            IF     ((TYPE(1:3) == 'BAR') .OR. (TYPE(1:4) == 'BEAM')) THEN
-               IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                  WRITE(F06,302) FILL(1: 20)
-               ELSE
-                  WRITE(F06,301) FILL(1: 13)
-               ENDIF
-               WRITE(F06,401) FILL(1: 42), ONAME
-
-            ELSE IF (TYPE(1:4) == 'BUSH') THEN
-               IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                  WRITE(F06,302) FILL(1: 20)
-               ELSE
-                  WRITE(F06,301) FILL(1: 11)
-               ENDIF
-               WRITE(F06,401) FILL(1: 40), ONAME
-
-            ELSE IF (TYPE(1:4) == 'ELAS') THEN
-               IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                  WRITE(F06,302) FILL(1: 20)
-               ELSE
-                  WRITE(F06,301) FILL(1: 11)
-               ENDIF
-               WRITE(F06,401) FILL(1: 40), ONAME
-
-            ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
-               IF (STRE_OPT == 'VONMISES') THEN
-                  IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                     IF(STR_CID == -2) THEN
-                        WRITE(F06,312) FILL(1: 20)
-                     ELSE
-                        WRITE(F06,302) FILL(1: 15)
-                     ENDIF
-                  ELSE
-                     IF(STR_CID == -2) THEN
-                        WRITE(F06,311) FILL(1: 32)
-                     ELSE
-                        WRITE(F06,301) FILL(1: 27)
-                     ENDIF
-                  ENDIF
-                  WRITE(F06,401) FILL(1: 55), ONAME
-               ELSE
-                  IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                     IF(STR_CID == -2) THEN
-                        WRITE(F06,312) FILL(1: 27)
-                     ELSE
-                        WRITE(F06,302) FILL(1: 22)
-                     ENDIF
-                  ELSE
-                     IF(STR_CID == -2) THEN
-                        WRITE(F06,311) FILL(1: 38)
-                     ELSE
-                        WRITE(F06,301) FILL(1: 33)
-                     ENDIF
-                  ENDIF
-                  WRITE(F06,401) FILL(1: 61), ONAME
-               ENDIF
-
-            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
-               IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                  WRITE(F06,302) FILL(1: 20)
-               ELSE
-                  WRITE(F06,301) FILL(1: 42)
-               ENDIF
-               WRITE(F06,401) FILL(1: 71), ONAME
-
-            ELSE IF (TYPE(1:3) == 'ROD') THEN
-               IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                  WRITE(F06,302) FILL(1: 20)
-               ELSE
-                  WRITE(F06,301) FILL(1: 13)
-               ENDIF
-               WRITE(F06,401) FILL(1: 42), ONAME
-
-            ELSE IF (TYPE(1:5) == 'SHEAR') THEN
-               IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                  WRITE(F06,302) FILL(1: 20)
-               ELSE
-                  WRITE(F06,301) FILL(1: 13)
-               ENDIF
-               WRITE(F06,401) FILL(1: 42), ONAME
-
-            ELSE IF (TYPE(1:5) == 'TRIA3') THEN
-               IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                  WRITE(F06,302) FILL(1: 20)
-               ELSE
-                  WRITE(F06,301) FILL(1: 36)
-               ENDIF
-               WRITE(F06,401) FILL(1: 65), ONAME
-            ENDIF
-
-            ! -- F06 header lines describing stress columns
-            IF      (TYPE == 'BAR     ') THEN
-               IF (BARTOR == 'Y') THEN
-                  WRITE(F06,1101) FILL(1:1), FILL(1:1)
-               ELSE
-                  WRITE(F06,1102) FILL(1:1), FILL(1:1)
-               ENDIF
-
-            ELSE IF (TYPE(1:4) == 'ELAS') THEN
-               WRITE(F06,1201) FILL(1:1), FILL(1:1)
-
-            ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
-               IF (STRE_OPT == 'VONMISES') THEN
-                  WRITE(F06,1301) FILL(1: 1), FILL(1: 1)
-               ELSE
-                  WRITE(F06,1302) FILL(1: 1), FILL(1: 1)
-               ENDIF
-
-            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
-               IF (STRE_OPT == 'VONMISES') THEN
-                  WRITE(F06,1401) FILL(1: 1), FILL(1: 1), FILL(1: 1)
-               ELSE
-                  WRITE(F06,1402) FILL(1: 1), FILL(1: 1)
-               ENDIF
-
-            ELSE IF  (TYPE == 'ROD     ') THEN
-               WRITE(F06,1501) FILL(1: 1), FILL(1: 1)
-
-            ELSE IF (TYPE(1:5) == 'SHEAR') THEN
-               WRITE(F06,1601) FILL(1: 1), FILL(1: 1)
-
-            ELSE IF (TYPE(1:5) == 'TRIA3') THEN
-               IF (STRE_OPT == 'VONMISES') THEN
-                  WRITE(F06,1701) FILL(1: 1), FILL(1: 1), FILL(1: 1)
-               ELSE
-                  WRITE(F06,1702) FILL(1: 1), FILL(1: 1)
-               ENDIF
-
-            ELSE IF  (TYPE == 'BUSH    ') THEN
-               WRITE(F06,1801) FILL(1: 1), FILL(1: 1)
-
-            ELSE IF  (TYPE == 'USERIN  ') THEN
-               WRITE(F06,1901) FILL(1: 1), FILL(1: 1)
-
-            ENDIF
-
-
+             IF (LABEL(INT_SC_NUM)(1:)  /= ' ') THEN
+                 WRITE(F06,201) LABEL(INT_SC_NUM)
+             ENDIF
          ENDIF  ! write f06
+         IF (WRITE_F06) WRITE(F06,*)
+         IF (WRITE_ANS) WRITE(ANS,*)
 
+        ! -- F06 1st 2 header lines for stress output description
+         IF     ((TYPE(1:3) == 'BAR') .OR. (TYPE(1:4) == 'BEAM')) THEN
+            IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+               IF (WRITE_F06) WRITE(F06,302) FILL(1: 20)
+               IF (WRITE_ANS) WRITE(ANS,302) FILL(1: 36)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,301) FILL(1: 13)
+               IF (WRITE_ANS) WRITE(ANS,301) FILL(1: 29)
+            ENDIF
+            IF (WRITE_F06) WRITE(F06,401) FILL(1: 42), ONAME
+            IF (WRITE_ANS) WRITE(ANS,401) FILL(1: 58), ONAME
 
+         ELSE IF (TYPE(1:4) == 'BUSH') THEN
+            IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+               IF (WRITE_F06) WRITE(F06,302) FILL(1: 20)
+               IF (WRITE_ANS) WRITE(ANS,302) FILL(1: 36)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,301) FILL(1: 11)
+               IF (WRITE_ANS) WRITE(ANS,301) FILL(1: 27)
+            ENDIF
+            IF (WRITE_F06) WRITE(F06,401) FILL(1: 40), ONAME
+            IF (WRITE_ANS) WRITE(ANS,401) FILL(1: 56), ONAME
 
+         ELSE IF (TYPE(1:4) == 'ELAS') THEN
+            IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+               IF (WRITE_F06) WRITE(F06,302) FILL(1: 20)
+               IF (WRITE_ANS) WRITE(ANS,302) FILL(1: 36)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,301) FILL(1: 11)
+               IF (WRITE_ANS) WRITE(ANS,301) FILL(1: 27)
+            ENDIF
+            IF (WRITE_F06) WRITE(F06,401) FILL(1: 40), ONAME
+            IF (WRITE_ANS) WRITE(ANS,401) FILL(1: 56), ONAME
 
+         ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+            IF (STRE_OPT == 'VONMISES') THEN
+               IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+                  IF (WRITE_F06) WRITE(F06,302) FILL(1: 15)
+                  IF (WRITE_ANS) WRITE(ANS,302) FILL(1: 15)
+               ELSE
+                  IF (WRITE_F06) WRITE(F06,301) FILL(1: 27)
+                  IF (WRITE_ANS) WRITE(ANS,301) FILL(1: 27)
+               ENDIF
+               IF (WRITE_F06) WRITE(F06,401) FILL(1: 55), ONAME
+               IF (WRITE_ANS) WRITE(ANS,401) FILL(1: 55), ONAME
+            ELSE
+               IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+                  IF (WRITE_F06) WRITE(F06,302) FILL(1: 22)
+                  IF (WRITE_ANS) WRITE(ANS,302) FILL(1: 22)
+               ELSE
+                  IF (WRITE_F06) WRITE(F06,301) FILL(1: 33)
+                  IF (WRITE_ANS) WRITE(ANS,301) FILL(1: 33)
+               ENDIF
+               IF (WRITE_F06) WRITE(F06,401) FILL(1: 61), ONAME
+               IF (WRITE_ANS) WRITE(ANS,401) FILL(1: 61), ONAME
+            ENDIF
 
+         ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+               IF (WRITE_F06) WRITE(F06,302) FILL(1: 20)
+               IF (WRITE_ANS) WRITE(ANS,302) FILL(1: 20)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,301) FILL(1: 42)
+               IF (WRITE_ANS) WRITE(ANS,301) FILL(1: 42)
+            ENDIF
+            IF (WRITE_F06) WRITE(F06,401) FILL(1: 71), ONAME
+            IF (WRITE_ANS) WRITE(ANS,401) FILL(1: 71), ONAME
+
+         ELSE IF (TYPE(1:3) == 'ROD') THEN
+            IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+               IF (WRITE_F06) WRITE(F06,302) FILL(1: 20)
+               IF (WRITE_ANS) WRITE(ANS,302) FILL(1: 36)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,301) FILL(1: 13)
+               IF (WRITE_ANS) WRITE(ANS,301) FILL(1: 29)
+            ENDIF
+            IF (WRITE_F06) WRITE(F06,401) FILL(1: 42), ONAME
+            IF (WRITE_ANS) WRITE(ANS,401) FILL(1: 58), ONAME
+
+         ELSE IF (TYPE(1:5) == 'SHEAR') THEN
+            IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+               WRITE(F06,302) FILL(1: 20)
+               IF (WRITE_ANS) WRITE(ANS,302) FILL(1: 36)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,301) FILL(1: 13)
+               IF (WRITE_ANS) WRITE(ANS,301) FILL(1: 52)
+            ENDIF
+            IF (WRITE_F06) WRITE(F06,401) FILL(1: 42), ONAME
+            IF (WRITE_ANS) WRITE(ANS,401) FILL(1: 81), ONAME
+
+         ELSE IF (TYPE(1:5) == 'TRIA3') THEN
+            IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+               IF (WRITE_F06) WRITE(F06,302) FILL(1: 20)
+               IF (WRITE_ANS) WRITE(ANS,302) FILL(1: 36)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,301) FILL(1: 36)
+               IF (WRITE_ANS) WRITE(ANS,301) FILL(1: 52)
+            ENDIF
+            IF (WRITE_F06) WRITE(F06,401) FILL(1: 65), ONAME
+            IF (WRITE_ANS) WRITE(ANS,401) FILL(1: 81), ONAME
+         ENDIF
+
+         ! -- F06 header lines describing stress columns
+         IF      (TYPE == 'BAR     ') THEN
+            IF (BARTOR == 'Y') THEN
+               IF (WRITE_F06) WRITE(F06,1101) FILL(1:1), FILL(1:1)
+               IF (WRITE_ANS) WRITE(ANS,1101) FILL(1:16), FILL(1:16)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,1102) FILL(1:1), FILL(1:1)
+               IF (WRITE_ANS) WRITE(ANS,1102) FILL(1:16), FILL(1:16)
+            ENDIF
+
+         ELSE IF (TYPE(1:4) == 'ELAS') THEN
+            IF (WRITE_F06) WRITE(F06,1201) FILL(1:1), FILL(1:1)
+            IF (WRITE_ANS) WRITE(ANS,1201) FILL(1:16), FILL(1:16)
+
+         ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+            IF (STRE_OPT == 'VONMISES') THEN
+               IF (WRITE_F06) WRITE(F06,1301) FILL(1: 1), FILL(1: 1)
+               IF (WRITE_ANS) WRITE(ANS,1301) FILL(1:16), FILL(1:16)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,1302) FILL(1: 1), FILL(1: 1)
+               IF (WRITE_ANS) WRITE(ANS,1302) FILL(1:16), FILL(1:16)
+            ENDIF
+
+         ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            IF (STRE_OPT == 'VONMISES') THEN
+               IF (WRITE_F06) WRITE(F06,1401) FILL(1: 1), FILL(1: 1), FILL(1: 1)
+               IF (WRITE_ANS) WRITE(ANS,1401) FILL(1:16), FILL(1:16), FILL(1:16)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,1402) FILL(1: 1), FILL(1: 1)
+               IF (WRITE_ANS) WRITE(ANS,1402) FILL(1:16), FILL(1:16)
+            ENDIF
+
+         ELSE IF  (TYPE == 'ROD     ') THEN
+            IF (WRITE_F06) WRITE(F06,1501) FILL(1: 1), FILL(1: 1)
+            IF (WRITE_ANS) WRITE(ANS,1501) FILL(1:16), FILL(1:16)
+
+         ELSE IF (TYPE(1:5) == 'SHEAR') THEN
+               IF (WRITE_F06) WRITE(F06,1601) FILL(1: 1), FILL(1: 1)
+               IF (WRITE_ANS) WRITE(ANS,1601) FILL(1:16), FILL(1:16), FILL(1:16)
+         ELSE IF (TYPE(1:5) == 'TRIA3') THEN
+            IF (STRE_OPT == 'VONMISES') THEN
+               IF (WRITE_F06) WRITE(F06,1701) FILL(1: 1), FILL(1: 1), FILL(1: 1)
+               IF (WRITE_ANS) WRITE(ANS,1701) FILL(1:16), FILL(1:16), FILL(1:16)
+            ELSE
+               IF (WRITE_F06) WRITE(F06,1702) FILL(1: 1), FILL(1: 1)
+               IF (WRITE_ANS) WRITE(ANS,1702) FILL(1:16), FILL(1:16)
+            ENDIF
+
+         ELSE IF  (TYPE == 'BUSH    ') THEN
+            IF (WRITE_F06) WRITE(F06,1801) FILL(1: 1), FILL(1: 1)
+            IF (WRITE_ANS) WRITE(ANS,1801) FILL(1:16), FILL(1:16)
+
+         ELSE IF  (TYPE == 'USERIN  ') THEN
+            IF (WRITE_F06) WRITE(F06,1901) FILL(1: 1), FILL(1: 1)
+            IF (WRITE_ANS) WRITE(ANS,1901) FILL(1:16), FILL(1:16)
+         ENDIF
 
       ENDIF
 
       ! Write the element stress output
       IF      (TYPE == 'BAR     ') THEN
-         CALL WRITE_BAR(NUM, FILL(1:1), ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI, &
-                        FIELD5_INT_MODE, FIELD6_EIGENVALUE, WRITE_F06)
+         CALL WRITE_BAR(NUM, FILL(1:1), FILL(1:16), ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI, &
+                        FIELD5_INT_MODE, FIELD6_EIGENVALUE)
 
       ELSE IF (TYPE(1:4) == 'ELAS') THEN
          IF (WRITE_OP2) THEN
@@ -392,7 +431,8 @@
              WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, REAL(OGEL(I,1), 4), I=1,NUM)
          ENDIF   ! end of op2
 
-         IF(WRITE_F06) WRITE(F06,1103) (FILL(1:1), EID_OUT_ARRAY(I,1), OGEL(I,1),I=1,NUM)
+         WRITE(F06,1103) (FILL(1:1), EID_OUT_ARRAY(I,1), OGEL(I,1),I=1,NUM)
+         IF(WRITE_ANS) WRITE(ANS,1104) (FILL(1:16), EID_OUT_ARRAY(I,1),OGEL(I,1),I=1,NUM)
 
       ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
          !       12345
@@ -461,27 +501,30 @@
             NCOLS = 8
          ENDIF
 
-         IF (WRITE_F06) THEN
-            K = 0
-            DO I=1,NUM,NUM_PTS
+         K = 0
+         DO I=1,NUM,NUM_PTS
+            K = K + 1
+            ! Center
+            WRITE(F06,1303) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,NCOLS)
+            ! Corner
+            DO L=1,NUM_PTS-1
                K = K + 1
-               ! Center
-               WRITE(F06,1303) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,NCOLS)
-               ! Corner
-               DO L=1,NUM_PTS-1
-                  K = K + 1
-                  WRITE(F06,1306) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,NCOLS)
-               ENDDO
+               WRITE(F06,1306) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,NCOLS)
             ENDDO
-         ENDIF
+         ENDDO
+
 
          CALL GET_MAX_MIN_ABS_STR ( NUM, NCOLS, 'N', MAX_ANS, MIN_ANS, ABS_ANS )
 
-         IF (WRITE_F06) THEN
-            IF (STRE_OPT == 'VONMISES') THEN
-               WRITE(F06,1304) (MAX_ANS(J),J=1,7), (MIN_ANS(J),J=1,7), (ABS_ANS(J),J=1,7)
-            ELSE
-               WRITE(F06,1305) (MAX_ANS(J),J=1,8), (MIN_ANS(J),J=1,8), (ABS_ANS(J),J=1,8)
+         IF (STRE_OPT == 'VONMISES') THEN
+            WRITE(F06,1304) (MAX_ANS(J),J=1,7), (MIN_ANS(J),J=1,7), (ABS_ANS(J),J=1,7)
+            IF (WRITE_ANS) THEN
+               WRITE(ANS,1314) (MAX_ANS(J),J=1,7), (MIN_ANS(J),J=1,7), (ABS_ANS(J),J=1,7)
+            ENDIF
+         ELSE
+            WRITE(F06,1305) (MAX_ANS(J),J=1,8), (MIN_ANS(J),J=1,8), (ABS_ANS(J),J=1,8)
+            IF (WRITE_ANS) THEN
+               WRITE(ANS,1315) (MAX_ANS(J),J=1,8), (MIN_ANS(J),J=1,8), (ABS_ANS(J),J=1,8)
             ENDIF
          ENDIF
 
@@ -552,27 +595,32 @@
  4          FORMAT(' *DEBUG:  WRITE_CQUAD4-144:  I=',I4, " K=", I4)
             K = K + 1
             WRITE(ERR,4) I,K
-            IF (WRITE_F06) WRITE(F06,*)
-            IF (WRITE_F06) WRITE(F06,1403) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
+            WRITE(F06,*)
+            IF (WRITE_ANS) WRITE(ANS,*)
+            WRITE(F06,1403) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
+            IF (WRITE_ANS) WRITE(ANS,1413) EID_OUT_ARRAY(I,1), (OGEL(K,J),J=1,10)
             K = K + 1
-            IF (WRITE_F06) WRITE(F06,1404) FILL(1: 0), (OGEL(K,J),J=1,8)
+            WRITE(F06,1404) FILL(1: 0), (OGEL(K,J),J=1,8)
+            IF (WRITE_ANS) WRITE(ANS,1414) (OGEL(K,J),J=1,8)
 
             DO L=1,NUM_PTS-1
                K = K + 1
                WRITE(ERR,4) I,K
-               IF (WRITE_F06) WRITE(F06,*)
+               WRITE(F06,*)
+               IF (WRITE_ANS) WRITE(ANS,*)
                IF (DABS(POLY_FIT_ERR(I+L)) >= 0.01D0) THEN
-                  IF (WRITE_F06) THEN
-                     WRITE(F06,1405) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10), POLY_FIT_ERR(I+L),          &
-                                     POLY_FIT_ERR_INDEX(I+L)
-                  ENDIF
+                  WRITE(F06,1405) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10), POLY_FIT_ERR(I+L), POLY_FIT_ERR_INDEX(I+L)
                   WRT_ERR_INDEX_NOTE(POLY_FIT_ERR_INDEX(I+L)) = 'Y'
                ELSE
-                  IF (WRITE_F06) WRITE(F06,1406) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10), POLY_FIT_ERR(I+L)
+                  WRITE(F06,1406) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10), POLY_FIT_ERR(I+L)
+               ENDIF
+               IF (WRITE_ANS) THEN
+                  WRITE(ANS,1415) GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10), POLY_FIT_ERR(I+L), POLY_FIT_ERR_INDEX(I+L)
                ENDIF
 
                K = K + 1
-               IF (WRITE_F06) WRITE(F06,1407) FILL(1: 0), (OGEL(K,J),J=1,8)
+               WRITE(F06,1407) FILL(1: 0), (OGEL(K,J),J=1,8)
+               IF (WRITE_ANS) WRITE(ANS,1417) (OGEL(K,J),J=1,8)
 
             ENDDO
          ENDDO
@@ -604,23 +652,31 @@
              ! Get abs POLY_FIT_ERR
          ABS_ANS(11) = MAX( DABS(MAX_ANS(11)), DABS(MIN_ANS(11)) )
 
-         IF (WRITE_F06) THEN
+         IF ((STRE_LOC == 'CORNER  ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            WRITE(F06,1408) FILL(1: 0), FILL(1: 0), MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),  &
+                                                    MAX_ANS(10),MAX_ANS(11),                                                       &
+                            FILL(1: 0),             MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),  &
+                                                    MIN_ANS(10),MIN_ANS(11),                                                       &
+                            FILL(1: 0),             ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),  &
+                                                    ABS_ANS(10),ABS_ANS(11), FILL(1: 0)
+         ELSE
+            WRITE(F06,1408) FILL(1: 0), FILL(1: 0), MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),  &
+                                                    MAX_ANS(10),MAX_ANS(11),                                                       &
+                            FILL(1: 0),             MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),  &
+                                                    MIN_ANS(10),MIN_ANS(11),                                                       &
+                            FILL(1: 0),             ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),  &
+                                                    ABS_ANS(10),ABS_ANS(11), FILL(1: 0)
+         ENDIF
+
+         IF (WRITE_ANS) THEN
             IF ((STRE_LOC == 'CORNER  ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
-               WRITE(F06,1408) FILL(1: 0),                                                                                      &
-                               FILL(1: 0),       MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),  &
-                                                 MAX_ANS(10),MAX_ANS(11),                                                       &
-                               FILL(1: 0),       MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),  &
-                                                 MIN_ANS(10),MIN_ANS(11),                                                       &
-                               FILL(1: 0),       ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),  &
-                                                 ABS_ANS(10),ABS_ANS(11), FILL(1: 0)
+               WRITE(ANS,1418)MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),MAX_ANS(10),MAX_ANS(11),&
+                              MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),MIN_ANS(10),MIN_ANS(11),&
+                              ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),ABS_ANS(10)
             ELSE
-               WRITE(F06,1408) FILL(1: 0),                                                                                      &
-                               FILL(1: 0),       MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),  &
-                                                 MAX_ANS(10),MAX_ANS(11),                                                       &
-                               FILL(1: 0),       MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),  &
-                                                 MIN_ANS(10),MIN_ANS(11),                                                       &
-                               FILL(1: 0),       ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),  &
-                                                 ABS_ANS(10),ABS_ANS(11), FILL(1: 0)
+               WRITE(ANS,1418)MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),MAX_ANS(10),MAX_ANS(11),&
+                              MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),MIN_ANS(10),MIN_ANS(11),&
+                              ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),ABS_ANS(10),ABS_ANS(11)
             ENDIF
          ENDIF
 
@@ -631,7 +687,7 @@
             ENDIF
          ENDDO
 
-         IF ((WRITE_NOTES == 'Y') .AND. (WRITE_F06)) THEN
+         IF (WRITE_NOTES == 'Y') THEN
             WRITE(F06,1498)
             DO I=1,MAX_NUM_STR
                IF (WRT_ERR_INDEX_NOTE(I) == 'Y') THEN
@@ -641,18 +697,18 @@
          ENDIF
 
       ELSE IF (TYPE == 'ROD     ') THEN
-         CALL WRITE_ROD (ISUBCASE, NUM, FILL(1:1), ITABLE, TITLEI, STITLEI, LABELI,  &
+         CALL WRITE_ROD (ISUBCASE, NUM, FILL(1:1), FILL(1:16), ITABLE, TITLEI, STITLEI, LABELI, &
                          FIELD5_INT_MODE, FIELD6_EIGENVALUE, WRITE_OP2 )
 
       ELSE IF (TYPE(1:5) == 'SHEAR') THEN
          CALL WRITE_OES_CSHEAR(NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI, &
                                FIELD5_INT_MODE, FIELD6_EIGENVALUE,                   &
-                               WRITE_F06, WRITE_OP2)
+                               WRITE_F06, WRITE_OP2, WRITE_ANS)
 
       ELSE IF (TYPE(1:5) == 'TRIA3') THEN
          CALL WRITE_OES_CTRIA3(NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI, &
                                FIELD5_INT_MODE, FIELD6_EIGENVALUE,                   &
-                               WRITE_F06, WRITE_OP2)
+                               WRITE_F06, WRITE_OP2, WRITE_ANS)
 
       ELSE IF (TYPE == 'BUSH    ') THEN
          IF (WRITE_OP2) THEN
@@ -667,18 +723,16 @@
              WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE,(REAL(OGEL(I,J),4),J=1,6), I=1,NUM)
          ENDIF
 
-         IF (WRITE_F06) THEN
-            DO I=1,NUM
-               WRITE(F06,1802) EID_OUT_ARRAY(I,1), (OGEL(I,J),J=1,6)
-            ENDDO
-         ENDIF
+         DO I=1,NUM
+            WRITE(F06,1802) EID_OUT_ARRAY(I,1),(OGEL(I,J),J=1,6)
+            IF (WRITE_ANS) WRITE(ANS,1812) EID_OUT_ARRAY(I,1), (OGEL(I,J),J=1,6)
+         ENDDO
 
       ELSE IF (TYPE == 'USERIN  ') THEN
-         IF (WRITE_F06) THEN
-            DO I=1,NUM
-               WRITE(F06,1902) EID_OUT_ARRAY(I,1), (OGEL(I,J),J=1,6)
-            ENDDO
-         ENDIF
+         DO I=1,NUM
+            WRITE(F06,1902) EID_OUT_ARRAY(I,1), (OGEL(I,J),J=1,6)
+            IF (WRITE_ANS) WRITE(ANS,1812) EID_OUT_ARRAY(I,1), (OGEL(I,J),J=1,6)
+         ENDDO
 
       ELSE
          WRITE(ERR,9300) SUBR_NAME,TYPE
@@ -687,7 +741,12 @@
          CALL OUTA_HERE ( 'Y' )                            ! Coding error (elem type not valid) , so quit
       ENDIF
 
-
+! **********************************************************************************************************************************
+      IF (WRT_LOG >= SUBR_BEGEND) THEN
+         CALL OURTIM
+         WRITE(F04,9002) SUBR_NAME,TSEC
+ 9002    FORMAT(1X,A,' END  ',F10.3)
+      ENDIF
 
       RETURN
 
@@ -706,10 +765,6 @@
 
   302 FORMAT(A,'C B   E L E M E N T   S T R E S S E S   O T M   I N   L O C A L   E L E M E N T   C O O R D I N A T E',            &
   '   S Y S T E M')
-
-  311 FORMAT(A,'E L E M E N T   S T R E S S E S   I N   M A T E R I A L   C O O R D I N A T E   S Y S T E M')
-
-  312 FORMAT(A,'C B   E L E M E N T   S T R E S S E S   O T M   I N   M A T E R I A L   C O O R D I N A T E   S Y S T E M')
 
   401 FORMAT(A,'F O R   E L E M E N T   T Y P E   ',A11)
 
@@ -731,6 +786,8 @@
           ,/,1X,A,'   ID                     ID                     ID                     ID                     ID')
 
  1103 FORMAT(5(A,I8,1ES14.6))
+
+ 1104 FORMAT(A,I8,1ES14.6)
 
 ! 3D Elems >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -759,6 +816,21 @@
 
  1306 FORMAT(1X,A,10X,'GRD',I8,5X,8(1ES14.6))
 
+ 1313 FORMAT(16X,I8,8(1ES14.6)) !todo ANS solid stress row
+
+ 1314 FORMAT(28X,'------------- ------------- ------------- ------------- ------------- ------------- -------------',/,            &
+             1X,'MAX (for output set):  ',7(ES14.6),/,                                                                             &
+             1X,'MIN (for output set):  ',7(ES14.6),//,                                                                            &
+             1X,'ABS (for output set):  ',7(ES14.6),/,                                                                             &
+             1X,'*for output set')
+
+ 1315 FORMAT(28X,'------------- ------------- ------------- ------------- ------------- ------------- -------------',              &
+                 ' -------------',/,                                                                                               &
+             1X,'MAX (for output set):  ',8(ES14.6),/,                                                                             &
+             1X,'MIN (for output set):  ',8(ES14.6),//,                                                                            &
+             1X,'ABS (for output set):  ',8(ES14.6),/,                                                                             &
+             1X,'*for output set')
+
 ! QUAD4 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  1401 FORMAT(1X,A,'  Elem  Location       Fibre       Stresses In Element Coord System     Principal Stresses (Zero Shear)',       &
   '               Transverse   Transverse   % Poly',/,1X,A,                                                                        &
@@ -786,6 +858,20 @@
              1X,A,'MIN* : ',25x,3(ES13.5),8X,5(ES13.5),E9.1,//,                                                                    &
              1X,A,'ABS* : ',25x,3(ES13.5),8X,5(ES13.5),E9.1,/,                                                                     &
              1X,A,'*for output set')
+
+ 1413 FORMAT(1X,I8,2X,'CENTER  ',5X,4(1ES14.6),0PF14.3,5(1ES14.6))
+
+ 1414 FORMAT(9X,15X,4(1ES14.6),0PF14.3,3(1ES14.6))
+
+ 1415 FORMAT(21X,'GRID',I8,1X,4(1ES14.6),0PF9.3,5(1ES14.6),F13.2,'% (',I1,')')
+
+ 1417 FORMAT(9X,15X,4(1ES14.6),0PF9.3,3(1ES14.6))
+
+ 1418 FORMAT(39X,'------------- ------------- -------------               ------------- ------------- ------------- -------------',&
+                 ' ------------- -------------',/,  &
+             1X,'MAX (for output set): ',15X,3(ES14.6),14X,5(ES14.6),F14.2,/,                                                      &
+             1X,'MIN (for output set): ',15X,3(ES14.6),14X,5(ES14.6),F14.2,//,                                                     &
+             1X,'ABS (for output set): ',15X,3(ES14.6),14X,5(ES14.6),F14.2)
 
  1498 FORMAT(' NOTE: Explanation of errors in the polynomial fit to extrapolate element corner point stresses from values at the', &
                    ' Gauss points:')
@@ -826,17 +912,30 @@
              1X,'ABS* : ',28x,3(ES13.5),9X,5(ES13.5),/,                                                                            &
              1X,'*for output set')
 
+ 1713 FORMAT(1X,I8,4X,'Anywhere',3X,4(1ES14.6),0PF14.3,5(1ES14.6))
+
+ 1714 FORMAT(13X,'in elem',4X,4(1ES14.6),0PF14.3,5(1ES14.6))
+
+ 1715 FORMAT(39X,'------------- ------------- -------------               ------------- ------------- ------------- ---------',/,  &
+             1X,'MAX (for output set): ',15X,3(ES14.6),14X,5(ES14.6),/,                                                            &
+             1X,'MIN (for output set): ',15X,3(ES14.6),14X,5(ES14.6),//,                                                           &
+             1X,'ABS (for output set): ',15X,3(ES14.6),14X,5(ES14.6),/)
+
 ! BUSH >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  1801 FORMAT(20X,A,'Element   Stress-1      Stress-2      Stress-3      Stress-4      Stress-5      Stress-6'                      &
           ,/,20X,A,'   ID')
 
  1802 FORMAT(19X,I8,8(1ES14.6))
 
+ 1812 FORMAT(16X,I8,8(1ES14.6))
+
 ! USERIN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  1901 FORMAT(20X,A,'Element   Stress-1      Stress-2      Stress-3      Stress-4      Stress-5      Stress-6'                      &
           ,/,20X,A,'   ID')
 
  1902 FORMAT(19X,I8,8(1ES14.6))
+
+ 1912 FORMAT(17X,I8,8(1ES14.6))
 
 ! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  9300 FORMAT(' *ERROR  9300: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
@@ -848,7 +947,7 @@
 
       SUBROUTINE WRITE_OES_CSHEAR(NUM, FILL, ISUBCASE, ITABLE, TITLE, SUBTITLE, LABEL, &
                                   FIELD5_INT_MODE, FIELD6_EIGENVALUE,                  &
-                                  WRITE_F06, WRITE_OP2)
+                                  WRITE_F06, WRITE_OP2, WRITE_ANS)
 !     TODO: calculate margin
 !
       USE PENTIUM_II_KIND, ONLY     :  BYTE, LONG, DOUBLE
@@ -863,7 +962,7 @@
       CHARACTER(LEN=128), INTENT(IN)  :: TITLE             ! the model TITLE
       CHARACTER(LEN=128), INTENT(IN)  :: SUBTITLE          ! the subcase SUBTITLE
       CHARACTER(LEN=128), INTENT(IN)  :: LABEL             ! the subcase LABEL
-      LOGICAL, INTENT(IN)             :: WRITE_F06, WRITE_OP2
+      LOGICAL, INTENT(IN)             :: WRITE_F06, WRITE_OP2, WRITE_ANS
       CHARACTER(128*BYTE)             :: FILL              ! Padding for output format
 
       INTEGER(LONG), INTENT(INOUT) :: ITABLE          ! the current subtable number
@@ -950,9 +1049,9 @@
 !==============================================================================
       SUBROUTINE WRITE_OES_CTRIA3 ( NUM, FILL, ISUBCASE, ITABLE, TITLE, SUBTITLE, LABEL, &
                                     FIELD5_INT_MODE, FIELD6_EIGENVALUE ,                 &
-                                    WRITE_F06, WRITE_OP2)
+                                    WRITE_F06, WRITE_OP2, WRITE_ANS)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  ERR, F06, OP2
+      USE IOUNT1, ONLY                :  ANS, ERR, F06, OP2
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, OGEL
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       IMPLICIT NONE
@@ -962,7 +1061,7 @@
       CHARACTER(LEN=128), INTENT(IN)  :: TITLE             ! the model TITLE
       CHARACTER(LEN=128), INTENT(IN)  :: SUBTITLE          ! the subcase SUBTITLE
       CHARACTER(LEN=128), INTENT(IN)  :: LABEL             ! the subcase LABEL
-      LOGICAL, INTENT(IN)             :: WRITE_F06, WRITE_OP2  ! flags
+      LOGICAL, INTENT(IN)             :: WRITE_F06, WRITE_OP2, WRITE_ANS  ! flags
       CHARACTER(128*BYTE)             :: FILL              ! Padding for output format
 
       INTEGER(LONG), INTENT(INOUT) :: ITABLE           ! the current subtable number
@@ -1022,14 +1121,24 @@
              1X,'ABS* : ',28x,3(ES13.5),9X,5(ES13.5),/,                                                                            &
              1X,'*for output set')
 
+ 1713 FORMAT(1X,I8,4X,'Anywhere',3X,4(1ES14.6),0PF14.3,5(1ES14.6))
+ 1714 FORMAT(13X,'in elem',4X,4(1ES14.6),0PF14.3,5(1ES14.6))
+ 1715 FORMAT(39X,'------------- ------------- -------------               ------------- ------------- ------------- ---------',/,  &
+             1X,'MAX (for output set): ',15X,3(ES14.6),14X,5(ES14.6),/,                                                            &
+             1X,'MIN (for output set): ',15X,3(ES14.6),14X,5(ES14.6),//,                                                           &
+             1X,'ABS (for output set): ',15X,3(ES14.6),14X,5(ES14.6),/)
+
       DO I=1,NUM
          K = K + 1
          WRITE(F06,*)
+         IF (WRITE_ANS) WRITE(ANS,*)
          ! the J=1,10 loop is the upper layer & 2 transverse shear
          WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
+         IF (WRITE_ANS) WRITE(ANS,1713) EID_OUT_ARRAY(I,1), (OGEL(K,J),J=1,10)
          K = K + 1
          ! the J=1,8 loop is the lower layer
          WRITE(F06,1704) (OGEL(K,J),J=1,8)
+         IF (WRITE_ANS) WRITE(ANS,1714) (OGEL(K,J),J=1,10)
       ENDDO
 
       CALL GET_MAX_MIN_ABS_STR ( NUM, 10, 'Y', MAX_ANS, MIN_ANS, ABS_ANS )
@@ -1039,6 +1148,11 @@
                       ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),ABS_ANS(10)
 
 
+      IF (WRITE_ANS) THEN
+         WRITE(ANS,1715) MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),MAX_ANS(10),  &
+                         MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),MIN_ANS(10),  &
+                         ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),ABS_ANS(10)
+      ENDIF
       END SUBROUTINE WRITE_OES_CTRIA3
 
 !==============================================================================
