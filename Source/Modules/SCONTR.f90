@@ -569,6 +569,8 @@
       INTEGER(LONG)            :: COUNTER_PERC        = ZERO     ! Current percentage of the counter.
       INTEGER(LONG)            :: COUNTER_TOTAL       = ZERO     ! Max value of the counter
       INTEGER(LONG)            :: COUNTER_STARTED     = ZERO     ! Timestamp of counter start
+      INTEGER(LONG)            :: COUNTER_UPDATED     = -1       ! Last second when counter was printed
+      INTEGER(LONG)            :: COUNTER_LIMITER     = 0        ! Per-second print limiter
       CHARACTER(:), ALLOCATABLE :: COUNTER_PREFIX
       CHARACTER(LEN=20) :: COUNTER_FMT
 

@@ -329,6 +329,8 @@
       INTEGER(LONG)                   :: ENF           = 1002 ! Unit no. for text file w/ enforced displ for all grids/comps
       INTEGER(LONG)                   :: ERR           =    3 ! Unit no. for error file
       INTEGER(LONG)                   :: F06           =    7 ! Unit no. for output file
+      INTEGER(LONG)                   :: ANS           =    8 ! Legacy formatted output unit (compatibility for v17-style writers)
+      INTEGER(LONG)                   :: F04           =    4 ! Legacy debug log unit (kept for v17 compatibility code paths)
       INTEGER(LONG)                   :: IN0           = 1003 ! Unit no. for input file with all INCLUDE files
       INTEGER(LONG)                   :: IN1           =    8 ! Unit no. for input file
       INTEGER(LONG)                   :: IN4           = 1004 ! Unit no. for IN4file
@@ -424,6 +426,7 @@
                                                                ! WRT_BUG specifies what to write to the BUG file. Set by C.C. ELDATA
 
       INTEGER(LONG)                   :: WRT_ERR = 1           ! WRT_ERR says whether to write ERR file or not
+      INTEGER(LONG)                   :: WRT_LOG = 0           ! Legacy F04 logging threshold flag (0 disables logging by default)
 
 
 ! Description of files:
