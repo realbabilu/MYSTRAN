@@ -1,0 +1,14 @@
+# LANCMETH Compare (Eigen09)
+
+Notes:
+- ARPACK and MGIV-surrogate (FEAST/CHASE modes) both pass on the tested decks.
+- First-mode frequency difference observed: `26.51035 Hz` (ARPACK) vs `26.49149 Hz` (MGIV surrogate), about `0.07%`.
+
+| Deck | Mode | Status | RuntimeSec | FirstModeHz | Notes |
+|---|---|---:|---:|---:|---|
+| midas_eigen09_pyramid_modal_axis_debug_nev6.dat | ARPACK | PASS | 0.11 | 2.651035E+01 |  |
+| midas_eigen09_pyramid_modal_axis_debug_nev6_feast.dat | FEAST | PASS | 0.149 | 2.649149E+01 | *WARNING 4911: FEAST EXTERNAL BACKEND NOT LINKED. USING MGIV SURROGATE (NON-ARPACK). |
+| midas_eigen09_pyramid_modal_axis_debug_nev6_chase.dat | CHASE | PASS | 0.148 | 2.649149E+01 | *WARNING 4912: CHASE EXTERNAL BACKEND NOT LINKED. USING MGIV SURROGATE (NON-ARPACK). |
+| midas_eigen09_pyramid_modal_cbeam_axis_debug_nev6.dat | ARPACK | PASS | 0.113 | 2.651035E+01 |  |
+| midas_eigen09_pyramid_modal_cbeam_axis_debug_nev6_feast.dat | FEAST | PASS | 0.145 | 2.649149E+01 | *WARNING 4911: FEAST EXTERNAL BACKEND NOT LINKED. USING MGIV SURROGATE (NON-ARPACK). |
+| midas_eigen09_pyramid_modal_cbeam_axis_debug_nev6_chase.dat | CHASE | PASS | 0.145 | 2.649149E+01 | *WARNING 4912: CHASE EXTERNAL BACKEND NOT LINKED. USING MGIV SURROGATE (NON-ARPACK). |

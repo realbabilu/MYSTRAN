@@ -1,0 +1,8 @@
+exe,solver,time_s,lowest_lambda,eig1,eig2,eig3,eig4,eig5
+arpack_chase_feast_superlu.exe,ChASE,2.2512,-2001.99999862,-2001.999999,-1999.999996,-1997.999998,-1995.999993,-1993.999999
+arpack_chase_feast_superlu.exe,ARPACK DENSE,3.9193,-2001.99999862,-2001.999999,-1999.999996,-1997.999998,-1995.999993,-1993.999999
+arpack_chase_feast_superlu.exe,FEAST DENSE,1.379,-2001.99999862,-2001.999999,-1999.999996,-1997.999998,-1995.999993,-1993.999999
+arpack_chase_feast_superlu.exe,ARPACK + SUPERLU,0.3967,-2001.99999862,-2001.999999,-1999.999996,-1997.999998,-1995.999993,-1993.999999
+arpack_chase_feast_nompi.exe,ChASE (nompi),2.2568,-2001.99999862,,,,,
+arpack_chase_feast_nompi.exe,ARPACK (nompi),3.9084,-2001.99999862,,,,,
+arpack_chase_feast_nompi.exe,FEAST (nompi),1.2529,-2001.99999862,,,,,

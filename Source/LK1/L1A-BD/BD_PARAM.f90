@@ -29,48 +29,31 @@
 ! Processes PARAM Bulk Data Cards
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
 
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ECHO, FATAL_ERR, IERRFL, JCARD_LEN, JF, MEPSIL, MPBARLU, NUM_USETSTR,       &
                                          WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  BD_PARAM_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE MACHINE_PARAMS, ONLY        :  MACH_PREC
       USE DOF_TABLES, ONLY            :  TSET_CHR_LEN
 
-      USE PARAMS, ONLY                :  ARP_TOL         , ART_KED         , ART_ROT_KED     , ART_TRAN_KED    ,                   &
-                                         ART_MASS        , ART_ROT_MASS    , ART_TRAN_MASS   , AUTOSPC         , AUTOSPC_NSET    , &
-                                         AUTOSPC_RAT     , AUTOSPC_INFO    , AUTOSPC_SPCF    , BAILOUT         , CRS_CCS         , &
-                                         CBMIN3          , CBMIN4          , CBMIN4T         , CBEAMBRN        , CHKGRDS         , &
-                                         CUSERIN         , CUSERIN_EID     , CUSERIN_IN4     , CUSERIN_PID     , CUSERIN_SPNT_ID , &
-                                         CUSERIN_XSET    , CUSERIN_COMPTYP , DARPACK         ,                                     &
-                                         DELBAN          , EIGESTL         , EIGNORM2        , ELFORCEN        , EPSERR          , &
-                                         EQCHK_REF_GRID  , EQCHK_NORM      , EQCHK_OUTPUT    , EQCHK_TINY      ,                   &
-                                         EPSIL           , EMP0_PAUSE      , ESP0_PAUSE      , F06_COL_START   ,                   &
-                                         GRDPNT          , GRDPNT_IN       , GRIDSEQ         , HEXAXIS         ,                   &
-                                         IORQ1M          , IORQ1S          , IORQ1B          , IORQ2B          , IORQ2T          , &
-                                         ITMAX           , KLLRAT          , KOORAT          , LANCMETH        , MATSPARS        , &
-                                         MEMAFAC         , MIN4TRED        , MXALLOCA        , MAXRATIO        ,                   &
-                                         MEFMCORD        , MEFMLOC         , MEFMGRID        ,                                     &
-                                         MPFOUT          , MXITERI         , MXITERL         , OTMSKIP         , POST            , &
-                                         PBARLDEC        , PBARLSHR        , PCOMPEQ         , PCHSPC1         , PCMPTSTM        , &
-                                         PRTBASIC        , PRTCONN         , PRTCORD         , PRTDISP         , PRTDLR          , &
-                                         PRTDOF          , PRTFOR          , PRTHMN          , PRTGMN          , PRTGOA          , &
-                                         PRTCGLTM        , PRTPHIZL        , PRTIFLTM        , PRTKXX          , PRTMXX          , &
-                                         PRTOU4          , PRTPHIXA        , PRTMASS         , PRTMASSD        , PRTRMG          , &
-                                         PRTSCP          , PRTPSET         , PRTTSET         , PRTUSET         ,                   &
-                                         PRTSTIFD        , PRTSTIFF        , PRTUO0          ,                                     &
-                                         PRTYS           , PRTQSYS         ,                                                       &
-                                         Q4SURFIT        , QUADAXIS        , QUAD4TYP        , RCONDK          , RELINK3         , &
-                                         SEQPRT          , SEQQUIT         , SETLKTM         , SETLKTK         , SHRFXFAC        , &
-                                         SKIPMGG         , SOLLIB          , SPARSE_FLAVOR   , SPARSTOR        ,                   &
-                                         SPC1QUIT        , SORT_MAX        , SPC1SID         , STR_CID                           , &
-                                         SUPINFO         , SUPWARN         , NOCOUNTS                                            , &
-                                         THRESHK         , THRESHK_LAP     , TINY            ,                                     &
-                                         TSTM_DEF        , USR_JCT         , USR_LTERM_KGG   , USR_LTERM_MGG   , WINAMEM         , &
-                                         WTMASS          , K6ROT,                                                                  &
-                                         PRTALL          , PRTANS          , PRTF06          , PRTNEU          , PRTOP2
+      USE PARAMS, ONLY : ARP_TOL, ART_KED, ART_ROT_KED, ART_TRAN_KED, ART_MASS, ART_ROT_MASS, ART_TRAN_MASS,       &
+                         AUTOSPC, AUTOSPC_NSET, AUTOSPC_RAT, AUTOSPC_INFO, AUTOSPC_SPCF, BAILOUT, BANDEDOPT,       &
+                         CRS_CCS, CBMIN3, CBMIN4, CBMIN4T, CBEAMBRN, CHKGRDS, CUSERIN, CUSERIN_EID, CUSERIN_IN4,   &
+                         CUSERIN_PID, CUSERIN_SPNT_ID, CUSERIN_XSET, CUSERIN_COMPTYP, DARPACK, DELBAN, EIGESTL,    &
+                         EIGNORM2, ELFORCEN, EPSERR, EQCHK_REF_GRID, EQCHK_NORM, EQCHK_OUTPUT, EQCHK_TINY, EPSIL,  &
+                         EMP0_PAUSE, ESP0_PAUSE, F06_COL_START, GRDPNT, GRDPNT_IN, GRIDSEQ, HEXAXIS, IORQ1M,        &
+                         IORQ1S, IORQ1B, IORQ2B, IORQ2T, ITMAX, KLLRAT, KOORAT, LANCMETH, MATSPARS, MEMAFAC,        &
+                         MIN4TRED, MXALLOCA, MAXRATIO, MEFMCORD, MEFMLOC, MEFMGRID, MPFOUT, MXITERI, MXITERL,       &
+                         OTMSKIP, POST, PBARLDEC, PBARLSHR, PCOMPEQ, PCHSPC1, PCMPTSTM, PRTBASIC, PRTCONN,          &
+                         PRTCORD, PRTDISP, PRTDLR, PRTDOF, PRTFOR, PRTHMN, PRTGMN, PRTGOA, PRTCGLTM, PRTPHIZL,      &
+                         PRTIFLTM, PRTKXX, PRTMXX, PRTOU4, PRTPHIXA, PRTMASS, PRTMASSD, PRTRMG, PRTSCP, PRTPSET,    &
+                         PRTTSET, PRTUSET, PRTSTIFD, PRTSTIFF, PRTUO0, PRTYS, PRTQSYS, Q4SURFIT, QUADAXIS,          &
+                         QUAD4TYP, RCONDK, RELINK3, SEQPRT, SEQQUIT, SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, SOLLIB,   &
+                         SPARSE_FLAVOR, SPARSTOR, SPC1QUIT, SORT_MAX, SPC1SID, STR_CID, SUPINFO, SUPWARN, NOCOUNTS,&
+                         THRESHK, THRESHK_LAP, TINY, TSTM_DEF, USR_JCT, USR_LTERM_KGG, USR_LTERM_MGG, WINAMEM,      &
+                         WTMASS, K6ROT, PRTALL, PRTANS, PRTF06, PRTNEU, PRTOP2
  
       USE BD_PARAM_USE_IFs
 
@@ -90,19 +73,11 @@
       INTEGER(LONG)                   :: IERR      = 0     ! Local error indicator
       INTEGER(LONG)                   :: II                ! An index in array EPSIL
       INTEGER(LONG)                   :: UPPER             ! Upper allowable value for an integer parameter
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = BD_PARAM_BEGEND
   
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare real zero
       REAL(DOUBLE)                    :: R8PARM            ! A value read from input file that should be a real value            
   
       INTRINSIC                       :: DABS
-
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
 
 ! **********************************************************************************************************************************
 ! PARAM Bulk Data Card routine
@@ -383,6 +358,12 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
+! BANDEDOPT enables experimental banded-order optimization path
+
+      ELSE IF (JCARD(2)(1:8) == 'BANDEDOP') THEN
+         PARNAM = 'BANDEDOPT'
+         CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, BANDEDOPT)
+
 ! CBMIN3 is a parameter for the Mindlin (thick) triangular plate element (CTRIA3).
 !   It is used in calculating PHISQ, a scalar multiple of the transverse shear stiff
 
@@ -443,7 +424,7 @@
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
       ! CBEAMBRN controls CBEAM bending branch:
-      !   0 = default DSB/Timoshenko (shear-flexible), 1 = Bernoulli limit (phi1=phi2=0)
+      !   0 = DSB/Timoshenko (shear-flexible), 1 = default Bernoulli limit (phi1=phi2=0)
       ELSE IF (JCARD(2)(1:8) == 'CBEAMBRN') THEN
          PARNAM = 'CBEAMBRN'
          CALL I4FLD ( JCARD(3), JF(3), I4PARM )
@@ -910,15 +891,17 @@
                GRIDSEQ = 'GRID    '
             ELSE IF (CHRPARM == 'INPUT   ') THEN
                GRIDSEQ = 'INPUT   '
+            ELSE IF (CHRPARM(1:3) == 'RCM') THEN
+               GRIDSEQ = 'RCM     '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'BANDIT, GRID or INPUT',CHRPARM,GRIDSEQ
+               WRITE(ERR,1189) PARNAM,'BANDIT, GRID, INPUT or RCM',CHRPARM,GRIDSEQ
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'BANDIT, GRID or INPUT',CHRPARM,GRIDSEQ
+                  WRITE(F06,1189) PARNAM,'BANDIT, GRID, INPUT or RCM',CHRPARM,GRIDSEQ
                ENDIF
             ENDIF
          ENDIF
@@ -1142,15 +1125,19 @@
             CALL LEFT_ADJ_BDFLD ( CHRPARM )
             IF      (CHRPARM == 'ARPACK  ') THEN
                LANCMETH = 'ARPACK'
+            ELSE IF (CHRPARM == 'FEAST   ') THEN
+               LANCMETH = 'FEAST '
+            ELSE IF (CHRPARM == 'CHASE   ') THEN
+               LANCMETH = 'CHASE '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'ARPACK',CHRPARM,SOLLIB
+               WRITE(ERR,1189) PARNAM,'ARPACK, FEAST or CHASE',CHRPARM,SOLLIB
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'ARPACK',CHRPARM,SOLLIB
+                  WRITE(F06,1189) PARNAM,'ARPACK, FEAST or CHASE',CHRPARM,SOLLIB
                ENDIF
             ENDIF
          ENDIF
@@ -2988,12 +2975,6 @@ do_i:    DO I=1,JCARD_LEN
       ENDIF
 
 ! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
-
       RETURN
 
 ! **********************************************************************************************************************************
