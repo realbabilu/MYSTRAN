@@ -128,6 +128,9 @@
          IF (NULL_COL == 'N') THEN                         ! FBS will solve for PHIZL1_COL & load it into PHIZL1   array
                                                            ! DPBTRS will return PHIZL1_COL = -KLL(-1)*RHS_col
 !                                                            Note 1st arg = 'N' assures that EQUIL_SCAL_FACS will not be used
+!                                                            NOTE FOR SPARSE/SUPERLU:
+!                                                            KLL factorization is performed upstream in SOLVE_DLR and reused here
+!                                                            through the global SuperLU factor handle (SLU_FACTORS).
             IF      (SOLLIB == 'BANDED  ') THEN
 
                CALL FBS_LAPACK ( 'N', NDOFL, KLL_SDIA, EQUIL_SCALE_FACS, INOUT_COL )

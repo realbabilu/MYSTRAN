@@ -75,6 +75,9 @@
       INTEGER(LONG)            :: BAILOUT        =     0     ! If >= 0 quit if a singularity in decomposing a matrix is detected
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
+      CHARACTER(  1*BYTE)      :: BANDEDOPT      =    'N'    ! 'Y'/'N' enable experimental banded-order optimization path
+
+! ----------------------------------------------------------------------------------------------------------------------------------
       REAL(DOUBLE)             :: CBMIN3         =  TWO      ! Trans shear factor for MIN3  triangle elems (TRIA3)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
@@ -84,8 +87,8 @@
       REAL(DOUBLE)             :: CBMIN4T        =  THREEP6  ! Trans shear factor for MIN4T quad    elems (QUAD4, QUAD4TYP='MIN4T ')
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-      INTEGER(LONG)            :: CBEAMBRN       =     0     ! 0 = CBEAM uses DSB/Timoshenko shear terms (default)
-!                                                              1 = force CBEAM Bernoulli branch (phi1 = phi2 = 0)
+      INTEGER(LONG)            :: CBEAMBRN       =     1     ! 0 = CBEAM uses DSB/Timoshenko shear terms
+!                                                              1 = force CBEAM Bernoulli branch (phi1 = phi2 = 0) (default)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: CHKGRDS        =    'Y'    ! If 'Y' call GET_ELEM_AGRID_BGRID to check all grids on elems exist
@@ -166,6 +169,7 @@
 !                                                              BANDIT for bandit auto grid swquencing
 !                                                              GRID for grid numerical order
 !                                                              INPUT for grid input order
+!                                                              RCM for reserved/add-on RCM path (currently mapped to INPUT flow)
       CHARACTER(  1*BYTE)      :: SEQQUIT        =    'N'    !*'Y', 'N' indicator to stop processing if G.P. auto sequencing failed
 !                                                               (goes in field 4 of PARAM GRIDSEQ entry)
       CHARACTER(  1*BYTE)      :: SEQPRT         =    'N'    !*'Y', 'N' indicator to print SEQGP card images from bandit
@@ -200,7 +204,9 @@
       CHARACTER(  1*BYTE)      :: KOORAT         =    'Y'    ! 'Y', 'N' to tell whether to calc ratio of max/min KOO diagonal terms
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-      CHARACTER(  6*BYTE)      :: LANCMETH       = 'ARPACK'  ! Lanczos method - ARPACK
+      CHARACTER(  6*BYTE)      :: LANCMETH       = 'ARPACK'  ! Lanczos backend:
+!                                                              ARPACK (implemented)
+!                                                              FEAST / CHASE (accepted; currently fallback to ARPACK in LINK4)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: MATSPARS       =    'Y'    ! 'Y' for use of sparse SFF, SFS, SSS or 'N' for full matrix add/mult

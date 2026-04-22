@@ -60,7 +60,7 @@
                                          NTERM_MLL, NTERM_MLLn,                                                                    &
                                          NVEC, NUM_EIGENS, NUM_KLLD_DIAG_ZEROS, NUM_MLL_DIAG_ZEROS, SOL_NAME, WARN_ERR
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSTOR, SUPINFO
+      USE PARAMS, ONLY                :  EPSIL, LANCMETH, SOLLIB, SPARSTOR, SUPINFO
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, &
                                          EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ,    &
                                          MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
@@ -268,11 +268,17 @@
          CALL EIG_INV_PWR
 
       ELSE IF (EIG_METH(1:7) == 'LANCZOS') THEN
-         ! Use adaptive version if frequency range specified and not BUCKLING/GEN CB MODEL
-         IF ((EIG_FRQ2 > EPS1) .AND. (SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL')) THEN
-            CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+         IF (LANCMETH(1:6) == 'FEAST ') THEN
+            CALL EIG_LANCZOS_FEAST
+         ELSE IF (LANCMETH(1:6) == 'CHASE ') THEN
+            CALL EIG_LANCZOS_CHASE
          ELSE
-            CALL EIG_LANCZOS_ARPACK
+            ! Use adaptive version if frequency range specified and not BUCKLING/GEN CB MODEL
+            IF ((EIG_FRQ2 > EPS1) .AND. (SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL')) THEN
+               CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+            ELSE
+               CALL EIG_LANCZOS_ARPACK
+            ENDIF
          ENDIF
 
       ELSE

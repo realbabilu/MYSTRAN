@@ -32,6 +32,7 @@
       USE ALLOCATE_SPARSE_MAT_Interface
       USE MATADD_SSS_Interface
       USE ALLOCATE_EIGEN1_MAT_Interface
+      USE BANDGEN_LAPACK_DGB_Interface
       USE SYM_MAT_DECOMP_LAPACK_Interface
       USE SYM_MAT_DECOMP_SUPRLU_Interface
       USE OUTA_HERE_Interface

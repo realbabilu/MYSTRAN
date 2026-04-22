@@ -37,7 +37,7 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FACTORED_MATRIX, FATAL_ERR, LINKNO
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, ONEPP6
-      USE PARAMS, ONLY                :  BAILOUT, EPSIL, SUPINFO
+      USE PARAMS, ONLY                :  BAILOUT, EPSIL, SPARSTOR, SUPINFO
       USE LAPACK_DPB_MATRICES, ONLY   :  ABAND, LAPACK_S
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG, NDEBUG
       USE LAPACK_LIN_EQN_DPB
@@ -85,6 +85,8 @@
       INTEGER(LONG)                   :: I                 ! DO loop index
       INTEGER(LONG)                   :: IIMAX             ! Row/Col in MATIN where max diagonal term occurs
       INTEGER(LONG)                   :: IIMIN             ! Row/Col in MATIN where min diagonal term occurs
+      INTEGER(LONG)                   :: NUM_NONPOS_DIAG   ! Number of diagonal terms <= EPS1 (not SPD-ready)
+      INTEGER(LONG)                   :: NUM_ZERO_DIAG     ! Number of diagonal terms <= ZERO
 
 
       REAL(DOUBLE) , INTENT(IN)       :: MATIN(NTERMS)     ! A small number to compare real zero
@@ -203,6 +205,21 @@
          IF (DABS(MINKII) > EPS1) THEN
             KRATIO = MAXKII/MINKII
             WRITE(F06,3008) MATIN_NAME, KRATIO
+         ENDIF
+      ENDIF
+
+! Quick SPD readiness diagnostic for LAPACK band Cholesky (DPBTRF/DPBTRS)
+
+      NUM_NONPOS_DIAG = 0
+      NUM_ZERO_DIAG   = 0
+      DO I=1,NROWS
+         IF (ABAND(MATIN_SDIA+1,I) <= EPS1) NUM_NONPOS_DIAG = NUM_NONPOS_DIAG + 1
+         IF (ABAND(MATIN_SDIA+1,I) <= ZERO) NUM_ZERO_DIAG   = NUM_ZERO_DIAG + 1
+      ENDDO
+      IF (NUM_NONPOS_DIAG > 0) THEN
+         WRITE(ERR,3090) MATIN_NAME, NUM_NONPOS_DIAG, NUM_ZERO_DIAG, SPARSTOR
+         IF (SUPINFO == 'N') THEN
+            WRITE(F06,3090) MATIN_NAME, NUM_NONPOS_DIAG, NUM_ZERO_DIAG, SPARSTOR
          ENDIF
       ENDIF
 
@@ -376,6 +393,10 @@
                            ' Occurs in row/col no. ',I8)
 
  3011 FORMAT(' *INFORMATION: RATIO OF MAX TO MIN DIAGONALS IN THE EQUILIBRATED MATRIX ',A11,'   = ',1ES13.6,/)
+
+ 3090 FORMAT(' *WARNING    3090: MATRIX ',A11,' HAS ',I10,' DIAGONAL TERM(S) <= EPS1; OF THESE, ',I10,' ARE <= 0.0',            &
+                    /,14X,' THIS MATRIX MAY NOT BE SPD, SO LAPACK BAND CHOLESKY (DPBTRF/DPBTRS) CAN FAIL.',                      &
+                    /,14X,' CURRENT PARAM SPARSTOR = ',A6,'. IF THIS IS EXPECTED, USE A NON-SPD PATH (E.G. SPARSE SOLVER).',/)
 
  3094 FORMAT(5X,' Bandwidth of ',A,'  = ',I8,' and requires ',F10.3,' MB of memory')
 
