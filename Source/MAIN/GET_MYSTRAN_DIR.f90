@@ -41,10 +41,11 @@
       INTEGER(LONG), INTENT(OUT)                   :: MYSTRAN_DIR_LEN   ! Length of MYSTRAN_DIR (not including trailing blanks)
       INTEGER(LONG)                                :: I                 ! DO loop index
 
-      INTRINSIC                                    :: GETENV
+      INTEGER(LONG)                                :: ENV_STAT          ! Status from GET_ENVIRONMENT_VARIABLE
 
 ! **********************************************************************************************************************************
-      CALL GETENV ( 'MYSTRAN_directory', MYSTRAN_DIR )
+      MYSTRAN_DIR = ' '
+      CALL GET_ENVIRONMENT_VARIABLE ( 'MYSTRAN_directory', MYSTRAN_DIR, STATUS=ENV_STAT )
       MYSTRAN_DIR_LEN = FILE_NAM_MAXLEN
       DO I=FILE_NAM_MAXLEN,1,-1
          IF (MYSTRAN_DIR(I:I) /= ' ') THEN
@@ -58,5 +59,4 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE GET_MYSTRAN_DIR
-
 
