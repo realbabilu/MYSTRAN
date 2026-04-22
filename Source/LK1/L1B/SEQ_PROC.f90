@@ -49,12 +49,12 @@
       INTEGER(LONG)                   :: I,J               ! DO loop indices
       INTEGER(LONG)                   :: IERROR            ! Error count
       INTEGER(LONG)                   :: IGRID             ! Internal grid ID
-      INTEGER(LONG)                   :: TMP_GRID_ID(NGRID)! Set to array GRID_ID for aid in sorting GRID_SEQ
-      INTEGER(LONG)                   :: TMP_GRD_SEQ(NGRID)! Set to array GRID_SEQ so we can sort it and get array INV_GRID_SEQ
+      INTEGER(LONG), ALLOCATABLE      :: TMP_GRID_ID(:)    ! Set to array GRID_ID for aid in sorting GRID_SEQ
+      INTEGER(LONG), ALLOCATABLE      :: TMP_GRD_SEQ(:)    ! Set to array GRID_SEQ so we can sort it and get array INV_GRID_SEQ
 !                                                            without disturbing GRID_SEQ sequence
 
 
-      REAL(DOUBLE)                    :: R_GSEQ(NGRID)     ! Real sequence numbers (since SEQGP cards can have real no's). In the
+      REAL(DOUBLE), ALLOCATABLE       :: R_GSEQ(:)         ! Real sequence numbers (since SEQGP cards can have real no's). In the
 !                                                            end, the sequence array that will be used is integer array GRID_SEQ
 
       INTRINSIC                       :: DBLE
@@ -63,6 +63,8 @@
 
 ! **********************************************************************************************************************************
 ! Coming in to this subr, GRID_SEQ is in the order of the grids as read in the input data deck.
+
+      ALLOCATE ( R_GSEQ(NGRID), TMP_GRID_ID(NGRID), TMP_GRD_SEQ(NGRID) )
 
 ! Generate initial R_GSEQ based on the GRID_SEQ value. R_GSEQ(I) is  the (real) sequence number for Grid Point GRID_ID(I).
 ! If there are no SEQGP sequencing cards, then this will be the final grid point sequence order (as a real number).
@@ -235,6 +237,15 @@
       ENDDO
 
 
+      IF (ALLOCATED(R_GSEQ)) THEN
+         DEALLOCATE ( R_GSEQ )
+      ENDIF
+      IF (ALLOCATED(TMP_GRID_ID)) THEN
+         DEALLOCATE ( TMP_GRID_ID )
+      ENDIF
+      IF (ALLOCATED(TMP_GRD_SEQ)) THEN
+         DEALLOCATE ( TMP_GRD_SEQ )
+      ENDIF
 
       RETURN
 

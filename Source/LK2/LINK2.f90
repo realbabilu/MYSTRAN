@@ -78,13 +78,14 @@
       CHARACTER(  1*BYTE)             :: CLOSE_IT          ! Input to subr READ_MATRIX_i. 'Y'/'N' whether to close a file or not
       CHARACTER( 8*BYTE)              :: CLOSE_STAT        ! What to do with file when it is closed
 
+      INTEGER(LONG)                   :: MEMERROR          ! Error indicator for local ALLOCATE
       INTEGER(LONG)                   :: NROWS             ! Value of DOF size to pass to subr WRITE_USERIN_BD_CARDS
       INTEGER(LONG)                   :: I,J               ! DO loop indices
       INTEGER(LONG), PARAMETER        :: P_LINKNO  = 1     ! Prior LINK no's that should have run before this LINK can execute
 
-      REAL(DOUBLE)                    :: KGG_DIAG(NDOFG)   ! Diagonal of KGG
+      REAL(DOUBLE), ALLOCATABLE       :: KGG_DIAG(:)       ! Diagonal of KGG
       REAL(DOUBLE)                    :: KGG_MAX_DIAG      ! Max diag term from KGG
-      REAL(DOUBLE)                    :: KGGD_DIAG(NDOFG)  ! Diagonal of KGGD
+      REAL(DOUBLE), ALLOCATABLE       :: KGGD_DIAG(:)      ! Diagonal of KGGD
       REAL(DOUBLE)                    :: KGGD_MAX_DIAG     ! Max diag term from KGGD
 
 ! **********************************************************************************************************************************
@@ -93,6 +94,14 @@
 ! Set time initializing parameters
 
       CALL TIME_INIT
+
+      ALLOCATE ( KGG_DIAG(NDOFG), KGGD_DIAG(NDOFG), STAT=MEMERROR )
+      IF (MEMERROR /= 0) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,9200) SUBR_NAME
+         WRITE(F06,9200) SUBR_NAME
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
 
 ! Initialize WRT_BUG
 
@@ -374,6 +383,13 @@
 
 ! Check allocation status of allocatable arrays, if requested
 
+      IF (ALLOCATED(KGG_DIAG)) THEN
+         DEALLOCATE ( KGG_DIAG )
+      ENDIF
+      IF (ALLOCATED(KGGD_DIAG)) THEN
+         DEALLOCATE ( KGGD_DIAG )
+      ENDIF
+
       IF (DEBUG(100) > 0) THEN
          CALL CHK_ARRAY_ALLOC_STAT
          IF (DEBUG(100) > 1) THEN
@@ -431,6 +447,8 @@
                     ,/,14X,' FATAL ERROR - CANNOT START LINK ',I2)
 
 12345 FORMAT(A,10X,A)
+
+ 9200 FORMAT(' *ERROR  9200: CANNOT ALLOCATE LOCAL DIAGNOSTIC ARRAYS IN SUBROUTINE ',A)
 
 ! ##################################################################################################################################
 

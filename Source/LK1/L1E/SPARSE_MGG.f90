@@ -67,13 +67,13 @@
       INTEGER(LONG)                   :: NUM_COMPS         ! Number of displ components (1 for SPOINT, 6 for physical grid)
       INTEGER(LONG)                   :: NZERO   = 0       ! Count on zero terms in array EMS
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to. Input to subr UNFORMATTED_OPEN
-      INTEGER(LONG)                   :: RJ(NDOFG)         ! Column numbers corresponding to the terms in REMS(I).
+      INTEGER(LONG), ALLOCATABLE      :: RJ(:)             ! Column numbers corresponding to the terms in REMS(I).
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
 
 
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare real zero
       REAL(DOUBLE)                    :: GRID_MGG(6,6)     ! 6 x 6 mass matrix for a grid
-      REAL(DOUBLE)                    :: REMS(NDOFG)       ! 1D array of the terms from EMS(I) pertaining to one row of the G-set
+      REAL(DOUBLE), ALLOCATABLE       :: REMS(:)           ! 1D array of the terms from EMS(I) pertaining to one row of the G-set
 !                                                            mass matrix. Initially, the cols are not in increasing global DOF
 !                                                            order. REMS is sorted, prior to writing the G-set mass matrix
 !                                                            to file LINK1R, so that the cols are in increasing DOF order.
@@ -84,6 +84,8 @@
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
+
+      ALLOCATE ( RJ(NDOFG), REMS(NDOFG) )
 ! Pass # 1: Determine final NTERM_MGGE (may be less due to zero terms)
 
       NZERO = 0
@@ -339,6 +341,12 @@ j_do3:      DO J = 1,NUM
       ENDIF
 
 
+      IF (ALLOCATED(RJ)) THEN
+         DEALLOCATE ( RJ )
+      ENDIF
+      IF (ALLOCATED(REMS)) THEN
+         DEALLOCATE ( REMS )
+      ENDIF
 
       RETURN
 
