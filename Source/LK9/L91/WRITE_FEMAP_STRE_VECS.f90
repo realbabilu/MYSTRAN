@@ -58,7 +58,7 @@
       INTEGER(LONG)                   :: ELEM_MIN               ! Elem ID where vector is min
 
                                                                 ! Col from FEMAP_EL_NUMS (elem ID's)
-      INTEGER(LONG)                   :: ELEM_NUMS(NUM_FEMAP_ROWS)
+      INTEGER(LONG), ALLOCATABLE      :: ELEM_NUMS(:)
 
       INTEGER(LONG)                   :: ELEM_NAME_LEN          ! Length of ELEM_TYP without trailing blanks
       INTEGER(LONG)                   :: I,J                    ! DO loop indices
@@ -68,7 +68,7 @@
       INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = WRITE_FEMAP_STRE_VECS_BEGEND
 
                                                                 ! One column from FEMAP_EL_VECS
-      REAL(DOUBLE)                    :: ELEM_VEC(NUM_FEMAP_ROWS)
+      REAL(DOUBLE), ALLOCATABLE       :: ELEM_VEC(:)
 
       REAL(DOUBLE)                    :: VEC_ABS                ! Abs value in vector
       REAL(DOUBLE)                    :: VEC_MAX                ! Max value in vector
@@ -92,6 +92,9 @@
             EXIT
          ENDIF
       ENDDO
+
+      ALLOCATE ( ELEM_NUMS(NUM_FEMAP_ROWS) )
+      ALLOCATE ( ELEM_VEC(NUM_FEMAP_ROWS) )
 
       IF     (ELEM_TYP(1:4) == 'ELAS') THEN
          VEC_ID_OFFSET = 60100
@@ -468,6 +471,13 @@
          CALL OURTIM
          WRITE(F04,9002) SUBR_NAME,TSEC
  9002    FORMAT(1X,A,' END  ',F10.3)
+      ENDIF
+
+      IF (ALLOCATED(ELEM_NUMS)) THEN
+         DEALLOCATE ( ELEM_NUMS )
+      ENDIF
+      IF (ALLOCATED(ELEM_VEC)) THEN
+         DEALLOCATE ( ELEM_VEC )
       ENDIF
 
       RETURN

@@ -58,7 +58,7 @@
       INTEGER(LONG)                   :: ELEM_NAME_LEN          ! Length of ELEM_TYP without trailing blanks
 
                                                                 ! Col from FEMAP_EL_NUMS (elem ID's)
-      INTEGER(LONG)                   :: ELEM_NUMS(NUM_FEMAP_ROWS)
+      INTEGER(LONG), ALLOCATABLE      :: ELEM_NUMS(:)
 
       INTEGER(LONG)                   :: I,J                    ! DO loop indices
       INTEGER(LONG)                   :: ID(20)                 ! Vector ID's for FEMAP output
@@ -66,7 +66,7 @@
       INTEGER(LONG)                   :: VEC_ID                 ! Vector ID for FEMAP output
 
 
-      REAL(DOUBLE)                    :: ELEM_VEC(NUM_FEMAP_ROWS)    ! One column from FEMAP_EL_VECS
+      REAL(DOUBLE), ALLOCATABLE       :: ELEM_VEC(:)                 ! One column from FEMAP_EL_VECS
       REAL(DOUBLE)                    :: VEC_ABS                ! Abs value in vector
       REAL(DOUBLE)                    :: VEC_MAX                ! Max value in vector
       REAL(DOUBLE)                    :: VEC_MIN                ! Min value in vector
@@ -83,6 +83,9 @@
             EXIT
          ENDIF
       ENDDO
+
+      ALLOCATE ( ELEM_NUMS(NUM_FEMAP_ROWS) )
+      ALLOCATE ( ELEM_VEC(NUM_FEMAP_ROWS) )
 
       IF      (ELEM_TYP == 'TRIA3K  ') THEN
          VEC_ID_OFFSET = 70400
@@ -270,6 +273,13 @@
 
 
 
+
+      IF (ALLOCATED(ELEM_NUMS)) THEN
+         DEALLOCATE ( ELEM_NUMS )
+      ENDIF
+      IF (ALLOCATED(ELEM_VEC)) THEN
+         DEALLOCATE ( ELEM_VEC )
+      ENDIF
 
       RETURN
 
