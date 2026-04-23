@@ -3,14 +3,16 @@
 This note is for runtime usage after build integration.
 
 ## 1) Pick one example deck
-From:
-- `examples/midas_eigen09_pyramid_modal_axis_debug_nev6.dat` (ARPACK baseline)
-- `examples/midas_eigen09_pyramid_modal_axis_debug_nev6_feast.dat`
-- `examples/midas_eigen09_pyramid_modal_axis_debug_nev6_chase.dat`
-- `examples/midas_eigen09_pyramid_modal_cbeam_axis_debug_nev6.dat` (ARPACK baseline)
-- `examples/midas_eigen09_pyramid_modal_cbeam_axis_debug_nev6_feast.dat`
-- `examples/midas_eigen09_pyramid_modal_cbeam_axis_debug_nev6_chase.dat`
-- `examples/feast_modal_chain_fullrank.dat` (small surrogate check)
+Pass-focused set (Eigen8 only):
+- `examples/midas_eigen08_cbar_axis_debug.dat` (ARPACK baseline)
+- `examples/midas_eigen08_cbar_axis_debug_feast.dat`
+- `examples/midas_eigen08_cbar_axis_debug_chase.dat`
+- `examples/midas_eigen08_cbeam_axis_debug.dat` (ARPACK baseline)
+- `examples/midas_eigen08_cbeam_axis_debug_feast.dat`
+- `examples/midas_eigen08_cbeam_axis_debug_chase.dat`
+- `examples/midas_eigen08_cbeam_axis_debug_bernoulli.dat` (ARPACK baseline)
+- `examples/midas_eigen08_cbeam_axis_debug_bernoulli_feast.dat`
+- `examples/midas_eigen08_cbeam_axis_debug_bernoulli_chase.dat`
 
 ## 2) How to switch method in deck
 Use `PARAM,LANCMETH,...`:
@@ -26,7 +28,7 @@ Recommended solver pairing for modal runs:
 Example:
 
 ```powershell
-E:\mystran17\mystran\Binaries\mystran.exe E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen09_pyramid_modal_axis_debug_nev6_feast.dat
+E:\mystran17\mystran\Binaries\mystran.exe E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_feast.dat
 ```
 
 ## 4) What to check
@@ -36,4 +38,4 @@ E:\mystran17\mystran\Binaries\mystran.exe E:\mystran17\mystran\howbuild\chase_fe
 
 ## 5) Current behavior note
 `LANCMETH=FEAST/CHASE` is integrated as experimental path with guarded behavior in LINK4 flow.  
-Keep ARPACK as production default unless validation deck set is explicitly passing for your case.
+This package intentionally uses Eigen8 decks because they are the most stable/pass-focused validation set for quick checks.

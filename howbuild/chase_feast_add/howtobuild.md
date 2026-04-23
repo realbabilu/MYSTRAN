@@ -61,9 +61,9 @@ Dengan snippet `# !--- CHASE and FEAST --- begin!` s.d. `# !--- CHASE and FEAST 
 - `mystran/CMakeLists.txt`
 
 ## Supporting Files (CHASE/FEAST add)
-- `mystran/Binaries/midas_eigen09_pyramid_modal_axis_debug_nev6_feast.dat`
-- `mystran/Binaries/midas_eigen09_pyramid_modal_cbeam_axis_debug_nev6_feast.dat`
-- `mystran/Binaries/feast_modal_chain_fullrank.dat`
+- `mystran/Binaries/midas_eigen08_cbar_axis_debug.dat`
+- `mystran/Binaries/midas_eigen08_cbeam_axis_debug.dat`
+- `mystran/Binaries/midas_eigen08_cbeam_axis_debug_bernoulli.dat`
 - `mystran/dev_docs/eigensolver_feast_chase_surrogate_validation.md`
 - `dev_docs/v18_static_eigen_validation_report.md`
 - `dev_docs/eigensolver_feast_chase_integration_plan.md`
