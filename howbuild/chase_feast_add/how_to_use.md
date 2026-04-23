@@ -20,6 +20,12 @@ Use `PARAM,LANCMETH,...`:
 - `PARAM,LANCMETH,FEAST`
 - `PARAM,LANCMETH,CHASE`
 
+Important:
+- `LANCMETH` is used in the **LANCZOS path** (`EIGRL`), not in `EIGR/MGIV`.
+- If your deck still uses `EIGR,...,MGIV`, summary will remain MGIV and FEAST/CHASE dispatch is not exercised.
+- New guard message confirms this explicitly:
+  - `*WARNING 4910: PARAM LANCMETH=... IS IGNORED FOR EIG METHOD "MGIV ..."`
+
 Recommended solver pairing for modal runs:
 - `PARAM,SOLLIB,SPARSE`
 - `PARAM,SPARSEFLAVOR,SUPERLU`
