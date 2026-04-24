@@ -360,9 +360,11 @@
 
 ! BANDEDOPT enables experimental banded-order optimization path
 
+! !--- RCM BANDED ADD-ON --- begin!
       ELSE IF (JCARD(2)(1:8) == 'BANDEDOP') THEN
          PARNAM = 'BANDEDOPT'
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, BANDEDOPT)
+! !--- RCM BANDED ADD-ON --- end!
 
 ! CBMIN3 is a parameter for the Mindlin (thick) triangular plate element (CTRIA3).
 !   It is used in calculating PHISQ, a scalar multiple of the transverse shear stiff
@@ -880,6 +882,7 @@
   
 ! GRIDSEQ specifies the grid point sequencing method
 
+! !--- RCM BANDED ADD-ON --- begin!
       ELSE IF (JCARD(2)(1:8) == 'GRIDSEQ ') THEN
          PARNAM = 'GRIDSEQ '
          CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
@@ -955,6 +958,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,5,0,0,0,0 )! Make sure that there are no imbedded blanks in fields 3-5
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,6,7,8,9 )! Issue warning if fields 6-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
+! !--- RCM BANDED ADD-ON --- end!
 
 ! HEXAXIS sets the method for how the local x axis of quad elements is determined
 
@@ -1118,6 +1122,7 @@
   
 ! LANCMETH sets the method to be used for Lanczos eigen extraction
 
+! !--- CHASE and FEAST --- begin!
       ELSE IF (JCARD(2)(1:8) == 'LANCMETH') THEN
          PARNAM = 'LANCMETH'
          CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
@@ -1145,6 +1150,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
+! !--- CHASE and FEAST --- end!
 
 ! MATSPARS Sets whether to use sparse matrix add and multiply routines for situations where the matrices are in any sparse format.
 ! If 'Y', use sparse routines. If 'N', use full matrix routines in place of all sparse routines

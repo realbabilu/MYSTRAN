@@ -38,8 +38,10 @@
       USE CRS_SYM_TO_CRS_NONSYM_Interface
       USE EIG_GIV_MGIV_Interface
       USE EIG_INV_PWR_Interface
+! !--- CHASE and FEAST --- begin!
       USE EIG_LANCZOS_FEAST_Interface
       USE EIG_LANCZOS_CHASE_Interface
+! !--- CHASE and FEAST --- end!
       USE EIG_LANCZOS_ARPACK_Interface
       USE EIG_LANCZOS_ARPACK_ADAPTIVE_Interface
       USE DEALLOCATE_SPARSE_MAT_Interface

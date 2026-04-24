@@ -23,10 +23,13 @@
 !
 ! End MIT license text.
 
+! !--- CHASE and FEAST --- begin!
       MODULE EIG_LANCZOS_CHASE_USE_IFs
 
 ! USE Interface statements for all subroutines called by SUBROUTINE EIG_LANCZOS_CHASE
 
-      USE EIG_GIV_MGIV_Interface
+      USE EIG_LANCZOS_ARPACK_Interface
+      USE ALLOCATE_EIGEN1_MAT_Interface
 
       END MODULE EIG_LANCZOS_CHASE_USE_IFs
+! !--- CHASE and FEAST --- end!

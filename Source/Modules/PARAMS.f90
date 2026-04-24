@@ -165,6 +165,7 @@
       INTEGER(LONG)            :: GRDPNT_IN      =    -1     ! Value of GRDPNT read in the Bulk Data File
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
+! !--- RCM BANDED ADD-ON --- begin!
       CHARACTER(  8*BYTE)      :: GRIDSEQ        = 'INPUT   '! Method for sequencing grids:
 !                                                              BANDIT for bandit auto grid swquencing
 !                                                              GRID for grid numerical order
@@ -174,6 +175,7 @@
 !                                                               (goes in field 4 of PARAM GRIDSEQ entry)
       CHARACTER(  1*BYTE)      :: SEQPRT         =    'N'    !*'Y', 'N' indicator to print SEQGP card images from bandit
 !                                                               (goes in field 5 of PARAM GRIDSEQ entry)
+! !--- RCM BANDED ADD-ON --- end!
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  6*BYTE)      :: HEXAXIS        = 'SPLITD'  ! 'SIDE12', use side 1-2 as the local elem x axis.
@@ -204,9 +206,11 @@
       CHARACTER(  1*BYTE)      :: KOORAT         =    'Y'    ! 'Y', 'N' to tell whether to calc ratio of max/min KOO diagonal terms
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
+! !--- CHASE and FEAST --- begin!
       CHARACTER(  6*BYTE)      :: LANCMETH       = 'ARPACK'  ! Lanczos backend:
 !                                                              ARPACK (implemented)
 !                                                              FEAST / CHASE (accepted; currently fallback to ARPACK in LINK4)
+! !--- CHASE and FEAST --- end!
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: MATSPARS       =    'Y'    ! 'Y' for use of sparse SFF, SFS, SSS or 'N' for full matrix add/mult

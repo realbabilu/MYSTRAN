@@ -3,6 +3,7 @@
 Date: 2026-04-22  
 Status: Proposed for implementation
 
+! !--- RCM BANDED ADD-ON --- begin!
 ## Context
 
 On `midas_static_24_cquad4_moremesh` we compared three `SOLLIB=BANDED` paths:
@@ -80,3 +81,4 @@ Out of scope (this phase):
 - Reordering must preserve all references (loads, SPC, MPC, recovery indexing).
 - Any failure in ordering path must be non-fatal and fall back automatically.
 - Keep output transparency: report old/new bandwidth proxy and elapsed time.
+! !--- RCM BANDED ADD-ON --- end!

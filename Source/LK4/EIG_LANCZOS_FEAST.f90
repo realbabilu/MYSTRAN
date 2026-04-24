@@ -24,12 +24,13 @@
 !
 ! End MIT license text.
 
+! !--- CHASE and FEAST --- begin!
       SUBROUTINE EIG_LANCZOS_FEAST
 
 ! FEAST backend for Lanczos entry point.
 ! Native path currently targets generalized symmetric real sparse problem:
 !     KLL * x = lambda * MLL * x
-! in modal solutions. Fallback remains MGIV for unsupported configurations.
+! in modal solutions. Fallback is ARPACK Lanczos for unsupported configurations.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -46,12 +47,14 @@
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'EIG_LANCZOS_FEAST'
-      CHARACTER(8*BYTE)               :: EIG_METH_SAVE = ' '
       CHARACTER(1*BYTE)               :: UPLO
 
       INTEGER(LONG), PARAMETER        :: MAX_FEAST_TRY = 6
       INTEGER(LONG), PARAMETER        :: FPM_SIZE = 64
       INTEGER(LONG)                   :: I, J, K, IT
+      INTEGER(LONG)                   :: IDX
+      INTEGER(LONG)                   :: IROW_BEG
+      INTEGER(LONG)                   :: IROW_END
       INTEGER(LONG)                   :: M0
       INTEGER(LONG)                   :: MODE
       INTEGER(LONG)                   :: INFO
@@ -62,17 +65,24 @@
       INTEGER(LONG)                   :: TMP_IDX
       INTEGER(LONG)                   :: MIN_NEEDED
       INTEGER(LONG)                   :: NMASS_DIAG_POS
+      INTEGER(LONG)                   :: NMASS_DIAG_FIX
+      INTEGER(LONG)                   :: NTERM_MLL_FEAST
       INTEGER(LONG)                   :: FPM(FPM_SIZE)
+      LOGICAL                         :: FEAST_OK
+      INTEGER(LONG), ALLOCATABLE      :: I_MLL_FEAST(:)
+      INTEGER(LONG), ALLOCATABLE      :: J_MLL_FEAST(:)
       INTEGER(LONG), ALLOCATABLE      :: PERM(:)
 
       REAL(DOUBLE)                    :: EPS1
       REAL(DOUBLE)                    :: EPSOUT
       REAL(DOUBLE)                    :: EMIN
       REAL(DOUBLE)                    :: EMAX
-      REAL(DOUBLE)                    :: MAX_RATIO
       REAL(DOUBLE)                    :: KDIAG
       REAL(DOUBLE)                    :: MDIAG
+      REAL(DOUBLE)                    :: AVG_MDIAG_POS
+      REAL(DOUBLE)                    :: MREG_FLOOR
       REAL(DOUBLE), ALLOCATABLE       :: LAMBDA(:)
+      REAL(DOUBLE), ALLOCATABLE       :: MLL_FEAST(:)
       REAL(DOUBLE), ALLOCATABLE       :: RES(:)
       REAL(DOUBLE), ALLOCATABLE       :: Q(:,:)
       REAL(DOUBLE), ALLOCATABLE       :: DIAG_K(:)
@@ -148,27 +158,67 @@
          ENDDO
       ENDDO
 
-      MAX_RATIO = ZERO
       NMASS_DIAG_POS = 0
+      NMASS_DIAG_FIX = 0
+      AVG_MDIAG_POS  = ZERO
       DO I=1,NDOFL
          KDIAG = DIAG_K(I)
          MDIAG = DIAG_M(I)
          IF (MDIAG > EPS1) THEN
             NMASS_DIAG_POS = NMASS_DIAG_POS + 1
-            IF (KDIAG/MDIAG > MAX_RATIO) MAX_RATIO = KDIAG/MDIAG
+            AVG_MDIAG_POS  = AVG_MDIAG_POS + MDIAG
+         ELSE
+            NMASS_DIAG_FIX = NMASS_DIAG_FIX + 1
          ENDIF
       ENDDO
 
-      IF (NMASS_DIAG_POS < NDOFL) THEN
-         WARN_ERR = WARN_ERR + 1
-         WRITE(ERR,4919) NMASS_DIAG_POS, NDOFL
-         IF (SUPINFO == 'N') WRITE(F06,4919) NMASS_DIAG_POS, NDOFL
-         DEALLOCATE(DIAG_K, DIAG_M)
-         GOTO 900
+      IF (NMASS_DIAG_POS > 0) THEN
+         AVG_MDIAG_POS = AVG_MDIAG_POS/REAL(NMASS_DIAG_POS,DOUBLE)
+      ELSE
+         AVG_MDIAG_POS = 1.0D0
       ENDIF
+! For shell-dominant models many rotational DOF are massless in MLL.
+! Keep a small regularization floor to preserve low-mode accuracy while
+! still avoiding zero pivots in generalized FEAST solves.
+      MREG_FLOOR = MAX(EPS1, ABS(AVG_MDIAG_POS)*1.0D-10)
 
-      IF (MAX_RATIO > ZERO) THEN
-         IF (EMAX < 1.5D0*MAX_RATIO) EMAX = 1.5D0*MAX_RATIO
+      IF (NMASS_DIAG_FIX > 0) THEN
+         WARN_ERR = WARN_ERR + 1
+         WRITE(ERR,4919) NMASS_DIAG_POS, NDOFL, NMASS_DIAG_FIX, MREG_FLOOR
+         IF (SUPINFO == 'N') WRITE(F06,4919) NMASS_DIAG_POS, NDOFL, NMASS_DIAG_FIX, MREG_FLOOR
+
+         NTERM_MLL_FEAST = NTERM_MLL + NMASS_DIAG_FIX
+         ALLOCATE(I_MLL_FEAST(NDOFL+1))
+         ALLOCATE(J_MLL_FEAST(NTERM_MLL_FEAST))
+         ALLOCATE(MLL_FEAST(NTERM_MLL_FEAST))
+
+         I_MLL_FEAST(1) = 1
+         IDX = 1
+         DO I=1,NDOFL
+            IROW_BEG = I_MLL(I)
+            IROW_END = I_MLL(I+1) - 1
+            NMASS_DIAG_POS = 0
+            DO K=IROW_BEG,IROW_END
+               J_MLL_FEAST(IDX) = J_MLL(K)
+               IF (J_MLL(K) == I) THEN
+                  NMASS_DIAG_POS = 1
+                  IF (MLL(K) > EPS1) THEN
+                     MLL_FEAST(IDX) = MLL(K)
+                  ELSE
+                     MLL_FEAST(IDX) = MREG_FLOOR
+                  ENDIF
+               ELSE
+                  MLL_FEAST(IDX) = MLL(K)
+               ENDIF
+               IDX = IDX + 1
+            ENDDO
+            IF (NMASS_DIAG_POS == 0) THEN
+               J_MLL_FEAST(IDX) = I
+               MLL_FEAST(IDX)   = MREG_FLOOR
+               IDX = IDX + 1
+            ENDIF
+            I_MLL_FEAST(I+1) = IDX
+         ENDDO
       ENDIF
 
       DEALLOCATE(DIAG_K, DIAG_M)
@@ -179,6 +229,7 @@
 
       INFO = -999
       MODE = 0
+      FEAST_OK = .FALSE.
 
       DO IT=1,MAX_FEAST_TRY
 
@@ -197,13 +248,22 @@
          FPM(3) = 12
          FPM(7) = 7
 
-         UPLO = 'U'
-         CALL DFEAST_SCSRGV(UPLO, NDOFL, KLL, I_KLL, J_KLL, &
-                            MLL, I_MLL, J_MLL, FPM, EPSOUT, LOOP, &
-                            EMIN, EMAX, M0, LAMBDA, Q, MODE, RES, INFO)
+! KLL/MLL are carried in sparse CRS arrays that can contain full symmetric
+! storage in current MYSTRAN sparse path. Use full-storage flag for FEAST.
+         UPLO = 'F'
+         IF (ALLOCATED(MLL_FEAST)) THEN
+            CALL DFEAST_SCSRGV(UPLO, NDOFL, KLL, I_KLL, J_KLL, &
+                               MLL_FEAST, I_MLL_FEAST, J_MLL_FEAST, FPM, EPSOUT, LOOP, &
+                               EMIN, EMAX, M0, LAMBDA, Q, MODE, RES, INFO)
+         ELSE
+            CALL DFEAST_SCSRGV(UPLO, NDOFL, KLL, I_KLL, J_KLL, &
+                               MLL, I_MLL, J_MLL, FPM, EPSOUT, LOOP, &
+                               EMIN, EMAX, M0, LAMBDA, Q, MODE, RES, INFO)
+         ENDIF
 
-         MIN_NEEDED = MIN(NEV_TARGET, M0)
-         IF ((INFO == 0) .AND. (MODE >= MIN_NEEDED)) THEN
+         MIN_NEEDED = NEV_TARGET
+         FEAST_OK = ((MODE >= MIN_NEEDED) .AND. ((INFO == 0) .OR. (INFO == 3)))
+         IF (FEAST_OK) THEN
             EXIT
          ENDIF
 
@@ -214,7 +274,7 @@
          ENDIF
       ENDDO
 
-      IF ((INFO /= 0) .OR. (MODE <= 0)) THEN
+      IF (.NOT. FEAST_OK) THEN
          WARN_ERR = WARN_ERR + 1
          WRITE(ERR,4916) INFO
          IF (SUPINFO == 'N') WRITE(F06,4916) INFO
@@ -261,10 +321,13 @@
 
       DEALLOCATE(PERM)
       DEALLOCATE(LAMBDA, RES, Q)
+      IF (ALLOCATED(I_MLL_FEAST)) DEALLOCATE(I_MLL_FEAST)
+      IF (ALLOCATED(J_MLL_FEAST)) DEALLOCATE(J_MLL_FEAST)
+      IF (ALLOCATED(MLL_FEAST))   DEALLOCATE(MLL_FEAST)
       RETURN
 
 #else
-      CALL LINK_MESSAGE('SOLVE FOR EIGENVALS/VECTORS - FEAST SURROGATE (MGIV CORE)')
+      CALL LINK_MESSAGE('SOLVE FOR EIGENVALS/VECTORS - FEAST FALLBACK (ARPACK LANCZOS)')
 
       WARN_ERR = WARN_ERR + 1
       WRITE(ERR,4911)
@@ -274,18 +337,20 @@
 #endif
 
  900  CONTINUE
-      EIG_METH_SAVE = EIG_METH
-      EIG_METH      = 'MGIV    '
-      CALL EIG_GIV_MGIV
-      EIG_METH = EIG_METH_SAVE
+      IF (ALLOCATED(I_MLL_FEAST)) DEALLOCATE(I_MLL_FEAST)
+      IF (ALLOCATED(J_MLL_FEAST)) DEALLOCATE(J_MLL_FEAST)
+      IF (ALLOCATED(MLL_FEAST))   DEALLOCATE(MLL_FEAST)
+      CALL LINK_MESSAGE('SOLVE FOR EIGENVALS/VECTORS - FEAST FALLBACK (ARPACK LANCZOS)')
+      CALL EIG_LANCZOS_ARPACK
       RETURN
 
- 4911 FORMAT(' *WARNING 4911: FEAST EXTERNAL BACKEND NOT LINKED. USING MGIV SURROGATE (NON-ARPACK).')
- 4915 FORMAT(' *WARNING 4915: FEAST NATIVE REQUIRES EIGRL FREQUENCY INTERVAL (V1/V2). USING MGIV SURROGATE.')
- 4916 FORMAT(' *WARNING 4916: FEAST NATIVE FAILED (INFO=',I8,'). USING MGIV SURROGATE.')
- 4917 FORMAT(' *WARNING 4917: FEAST NATIVE FOR BUCKLING (KLL,KLLD) NOT WIRED YET. USING MGIV SURROGATE.')
+ 4911 FORMAT(' *WARNING 4911: FEAST EXTERNAL BACKEND NOT LINKED. USING ARPACK LANCZOS FALLBACK.')
+ 4915 FORMAT(' *WARNING 4915: FEAST NATIVE REQUIRES EIGRL FREQUENCY INTERVAL (V1/V2). USING ARPACK LANCZOS FALLBACK.')
+ 4916 FORMAT(' *WARNING 4916: FEAST NATIVE FAILED (INFO=',I8,'). USING ARPACK LANCZOS FALLBACK.')
+ 4917 FORMAT(' *WARNING 4917: FEAST NATIVE FOR BUCKLING (KLL,KLLD) NOT WIRED YET. USING ARPACK LANCZOS FALLBACK.')
  4918 FORMAT(' *WARNING 4918: FEAST EXTERNAL BACKEND LINKED. RUNNING NATIVE FEAST PATH FOR MODES.')
- 4919 FORMAT(' *WARNING 4919: FEAST NATIVE REQUIRES FULL-RANK POSITIVE MASS DIAGONAL. FOUND ',I8,' OF ',I8, &
-             ' POSITIVE MASS DIAGONALS IN MLL. USING MGIV SURROGATE.')
+ 4919 FORMAT(' *WARNING 4919: FEAST NATIVE MASS DIAGONAL HAS ',I8,' OF ',I8,' POSITIVE ENTRIES. ', &
+             'REGULARIZING ',I8,' DIAGONAL TERMS WITH FLOOR=',1ES12.4,' FOR NATIVE FEAST ATTEMPT.')
 
       END SUBROUTINE EIG_LANCZOS_FEAST
+! !--- CHASE and FEAST --- end!

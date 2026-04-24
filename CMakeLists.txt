@@ -242,6 +242,22 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
   "${CMAKE_SOURCE_DIR}/*.F03"
 )
 
+# !--- CHASE and FEAST --- begin!
+# FEAST/ChASE wrapper sources use preprocessor guards for optional native hooks.
+set_source_files_properties(
+  "${CMAKE_SOURCE_DIR}/LK4/EIG_LANCZOS_FEAST.f90"
+  "${CMAKE_SOURCE_DIR}/LK4/EIG_LANCZOS_CHASE.f90"
+  PROPERTIES COMPILE_OPTIONS "-cpp"
+)
+
+option(MYSTRAN_USE_EXTERNAL_CHASE "Enable native ChASE backend bridge" OFF)
+set(MYSTRAN_CHASE_LIBRARY "" CACHE FILEPATH "Path to external ChASE wrapper/library")
+set(MYSTRAN_CHASE_EXTRA_LIBS "" CACHE STRING "Additional libraries for ChASE bridge (e.g. chase_c;stdc++;gomp)")
+option(MYSTRAN_USE_EXTERNAL_FEAST "Enable native FEAST backend bridge" OFF)
+set(MYSTRAN_FEAST_LIBRARY "" CACHE FILEPATH "Path to external FEAST library")
+set(MYSTRAN_FEAST_EXTRA_LIBS "" CACHE STRING "Additional libraries for FEAST bridge (if needed)")
+# !--- CHASE and FEAST --- end!
+
 # same BLAS-finding subroutine as SuperLU
 if(NOT enable_internal_blaslib)
   if(TPL_BLAS_LIBRARIES)
@@ -322,6 +338,34 @@ if(USE_SUPERLU_MT)
 else()
   target_link_libraries(mystran superlu f2c)
 endif()
+
+# !--- CHASE and FEAST --- begin!
+if(MYSTRAN_USE_EXTERNAL_CHASE)
+  if(NOT MYSTRAN_CHASE_LIBRARY)
+    message(FATAL_ERROR "MYSTRAN_USE_EXTERNAL_CHASE=ON requires MYSTRAN_CHASE_LIBRARY to be set.")
+  endif()
+  message(STATUS "Enabling external ChASE bridge: ${MYSTRAN_CHASE_LIBRARY}")
+  target_compile_definitions(mystran PRIVATE MYSTRAN_HAVE_EXTERNAL_CHASE)
+  target_link_libraries(mystran ${MYSTRAN_CHASE_LIBRARY})
+  if(MYSTRAN_CHASE_EXTRA_LIBS)
+    message(STATUS "Adding external ChASE extra libs: ${MYSTRAN_CHASE_EXTRA_LIBS}")
+    target_link_libraries(mystran ${MYSTRAN_CHASE_EXTRA_LIBS})
+  endif()
+endif()
+
+if(MYSTRAN_USE_EXTERNAL_FEAST)
+  if(NOT MYSTRAN_FEAST_LIBRARY)
+    message(FATAL_ERROR "MYSTRAN_USE_EXTERNAL_FEAST=ON requires MYSTRAN_FEAST_LIBRARY to be set.")
+  endif()
+  message(STATUS "Enabling external FEAST bridge: ${MYSTRAN_FEAST_LIBRARY}")
+  target_compile_definitions(mystran PRIVATE MYSTRAN_HAVE_EXTERNAL_FEAST)
+  target_link_libraries(mystran ${MYSTRAN_FEAST_LIBRARY})
+  if(MYSTRAN_FEAST_EXTRA_LIBS)
+    message(STATUS "Adding external FEAST extra libs: ${MYSTRAN_FEAST_EXTRA_LIBS}")
+    target_link_libraries(mystran ${MYSTRAN_FEAST_EXTRA_LIBS})
+  endif()
+endif()
+# !--- CHASE and FEAST --- end!
 
 set_target_properties(
   mystran PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
