@@ -1,0 +1,410 @@
+      424121347
+              2
+ MODES           
+              6
+              2 DELETE   ELEMENT DEBUG OUTPUT FILE                                        E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.BUG                                                                                                                                             
+           1001 KEEP     EIGENVEC NUMBERS FOR SIGN CHANGE                                 E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.EIN                                                                                                                                             
+           1002 KEEP     ENFORCED DISPL FOR ALL DOFs FILE                                 E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.ENF                                                                                                                                             
+              3 KEEP     ERROR FILE                                                       E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.ERR                                                                                                                                             
+              7 KEEP     PROGRAM OUTPUT DATA FILE                                         E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.F06                                                                                                                                             
+           1003 KEEP     PROGRAM INPUT DATA FILE WITH ALL INCLUDE FILES                   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.IN0                                                                                                                                             
+            101 DELETE   LINK1A TEXT FILE (I/O UNITS, COUNTERS, ETC)                      E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1A                                                                                                                                             
+             10 DELETE   FEMAP NEUTRAL FILE                                               E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.NEU                                                                                                                                             
+             11 DELETE   PUNCH OUTPUT FILE                                                E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.PCH                                                                                                                                             
+             12 DELETE   BANDIT SEQGP CARD IMAGES                                         E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.SEQ                                                                                                                                             
+             13 DELETE   SPC1 TEXT FILE                                                   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.SPC                                                                                                                                             
+             91 DELETE   ELEM THERM & PRESS LOADS DISK FILE - IN LOCAL ELEM COORDS        E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.F21                                                                                                                                             
+             92 DELETE   ELEM MASS DISK FILE - IN LOCAL ELEM COORDS                       E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.F22                                                                                                                                             
+             93 DELETE   ELEM STIFF MATRIX DISK FILE - IN LOCAL ELEM COORDS               E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.F23                                                                                                                                             
+             94 DELETE   ELEM STRESS RECOVERY MATRICES DISK FILE - IN LOCAL ELEM COORDS   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.F24                                                                                                                                             
+             95 DELETE   ELEM NODAL DISPL & LOADS DISK FILE - IN LOCAL ELEM COORDS        E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.F25                                                                                                                                             
+            102 DELETE   GRID, GRID SEQ, AND COORD DATA                                   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1B                                                                                                                                             
+            103 DELETE   DOF TABLES                                                       E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1C                                                                                                                                             
+            104 DELETE   SUBCASE DATA                                                     E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1D                                                                                                                                             
+            105 DELETE   PG LOAD MATRIX                                                   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1E                                                                                                                                             
+            106 DELETE   RIGID ELEMENT DATA                                               E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1F                                                                                                                                             
+            107 DELETE   ELEM CONN, PROP, MATL, ETC                                       E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1G                                                                                                                                             
+            108 DELETE   ENFORCED DISPLACEMENTS                                           E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1H                                                                                                                                             
+            109 DELETE   FORCE, MOMENT DATA                                               E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1I                                                                                                                                             
+            110 DELETE   RMG MATRIX                                                       E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1J                                                                                                                                             
+            111 DELETE   ELEM TEMPERATURE DATA                                            E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1K                                                                                                                                             
+            112 DELETE   KGG STIFFNESS MATRIX                                             E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1L                                                                                                                                             
+            113 DELETE   EIGENVALUE EXTRACTION DATA                                       E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1M                                                                                                                                             
+            114 DELETE   ASET, OMIT DATA                                                  E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1N                                                                                                                                             
+            115 DELETE   SPC, SPC1 DATA                                                   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1O                                                                                                                                             
+            116 DELETE   GRAV LOAD DATA                                                   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1P                                                                                                                                             
+            117 DELETE   ELEM PRESSURE DATA                                               E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1Q                                                                                                                                             
+            118 DELETE   MGG MASS MATRIX                                                  E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1R                                                                                                                                             
+            119 DELETE   MPC GRIDS, COMPONENTS, EQN COEFFICIENTS                          E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1S                                                                                                                                             
+            120 DELETE   SUPORT DATA                                                      E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1T                                                                                                                                             
+            121 DELETE   RFORCE LOAD DATA                                                 E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1U                                                                                                                                             
+            122 DELETE   PARTVEC, PARTVEC1 DATA                                           E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1V                                                                                                                                             
+            123 DELETE   SCALAR LOAD DATA                                                 E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1W                                                                                                                                             
+            123 DELETE   USET, USET1 DATA                                                 E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1X                                                                                                                                             
+            125 DELETE   CONCENTRATED AND SCALAR MASS DATA                                E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1Y                                                                                                                                             
+            126 DELETE   CHKPNT DATA                                                      E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L1Z                                                                                                                                             
+            201 DELETE   GMN CONSTRAINT MATRIX                                            E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2A                                                                                                                                             
+            202 DELETE   KSF STIFFNESS MATRIX                                             E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2B                                                                                                                                             
+            203 DELETE   QSYS ENFORCED DISPL EQUIVALENT LOADS                             E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2C                                                                                                                                             
+            204 DELETE   PS LOAD MATRIX                                                   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2D                                                                                                                                             
+            205 DELETE   GOA MATRIX                                                       E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2E                                                                                                                                             
+            206 DELETE   UO0 MATRIX                                                       E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2F                                                                                                                                             
+            207 DELETE   KLL STIFFNESS MATRIX                                             E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2G                                                                                                                                             
+            208 DELETE   PL LOAD MATRIX                                                   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2H                                                                                                                                             
+            209 DELETE   MLL MASS MATRIX                                                  E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2I                                                                                                                                             
+            210 DELETE   MPC FORCE RECOVERY STIFF MATRIX, HMN                             E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2J                                                                                                                                             
+            211 DELETE   KRL STIFFNESS MATRIX                                             E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2K                                                                                                                                             
+            212 DELETE   KRR STIFFNESS MATRIX                                             E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2L                                                                                                                                             
+            213 DELETE   MRL MASS MATRIX                                                  E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2M                                                                                                                                             
+            214 DELETE   MRR MASS MATRIX                                                  E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2N                                                                                                                                             
+            215 DELETE   KAA STIFFNESS MATRIX                                             E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2O                                                                                                                                             
+            216 DELETE   MAA MASS MATRIX                                                  E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2P                                                                                                                                             
+            217 DELETE   PA  LOAD MATRIX                                                  E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2Q                                                                                                                                             
+            218 DELETE   MPC FORCE RECOVERY MASS MATRIX, LMN                              E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2R                                                                                                                                             
+            219 DELETE   MSF MASS MATRIX                                                  E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2S                                                                                                                                             
+            220 DELETE   KLLs STIFFNESS MATRIX                                            E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L2T                                                                                                                                             
+            301 DELETE   UL DISPL VECTORS                                                 E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L3A                                                                                                                                             
+            401 DELETE   ULLI - inverse of KMSM triangular factor ULL                     E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L4A                                                                                                                                             
+            402 DELETE   ALL L-set matrix for the standard eigenproblem                   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L4B                                                                                                                                             
+            403 DELETE   LINK4C                                                           E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L4C                                                                                                                                             
+            404 DELETE   LINK4D                                                           E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L4D                                                                                                                                             
+            501 DELETE   UG DISPL VECTORS                                                 E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L5A                                                                                                                                             
+            502 DELETE   COLS OF PHIXA EXPANDED TO G-SET                                  E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.L5B                                                                                                                                             
+             14 KEEP     OP2 PROGRAM OUTPUT FILE                                          E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OP2                                                                                                                                             
+             21 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OU1                                                                                                                                             
+             22 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OU2                                                                                                                                             
+             23 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OU3                                                                                                                                             
+             24 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OU4                                                                                                                                             
+             25 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OU5                                                                                                                                             
+             26 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OU6                                                                                                                                             
+             27 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OU7                                                                                                                                             
+             28 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OU8                                                                                                                                             
+             29 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OU9                                                                                                                                             
+             31 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OT1                                                                                                                                             
+             32 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OT2                                                                                                                                             
+             33 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OT3                                                                                                                                             
+             34 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OT4                                                                                                                                             
+             35 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OT5                                                                                                                                             
+             36 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OT6                                                                                                                                             
+             37 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OT7                                                                                                                                             
+             38 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OT8                                                                                                                                             
+             39 DELETE   E:\mystran17\mystran\howbuild\chase_feast_add\examples\midas_eigen08_cbeam_axis_debug_lanc_feast_interval_tuned.OT9                                                                                                                                             
+              0 LBAROFF               (  1)
+              0 LBUSHOFF              (  2)
+              0 LCMASS                (  3)
+             14 LCONM2                (  4)
+              0 LCORD                 (  5)
+            108 LDOFG                 (  6)
+            144 LEDAT                 (  7)
+             18 LELE                  (  8)
+              0 LFORCE                (  9)
+              0 LGRAV                 ( 10)
+             18 LGRID                 ( 11)
+              0 LGUSERIN              ( 12)
+              0 LIND_GRDS_MPCS        ( 13)
+              0 LLOADC                ( 14)
+              0 LLOADR                ( 15)
+              0 LMATANGLE             ( 16)
+              1 LMATL                 ( 17)
+              0 LMPC                  ( 18)
+              0 LMPCADDC              ( 19)
+              0 LMPCADDR              ( 20)
+              0 LPBAR                 ( 21)
+              1 LPBEAM                ( 22)
+              0 LPBUSH                ( 23)
+              0 LPCOMP                ( 24)
+              0 LPCOMP_PLIES          ( 25)
+              0 LPDAT                 ( 26)
+              0 LPELAS                ( 27)
+              0 LPLATEOFF             ( 28)
+              0 LPLATETHICK           ( 29)
+              0 LPLOAD                ( 30)
+              0 LPLOTEL               ( 31)
+              0 LPMASS                ( 32)
+              0 LPROD                 ( 33)
+              0 LPSHEAR               ( 34)
+              0 LPSHEL                ( 35)
+              0 LPSOLID               ( 36)
+              0 LPUSER1               ( 37)
+              0 LPUSERIN              ( 38)
+              0 LRFORCE               ( 39)
+              0 LRIGEL                ( 40)
+              0 LSEQ                  ( 41)
+              0 LSETLN                ( 42)
+              0 LSETS                 ( 43)
+              0 LSLOAD                ( 44)
+             24 LSPC                  ( 45)
+              0 LSPC1                 ( 46)
+              0 LSPCADDC              ( 47)
+              0 LSPCADDR              ( 48)
+              5 LSUB                  ( 49)
+              0 LSUSERIN              ( 50)
+              0 LTDAT                 ( 51)
+            572 LTERM_KGG             ( 52)
+              0 LTERM_KGGD            ( 53)
+           2592 LTERM_MGGE            ( 54)
+             36 LVVEC                 ( 55)
+              0 MAX_ELEM_DEGREE       ( 56)
+              3 MAX_GAUSS_POINTS      ( 57)
+              9 MAX_STRESS_POINTS     ( 58)
+              6 MDT                   ( 59)
+              2 MELGP                 ( 60)
+             12 MELDOF                ( 61)
+        1000000 MID1_PCOMP_EQ         ( 62)
+        2000000 MID2_PCOMP_EQ         ( 63)
+        3000000 MID3_PCOMP_EQ         ( 64)
+        4000000 MID4_PCOMP_EQ         ( 65)
+              0 MLL_SDIA              ( 66)
+              0 MMPC                  ( 67)
+              2 MOFFSET               ( 68)
+              1 MRBE3                 ( 69)
+              1 MRSPLINE              ( 70)
+              0 NAOCARD               ( 71)
+              0 NBAROFF               ( 72)
+              0 NBUSHOFF              ( 73)
+              0 NBAROR                ( 74)
+              0 NBEAMOR               ( 75)
+              0 NCBAR                 ( 76)
+             18 NCBEAM                ( 77)
+              0 NCBUSH                ( 78)
+              0 NCELAS1               ( 79)
+              0 NCELAS2               ( 80)
+              0 NCELAS3               ( 81)
+              0 NC_INFILE             ( 82)
+              0 NCELAS4               ( 83)
+              0 NCHEXA8               ( 84)
+              0 NCHEXA20              ( 85)
+              0 NCMASS                ( 86)
+             14 NCONM2                ( 87)
+              0 NCORD                 ( 88)
+              0 NCORD1                ( 89)
+              0 NCORD2                ( 90)
+              0 NCPENTA6              ( 91)
+              0 NCPENTA15             ( 92)
+              0 NCQUAD4               ( 93)
+              0 NCQUAD4K              ( 94)
+              0 NCROD                 ( 95)
+              0 NCSHEAR               ( 96)
+              0 NCTETRA4              ( 97)
+              0 NCTETRA10             ( 98)
+              0 NCTRIA3               ( 99)
+              0 NCTRIA3K              (100)
+              0 NCUSER1               (101)
+              0 NCUSERIN              (102)
+             84 NDOFA                 (103)
+              0 NDOF_EIG              (104)
+             84 NDOFF                 (105)
+            108 NDOFG                 (106)
+             84 NDOFL                 (107)
+              0 NDOFM                 (108)
+            108 NDOFN                 (109)
+              0 NDOFO                 (110)
+              0 NDOFR                 (111)
+             24 NDOFS                 (112)
+              0 NDOFSA                (113)
+             24 NDOFSB                (114)
+              0 NDOFSE                (115)
+              0 NDOFSG                (116)
+             24 NDOFSZ                (117)
+            144 NEDAT                 (118)
+             18 NELE                  (119)
+              0 NFORCE                (120)
+              0 NGRAV                 (121)
+              0 NGRDSET               (122)
+             18 NGRID                 (123)
+              0 NIND_GRDS_MPCS        (124)
+              0 NLOAD                 (125)
+              0 NMATANGLE             (126)
+              1 NMATL                 (127)
+              0 NMPC                  (128)
+              0 NMPCADD               (129)
+              0 NPBAR                 (130)
+              0 NPBARL                (131)
+              1 NPBEAM                (132)
+              0 NPBUSH                (133)
+              0 NPCARD                (134)
+              0 NPCOMP                (135)
+              0 NPDAT                 (136)
+              0 NPELAS                (137)
+              0 NPLATEOFF             (138)
+              0 NPLATETHICK           (139)
+              0 NPLOTEL               (140)
+              0 NPLOAD                (141)
+              0 NPLOAD4_3D            (142)
+              0 NPMASS                (143)
+              0 NPROD                 (144)
+              0 NPSHEAR               (145)
+              0 NPSHEL                (146)
+              0 NPSOLID               (147)
+              0 NPUSER1               (148)
+              0 NPUSERIN              (149)
+              0 NRBAR                 (150)
+              0 NRBE1                 (151)
+              0 NRBE2                 (152)
+              0 NRFORCE               (153)
+              0 NRIGEL                (154)
+              0 NRECARD               (155)
+              0 NROWS_OTM_ACCE        (156)
+              0 NROWS_OTM_DISP        (157)
+              0 NROWS_OTM_MPCF        (158)
+              0 NROWS_OTM_SPCF        (159)
+              0 NROWS_OTM_ELFE        (160)
+              0 NROWS_OTM_ELFN        (161)
+              0 NROWS_OTM_STRE        (162)
+              0 NROWS_OTM_STRN        (163)
+              0 NROWS_TXT_ACCE        (164)
+              0 NROWS_TXT_DISP        (165)
+              0 NROWS_TXT_MPCF        (166)
+              0 NROWS_TXT_SPCF        (167)
+              0 NROWS_TXT_ELFE        (168)
+              0 NROWS_TXT_ELFN        (169)
+              0 NROWS_TXT_STRE        (170)
+              0 NROWS_TXT_STRN        (171)
+              0 NRSPLINE              (172)
+              0 NSEQ                  (173)
+              0 NSETS                 (174)
+              0 NSLOAD                (175)
+             24 NSPC                  (176)
+              0 NSPC1                 (177)
+              0 NSPCADD               (178)
+              0 NSPOINT               (179)
+              1 NUM_SPCSIDS           (180)
+              1 NSUB                  (181)
+              0 NTCARD                (182)
+              0 NTDAT                 (183)
+              0 NTERM_ALL             (184)
+              0 NTERM_CG_LTM          (185)
+              0 NTERM_DLR             (186)
+              0 NTERM_GMN             (187)
+              0 NTERM_GOA             (188)
+              0 NTERM_HMN             (189)
+              0 NTERM_IF_LTM          (190)
+              0 NTERM_IRR             (191)
+            444 NTERM_KAA             (192)
+              0 NTERM_KAAD            (193)
+              0 NTERM_KAO             (194)
+              0 NTERM_KAOD            (195)
+            444 NTERM_KFF             (196)
+              0 NTERM_KFFD            (197)
+             40 NTERM_KFS             (198)
+              0 NTERM_KFSD            (199)
+              0 NTERM_KFSe            (200)
+              0 NTERM_KFSDe           (201)
+            564 NTERM_KGG             (202)
+              0 NTERM_KGGD            (203)
+            444 NTERM_KLL             (204)
+              0 NTERM_KLLD            (205)
+              0 NTERM_KLLDn           (206)
+              0 NTERM_KLLs            (207)
+              0 NTERM_KLLDs           (208)
+              0 NTERM_KMM             (209)
+              0 NTERM_KMMD            (210)
+              0 NTERM_KMSM            (211)
+              0 NTERM_KMSMn           (212)
+              0 NTERM_KMSMs           (213)
+              0 NTERM_KNM             (214)
+              0 NTERM_KNMD            (215)
+            564 NTERM_KNN             (216)
+              0 NTERM_KNND            (217)
+              0 NTERM_KOO             (218)
+              0 NTERM_KOOD            (219)
+              0 NTERM_KOOs            (220)
+              0 NTERM_KOODs           (221)
+              0 NTERM_KRL             (222)
+              0 NTERM_KRLD            (223)
+              0 NTERM_KRR             (224)
+              0 NTERM_KRRD            (225)
+              0 NTERM_KRRcb           (226)
+              0 NTERM_KRRcbs          (227)
+              0 NTERM_KRRcbn          (228)
+              0 NTERM_KXX             (229)
+             40 NTERM_KSS             (230)
+              0 NTERM_KSSD            (231)
+              0 NTERM_KSSe            (232)
+              0 NTERM_KSSDe           (233)
+              0 NTERM_LMN             (234)
+              0 NTERM_LTM             (235)
+             42 NTERM_MAA             (236)
+              0 NTERM_MAO             (237)
+             42 NTERM_MFF             (238)
+              0 NTERM_MFS             (239)
+             42 NTERM_MGG             (240)
+             42 NTERM_MGGC            (241)
+              0 NTERM_MGGE            (242)
+              0 NTERM_MGGS            (243)
+             42 NTERM_MLL             (244)
+              0 NTERM_MLLn            (245)
+              0 NTERM_MLLs            (246)
+              0 NTERM_MLR             (247)
+              0 NTERM_MMM             (248)
+              0 NTERM_MNM             (249)
+             42 NTERM_MNN             (250)
+              0 NTERM_MOO             (251)
+              0 NTERM_MPF0            (252)
+              0 NTERM_MRL             (253)
+              0 NTERM_MRN             (254)
+              0 NTERM_MRR             (255)
+              0 NTERM_MRRcb           (256)
+              0 NTERM_MRRcbn          (257)
+              0 NTERM_MXX             (258)
+              0 NTERM_MXXn            (259)
+              0 NTERM_MSS             (260)
+              0 NTERM_PA              (261)
+              0 NTERM_PF              (262)
+              0 NTERM_PFYS            (263)
+              0 NTERM_PG              (264)
+              0 NTERM_PHIXA           (265)
+              0 NTERM_PHIXG           (266)
+              0 NTERM_PHIZG           (267)
+              0 NTERM_PHIZL           (268)
+              0 NTERM_PHIZL1          (269)
+              0 NTERM_PHIZL2          (270)
+              0 NTERM_PL              (271)
+              0 NTERM_PM              (272)
+              0 NTERM_PN              (273)
+              0 NTERM_PO              (274)
+              0 NTERM_PR              (275)
+              0 NTERM_PS              (276)
+              0 NTERM_QM              (277)
+              0 NTERM_QS              (278)
+              0 NTERM_QSYS            (279)
+              0 NTERM_RMG             (280)
+              0 NTERM_RMM             (281)
+              0 NTERM_RMN             (282)
+              0 NTERM_ULL             (283)
+              0 NTERM_ULLI            (284)
+              0 NTSUB                 (285)
+              0 NUM_CB_DOFS           (286)
+              0 NUM_EIGENS            (287)
+              0 NUM_KLLD_DIAG_ZEROS   (288)
+              0 NUM_MLL_DIAG_ZEROS    (289)
+              0 NUM_MPCSIDS           (290)
+              0 NUM_PARTVEC_RECORDS   (291)
+              0 NUM_PCHD_SPC1         (292)
+             24 NUM_SPC_RECORDS       (293)
+              0 NUM_SPC1_RECORDS      (294)
+              0 NUM_SUPT_CARDS        (295)
+              0 NUM_USET_RECORDS      (296)
+              0 NUM_USETSTR           (297)
+              0 NUM_USET              (298)
+              0 NUM_USET_U1           (299)
+              0 NUM_USET_U2           (300)
+              0 NVEC                  (301)
+              2 NVVEC                 (302)
+              0 PCH_LINE_NUM          (303)
+              0 SETLEN                (304)
+         GLOBAL PARAM ELFORCEN (needed for restart)
+         SPLITD PARAM HEXAXIS  (needed for restart)
+              Y PARAM MATSPARS (needed for restart)
+            STC PARAM MIN4TRED (needed for restart)
+         MIN4   PARAM QUAD4TYP (needed for restart)
+         SPLITD PARAM QUADAXIS (needed for restart)
+         NONSYM PARAM SPARSTOR (needed for restart)
+              2 PARAM IORQ1M   (needed for restart)
+              1 PARAM IORQ1S   (needed for restart)
+              2 PARAM IORQ1B   (needed for restart)
+              2 PARAM IORQ2B   (needed for restart)
+              3 PARAM IORQ2T   (needed for restart)
+   2.000000E+00 PARAM CBMIN3   (needed for restart)
+   3.600000E+00 PARAM CBMIN4   (needed for restart)
+ CCC00000000000000000000000000000000000000000000000

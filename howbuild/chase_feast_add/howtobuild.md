@@ -27,12 +27,28 @@ set_source_files_properties(
 cmake ..\mystran `
   -DMYSTRAN_USE_EXTERNAL_FEAST=ON `
   -DMYSTRAN_USE_EXTERNAL_CHASE=ON `
-  -DMYSTRAN_FEAST_INCLUDE_DIR="..." `
   -DMYSTRAN_FEAST_LIBRARY="...\libfeast.a" `
-  -DMYSTRAN_CHASE_INCLUDE_DIR="..." `
-  -DMYSTRAN_CHASE_LIBRARY="...\libchase_f.a"
+  -DMYSTRAN_CHASE_LIBRARY="...\libchase_f.a" `
+  -DMYSTRAN_CHASE_EXTRA_LIBS="...\libchase_c.a;stdc++;gomp"
 cmake --build . -j 8
 ```
+
+Reference from `E:\mystran17\eigenbenchmark\build4.bat`:
+
+```powershell
+cmake -S E:\mystran17\mystran -B E:\mystran17\mystran\build-codex -G "MinGW Makefiles" `
+  -DMYSTRAN_USE_EXTERNAL_CHASE=ON `
+  -DMYSTRAN_CHASE_LIBRARY="C:/gcc/chase32/nompi/libchase_f.a" `
+  -DMYSTRAN_CHASE_EXTRA_LIBS="C:/gcc/chase32/nompi/libchase_c.a;stdc++;gomp" `
+  -DMYSTRAN_USE_EXTERNAL_FEAST=ON `
+  -DMYSTRAN_FEAST_LIBRARY="C:/gcc/feast32/libfeast.a"
+cmake --build E:\mystran17\mystran\build-codex -j 8
+```
+
+Notes:
+- Current CMake wiring for CHASE requires `MYSTRAN_USE_EXTERNAL_CHASE=ON` + `MYSTRAN_CHASE_LIBRARY`.
+- If CHASE backend is not linked, runtime uses ARPACK fallback with warning `4912`.
+- FEAST include/library variables in this package are legacy placeholders from earlier notes; only library path is used in current wiring.
 
 ## Info
 - v18: ARPACK sudah bisa jalan lewat SuperLU saat `SOLLIB=SPARSE`, jadi bukan LAPACK-only.
