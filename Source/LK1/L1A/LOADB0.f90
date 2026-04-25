@@ -39,7 +39,8 @@
                                          MEDAT_CELAS1, MEDAT_CELAS2, MEDAT_CELAS3, MEDAT_CELAS4,                                   &
                                          MEDAT_CQUAD, MEDAT_CQUAD8, MEDAT_CROD, MEDAT_CSHEAR, MEDAT_CTRIA, MEDAT_CUSER1,           &
                                          MEDAT0_CUSERIN, MMPC,                                                                     &
-                                         MPDAT_PLOAD2, MPDAT_PLOAD4, MEDAT_PLOTEL, MRBE3, MRSPLINE, MTDAT_TEMPRB, MTDAT_TEMPP1,    &
+                                         MPDAT_PLOAD1, MPDAT_PLOAD2, MPDAT_PLOAD4, MEDAT_PLOTEL, MRBE3, MRSPLINE, MTDAT_TEMPRB,    &
+                                         MTDAT_TEMPP1,                                                                             &
                                          NPBARL, NSPOINT, PROG_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  GRDSET3, GRDSET7, GRDSET8
@@ -407,8 +408,12 @@
          ELSE IF (CARD(1:5) == 'PELAS'   )  THEN
             LPELAS = LPELAS + 1
 
-         ELSE IF (CARD(1:6) == 'PLOAD2'  )  THEN
-            LPDAT  = LPDAT  + MPDAT_PLOAD2
+         ELSE IF ((CARD(1:6) == 'PLOAD1'  ) .OR. (CARD(1:6) == 'PLOAD2'  ))  THEN
+            IF (CARD(1:6) == 'PLOAD1') THEN
+               LPDAT  = LPDAT  + MPDAT_PLOAD1
+            ELSE
+               LPDAT  = LPDAT  + MPDAT_PLOAD2
+            ENDIF
             LPLOAD = LPLOAD + 1
 
          ELSE IF (CARD(1:6) == 'PLOAD4'  )  THEN

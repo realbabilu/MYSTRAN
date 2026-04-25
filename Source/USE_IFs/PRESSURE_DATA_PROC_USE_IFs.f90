@@ -31,6 +31,7 @@
       USE READERR_Interface
       USE MKJCARD_Interface
       USE OUTA_HERE_Interface
+      USE LEFT_ADJ_BDFLD_Interface
       USE TOKCHK_Interface
       USE FILE_CLOSE_Interface
       USE FILE_OPEN_Interface

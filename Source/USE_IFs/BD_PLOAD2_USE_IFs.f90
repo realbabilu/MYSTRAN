@@ -31,6 +31,7 @@
       USE MKJCARD_Interface
       USE I4FLD_Interface
       USE R8FLD_Interface
+      USE LEFT_ADJ_BDFLD_Interface
       USE TOKCHK_Interface
       USE BD_IMBEDDED_BLANK_Interface
       USE CARD_FLDS_NOT_BLANK_Interface

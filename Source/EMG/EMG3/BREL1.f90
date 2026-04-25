@@ -38,7 +38,7 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  TWO
+      USE CONSTANTS_1, ONLY           :  TWO, ZERO
       USE PARAMS, ONLY                :  EPSIL
       USE DEBUG_PARAMETERS
       USE MODEL_STUF, ONLY            :  EID, ELEM_LEN_AB, EMAT, NUM_EMG_FATAL_ERRS, EPROP, FCONV, ME, ULT_STRE, ULT_STRN, &
@@ -51,8 +51,6 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'BREL1'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)            ! 'Y'/'N' flags for whether to calc certain elem matrices
       CHARACTER(LEN=*), INTENT(IN)    :: WRITE_WARN        ! If 'Y" write warning messages, otherwise do not
-
-
 
       REAL(DOUBLE)                    :: ALPHA             ! Coefficient of thermal expansion
       REAL(DOUBLE)                    :: AREA              ! Cross-sectional area
@@ -108,7 +106,24 @@
          FCONV(1) = AREA
 
       ELSE IF (TYPE == 'BEAM    ') THEN
-
+         AREA     = EPROP( 1)
+         I1       = EPROP( 2)
+         I2       = EPROP( 3)
+         I12      = EPROP( 4)
+         JTOR     = EPROP( 5)
+         NSM      = EPROP( 6)
+         ZS(1)    = EPROP( 7)
+         ZS(2)    = EPROP( 8)
+         ZS(3)    = EPROP( 9)
+         ZS(4)    = EPROP(10)
+         ZS(5)    = EPROP(11)
+         ZS(6)    = EPROP(12)
+         ZS(7)    = EPROP(13)
+         ZS(8)    = EPROP(14)
+         K1       = EPROP(30)
+         K2       = EPROP(31)
+         ZS(9)    = ZERO
+         FCONV(1) = AREA
       ENDIF
 
 ! Need to set some values for materials here since subr for material properties not called for these 1D elements
@@ -164,7 +179,7 @@
 
          ELSE IF (TYPE == 'BEAM    ') THEN                 ! General beam
 
-            CALL BEAM
+            CALL BEAM ( OPT, ELEM_LEN_AB, AREA, I1, I2, JTOR, ZS(9), K1, K2, I12, E, G, ALPHA, TREF )
 
          ENDIF
 
@@ -172,8 +187,6 @@
 
 ! **********************************************************************************************************************************
  1963 FORMAT(' *ERROR  1962: TIMOSHENKO BAR ELEMENT ',A,' CANNOT HAVE NONZERO I12. IT WILL BE SET TO I12 = 0.')
-
-
 
       RETURN
 
