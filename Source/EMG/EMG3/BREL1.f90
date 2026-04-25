@@ -106,6 +106,7 @@
          FCONV(1) = AREA
 
       ELSE IF (TYPE == 'BEAM    ') THEN
+! --- cbeam_add begin --- !
          AREA     = EPROP( 1)
          I1       = EPROP( 2)
          I2       = EPROP( 3)
@@ -124,6 +125,7 @@
          K2       = EPROP(31)
          ZS(9)    = ZERO
          FCONV(1) = AREA
+! --- cbeam_add end --- !
       ENDIF
 
 ! Need to set some values for materials here since subr for material properties not called for these 1D elements
@@ -179,7 +181,9 @@
 
          ELSE IF (TYPE == 'BEAM    ') THEN                 ! General beam
 
+! --- cbeam_add begin --- !
             CALL BEAM ( OPT, ELEM_LEN_AB, AREA, I1, I2, JTOR, ZS(9), K1, K2, I12, E, G, ALPHA, TREF )
+! --- cbeam_add end --- !
 
          ENDIF
 

@@ -408,6 +408,7 @@
          ELSE IF (CARD(1:5) == 'PELAS'   )  THEN
             LPELAS = LPELAS + 1
 
+! --- cbeam_add begin --- !
          ELSE IF ((CARD(1:6) == 'PLOAD1'  ) .OR. (CARD(1:6) == 'PLOAD2'  ))  THEN
             IF (CARD(1:6) == 'PLOAD1') THEN
                LPDAT  = LPDAT  + MPDAT_PLOAD1
@@ -415,6 +416,7 @@
                LPDAT  = LPDAT  + MPDAT_PLOAD2
             ENDIF
             LPLOAD = LPLOAD + 1
+! --- cbeam_add end --- !
 
          ELSE IF (CARD(1:6) == 'PLOAD4'  )  THEN
             LPDAT  = LPDAT  + MPDAT_PLOAD4

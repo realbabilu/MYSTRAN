@@ -122,6 +122,7 @@
                ENDDO
             ENDDO
 
+! --- cbeam_add begin --- !
             IF ((TYPE == 'BAR     ') .OR. (TYPE == 'BART    ') .OR. (TYPE == 'BEAM    ')) THEN
 
                IF (PTYPE(INT_ELEM_ID) == '2') THEN
@@ -138,6 +139,7 @@
                ENDIF
 
             ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
+! --- cbeam_add end --- !
 
                IF      (PTYPE(INT_ELEM_ID) == '1') THEN
 

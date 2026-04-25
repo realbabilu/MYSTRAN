@@ -486,8 +486,10 @@ bdf:  DO
          ELSE IF (CARD(1:6) == 'PLOAD4'  )  THEN
             CALL BD_PLOAD4  ( CARD, CC_LOAD_FND )
 
+! --- cbeam_add begin --- !
          ELSE IF ((CARD(1:6) == 'PLOAD1'  ) .OR. (CARD(1:6) == 'PLOAD2'  ))  THEN
             CALL BD_PLOAD2  ( CARD, CC_LOAD_FND )
+! --- cbeam_add end --- !
 
          ELSE IF (CARD(1:6) == 'PLOTEL'  )  THEN
             CALL BD_PLOTEL  ( CARD )

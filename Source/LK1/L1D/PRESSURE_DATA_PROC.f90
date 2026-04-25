@@ -53,8 +53,10 @@
       CHARACTER( 1*BYTE)              :: FOUND             ! Indicator on whether we found something we were looking for
       CHARACTER(LEN=JCARD_LEN)        :: JCARD(10)         ! The 10 fields of characters in CARD
       CHARACTER( 8*BYTE)              :: NAME              ! Card name (PLOAD1,2 or 4)
+! --- cbeam_add begin --- !
       CHARACTER( 8*BYTE)              :: PLOAD1_SCALE      ! PLOAD1 scale keyword
       CHARACTER( 8*BYTE)              :: PLOAD1_TYPE       ! PLOAD1 load direction keyword
+! --- cbeam_add end --- !
       CHARACTER( 6*BYTE)              :: PLATE_OR_SOLID    ! 'PLATE' or 'SOLID' element designation from PLOAD4 entries
       CHARACTER( 8*BYTE)              :: TOKEN             ! The 1st 8 characters from a JCARD
       CHARACTER( 8*BYTE)              :: TOKTYP            ! Variable to test whether "THRU" option was used on B.D. PLOAD2 card
@@ -83,10 +85,12 @@
       REAL(DOUBLE)                    :: SCALE             ! Scale factor from a LOAD Bulk Data card
       REAL(DOUBLE)                    :: RPDAT             ! Real pressure value read from file LINK1Q
       REAL(DOUBLE)                    :: RPDAT1            ! Real pressure value read from file LINK1Q
+! --- cbeam_add begin --- !
       REAL(DOUBLE)                    :: RPDAT2            ! 2nd real pressure value read from file LINK1Q
       REAL(DOUBLE)                    :: RSID(LLOADC+1)    ! Array of load magnitudes (for LSID set ID's) needed for one S/C
       REAL(DOUBLE)                    :: X1                ! PLOAD1 start fraction/location
       REAL(DOUBLE)                    :: X2                ! PLOAD1 end fraction/location
+! --- cbeam_add end --- !
 
 
 
@@ -167,6 +171,7 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
             ENDIF
 
 ! Put pressure data into PDATA
+! --- cbeam_add begin --- !
             IF (((NAME(1:6) /= 'PLOAD1') .AND. ((NPDAT + NFIELD) > LPDAT))) THEN
                WRITE(ERR,1523) SUBR_NAME,LPDAT
                WRITE(F06,1523) SUBR_NAME,LPDAT
@@ -320,6 +325,7 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
                   ENDIF
                ENDDO
             ENDIF
+! --- cbeam_add end --- !
 
 ! Process EID's. First check for the 2 options on specifying elem data. For PLOAD2, either all data are EID's or THRU option is used
 !                For PLOAD4, either "THRU" is used or there is only 1 EID
@@ -474,6 +480,7 @@ k_do6:            DO K=EID1,EID2
  1523 FORMAT(' *ERROR  1523: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' TOO MUCH ELEMENT PRESSURE DATA. MAX IS LPDAT = ',I8)
 
+! --- cbeam_add begin --- !
  1524 FORMAT(' *ERROR      : PLOAD1 SCALE "',A,'" ON ELEMENT ',I8,' IN LOAD SET ',I8,' IS NOT SUPPORTED. USE FR FOR V1')
 
  1525 FORMAT(' *ERROR      : PLOAD1 ON ELEMENT ',I8,' IN LOAD SET ',I8,                                                   &
@@ -489,11 +496,13 @@ k_do6:            DO K=EID1,EID2
                     'CURRENT IMPLEMENTATION ALLOWS ONE ENTRY PER COMPONENT/PER ELEMENT/PER SUBCASE')
 
  1530 FORMAT(' *ERROR  1520: ELEMENT ',I8,' ON PLOADi ',I8,' DOES NOT EXIST OR IS OF WRONG TYPE FOR THE PRESSURE CARD:')
+! --- cbeam_add end --- !
 
 ! ##################################################################################################################################
 
       CONTAINS
 
+! --- cbeam_add begin --- !
       SUBROUTINE PLOAD1_PUT ( IELEM, JSUB, IPPNT, EL_REDUNDANT_PRES, EL_PRES_ERR )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
@@ -548,6 +557,7 @@ k_do6:            DO K=EID1,EID2
                     ' HAS INCOMPATIBLE MIXED PLOAD TYPES. EXISTING PTYPE = ',A1)
 
       END SUBROUTINE PLOAD1_PUT
+! --- cbeam_add end --- !
 
 ! Change log (changes following completion of Version 1.02 on 05/01/03)
 
