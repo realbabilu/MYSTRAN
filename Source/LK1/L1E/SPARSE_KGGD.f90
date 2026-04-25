@@ -57,17 +57,18 @@
       INTEGER(LONG)                   :: KGGD_ROW_NUM       ! The row num in G-set stiff matrix where stiff for DOF I begins
       INTEGER(LONG)                   :: KGGD_II_COL_NUM    ! Col number in the 6x6 stiff matrix for 1 grid
       INTEGER(LONG)                   :: KTERM_KGGD         ! Count of terms written to KGGD to compare with NTERM_KGGD
+      INTEGER(LONG)                   :: MEMERROR           ! Error indicator for dynamic memory allocation
       INTEGER(LONG)                   :: NUM_NONZERO_IN_ROW ! Count of the actual number of nonzero terms in a row of KGGD
       INTEGER(LONG)                   :: NUM_MAX = 0        ! largest number of terms in any row of the KGGD stiffness matrix
       INTEGER(LONG)                   :: NUM_COMPS          ! Number of displ components (1 for SPOINT, 6 for physical grid)
       INTEGER(LONG)                   :: NZERO   = 0        ! Count on zero terms in array STF
       INTEGER(LONG)                   :: ROW_NUM_START      ! DOF number where TDOF data begins for a grid
-      INTEGER(LONG)                   :: RJ(NDOFG)          ! Column numbers corresponding to the terms in RSTF(I).
+      INTEGER(LONG), ALLOCATABLE      :: RJ(:)              ! Column numbers corresponding to the terms in RSTF(I).
 
 
       REAL(DOUBLE)                    :: EPS1               ! A small number to compare real zero
       REAL(DOUBLE)                    :: KGGD_II(6,6)       ! 6 x 6 diagonal stiffness matrices for 1 grid
-      REAL(DOUBLE)                    :: RSTF(NDOFG)        ! 1D array of terms from STF(I) pertaining to one row of the G-set
+      REAL(DOUBLE), ALLOCATABLE       :: RSTF(:)            ! 1D array of terms from STF(I) pertaining to one row of the G-set
 !                                                             stiffness matrix. Initially, the cols are not in increasing global
 !                                                             DOF order. RSTF is sorted so that the cols are in incr DOF order.
 
@@ -77,6 +78,14 @@
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
+
+      ALLOCATE ( RJ(NDOFG), RSTF(NDOFG), STAT=MEMERROR )
+      IF (MEMERROR /= 0) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,9200) SUBR_NAME
+         WRITE(F06,9200) SUBR_NAME
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
 
 ! Pass # 1: Determine final NTERM_KGGD (may be less due to terms stripped)
 
@@ -228,6 +237,9 @@ j_do3:      DO J=1,NUM_NONZERO_IN_ROW
 
 
 
+      IF (ALLOCATED(RJ  )) DEALLOCATE(RJ)
+      IF (ALLOCATED(RSTF)) DEALLOCATE(RSTF)
+
       RETURN
 
 ! **********************************************************************************************************************************
@@ -237,9 +249,10 @@ j_do3:      DO J=1,NUM_NONZERO_IN_ROW
 
  1611 FORMAT(' *ERROR  1611: THE G-SET DIFFERENTIAL STIFF MATRIX, KGGD, MUST HAVE SOME NONZERO TERMS. HOWEVER IT HAS ',I12,' TERMS')
 
- 1625 FORMAT(' *ERROR  1625: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+1625 FORMAT(' *ERROR  1625: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' 1ST COL OF ARRAY STF3 INDICATES THERE IS MORE DATA IN ARRAY STF3 FOR ROW ',I12,' OF THE KGGD STIFF'   &
                     ,/,14X,' MATRIX ALTHOUGH THE DOF COUNT IS AT THE END OF THE ROW')
+ 9200 FORMAT(' *ERROR  9200: CANNOT ALLOCATE LOCAL ROW-WORK ARRAYS IN SUBROUTINE ',A)
 
 ! **********************************************************************************************************************************
 

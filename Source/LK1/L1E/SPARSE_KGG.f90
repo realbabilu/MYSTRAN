@@ -72,6 +72,7 @@
       INTEGER(LONG)                   :: KGG_II_COL_NUM     ! Col number in the 6x6 stiff matrix for 1 grid
       INTEGER(LONG)                   :: KGG_NUM_ASPC       ! Sum of NUM_ASPC_BY_COMP(6) (this is also NDOFSA but we need to test
       INTEGER(LONG)                   :: KTERM_KGG          ! Count of terms written to KGG file LINK1L to compare with NTERM_KGG
+      INTEGER(LONG)                   :: MEMERROR           ! Error indicator for dynamic memory allocation
       INTEGER(LONG)                   :: NUM_NONZERO_IN_ROW ! Count of the actual number of nonzero terms in a row of KGG
       INTEGER(LONG)                   :: NUM_ASPC_BY_COMP(6)! The number of SPC1's for each displ component
       INTEGER(LONG)                   :: NUM_MAX = 0        ! largest number of terms in any row of the KGG stiffness matrix
@@ -79,12 +80,12 @@
       INTEGER(LONG)                   :: NZERO   = 0        ! Count on zero terms in array STF
       INTEGER(LONG)                   :: OUNT(2)            ! File units to write messages to. Input to subr UNFORMATTED_OPEN
       INTEGER(LONG)                   :: ROW_NUM_START      ! DOF number where TDOF data begins for a grid
-      INTEGER(LONG)                   :: RJ(NDOFG)          ! Column numbers corresponding to the terms in RSTF(I).
+      INTEGER(LONG), ALLOCATABLE      :: RJ(:)              ! Column numbers corresponding to the terms in RSTF(I).
 
 
       REAL(DOUBLE)                    :: EPS1               ! A small number to compare real zero
       REAL(DOUBLE)                    :: KGG_II(6,6)        ! 6 x 6 diagonal stiffness matrices for 1 grid
-      REAL(DOUBLE)                    :: RSTF(NDOFG)        ! 1D array of terms from STF(I) pertaining to one row of the G-set
+      REAL(DOUBLE), ALLOCATABLE       :: RSTF(:)            ! 1D array of terms from STF(I) pertaining to one row of the G-set
 !                                                             stiffness matrix. Initially, the cols are not in increasing global
 !                                                             DOF order. RSTF is sorted, prior to writing the G-set stiff matrix
 !                                                             to file LINK1L, so that the cols are in increasing DOF order.
@@ -96,6 +97,14 @@
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
+
+      ALLOCATE ( RJ(NDOFG), RSTF(NDOFG), STAT=MEMERROR )
+      IF (MEMERROR /= 0) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,9200) SUBR_NAME
+         WRITE(F06,9200) SUBR_NAME
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
 
 ! Pass # 1: Determine final NTERM_KGG (may be less due to terms stripped)
 
@@ -338,6 +347,9 @@ j_do4:   DO J=1,NIND_GRDS_MPCS                           ! on MPC's since they m
 
 
 
+      IF (ALLOCATED(RJ  )) DEALLOCATE(RJ)
+      IF (ALLOCATED(RSTF)) DEALLOCATE(RSTF)
+
       RETURN
 
 ! **********************************************************************************************************************************
@@ -372,7 +384,8 @@ j_do4:   DO J=1,NIND_GRDS_MPCS                           ! on MPC's since they m
              ' __________________________________________________________________________________________________________________',&
              '_________________',/)
 
- 9991 FORMAT(' PROCESSING ABORTED IN SUBR ',A,' BASED ON PARAMETER SPC1QUIT = ',A)
+9991 FORMAT(' PROCESSING ABORTED IN SUBR ',A,' BASED ON PARAMETER SPC1QUIT = ',A)
+ 9200 FORMAT(' *ERROR  9200: CANNOT ALLOCATE LOCAL ROW-WORK ARRAYS IN SUBROUTINE ',A)
 
 
 

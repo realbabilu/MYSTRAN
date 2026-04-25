@@ -48,7 +48,7 @@
                                          L2F_MSG, L2G_MSG, L2H_MSG, L2I_MSG, L2J_MSG, L2K_MSG, L2L_MSG, L2M_MSG, L2N_MSG, L2O_MSG, &
                                          L2P_MSG, L2Q_MSG, L3A_MSG, L5A_MSG
 
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, NSUB, NVEC, SOL_NAME, WARN_ERR
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NSUB, NVEC, SOL_NAME, WARN_ERR
 
       USE SCONTR, ONLY                :  NDOFA    , NDOFF    , NDOFG    , NDOFL    , NDOFM    , NDOFO    , NDOFR    , NDOFS
 
@@ -88,16 +88,17 @@
       INTEGER(LONG)                   :: I,J               ! DO loop indices
       INTEGER(LONG)                   :: IERROR            ! Error count
       INTEGER(LONG)                   :: IOCHK             ! IOSTAT error number when opening/reading a file
+      INTEGER(LONG)                   :: MEMERROR          ! Error indicator for dynamic memory allocation
       INTEGER(LONG)                   :: NTERM_KSF         ! Number of nonzeros in sparse matrix KSF (= NTERM_KFS)
       INTEGER(LONG)                   :: NUM_SOLNS         ! NSUB for statics, NVEC for eigenvalues, etc
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to. Input to subr UNFORMATTED_OPEN
       INTEGER(LONG)                   :: REC_NO            ! Record number when reading a file
 
 
-      REAL(DOUBLE)                    :: KAA_DIAG(NDOFA)   ! Diagonal of KAA
-      REAL(DOUBLE)                    :: KGG_DIAG(NDOFG)   ! Diagonal of KGG
-      REAL(DOUBLE)                    :: KLL_DIAG(NDOFL)   ! Diagonal of KLL
-      REAL(DOUBLE)                    :: KRR_DIAG(NDOFR)   ! Diagonal of KRR
+      REAL(DOUBLE), ALLOCATABLE       :: KAA_DIAG(:)       ! Diagonal of KAA
+      REAL(DOUBLE), ALLOCATABLE       :: KGG_DIAG(:)       ! Diagonal of KGG
+      REAL(DOUBLE), ALLOCATABLE       :: KLL_DIAG(:)       ! Diagonal of KLL
+      REAL(DOUBLE), ALLOCATABLE       :: KRR_DIAG(:)       ! Diagonal of KRR
 
       REAL(DOUBLE)                    :: KAA_MAX_DIAG      ! Max diag term from KAA
       REAL(DOUBLE)                    :: KGG_MAX_DIAG      ! Max diag term from KGG
@@ -118,6 +119,14 @@
 
       OUNT(1) = ERR
       OUNT(2) = F06
+
+      ALLOCATE ( KAA_DIAG(NDOFA), KGG_DIAG(NDOFG), KLL_DIAG(NDOFL), KRR_DIAG(NDOFR), STAT=MEMERROR )
+      IF (MEMERROR /= 0) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,9200) SUBR_NAME
+         WRITE(F06,9200) SUBR_NAME
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
 
 !xx   WRITE(SC1, * ) '    ALLOCATE/DEALLOCATE SOME ARRAYS'
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages
@@ -757,12 +766,18 @@
 
 
 
+      IF (ALLOCATED(KAA_DIAG)) DEALLOCATE(KAA_DIAG)
+      IF (ALLOCATED(KGG_DIAG)) DEALLOCATE(KGG_DIAG)
+      IF (ALLOCATED(KLL_DIAG)) DEALLOCATE(KLL_DIAG)
+      IF (ALLOCATED(KRR_DIAG)) DEALLOCATE(KRR_DIAG)
+
       RETURN
 
 ! **********************************************************************************************************************************
   101 FORMAT(' *WARNING    : THE FOLLOWING FILE FOR THE ',A                                                                        &
                     ,/,14X,' EITHER DOES NOT EXIST OR IS NULL: '                                                                   &
                     ,/,15X,A)
+ 9200 FORMAT(' *ERROR  9200: CANNOT ALLOCATE LOCAL DIAGNOSTIC ARRAYS IN SUBROUTINE ',A)
 
  9995 FORMAT(/,' PROCESSING ENDED DUE TO ABOVE ',I8,' ERRORS')
 

@@ -117,7 +117,7 @@
       INTEGER(LONG) :: POST
       INTEGER(LONG)                   :: BGRID             ! Internal grid point number
 
-      REAL(DOUBLE)                    :: KGG_DIAG(NDOFG)   ! Diagonal of KGG (needed for equil check on RESTART)
+      REAL(DOUBLE), ALLOCATABLE       :: KGG_DIAG(:)       ! Diagonal of KGG (needed for equil check on RESTART)
       REAL(DOUBLE)                    :: KGG_MAX_DIAG      ! Max diag term from KGG (needed for equil check on RESTART)
       !LOGICAL                        :: WRITE_F06  ! flag
       !LOGICAL                        :: WRITE_OP2  ! flag
@@ -132,6 +132,8 @@
       DO I=0,MBUG-1
          WRT_BUG(I) = 0
       ENDDO
+
+      ALLOCATE ( KGG_DIAG(NDOFG) )
 
       RBG_GSET_ALLOCATED = 'N'
 
@@ -1175,6 +1177,8 @@ res20:IF (RESTART == 'N') THEN
 12345 FORMAT(A, ', I = ', I8, ' of ', I8, A)
 
 ! ##################################################################################################################################
+
+      IF (ALLOCATED(KGG_DIAG)) DEALLOCATE(KGG_DIAG)
 
       CONTAINS
 

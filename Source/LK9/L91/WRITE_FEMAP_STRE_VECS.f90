@@ -57,7 +57,7 @@
       INTEGER(LONG)                   :: ELEM_MIN               ! Elem ID where vector is min
 
                                                                 ! Col from FEMAP_EL_NUMS (elem ID's)
-      INTEGER(LONG)                   :: ELEM_NUMS(NUM_FEMAP_ROWS)
+      INTEGER(LONG), ALLOCATABLE      :: ELEM_NUMS(:)
 
       INTEGER(LONG)                   :: ELEM_NAME_LEN          ! Length of ELEM_TYP without trailing blanks
       INTEGER(LONG)                   :: I,J                    ! DO loop indices
@@ -67,7 +67,7 @@
 
 
                                                                 ! One column from FEMAP_EL_VECS
-      REAL(DOUBLE)                    :: ELEM_VEC(NUM_FEMAP_ROWS)
+      REAL(DOUBLE), ALLOCATABLE       :: ELEM_VEC(:)
 
       REAL(DOUBLE)                    :: VEC_ABS                ! Abs value in vector
       REAL(DOUBLE)                    :: VEC_MAX                ! Max value in vector
@@ -86,6 +86,8 @@
             EXIT
          ENDIF
       ENDDO
+
+      ALLOCATE ( ELEM_NUMS(NUM_FEMAP_ROWS), ELEM_VEC(NUM_FEMAP_ROWS) )
 
       IF     (ELEM_TYP(1:4) == 'ELAS') THEN
          VEC_ID_OFFSET = 60100
@@ -458,6 +460,9 @@
 
 
 
+
+      IF (ALLOCATED(ELEM_NUMS)) DEALLOCATE(ELEM_NUMS)
+      IF (ALLOCATED(ELEM_VEC )) DEALLOCATE(ELEM_VEC)
 
       RETURN
 

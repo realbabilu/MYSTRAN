@@ -47,8 +47,8 @@
       CHARACTER( 1*BYTE)              :: USETSTR_OUTPUT      ! If 'Y' then output of USET tables is requested
 
       INTEGER(LONG)                   :: COL_NUM             ! Column number in TDOF where a DOF set exists
-      INTEGER(LONG)                   :: GRID_NUM(NDOFG)     ! Array of grid numbers for members of a DOF set requested in USETSTR
-      INTEGER(LONG)                   :: COMP_NUM(NDOFG)     ! Array of comp numbers for members of a DOF set requested in USETSTR
+      INTEGER(LONG), ALLOCATABLE      :: GRID_NUM(:)         ! Array of grid numbers for members of a DOF set requested in USETSTR
+      INTEGER(LONG), ALLOCATABLE      :: COMP_NUM(:)         ! Array of comp numbers for members of a DOF set requested in USETSTR
       INTEGER(LONG)                   :: I,J,K               ! DO loop indices or counters
       INTEGER(LONG)                   :: NUM_LEFT            ! Used when printing a line of 10 values in the set
       INTEGER(LONG)                   :: NUM_IN_SET          ! A set length (e.g. NDOFM for the M-set
@@ -63,6 +63,7 @@
 ! Initialize
 
       NUM_NULL = 0
+      ALLOCATE ( GRID_NUM(NDOFG), COMP_NUM(NDOFG) )
 
 ! Scan table USETSTR to see if there are output requests
 
@@ -175,6 +176,9 @@
 
 
 
+
+      IF (ALLOCATED(GRID_NUM)) DEALLOCATE(GRID_NUM)
+      IF (ALLOCATED(COMP_NUM)) DEALLOCATE(COMP_NUM)
 
       RETURN
 
