@@ -42,6 +42,7 @@
                                          I_KMSM, I2_KMSM, J_KMSM, KMSM, I_KMSMs, I2_KMSMs, J_KMSMs, KMSMs
       USE SPARSE_MATRICES, ONLY       :  SYM_KLL, SYM_KLLD, SYM_MLL
       USE LAPACK_LIN_EQN_DPB
+      USE LAPACK_LIN_EQN_DGB
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
       USE EIG_INV_PWR_USE_IFs
@@ -58,7 +59,12 @@
 
       INTEGER(LONG)                   :: I                 ! DO loop index
       INTEGER(LONG)                   :: INFO        = 0   !
+      INTEGER(LONG)                   :: INFO_DGB    = 0   ! INFO from DGBTRF/DGBTRS fallback
       INTEGER(LONG)                   :: ITER_NUM          ! Number of iterations in converging on eigenvalue
+      INTEGER(LONG)                   :: KL_DGB            ! Number of subdiagonals for DGB fallback
+      INTEGER(LONG)                   :: KU_DGB            ! Number of superdiagonals for DGB fallback
+      INTEGER(LONG)                   :: LDRFAC_DGB        ! Leading dimension for DGB fallback matrix
+      INTEGER(LONG)                   :: ASTAT             ! Allocation status
 
 
 
@@ -74,6 +80,10 @@
       REAL(DOUBLE)                    :: RCOND             ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
 
       INTRINSIC                       :: MIN
+
+      LOGICAL                         :: USE_DGB_FALLBACK  ! Use DGBTRF/DGBTRS if DPBTRF fails
+      REAL(DOUBLE), ALLOCATABLE       :: RFAC_DGB(:,:)     ! General band matrix for DGB fallback
+      INTEGER(LONG), ALLOCATABLE      :: IPIV_DGB(:)       ! Pivot vector for DGB fallback
 
 
 
@@ -122,13 +132,56 @@
 
       DEB_PRT(1) = 44
       DEB_PRT(2) = 45
+      USE_DGB_FALLBACK = .FALSE.
 
       EQUED = 'N'
       IF (SOLLIB == 'BANDED  ') THEN
 
-         INFO = 0
+         INFO = -1                                        ! Do not abort in SYM_MAT_DECOMP_LAPACK on INFO > 0; handle fallback here
          CALL SYM_MAT_DECOMP_LAPACK ( SUBR_NAME, 'KMSM', 'L ', NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, 'Y', KLLRAT, 'N', 'N',     &
                                       DEB_PRT, EQUED, KMSM_SDIA, K_INORM, RCOND, NULL_SCALE_FACS, INFO )
+
+         IF (INFO > 0) THEN
+
+            KL_DGB = KMSM_SDIA
+            KU_DGB = KMSM_SDIA
+            LDRFAC_DGB = 3*KMSM_SDIA + 1
+            WRITE(ERR,4891) INFO
+            IF (SUPINFO == 'N') THEN
+               WRITE(F06,4891) INFO
+            ENDIF
+
+            IF (ALLOCATED(RFAC_DGB)) DEALLOCATE(RFAC_DGB)
+            IF (ALLOCATED(IPIV_DGB)) DEALLOCATE(IPIV_DGB)
+            ALLOCATE(RFAC_DGB(LDRFAC_DGB,NDOFL), STAT=ASTAT)
+            IF (ASTAT /= 0) THEN
+               WRITE(ERR,4892) 'RFAC_DGB', LDRFAC_DGB, NDOFL, ASTAT
+               WRITE(F06,4892) 'RFAC_DGB', LDRFAC_DGB, NDOFL, ASTAT
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+            ALLOCATE(IPIV_DGB(NDOFL), STAT=ASTAT)
+            IF (ASTAT /= 0) THEN
+               WRITE(ERR,4892) 'IPIV_DGB', NDOFL, 1, ASTAT
+               WRITE(F06,4892) 'IPIV_DGB', NDOFL, 1, ASTAT
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+            RFAC_DGB = ZERO
+
+            CALL BANDGEN_LAPACK_DGB ( 'KMSM', NDOFL, KMSM_SDIA, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, RFAC_DGB, SUBR_NAME )
+            INFO_DGB = 0
+            CALL DGBTRF ( NDOFL, NDOFL, KL_DGB, KU_DGB, RFAC_DGB, LDRFAC_DGB, IPIV_DGB, INFO_DGB )
+            IF (INFO_DGB /= 0) THEN
+               WRITE(ERR,4893) INFO_DGB
+               WRITE(F06,4893) INFO_DGB
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+
+            USE_DGB_FALLBACK = .TRUE.
+            INFO = 0
+         ENDIF
 
       ELSE IF (SOLLIB == 'SPARSE  ') THEN
 
@@ -204,7 +257,18 @@ iters:DO
 
          IF      (SOLLIB == 'BANDED  ') THEN
 
-            CALL FBS_LAPACK ( 'N', NDOFL, KMSM_SDIA, NULL_SCALE_FACS, MVEC )
+            IF (USE_DGB_FALLBACK) THEN
+               INFO_DGB = 0
+               CALL DGBTRS ( 'N', NDOFL, KL_DGB, KU_DGB, 1, RFAC_DGB, LDRFAC_DGB, IPIV_DGB, MVEC, NDOFL, INFO_DGB, 'N' )
+               IF (INFO_DGB /= 0) THEN
+                  WRITE(ERR,4894) INFO_DGB, ITER_NUM
+                  WRITE(F06,4894) INFO_DGB, ITER_NUM
+                  FATAL_ERR = FATAL_ERR + 1
+                  CALL OUTA_HERE ( 'Y' )
+               ENDIF
+            ELSE
+               CALL FBS_LAPACK ( 'N', NDOFL, KMSM_SDIA, NULL_SCALE_FACS, MVEC )
+            ENDIF
 
          ELSE IF (SOLLIB == 'SPARSE  ') THEN
 
@@ -320,6 +384,8 @@ iters:DO
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages
       WRITE(SC1,32345,ADVANCE='NO') '       Deallocate KMSM'
       CALL DEALLOCATE_SPARSE_MAT ( 'KMSM' )
+      IF (ALLOCATED(RFAC_DGB)) DEALLOCATE(RFAC_DGB)
+      IF (ALLOCATED(IPIV_DGB)) DEALLOCATE(IPIV_DGB)
 
 ! If this is not a CB or BUCKLING soln, dellocate arrays for KLL.
 
@@ -339,6 +405,15 @@ iters:DO
                     ,/,14X,' PARAMETER SPARSTOR MUST BE EITHER "SYM" OR "NONSYM" BUT VALUE IS ',A)
 
  9892 FORMAT('               THIS IS FOR ROW AND COL IN THE MATRIX FOR GRID POINT ',I8,' COMPONENT ',I3)
+
+ 4891 FORMAT(' *WARNING  4891: DPBTRF FACTORIZATION FAILED FOR KMSM (LEADING MINOR ORDER = ',I10,').',                            &
+                    /,14X,' TRYING BANDED GENERAL FALLBACK WITH DGBTRF/DGBTRS FOR INVERSE POWER.')
+
+ 4892 FORMAT(' *ERROR    4892: ALLOCATE FAILED FOR ',A,' IN EIG_INV_PWR. REQUESTED SIZE = (',I10,',',I10,') STAT = ',I10)
+
+ 4893 FORMAT(' *ERROR    4893: DGBTRF FALLBACK FAILED IN EIG_INV_PWR. INFO = ',I10)
+
+ 4894 FORMAT(' *ERROR    4894: DGBTRS FALLBACK FAILED IN EIG_INV_PWR. INFO = ',I10,' AT ITERATION ',I10)
 
  4001 FORMAT(' *ERROR  4001: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' MATRIX KMSM WAS EQUILIBRATED: EQUED = ',A,'. CODE NOT WRITTEN TO ALLOW THIS AS YET')
