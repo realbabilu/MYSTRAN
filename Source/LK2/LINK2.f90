@@ -78,14 +78,13 @@
       CHARACTER(  1*BYTE)             :: CLOSE_IT          ! Input to subr READ_MATRIX_i. 'Y'/'N' whether to close a file or not
       CHARACTER( 8*BYTE)              :: CLOSE_STAT        ! What to do with file when it is closed
 
-      INTEGER(LONG)                   :: MEMERROR          ! Error indicator for dynamic memory allocation
       INTEGER(LONG)                   :: NROWS             ! Value of DOF size to pass to subr WRITE_USERIN_BD_CARDS
       INTEGER(LONG)                   :: I,J               ! DO loop indices
       INTEGER(LONG), PARAMETER        :: P_LINKNO  = 1     ! Prior LINK no's that should have run before this LINK can execute
 
-      REAL(DOUBLE), ALLOCATABLE       :: KGG_DIAG(:)       ! Diagonal of KGG
+      REAL(DOUBLE)                    :: KGG_DIAG(NDOFG)   ! Diagonal of KGG
       REAL(DOUBLE)                    :: KGG_MAX_DIAG      ! Max diag term from KGG
-      REAL(DOUBLE), ALLOCATABLE       :: KGGD_DIAG(:)      ! Diagonal of KGGD
+      REAL(DOUBLE)                    :: KGGD_DIAG(NDOFG)  ! Diagonal of KGGD
       REAL(DOUBLE)                    :: KGGD_MAX_DIAG     ! Max diag term from KGGD
 
 ! **********************************************************************************************************************************
@@ -94,14 +93,6 @@
 ! Set time initializing parameters
 
       CALL TIME_INIT
-
-      ALLOCATE ( KGG_DIAG(NDOFG), KGGD_DIAG(NDOFG), STAT=MEMERROR )
-      IF (MEMERROR /= 0) THEN
-         FATAL_ERR = FATAL_ERR + 1
-         WRITE(ERR,9200) SUBR_NAME
-         WRITE(F06,9200) SUBR_NAME
-         CALL OUTA_HERE ( 'Y' )
-      ENDIF
 
 ! Initialize WRT_BUG
 
@@ -566,9 +557,6 @@
          CALL DEALLOCATE_SPARSE_MAT ( 'PG'      )
          CALL DEALLOCATE_SPARSE_MAT ( 'RMG'     )
       ENDIF
-
-      IF (ALLOCATED(KGG_DIAG )) DEALLOCATE(KGG_DIAG)
-      IF (ALLOCATED(KGGD_DIAG)) DEALLOCATE(KGGD_DIAG)
 
 ! **********************************************************************************************************************************
 
