@@ -224,14 +224,6 @@
 !                                                              and we know that the request is conservative.
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-! !--- CHASE and FEAST --- begin!
-      CHARACTER(  6*BYTE)      :: LANCMETH       = 'ARPACK'  ! Lanczos backend selector
-      INTEGER(LONG)            :: SUBSPITR       =   300     ! Subspace: max iterations
-      REAL(DOUBLE)             :: SUBSPTOL       = ONEPM6    ! Subspace: convergence tolerance
-      INTEGER(LONG)            :: SUBSPMAX       =    10     ! Subspace: default mode count fallback
-! !--- CHASE and FEAST --- end!
-
-! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: MPFOUT         =    '6'    ! MPFACTOR's can be output for 6 components (rel to MEFMGRID)
 !                                                              or for all NDOFR (MPFOUT = 'R') DOF's
 
