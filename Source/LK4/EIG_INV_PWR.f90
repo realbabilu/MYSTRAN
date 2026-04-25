@@ -212,11 +212,7 @@ iters:DO
 
                INFO = 0
 
-               IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-                  CALL FBS_SUPRLU ( SUBR_NAME, 'KLLD', NDOFL, NTERM_KLLD, I_KLLD, J_KLLD, KLLD, ITER_NUM, MVEC, INFO )
-               ELSE
-                  CALL FBS_SUPRLU ( SUBR_NAME, 'KLL' , NDOFL, NTERM_KLL , I_KLL , J_KLL , KLL , ITER_NUM, MVEC, INFO )
-               ENDIF
+               CALL FBS_SUPRLU ( SUBR_NAME, 'KMSM', NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, ITER_NUM, MVEC, INFO )
 
             ELSE
 
