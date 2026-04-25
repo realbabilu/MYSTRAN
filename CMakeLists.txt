@@ -13,7 +13,7 @@ if(WIN32)
   enable_language(RC)
 endif()
 
-# ! --- Modernizing MYSTRAN BLAS Integration start --- !
+# ! --- hijack mode for extern blas begin--- !
 # ==============================================================================
 # ABI SAFETY CHECK
 # ==============================================================================
@@ -33,9 +33,9 @@ if(NOT FORTRAN_C_INT_IS_4BYTE)
     \"Your Fortran compiler's C_INT is not 4 bytes. \"
     \"This means standard OpenBLAS (LP64) will corrupt the stack.\n\")
 endif()
-# ! --- Modernizing MYSTRAN BLAS Integration end --- !
+# ! --- hijack mode for extern blas end--- !
 
-# ! --- Modernizing MYSTRAN BLAS Integration start --- !
+# ! --- hijack mode for extern blas begin--- !
 # ==============================================================================
 # FIND OPENBLAS
 # ==============================================================================
@@ -53,7 +53,7 @@ else()
     set(enable_internal_blaslib ON CACHE BOOL "" FORCE)
     unset(TPL_BLAS_LIBRARIES CACHE)
 endif()
-# ! --- Modernizing MYSTRAN BLAS Integration end --- !
+# ! --- hijack mode for extern blas end--- !
 
 # basic compiler and output options
 set(CMAKE_SOURCE_DIR "${PROJECT_SOURCE_DIR}/Source")
@@ -195,7 +195,7 @@ else()
   set(SLU_DRIVER "${SUPERLU_DIR}/FORTRAN/c_fortran_dgssv.c")
 endif()
 
-# ! --- Modernizing MYSTRAN BLAS Integration start --- !
+# ! --- hijack mode for extern blas begin--- !
 if(NOT MYSTRAN_USE_OPENBLAS)
 # f2c stuff
 set(F2C_DIR "${PROJECT_SOURCE_DIR}/f2c")
@@ -269,7 +269,7 @@ if(WIN32)
   add_definitions(-DUSE_CLOCK -DMSDOS)
 endif()
 endif() # NOT MYSTRAN_USE_OPENBLAS
-# ! --- Modernizing MYSTRAN BLAS Integration end --- !
+# ! --- hijack mode for extern blas end--- !
 
 # set some extra vars for MSYS builds to make the binary portable
 if(WIN32)
@@ -288,12 +288,11 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
   "${CMAKE_SOURCE_DIR}/*.F03"
 )
 
-# ! --- Modernizing MYSTRAN BLAS Integration start --- !
+# ! --- hijack mode for extern blas begin--- !
 # BLAS configuration
 if(MYSTRAN_USE_OPENBLAS)
     message(STATUS "Using OpenBLAS: ${TPL_BLAS_LIBRARIES}")
-    # XERBLA.f removed per admin architecture; MYSTRAN_XERBLA.f90 handles MYSTRAN-side aborts.
-    set(missing_blas_src "")
+    set(missing_blas_src "${BLAS_SOURCE_DIR}/XERBLA.f")
 else()
     # same BLAS-finding subroutine as SuperLU
     if(NOT enable_internal_blaslib)
@@ -351,7 +350,7 @@ else()
       message(STATUS "Using system BLAS (${TPL_BLAS_LIBRARIES})")
     endif()
 endif()
-# ! --- Modernizing MYSTRAN BLAS Integration end --- !
+# ! --- hijack mode for extern blas end--- !
 
 # prepare the main executable, linked against the specifics and the m
 # it appears utils used to be a module, but that is no longer the case?

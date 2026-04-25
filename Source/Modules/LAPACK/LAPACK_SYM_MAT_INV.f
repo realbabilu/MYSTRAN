@@ -116,7 +116,7 @@
          INFO = -4
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DPOTRF', -INFO )
+         CALL XERBLA( 'DPOTRF', -INFO )
          RETURN
       END IF
 *
@@ -281,7 +281,7 @@
          INFO = -4
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DPOTRI', -INFO )
+         CALL XERBLA( 'DPOTRI', -INFO )
          RETURN
       END IF
 *
@@ -401,7 +401,7 @@
          INFO = -4
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DLAUUM', -INFO )
+         CALL XERBLA( 'DLAUUM', -INFO )
          RETURN
       END IF
 *
@@ -562,7 +562,7 @@
          INFO = -4
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DLAUU2', -INFO )
+         CALL XERBLA( 'DLAUU2', -INFO )
          RETURN
       END IF
 *
@@ -708,7 +708,7 @@
          INFO = -5
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DTRTI2', -INFO )
+         CALL XERBLA( 'DTRTI2', -INFO )
          RETURN
       END IF
 *

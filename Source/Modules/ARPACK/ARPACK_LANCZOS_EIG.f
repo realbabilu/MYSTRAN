@@ -7030,7 +7030,7 @@ c$$$     $         N ) ) ) THEN
 c$$$         INFO = -6
 c$$$      END IF
 c$$$      IF( INFO.NE.0 ) THEN
-c$$$         CALL MYSTRAN_XERBLA( 'SSTEQR', -INFO )
+c$$$         CALL XERBLA( 'SSTEQR', -INFO )
 c$$$         RETURN
 c$$$      END IF
 c

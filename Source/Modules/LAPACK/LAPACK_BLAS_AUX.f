@@ -398,7 +398,7 @@ c
          INFO = 13
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DGBMV ', INFO )
+         CALL XERBLA( 'DGBMV ', INFO )
          RETURN
       END IF
 *
@@ -642,7 +642,7 @@ c
          INFO = 9
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DGER  ', INFO )
+         CALL XERBLA( 'DGER  ', INFO )
          RETURN
       END IF
 *
@@ -973,7 +973,7 @@ c
          INFO = 11
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DSBMV ', INFO )
+         CALL XERBLA( 'DSBMV ', INFO )
          RETURN
       END IF
 *
@@ -1256,7 +1256,7 @@ c
          INFO = 10
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DSYMV ', INFO )
+         CALL XERBLA( 'DSYMV ', INFO )
          RETURN
       END IF
 *
@@ -1506,7 +1506,7 @@ c
          INFO = 7
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DSYR  ', INFO )
+         CALL XERBLA( 'DSYR  ', INFO )
          RETURN
       END IF
 *
@@ -1720,7 +1720,7 @@ c
          INFO = 9
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DSYR2 ', INFO )
+         CALL XERBLA( 'DSYR2 ', INFO )
          RETURN
       END IF
 *
@@ -2009,7 +2009,7 @@ c
          INFO = 12
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DSYR2K', INFO )
+         CALL XERBLA( 'DSYR2K', INFO )
          RETURN
       END IF
 *
@@ -2319,7 +2319,7 @@ c
          INFO = 10
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DSYRK ', INFO )
+         CALL XERBLA( 'DSYRK ', INFO )
          RETURN
       END IF
 *
@@ -2645,7 +2645,7 @@ c
          INFO = 9
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DTBSV ', INFO )
+         CALL XERBLA( 'DTBSV ', INFO )
          RETURN
       END IF
 *
@@ -3028,7 +3028,7 @@ c
          INFO = 11
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DTRMM ', INFO )
+         CALL XERBLA( 'DTRMM ', INFO )
          RETURN
       END IF
 *
@@ -3346,7 +3346,7 @@ c
          INFO = 8
       END IF
       IF( INFO.NE.0 )THEN
-         CALL MYSTRAN_XERBLA( 'DTRMV ', INFO )
+         CALL XERBLA( 'DTRMV ', INFO )
          RETURN
       END IF
 *
@@ -4901,7 +4901,7 @@ CIBM           PREFER SCALAR
          INFO = -2
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DLAGTS', -INFO )
+         CALL XERBLA( 'DLAGTS', -INFO )
          RETURN
       END IF
 *
@@ -8561,7 +8561,7 @@ CIBM           PREFER SCALAR
       END IF
 *
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DLASCL', -INFO )
+         CALL XERBLA( 'DLASCL', -INFO )
          RETURN
       END IF
 *
@@ -8948,7 +8948,7 @@ CIBM           PREFER SCALAR
          INFO = 9
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DLASR ', INFO )
+         CALL XERBLA( 'DLASR ', INFO )
          RETURN
       END IF
 *
@@ -9213,7 +9213,7 @@ CIBM           PREFER SCALAR
          INFO = -2
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DLASRT', -INFO )
+         CALL XERBLA( 'DLASRT', -INFO )
          RETURN
       END IF
 *
@@ -9834,7 +9834,7 @@ CIBM           PREFER SCALAR
          INFO = -8
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DLATBS', -INFO )
+         CALL XERBLA( 'DLATBS', -INFO )
          RETURN
       END IF
 *
@@ -10700,7 +10700,7 @@ CIBM           PREFER SCALAR
          INFO = -5
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DORG2L', -INFO )
+         CALL XERBLA( 'DORG2L', -INFO )
          RETURN
       END IF
 *
@@ -10831,7 +10831,7 @@ CIBM           PREFER SCALAR
          INFO = -5
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DORG2R', -INFO )
+         CALL XERBLA( 'DORG2R', -INFO )
          RETURN
       END IF
 *
@@ -10987,7 +10987,7 @@ CIBM           PREFER SCALAR
          INFO = -8
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DORGQL', -INFO )
+         CALL XERBLA( 'DORGQL', -INFO )
          RETURN
       ELSE IF( LQUERY ) THEN
          RETURN
@@ -11204,7 +11204,7 @@ CIBM           PREFER SCALAR
          INFO = -8
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DORGQR', -INFO )
+         CALL XERBLA( 'DORGQR', -INFO )
          RETURN
       ELSE IF( LQUERY ) THEN
          RETURN
@@ -11582,7 +11582,7 @@ CIBM           PREFER SCALAR
          INFO = -4
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DSYTD2', -INFO )
+         CALL XERBLA( 'DSYTD2', -INFO )
          RETURN
       END IF
 *

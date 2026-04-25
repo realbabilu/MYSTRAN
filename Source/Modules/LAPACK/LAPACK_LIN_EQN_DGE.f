@@ -132,7 +132,7 @@
          INFO = -4
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DGETRF', -INFO )
+         CALL XERBLA( 'DGETRF', -INFO )
          RETURN
       END IF
 *
@@ -309,7 +309,7 @@
          INFO = -6
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DGETRI', -INFO )
+         CALL XERBLA( 'DGETRI', -INFO )
          RETURN
       ELSE IF( LQUERY ) THEN
          RETURN
@@ -510,7 +510,7 @@
          INFO = -8
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DGETRS', -INFO )
+         CALL XERBLA( 'DGETRS', -INFO )
          RETURN
       END IF
 *
@@ -655,7 +655,7 @@
          INFO = -4
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DGETF2', -INFO )
+         CALL XERBLA( 'DGETF2', -INFO )
          RETURN
       END IF
 *

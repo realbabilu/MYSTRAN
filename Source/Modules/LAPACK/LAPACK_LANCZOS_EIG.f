@@ -130,7 +130,7 @@
          INFO = -4
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DGEQR2', -INFO )
+         CALL XERBLA( 'DGEQR2', -INFO )
          RETURN
       END IF
 *
@@ -309,7 +309,7 @@
          INFO = -10
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL MYSTRAN_XERBLA( 'DORM2R', -INFO )
+         CALL XERBLA( 'DORM2R', -INFO )
          RETURN
       END IF
 *

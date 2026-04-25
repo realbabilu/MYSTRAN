@@ -1,4 +1,3 @@
-! --- Modernizing MYSTRAN BLAS Integration start --- !
 ! 068 LAPACK_BLAS_AUX ##############################################################################################################
 
       SUBROUTINE XERBLA( SRNAME, arg_num )
@@ -57,5 +56,4 @@
 *     End of XERBLA
 *
       END SUBROUTINE XERBLA
-! --- Modernizing MYSTRAN BLAS Integration end --- !
 
