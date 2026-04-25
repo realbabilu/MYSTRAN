@@ -9,10 +9,10 @@
 ! without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 ! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
 ! the following conditions:
-
+!
 ! The above copyright notice and this permission notice shall be included in all copies or substantial
 ! portions of the Software and documentation.
-
+!
 ! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 ! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 ! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -40,10 +40,10 @@
 
       INTEGER(LONG), INTENT(OUT)                   :: MYSTRAN_DIR_LEN   ! Length of MYSTRAN_DIR (not including trailing blanks)
       INTEGER(LONG)                                :: I                 ! DO loop index
+      INTEGER(LONG)                                :: ENV_STAT          ! Status from GET_ENVIRONMENT_VARIABLE
 
-! --- get_env fix start --- !
-      CALL GET_ENVIRONMENT_VARIABLE ( 'MYSTRAN_directory', MYSTRAN_DIR )
-! --- get_env fix end --- !
+      MYSTRAN_DIR = ' '
+      CALL GET_ENVIRONMENT_VARIABLE ( 'MYSTRAN_directory', MYSTRAN_DIR, STATUS=ENV_STAT )
       MYSTRAN_DIR_LEN = FILE_NAM_MAXLEN
       DO I=FILE_NAM_MAXLEN,1,-1
          IF (MYSTRAN_DIR(I:I) /= ' ') THEN
@@ -57,5 +57,4 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE GET_MYSTRAN_DIR
-
 
