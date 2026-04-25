@@ -60,7 +60,7 @@
                                          NTERM_MLL, NTERM_MLLn,                                                                    &
                                          NVEC, NUM_EIGENS, NUM_KLLD_DIAG_ZEROS, NUM_MLL_DIAG_ZEROS, SOL_NAME, WARN_ERR
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSTOR, SUPINFO
+      USE PARAMS, ONLY                :  EPSIL, LANCMETH, SOLLIB, SPARSTOR, SUPINFO
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, &
                                          EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ,    &
                                          MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
@@ -261,6 +261,16 @@
 
 ! **********************************************************************************************************************************
       ! Solve eigenvalue problem
+! !--- CHASE and FEAST --- begin!
+      IF (((LANCMETH(1:6) == 'FEAST ') .OR. (LANCMETH(1:6) == 'CHASE ') .OR. (LANCMETH(1:6) == 'SUBSP ')) .AND.                 &
+          (EIG_METH(1:7) /= 'LANCZOS')) THEN
+         WARN_ERR = WARN_ERR + 1
+         WRITE(ERR,4910) LANCMETH, EIG_METH
+         IF (SUPINFO == 'N') THEN
+            WRITE(F06,4910) LANCMETH, EIG_METH
+         ENDIF
+      ENDIF
+! !--- CHASE and FEAST --- end!
       IF ((EIG_METH(1:3) == 'GIV') .OR. (EIG_METH(1:4) == 'MGIV')) THEN
          CALL EIG_GIV_MGIV
 
@@ -268,12 +278,22 @@
          CALL EIG_INV_PWR
 
       ELSE IF (EIG_METH(1:7) == 'LANCZOS') THEN
-         ! Use adaptive version if frequency range specified and not BUCKLING/GEN CB MODEL
-         IF ((EIG_FRQ2 > EPS1) .AND. (SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL')) THEN
-            CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+! !--- CHASE and FEAST --- begin!
+         IF (LANCMETH(1:6) == 'FEAST ') THEN
+            CALL EIG_LANCZOS_FEAST
+         ELSE IF (LANCMETH(1:6) == 'CHASE ') THEN
+            CALL EIG_LANCZOS_CHASE
+         ELSE IF (LANCMETH(1:6) == 'SUBSP ') THEN
+            CALL EIG_LANCZOS_SUBSPACE
          ELSE
-            CALL EIG_LANCZOS_ARPACK
+            ! Use adaptive version if frequency range specified and not BUCKLING/GEN CB MODEL
+            IF ((EIG_FRQ2 > EPS1) .AND. (SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL')) THEN
+               CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+            ELSE
+               CALL EIG_LANCZOS_ARPACK
+            ENDIF
          ENDIF
+! !--- CHASE and FEAST --- end!
 
       ELSE
 
@@ -434,6 +454,9 @@
                     ,/,14X,' FATAL ERROR - CANNOT START LINK ',I2)
 
 12345 FORMAT(A,10X,A)
+
+ 4910 FORMAT(' *WARNING 4910: PARAM LANCMETH=',A6,' IS IGNORED FOR EIG METHOD "',A,'" (NON-LANCZOS). USING EIG METHOD PATH AS-IS.'&
+                 ,/,15X,' SET EIGRL/LANCZOS TO ENABLE FEAST/CHASE/SUBSP DISPATCH.')
 
 99001 FORMAT(1X,6(1ES14.6))
 

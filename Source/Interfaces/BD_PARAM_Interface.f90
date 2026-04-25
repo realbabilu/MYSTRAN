@@ -43,16 +43,18 @@
 
       USE PARAMS, ONLY                :  ARP_TOL         , ART_KED         , ART_ROT_KED     , ART_TRAN_KED    ,                   &
                                          ART_MASS        , ART_ROT_MASS    , ART_TRAN_MASS   , AUTOSPC         , AUTOSPC_NSET    , &
-                                         AUTOSPC_RAT     , AUTOSPC_INFO    , AUTOSPC_SPCF    , BAILOUT         , CRS_CCS         , &
-                                         CBMIN3          , CBMIN4          , CBMIN4T         , CHKGRDS         ,                   &
+                                         AUTOSPC_RAT     , AUTOSPC_INFO    , AUTOSPC_SPCF    , BAILOUT         , BANDEDOPT       , &
+                                         CRS_CCS         , CBMIN3          , CBMIN4          , CBMIN4T         ,                   &
+                                         CHKGRDS         ,                                                                               &
                                          CUSERIN         , CUSERIN_EID     , CUSERIN_IN4     , CUSERIN_PID     , CUSERIN_SPNT_ID , &
                                          CUSERIN_XSET    , CUSERIN_COMPTYP , DARPACK         ,                                     &
                                          DELBAN          , EIGESTL         , EIGNORM2        , ELFORCEN        , EPSERR          , &
                                          EQCHK_REF_GRID  , EQCHK_NORM      , EQCHK_OUTPUT    , EQCHK_TINY      ,                   &
                                          EPSIL           , EMP0_PAUSE      , ESP0_PAUSE      , F06_COL_START   ,                   &
-                                         GRDPNT          , GRIDSEQ         , HEXAXIS         ,                                     &
+                                         GRDPNT          , GRDPNT_IN       , GRIDSEQ         , HEXAXIS         ,                   &
                                          IORQ1M          , IORQ1S          , IORQ1B          , IORQ2B          , IORQ2T          , &
-                                         ITMAX           , KLLRAT          , KOORAT          ,                   MATSPARS        , &
+                                         ITMAX           , KLLRAT          , KOORAT          , LANCMETH        , SUBSPITR        , &
+                                         SUBSPTOL        , SUBSPMAX        , MATSPARS        ,                                     &
                                          MEMAFAC         , MIN4TRED        , MXALLOCA        , MAXRATIO        ,                   &
                                          MEFMCORD        , MEFMLOC         , MEFMGRID        ,                                     &
                                          MPFOUT          , MXITERI         , MXITERL         , OTMSKIP         , POST            , &

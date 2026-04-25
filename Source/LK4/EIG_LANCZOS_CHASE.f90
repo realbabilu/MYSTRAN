@@ -1,17 +1,18 @@
+! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
-
+!
 ! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)
-
+!
 ! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 ! associated documentation files (the "Software"), to deal in the Software without restriction, including
 ! without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 ! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
 ! the following conditions:
-
+!
 ! The above copyright notice and this permission notice shall be included in all copies or substantial
 ! portions of the Software and documentation.
-
+!
 ! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 ! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 ! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,46 +21,38 @@
 ! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ! THE SOFTWARE.
 ! _______________________________________________________________________________________________________
-
+!
 ! End MIT license text.
 
-      MODULE LINK4_USE_IFs
-
-! USE Interface statements for all subroutines called by SUBROUTINE LINK4
-
-      USE TIME_INIT_Interface
-      USE OURDAT_Interface
-      USE OURTIM_Interface
-      USE READ_L1A_Interface
-      USE OUTA_HERE_Interface
-      USE READ_L1M_Interface
-      USE SPARSE_MAT_DIAG_ZEROS_Interface
-      USE ALLOCATE_SPARSE_MAT_Interface
-      USE CRS_SYM_TO_CRS_NONSYM_Interface
-      USE EIG_GIV_MGIV_Interface
-      USE EIG_INV_PWR_Interface
 ! !--- CHASE and FEAST --- begin!
-      USE EIG_LANCZOS_FEAST_Interface
-      USE EIG_LANCZOS_CHASE_Interface
-      USE EIG_LANCZOS_SUBSPACE_Interface
-! !--- CHASE and FEAST --- end!
-      USE EIG_LANCZOS_ARPACK_Interface
-      USE EIG_LANCZOS_ARPACK_ADAPTIVE_Interface
-      USE DEALLOCATE_SPARSE_MAT_Interface
-      USE ALLOCATE_EIGEN1_MAT_Interface
-      USE CALC_GEN_MASS_Interface
-      USE RENORM_ON_MASS_Interface
-      USE WRITE_L1M_Interface
-      USE EIG_SUMMARY_Interface
-      USE FILE_OPEN_Interface
-      USE FILE_CLOSE_Interface
-      USE WRITE_VECTOR_Interface
-      USE OUTPUT4_PROC_Interface
-      USE DEALLOCATE_LAPACK_MAT_Interface
-      USE DEALLOCATE_EIGEN1_MAT_Interface
-      USE WRITE_L1A_Interface
-      USE CHK_ARRAY_ALLOC_STAT_Interface
-      USE WRITE_ALLOC_MEM_TABLE_Interface
-      USE FILE_INQUIRE_Interface
+      SUBROUTINE EIG_LANCZOS_CHASE
 
-      END MODULE LINK4_USE_IFs
+! Stage-1 CHASE entry point.
+! The method selector is integrated, but if the native backend is not linked
+! this wrapper falls back to ARPACK Lanczos.
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE
+      USE IOUNT1, ONLY                :  ERR, F06
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, WARN_ERR
+      USE PARAMS, ONLY                :  SUPINFO
+
+      USE EIG_LANCZOS_CHASE_USE_IFs
+      USE LINK_MESSAGE_Interface
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'EIG_LANCZOS_CHASE'
+
+      WARN_ERR = WARN_ERR + 1
+      WRITE(ERR,4912)
+      IF (SUPINFO == 'N') WRITE(F06,4912)
+
+      CALL LINK_MESSAGE('SOLVE FOR EIGENVALS/VECTORS - CHASE FALLBACK (ARPACK LANCZOS)')
+      CALL EIG_LANCZOS_ARPACK
+
+      RETURN
+
+ 4912 FORMAT(' *WARNING 4912: CHASE NATIVE BACKEND NOT LINKED IN THIS BUILD. USING ARPACK LANCZOS FALLBACK.')
+
+      END SUBROUTINE EIG_LANCZOS_CHASE
+! !--- CHASE and FEAST --- end!

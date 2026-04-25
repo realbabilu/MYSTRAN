@@ -312,6 +312,15 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
   "${CMAKE_SOURCE_DIR}/*.F03"
 )
 
+# !--- CHASE and FEAST --- begin!
+set_source_files_properties(
+  "${CMAKE_SOURCE_DIR}/Source/LK4/EIG_LANCZOS_FEAST.f90"
+  "${CMAKE_SOURCE_DIR}/Source/LK4/EIG_LANCZOS_CHASE.f90"
+  "${CMAKE_SOURCE_DIR}/Source/LK4/EIG_LANCZOS_SUBSPACE.f90"
+  PROPERTIES COMPILE_OPTIONS "-cpp"
+)
+# !--- CHASE and FEAST --- end!
+
 # ! --- hijack mode for extern blas begin--- !
 # BLAS configuration
 if(MYSTRAN_USE_OPENBLAS)

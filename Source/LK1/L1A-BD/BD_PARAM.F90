@@ -50,7 +50,8 @@
                                          EPSIL           , EMP0_PAUSE      , ESP0_PAUSE      , F06_COL_START   ,                   &
                                          GRDPNT          , GRDPNT_IN       , GRIDSEQ         , HEXAXIS         ,                   &
                                          IORQ1M          , IORQ1S          , IORQ1B          , IORQ2B          , IORQ2T          , &
-                                         ITMAX           , KLLRAT          , KOORAT          ,                   MATSPARS        , &
+                                         ITMAX           , KLLRAT          , KOORAT          , LANCMETH        , SUBSPITR        , &
+                                         SUBSPTOL        , SUBSPMAX        , MATSPARS        ,                                     &
                                          MEMAFAC         , MIN4TRED        , MXALLOCA        , MAXRATIO        ,                   &
                                          MEFMCORD        , MEFMLOC         , MEFMGRID        ,                                     &
                                          MPFOUT          , MXITERI         , MXITERL         , OTMSKIP         , POST            , &
@@ -1364,6 +1365,115 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
+
+! !--- CHASE and FEAST --- begin!
+! LANCMETH sets the Lanczos backend selector for EIGRL/LANCZOS flow
+
+      ELSE IF (JCARD(2)(1:8) == 'LANCMETH') THEN
+         PARNAM = 'LANCMETH'
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      (CHRPARM == 'ARPACK  ') THEN
+               LANCMETH = 'ARPACK'
+            ELSE IF (CHRPARM == 'FEAST   ') THEN
+               LANCMETH = 'FEAST '
+            ELSE IF (CHRPARM == 'CHASE   ') THEN
+               LANCMETH = 'CHASE '
+            ELSE IF ((CHRPARM == 'SUBSP   ') .OR. (CHRPARM == 'SUBSPACE')) THEN
+               LANCMETH = 'SUBSP '
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'ARPACK, FEAST, CHASE, OR SUBSP',CHRPARM,LANCMETH
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'ARPACK, FEAST, CHASE, OR SUBSP',CHRPARM,LANCMETH
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+! SUBSPITR sets max iterations for subspace stage-1 backend
+
+      ELSE IF (JCARD(2)(1:8) == 'SUBSPITR') THEN
+         PARNAM = 'SUBSPITR'
+         CALL I4FLD ( JCARD(3), JF(3), I4PARM )
+         IF (IERRFL(3) == 'N') THEN
+            IF (I4PARM >= 1) THEN
+               SUBSPITR = I4PARM
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1172) PARNAM,'>= 1',I4PARM,SUBSPITR
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1172) PARNAM,'>= 1',I4PARM,SUBSPITR
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+! SUBSPTOL sets convergence tolerance for subspace stage-1 backend
+
+      ELSE IF (JCARD(2)(1:8) == 'SUBSPTOL') THEN
+         PARNAM = 'SUBSPTOL'
+         CALL R8FLD ( JCARD(3), JF(3), R8PARM )
+         IF (IERRFL(3) == 'N') THEN
+            IF (R8PARM > ZERO) THEN
+               SUBSPTOL = R8PARM
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1173) PARNAM,'> 0.D0',R8PARM
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1173) PARNAM,'> 0.D0',R8PARM
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+! SUBSPMAX sets default number of requested modes for subspace stage-1 backend
+
+      ELSE IF (JCARD(2)(1:8) == 'SUBSPMAX') THEN
+         PARNAM = 'SUBSPMAX'
+         CALL I4FLD ( JCARD(3), JF(3), I4PARM )
+         IF (IERRFL(3) == 'N') THEN
+            IF (I4PARM >= 1) THEN
+               SUBSPMAX = I4PARM
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1172) PARNAM,'>= 1',I4PARM,SUBSPMAX
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1172) PARNAM,'>= 1',I4PARM,SUBSPMAX
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+! !--- CHASE and FEAST --- end!
 
 ! OTMSKIP defines whether tp quit if a singularity is found in matrix decomp
 
