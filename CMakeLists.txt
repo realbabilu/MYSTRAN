@@ -82,6 +82,30 @@ set(CMAKE_CONFIGURATION_TYPES
   CACHE STRING "" FORCE
 )
 
+# !--- ndebug release fix --- begin!
+# Some Intel ifx Release setups conflict with forced NDEBUG definitions coming
+# from default CMake release flags. Allow stripping NDEBUG for reproducible
+# behavior across toolchains.
+option(MYSTRAN_DISABLE_NDEBUG "Remove NDEBUG from CMake release-style flags" ON)
+if(MYSTRAN_DISABLE_NDEBUG)
+  foreach(lang C CXX Fortran)
+    foreach(cfg RELEASE RELWITHDEBINFO MINSIZEREL)
+      set(_var "CMAKE_${lang}_FLAGS_${cfg}")
+      if(DEFINED ${_var})
+        set(_flags "${${_var}}")
+        string(REPLACE "-DNDEBUG" "" _flags "${_flags}")
+        string(REPLACE "/DNDEBUG" "" _flags "${_flags}")
+        string(REPLACE "-D NDEBUG" "" _flags "${_flags}")
+        string(REPLACE "/D NDEBUG" "" _flags "${_flags}")
+        string(REGEX REPLACE "[ \t]+" " " _flags "${_flags}")
+        string(STRIP "${_flags}" _flags)
+        set(${_var} "${_flags}" CACHE STRING "" FORCE)
+      endif()
+    endforeach()
+  endforeach()
+endif()
+# !--- ndebug release fix --- end!
+
 # suppress cmake warnings for superlu
 if(NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
   set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
