@@ -40,7 +40,8 @@
 
       USE PARAMS, ONLY                :  ARP_TOL         , ART_KED         , ART_ROT_KED     , ART_TRAN_KED    ,                   &
                                          ART_MASS        , ART_ROT_MASS    , ART_TRAN_MASS   , AUTOSPC         , AUTOSPC_NSET    , &
-                                         AUTOSPC_RAT     , AUTOSPC_INFO    , AUTOSPC_SPCF    , BAILOUT         , CRS_CCS         , &
+                                         AUTOSPC_RAT     , AUTOSPC_INFO    , AUTOSPC_SPCF    , BAILOUT         , BANDEDOPT       , &
+                                         CRS_CCS         , &
                                          CBMIN3          , CBMIN4          , CBMIN4T         , CHKGRDS         ,                   &
                                          CUSERIN         , CUSERIN_EID     , CUSERIN_IN4     , CUSERIN_PID     , CUSERIN_SPNT_ID , &
                                          CUSERIN_XSET    , CUSERIN_COMPTYP , DARPACK         ,                                     &
@@ -377,6 +378,12 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
+
+! BANDEDOPT enables experimental banded-order optimization path
+
+      ELSE IF (JCARD(2)(1:8) == 'BANDEDOP') THEN
+         PARNAM = 'BANDEDOPT'
+         CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, BANDEDOPT)
 
 ! CBMIN3 is a parameter for the Mindlin (thick) triangular plate element (CTRIA3).
 !   It is used in calculating PHISQ, a scalar multiple of the transverse shear stiff
@@ -872,15 +879,17 @@
                GRIDSEQ = 'GRID    '
             ELSE IF (CHRPARM == 'INPUT   ') THEN
                GRIDSEQ = 'INPUT   '
+            ELSE IF (CHRPARM(1:3) == 'RCM') THEN
+               GRIDSEQ = 'RCM     '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'BANDIT, GRID or INPUT',CHRPARM,GRIDSEQ
+               WRITE(ERR,1189) PARNAM,'BANDIT, GRID, INPUT or RCM',CHRPARM,GRIDSEQ
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'BANDIT, GRID or INPUT',CHRPARM,GRIDSEQ
+                  WRITE(F06,1189) PARNAM,'BANDIT, GRID, INPUT or RCM',CHRPARM,GRIDSEQ
                ENDIF
             ENDIF
          ENDIF

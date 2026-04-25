@@ -75,6 +75,9 @@
       INTEGER(LONG)            :: BAILOUT        =     0     ! If >= 0 quit if a singularity in decomposing a matrix is detected
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
+      CHARACTER(  1*BYTE)      :: BANDEDOPT      =    'N'    ! 'Y'/'N' enable experimental banded-order optimization path
+
+! ----------------------------------------------------------------------------------------------------------------------------------
       REAL(DOUBLE)             :: CBMIN3         =  TWO      ! Trans shear factor for MIN3  triangle elems (TRIA3)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
@@ -161,6 +164,7 @@
 !                                                              BANDIT for bandit auto grid swquencing
 !                                                              GRID for grid numerical order
 !                                                              INPUT for grid input order
+!                                                              RCM for reserved/add-on RCM path (currently mapped to INPUT flow)
       CHARACTER(  1*BYTE)      :: SEQQUIT        =    'N'    !*'Y', 'N' indicator to stop processing if G.P. auto sequencing failed
 !                                                               (goes in field 4 of PARAM GRIDSEQ entry)
       CHARACTER(  1*BYTE)      :: SEQPRT         =    'N'    !*'Y', 'N' indicator to print SEQGP card images from bandit
