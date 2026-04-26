@@ -1747,6 +1747,17 @@
 !                                                              DGB is the type used in the original ARPACK subr dsband
 !                                                              DPB uses less disk storage but may not work for free-free eigens
 
+! --- chase_feast_add --- begin !
+      CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_METHOD  = 'ARPACK'
+                                                             ! Extract backend selected for EIGRL/LANCZOS family.
+
+      CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_MODE    = ' '
+                                                             ! Optional method-specific mode selector from EIGRL continuation.
+
+      CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_SOURCE  = 'DEFAULT'
+                                                             ! DEFAULT/EIGRL/PARAM source for extract-method selection.
+! --- chase_feast_add --- end !
+
       CHARACTER(1*BYTE)               :: EIG_VECS            = 'Y'
                                                              ! Indicator of whether to calc eigenvecs
 
@@ -1781,6 +1792,36 @@
 !                                                              extraction method.(see subr DSBAND in module ARPACK_LANCZOS_1).
 !                                                              It must be > 1
 
+      INTEGER(LONG)                   :: EIG_CHASE_NEX       = 64
+                                                             ! CHASE oversampling dimension.
+
+      INTEGER(LONG)                   :: EIG_CHASE_MAX_ITER  = 80
+                                                             ! CHASE iteration limit.
+
+      INTEGER(LONG)                   :: EIG_CHASE_DEG       = 0
+                                                             ! CHASE Chebyshev degree override, 0 means library default.
+
+      INTEGER(LONG)                   :: EIG_FEAST_M0        = 48
+                                                             ! FEAST search subspace size.
+
+      INTEGER(LONG)                   :: EIG_FEAST_TOL_DIGITS= 8
+                                                             ! FEAST convergence digits (fpm(3)).
+
+      INTEGER(LONG)                   :: EIG_FEAST_MAX_LOOP  = 60
+                                                             ! FEAST iteration limit (fpm(4)).
+
+      INTEGER(LONG)                   :: EIG_FEAST_N_CONTOUR = 8
+                                                             ! FEAST contour integration points (fpm(8)).
+
+      INTEGER(LONG)                   :: EIG_SUBSPACE_NSUB   = 24
+                                                             ! Dense inverse-subspace working subspace dimension.
+
+      INTEGER(LONG)                   :: EIG_SUBSPACE_MAX_ITER = 40
+                                                             ! Dense inverse-subspace iteration limit.
+
+      INTEGER(LONG)                   :: EIG_DENSE_NEX       = 64
+                                                             ! Reserved dense oversampling/workspace knob for parity with other methods.
+
       INTEGER(LONG)                   :: MIJ_ROW             = 0
                                                              ! Row no. of largest off-diag gen. mass term.
 
@@ -1804,6 +1845,15 @@
 
       REAL(DOUBLE)                    :: EIG_SIGMA           = -ONE
                                                              ! For Lanczos, the shift frequency
+
+      REAL(DOUBLE)                    :: EIG_CHASE_TOL       = 1.0D-10
+                                                             ! CHASE convergence tolerance.
+
+      REAL(DOUBLE)                    :: EIG_FEAST_SEARCH_SCALE = 1.10D0
+                                                             ! FEAST range expansion factor when upper frequency is requested.
+
+      REAL(DOUBLE)                    :: EIG_SUBSPACE_TOL    = 1.0D-06
+                                                             ! Dense inverse-subspace convergence tolerance.
 
       REAL(DOUBLE)                    :: MAXMIJ              = ZERO
                                                              ! Largest off-diag term in generalized mass matrix.

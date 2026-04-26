@@ -268,6 +268,7 @@ if(WIN32)
 endif()
 
 set(F2C_ARITH_H "${F2C_INCLUDE_DIR}/arith.h")
+# --- chase_feast_add --- begin !
 set_source_files_properties(
   ${F2C_ARITHCHK_SRC} PROPERTIES COMPILE_FLAGS "-DNO_LONG_LONG -DNO_FPINIT"
 )
@@ -311,6 +312,17 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
   "${CMAKE_SOURCE_DIR}/*.f03"
   "${CMAKE_SOURCE_DIR}/*.F03"
 )
+
+set_source_files_properties(
+  "${PROJECT_SOURCE_DIR}/Source/LK4/EIGRL_EXTRACT_SOLVERS.F90"
+  PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"
+)
+
+option(MYSTRAN_USE_EXTERNAL_CHASE "Enable native CHASE backend on condensed dense problem" OFF)
+set(MYSTRAN_CHASE_EXTRA_LIBS "" CACHE STRING "Additional libraries for native CHASE backend (for example: chase_f;chase_c;stdc++;gomp)")
+option(MYSTRAN_USE_EXTERNAL_FEAST "Enable native FEAST backend on condensed dense problem" OFF)
+set(MYSTRAN_FEAST_EXTRA_LIBS "" CACHE STRING "Additional libraries for native FEAST backend")
+# --- chase_feast_add --- end !
 
 # ! --- hijack mode for extern blas begin--- !
 # BLAS configuration
@@ -410,6 +422,35 @@ else()
     target_link_libraries(mystran superlu ${TPL_BLAS_LIBRARIES})
   else()
     target_link_libraries(mystran superlu f2c)
+  endif()
+endif()
+
+if(MYSTRAN_USE_EXTERNAL_CHASE)
+  target_compile_definitions(mystran PRIVATE MYSTRAN_HAVE_EXTERNAL_CHASE)
+  foreach(_chase_lib IN LISTS MYSTRAN_CHASE_EXTRA_LIBS)
+    get_filename_component(_chase_dir "${_chase_lib}" DIRECTORY)
+    if(EXISTS "${_chase_dir}/chase_diag.mod")
+      target_include_directories(mystran PRIVATE "${_chase_dir}")
+      break()
+    endif()
+  endforeach()
+  if(MYSTRAN_CHASE_EXTRA_LIBS)
+    separate_arguments(MYSTRAN_CHASE_EXTRA_LIBS)
+    target_link_libraries(mystran ${MYSTRAN_CHASE_EXTRA_LIBS})
+  endif()
+endif()
+
+if(MYSTRAN_USE_EXTERNAL_FEAST)
+  target_compile_definitions(mystran PRIVATE MYSTRAN_HAVE_EXTERNAL_FEAST)
+  foreach(_feast_lib IN LISTS MYSTRAN_FEAST_EXTRA_LIBS)
+    get_filename_component(_feast_dir "${_feast_lib}" DIRECTORY)
+    if(EXISTS "${_feast_dir}")
+      target_include_directories(mystran PRIVATE "${_feast_dir}")
+    endif()
+  endforeach()
+  if(MYSTRAN_FEAST_EXTRA_LIBS)
+    separate_arguments(MYSTRAN_FEAST_EXTRA_LIBS)
+    target_link_libraries(mystran ${MYSTRAN_FEAST_EXTRA_LIBS})
   endif()
 endif()
 

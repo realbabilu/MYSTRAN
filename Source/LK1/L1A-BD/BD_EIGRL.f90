@@ -33,9 +33,14 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LSUB, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONEPM4
+      USE PARAMS, ONLY                :  LANCMETH
       USE MODEL_STUF, ONLY            :  CC_EIGR_SID, EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_LANCZOS_NEV_DELT,      &
                                          EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM,  &
-                                         EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
+                                         EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT,                     &
+                                         EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, EIG_EXTRACT_SOURCE,                                   &
+                                         EIG_CHASE_NEX, EIG_CHASE_MAX_ITER, EIG_CHASE_DEG, EIG_FEAST_M0, EIG_FEAST_TOL_DIGITS,      &
+                                         EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR, EIG_SUBSPACE_NSUB, EIG_SUBSPACE_MAX_ITER,         &
+                                         EIG_DENSE_NEX, EIG_CHASE_TOL, EIG_FEAST_SEARCH_SCALE, EIG_SUBSPACE_TOL
 
       USE BD_EIGRL_USE_IFs
 
@@ -48,11 +53,15 @@
       CHARACTER(LEN(CARD))            :: CHILD             ! "Child" card read in subr NEXTC, called herein
       CHARACTER( 1*BYTE)              :: USE_THIS_EIG      ! ='Y' if this is the EIGR meth requested in CC
       CHARACTER(LEN=JCARD_LEN)        :: JCARD(10)         ! The 10 fields of characters making up CARD
+! --- chase_feast_add --- begin !
+      CHARACTER(LEN=JCARD_LEN)        :: JCARD_MAIN(10)    ! Saved copy of the parent EIGRL card fields
+! --- chase_feast_add --- end !
 
       INTEGER(LONG)                   :: I4INP             ! An integer*4 value read
       INTEGER(LONG)                   :: ICONT     = 0     ! Indicator of whether a cont card exists. Output from subr NEXTC
       INTEGER(LONG)                   :: IERR      = 0     ! Error indicator returned from subr NEXTC called herein
       INTEGER(LONG)                   :: JERR      = 0     ! A local error count
+      REAL(DOUBLE)                    :: R8INP             ! Generic real read from continuation
 
 
 
@@ -73,30 +82,25 @@
 !   8      EIG_SIGMA             Lanczos shift eigen                  Real
 !   9      EIG_NORM              Renormalization method (MASS or MAX) Char
 
-! Continuation entry:
-
-!   1      EIG_MODE              Lanczos "mode" (dsband)              Integer, 2 or 3
-!   2      EIG_LAP_MAT_TYPE      LAPACK matrix type (DGB, DPB)        Char
-!   3      EIG_LANCZOS_NEV_DELT  Number to add to est num roots       Integer >= 0
+! --- chase_feast_add --- begin !
+! Continuation entry (v1 extract-method selector):
+!
+!   2      EIG_EXTRACT_METHOD    ARPACK/CHASE/FEAST/SUBSP/DENSE
+!   3      EIG_EXTRACT_MODE      Optional method-specific mode string
+!   4-9    Method positional options (see implementation notes)
+! --- chase_feast_add --- end !
 
 ! Make JCARD from CARD
 
       CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
+      JCARD_MAIN = JCARD
 
       JERR = 0
       USE_THIS_EIG = 'N'
 
-      ! second card deprecated. set defaults:
-      !   - ARPACK mode 2 for buckling, 3 for everything else
-      !   - DGB matrix type (in case we use the banded solver)
-      !   - EIG_LANCZOS_NEV_DELT, previously undocumented, kept default (2)
-      IF (SOL_NAME == 'BUCKLING') THEN
-         EIG_MODE = 2
-      ELSE
-         EIG_MODE = 3
-      ENDIF
-      EIG_LAP_MAT_TYPE = 'DGB     '
-      EIG_LANCZOS_NEV_DELT = 2
+! --- chase_feast_add --- begin !
+      CALL SET_EXTRACT_DEFAULTS
+! --- chase_feast_add --- end !
 
       CALL I4FLD ( JCARD(2), JF(2), EIG_SID )              ! Read set ID and check if it is one requested in Case Control
       IF (IERRFL(2) == 'N') THEN
@@ -129,6 +133,7 @@
             EIG_N2 = I4INP
          ENDIF
       ENDIF
+      CALL APPLY_METHOD_SIZED_DEFAULTS
 
       IF (JCARD(6)(1:) /= ' ') THEN                        ! Read field 6: MSGLVL
          CALL I4FLD ( JCARD(6), JF(6), I4INP )
@@ -166,6 +171,25 @@
             WRITE(F06,1107) EIG_NORM
          ENDIF
       ENDIF
+
+! --- chase_feast_add --- begin !
+      IF (LARGE_FLD_INP == 'N') THEN
+         CALL NEXTC  ( CARD, ICONT, IERR )
+         IF (ICONT == 1) THEN
+            CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
+            CALL PARSE_EIGRL_CONTINUATION ( JCARD, JERR )
+            JCARD = JCARD_MAIN
+         ENDIF
+      ELSE
+         CALL NEXTC2 ( CARD, ICONT, IERR, CHILD )
+         IF (ICONT == 1) THEN
+            CARD = CHILD
+            CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
+            CALL PARSE_EIGRL_CONTINUATION ( JCARD, JERR )
+            JCARD = JCARD_MAIN
+         ENDIF
+      ENDIF
+! --- chase_feast_add --- end !
 
 ! Check that the above data read meets requirements.
 
@@ -238,6 +262,7 @@
 
 ! ##################################################################################################################################
 
+! --- chase_feast_add --- begin !
       CONTAINS
 
 ! ##################################################################################################################################
@@ -303,4 +328,196 @@
 
       END SUBROUTINE EIGRL_DATA_CHECK
 
+! ##################################################################################################################################
+
+      SUBROUTINE SET_EXTRACT_DEFAULTS
+
+      IMPLICIT NONE
+
+      EIG_EXTRACT_METHOD = 'ARPACK  '
+      EIG_EXTRACT_MODE   = '        '
+      EIG_EXTRACT_SOURCE = 'DEFAULT '
+
+      IF (SOL_NAME == 'BUCKLING') THEN
+         EIG_MODE = 2
+      ELSE
+         EIG_MODE = 3
+      ENDIF
+      EIG_LAP_MAT_TYPE      = 'DGB     '
+      EIG_LANCZOS_NEV_DELT  = 2
+      CALL APPLY_METHOD_SIZED_DEFAULTS
+
+      IF (LANCMETH /= '        ') THEN
+         EIG_EXTRACT_METHOD = LANCMETH
+         EIG_EXTRACT_SOURCE = 'PARAM   '
+      ENDIF
+
+      END SUBROUTINE SET_EXTRACT_DEFAULTS
+
+! ##################################################################################################################################
+
+      SUBROUTINE APPLY_METHOD_SIZED_DEFAULTS
+
+      IMPLICIT NONE
+
+      EIG_CHASE_NEX          = MAX(64, 4*MAX(1,EIG_N2))
+      EIG_CHASE_TOL          = 1.0D-10
+      EIG_CHASE_MAX_ITER     = 80
+      EIG_CHASE_DEG          = 0
+
+      EIG_FEAST_M0           = MAX(48, 2*(MAX(1,EIG_N2) + 16))
+      EIG_FEAST_TOL_DIGITS   = 8
+      EIG_FEAST_MAX_LOOP     = 60
+      EIG_FEAST_N_CONTOUR    = 8
+      EIG_FEAST_SEARCH_SCALE = 1.10D0
+
+      EIG_SUBSPACE_NSUB      = MAX(MAX(1,EIG_N2) + 16, 24)
+      EIG_SUBSPACE_TOL       = 1.0D-06
+      EIG_SUBSPACE_MAX_ITER  = 40
+
+      EIG_DENSE_NEX          = MAX(64, 4*MAX(1,EIG_N2))
+
+      END SUBROUTINE APPLY_METHOD_SIZED_DEFAULTS
+
+! ##################################################################################################################################
+
+      SUBROUTINE PARSE_EIGRL_CONTINUATION ( JCARDX, JERRX )
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=JCARD_LEN), INTENT(IN) :: JCARDX(10)
+      INTEGER(LONG), INTENT(INOUT)         :: JERRX
+      CHARACTER(LEN=JCARD_LEN)             :: METHOD
+
+      METHOD = '        '
+
+      IF (JCARDX(2)(1:) == ' ') THEN
+         RETURN
+      ENDIF
+
+      CALL CHAR_FLD ( JCARDX(2), JF(2), METHOD )
+      CALL LEFT_ADJ_BDFLD ( METHOD )
+
+      IF ((METHOD(1:6) == 'ARPACK') .OR. (METHOD(1:5) == 'CHASE') .OR. (METHOD(1:5) == 'FEAST') .OR.                           &
+          (METHOD(1:5) == 'SUBSP')  .OR. (METHOD(1:5) == 'DENSE')) THEN
+
+         IF (METHOD(1:6) == 'ARPACK') THEN
+            EIG_EXTRACT_METHOD = 'ARPACK  '
+         ELSE IF (METHOD(1:5) == 'CHASE') THEN
+            EIG_EXTRACT_METHOD = 'CHASE   '
+         ELSE IF (METHOD(1:5) == 'FEAST') THEN
+            EIG_EXTRACT_METHOD = 'FEAST   '
+         ELSE IF (METHOD(1:5) == 'SUBSP') THEN
+            EIG_EXTRACT_METHOD = 'SUBSP   '
+         ELSE
+            EIG_EXTRACT_METHOD = 'DENSE   '
+         ENDIF
+         EIG_EXTRACT_SOURCE = 'EIGRL   '
+
+         IF (JCARDX(3)(1:) /= ' ') THEN
+            CALL CHAR_FLD ( JCARDX(3), JF(3), EIG_EXTRACT_MODE )
+         ENDIF
+
+         IF (EIG_EXTRACT_METHOD(1:6) == 'ARPACK') THEN
+            IF (JCARDX(4)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(4), JF(4), I4INP )
+               IF (IERRFL(4) == 'N') EIG_NCVFACL = I4INP
+            ENDIF
+            IF (JCARDX(5)(1:) /= ' ') THEN
+               CALL R8FLD ( JCARDX(5), JF(5), EIG_SIGMA )
+            ENDIF
+            IF (JCARDX(6)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(6), JF(6), I4INP )
+               IF (IERRFL(6) == 'N') EIG_LANCZOS_NEV_DELT = I4INP
+            ENDIF
+            IF (JCARDX(7)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(7), JF(7), I4INP )
+               IF (IERRFL(7) == 'N') EIG_MODE = I4INP
+            ENDIF
+            IF (JCARDX(8)(1:) /= ' ') THEN
+               CALL CHAR_FLD ( JCARDX(8), JF(8), EIG_LAP_MAT_TYPE )
+            ENDIF
+
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'CHASE') THEN
+            IF (JCARDX(4)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(4), JF(4), I4INP )
+               IF (IERRFL(4) == 'N') EIG_CHASE_NEX = I4INP
+            ENDIF
+            IF (JCARDX(5)(1:) /= ' ') THEN
+               CALL R8FLD ( JCARDX(5), JF(5), R8INP )
+               IF (IERRFL(5) == 'N') EIG_CHASE_TOL = R8INP
+            ENDIF
+            IF (JCARDX(6)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(6), JF(6), I4INP )
+               IF (IERRFL(6) == 'N') EIG_CHASE_MAX_ITER = I4INP
+            ENDIF
+            IF (JCARDX(7)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(7), JF(7), I4INP )
+               IF (IERRFL(7) == 'N') EIG_CHASE_DEG = I4INP
+            ENDIF
+
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'FEAST') THEN
+            IF (JCARDX(4)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(4), JF(4), I4INP )
+               IF (IERRFL(4) == 'N') EIG_FEAST_M0 = I4INP
+            ENDIF
+            IF (JCARDX(5)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(5), JF(5), I4INP )
+               IF (IERRFL(5) == 'N') EIG_FEAST_TOL_DIGITS = I4INP
+            ENDIF
+            IF (JCARDX(6)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(6), JF(6), I4INP )
+               IF (IERRFL(6) == 'N') EIG_FEAST_MAX_LOOP = I4INP
+            ENDIF
+            IF (JCARDX(7)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(7), JF(7), I4INP )
+               IF (IERRFL(7) == 'N') EIG_FEAST_N_CONTOUR = I4INP
+            ENDIF
+            IF (JCARDX(8)(1:) /= ' ') THEN
+               CALL R8FLD ( JCARDX(8), JF(8), R8INP )
+               IF (IERRFL(8) == 'N') EIG_FEAST_SEARCH_SCALE = R8INP
+            ENDIF
+
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'SUBSP') THEN
+            IF (JCARDX(4)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(4), JF(4), I4INP )
+               IF (IERRFL(4) == 'N') EIG_SUBSPACE_NSUB = I4INP
+            ENDIF
+            IF (JCARDX(5)(1:) /= ' ') THEN
+               CALL R8FLD ( JCARDX(5), JF(5), R8INP )
+               IF (IERRFL(5) == 'N') EIG_SUBSPACE_TOL = R8INP
+            ENDIF
+            IF (JCARDX(6)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(6), JF(6), I4INP )
+               IF (IERRFL(6) == 'N') EIG_SUBSPACE_MAX_ITER = I4INP
+            ENDIF
+
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'DENSE') THEN
+            IF (JCARDX(4)(1:) /= ' ') THEN
+               CALL I4FLD ( JCARDX(4), JF(4), I4INP )
+               IF (IERRFL(4) == 'N') EIG_DENSE_NEX = I4INP
+            ENDIF
+         ENDIF
+
+      ELSE
+         ! Backward-compatible deprecated continuation:
+         IF (JCARDX(2)(1:) /= ' ') THEN
+            CALL I4FLD ( JCARDX(2), JF(2), I4INP )
+            IF (IERRFL(2) == 'N') EIG_MODE = I4INP
+         ENDIF
+         IF (JCARDX(3)(1:) /= ' ') THEN
+            CALL CHAR_FLD ( JCARDX(3), JF(3), EIG_LAP_MAT_TYPE )
+         ENDIF
+         IF (JCARDX(4)(1:) /= ' ') THEN
+            CALL I4FLD ( JCARDX(4), JF(4), I4INP )
+            IF (IERRFL(4) == 'N') EIG_LANCZOS_NEV_DELT = I4INP
+         ENDIF
+      ENDIF
+
+      CALL BD_IMBEDDED_BLANK   ( JCARDX,2,3,4,5,6,7,8,9 )
+      CALL CARD_FLDS_NOT_BLANK ( JCARDX,0,0,0,0,0,0,0,0 )
+
+      END SUBROUTINE PARSE_EIGRL_CONTINUATION
+
       END SUBROUTINE BD_EIGRL
+! --- chase_feast_add --- end !

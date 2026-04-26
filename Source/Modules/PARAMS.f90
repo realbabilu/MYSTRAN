@@ -49,6 +49,10 @@
 !                                                                    Lanczos algorithm will use machine precision for ARP_TOL
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
+! --- chase_feast_add --- begin !
+      CHARACTER(  8*BYTE)      :: LANCMETH       = '        '! Deprecated alias for EIGRL extract method selection.
+! --- chase_feast_add --- end !
+! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: ART_KED        =    'N'    ! Indicates whether to add artificial differ stiff terms to KED
       REAL(DOUBLE)             :: ART_TRAN_KED   =   ONEPM6  ! Artificial differ stiff for translational DOF's
       REAL(DOUBLE)             :: ART_ROT_KED    =   ONEPM6  ! Artificial differ stiff for rotational DOF's

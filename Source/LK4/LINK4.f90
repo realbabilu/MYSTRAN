@@ -63,7 +63,10 @@
       USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSTOR, SUPINFO
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, &
                                          EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ,    &
-                                         MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
+                                         MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT, EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, EIG_EXTRACT_SOURCE,  &
+                                         EIG_CHASE_NEX, EIG_CHASE_MAX_ITER, EIG_CHASE_DEG, EIG_FEAST_M0, EIG_FEAST_TOL_DIGITS,      &
+                                         EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR, EIG_SUBSPACE_NSUB, EIG_SUBSPACE_MAX_ITER,         &
+                                         EIG_DENSE_NEX, EIG_CHASE_TOL, EIG_FEAST_SEARCH_SCALE, EIG_SUBSPACE_TOL
 
       USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_KLLD, J_KLLD, KLLD, I_KLLDn, J_KLLDn, KLLDn,                         &
                                          I_MLL, J_MLL, MLL, I_MLLn, J_MLLn, MLLn
@@ -71,6 +74,9 @@
       USE EIGEN_MATRICES_1, ONLY      :  GEN_MASS, MODE_NUM, EIGEN_VAL, EIGEN_VEC
       USE LAPACK_DPB_MATRICES, ONLY   :  ABAND, BBAND
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
+! --- chase_feast_add --- begin !
+      USE EIGRL_EXTRACT_SOLVERS, ONLY :  EIG_LANCZOS_CHASE, EIG_LANCZOS_FEAST, EIG_LANCZOS_SUBSPACE, EIG_LANCZOS_DENSE
+! --- chase_feast_add --- end !
 
       USE LINK4_USE_IFs
       USE LINK_MESSAGE_Interface
@@ -161,10 +167,28 @@
          WRITE(F06,9101) '   EIG_LAP_MAT_TYPE', EIG_LAP_MAT_TYPE
          WRITE(F06,9102) '   EIG_MSGLVL      ', EIG_MSGLVL
          WRITE(F06,9102) '   EIG_NCVFACL     ', EIG_NCVFACL
+! --- chase_feast_add --- begin !
+         WRITE(F06,9101) '   EIG_EXTRACT_METH', EIG_EXTRACT_METHOD
+         WRITE(F06,9101) '   EIG_EXTRACT_MODE', EIG_EXTRACT_MODE
+         WRITE(F06,9101) '   EIG_EXTRACT_SRC ', EIG_EXTRACT_SOURCE
+         WRITE(F06,9102) '   EIG_CHASE_NEX   ', EIG_CHASE_NEX
+         WRITE(F06,9103) '   EIG_CHASE_TOL   ', EIG_CHASE_TOL
+         WRITE(F06,9102) '   EIG_CHASE_ITR   ', EIG_CHASE_MAX_ITER
+         WRITE(F06,9102) '   EIG_CHASE_DEG   ', EIG_CHASE_DEG
+         WRITE(F06,9102) '   EIG_FEAST_M0    ', EIG_FEAST_M0
+         WRITE(F06,9102) '   EIG_FEAST_DIGIT ', EIG_FEAST_TOL_DIGITS
+         WRITE(F06,9102) '   EIG_FEAST_LOOP  ', EIG_FEAST_MAX_LOOP
+         WRITE(F06,9102) '   EIG_FEAST_NCONT ', EIG_FEAST_N_CONTOUR
+         WRITE(F06,9103) '   EIG_FEAST_SCALE ', EIG_FEAST_SEARCH_SCALE
+         WRITE(F06,9102) '   EIG_SUBSP_NSUB  ', EIG_SUBSPACE_NSUB
+         WRITE(F06,9103) '   EIG_SUBSP_TOL   ', EIG_SUBSPACE_TOL
+         WRITE(F06,9102) '   EIG_SUBSP_ITR   ', EIG_SUBSPACE_MAX_ITER
+         WRITE(F06,9102) '   EIG_DENSE_NEX   ', EIG_DENSE_NEX
          WRITE(F06,9102) '   NUM_FAIL_CRIT   ', NUM_FAIL_CRIT
          WRITE(F06,9103) '   MAXMIJ          ', MAXMIJ
          WRITE(F06,9102) '   MIJ_ROW         ', MIJ_ROW
          WRITE(F06,9102) '   MIJ_COL         ', MIJ_COL
+! --- chase_feast_add --- end !
          WRITE(F06,*)
       ENDIF
 
@@ -268,12 +292,24 @@
          CALL EIG_INV_PWR
 
       ELSE IF (EIG_METH(1:7) == 'LANCZOS') THEN
-         ! Use adaptive version if frequency range specified and not BUCKLING/GEN CB MODEL
-         IF ((EIG_FRQ2 > EPS1) .AND. (SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL')) THEN
-            CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+! --- chase_feast_add --- begin !
+         IF (EIG_EXTRACT_METHOD(1:5) == 'CHASE') THEN
+            CALL EIG_LANCZOS_CHASE
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'FEAST') THEN
+            CALL EIG_LANCZOS_FEAST
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'SUBSP') THEN
+            CALL EIG_LANCZOS_SUBSPACE
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'DENSE') THEN
+            CALL EIG_LANCZOS_DENSE
          ELSE
-            CALL EIG_LANCZOS_ARPACK
+            ! Use adaptive version if frequency range specified and not BUCKLING/GEN CB MODEL
+            IF ((EIG_FRQ2 > EPS1) .AND. (SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL')) THEN
+               CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+            ELSE
+               CALL EIG_LANCZOS_ARPACK
+            ENDIF
          ENDIF
+! --- chase_feast_add --- end !
 
       ELSE
 

@@ -43,7 +43,12 @@
       USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSTOR, SUPINFO
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, &
                                          EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ,    &
-                                         MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
+! --- chase_feast_add --- begin !
+                                         MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT, EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, EIG_EXTRACT_SOURCE,  &
+                                         EIG_CHASE_NEX, EIG_CHASE_MAX_ITER, EIG_CHASE_DEG, EIG_FEAST_M0, EIG_FEAST_TOL_DIGITS,      &
+                                         EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR, EIG_SUBSPACE_NSUB, EIG_SUBSPACE_MAX_ITER,         &
+                                         EIG_DENSE_NEX, EIG_CHASE_TOL, EIG_FEAST_SEARCH_SCALE, EIG_SUBSPACE_TOL
+! --- chase_feast_add --- end !
 
       USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_KLLD, J_KLLD, KLLD, I_KLLDn, J_KLLDn, KLLDn,                         &
                                          I_MLL, J_MLL, MLL, I_MLLn, J_MLLn, MLLn

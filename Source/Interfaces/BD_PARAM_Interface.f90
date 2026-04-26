@@ -52,7 +52,8 @@
                                          EPSIL           , EMP0_PAUSE      , ESP0_PAUSE      , F06_COL_START   ,                   &
                                          GRDPNT          , GRIDSEQ         , HEXAXIS         ,                                     &
                                          IORQ1M          , IORQ1S          , IORQ1B          , IORQ2B          , IORQ2T          , &
-                                         ITMAX           , KLLRAT          , KOORAT          ,                   MATSPARS        , &
+! --- chase_feast_add --- begin !
+                                         ITMAX           , KLLRAT          , KOORAT          , LANCMETH        , MATSPARS        , &
                                          MEMAFAC         , MIN4TRED        , MXALLOCA        , MAXRATIO        ,                   &
                                          MEFMCORD        , MEFMLOC         , MEFMGRID        ,                                     &
                                          MPFOUT          , MXITERI         , MXITERL         , OTMSKIP         , POST            , &
@@ -72,6 +73,7 @@
                                          THRESHK         , THRESHK_LAP     , TINY            ,                                     &
                                          TSTM_DEF        , USR_JCT         , USR_LTERM_KGG   , USR_LTERM_MGG   , WINAMEM         , &
                                          WTMASS
+! --- chase_feast_add --- end !
 
       IMPLICIT NONE
 
