@@ -281,8 +281,11 @@
 ! **********************************************************************************************************************************
   101 FORMAT(' *INFORMATION: SUBR AUTO_SEQ_PROC DID NOT SEQUENCE ALL OF THE ',I8,' GRIDS. ONLY ',I8,' GRIDS WERE SEQUENCED.'       &
                   ,/,15X,A,' WILL DEFAULT TO A SEQUENCE THAT IS IN GRID NUMERICAL ORDER',/)
+! --- BANDED_optimizisation -begin-- !
   102 FORMAT(' *INFORMATION: IN-CORE RCM GRID SEQUENCING APPLIED TO ',I8,' GRIDS (IGNORED ',I8,' INPUT/AUTO SEQGP ENTRY(IES)).'    &
-                  ,/,15X,' PARAM GRIDSEQ=',A8,' BANDEDOPT=',A1,' SOLLIB=',A8)
+                  ,/,15X,' PARAM GRIDSEQ=',A8,' BANDEDOPT=',A1,' SOLLIB=',A8                                                    &
+                  ,/,15X,' RCM UPDATES GRID_SEQ/INV_GRID_SEQ BEFORE DOF NUMBERING, SO MASS AND STIFFNESS MATRICES SHARE ORDER.')
+! --- BANDED_optimizisation -end-- !
   103 FORMAT(' *WARNING    : IN-CORE RCM SEQUENCING REQUESTED BUT A VALID CONNECTIVITY GRAPH COULD NOT BE BUILT.'                  &
                   ,/,15X,' FALLING BACK TO EXISTING GRIDSEQ FLOW. PARAM GRIDSEQ=',A8,' BANDEDOPT=',A1,' SOLLIB=',A8)
 

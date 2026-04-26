@@ -33,7 +33,7 @@
 ! actual work
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  ERR, F06
+      USE IOUNT1, ONLY                :  ERR, F06, SC1
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FACTORED_MATRIX, FATAL_ERR, LINKNO
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, ONEPP6
@@ -102,6 +102,9 @@
       REAL(DOUBLE)                    :: KRATIO            ! Ratio: MAXKII/MINKII
       REAL(DOUBLE)                    :: MAXKII            ! Maximum diagonal term in MATIN
       REAL(DOUBLE)                    :: MAXIMAX_RATIO     ! Largest of the ratios of matrix diagonal to factor diagonal
+! --- BANDED_optimizisation -begin-- !
+      REAL(DOUBLE)                    :: BAND_TERMS_EST    ! Number of terms in compact symmetric band storage
+! --- BANDED_optimizisation -end-- !
       REAL(DOUBLE)                    :: MB_TO_ALLOCATE    ! MB of memory to allocate
       REAL(DOUBLE)                    :: MINKII            ! Minimum diagonal term in MATIN
 !xx   REAL(DOUBLE)                    :: SCOND             ! Ratio of min to max scaling factors, LAPACK_S(i), if MATIN is equil'ed.
@@ -130,12 +133,18 @@
 
       CALL LINK_MESSAGE('CALC BANDWIDTH OF MATRIX ' // MATIN_NAME(1:))
       CALL BANDSIZ ( NROWS, NTERMS, I_MATIN, J_MATIN, MATIN_SDIA )
-      MB_TO_ALLOCATE = (REAL(DOUBLE))*(REAL(MATIN_SDIA+1))*(REAL(NROWS))/ONEPP6
+! --- BANDED_optimizisation -begin-- !
+      BAND_TERMS_EST = REAL(MATIN_SDIA+1,DOUBLE)*REAL(NROWS,DOUBLE)
+      MB_TO_ALLOCATE = REAL(DOUBLE,DOUBLE)*BAND_TERMS_EST/ONEPP6
+! --- BANDED_optimizisation -end-- !
       WRITE(SC1,3094) MATIN_NAME, MATIN_SDIA+1, MB_TO_ALLOCATE
       WRITE(ERR,3002) MATIN_NAME, MATIN_SDIA+1
       IF (SUPINFO == 'N') THEN
          WRITE(F06,3002) MATIN_NAME, MATIN_SDIA+1
       ENDIF
+! --- BANDED_optimizisation -begin-- !
+      CALL REPORT_BANDED_STORAGE_ESTIMATE ( MATIN_NAME, NROWS, NTERMS, I_MATIN, J_MATIN, MATIN_SDIA+1, SUPINFO )
+! --- BANDED_optimizisation -end-- !
       IF (MB_TO_ALLOCATE <= ONE) THEN
          WRITE(ERR,3003) MATIN_NAME, MB_TO_ALLOCATE
          IF (SUPINFO == 'N') THEN
@@ -399,7 +408,6 @@
                     /,14X,' CURRENT PARAM SPARSTOR = ',A6,'. IF THIS IS EXPECTED, USE A NON-SPD PATH (E.G. SPARSE SOLVER).',/)
 
  3094 FORMAT(5X,' Bandwidth of ',A,'  = ',I8,' and requires ',F10.3,' MB of memory')
-
 
 99999 FORMAT(/,' PROCESSING TERMINATED DUE TO ABOVE MESSAGES AND BULK DATA PARAMETER BAILOUT = ',I7)
 

@@ -174,6 +174,10 @@ sol_do:  DO
          ENDDO sol_do
       ENDIF
 
+! --- BANDED_optimizisation -begin-- !
+      CALL REPORT_SOLVER_DISPATCH_POLICY ( 'KLL', SUBR_NAME )
+! --- BANDED_optimizisation -end-- !
+
 Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
 
          INFO = 0
@@ -456,8 +460,6 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
 !***********************************************************************************************************************************
 
       END SUBROUTINE LINK3
-
-
 
 
 

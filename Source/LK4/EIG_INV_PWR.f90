@@ -34,8 +34,9 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, KMSM_SDIA, LINKNO, NDOFL, NTERM_KLL, NTERM_KLLD, NTERM_KMSM,     &
                                          NTERM_KMSMs, NTERM_MLL, NUM_EIGENS, NVEC, SOL_NAME, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  BAILOUT, EPSIL, KLLRAT, MXITERI, SOLLIB, SPARSE_FLAVOR, SPARSTOR, SUPINFO, SUPWARN
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, ONEPP6
+      USE PARAMS, ONLY                :  BAILOUT, EPSIL, KLLRAT, MXITERI, SOLLIB, SPARSE_FLAVOR, SPARSTOR, SUPINFO, SUPWARN,       &
+                                         WINAMEM
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
       USE MODEL_STUF, ONLY            :  EIG_N2, EIG_SIGMA
       USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_KLLD, J_KLLD, KLLD, I_MLL, J_MLL, MLL,                               &
@@ -72,6 +73,7 @@
                                                            ! Eigenvalue at a given iteration number
 
       REAL(DOUBLE)                    :: K_INORM           ! Inf norm of KOO matrix
+      REAL(DOUBLE)                    :: MB_RFAC_DGB       ! MB required for RFAC_DGB allocation
       REAL(DOUBLE)                    :: MVEC(NDOFL,1)     ! MLL*EIGEN_VEC (or KLLD*EIGEN_VEC for BUCKLING)
       REAL(DOUBLE)                    :: MAX_VALUE         ! Max value from EIGEN_VEC(I,1)
       REAL(DOUBLE)                    :: NULL_SCALE_FACS(NDOFL)
@@ -135,6 +137,10 @@
       USE_DGB_FALLBACK = .FALSE.
 
       EQUED = 'N'
+! --- BANDED_optimizisation -begin-- !
+      CALL REPORT_SOLVER_DISPATCH_POLICY ( 'KMSM', SUBR_NAME )
+! --- BANDED_optimizisation -end-- !
+
       IF (SOLLIB == 'BANDED  ') THEN
 
          INFO = -1                                        ! Do not abort in SYM_MAT_DECOMP_LAPACK on INFO > 0; handle fallback here
@@ -153,6 +159,15 @@
 
             IF (ALLOCATED(RFAC_DGB)) DEALLOCATE(RFAC_DGB)
             IF (ALLOCATED(IPIV_DGB)) DEALLOCATE(IPIV_DGB)
+! --- BANDED_optimizisation -begin-- !
+            MB_RFAC_DGB = REAL(DOUBLE,DOUBLE)*REAL(LDRFAC_DGB,DOUBLE)*REAL(NDOFL,DOUBLE)/ONEPP6
+            IF ((WINAMEM > ZERO) .AND. (MB_RFAC_DGB > WINAMEM)) THEN
+               WRITE(ERR,4895) 'RFAC_DGB', MB_RFAC_DGB, WINAMEM
+               WRITE(F06,4895) 'RFAC_DGB', MB_RFAC_DGB, WINAMEM
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+! --- BANDED_optimizisation -end-- !
             ALLOCATE(RFAC_DGB(LDRFAC_DGB,NDOFL), STAT=ASTAT)
             IF (ASTAT /= 0) THEN
                WRITE(ERR,4892) 'RFAC_DGB', LDRFAC_DGB, NDOFL, ASTAT
@@ -413,7 +428,11 @@ iters:DO
 
  4893 FORMAT(' *ERROR    4893: DGBTRF FALLBACK FAILED IN EIG_INV_PWR. INFO = ',I10)
 
- 4894 FORMAT(' *ERROR    4894: DGBTRS FALLBACK FAILED IN EIG_INV_PWR. INFO = ',I10,' AT ITERATION ',I10)
+4894 FORMAT(' *ERROR    4894: DGBTRS FALLBACK FAILED IN EIG_INV_PWR. INFO = ',I10,' AT ITERATION ',I10)
+
+! --- BANDED_optimizisation -begin-- !
+ 4895 FORMAT(' *ERROR    4895: ATTEMPT TO ALLOCATE ',A,' REQUIRES ',F10.3,' MB, EXCEEDING PARAM WINAMEM LIMIT OF ',F10.3,' MB')
+! --- BANDED_optimizisation -end-- !
 
  4001 FORMAT(' *ERROR  4001: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' MATRIX KMSM WAS EQUILIBRATED: EQUED = ',A,'. CODE NOT WRITTEN TO ALLOW THIS AS YET')

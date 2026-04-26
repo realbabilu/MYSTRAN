@@ -2866,8 +2866,10 @@ do_i:    DO I=1,JCARD_LEN
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
-! WINAMEM is the max MB of memory Windows allows. If an attempt is made to exceed it, the code can abort with an
-! abnormal termination
+! --- BANDED_optimizisation -begin-- !
+! WINAMEM is an optional per-array MB cap. Historical MYSTRAN used this for the Windows XP 2 GB address-space limit.
+! In modern 64-bit builds, WINAMEM <= 0 disables this legacy cap and lets ALLOCATE/STAT report memory failure.
+! --- BANDED_optimizisation -end-- !
 
       ELSE IF (JCARD(2)(1:8) == 'WINAMEM ') THEN
          PARNAM = 'WINAMEM  '
