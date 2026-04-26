@@ -50,6 +50,7 @@
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
 ! --- chase_feast_add --- begin !
+      CHARACTER(  8*BYTE)      :: ARPKSOLV       = 'SOLLIB  '! ARPACK linear backend override: SOLLIB, SPARSE, or BANDED.
       CHARACTER(  8*BYTE)      :: LANCMETH       = '        '! Deprecated alias for EIGRL extract method selection.
 ! --- chase_feast_add --- end !
 ! ----------------------------------------------------------------------------------------------------------------------------------

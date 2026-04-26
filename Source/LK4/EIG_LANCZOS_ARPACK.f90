@@ -36,7 +36,7 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  ARP_TOL, BAILOUT, DARPACK, EIGESTL, EPSIL, MXITERL, SOLLIB, SPARSTOR, SUPINFO,            &
+      USE PARAMS, ONLY                :  ARPKSOLV, ARP_TOL, BAILOUT, DARPACK, EIGESTL, EPSIL, MXITERL, SOLLIB, SPARSTOR, SUPINFO,  &
                                          SUPWARN
       USE DOF_TABLES, ONLY            :  TDOFI
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
@@ -75,6 +75,7 @@
 !                                                            When IPARAM(7) = 3, 4, or 5,  WHICH should be set to 'LM' only.
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: CALLED_SUBR = ' ' ! Name of a called subr (for output error purposes)
+      CHARACTER( 8*BYTE)              :: SOLLIB_SAVE       ! Saved global SOLLIB while ARPKSOLV locally overrides ARPACK backend
 
       INTEGER(LONG)                   :: COMPV             ! Component number (1-6) of a grid DOF
       INTEGER(LONG)                   :: GRIDV             ! Grid number
@@ -104,6 +105,15 @@
 
 
 ! **********************************************************************************************************************************
+! --- BANDED_optimizisation -begin-- !
+      SOLLIB_SAVE = SOLLIB
+      IF      (ARPKSOLV == 'SPARSE  ') THEN
+         SOLLIB = 'SPARSE  '
+      ELSE IF (ARPKSOLV == 'BANDED  ') THEN
+         SOLLIB = 'BANDED  '
+      ENDIF
+! --- BANDED_optimizisation -end-- !
+
       EPS1 = EPSIL(1)
 
       NUM_EST_EIGENS = 0
@@ -210,6 +220,7 @@
 
 ! --- BANDED_optimizisation -begin-- !
       CALL REPORT_SOLVER_DISPATCH_POLICY ( 'KMSM', SUBR_NAME )
+      CALL REPORT_ARPACK_LINEAR_BACKEND ( 'KMSM', SUBR_NAME, EIG_LAP_MAT_TYPE )
 ! --- BANDED_optimizisation -end-- !
       IF (SOL_NAME(1:8) == 'BUCKLING') THEN
          CALL LINK_MESSAGE('ALLOCATE ARPACK BAND MAT: RFAC = KLL + sigma*KLLD')
@@ -519,6 +530,7 @@
 
 
 
+      SOLLIB = SOLLIB_SAVE
       RETURN
 
 ! **********************************************************************************************************************************
@@ -622,6 +634,7 @@
 
 ! --- BANDED_optimizisation -begin-- !
       CALL REPORT_SOLVER_DISPATCH_POLICY ( 'KMSM', SUBR_NAME )
+      CALL REPORT_ARPACK_LINEAR_BACKEND ( 'KMSM', SUBR_NAME, EIG_LAP_MAT_TYPE )
 ! --- BANDED_optimizisation -end-- !
       CALL ALLOCATE_LAPACK_MAT ( 'RFAC', LDRFAC, NDOFL, SUBR_NAME )
 

@@ -41,7 +41,7 @@
       USE MACHINE_PARAMS, ONLY        :  MACH_PREC
       USE DOF_TABLES, ONLY            :  TSET_CHR_LEN
 
-      USE PARAMS, ONLY                :  ARP_TOL         , ART_KED         , ART_ROT_KED     , ART_TRAN_KED    ,                   &
+      USE PARAMS, ONLY                :  ARPKSOLV        , ARP_TOL         , ART_KED         , ART_ROT_KED     , ART_TRAN_KED    , &
                                          ART_MASS        , ART_ROT_MASS    , ART_TRAN_MASS   , AUTOSPC         , AUTOSPC_NSET    , &
                                          AUTOSPC_RAT     , AUTOSPC_INFO    , AUTOSPC_SPCF    , BAILOUT         , CRS_CCS         , &
                                          CBMIN3          , CBMIN4          , CBMIN4T         , CHKGRDS         ,                   &

@@ -46,7 +46,7 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  ARP_TOL, BAILOUT, EPSIL, MXITERL, SOLLIB, SPARSTOR, SUPINFO, SUPWARN
+      USE PARAMS, ONLY                :  ARPKSOLV, ARP_TOL, BAILOUT, EPSIL, MXITERL, SOLLIB, SPARSTOR, SUPINFO, SUPWARN
       USE DOF_TABLES, ONLY            :  TDOFI
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
       USE MODEL_STUF, ONLY            :  EIG_FRQ1, EIG_FRQ2, EIG_LAP_MAT_TYPE, EIG_N2, EIG_NCVFACL
@@ -78,6 +78,7 @@
       CHARACTER( 1*BYTE)              :: HOWMNY            ! 'A' to compute all eigenvectors
       CHARACTER( 2*BYTE)              :: WHICH             ! 'LM' for largest magnitude (closest to sigma in shift-invert)
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: CALLED_SUBR = ' ' ! Name of called subr for error messages
+      CHARACTER( 8*BYTE)              :: SOLLIB_SAVE       ! Saved global SOLLIB while ARPKSOLV locally overrides ARPACK backend
 
       INTEGER(LONG)                   :: COMPV             ! Component number (1-6) of a grid DOF
       INTEGER(LONG)                   :: GRIDV             ! Grid number
@@ -134,6 +135,15 @@
 !   - SOL_NAME is not BUCKLING or GEN CB MODEL
 ! These conditions are checked in LINK4 before calling this routine.
 ! The checks below are defensive programming to catch any programming errors.
+
+! --- BANDED_optimizisation -begin-- !
+      SOLLIB_SAVE = SOLLIB
+      IF      (ARPKSOLV == 'SPARSE  ') THEN
+         SOLLIB = 'SPARSE  '
+      ELSE IF (ARPKSOLV == 'BANDED  ') THEN
+         SOLLIB = 'BANDED  '
+      ENDIF
+! --- BANDED_optimizisation -end-- !
 
       EPS1 = EPSIL(1)
 
@@ -281,6 +291,7 @@
       ! Allocate RFAC and IWORK (kept across all iterations)
 ! --- BANDED_optimizisation -begin-- !
       CALL REPORT_SOLVER_DISPATCH_POLICY ( 'KMSM', SUBR_NAME )
+      CALL REPORT_ARPACK_LINEAR_BACKEND ( 'KMSM', SUBR_NAME, EIG_LAP_MAT_TYPE )
 ! --- BANDED_optimizisation -end-- !
       CALL ALLOCATE_LAPACK_MAT ( 'RFAC', LDRFAC, NDOFL, SUBR_NAME )
       CALL ALLOCATE_LAPACK_MAT ( 'IWORK', NDOFL, 1, SUBR_NAME )
@@ -708,6 +719,7 @@
       WRITE(SC1,1014) NUM_EIGENS
 
 
+      SOLLIB = SOLLIB_SAVE
       RETURN
 
 ! **********************************************************************************************************************************

@@ -32,7 +32,7 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE PARAMS, ONLY                :  SOLLIB, SPARSE_FLAVOR, SUPINFO
+      USE PARAMS, ONLY                :  ARPKSOLV, SOLLIB, SPARSE_FLAVOR, SUPINFO
 
       IMPLICIT NONE
 
@@ -66,3 +66,63 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE REPORT_SOLVER_DISPATCH_POLICY
+
+! ##################################################################################################################################
+
+      SUBROUTINE REPORT_ARPACK_LINEAR_BACKEND ( MATRIX_NAME, CALLING_SUBR, LAPACK_MAT_TYPE )
+
+! --- BANDED_optimizisation -begin-- !
+! Reports the effective ARPACK linear backend. This routine is diagnostic only; it does not change solver selection.
+! --- BANDED_optimizisation -end-- !
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE
+      USE IOUNT1, ONLY                :  ERR, F06
+      USE PARAMS, ONLY                :  ARPKSOLV, SOLLIB, SPARSE_FLAVOR, SUPINFO
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(IN)    :: CALLING_SUBR
+      CHARACTER(LEN=*), INTENT(IN)    :: LAPACK_MAT_TYPE
+      CHARACTER(LEN=*), INTENT(IN)    :: MATRIX_NAME
+
+! **********************************************************************************************************************************
+
+      IF (SOLLIB == 'SPARSE  ') THEN
+         WRITE(ERR,9101) MATRIX_NAME, CALLING_SUBR, ARPKSOLV, SPARSE_FLAVOR
+         WRITE(F06,9101) MATRIX_NAME, CALLING_SUBR, ARPKSOLV, SPARSE_FLAVOR
+      ELSE IF (SOLLIB == 'BANDED  ') THEN
+         IF (LAPACK_MAT_TYPE(1:3) == 'DPB') THEN
+            WRITE(ERR,9102) MATRIX_NAME, CALLING_SUBR, ARPKSOLV
+            WRITE(F06,9102) MATRIX_NAME, CALLING_SUBR, ARPKSOLV
+         ELSE IF (LAPACK_MAT_TYPE(1:3) == 'DGB') THEN
+            WRITE(ERR,9103) MATRIX_NAME, CALLING_SUBR, ARPKSOLV
+            WRITE(F06,9103) MATRIX_NAME, CALLING_SUBR, ARPKSOLV
+         ELSE
+            WRITE(ERR,9104) MATRIX_NAME, CALLING_SUBR, LAPACK_MAT_TYPE, ARPKSOLV
+            WRITE(F06,9104) MATRIX_NAME, CALLING_SUBR, LAPACK_MAT_TYPE, ARPKSOLV
+         ENDIF
+      ELSE
+         WRITE(ERR,9105) MATRIX_NAME, CALLING_SUBR, ARPKSOLV, SOLLIB
+         WRITE(F06,9105) MATRIX_NAME, CALLING_SUBR, ARPKSOLV, SOLLIB
+      ENDIF
+
+      RETURN
+
+! **********************************************************************************************************************************
+ 9101 FORMAT(' *INFORMATION: ARPACK LINEAR BACKEND FOR MATRIX ',A,' IN ',A,': ARPACK + SUPERLU',                                  &
+                    /,14X,' ARPKSOLV=',A8,' EFFECTIVE SOLLIB=SPARSE, SPARSE_FLAVOR=',A8,'.')
+
+ 9102 FORMAT(' *INFORMATION: ARPACK LINEAR BACKEND FOR MATRIX ',A,' IN ',A,': ARPACK + LAPACK BANDED SPD',                        &
+                    /,14X,' ARPKSOLV=',A8,' EFFECTIVE SOLLIB=BANDED USES DPBTRF/DPBTRS; NO AUTOMATIC SUPERLU FALLBACK IS ENABLED.')
+
+ 9103 FORMAT(' *INFORMATION: ARPACK LINEAR BACKEND FOR MATRIX ',A,' IN ',A,': ARPACK + LAPACK GENERAL BAND',                      &
+                    /,14X,' ARPKSOLV=',A8,' EFFECTIVE SOLLIB=BANDED USES DGBTRF/DGBTRS; NO AUTOMATIC SUPERLU FALLBACK IS ENABLED.')
+
+ 9104 FORMAT(' *WARNING    : ARPACK LINEAR BACKEND FOR MATRIX ',A,' IN ',A,' HAS UNKNOWN LAPACK MATRIX TYPE ',A8,                 &
+                    /,14X,' ARPKSOLV=',A8,' EFFECTIVE SOLLIB=BANDED IS ACTIVE; NO AUTOMATIC SUPERLU FALLBACK IS ENABLED.')
+
+ 9105 FORMAT(' *WARNING    : ARPACK LINEAR BACKEND FOR MATRIX ',A,' IN ',A,' HAS UNKNOWN ARPKSOLV=',A8,' SOLLIB=',A8)
+
+! **********************************************************************************************************************************
+
+      END SUBROUTINE REPORT_ARPACK_LINEAR_BACKEND
