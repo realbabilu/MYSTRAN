@@ -31,17 +31,19 @@
       USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NDOFL, NUM_EIGENS, NVEC, SOL_NAME, WARN_ERR
       USE CONSTANTS_1, ONLY           :  ZERO
+      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  EPSIL, SPARSTOR, SUPINFO
       USE MODEL_STUF, ONLY            :  EIG_CHASE_DEG, EIG_CHASE_MAX_ITER, EIG_CHASE_NEX, EIG_CHASE_TOL,                  &
                                          EIG_DENSE_NEX, EIG_EXTRACT_METHOD, EIG_FEAST_M0, EIG_FEAST_MAX_LOOP,                &
                                          EIG_FEAST_N_CONTOUR, EIG_FEAST_SEARCH_SCALE, EIG_FEAST_TOL_DIGITS, EIG_FRQ1,       &
                                          EIG_FRQ2, EIG_N2, EIG_SUBSPACE_MAX_ITER, EIG_SUBSPACE_NSUB, EIG_SUBSPACE_TOL
-      USE SPARSE_MATRICES, ONLY       :  I_KLL, I_MLL, J_KLL, J_MLL, KLL, MLL
+      USE SPARSE_MATRICES, ONLY       :  I_KLL, I_KLLD, I_MLL, J_KLL, J_KLLD, J_MLL, KLL, KLLD, MLL
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
 
       USE ALLOCATE_EIGEN1_MAT_Interface
       USE EIG_LANCZOS_ARPACK_Interface
       USE LINK_MESSAGE_Interface
+      USE WRITE_SPARSE_CRS_Interface
 #ifdef MYSTRAN_HAVE_EXTERNAL_CHASE
       USE chase_diag
 #endif
@@ -67,6 +69,13 @@
             INTEGER, INTENT(OUT) :: INFO
          END SUBROUTINE DPOTRS
 
+         SUBROUTINE DTRTRI(UPLO, DIAG, N, A, LDA, INFO)
+            CHARACTER(1), INTENT(IN) :: UPLO, DIAG
+            INTEGER, INTENT(IN) :: N, LDA
+            DOUBLE PRECISION, INTENT(INOUT) :: A(LDA,*)
+            INTEGER, INTENT(OUT) :: INFO
+         END SUBROUTINE DTRTRI
+
          SUBROUTINE DSYEV(JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO)
             CHARACTER(1), INTENT(IN) :: JOBZ, UPLO
             INTEGER, INTENT(IN) :: N, LDA, LWORK
@@ -74,6 +83,22 @@
             DOUBLE PRECISION, INTENT(OUT) :: W(*)
             INTEGER, INTENT(OUT) :: INFO
          END SUBROUTINE DSYEV
+
+         SUBROUTINE DSYGV(ITYPE, JOBZ, UPLO, N, A, LDA, B, LDB, W, WORK, LWORK, INFO)
+            INTEGER, INTENT(IN) :: ITYPE, N, LDA, LDB, LWORK
+            CHARACTER(1), INTENT(IN) :: JOBZ, UPLO
+            DOUBLE PRECISION, INTENT(INOUT) :: A(LDA,*), B(LDB,*), WORK(*)
+            DOUBLE PRECISION, INTENT(OUT) :: W(*)
+            INTEGER, INTENT(OUT) :: INFO
+         END SUBROUTINE DSYGV
+
+         SUBROUTINE DGGEV(JOBVL, JOBVR, N, A, LDA, B, LDB, ALPHAR, ALPHAI, BETA, VL, LDVL, VR, LDVR, WORK, LWORK, INFO)
+            CHARACTER(1), INTENT(IN) :: JOBVL, JOBVR
+            INTEGER, INTENT(IN) :: N, LDA, LDB, LDVL, LDVR, LWORK
+            DOUBLE PRECISION, INTENT(INOUT) :: A(LDA,*), B(LDB,*), WORK(*)
+            DOUBLE PRECISION, INTENT(OUT) :: ALPHAR(*), ALPHAI(*), BETA(*), VL(LDVL,*), VR(LDVR,*)
+            INTEGER, INTENT(OUT) :: INFO
+         END SUBROUTINE DGGEV
       END INTERFACE
 
       CONTAINS
@@ -144,8 +169,7 @@
       SUBR_NAME = 'EIGRL_EXTRACT_SOLVERS'
 
       IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-         CALL WRITE_FALLBACK_WARNING(METHOD, 4941, 'CONDENSED EXTRACT METHODS ARE CURRENTLY MODES-ONLY. USING ARPACK LANCZOS.')
-         CALL EIG_LANCZOS_ARPACK
+         CALL SOLVE_BUCKLING_GENERALIZED(METHOD)
          RETURN
       ENDIF
 
@@ -320,6 +344,227 @@
       NVEC       = KEEP_COUNT
 
       END SUBROUTINE SOLVE_CONDENSED_MODAL
+
+!***********************************************************************************************************************************
+      SUBROUTINE SOLVE_BUCKLING_GENERALIZED ( METHOD )
+
+      CHARACTER(LEN=*), INTENT(IN)    :: METHOD
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: INFO
+      INTEGER(LONG)                   :: KEEP_COUNT
+      INTEGER(LONG), ALLOCATABLE      :: KEEP_IDX(:)
+      REAL(DOUBLE), ALLOCATABLE       :: CSTD(:,:)
+      REAL(DOUBLE)                    :: EMAX
+      REAL(DOUBLE)                    :: EMIN
+      REAL(DOUBLE), ALLOCATABLE       :: BFULL(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: EVAL_ALL(:)
+      REAL(DOUBLE), ALLOCATABLE       :: EVEC_FULL(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: KFULL(:,:)
+
+! Dump the exact reduced buckling pair when debug output is requested so it can be replayed outside MYSTRAN.
+      IF (DEBUG(49) > 0) THEN
+         CALL WRITE_SPARSE_CRS ( ' KLL input to new buckling extractors', 'A ', 'A ', SIZE(KLL),  NDOFL, I_KLL,  J_KLL,  KLL  )
+         CALL WRITE_SPARSE_CRS ( ' KLLD input to new buckling extractors', 'A ', 'A ', SIZE(KLLD), NDOFL, I_KLLD, J_KLLD, KLLD )
+      ENDIF
+
+      CALL BUILD_DENSE_BUCKLING_PAIR(KFULL, BFULL)
+
+      SELECT CASE (METHOD(1:MIN(LEN(METHOD),5)))
+      CASE ('DENSE')
+         CALL LINK_MESSAGE('SOLVE FOR EIGENVALS/VECTORS - DENSE BUCKLING REFERENCE (FULL DGGEV)')
+         CALL RUN_DENSE_GENERALIZED_BACKEND(KFULL, BFULL, EVAL_ALL, EVEC_FULL, INFO)
+         IF (INFO /= 0) THEN
+            CALL WRITE_FALLBACK_WARNING(METHOD, 4958, 'DENSE GENERALIZED BUCKLING SOLVE FAILED. USING ARPACK LANCZOS.')
+            CALL EIG_LANCZOS_ARPACK
+            RETURN
+         ENDIF
+
+        CASE ('SUBSP')
+           CALL WRITE_FALLBACK_WARNING(METHOD, 4959, 'SUBSPACE BUCKLING IS NOT YET SUPPORTED NATIVE. USING DENSE GENERALIZED REFERENCE.')
+           CALL LINK_MESSAGE('SOLVE FOR EIGENVALS/VECTORS - SUBSPACE BUCKLING VIA DENSE GENERALIZED REFERENCE')
+           CALL RUN_DENSE_GENERALIZED_BACKEND(KFULL, BFULL, EVAL_ALL, EVEC_FULL, INFO)
+           IF (INFO /= 0) THEN
+              CALL WRITE_FALLBACK_WARNING(METHOD, 4960, 'SUBSPACE BUCKLING DENSE REFERENCE FAILED. USING ARPACK LANCZOS.')
+              CALL EIG_LANCZOS_ARPACK
+              RETURN
+           ENDIF
+
+        CASE ('CHASE')
+           CALL WRITE_FALLBACK_WARNING(METHOD, 4961, 'CHASE BUCKLING IS NOT YET SUPPORTED NATIVE. USING DENSE GENERALIZED REFERENCE.')
+           CALL LINK_MESSAGE('SOLVE FOR EIGENVALS/VECTORS - CHASE BUCKLING VIA DENSE GENERALIZED REFERENCE')
+           CALL RUN_DENSE_GENERALIZED_BACKEND(KFULL, BFULL, EVAL_ALL, EVEC_FULL, INFO)
+           IF (INFO /= 0) THEN
+              CALL WRITE_FALLBACK_WARNING(METHOD, 4962, 'CHASE BUCKLING DENSE REFERENCE FAILED. USING ARPACK LANCZOS.')
+              CALL EIG_LANCZOS_ARPACK
+              RETURN
+           ENDIF
+
+! --- dense/feast buckling begin --- !
+        CASE ('FEAST')
+#ifdef MYSTRAN_HAVE_EXTERNAL_FEAST
+           CALL LINK_MESSAGE('SOLVE FOR EIGENVALS/VECTORS - FEAST BUCKLING NATIVE (SYMMETRIC MU-FORM)')
+           CALL RUN_FEAST_BUCKLING_BACKEND(KFULL, BFULL, EVAL_ALL, EVEC_FULL, INFO)
+           IF (INFO /= 0) THEN
+              CALL WRITE_FALLBACK_WARNING(METHOD, 4964, 'FEAST BUCKLING NATIVE MU-FORM FAILED. USING DENSE GENERALIZED REFERENCE.')
+              CALL RUN_DENSE_GENERALIZED_BACKEND(KFULL, BFULL, EVAL_ALL, EVEC_FULL, INFO)
+              IF (INFO /= 0) THEN
+                 CALL EIG_LANCZOS_ARPACK
+                 RETURN
+              ENDIF
+           ENDIF
+#else
+           CALL WRITE_FALLBACK_WARNING(METHOD, 4963, 'FEAST EXTERNAL BACKEND NOT LINKED FOR BUCKLING. USING DENSE GENERALIZED REFERENCE.')
+           CALL RUN_DENSE_GENERALIZED_BACKEND(KFULL, BFULL, EVAL_ALL, EVEC_FULL, INFO)
+           IF (INFO /= 0) THEN
+              CALL EIG_LANCZOS_ARPACK
+              RETURN
+           ENDIF
+#endif
+
+        CASE DEFAULT
+           CALL WRITE_FALLBACK_WARNING(METHOD, 4941, 'BUCKLING CURRENTLY SUPPORTS DENSE/SUBSP/CHASE/FEAST ONLY IN THE NEW PATH. USING ARPACK LANCZOS.')
+           CALL EIG_LANCZOS_ARPACK
+           RETURN
+        END SELECT
+! --- dense/feast buckling end --- !
+
+      EMIN = ZERO
+      EMAX = -ONE()
+      CALL SELECT_REQUESTED_MODES(EVAL_ALL, EMIN, EMAX, KEEP_IDX, KEEP_COUNT)
+      IF (KEEP_COUNT <= 0) THEN
+         CALL WRITE_FALLBACK_WARNING(METHOD, 4955, 'NO MODES SATISFIED THE REQUESTED DENSE/CONDENSED FILTER. USING ARPACK LANCZOS.')
+         CALL EIG_LANCZOS_ARPACK
+         RETURN
+      ENDIF
+
+      CALL ALLOCATE_EIGEN1_MAT('EIGEN_VEC', NDOFL, KEEP_COUNT, 'EIGRL_EXTRACT_SOLVERS')
+      CALL ALLOCATE_EIGEN1_MAT('MODE_NUM' , NDOFL, 1,          'EIGRL_EXTRACT_SOLVERS')
+      CALL ALLOCATE_EIGEN1_MAT('EIGEN_VAL', NDOFL, 1,          'EIGRL_EXTRACT_SOLVERS')
+
+      DO I=1,KEEP_COUNT
+         EIGEN_VAL(I) = EVAL_ALL(KEEP_IDX(I))
+         MODE_NUM(I)  = I
+         EIGEN_VEC(1:NDOFL,I) = EVEC_FULL(1:NDOFL,KEEP_IDX(I))
+      ENDDO
+
+      NUM_EIGENS = KEEP_COUNT
+      NVEC       = KEEP_COUNT
+
+      END SUBROUTINE SOLVE_BUCKLING_GENERALIZED
+
+!***********************************************************************************************************************************
+      SUBROUTINE BUILD_DENSE_BUCKLING_PAIR ( KFULL, BFULL )
+
+      REAL(DOUBLE), ALLOCATABLE       :: BFULL(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: KFULL(:,:)
+
+      CALL BUILD_DENSE_FROM_SPARSE(I_KLL, J_KLL, KLL, KFULL)
+      CALL BUILD_DENSE_FROM_SPARSE(I_KLLD, J_KLLD, KLLD, BFULL)
+      BFULL = -BFULL
+
+      END SUBROUTINE BUILD_DENSE_BUCKLING_PAIR
+
+!***********************************************************************************************************************************
+! --- dense/feast buckling begin --- !
+      SUBROUTINE BUILD_FEAST_BUCKLING_INTERVAL ( KFULL, BFULL, EMIN, EMAX, INFO )
+
+      REAL(DOUBLE), INTENT(IN)        :: KFULL(:,:)
+      REAL(DOUBLE), INTENT(IN)        :: BFULL(:,:)
+      INTEGER(LONG), INTENT(OUT)      :: INFO
+      REAL(DOUBLE), INTENT(OUT)       :: EMIN
+      REAL(DOUBLE), INTENT(OUT)       :: EMAX
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: LIMIT
+      INTEGER(LONG)                   :: NPOS
+      REAL(DOUBLE)                    :: LAMBDA_HI
+      REAL(DOUBLE)                    :: LAMBDA_LO
+      REAL(DOUBLE)                    :: SCALE
+      REAL(DOUBLE), ALLOCATABLE       :: EVAL_SEED(:)
+      REAL(DOUBLE), ALLOCATABLE       :: EVEC_SEED(:,:)
+
+      INFO = 0
+      SCALE = MAX(EIG_FEAST_SEARCH_SCALE, 1.05D0)
+
+      IF (EIG_FRQ2 > EIG_FRQ1 + EPSIL(1)) THEN
+         LAMBDA_LO = MAX(EIG_FRQ1, EPSIL(1))
+         LAMBDA_HI = MAX(EIG_FRQ2, LAMBDA_LO*SCALE)
+      ELSE
+         CALL RUN_DENSE_GENERALIZED_BACKEND(KFULL, BFULL, EVAL_SEED, EVEC_SEED, INFO)
+         IF (INFO /= 0) RETURN
+         LIMIT = MIN(SIZE(EVAL_SEED), MAX(2, MAX(1,EIG_N2)))
+         NPOS = 0
+         LAMBDA_LO = ZERO
+         LAMBDA_HI = ZERO
+         DO I=1,SIZE(EVAL_SEED)
+            IF (EVAL_SEED(I) <= EPSIL(1)) CYCLE
+            NPOS = NPOS + 1
+            IF (NPOS == 1) LAMBDA_LO = EVAL_SEED(I)
+            IF (NPOS <= LIMIT) LAMBDA_HI = EVAL_SEED(I)
+         ENDDO
+         IF (NPOS <= 0) THEN
+            INFO = SIZE(KFULL,1) + 2
+            RETURN
+         ENDIF
+         IF (LAMBDA_HI <= LAMBDA_LO) LAMBDA_HI = LAMBDA_LO*SCALE
+      ENDIF
+
+      EMIN = MAX(EPSIL(1), ONE()/(LAMBDA_HI*SCALE))
+      EMAX = MAX(EMIN + EPSIL(1), (ONE()/LAMBDA_LO)*SCALE)
+
+      END SUBROUTINE BUILD_FEAST_BUCKLING_INTERVAL
+! --- dense/feast buckling end --- !
+
+!***********************************************************************************************************************************
+      SUBROUTINE BUILD_STANDARDIZED_BUCKLING_OPERATOR ( KFULL, BFULL, CSTD, INFO )
+
+      REAL(DOUBLE), INTENT(IN)        :: KFULL(:,:)
+      REAL(DOUBLE), INTENT(IN)        :: BFULL(:,:)
+      INTEGER(LONG), INTENT(OUT)      :: INFO
+      REAL(DOUBLE), ALLOCATABLE       :: CSTD(:,:)
+
+      REAL(DOUBLE), ALLOCATABLE       :: TMP(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: UINV(:,:)
+
+      INFO = 0
+      ALLOCATE(UINV(SIZE(KFULL,1),SIZE(KFULL,2)))
+      UINV = KFULL
+      CALL DPOTRF('U', SIZE(KFULL,1), UINV, SIZE(KFULL,1), INFO)
+      IF (INFO /= 0) RETURN
+      CALL DTRTRI('U', 'N', SIZE(KFULL,1), UINV, SIZE(KFULL,1), INFO)
+      IF (INFO /= 0) RETURN
+      CALL ZERO_STRICT_LOWER(UINV)
+
+      ALLOCATE(TMP(SIZE(BFULL,1),SIZE(BFULL,2)))
+      TMP = MATMUL(BFULL, UINV)
+      ALLOCATE(CSTD(SIZE(KFULL,1),SIZE(KFULL,2)))
+      CSTD = MATMUL(TRANSPOSE(UINV), TMP)
+      CSTD = HALF_SYM(CSTD)
+
+      END SUBROUTINE BUILD_STANDARDIZED_BUCKLING_OPERATOR
+
+!***********************************************************************************************************************************
+      SUBROUTINE BUILD_DENSE_FROM_SPARSE ( IROWPTR, JCOLIND, VALUES, A )
+
+      INTEGER(LONG), INTENT(IN)       :: IROWPTR(:)
+      INTEGER(LONG), INTENT(IN)       :: JCOLIND(:)
+      REAL(DOUBLE), INTENT(IN)        :: VALUES(:)
+      REAL(DOUBLE), ALLOCATABLE       :: A(:,:)
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: P
+
+      ALLOCATE(A(NDOFL,NDOFL))
+      A = ZERO
+      DO I=1,NDOFL
+         DO P=IROWPTR(I),IROWPTR(I+1)-1
+            A(I,JCOLIND(P)) = A(I,JCOLIND(P)) + VALUES(P)
+         ENDDO
+      ENDDO
+      A = HALF_SYM(A)
+
+      END SUBROUTINE BUILD_DENSE_FROM_SPARSE
 
 !***********************************************************************************************************************************
       SUBROUTINE BUILD_CONDENSED_MODAL_CORE ( NACTIVE, NZERO, ACTIVE_POS, ZERO_POS, ACTIVE_MAP, ZERO_MAP, MASS_A, KAA, KZZ,        &
@@ -615,6 +860,341 @@
       CALL DSYEV('V', 'U', SIZE(ASTD,1), EVEC_STD, SIZE(ASTD,1), EVAL_ALL, WORK, LWORK, INFO)
 
       END SUBROUTINE RUN_DENSE_BACKEND
+
+!***********************************************************************************************************************************
+      SUBROUTINE RUN_DENSE_GENERALIZED_BACKEND ( AFULL, BFULL, EVAL_ALL, EVEC_FULL, INFO )
+
+      REAL(DOUBLE), INTENT(IN)        :: AFULL(:,:)
+      REAL(DOUBLE), INTENT(IN)        :: BFULL(:,:)
+      INTEGER(LONG), INTENT(OUT)      :: INFO
+      REAL(DOUBLE), ALLOCATABLE       :: EVAL_ALL(:)
+      REAL(DOUBLE), ALLOCATABLE       :: EVEC_FULL(:,:)
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: J
+      INTEGER(LONG)                   :: K
+      INTEGER(LONG)                   :: LWORK
+      INTEGER(LONG)                   :: N
+      INTEGER(LONG)                   :: NKEEP
+      REAL(DOUBLE), ALLOCATABLE       :: AWORK(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: ALPHAI(:)
+      REAL(DOUBLE), ALLOCATABLE       :: ALPHAR(:)
+      REAL(DOUBLE), ALLOCATABLE       :: BWORK(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: BETA(:)
+      REAL(DOUBLE), ALLOCATABLE       :: EVAL_TMP(:)
+      REAL(DOUBLE), ALLOCATABLE       :: EVEC_TMP(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: VL(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: VR(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: WORK(:)
+      REAL(DOUBLE)                    :: BETA_ABS
+      REAL(DOUBLE)                    :: EVAL_I
+      REAL(DOUBLE)                    :: EVAL_J
+      REAL(DOUBLE)                    :: SCALE
+
+      N = SIZE(AFULL,1)
+      ALLOCATE(AWORK(N,N), BWORK(N,N), ALPHAR(N), ALPHAI(N), BETA(N), VL(1,1), VR(N,N))
+      AWORK = AFULL
+      BWORK = BFULL
+      VL = ZERO
+      VR = ZERO
+
+      LWORK = -1
+      ALLOCATE(WORK(1))
+      CALL DGGEV('N', 'V', N, AWORK, N, BWORK, N, ALPHAR, ALPHAI, BETA, VL, 1, VR, N, WORK, LWORK, INFO)
+      IF (INFO /= 0) RETURN
+      LWORK = MAX(1, NINT(WORK(1)))
+      DEALLOCATE(WORK)
+      ALLOCATE(WORK(LWORK))
+      CALL DGGEV('N', 'V', N, AWORK, N, BWORK, N, ALPHAR, ALPHAI, BETA, VL, 1, VR, N, WORK, LWORK, INFO)
+      IF (INFO /= 0) RETURN
+
+      ALLOCATE(EVAL_TMP(N), EVEC_TMP(N,N))
+      NKEEP = 0
+      DO I=1,N
+         BETA_ABS = DABS(BETA(I))
+         SCALE    = MAX(1.0D0, DABS(ALPHAR(I)), BETA_ABS)
+         IF (BETA_ABS <= EPSIL(1)*SCALE) CYCLE
+         IF (DABS(ALPHAI(I)) > SQRT(EPSIL(1))*SCALE) CYCLE
+         IF ((ALPHAR(I)/BETA(I)) <= ZERO) CYCLE
+         NKEEP = NKEEP + 1
+         EVAL_TMP(NKEEP) = ALPHAR(I)/BETA(I)
+         EVEC_TMP(1:N,NKEEP) = VR(1:N,I)
+      ENDDO
+
+      IF (NKEEP <= 0) THEN
+         INFO = N + 1
+         RETURN
+      ENDIF
+
+      DO I=1,NKEEP-1
+         DO J=I+1,NKEEP
+            EVAL_I = EVAL_TMP(I)
+            EVAL_J = EVAL_TMP(J)
+            IF (EVAL_J < EVAL_I) THEN
+               EVAL_TMP(I) = EVAL_J
+               EVAL_TMP(J) = EVAL_I
+               DO K=1,N
+                  SCALE = EVEC_TMP(K,I)
+                  EVEC_TMP(K,I) = EVEC_TMP(K,J)
+                  EVEC_TMP(K,J) = SCALE
+               ENDDO
+            ENDIF
+         ENDDO
+      ENDDO
+
+      ALLOCATE(EVAL_ALL(NKEEP), EVEC_FULL(N,NKEEP))
+      DO I=1,NKEEP
+         EVAL_ALL(I) = EVAL_TMP(I)
+         EVEC_FULL(1:N,I) = EVEC_TMP(1:N,I)
+      ENDDO
+
+      END SUBROUTINE RUN_DENSE_GENERALIZED_BACKEND
+
+!***********************************************************************************************************************************
+      SUBROUTINE RUN_FEAST_BUCKLING_BACKEND ( AFULL, BFULL, EVAL_ALL, EVEC_FULL, INFO )
+
+      REAL(DOUBLE), INTENT(IN)        :: AFULL(:,:)
+      REAL(DOUBLE), INTENT(IN)        :: BFULL(:,:)
+      INTEGER(LONG), INTENT(OUT)      :: INFO
+      REAL(DOUBLE), ALLOCATABLE       :: EVAL_ALL(:)
+      REAL(DOUBLE), ALLOCATABLE       :: EVEC_FULL(:,:)
+
+#ifdef MYSTRAN_HAVE_EXTERNAL_FEAST
+      INTEGER(LONG)                   :: FEAST_FPM(128)
+      INTEGER(LONG)                   :: FEAST_INFO
+      INTEGER(LONG)                   :: FEAST_LOOP
+      INTEGER(LONG)                   :: FEAST_M0
+      INTEGER(LONG)                   :: FEAST_MODE
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: KEEP
+      REAL(DOUBLE)                    :: EMAX
+      REAL(DOUBLE)                    :: EMIN
+      REAL(DOUBLE)                    :: EPSOUT
+      REAL(DOUBLE), ALLOCATABLE       :: EVAL_TMP(:)
+      REAL(DOUBLE), ALLOCATABLE       :: RES(:)
+      REAL(DOUBLE), ALLOCATABLE       :: A(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: B(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: MU(:)
+      REAL(DOUBLE), ALLOCATABLE       :: Q(:,:)
+
+      INTERFACE
+         SUBROUTINE FEASTINIT(FPM)
+            INTEGER :: FPM(*)
+         END SUBROUTINE FEASTINIT
+         SUBROUTINE DFEAST_SYGV(UPLO, N, A, LDA, B, LDB, FPM, EPSOUT, LOOP, EMIN, EMAX, M0, LAMBDA, Q, MODE, RES, INFO)
+            CHARACTER(1), INTENT(IN) :: UPLO
+            INTEGER, INTENT(IN) :: N, LDA, LDB, FPM(*), M0
+            DOUBLE PRECISION, INTENT(INOUT) :: A(LDA,*), B(LDB,*)
+            DOUBLE PRECISION, INTENT(IN) :: EMIN, EMAX
+            DOUBLE PRECISION, INTENT(OUT) :: LAMBDA(*), Q(N,*)
+            DOUBLE PRECISION, INTENT(OUT) :: EPSOUT, RES(*)
+            INTEGER, INTENT(OUT) :: LOOP, MODE, INFO
+         END SUBROUTINE DFEAST_SYGV
+      END INTERFACE
+
+      INFO = 0
+      CALL BUILD_FEAST_BUCKLING_INTERVAL(AFULL, BFULL, EMIN, EMAX, INFO)
+      IF (INFO /= 0) RETURN
+
+      FEAST_M0 = MAX(1, MIN(SIZE(AFULL,1), MAX(EIG_FEAST_M0, 2*MAX(1,EIG_N2) + 8)))
+      ALLOCATE(A(SIZE(BFULL,1),SIZE(BFULL,2)), B(SIZE(AFULL,1),SIZE(AFULL,2)), MU(FEAST_M0), Q(SIZE(AFULL,1),FEAST_M0),         &
+               RES(FEAST_M0), EVAL_TMP(FEAST_M0))
+      A = BFULL
+      B = AFULL
+      CALL FEASTINIT(FEAST_FPM)
+      FEAST_FPM(1) = MERGE(1,0,SUPINFO == 'N')
+      FEAST_FPM(3) = EIG_FEAST_TOL_DIGITS
+      FEAST_FPM(4) = EIG_FEAST_MAX_LOOP
+      FEAST_FPM(8) = EIG_FEAST_N_CONTOUR
+
+      CALL DFEAST_SYGV('U', SIZE(AFULL,1), A, SIZE(AFULL,1), B, SIZE(AFULL,1), FEAST_FPM, EPSOUT, FEAST_LOOP, EMIN, EMAX,         &
+                       FEAST_M0, MU, Q, FEAST_MODE, RES, FEAST_INFO)
+      INFO = FEAST_INFO
+      IF ((INFO == 0) .AND. (FEAST_MODE > 0)) THEN
+         KEEP = 0
+         DO I=1,FEAST_MODE
+            IF (MU(I) <= EPSIL(1)) CYCLE
+            KEEP = KEEP + 1
+            EVAL_TMP(KEEP) = ONE()/MU(I)
+         ENDDO
+         IF (KEEP > 0) THEN
+            ALLOCATE(EVAL_ALL(KEEP), EVEC_FULL(SIZE(AFULL,1),KEEP))
+            KEEP = 0
+            DO I=1,FEAST_MODE
+               IF (MU(I) <= EPSIL(1)) CYCLE
+               KEEP = KEEP + 1
+               EVAL_ALL(KEEP) = ONE()/MU(I)
+               EVEC_FULL(:,KEEP) = Q(:,I)
+            ENDDO
+            CALL SORT_EIGENPAIRS(EVAL_ALL, EVEC_FULL)
+         ELSE
+            INFO = 1
+         ENDIF
+      ENDIF
+#else
+      INFO = 1
+#endif
+
+      END SUBROUTINE RUN_FEAST_BUCKLING_BACKEND
+
+!***********************************************************************************************************************************
+      SUBROUTINE RUN_SUBSPACE_BUCKLING_BACKEND ( KFULL, CSTD, NEV, NSUB, TOL, MAXIT, EVAL_ALL, EVEC_FULL, INFO )
+
+      REAL(DOUBLE), INTENT(IN)        :: KFULL(:,:)
+      REAL(DOUBLE), INTENT(IN)        :: CSTD(:,:)
+      REAL(DOUBLE), INTENT(IN)        :: TOL
+      INTEGER(LONG), INTENT(IN)       :: MAXIT
+      INTEGER(LONG), INTENT(IN)       :: NEV
+      INTEGER(LONG), INTENT(IN)       :: NSUB
+      INTEGER(LONG), INTENT(OUT)      :: INFO
+      REAL(DOUBLE), ALLOCATABLE       :: EVAL_ALL(:)
+      REAL(DOUBLE), ALLOCATABLE       :: EVEC_FULL(:,:)
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: ITER
+      INTEGER(LONG)                   :: LWORK
+      INTEGER(LONG)                   :: N
+      INTEGER(LONG)                   :: NKEEP
+      INTEGER(LONG)                   :: NEV_EFF
+      INTEGER(LONG)                   :: NSUB_EFF
+      REAL(DOUBLE)                    :: MAX_RESID
+      REAL(DOUBLE)                    :: MU
+      REAL(DOUBLE), ALLOCATABLE       :: AX(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: LAMBDA_TMP(:)
+      REAL(DOUBLE), ALLOCATABLE       :: RESID(:)
+      REAL(DOUBLE), ALLOCATABLE       :: T(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: UINV(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: W(:)
+      REAL(DOUBLE), ALLOCATABLE       :: WORK(:)
+      REAL(DOUBLE), ALLOCATABLE       :: X(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: Y(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: ZKEEP(:,:)
+
+      INFO = 0
+      N = SIZE(CSTD,1)
+      NEV_EFF = MIN(MAX(1,NEV), N)
+      NSUB_EFF = MIN(N, MAX(NEV_EFF, NSUB))
+      ALLOCATE(X(N,NSUB_EFF), Y(N,NSUB_EFF), T(NSUB_EFF,NSUB_EFF), W(NSUB_EFF), AX(N,NEV_EFF), RESID(NEV_EFF))
+
+      CALL RANDOM_NUMBER(X)
+      CALL ORTHONORMALIZE_MGS(X)
+
+      LWORK = MAX(1, 8*NSUB_EFF)
+      ALLOCATE(WORK(LWORK))
+      DO ITER=1,MAX(1,MAXIT)
+         Y = MATMUL(CSTD, X)
+         CALL ORTHONORMALIZE_MGS(Y)
+         T = MATMUL(TRANSPOSE(Y), MATMUL(CSTD, Y))
+         CALL DSYEV('V', 'U', NSUB_EFF, T, NSUB_EFF, W, WORK, LWORK, INFO)
+         IF (INFO /= 0) RETURN
+         CALL SORT_EIGENPAIRS_DESC(W, T)
+         X = MATMUL(Y, T)
+         CALL ORTHONORMALIZE_MGS(X)
+         AX = MATMUL(CSTD, X(:,1:NEV_EFF))
+         MAX_RESID = ZERO
+         DO I=1,NEV_EFF
+            RESID(I) = SQRT(MAX(DOT_PRODUCT(AX(:,I) - W(I)*X(:,I), AX(:,I) - W(I)*X(:,I)), ZERO))
+            IF (RESID(I) > MAX_RESID) MAX_RESID = RESID(I)
+         ENDDO
+         IF (MAX_RESID < TOL) EXIT
+      ENDDO
+
+      ALLOCATE(LAMBDA_TMP(NEV_EFF), ZKEEP(N,NEV_EFF))
+      NKEEP = 0
+      DO I=1,NEV_EFF
+         MU = W(I)
+         IF (MU <= EPSIL(1)) CYCLE
+         NKEEP = NKEEP + 1
+         LAMBDA_TMP(NKEEP) = ONE()/MU
+         ZKEEP(:,NKEEP) = X(:,I)
+      ENDDO
+
+      IF (NKEEP <= 0) THEN
+         INFO = N + 1
+         RETURN
+      ENDIF
+
+      ALLOCATE(UINV(N,N))
+      UINV = KFULL
+      CALL DPOTRF('U', N, UINV, N, INFO)
+      IF (INFO /= 0) RETURN
+      CALL DTRTRI('U', 'N', N, UINV, N, INFO)
+      IF (INFO /= 0) RETURN
+      CALL ZERO_STRICT_LOWER(UINV)
+
+      ALLOCATE(EVAL_ALL(NKEEP), EVEC_FULL(N,NKEEP))
+      EVAL_ALL(1:NKEEP) = LAMBDA_TMP(1:NKEEP)
+      EVEC_FULL = MATMUL(TRANSPOSE(UINV), ZKEEP(:,1:NKEEP))
+      CALL SORT_EIGENPAIRS(EVAL_ALL, EVEC_FULL)
+
+      END SUBROUTINE RUN_SUBSPACE_BUCKLING_BACKEND
+
+!***********************************************************************************************************************************
+      SUBROUTINE RUN_CHASE_BUCKLING_BACKEND ( KFULL, CSTD, NEV, NEX, TOL, MAXIT, EVAL_ALL, EVEC_FULL, INFO )
+
+      REAL(DOUBLE), INTENT(IN)        :: KFULL(:,:)
+      REAL(DOUBLE), INTENT(IN)        :: CSTD(:,:)
+      REAL(DOUBLE), INTENT(IN)        :: TOL
+      INTEGER(LONG), INTENT(IN)       :: MAXIT
+      INTEGER(LONG), INTENT(IN)       :: NEV
+      INTEGER(LONG), INTENT(IN)       :: NEX
+      INTEGER(LONG), INTENT(OUT)      :: INFO
+      REAL(DOUBLE), ALLOCATABLE       :: EVAL_ALL(:)
+      REAL(DOUBLE), ALLOCATABLE       :: EVEC_FULL(:,:)
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: N
+      INTEGER(LONG)                   :: NKEEP
+      REAL(DOUBLE)                    :: ALPHA_SHIFT
+      REAL(DOUBLE)                    :: ETA
+      REAL(DOUBLE)                    :: MU
+      REAL(DOUBLE), ALLOCATABLE       :: EVAL_STD(:)
+      REAL(DOUBLE), ALLOCATABLE       :: LAMBDA_TMP(:)
+      REAL(DOUBLE), ALLOCATABLE       :: ASHIFT(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: UINV(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: YKEEP(:,:)
+
+      INFO = 0
+      N = SIZE(CSTD,1)
+
+      ALPHA_SHIFT = GERSHGORIN_UPPER_BOUND(CSTD) + MAX(ONE(), ABS(GERSHGORIN_UPPER_BOUND(CSTD)))*1.0D-6
+      ALLOCATE(ASHIFT(N,N))
+      ASHIFT = -CSTD
+      DO I=1,N
+         ASHIFT(I,I) = ASHIFT(I,I) + ALPHA_SHIFT
+      ENDDO
+      CALL RUN_CHASE_BACKEND(ASHIFT, NEV, NEX, TOL, MAXIT, EVAL_STD, YKEEP, INFO)
+      IF (INFO /= 0) RETURN
+
+      ALLOCATE(LAMBDA_TMP(SIZE(EVAL_STD)))
+      NKEEP = 0
+      DO I=1,SIZE(EVAL_STD)
+         ETA = EVAL_STD(I)
+         MU = ALPHA_SHIFT - ETA
+         IF (MU <= EPSIL(1)) CYCLE
+         NKEEP = NKEEP + 1
+         LAMBDA_TMP(NKEEP) = ONE()/MU
+      ENDDO
+
+      IF (NKEEP <= 0) THEN
+         INFO = N + 1
+         RETURN
+      ENDIF
+
+      ALLOCATE(UINV(N,N))
+      UINV = KFULL
+      CALL DPOTRF('U', N, UINV, N, INFO)
+      IF (INFO /= 0) RETURN
+      CALL DTRTRI('U', 'N', N, UINV, N, INFO)
+      IF (INFO /= 0) RETURN
+      CALL ZERO_STRICT_LOWER(UINV)
+
+      ALLOCATE(EVAL_ALL(NKEEP), EVEC_FULL(N,NKEEP))
+      EVAL_ALL(1:NKEEP) = LAMBDA_TMP(1:NKEEP)
+      EVEC_FULL = MATMUL(UINV, YKEEP(:,1:NKEEP))
+      CALL SORT_EIGENPAIRS(EVAL_ALL, EVEC_FULL)
+
+      END SUBROUTINE RUN_CHASE_BUCKLING_BACKEND
 
 !***********************************************************************************************************************************
       SUBROUTINE RUN_SUBSPACE_BACKEND ( ASTD, NEV, NSUB, TOL, MAXIT, EVAL_ALL, EVEC_STD, INFO )
@@ -944,6 +1524,28 @@
       END SUBROUTINE ORTHONORMALIZE_MGS
 
 !***********************************************************************************************************************************
+      REAL(DOUBLE) FUNCTION GERSHGORIN_UPPER_BOUND ( A )
+
+      REAL(DOUBLE), INTENT(IN)        :: A(:,:)
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: J
+      REAL(DOUBLE)                    :: RADIUS
+      REAL(DOUBLE)                    :: ROW_BOUND
+
+      GERSHGORIN_UPPER_BOUND = -HUGE(ONE())
+      DO I=1,SIZE(A,1)
+         RADIUS = ZERO
+         DO J=1,SIZE(A,2)
+            IF (J /= I) RADIUS = RADIUS + ABS(A(I,J))
+         ENDDO
+         ROW_BOUND = A(I,I) + RADIUS
+         IF (ROW_BOUND > GERSHGORIN_UPPER_BOUND) GERSHGORIN_UPPER_BOUND = ROW_BOUND
+      ENDDO
+
+      END FUNCTION GERSHGORIN_UPPER_BOUND
+
+!***********************************************************************************************************************************
       SUBROUTINE SORT_EIGENPAIRS ( EVALS, EVECS )
 
       REAL(DOUBLE), INTENT(INOUT)     :: EVALS(:)
@@ -969,6 +1571,46 @@
       ENDDO
 
       END SUBROUTINE SORT_EIGENPAIRS
+
+!***********************************************************************************************************************************
+      SUBROUTINE SORT_EIGENPAIRS_DESC ( EVALS, EVECS )
+
+      REAL(DOUBLE), INTENT(INOUT)     :: EVALS(:)
+      REAL(DOUBLE), INTENT(INOUT)     :: EVECS(:,:)
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: J
+      REAL(DOUBLE)                    :: TMP
+      REAL(DOUBLE), ALLOCATABLE       :: TMPV(:)
+
+      ALLOCATE(TMPV(SIZE(EVECS,1)))
+      DO I=1,SIZE(EVALS)-1
+         DO J=I+1,SIZE(EVALS)
+            IF (EVALS(J) > EVALS(I)) THEN
+               TMP      = EVALS(I)
+               EVALS(I) = EVALS(J)
+               EVALS(J) = TMP
+               TMPV     = EVECS(:,I)
+               EVECS(:,I) = EVECS(:,J)
+               EVECS(:,J) = TMPV
+            ENDIF
+         ENDDO
+      ENDDO
+
+      END SUBROUTINE SORT_EIGENPAIRS_DESC
+
+!***********************************************************************************************************************************
+      SUBROUTINE ZERO_STRICT_LOWER ( A )
+
+      REAL(DOUBLE), INTENT(INOUT)     :: A(:,:)
+
+      INTEGER(LONG)                   :: I
+
+      DO I=2,SIZE(A,1)
+         A(I,1:I-1) = ZERO
+      ENDDO
+
+      END SUBROUTINE ZERO_STRICT_LOWER
 
 !***********************************************************************************************************************************
       SUBROUTINE WRITE_FALLBACK_WARNING ( METHOD, CODE, MESSAGE )
