@@ -77,7 +77,8 @@
 ! **********************************************************************************************************************************
 ! Calculates strain output for shell elements (TRIA3, QUAD4, SHEAR) and puts results into array OGEL for later output to F06 file
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR. (TYPE(1:5) == 'SHEAR')) THEN
+! --- CQUADR_DKMQ24 begin --- !
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8') .OR. (TYPE(1:5) == 'SHEAR')) THEN
 
          IF (PCOMP_PROPS == 'Y') THEN
 
@@ -276,6 +277,7 @@
          WRITE(F06,9203) SUBR_NAME, TYPE
          CALL OUTA_HERE ( 'Y' )
 
+! --- CQUADR_DKMQ24 end --- !
       ENDIF
 
 

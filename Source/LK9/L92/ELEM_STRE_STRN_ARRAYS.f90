@@ -156,7 +156,7 @@
 ! **********************************************************************************************************************************
 ! Calc strains, then stresses for 2D elements
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR.                                 &
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8') .OR.     &
                (TYPE(1:5) == 'SHEAR') .OR. (TYPE(1:5) == 'USER1')) THEN
 
          DO I=1,3
@@ -326,7 +326,7 @@
 ! L O C A L   E L E M E N T   C O O R D I N A T E   S Y S T E M even when it's transformed here.
 ! STR_CID == -2 says M A T E R I A L   C O O R D I N A T E   S Y S T E M for solids.
 
-         IF      ((TYPE (1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'TRIA3')) THEN
+         IF      ((TYPE (1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'TRIA3')) THEN
 
             IF (STR_CID /= -2) THEN
 ! Shells don't work because STR_TENSOR_TRANSFORM should be between setting STR_TENSOR and setting stress

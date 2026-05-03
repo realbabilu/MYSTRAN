@@ -138,7 +138,7 @@
 
                ENDIF
 
-            ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
+            ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))) THEN
 ! --- cbeam_add end --- !
 
                IF      (PTYPE(INT_ELEM_ID) == '1') THEN

@@ -63,7 +63,7 @@
                   (TYPE == 'TRIA3K  ') .OR. (TYPE == 'TRIA3   ')) THEN
              I1 = DEDAT_T3_SHELL_KEY
          ELSE IF ((TYPE == 'QDMEM   ') .OR. (TYPE == 'QDPLT1  ') .OR. (TYPE == 'QDPLT2  ') .OR.                                    &
-                  (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD4   ')) THEN
+                  (TYPE == 'QUAD4K  ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   '))) THEN
              I1 = DEDAT_Q4_SHELL_KEY
          ENDIF
 

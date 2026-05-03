@@ -203,6 +203,7 @@
       INTEGER(LONG)            :: NCPENTA15           =   0      ! Count of no. of CPENTA  elems with 15 nodes
       INTEGER(LONG)            :: NCQUAD4             =   0      ! Count of no. of CQUAD4  elems
       INTEGER(LONG)            :: NCQUAD4K            =   0      ! Count of no. of CQUAD4K elems
+      INTEGER(LONG)            :: NCQUADR             =   0      ! Count of no. of CQUADR  elems
       INTEGER(LONG)            :: NCQUAD8             =   0      ! Count of no. of CQUAD8  elems
       INTEGER(LONG)            :: NCROD               =   0      ! Count of no. of CROD    elems
       INTEGER(LONG)            :: NCSHEAR             =   0      ! Count of no. of CSHEAR  elems
@@ -473,7 +474,7 @@
       INTEGER(LONG), PARAMETER :: MEOFIL              =   4      ! Max no. elem disk debug output files
       INTEGER(LONG), PARAMETER :: MEPROP              =  50      ! Max no. element properties that cab be stored in array EPROP
       INTEGER(LONG), PARAMETER :: MEPSIL              =   6      ! Max no. variables in EPSIL array
-      INTEGER(LONG), PARAMETER :: METYPE              =  23      ! Max number of element types
+      INTEGER(LONG), PARAMETER :: METYPE              =  24      ! Max number of element types
       INTEGER(LONG), PARAMETER :: MFIJ                =   5      ! Max number of disk files for WRT_FIJ (F21, F22, etc files)
       INTEGER(LONG), PARAMETER :: MGRID               =   6      ! No. cols allowed in dimensioning array GRID
       INTEGER(LONG), PARAMETER :: MGROUTS             =   6      ! No. of types of grid related outputs

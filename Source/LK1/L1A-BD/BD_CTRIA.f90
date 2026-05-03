@@ -103,13 +103,18 @@
       CALL ELEPRO ( 'Y', JCARD_EDAT, 5, MEDAT_CTRIA, 'Y', 'Y', 'Y', 'Y', 'Y', 'N', 'N', 'N' )
 
       NUM_GRD = 3
-      IF       (JCARD(1)(1:7) == 'CTRIA3K') THEN
+! --- CQUAD4R_CTRIAR_add begin --- !
+      IF       (JCARD(1)(1:6) == 'CTRIAR') THEN
+         NCTRIA3 = NCTRIA3 + 1
+         ETYPE(NELE) = 'TRIA3   '
+      ELSE IF (JCARD(1)(1:7) == 'CTRIA3K') THEN
          NCTRIA3K = NCTRIA3K + 1
          ETYPE(NELE) = 'TRIA3K  '
       ELSE IF ((JCARD(1)(1:7) == 'CTRIA3 ') .OR. (JCARD(1)(1:7) == 'CTRIA3*')) THEN
          NCTRIA3 = NCTRIA3 + 1
          ETYPE(NELE) = 'TRIA3   '
       ENDIF
+! --- CQUAD4R_CTRIAR_add end --- !
 
 ! Read material property orientation angle. It takes 2 values put into EDAT to cover all of the possibilities of field 7:
 !  (a) If field 7 is a real value it is the angle of the material axis relative to the element x axis.
@@ -201,10 +206,15 @@
       NEDAT = NEDAT + 1                                    ! 8: PSHELL/PCOMP flag (to be set in subr ELEM_PROP_MATL_IIDS)
       EDAT(NEDAT) = 0
 
+! --- CQUAD4R_CTRIAR_add begin --- !
 ! Load a 0 into EDAT as a flag for whether this element has thicknesses defined on a continuation entry
 
-      NEDAT = NEDAT + 1                                    ! 8: PSHELL/PCOMP flag (to be set in subr ELEM_PROP_MATL_IIDS)
+      NEDAT = NEDAT + 1                                    ! 9: plate thickness key / CTRIAR DKMT18 sentinel
       EDAT(NEDAT) = 0
+      IF (JCARD(1)(1:6) == 'CTRIAR') THEN
+         EDAT(NEDAT) = -18
+      ENDIF
+! --- CQUAD4R_CTRIAR_add end --- !
 
       CALL BD_IMBEDDED_BLANK   ( JCARD,2,3,4,5,6,7,8,0 )   ! Make sure that there are no imbedded blanks in fields 2-6
       CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,0,0,0,9 )   ! Issue warning if field 9 not blank

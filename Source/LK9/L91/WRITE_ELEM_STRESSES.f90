@@ -280,7 +280,8 @@
                   WRITE(F06,401) FILL(1: 61), ONAME
                ENDIF
 
-            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+! --- CQUADR_DKMQ24 begin --- !
+            ELSE IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                   WRITE(F06,302) FILL(1: 20)
                ELSE
@@ -331,7 +332,7 @@
                   WRITE(F06,1302) FILL(1: 1), FILL(1: 1)
                ENDIF
 
-            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            ELSE IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
                IF (STRE_OPT == 'VONMISES') THEN
                   WRITE(F06,1401) FILL(1: 1), FILL(1: 1), FILL(1: 1)
                ELSE
@@ -485,7 +486,7 @@
             ENDIF
          ENDIF
 
-      ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      ELSE IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
          !CALL WRITE_OES_CQUAD4 ( NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI )
 
          !CALL GET_STRESS_CODE(STRESS_CODE, IS_VON_MISES, IS_STRAIN, IS_FIBER_DISTANCE)
@@ -685,6 +686,7 @@
          WRITE(F06,9300) SUBR_NAME,TYPE
          FATAL_ERR = FATAL_ERR + 1
          CALL OUTA_HERE ( 'Y' )                            ! Coding error (elem type not valid) , so quit
+! --- CQUADR_DKMQ24 end --- !
       ENDIF
 
 

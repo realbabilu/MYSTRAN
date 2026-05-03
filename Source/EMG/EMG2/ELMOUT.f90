@@ -98,7 +98,7 @@
          WRITE(BUG,1001) ELDT_BUG_DAT1_BIT, TYPE, EID
          WRITE(BUG,*)
 
-         IF ((TYPE == 'QDPLT2   ') .OR. (TYPE == 'QUAD4   ')) THEN
+         IF ((TYPE == 'QDPLT2   ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   '))) THEN
             WRITE(BUG,*) '  Bending portion of QUAD4 is based on QUAD4TYP formulation = ',QUAD4TYP
             WRITE(BUG,*)
          ENDIF
@@ -205,7 +205,7 @@
                   WRITE(BUG,*) '  TE coord transformation matrix from subr ELMGM1'
 
             ELSE IF ((TYPE == 'QDMEM   ') .OR. (TYPE == 'QDPLT1  ') .OR. (TYPE == 'QDPLT2   ') .OR.                                &
-                     (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD4   ')) THEN
+                     (TYPE == 'QUAD4K  ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   '))) THEN
                   WRITE(BUG,*) '  TE coord transformation matrix from subr ELMGM2 with QUADAXIS = ',QUADAXIS
 
             ELSE IF ((TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ') .OR.                                                           &
@@ -240,7 +240,7 @@
             WRITE(BUG,*)
 
             IF ((TYPE == 'QDMEM   ') .OR. (TYPE == 'QDPLT1  ') .OR. (TYPE == 'QDPLT2   ') .OR.                                     &
-                (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD4   ')) THEN
+                (TYPE == 'QUAD4K  ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   '))) THEN
                WRITE(BUG,5002) HBAR, MXWARP
                WRITE(BUG,5003) CONV_RAD_DEG*QUAD_THETA
                WRITE(BUG,5004) CONV_RAD_DEG*QUAD_GAMMA
@@ -268,7 +268,7 @@
             IF((TYPE == 'TRMEM   ') .OR. (TYPE == 'TRPLT1  ') .OR. (TYPE == 'TRPLT2  ') .OR.                                       &
                (TYPE == 'TRIA3K  ') .OR. (TYPE == 'TRIA3   ') .OR.                                                                 &
                (TYPE == 'QDMEM   ') .OR. (TYPE == 'QDPLT1  ') .OR. (TYPE == 'QDPLT2   ') .OR.                                      &
-               (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD4   ')) THEN
+               (TYPE == 'QUAD4K  ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   '))) THEN
 
                WRITE(BUG,*) '  EM material matrix, in local element coordinate system, for membrane stresses'
                WRITE(BUG,*) '  -----------------------------------------------------------------------------'

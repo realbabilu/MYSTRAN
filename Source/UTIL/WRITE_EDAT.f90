@@ -220,6 +220,7 @@
       EDAT_DESCR(11,13) = 'Plate thick key '
 
       EDAT_DESCR( 0,14) = 'QUAD4K          '
+      EDAT_DESCR( 0,24) = 'CQUADR          '
       EDAT_DESCR( 1,14) = 'Elem ID         '
       EDAT_DESCR( 2,14) = 'Prop ID         '
       EDAT_DESCR( 3,14) = 'Grid A          '
@@ -338,6 +339,7 @@ do_1: DO K=1,NELE
          ELSE IF (ETYPE(K) == 'PLOTEL  ') THEN   ;   MEDAT = MEDAT_PLOTEL
          ELSE IF (ETYPE(K) == 'QUAD4   ') THEN   ;   MEDAT = MEDAT_CQUAD
          ELSE IF (ETYPE(K) == 'QUAD4K  ') THEN   ;   MEDAT = MEDAT_CQUAD
+         ELSE IF (ETYPE(K) == 'QUADR   ') THEN   ;   MEDAT = MEDAT_CQUAD
          ELSE IF (ETYPE(K) == 'ROD     ') THEN   ;   MEDAT = MEDAT_CROD
          ELSE IF (ETYPE(K) == 'SHEAR   ') THEN   ;   MEDAT = MEDAT_CSHEAR
          ELSE IF (ETYPE(K) == 'TETRA4  ') THEN   ;   MEDAT = MEDAT_CTETRA4

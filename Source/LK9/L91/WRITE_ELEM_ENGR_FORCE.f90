@@ -395,11 +395,11 @@ headr:IF (IHDR == 'Y') THEN
          ENDIF
          NUM_TERMS = 6
 
-      ELSE IF ((TYPE == 'TRIA3   ') .OR. (TYPE == 'QUAD4   ') .OR. (TYPE == 'QUAD8   ')) THEN
+      ELSE IF ((TYPE == 'TRIA3   ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE == 'QUAD8   ')) THEN
         IF (WRITE_OP2)  THEN
           IF (TYPE == 'TRIA3   ') THEN
               ELEMENT_TYPE = 74
-          ELSE IF (TYPE == 'QUAD4   ') THEN
+          ELSE IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) THEN
               ELEMENT_TYPE = 33  ! todo: verify no ELEMENT_TYPE=144
           !ELSE
           !   error

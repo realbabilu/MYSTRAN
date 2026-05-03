@@ -92,7 +92,7 @@
          VEC_ID_OFFSET = 70500
       ELSE IF (ELEM_TYP == 'QUAD4K  ') THEN
          VEC_ID_OFFSET = 70600
-      ELSE IF (ELEM_TYP == 'QUAD4   ') THEN
+      ELSE IF ((ELEM_TYP == 'QUAD4   ') .OR. (ELEM_TYP == 'QUADR   ')) THEN
          VEC_ID_OFFSET = 70700
       ELSE IF (ELEM_TYP == 'HEXA8   ') THEN
          VEC_ID_OFFSET = 70800

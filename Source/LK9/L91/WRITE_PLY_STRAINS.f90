@@ -219,7 +219,7 @@
       ! 98:  ctria6
       ! 232: cquadr
       ! 233: ctriar
-      IF      (ETYPE == "QUAD4   ") THEN
+      IF      ((ETYPE == "QUAD4   ") .OR. (ETYPE == "QUADR   ")) THEN
           ELEMENT_TYPE = 95
       ELSE IF (ETYPE == "TRIA3   ") THEN
           ELEMENT_TYPE = 97

@@ -261,7 +261,8 @@
                   WRITE(F06,401) FILL(1: 61), ONAME
                ENDIF
 
-            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+! --- CQUADR_DKMQ24 begin --- !
+            ELSE IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                   WRITE(F06,302) FILL(1: 20)
                ELSE
@@ -316,7 +317,7 @@
                ELSE
                   WRITE(F06,1302) FILL(1: 1), FILL(1: 1)
                ENDIF
-            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            ELSE IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
                IF (STRN_OPT == 'VONMISES') THEN
                   WRITE(F06,1401) FILL(1: 1), FILL(1: 1), FILL(1: 1)
                ELSE
@@ -465,7 +466,7 @@
             WRITE(F06,1305) (MAX_ANS(J),J=1,8), (MIN_ANS(J),J=1,8), (ABS_ANS(J),J=1,8)
          ENDIF
 
-      ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      ELSE IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
 
          IF (WRITE_OP2) THEN
            !CALL WRITE_OST_CQUAD4 ( NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI )
@@ -658,6 +659,7 @@
          WRITE(F06,9300) SUBR_NAME,TYPE
          FATAL_ERR = FATAL_ERR + 1
          CALL OUTA_HERE ( 'Y' )                            ! Coding error (elem type not valid) , so quit
+! --- CQUADR_DKMQ24 end --- !
       ENDIF
 
 

@@ -100,7 +100,7 @@
          VEC_ID_OFFSET = 50400
       ELSE IF (ELEM_TYP == 'QUAD4K  ') THEN
          VEC_ID_OFFSET = 50500
-      ELSE IF (ELEM_TYP == 'QUAD4   ') THEN
+      ELSE IF ((ELEM_TYP == 'QUAD4   ') .OR. (ELEM_TYP == 'QUADR   ')) THEN
          VEC_ID_OFFSET = 50600
       ELSE IF (ELEM_TYP == 'SHEAR   ') THEN
          VEC_ID_OFFSET = 50700
@@ -281,7 +281,7 @@
 ! Process plate elements
 
       ELSE IF ((ELEM_TYP == 'TRIA3K  ') .OR. (ELEM_TYP == 'TRIA3   ') .OR.                                                         &
-               (ELEM_TYP == 'QUAD4K  ') .OR. (ELEM_TYP == 'QUAD4   ') .OR. (ELEM_TYP == 'SHEAR   ')) THEN
+               (ELEM_TYP == 'QUAD4K  ') .OR. ((ELEM_TYP == 'QUAD4   ') .OR. (ELEM_TYP == 'QUADR   ')) .OR. (ELEM_TYP == 'SHEAR   ')) THEN
 
          TITLE_E( 1) = 'X  Membrane Force'
          TITLE_E( 2) = 'Y  Membrane Force'

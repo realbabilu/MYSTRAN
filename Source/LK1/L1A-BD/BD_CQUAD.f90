@@ -33,7 +33,7 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, IERRFL, FATAL_ERR, JCARD_LEN, JF, LMATANGLE, LPLATEOFF, LPLATETHICK,        &
-                                         MEDAT_CQUAD, NCQUAD4K, NCQUAD4, NEDAT, NELE, NMATANGLE, NPLATEOFF, NPLATETHICK
+                                         MEDAT_CQUAD, NCQUAD4K, NCQUAD4, NCQUADR, NEDAT, NELE, NMATANGLE, NPLATEOFF, NPLATETHICK
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
       USE MODEL_STUF, ONLY            :  EDAT, ETYPE, MATANGLE, PLATEOFF, PLATETHICK
@@ -103,13 +103,18 @@
       CALL ELEPRO ( 'Y', JCARD_EDAT, 6, MEDAT_CQUAD, 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'N', 'N' )
 
       NUM_GRD = 4
+      ! --- CQUAD4R_CTRIAR_add begin --- !
       IF       (JCARD(1)(1:7) == 'CQUAD4K') THEN
          NCQUAD4K = NCQUAD4K + 1
          ETYPE(NELE) = 'QUAD4K  '
       ELSE IF ((JCARD(1)(1:7) == 'CQUAD4 ') .OR. (JCARD(1)(1:7) == 'CQUAD4*')) THEN
          NCQUAD4 = NCQUAD4 + 1
          ETYPE(NELE) = 'QUAD4   '
+      ELSE IF ((JCARD(1)(1:7) == 'CQUADR ') .OR. (JCARD(1)(1:7) == 'CQUADR*')) THEN
+         NCQUADR = NCQUADR + 1
+         ETYPE(NELE) = 'QUADR   '
       ENDIF
+      ! --- CQUAD4R_CTRIAR_add end --- !
 
 ! Read material property orientation angle. It takes 2 values put into EDAT to cover all of the possibilities of field 8:
 !  (a) If field 8 is a real value it is the angle of the material axis relative to the element x axis.

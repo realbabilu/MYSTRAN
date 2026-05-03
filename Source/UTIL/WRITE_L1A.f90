@@ -297,6 +297,7 @@
       I = I + 1  ;     WRITE(L1A,160) NCPENTA15          , 'NCPENTA15             ( 92)'  !
       I = I + 1  ;     WRITE(L1A,160) NCQUAD4            , 'NCQUAD4               ( 93)'  !
       I = I + 1  ;     WRITE(L1A,160) NCQUAD4K           , 'NCQUAD4K              ( 94)'  !
+      I = I + 1  ;     WRITE(L1A,160) NCQUADR            , 'NCQUADR               ( 95)'  !
       I = I + 1  ;     WRITE(L1A,160) NCROD              , 'NCROD                 ( 95)'  !
       I = I + 1  ;     WRITE(L1A,160) NCSHEAR            , 'NCSHEAR               ( 96)'  !
       I = I + 1  ;     WRITE(L1A,160) NCTETRA4           , 'NCTETRA4              ( 97)'  !

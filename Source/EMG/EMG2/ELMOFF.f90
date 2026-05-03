@@ -257,12 +257,12 @@
                Ksita = 10.0**(-6.0) * SHELL_A(3,3) * ABS(AREA) * K6ROT
 
                ! Find the direction of the singularity DOF (SNORM) in the element coordinate system.
-               IF ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MITC4 ') .OR. (QUAD4TYP == 'MITC4+'))) THEN
+               IF (((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) .AND. ((QUAD4TYP == 'MITC4 ') .OR. (QUAD4TYP == 'MITC4+'))) THEN
                                                            ! This is currently the director vector
                                                            ! but it won't be if SNORM is implemented
                                                            ! without changing the geometry of the element.
                   K6_DIR(:,1:ELGP) = DIRECTOR(:,1:ELGP)
-               ELSEIF (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MIN4  ') .OR. (QUAD4TYP == 'MIN4T ')))                           &
+               ELSEIF ((((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) .AND. ((QUAD4TYP == 'MIN4  ') .OR. (QUAD4TYP == 'MIN4T ')))                           &
                  .OR.   (TYPE == 'TRIA3   ')) THEN
                                                            ! Spring axis is simply the element z axis.
                   K6_DIR(1,:) = ZERO

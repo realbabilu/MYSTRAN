@@ -239,7 +239,7 @@ do_strain_pts:    DO M=1,NUM_PTS(I)
 
                         CALL GET_STRAIN_ITEM_DATA
 
-                        IF ((TYPE == 'TRIA3   ') .OR. (TYPE == 'QUAD4   ') .OR. (TYPE == 'SHEAR   ')) THEN
+                        IF ((TYPE == 'TRIA3   ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE == 'SHEAR   ')) THEN
                            DO L=1,2
                               DO K=1,NUM_OTM_ENTRIES
                                  OT4_EROW = OT4_EROW + 1

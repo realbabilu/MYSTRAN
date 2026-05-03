@@ -195,7 +195,7 @@ elems_5: DO J = 1,NELE
                       (TYPE(1:5) == 'TETRA') .OR.                                                                                  &
                       (TYPE(1:5) == 'QUAD8')) THEN
 
-                     IF (TYPE(1:5) == 'QUAD4') THEN
+                     IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                         CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS(I), STRESS_OUT, STRESS_OUT_PCT_ERR,                    &
                                                      STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
 
@@ -236,7 +236,7 @@ do_stress_pts:    DO M=1,NUM_PTS(I)
 
                         CALL GET_STRESS_ITEM_DATA
 
-                        IF ((TYPE == 'BAR     ') .OR. (TYPE == 'TRIA3   ') .OR. (TYPE == 'QUAD4   ') .OR. (TYPE == 'SHEAR   ')) THEN
+                        IF ((TYPE == 'BAR     ') .OR. (TYPE == 'TRIA3   ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE == 'SHEAR   ')) THEN
                            DO L=1,2
                               DO K=1,NUM_OTM_ENTRIES
                                  OT4_EROW = OT4_EROW + 1
@@ -244,7 +244,7 @@ do_stress_pts:    DO M=1,NUM_PTS(I)
                                  IF (JVEC == 1) THEN
                                     IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ')) THEN
                                        IF (M == 1) THEN
-                                          IF (TYPE(1:5) == 'QUAD4') THEN
+                                          IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                                              WRITE(TXT_STRE(OT4_EROW),9190) OT4_EROW, OT4_DESCRIPTOR, TYPE, EID,                   &
                                                                            STRESS_ITEM(K+(L-1)*NUM_OTM_ENTRIES)
                                           ELSE
@@ -284,7 +284,7 @@ do_stress_pts:    DO M=1,NUM_PTS(I)
                      EID_OUT_ARRAY(NUM_OGEL_ROWS,1) = EID
                      GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                      IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ')) THEN
-                        IF (TYPE(1:5) == 'QUAD4') THEN
+                        IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                            POLY_FIT_ERR(NUM_OGEL_ROWS)       = STRESS_OUT_PCT_ERR(M)
                            POLY_FIT_ERR_INDEX(NUM_OGEL_ROWS) = STRESS_OUT_ERR_INDEX(M)
                         ENDIF

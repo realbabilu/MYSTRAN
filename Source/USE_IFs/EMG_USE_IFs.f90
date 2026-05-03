@@ -45,7 +45,9 @@
       USE BREL1_Interface
       USE BUSH_Interface
       USE TREL1_Interface
+      USE CTRIAR_DKMT18_Interface
       USE QDEL1_Interface
+      USE CQUADR_DKMQ24_Interface
       USE HEXA_Interface
       USE PENTA_Interface
       USE TETRA_Interface

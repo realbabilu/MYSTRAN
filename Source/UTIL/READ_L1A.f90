@@ -363,6 +363,7 @@
       READ(L1A,160,IOSTAT=IOCHKI( 92)) NCPENTA15           !  92 (From module SCONTR)
       READ(L1A,160,IOSTAT=IOCHKI( 93)) NCQUAD4             !  93 (From module SCONTR)
       READ(L1A,160,IOSTAT=IOCHKI( 94)) NCQUAD4K            !  94 (From module SCONTR)
+      READ(L1A,160,IOSTAT=IOCHKI( 95)) NCQUADR             !  95 (From module SCONTR)
       READ(L1A,160,IOSTAT=IOCHKI( 95)) NCROD               !  95 (From module SCONTR)
       READ(L1A,160,IOSTAT=IOCHKI( 96)) NCSHEAR             !  96 (From module SCONTR)
       READ(L1A,160,IOSTAT=IOCHKI( 97)) NCTETRA4            !  97 (From module SCONTR)

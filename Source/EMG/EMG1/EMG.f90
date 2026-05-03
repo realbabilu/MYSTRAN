@@ -55,6 +55,7 @@
       USE CONSTANTS_1, ONLY           :  CONV_DEG_RAD, CONV_RAD_DEG, ZERO, ONE
       USE MODEL_STUF, ONLY            :  CAN_ELEM_TYPE_OFFSET, EDAT, EID, EPNT, ETYPE, ISOLID, MATANGLE, NUM_EMG_FATAL_ERRS,       &
                                          PCOMP_PROPS, PLY_NUM, TE_IDENT, THETAM, TYPE, XEL, TE
+      USE MODEL_STUF, ONLY            :  BE1, BE2, BE3, ELDOF, ELGP, KE, ME, SE1, SE2, SE3
 
       USE EMG_USE_IFs
       USE MITC8_Interface
@@ -102,7 +103,7 @@
           (TYPE == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                                      &
           (TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ') .OR.                                                                      &
           (TYPE == 'USER1   ') .OR. (TYPE == 'USERIN  ') .OR. (TYPE == 'PLOTEL  ') .OR.                                            &
-          (TYPE == 'SHEAR   ') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE(1:5) == 'QUAD8'   )) THEN
+          (TYPE == 'SHEAR   ') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE(1:5) == 'QUAD8'   ) .OR. (TYPE == 'QUADR   ')) THEN
          CALL ELMDAT1 ( INT_ELEM_ID, WRITE_WARN )
       ELSE
          WRITE(ERR,1916) SUBR_NAME,EID,TYPE
@@ -145,7 +146,7 @@
       ELSE IF (TYPE == 'BUSH    ') THEN
          CALL ELMGM1_BUSH ( INT_ELEM_ID, WRITE_WARN )
 
-      ELSE IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD8   ') .OR. (TYPE == 'SHEAR   ')) THEN
+      ELSE IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD8   ') .OR. (TYPE == 'QUADR   ') .OR. (TYPE == 'SHEAR   ')) THEN
          CALL ELMGM2 ( WRITE_WARN )
 
       ELSE IF ((TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ')) THEN
@@ -179,7 +180,7 @@
 ! Matrices of material props are not generated for 1-D elements
 ! --------
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'SHEAR   ')) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE == 'SHEAR   ')) THEN
          IF (PCOMP_PROPS == 'N') THEN                      ! SHEAR elem does not use PCOMP props
 
             THETAM = ZERO
@@ -288,8 +289,10 @@
          CALL ELMOUT ( INT_ELEM_ID, DUM_BUG, CASE_NUM, OPT )
       ENDIF
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR. (TYPE(1:6) == 'SHEAR') .OR.          &
-          (TYPE == 'USER1   ')) THEN
+! --- CQUADR_DKMQ24 begin --- !
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR. (TYPE == 'QUADR   ') .OR.            &
+          (TYPE(1:6) == 'SHEAR') .OR. (TYPE == 'USER1   ')) THEN
+! --- CQUADR_DKMQ24 end --- !
          CALL SHELL_ABD_MATRICES ( INT_ELEM_ID, WRITE_WARN )
       ENDIF
 
@@ -313,7 +316,8 @@
 ! For all but USERIN elem, call ELMDAT2 subr to get the rest of the data needed to calculate the matrices for this element.
 
       IF ((TYPE(1:4) == 'ELAS'    ) .OR. (TYPE      == 'ROD     ') .OR. (TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR.        &
-          (TYPE(1:5) == 'TRIA3'   ) .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE == 'SHEAR   ') .OR. (TYPE == 'USER1   ') .OR.        &
+          (TYPE(1:5) == 'TRIA3'   ) .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE == 'QUADR   ') .OR. (TYPE == 'SHEAR   ') .OR.        &
+          (TYPE == 'USER1   ') .OR.                                                                                                 &
           (TYPE      == 'HEXA8   ') .OR. (TYPE      == 'HEXA20  ') .OR.                                                            &
           (TYPE      == 'PENTA6  ') .OR. (TYPE      == 'PENTA15 ') .OR.                                                            &
           (TYPE      == 'TETRA4  ') .OR. (TYPE      == 'TETRA10 ')) THEN
@@ -337,9 +341,15 @@
          CALL BUSH ( INT_ELEM_ID, OPT, WRITE_WARN )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
+! --- CQUAD4R_CTRIAR_add begin --- !
       ELSE IF (TYPE(1:5) == 'TRIA3') THEN
-         CALL TREL1 ( OPT, WRITE_WARN )
+         IF (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18) THEN
+            CALL CTRIAR_DKMT18 ( OPT, INT_ELEM_ID )
+         ELSE
+            CALL TREL1 ( OPT, WRITE_WARN )
+         ENDIF
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
+! --- CQUAD4R_CTRIAR_add end --- !
 
       ELSE IF (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MIN4  ') .OR. (QUAD4TYP == 'MIN4T '))) .OR.                              &
                 (TYPE == 'QUAD4K  ') .OR.                                                                                          &
@@ -350,6 +360,14 @@
       ELSE IF ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MITC4 ') .OR. (QUAD4TYP == 'MITC4+'))) THEN
          CALL MITC4 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
+
+      ! --- CQUAD4R_CTRIAR_add begin --- !
+      ! Keep CQUAD4 conservative: DKMQ24 is dispatched only for the explicit CQUADR card.
+      ! Legacy CQUAD4 continues to use QUAD4TYP = MIN4T/MIN4/MITC4/MITC4+ only.
+      ELSE IF (TYPE == 'QUADR   ') THEN
+         CALL CQUADR_DKMQ24 ( OPT, INT_ELEM_ID )
+         IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
+      ! --- CQUAD4R_CTRIAR_add end --- !
 
       ELSE IF (TYPE(1:5) == 'QUAD8') THEN
          CALL MITC8 ( OPT, INT_ELEM_ID )
@@ -399,9 +417,15 @@
 ! **********************************************************************************************************************************
 ! For plate elements, process offsets (since they are specified in local element coordinates)
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
-         CALL ELMOFF ( OPT, WRITE_WARN )
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+         IF ((TYPE(1:5) == 'TRIA3') .AND. (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18)) THEN
+            CONTINUE
+         ELSE
+            CALL ELMOFF ( OPT, WRITE_WARN )
+         ENDIF
       ENDIF
+
+      CALL EMG_CODEX_DUMP
 
 ! **********************************************************************************************************************************
 ! Call ELMOUT to output for data items 2-5
@@ -795,5 +819,113 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE EMG_QUIT
+
+! ##################################################################################################################################
+
+      SUBROUTINE EMG_CODEX_DUMP
+
+      CHARACTER(512)                  :: DUMP_DIR
+      CHARACTER(640)                  :: DUMP_FILE
+      CHARACTER( 32)                  :: DUMP_EID_CHR
+      CHARACTER( 32)                  :: EID_CHR
+      CHARACTER( 32)                  :: I_CHR
+      CHARACTER(  6)                  :: OPT_CHR
+      INTEGER, SAVE                   :: DUMP_CALL_COUNT = 0
+      INTEGER                         :: DIR_LEN
+      INTEGER                         :: EID_FILTER_LEN
+      INTEGER                         :: DUMP_STAT
+      INTEGER                         :: DUMP_UNIT
+      INTEGER                         :: EID_LEN
+      INTEGER                         :: FILTER_EID
+      INTEGER                         :: IOS
+      INTEGER                         :: II
+      INTEGER                         :: JJ
+      INTEGER                         :: KK
+
+      CALL GET_ENVIRONMENT_VARIABLE('MYSTRAN_EMG_DUMP_DIR', DUMP_DIR, DIR_LEN, DUMP_STAT)
+      IF ((DUMP_STAT /= 0) .OR. (DIR_LEN <= 0)) RETURN
+
+      FILTER_EID = -1
+      CALL GET_ENVIRONMENT_VARIABLE('MYSTRAN_EMG_DUMP_EID', DUMP_EID_CHR, EID_FILTER_LEN, DUMP_STAT)
+      IF ((DUMP_STAT == 0) .AND. (EID_FILTER_LEN > 0)) THEN
+         READ(DUMP_EID_CHR(1:EID_FILTER_LEN),*,IOSTAT=IOS) FILTER_EID
+         IF (IOS /= 0) FILTER_EID = -1
+      ENDIF
+      IF ((FILTER_EID > 0) .AND. (EID /= FILTER_EID)) RETURN
+
+      IF (.NOT.((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))) RETURN
+
+      DUMP_CALL_COUNT = DUMP_CALL_COUNT + 1
+      OPT_CHR = OPT(1)//OPT(2)//OPT(3)//OPT(4)//OPT(5)//OPT(6)
+      WRITE(EID_CHR,'(I0)') EID
+      EID_LEN = LEN_TRIM(EID_CHR)
+      WRITE(I_CHR,'(I0)') DUMP_CALL_COUNT
+      IF ((DUMP_DIR(DIR_LEN:DIR_LEN) == '\') .OR. (DUMP_DIR(DIR_LEN:DIR_LEN) == '/')) THEN
+         DUMP_FILE = DUMP_DIR(1:DIR_LEN)//'emg_'//TRIM(TYPE)//'_eid_'//EID_CHR(1:EID_LEN)//'_opt_'//OPT_CHR//'_call_'//TRIM(I_CHR)//'.txt'
+      ELSE
+         DUMP_FILE = DUMP_DIR(1:DIR_LEN)//'\emg_'//TRIM(TYPE)//'_eid_'//EID_CHR(1:EID_LEN)//'_opt_'//OPT_CHR//'_call_'//TRIM(I_CHR)//'.txt'
+      ENDIF
+
+      OPEN(NEWUNIT=DUMP_UNIT, FILE=TRIM(DUMP_FILE), STATUS='REPLACE', ACTION='WRITE', IOSTAT=IOS)
+      IF (IOS /= 0) RETURN
+
+      WRITE(DUMP_UNIT,'(A)') '# MYSTRAN EMG Codex dump'
+      WRITE(DUMP_UNIT,'(A,I0)') '# EID ', EID
+      WRITE(DUMP_UNIT,'(A,A)') '# TYPE ', TRIM(TYPE)
+      WRITE(DUMP_UNIT,'(A,I0)') '# ELGP ', ELGP
+      WRITE(DUMP_UNIT,'(A,I0)') '# ELDOF ', ELDOF
+      WRITE(DUMP_UNIT,'(A,A)') '# DOF_ORDER_PER_NODE ', 'T1 T2 T3 R1 R2 R3'
+
+      WRITE(DUMP_UNIT,'(A)') '$TE rows=3 cols=3'
+      DO II=1,3
+         WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (TE(II,JJ),JJ=1,3)
+      ENDDO
+
+      WRITE(DUMP_UNIT,'(A,I0,A)') '$XEL rows=', ELGP, ' cols=3'
+      DO II=1,ELGP
+         WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (XEL(II,JJ),JJ=1,3)
+      ENDDO
+
+      WRITE(DUMP_UNIT,'(A,I0,A,I0)') '$KE rows=', ELDOF, ' cols=', ELDOF
+      DO II=1,ELDOF
+         WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (KE(II,JJ),JJ=1,ELDOF)
+      ENDDO
+
+      WRITE(DUMP_UNIT,'(A,I0,A,I0)') '$ME rows=', ELDOF, ' cols=', ELDOF
+      DO II=1,ELDOF
+         WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (ME(II,JJ),JJ=1,ELDOF)
+      ENDDO
+
+      DO KK=1,SIZE(BE1,3)
+         WRITE(I_CHR,'(I0)') KK
+         WRITE(DUMP_UNIT,'(A,A,A,I0)') '$BE1_', TRIM(I_CHR), ' rows=3 cols=', ELDOF
+         DO II=1,3
+            WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (BE1(II,JJ,KK),JJ=1,ELDOF)
+         ENDDO
+         WRITE(DUMP_UNIT,'(A,A,A,I0)') '$BE2_', TRIM(I_CHR), ' rows=3 cols=', ELDOF
+         DO II=1,3
+            WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (BE2(II,JJ,KK),JJ=1,ELDOF)
+         ENDDO
+         WRITE(DUMP_UNIT,'(A,A,A,I0)') '$BE3_', TRIM(I_CHR), ' rows=3 cols=', ELDOF
+         DO II=1,3
+            WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (BE3(II,JJ,KK),JJ=1,ELDOF)
+         ENDDO
+         WRITE(DUMP_UNIT,'(A,A,A,I0)') '$SE1_', TRIM(I_CHR), ' rows=3 cols=', ELDOF
+         DO II=1,3
+            WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (SE1(II,JJ,KK),JJ=1,ELDOF)
+         ENDDO
+         WRITE(DUMP_UNIT,'(A,A,A,I0)') '$SE2_', TRIM(I_CHR), ' rows=3 cols=', ELDOF
+         DO II=1,3
+            WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (SE2(II,JJ,KK),JJ=1,ELDOF)
+         ENDDO
+         WRITE(DUMP_UNIT,'(A,A,A,I0)') '$SE3_', TRIM(I_CHR), ' rows=3 cols=', ELDOF
+         DO II=1,3
+            WRITE(DUMP_UNIT,'(*(1ES24.16,1X))') (SE3(II,JJ,KK),JJ=1,ELDOF)
+         ENDDO
+      ENDDO
+
+      CLOSE(DUMP_UNIT)
+
+      END SUBROUTINE EMG_CODEX_DUMP
 
       END SUBROUTINE EMG

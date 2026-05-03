@@ -290,10 +290,12 @@
             CALL BD_CPENTA0 ( CARD, LARGE_FLD_INP, DELTA_LEDAT )
             LEDAT = LEDAT + DELTA_LEDAT
 
-         ELSE IF (CARD(1:6) == 'CQUAD4'  ) THEN
+         ! --- CQUAD4R_CTRIAR_add begin --- !
+         ELSE IF ((CARD(1:6) == 'CQUAD4') .OR. (CARD(1:6) == 'CQUADR')) THEN
             LELE  = LELE + 1
             LEDAT = LEDAT + MEDAT_CQUAD
             CALL BD_CQUAD0 ( CARD, LARGE_FLD_INP )
+         ! --- CQUAD4R_CTRIAR_add end --- !
 
          ELSE IF (CARD(1:6) == 'CQUAD8'  ) THEN
             LELE  = LELE + 1
@@ -313,10 +315,12 @@
             CALL BD_CTETRA0 ( CARD, LARGE_FLD_INP, DELTA_LEDAT )
             LEDAT = LEDAT + DELTA_LEDAT
 
-         ELSE IF (CARD(1:6) == 'CTRIA3'  ) THEN
+! --- CQUAD4R_CTRIAR_add begin --- !
+         ELSE IF ((CARD(1:6) == 'CTRIA3') .OR. (CARD(1:6) == 'CTRIAR')) THEN
             LELE  = LELE + 1
             LEDAT = LEDAT + MEDAT_CTRIA
             CALL BD_CTRIA0 ( CARD, LARGE_FLD_INP )
+! --- CQUAD4R_CTRIAR_add end --- !
 
          ELSE IF (CARD(1:6) == 'CUSER1'  )  THEN
             LELE  = LELE + 1

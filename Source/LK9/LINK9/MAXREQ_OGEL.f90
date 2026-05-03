@@ -234,7 +234,7 @@
 !                                                            -----
          NUMBER_ROWS(K) = 1
 
-         IF (TYPE(1:5) == 'QUAD4') THEN
+         IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
             IF (FORC_LOC == 'CENTER  ') THEN            !    PSHELL requires 2 rows of output/elem for FORC_LOC = 'CENTER'
                NUMBER_ROWS(K) = 1
             ELSE                                        !    PSHELL requires more lines of output for other FORC_LOC
@@ -253,7 +253,7 @@
 
          IF       (TYPE(1:3) == 'BAR  ') THEN
                NUMBER_ROWS(K) = 2                          !    BAR stresses require 2 rows of output/elem
-         ELSE IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4')) THEN
+         ELSE IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
             IF (PCOMP_PROPS == 'Y') THEN
                NUMBER_ROWS(K) = NUM_PLIES                  !    PCOMP requires NUM_PLIES rows of output/elem
             ELSE
@@ -282,7 +282,7 @@
             CALL GET_ELEM_NUM_PLIES ( INT_ELEM_ID )
          ENDIF
 
-         IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'SHEAR')) THEN
+         IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'SHEAR')) THEN
             IF (PCOMP_PROPS == 'Y') THEN
                NUMBER_ROWS(K) = NUM_PLIES                  !    PCOMP requires NUM_PLIES rows of output/elem
             ELSE

@@ -1329,7 +1329,7 @@ res20:IF (RESTART == 'N') THEN
       SUBROUTINE WRITE_ELEM_SUMMARY
 
       USE SCONTR, ONLY                :  NCBAR, NCBEAM, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20, NCPENTA6, NCPENTA15,&
-                                         NCQUAD4, NCQUAD4K, NCQUAD8, NCROD, NCTETRA4, NCTETRA10, NCTRIA3, NCTRIA3K, NCUSER1,       &
+                                         NCQUAD4, NCQUAD4K, NCQUAD8, NCQUADR, NCROD, NCTETRA4, NCTETRA10, NCTRIA3, NCTRIA3K, NCUSER1,       &
                                          NCUSERIN
 
       INTEGER(LONG)                   :: TOTAL = 0         ! Sum of number of elements written
@@ -1395,6 +1395,10 @@ res20:IF (RESTART == 'N') THEN
       IF (NCQUAD4K  > 0) THEN
          TOTAL = TOTAL + NCQUAD4K
          WRITE(F06,7777) 'QUAD4K ', NCQUAD4K
+      ENDIF
+      IF (NCQUADR  > 0) THEN
+         TOTAL = TOTAL + NCQUADR
+         WRITE(F06,7777) 'CQUADR ', NCQUADR
       ENDIF
 
       IF (NCQUAD8   > 0) THEN
