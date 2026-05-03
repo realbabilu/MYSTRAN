@@ -321,6 +321,10 @@ set_source_files_properties(
   "${PROJECT_SOURCE_DIR}/Source/LK3/LINK3.f90"
   PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"
 )
+set_source_files_properties(
+  "${PROJECT_SOURCE_DIR}/Source/Modules/DMUMPS_STUF.f90"
+  PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"
+)
 
 option(MYSTRAN_USE_EXTERNAL_CHASE "Enable native CHASE backend on condensed dense problem" OFF)
 set(MYSTRAN_CHASE_EXTRA_LIBS "" CACHE STRING "Additional libraries for native CHASE backend (for example: chase_f;chase_c;stdc++;gomp)")

@@ -8,7 +8,9 @@
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  EIG_MSGLVL
       USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO
-      USE PARAMS, ONLY                :  SOLLIB
+      USE PARAMS, ONLY                :  SOLLIB, SPARSE_FLAVOR
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_FACTOR_CRS,
+     &                                   DMUMPS_SOLVE_VECTOR
       USE ARPACK_UTIL
       USE LAPACK_BLAS_AUX
       USE LAPACK_LANCZOS_EIG
@@ -666,11 +668,15 @@ c
 
          IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-            !todo not sure about MATIN_SET = 'L '
-            SLU_INFO = 0
-            call SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME , 'KMSM',  'L ',
-     &                                   n, NTERM_KMSMn, I_KMSMn,
-     &                                   J_KMSMn,  KMSMn,  SLU_INFO )
+            if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
+               SLU_INFO = 0
+               call SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME , 'KMSM',  'L ',
+     &                                      n, NTERM_KMSMn, I_KMSMn,
+     &                                      J_KMSMn,  KMSMn,  SLU_INFO )
+            else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
+               call DMUMPS_FACTOR_CRS ( n, NTERM_KMSMn, I_KMSMn,
+     &                                  J_KMSMn, KMSMn, 'N', SLU_INFO )
+            endif
 
          ELSE
 
@@ -712,11 +718,15 @@ c
 
          IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-            !todo not sure about MATIN_SET = 'L '
-            SLU_INFO = 0
-            call SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME , 'KMSM',  'L ',
-     &                                   n, NTERM_KMSMn, I_KMSMn,
-     &                                   J_KMSMn,  KMSMn,  SLU_INFO )
+            if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
+               SLU_INFO = 0
+               call SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME , 'KMSM',  'L ',
+     &                                      n, NTERM_KMSMn, I_KMSMn,
+     &                                      J_KMSMn,  KMSMn,  SLU_INFO )
+            else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
+               call DMUMPS_FACTOR_CRS ( n, NTERM_KMSMn, I_KMSMn,
+     &                                  J_KMSMn, KMSMn, 'N', SLU_INFO )
+            endif
 
          ELSE
 
@@ -848,10 +858,15 @@ c
 
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-               SLU_INFO = 0
-               call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
+               if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
+                  SLU_INFO = 0
+                  call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
      &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
      &                        0, workd(ipntr(2)), SLU_INFO )
+               else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
+                  call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
+     &                                      SLU_INFO )
+               endif
 
             ELSE
 
@@ -909,10 +924,15 @@ c
 
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-               SLU_INFO = 0
-               call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
+               if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
+                  SLU_INFO = 0
+                  call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
      &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
      &                        0, workd(ipntr(2)), SLU_INFO )
+               else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
+                  call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
+     &                                      SLU_INFO )
+               endif
 
             ELSE
 
@@ -973,10 +993,15 @@ c
 
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-               SLU_INFO = 0
-               call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
+               if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
+                  SLU_INFO = 0
+                  call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
      &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
      &                        0, workd(ipntr(2)), SLU_INFO )
+               else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
+                  call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
+     &                                      SLU_INFO )
+               endif
 
             ELSE
 
@@ -1015,10 +1040,15 @@ c
 
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-               SLU_INFO = 0
-               call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
+               if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
+                  SLU_INFO = 0
+                  call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
      &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
      &                        0, workd(ipntr(2)), SLU_INFO )
+               else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
+                  call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
+     &                                      SLU_INFO )
+               endif
 
             ELSE
 

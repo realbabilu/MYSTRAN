@@ -46,13 +46,15 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  ARPKSOLV, ARP_TOL, BAILOUT, EPSIL, MXITERL, SOLLIB, SPARSTOR, SUPINFO, SUPWARN
+      USE PARAMS, ONLY                :  ARPKSOLV, ARP_TOL, BAILOUT, EPSIL, MXITERL, SOLLIB, SPARSE_FLAVOR, SPARSTOR, SUPINFO,    &
+                                         SUPWARN
       USE DOF_TABLES, ONLY            :  TDOFI
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
       USE MODEL_STUF, ONLY            :  EIG_FRQ1, EIG_FRQ2, EIG_LAP_MAT_TYPE, EIG_N2, EIG_NCVFACL
       USE ARPACK_MATRICES_1, ONLY     :  IWORK, RESID, RFAC, SELECT, VBAS, WORKD, WORKL
       USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_MLL, J_MLL, MLL, SYM_KLL, SYM_MLL,                                   &
                                          I_KMSM, J_KMSM, KMSM, I_KMSMn, J_KMSMn, KMSMn
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS, DMUMPS_FREE_FACTORS
       USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO
 
       USE ARPACK_LANCZOS_EIG
@@ -297,13 +299,35 @@
       CALL ALLOCATE_LAPACK_MAT ( 'IWORK', NDOFL, 1, SUBR_NAME )
 
       IF (SOLLIB(1:6) == 'SPARSE') THEN
-         ! Factor using SuperLU - factorization stored in SLU_FACTORS
-         SLU_INFO = 0
-         CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KMSM', 'L ',                                                                     &
-                                      NDOFL, NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn, SLU_INFO )
-         IF (SLU_INFO /= 0) THEN
-            WRITE(ERR,9903) SLU_INFO, SUBR_NAME
-            WRITE(F06,9903) SLU_INFO, SUBR_NAME
+         IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+            ! Factor using SuperLU - factorization stored in SLU_FACTORS
+            SLU_INFO = 0
+            CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KMSM', 'L ',                                                                  &
+                                         NDOFL, NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn, SLU_INFO )
+            IF (SLU_INFO /= 0) THEN
+               WRITE(ERR,9903) SLU_INFO, SUBR_NAME
+               WRITE(F06,9903) SLU_INFO, SUBR_NAME
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+         ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+            IF (.NOT. DMUMPS_COMPILED_IN()) THEN
+               WRITE(ERR,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+               WRITE(F06,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+            IERR = 0
+            CALL DMUMPS_FACTOR_CRS ( NDOFL, NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn, 'N', IERR )
+            IF (IERR /= 0) THEN
+               WRITE(ERR,9904) IERR, SUBR_NAME
+               WRITE(F06,9904) IERR, SUBR_NAME
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+         ELSE
+            WRITE(ERR,9991) SUBR_NAME, 'SPARSE_FLAVOR'
+            WRITE(F06,9991) SUBR_NAME, 'SPARSE_FLAVOR'
             FATAL_ERR = FATAL_ERR + 1
             CALL OUTA_HERE ( 'Y' )
          ENDIF
@@ -700,8 +724,12 @@
 
 ! Free SuperLU factorization (for SPARSE solver)
       IF (SOLLIB(1:6) == 'SPARSE') THEN
-         DUM_COL(1) = ZERO
-         CALL C_FORTRAN_DGSSV ( 3, NDOFL, NTERM_KMSMn, 1, KMSMn, J_KMSMn, I_KMSMn, DUM_COL, NDOFL, SLU_FACTORS, SLU_INFO )
+         IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+            DUM_COL(1) = ZERO
+            CALL C_FORTRAN_DGSSV ( 3, NDOFL, NTERM_KMSMn, 1, KMSMn, J_KMSMn, I_KMSMn, DUM_COL, NDOFL, SLU_FACTORS, SLU_INFO )
+         ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+            CALL DMUMPS_FREE_FACTORS()
+         ENDIF
       ENDIF
 
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate KMSMn ', CR13
@@ -845,9 +873,17 @@
 
  9892 FORMAT('               THIS IS FOR ROW AND COL IN THE MATRIX FOR GRID POINT ',I8,' COMPONENT ',I3)
 
- 9903 FORMAT(' *ERROR  9903: SUPERLU SPARSE SOLVER HAS FAILED WITH INFO = ', I12,' IN SUBR ', A)
+  9903 FORMAT(' *ERROR  9903: SUPERLU SPARSE SOLVER HAS FAILED WITH INFO = ', I12,' IN SUBR ', A)
 
- 9996 FORMAT('  PROCESSING STOPPED DUE TO ARPACK ERRORS')
+  9904 FORMAT(' *ERROR  9904: MUMPS SPARSE SOLVER HAS FAILED WITH INFOG(1) = ', I12,' IN SUBR ', A)
+
+  9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A,                                                                  &
+                    /,14X,A,' NOT PROGRAMMED')
+
+  9992 FORMAT(' *ERROR  9992: PROGRAMMING ERROR IN SUBROUTINE ',A,                                                                  &
+                    /,14X,A,' = ',A,' WAS REQUESTED BUT THIS BUILD WAS NOT COMPILED WITH DMUMPS_Solver.')
+
+  9996 FORMAT('  PROCESSING STOPPED DUE TO ARPACK ERRORS')
 
  9776 FORMAT(' *ERROR  9776: TOO MANY EIGENVALUES REQUESTED FOR THIS PROBLEM SIZE: NDOFL=',I0,', NEV=',I0,'.')
 

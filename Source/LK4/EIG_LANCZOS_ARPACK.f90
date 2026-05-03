@@ -36,8 +36,8 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  ARPKSOLV, ARP_TOL, BAILOUT, DARPACK, EIGESTL, EPSIL, MXITERL, SOLLIB, SPARSTOR, SUPINFO,  &
-                                         SUPWARN
+      USE PARAMS, ONLY                :  ARPKSOLV, ARP_TOL, BAILOUT, DARPACK, EIGESTL, EPSIL, MXITERL, SOLLIB, SPARSE_FLAVOR,      &
+                                         SPARSTOR, SUPINFO, SUPWARN
       USE DOF_TABLES, ONLY            :  TDOFI
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
       USE MODEL_STUF, ONLY            :  EIG_FRQ1, EIG_FRQ2, EIG_LANCZOS_NEV_DELT, EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2,     &
@@ -47,6 +47,7 @@
                                          I_KMSM, J_KMSM, KMSM, I_KMSMn, J_KMSMn, KMSMn, I_KMSMs, J_KMSMs, KMSMs
 
       USE ARPACK_LANCZOS_EIG
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_FREE_FACTORS
 
       USE EIG_LANCZOS_ARPACK_USE_IFs
       USE LINK_MESSAGE_Interface
@@ -451,6 +452,10 @@
       CALL DSBAND ( RVEC, HOWMNY, SELECT, EIGEN_VAL, EIGEN_VEC, NDOFL, EIG_SIGMA, NDOFL, LDRFAC, RFAC, KL, KU, WHICH, BMAT,        &
                     NEV, ARP_TOL, RESID, NCV, VBAS, NDOFL, IPARAM, WORKD, WORKL, LWORKL, IWORK, INFO_ARPACK,                       &
                     INFO_LAPACK, 'Y', DEBUG(47) )
+
+      IF ((SOLLIB(1:6) == 'SPARSE') .AND. (SPARSE_FLAVOR(1:5) == 'MUMPS')) THEN
+         CALL DMUMPS_FREE_FACTORS()
+      ENDIF
 
       NVEC       = IPARAM(5)                               ! With HOWMNY = 'A' we are calc'ing eigenvecs for all eigenvalues found
       NUM_EIGENS = IPARAM(5)
