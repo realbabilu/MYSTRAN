@@ -317,11 +317,18 @@ set_source_files_properties(
   "${PROJECT_SOURCE_DIR}/Source/LK4/EIGRL_EXTRACT_SOLVERS.F90"
   PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"
 )
+set_source_files_properties(
+  "${PROJECT_SOURCE_DIR}/Source/LK3/LINK3.f90"
+  PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"
+)
 
 option(MYSTRAN_USE_EXTERNAL_CHASE "Enable native CHASE backend on condensed dense problem" OFF)
 set(MYSTRAN_CHASE_EXTRA_LIBS "" CACHE STRING "Additional libraries for native CHASE backend (for example: chase_f;chase_c;stdc++;gomp)")
 option(MYSTRAN_USE_EXTERNAL_FEAST "Enable native FEAST backend on condensed dense problem" OFF)
 set(MYSTRAN_FEAST_EXTRA_LIBS "" CACHE STRING "Additional libraries for native FEAST backend")
+option(MYSTRAN_USE_DMUMPS_SOLVER "Enable direct MUMPS sparse solver path for LINK3" OFF)
+set(MYSTRAN_DMUMPS_INCLUDE_DIR "C:/gcc/libmumps/include" CACHE PATH "Directory containing dmumps_struc.h and mpif.h")
+set(MYSTRAN_DMUMPS_EXTRA_LIBS "C:/gcc/mumps32_nonmpi/libdmumps.a;C:/gcc/mumps32_nonmpi/libmumps_common.a;C:/gcc/mumps32_nonmpi/libpord.a;C:/gcc/mumps32_nonmpi/libmpiseq.a" CACHE STRING "Libraries for direct MUMPS sparse solver path")
 # --- chase_feast_add --- end !
 
 # ! --- hijack mode for extern blas begin--- !
@@ -451,6 +458,17 @@ if(MYSTRAN_USE_EXTERNAL_FEAST)
   if(MYSTRAN_FEAST_EXTRA_LIBS)
     separate_arguments(MYSTRAN_FEAST_EXTRA_LIBS)
     target_link_libraries(mystran ${MYSTRAN_FEAST_EXTRA_LIBS})
+  endif()
+endif()
+
+if(MYSTRAN_USE_DMUMPS_SOLVER)
+  target_compile_definitions(mystran PRIVATE DMUMPS_Solver)
+  target_link_options(mystran PRIVATE -fopenmp)
+  if(EXISTS "${MYSTRAN_DMUMPS_INCLUDE_DIR}")
+    target_include_directories(mystran PRIVATE "${MYSTRAN_DMUMPS_INCLUDE_DIR}")
+  endif()
+  if(MYSTRAN_DMUMPS_EXTRA_LIBS)
+    target_link_libraries(mystran ${MYSTRAN_DMUMPS_EXTRA_LIBS})
   endif()
 endif()
 
