@@ -41,6 +41,9 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, TENTH, ONE, TWO, THREE, TWELVE
       USE PARAMS, ONLY                :  SUPWARN
+! --- MITC3+_add begin --- !
+      USE PARAMS, ONLY                :  TRIA3TYP
+! --- MITC3+_add end --- !
       USE MODEL_STUF, ONLY            :  EID, ELDOF, EMG_IWE, EMG_RWE, INTL_MID, KE, MASS_PER_UNIT_AREA, ME,                       &
                                          NUM_EMG_FATAL_ERRS, PCOMP_LAM, PCOMP_PROPS, SHELL_B, TYPE, XEB, XEL
       USE MODEL_STUF, ONLY            :  BENSUM, SHRSUM, PHI_SQ, PSI_HAT, XTB, XTL
@@ -181,7 +184,14 @@
 
          IF (TYPE == 'TRIA3   ') THEN
             IF (INTL_MID(2) /= 0) THEN
-               CALL TPLT2 (OPT, AREA, X2E, X3E, Y3E, 'Y', IERROR, KV, PTV, PPV, B2V, B3V, S2V, S3V, BIG_BB, MN4T_QD, TRIA_NUM, PSI)
+! --- MITC3+_add begin --- !
+               IF (TRIA3TYP == 'MITC3+') THEN
+                  CALL TPLT_MITC3P (OPT, AREA, X2E, X3E, Y3E, 'Y', IERROR, KV, PTV, PPV, B2V, B3V, S2V, S3V, BIG_BB,              &
+                                    MN4T_QD, TRIA_NUM, PSI)
+               ELSE
+                  CALL TPLT2 (OPT, AREA, X2E, X3E, Y3E, 'Y', IERROR, KV, PTV, PPV, B2V, B3V, S2V, S3V, BIG_BB, MN4T_QD, TRIA_NUM, PSI)
+               ENDIF
+! --- MITC3+_add end --- !
             ENDIF
          ENDIF
 
