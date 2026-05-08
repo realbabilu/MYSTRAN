@@ -149,6 +149,18 @@ set(MYSTRAN_EXTERNAL_SUPERLU_LIB "C:/gcc/libsuperlu/superlu-metis/libsuperlu.a" 
 set(MYSTRAN_EXTERNAL_SUPERLU_INCLUDE_DIR "${SUPERLU_DIR}/SRC" CACHE PATH "Directory containing SuperLU headers such as slu_ddefs.h")
 set(MYSTRAN_EXTERNAL_SUPERLU_CONFIG_DIR "C:/gcc/libsuperlu" CACHE PATH "Directory containing external superlu_config.h for the prebuilt SuperLU archive")
 set(MYSTRAN_EXTERNAL_SUPERLU_DRIVER "${SUPERLU_DIR}/FORTRAN/c_fortran_dgssv.c" CACHE FILEPATH "Driver source used by MYSTRAN to call regular SuperLU")
+option(TPL_ENABLE_METISLIB "Link external METIS/GK libraries needed by SuperLU or MUMPS" OFF)
+set(TPL_METIS_INCLUDE_DIRS "" CACHE STRING "Semicolon-separated METIS/GK include directories")
+set(TPL_METIS_LIBRARIES "" CACHE STRING "Semicolon-separated METIS/GK libraries")
+
+if(TPL_ENABLE_METISLIB)
+  if(NOT TPL_METIS_LIBRARIES)
+    message(FATAL_ERROR "TPL_ENABLE_METISLIB=ON requires -DTPL_METIS_LIBRARIES=\"...\"")
+  endif()
+  if(TPL_METIS_INCLUDE_DIRS)
+    include_directories(${TPL_METIS_INCLUDE_DIRS})
+  endif()
+endif()
 
 set(enable_examples OFF FORCE)
 set(enable_tests OFF FORCE)
@@ -503,6 +515,15 @@ if(MYSTRAN_USE_DMUMPS_SOLVER)
   if(MYSTRAN_DMUMPS_EXTRA_LIBS)
     target_link_libraries(mystran ${MYSTRAN_DMUMPS_EXTRA_LIBS})
   endif()
+endif()
+
+# Re-link dependency libraries after optional static archives so MinGW resolves
+# symbols pulled in by CHASE, FEAST, DMUMPS, and external SuperLU+METIS builds.
+if(MYSTRAN_USE_OPENBLAS)
+  target_link_libraries(mystran ${TPL_BLAS_LIBRARIES})
+endif()
+if(TPL_ENABLE_METISLIB)
+  target_link_libraries(mystran ${TPL_METIS_LIBRARIES})
 endif()
 
 set_target_properties(

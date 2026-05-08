@@ -20,6 +20,12 @@ Live source change:
   - `MYSTRAN_EXTERNAL_SUPERLU_INCLUDE_DIR`
   - `MYSTRAN_EXTERNAL_SUPERLU_CONFIG_DIR`
   - `MYSTRAN_EXTERNAL_SUPERLU_DRIVER`
+  - `TPL_ENABLE_METISLIB=ON`
+  - `TPL_METIS_INCLUDE_DIRS`
+  - `TPL_METIS_LIBRARIES`
+- when METIS is enabled, `CMakeLists.txt` validates the METIS/GK library list
+  and re-links METIS after optional static archives so the prebuilt
+  `superlu-metis` archive resolves cleanly.
 
 Batch file:
 
