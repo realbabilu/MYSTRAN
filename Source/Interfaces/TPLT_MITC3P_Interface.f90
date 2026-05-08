@@ -28,37 +28,22 @@
 
    INTERFACE
 
-      SUBROUTINE TPLT_MITC3P ( OPT, AREA, X2E, X3E, Y3E, CALC_EMATS, IERROR, KV, PTV, PPV, B2V, B3V, S2V, S3V, BIG_BB,            &
-                               MN4T_QD, TRIA_NUM, PSI )
+      SUBROUTINE TPLT_MITC3P ( OPT, AREA, X2E, X3E, Y3E, BIG_BB )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, NSUB, NTSUB
-      USE CONSTANTS_1, ONLY           :  ZERO
-      USE MODEL_STUF, ONLY            :  KE
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM
+      USE MODEL_STUF, ONLY            :  ELDOF
 
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'TPLT_MITC3P'
-      CHARACTER(1*BYTE), INTENT(IN)   :: CALC_EMATS
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
-      CHARACTER(LEN=*) , INTENT(IN)   :: MN4T_QD
 
-      INTEGER(LONG), INTENT(OUT)      :: IERROR
-      INTEGER(LONG), INTENT(IN)       :: TRIA_NUM
-
-      REAL(DOUBLE) , INTENT(IN)       :: AREA
-      REAL(DOUBLE) , INTENT(IN)       :: PSI
-      REAL(DOUBLE) , INTENT(IN)       :: X2E
-      REAL(DOUBLE) , INTENT(IN)       :: X3E
-      REAL(DOUBLE) , INTENT(IN)       :: Y3E
-      REAL(DOUBLE) , INTENT(OUT)      :: BIG_BB(3,18,1)
-      REAL(DOUBLE) , INTENT(OUT)      :: B2V(3,9)
-      REAL(DOUBLE) , INTENT(OUT)      :: B3V(3,9)
-      REAL(DOUBLE) , INTENT(OUT)      :: KV(9,9)
-      REAL(DOUBLE) , INTENT(OUT)      :: PPV(9,NSUB)
-      REAL(DOUBLE) , INTENT(OUT)      :: PTV(9,NTSUB)
-      REAL(DOUBLE) , INTENT(OUT)      :: S2V(3,9)
-      REAL(DOUBLE) , INTENT(OUT)      :: S3V(3,9)
+      REAL(DOUBLE), INTENT(IN)        :: AREA
+      REAL(DOUBLE), INTENT(IN)        :: X2E
+      REAL(DOUBLE), INTENT(IN)        :: X3E
+      REAL(DOUBLE), INTENT(IN)        :: Y3E
+      REAL(DOUBLE), INTENT(OUT)       :: BIG_BB(3,ELDOF,1)
 
       END SUBROUTINE TPLT_MITC3P
 

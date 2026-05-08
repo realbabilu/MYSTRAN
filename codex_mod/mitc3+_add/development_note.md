@@ -5,14 +5,10 @@ Date: 2026-05-05
 ## 2026-05-08 workspace port note
 
 This package was consolidated under the canonical `mitc3+_add` name for the
-`optimization_rcm_v2` branch. The current workspace did not contain the older
-full `TPLT_MITC3P.f90` bubble-condensed Python-closure source referenced below,
-so the live committed MYSTRAN port wires the parser/routing/interface and adds a
-first-pass `TPLT_MITC3P` implementation point that delegates to the legacy MIN3
-plate machinery with explicit MITC3+ selection and light `RZ` drilling stiffness.
-
-The older validation notes below are retained as historical handoff context for
-the intended full kernel.
+`optimization_rcm_v2` branch. The duplicate `mitc3+_add_2` folder contained the
+full `TPLT_MITC3P.f90` bubble-condensed kernel, and that source is now copied
+into the live MYSTRAN tree and this canonical package. The older misspelled /
+duplicate package history is therefore preserved here under one name.
 
 ## Goal
 

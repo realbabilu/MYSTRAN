@@ -186,8 +186,7 @@
             IF (INTL_MID(2) /= 0) THEN
 ! --- MITC3+_add begin --- !
                IF (TRIA3TYP == 'MITC3+') THEN
-                  CALL TPLT_MITC3P (OPT, AREA, X2E, X3E, Y3E, 'Y', IERROR, KV, PTV, PPV, B2V, B3V, S2V, S3V, BIG_BB,              &
-                                    MN4T_QD, TRIA_NUM, PSI)
+                  CALL TPLT_MITC3P ( OPT, AREA, X2E, X3E, Y3E, BIG_BB )
                ELSE
                   CALL TPLT2 (OPT, AREA, X2E, X3E, Y3E, 'Y', IERROR, KV, PTV, PPV, B2V, B3V, S2V, S3V, BIG_BB, MN4T_QD, TRIA_NUM, PSI)
                ENDIF
