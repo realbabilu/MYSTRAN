@@ -2,14 +2,6 @@
 
 Date: 2026-05-05
 
-## 2026-05-08 workspace port note
-
-This package was consolidated under the canonical `mitc3+_add` name for the
-`optimization_rcm_v2` branch. The duplicate `mitc3+_add_2` folder contained the
-full `TPLT_MITC3P.f90` bubble-condensed kernel, and that source is now copied
-into the live MYSTRAN tree and this canonical package. The older misspelled /
-duplicate package history is therefore preserved here under one name.
-
 ## Goal
 
 Add a first-pass `MITC3+` triangular shell kernel into MYSTRAN under the `CTRIA3` family, with explicit parameter selection and one-element validation against the uploaded Python implementation.
