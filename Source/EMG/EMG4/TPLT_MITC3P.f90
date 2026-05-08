@@ -1,4 +1,4 @@
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
       SUBROUTINE TPLT_MITC3P ( OPT, AREA, X2E, X3E, Y3E, BIG_BB )
 
 ! Experimental MITC3+ triangular shell bending/shear kernel for PARAM,TRIA3TYP,MITC3+.
@@ -58,7 +58,7 @@
       XY(3,1) = X3E
       XY(3,2) = Y3E
 
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
 ! Match the uploaded Python implementation's Jacobian layout:
 !   J = d(x,y)/d(r,s) with rows = parametric directions (r,s)
 ! so:
@@ -70,7 +70,7 @@
       JMAT(1,2) = ZERO
       JMAT(2,1) = X3E
       JMAT(2,2) = Y3E
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
       DETJ      = JMAT(1,1)*JMAT(2,2) - JMAT(1,2)*JMAT(2,1)
       IF (DABS(DETJ) <= EPS1) THEN
          WRITE(ERR,*) ' *ERROR: ', TYPE, ' ELEMENT ', EID, ' HAS SINGULAR JACOBIAN IN TPLT_MITC3P'
@@ -131,7 +131,7 @@
       CALL MITC3P_INV2(KBB, KBB_INV)
       KCOND = KAA - MATMUL(KAB, MATMUL(KBB_INV, KBA))
 
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
       BUGOUT = 'Y'
       WRITE(ERR,*) 'MITC3P_DEBUG_BEGIN EID=', EID
       CALL MITC3P_WRITE_MAT(ERR, 'SHELL_D', SHELL_D, 3, 3)
@@ -143,7 +143,7 @@
       CALL MITC3P_WRITE_MAT(ERR, 'KBB',   KBB,    2,  2)
       CALL MITC3P_WRITE_MAT(ERR, 'KCOND', KCOND, 18, 18)
       WRITE(ERR,*) 'MITC3P_DEBUG_END EID=', EID
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
 
       DO I=1,18
          DO J=1,18
@@ -307,7 +307,7 @@
          BSOUT(2,:) = CONST_EST + FAC_ST*CHAT
       END SUBROUTINE MITC3P_BS_AT
 
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
       SUBROUTINE MITC3P_WRITE_MAT(LU, NAME, MAT, NROW, NCOL)
          INTEGER(LONG), INTENT(IN)         :: LU, NROW, NCOL
          CHARACTER(*), INTENT(IN)          :: NAME
@@ -319,7 +319,7 @@
          ENDDO
          WRITE(LU,*) 'MITC3P_MATRIX_END ', TRIM(NAME)
       END SUBROUTINE MITC3P_WRITE_MAT
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
 
       END SUBROUTINE TPLT_MITC3P
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !

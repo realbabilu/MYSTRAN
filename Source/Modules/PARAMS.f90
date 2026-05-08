@@ -404,12 +404,12 @@
 !                                                              'MITC4 ': Use Bathe's MITC4 (1983)
 !                                                              'MITC4+': Use Ko/Bathe's 2nd MITC4+ (Nov 2016)
 
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  6*BYTE)      :: TRIA3TYP       =  'MIN3  ' ! Which plate bending/shear option to use for CTRIA3
 !                                                              'MIN3  ': Use Tessler's MIN3 element
 !                                                              'MITC3+': Use MITC3+ triangular shell plate branch
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: RELINK3        =    'N'    ! 'Y', 'N' indicator to redo LINK3,5 on a restart

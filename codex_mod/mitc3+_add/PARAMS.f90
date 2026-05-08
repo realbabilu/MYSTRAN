@@ -403,12 +403,12 @@
       CHARACTER(  6*BYTE)      :: REFT3MEM       = 'ALLMAN'  ! Refined CTRIAR  membrane family: 'ALLMAN' or 'T3FREE'
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
       CHARACTER(  6*BYTE)      :: TRIA3TYP       = 'MIN3  ' ! Which plate/shell kernel to use in MYSTRAN as the CTRIA3 element
 !                                                              'MIN3  ': Use Tessler/Hughes MIN3 triangle (TPLT2)
 !                                                              'MITC3+': Use Lee/Lee/Bathe MITC3+ triangle shell
 !                                                              This stays in the CTRIA3 shell family, not the refined CTRIAR family
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  6*BYTE)      :: QUAD4TYP       =  'MIN4  ' ! Which element to use in MYSTRAN as the QUAD4 element

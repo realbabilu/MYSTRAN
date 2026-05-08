@@ -56,7 +56,7 @@
             REAL(DOUBLE), INTENT(IN)        :: AREA
             REAL(DOUBLE), INTENT(OUT)       :: BIG_BM(3,ELDOF,1)
          END SUBROUTINE TMEM_T3FREE
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
          SUBROUTINE TPLT_MITC3P ( OPT, AREA, X2E, X3E, Y3E, BIG_BB )
             USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
             USE MODEL_STUF, ONLY            :  ELDOF
@@ -68,7 +68,7 @@
             REAL(DOUBLE), INTENT(IN)        :: Y3E
             REAL(DOUBLE), INTENT(OUT)       :: BIG_BB(3,ELDOF,1)
          END SUBROUTINE TPLT_MITC3P
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
       END INTERFACE
 ! --- cquadr/ctriar end --- !
 

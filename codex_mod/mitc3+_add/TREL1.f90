@@ -196,7 +196,7 @@
             ENDIF
          ENDIF
 
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
          IF (TYPE == 'TRIA3   ') THEN
             IF (INTL_MID(2) /= 0) THEN
                IF (TRIA3TYP == 'MITC3+') THEN
@@ -208,7 +208,7 @@
                ENDIF
             ENDIF
          ENDIF
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
          IF (TYPE == 'TRIA3R  ') THEN
             IF (INTL_MID(2) /= 0) THEN
                IF (REFT3MEM == 'T3FREE') THEN

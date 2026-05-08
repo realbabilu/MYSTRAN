@@ -31,9 +31,9 @@
       USE TMEM1_Interface
       USE TPLT1_Interface
       USE TPLT2_Interface
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
       USE TPLT_MITC3P_Interface
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
       USE outa_here_Interface
       USE MATMULT_FFF_Interface
       USE MATMULT_FFF_T_Interface

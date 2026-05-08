@@ -47,8 +47,8 @@ Legacy fallback remains:
 
 All source edits for this addition were marked with the snippet guard:
 
-- `! --- MITC3+_add begin --- !`
-- `! --- MITC3+_add end --- !`
+- `! --- mitc3plus_add begin --- !`
+- `! --- mitc3plus_add end --- !`
 
 Primary files:
 

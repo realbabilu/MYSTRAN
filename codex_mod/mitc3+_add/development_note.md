@@ -30,8 +30,8 @@ Default remains:
 
 All MYSTRAN source edits for this feature are wrapped with:
 
-- `! --- MITC3+_add begin --- !`
-- `! --- MITC3+_add end --- !`
+- `! --- mitc3plus_add begin --- !`
+- `! --- mitc3plus_add end --- !`
 
 Files touched:
 

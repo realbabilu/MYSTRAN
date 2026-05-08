@@ -2601,7 +2601,7 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
          CALL CRDERR ( CARD )
 
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
 ! TRIA3TYP selects the CTRIA3-class shell triangle kernel explicitly.
 ! MITC3+ remains under the standard CTRIA3 house, analogous to MITC4/MITC4+
 ! remaining under CQUAD4.
@@ -2634,7 +2634,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
          CALL CRDERR ( CARD )
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
 
 
       ! RCONDK = 'Y' executes LAPACK code in LINK3 to calc the recriprocal of the condition number, RCOND, of a matrix to be decomposed

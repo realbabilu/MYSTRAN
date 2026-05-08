@@ -2489,7 +2489,7 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
-! --- MITC3+_add begin --- !
+! --- mitc3plus_add begin --- !
 ! TRIA3TYP tells which triangular plate bending/shear branch to use for CTRIA3 elements
 
       ELSE IF (JCARD(2)(1:8) == 'TRIA3TYP') THEN
@@ -2517,7 +2517,7 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
          CALL CRDERR ( CARD )
-! --- MITC3+_add end --- !
+! --- mitc3plus_add end --- !
 
 
       ! RCONDK = 'Y' executes LAPACK code in LINK3 to calc the recriprocal of the condition number, RCOND, of a matrix to be decomposed
