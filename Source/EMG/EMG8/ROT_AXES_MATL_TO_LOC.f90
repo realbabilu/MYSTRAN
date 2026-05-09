@@ -159,7 +159,7 @@
             CALL DEBUG_ROT_AXES_1
          ENDIF
 
-      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 
          IF (ISOLID(3) /= -1) THEN                         ! If -1 ES already in elem coords, else transf ES from basic to elem axes
 
@@ -322,7 +322,7 @@ mem_bend:   IF ((MTRL_TYPE(4) == 2) .OR. (MTRL_TYPE(4) == 8)) THEN
 
          ENDIF
 
-      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 
          WRITE(F06,'()') 'ISOLID(3) = ',ISOLID(3)
          WRITE(F06,'()') 'MATL MATRIX ES BEFORE COORD TRANSFORMATION = '
@@ -378,6 +378,5 @@ mem_bend:   IF ((MTRL_TYPE(4) == 2) .OR. (MTRL_TYPE(4) == 8)) THEN
       END SUBROUTINE DEBUG_ROT_AXES_1
 
       END SUBROUTINE ROT_AXES_MATL_TO_LOC
-
 
 
