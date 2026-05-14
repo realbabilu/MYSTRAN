@@ -1439,8 +1439,6 @@
             CALL LEFT_ADJ_BDFLD ( CHRPARM )
             IF      (CHRPARM(1:6) == 'ARPACK') THEN
                LANCMETH = 'ARPACK  '
-            ELSE IF (CHRPARM(1:5) == 'CHASE') THEN
-               LANCMETH = 'CHASE   '
             ELSE IF (CHRPARM(1:5) == 'FEAST') THEN
                LANCMETH = 'FEAST   '
             ELSE IF (CHRPARM(1:5) == 'SUBSP') THEN
@@ -1450,12 +1448,12 @@
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'ARPACK/CHASE/FEAST/SUBSP/DENSE',CHRPARM,LANCMETH
+               WRITE(ERR,1189) PARNAM,'ARPACK/FEAST/SUBSP/DENSE',CHRPARM,LANCMETH
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'ARPACK/CHASE/FEAST/SUBSP/DENSE',CHRPARM,LANCMETH
+                  WRITE(F06,1189) PARNAM,'ARPACK/FEAST/SUBSP/DENSE',CHRPARM,LANCMETH
                ENDIF
             ENDIF
          ENDIF

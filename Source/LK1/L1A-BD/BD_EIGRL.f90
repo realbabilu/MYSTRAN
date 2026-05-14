@@ -398,13 +398,11 @@
       CALL CHAR_FLD ( JCARDX(2), JF(2), METHOD )
       CALL LEFT_ADJ_BDFLD ( METHOD )
 
-      IF ((METHOD(1:6) == 'ARPACK') .OR. (METHOD(1:5) == 'CHASE') .OR. (METHOD(1:5) == 'FEAST') .OR.                           &
-          (METHOD(1:5) == 'SUBSP')  .OR. (METHOD(1:5) == 'DENSE')) THEN
+      IF ((METHOD(1:6) == 'ARPACK') .OR. (METHOD(1:5) == 'FEAST') .OR. (METHOD(1:5) == 'SUBSP') .OR.                          &
+          (METHOD(1:5) == 'DENSE')) THEN
 
          IF (METHOD(1:6) == 'ARPACK') THEN
             EIG_EXTRACT_METHOD = 'ARPACK  '
-         ELSE IF (METHOD(1:5) == 'CHASE') THEN
-            EIG_EXTRACT_METHOD = 'CHASE   '
          ELSE IF (METHOD(1:5) == 'FEAST') THEN
             EIG_EXTRACT_METHOD = 'FEAST   '
          ELSE IF (METHOD(1:5) == 'SUBSP') THEN
@@ -436,24 +434,6 @@
             ENDIF
             IF (JCARDX(8)(1:) /= ' ') THEN
                CALL CHAR_FLD ( JCARDX(8), JF(8), EIG_LAP_MAT_TYPE )
-            ENDIF
-
-         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'CHASE') THEN
-            IF (JCARDX(4)(1:) /= ' ') THEN
-               CALL I4FLD ( JCARDX(4), JF(4), I4INP )
-               IF (IERRFL(4) == 'N') EIG_CHASE_NEX = I4INP
-            ENDIF
-            IF (JCARDX(5)(1:) /= ' ') THEN
-               CALL R8FLD ( JCARDX(5), JF(5), R8INP )
-               IF (IERRFL(5) == 'N') EIG_CHASE_TOL = R8INP
-            ENDIF
-            IF (JCARDX(6)(1:) /= ' ') THEN
-               CALL I4FLD ( JCARDX(6), JF(6), I4INP )
-               IF (IERRFL(6) == 'N') EIG_CHASE_MAX_ITER = I4INP
-            ENDIF
-            IF (JCARDX(7)(1:) /= ' ') THEN
-               CALL I4FLD ( JCARDX(7), JF(7), I4INP )
-               IF (IERRFL(7) == 'N') EIG_CHASE_DEG = I4INP
             ENDIF
 
          ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'FEAST') THEN

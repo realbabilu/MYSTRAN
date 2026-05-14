@@ -367,8 +367,6 @@ set_source_files_properties(
   PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"
 )
 
-option(MYSTRAN_USE_EXTERNAL_CHASE "Enable native CHASE backend on condensed dense problem" OFF)
-set(MYSTRAN_CHASE_EXTRA_LIBS "" CACHE STRING "Additional libraries for native CHASE backend (for example: chase_f;chase_c;stdc++;gomp)")
 option(MYSTRAN_USE_EXTERNAL_FEAST "Enable native FEAST backend on condensed dense problem" OFF)
 set(MYSTRAN_FEAST_EXTRA_LIBS "" CACHE STRING "Additional libraries for native FEAST backend")
 option(MYSTRAN_USE_DMUMPS_SOLVER "Enable direct MUMPS sparse solver path for LINK3" OFF)
@@ -477,21 +475,6 @@ else()
   endif()
 endif()
 
-if(MYSTRAN_USE_EXTERNAL_CHASE)
-  target_compile_definitions(mystran PRIVATE MYSTRAN_HAVE_EXTERNAL_CHASE)
-  foreach(_chase_lib IN LISTS MYSTRAN_CHASE_EXTRA_LIBS)
-    get_filename_component(_chase_dir "${_chase_lib}" DIRECTORY)
-    if(EXISTS "${_chase_dir}/chase_diag.mod")
-      target_include_directories(mystran PRIVATE "${_chase_dir}")
-      break()
-    endif()
-  endforeach()
-  if(MYSTRAN_CHASE_EXTRA_LIBS)
-    separate_arguments(MYSTRAN_CHASE_EXTRA_LIBS)
-    target_link_libraries(mystran ${MYSTRAN_CHASE_EXTRA_LIBS})
-  endif()
-endif()
-
 if(MYSTRAN_USE_EXTERNAL_FEAST)
   target_compile_definitions(mystran PRIVATE MYSTRAN_HAVE_EXTERNAL_FEAST)
   foreach(_feast_lib IN LISTS MYSTRAN_FEAST_EXTRA_LIBS)
@@ -518,7 +501,7 @@ if(MYSTRAN_USE_DMUMPS_SOLVER)
 endif()
 
 # Re-link dependency libraries after optional static archives so MinGW resolves
-# symbols pulled in by CHASE, FEAST, DMUMPS, and external SuperLU+METIS builds.
+# symbols pulled in by FEAST, DMUMPS, and external SuperLU+METIS builds.
 if(MYSTRAN_USE_OPENBLAS)
   target_link_libraries(mystran ${TPL_BLAS_LIBRARIES})
 endif()

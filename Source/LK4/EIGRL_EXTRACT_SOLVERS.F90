@@ -51,7 +51,7 @@
       IMPLICIT NONE
 
       PRIVATE
-      PUBLIC :: EIG_LANCZOS_CHASE, EIG_LANCZOS_FEAST, EIG_LANCZOS_SUBSPACE, EIG_LANCZOS_DENSE
+      PUBLIC :: EIG_LANCZOS_FEAST, EIG_LANCZOS_SUBSPACE, EIG_LANCZOS_DENSE
 
       INTERFACE
          SUBROUTINE DPOTRF(UPLO, N, A, LDA, INFO)
@@ -117,14 +117,6 @@
 
       END SUBROUTINE EIG_LANCZOS_SUBSPACE
 
-!***********************************************************************************************************************************
-      SUBROUTINE EIG_LANCZOS_CHASE
-
-      CALL SOLVE_CONDENSED_MODAL('CHASE')
-
-      END SUBROUTINE EIG_LANCZOS_CHASE
-
-!***********************************************************************************************************************************
       SUBROUTINE EIG_LANCZOS_FEAST
 
       CALL SOLVE_CONDENSED_MODAL('FEAST')
