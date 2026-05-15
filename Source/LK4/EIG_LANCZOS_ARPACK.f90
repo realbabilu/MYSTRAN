@@ -100,7 +100,7 @@
       INTEGER(LONG)                   :: NUM_EST_EIGENS    ! Number of estimated eigens in the freq interval (EIG_FRQ2 - EIG_FRQ1)
       INTEGER(LONG)                   :: NUM_KMSM_DIAG_0   ! Number of zero diagonal terms in KMSM
 
-      INTEGER(LONG)                   :: MIN_NCV, MAX_NCV, LNONZEROS
+      INTEGER(LONG)                   :: MIN_NCV, MAX_NCV, LNONZEROS, NDOFL_EFFECTIVE
 
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare zero to
 
@@ -330,12 +330,21 @@
          LNONZEROS = NDOFL - NUM_MLL_DIAG_ZEROS
       ENDIF
 
+! --- arpack_surgery begin --- !
+      IF (DEBUG(185) == 0) THEN
+         NDOFL_EFFECTIVE = LNONZEROS
+      ELSE
+         NDOFL_EFFECTIVE = NDOFL
+      ENDIF
+! --- arpack_surgery end --- !
 
       IF (NUM_EST_EIGENS > 0) THEN
          NEV = NUM_EST_EIGENS + EIG_LANCZOS_NEV_DELT
       ELSE
          ! prevent the addition of DARPACK from crashing ARPACK
-         IF ((EIG_N2 + DARPACK) > (LNONZEROS - 4)) THEN
+! --- arpack_surgery begin --- !
+         IF ((EIG_N2 + DARPACK) > (NDOFL_EFFECTIVE - 4)) THEN
+! --- arpack_surgery end --- !
             WRITE(ERR,9775) NDOFL, DARPACK
             IF (SUPWARN == 'N') THEN
                WRITE(F06,9775) NDOFL, DARPACK
@@ -368,7 +377,9 @@
       ENDIF
 
       MIN_NCV = NEV + 2
-      MAX_NCV = LNONZEROS - 2
+! --- arpack_surgery begin --- !
+      MAX_NCV = NDOFL_EFFECTIVE - 2
+! --- arpack_surgery end --- !
 
       ! sanity check on feasible NCV range
       IF (MIN_NCV > MAX_NCV) THEN
