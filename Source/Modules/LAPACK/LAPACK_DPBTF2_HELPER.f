@@ -9,6 +9,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPBTF2( UPLO, N, KD, AB, LDAB, INFO )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -92,5 +93,6 @@
       RETURN
 
       END SUBROUTINE DPBTF2
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DPBTF2_HELPER

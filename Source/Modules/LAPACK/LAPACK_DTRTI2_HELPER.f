@@ -10,6 +10,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DTRTI2( UPLO, DIAG, N, A, LDA, INFO )
 *
 *  -- LAPACK routine (version 3.0) --
@@ -76,5 +77,6 @@
 
       RETURN
       END SUBROUTINE DTRTI2
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DTRTI2_HELPER

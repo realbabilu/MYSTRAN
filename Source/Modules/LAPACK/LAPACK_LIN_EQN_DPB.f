@@ -50,6 +50,7 @@
 ! ##################################################################################################################################
 ! 001 LAPACK_LINEAR_EQN_DPB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPBEQU( UPLO, N, KD, AB, LDAB, S, SCOND, AMAX, INFO )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -61,10 +62,12 @@
       CALL DPBEQU_HELPER( UPLO, N, KD, AB, LDAB, S, SCOND, AMAX, INFO )
       RETURN
       END SUBROUTINE DPBEQU
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 002 LAPACK_LINEAR_EQN_DPB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPBTRF( UPLO, N, KD, AB, LDAB, INFO )
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
 
@@ -101,10 +104,12 @@
 
       RETURN
       END SUBROUTINE DPBTRF
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 003 LAPACK_LINEAR_EQN_DPB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPBTF2( UPLO, N, KD, AB, LDAB, INFO )
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       CHARACTER          UPLO
@@ -113,10 +118,12 @@
       CALL DPBTF2_HELPER( UPLO, N, KD, AB, LDAB, INFO )
       RETURN
       END SUBROUTINE DPBTF2
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 004 LAPACK_LINEAR_EQN_DPB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPOTF2( UPLO, N, A, LDA, INFO )
       CHARACTER          UPLO
       INTEGER            INFO, LDA, N
@@ -124,10 +131,12 @@
       CALL DPOTF2_HELPER( UPLO, N, A, LDA, INFO )
       RETURN
       END SUBROUTINE DPOTF2
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 005 LAPACK_LINEAR_EQN_DPB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPBCON( UPLO, N, KD, AB, LDAB, ANORM, RCOND, WORK,
      $                   IWORK, INFO, itmax, dtbsv_msg )
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -141,12 +150,14 @@
       CALL DPBCON_HELPER( UPLO, N, KD, AB, LDAB, ANORM, RCOND, WORK,
      $                    IWORK, INFO, itmax, dtbsv_msg )
       END SUBROUTINE DPBCON
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 006 LAPACK_LINEAR_EQN_DPB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPBTRS( UPLO, N, KD, NRHS, AB, LDAB, B, LDB, INFO,
-     &                   dtbsv_msg )     ! my addition
+     $                   dtbsv_msg )     ! my addition
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
 
@@ -155,9 +166,10 @@
       INTEGER            INFO, KD, LDAB, LDB, N, NRHS
       REAL(DOUBLE)   AB( LDAB, * ), B( LDB, * )
       CALL DPBTRS_HELPER( UPLO, N, KD, NRHS, AB, LDAB, B, LDB, INFO,
-     &                    dtbsv_msg )
+     $                    dtbsv_msg )
       RETURN
       END SUBROUTINE DPBTRS
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 007 LAPACK_LINEAR_EQN_DPB
@@ -336,6 +348,7 @@
 ! #################################################################################################################################
 ! 008 LAPACK_LINEAR_EQN_DPB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DSYTF2( UPLO, N, A, LDA, IPIV, INFO )
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: subr_name = 'DSYTF2'
@@ -495,6 +508,7 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE DSYTF2
+! --- lapack_peeloff end --- !
 
 ! --- lapack_surgery end --- !
       END MODULE LAPACK_LIN_EQN_DPB

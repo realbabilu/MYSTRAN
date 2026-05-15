@@ -10,6 +10,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGETRF_HELPER( M, N, A, LDA, IPIV, INFO )
 
       INTEGER            INFO, LDA, M, N
@@ -84,5 +85,6 @@
       RETURN
 
       END SUBROUTINE DGETRF_HELPER
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DGETRF_HELPER

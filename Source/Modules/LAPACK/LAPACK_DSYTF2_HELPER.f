@@ -10,6 +10,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DSYTF2( UPLO, N, A, LDA, IPIV, INFO )
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: subr_name = 'DSYTF2'
@@ -355,5 +356,6 @@
 *     End of DSYTF2
 *
       END SUBROUTINE DSYTF2
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DSYTF2_HELPER

@@ -10,6 +10,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPBCON( UPLO, N, KD, AB, LDAB, ANORM, RCOND, WORK,
      $                   IWORK, INFO, itmax, dtbsv_msg )
 
@@ -114,5 +115,6 @@
       RETURN
 
       END SUBROUTINE DPBCON
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DPBCON_HELPER

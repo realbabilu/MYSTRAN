@@ -9,6 +9,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGETRI_HELPER( N, A, LDA, IPIV, WORK, LWORK, INFO )
 
       INTEGER            INFO, LDA, LWORK, N
@@ -110,5 +111,6 @@
       RETURN
 
       END SUBROUTINE DGETRI_HELPER
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DGETRI_HELPER

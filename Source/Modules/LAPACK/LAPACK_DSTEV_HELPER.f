@@ -10,6 +10,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DSTEV( JOBZ, N, D, E, Z, LDZ, WORK, INFO )
 
       CHARACTER          JOBZ
@@ -90,5 +91,6 @@
 
       RETURN
       END SUBROUTINE DSTEV
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DSTEV_HELPER

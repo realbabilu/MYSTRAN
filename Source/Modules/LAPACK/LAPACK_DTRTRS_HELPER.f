@@ -8,6 +8,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DTRTRS( UPLO, TRANS, DIAG, N, NRHS, A, LDA, B, LDB,
      $                   INFO )
 
@@ -61,5 +62,6 @@
 
       RETURN
       END SUBROUTINE DTRTRS
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DTRTRS_HELPER

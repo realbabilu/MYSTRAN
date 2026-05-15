@@ -10,6 +10,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DSYEV( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
 
       CHARACTER          JOBZ, UPLO
@@ -113,9 +114,11 @@
 
       RETURN
       END SUBROUTINE DSYEV
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DSYTRD( UPLO, N, A, LDA, D, E, TAU, WORK, LWORK, INFO )
 
       CHARACTER          UPLO
@@ -207,9 +210,11 @@
 
       RETURN
       END SUBROUTINE DSYTRD
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DORGTR( UPLO, N, A, LDA, TAU, WORK, LWORK, INFO )
 
       CHARACTER          UPLO
@@ -275,5 +280,6 @@
 
       RETURN
       END SUBROUTINE DORGTR
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_STD_EIG_1_HELPER

@@ -31,6 +31,7 @@
 ! ##################################################################################################################################
 ! 001 LAPACK_LINEAR_EQN_DGE
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGETRF( M, N, A, LDA, IPIV, INFO )
       INTEGER            INFO, LDA, M, N
       INTEGER            IPIV( * )
@@ -39,10 +40,12 @@
       CALL DGETRF_HELPER( M, N, A, LDA, IPIV, INFO )
 
       END SUBROUTINE DGETRF
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 002 LAPACK_LINEAR_EQN_DGE
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGETRI( N, A, LDA, IPIV, WORK, LWORK, INFO )
       INTEGER            INFO, LDA, LWORK, N
       INTEGER            IPIV( * )
@@ -51,10 +54,12 @@
       CALL DGETRI_HELPER( N, A, LDA, IPIV, WORK, LWORK, INFO )
 
       END SUBROUTINE DGETRI
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 003 LAPACK_LINEAR_EQN_DGE
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGETRS( TRANS, N, NRHS, A, LDA, IPIV, B, LDB, INFO )
       CHARACTER          TRANS
       INTEGER            INFO, LDA, LDB, N, NRHS
@@ -64,10 +69,12 @@
       CALL DGETRS_HELPER( TRANS, N, NRHS, A, LDA, IPIV, B, LDB, INFO )
 
       END SUBROUTINE DGETRS
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 004 LAPACK_LINEAR_EQN_DGE
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGETF2( M, N, A, LDA, IPIV, INFO )
       INTEGER            INFO, LDA, M, N
       INTEGER            IPIV( * )
@@ -76,6 +83,7 @@
       CALL DGETF2_HELPER( M, N, A, LDA, IPIV, INFO )
 
       END SUBROUTINE DGETF2
+! --- lapack_peeloff end --- !
 
 ! --- lapack_surgery end --- !
       END MODULE LAPACK_LIN_EQN_DGE

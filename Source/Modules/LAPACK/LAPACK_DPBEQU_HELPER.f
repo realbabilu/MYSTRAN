@@ -9,6 +9,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPBEQU( UPLO, N, KD, AB, LDAB, S, SCOND, AMAX, INFO )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -88,5 +89,6 @@
       RETURN
 
       END SUBROUTINE DPBEQU
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DPBEQU_HELPER

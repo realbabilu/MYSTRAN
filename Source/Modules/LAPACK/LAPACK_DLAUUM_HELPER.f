@@ -10,6 +10,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DLAUUM( UPLO, N, A, LDA, INFO )
 *
 *  -- LAPACK auxiliary routine (version 3.0) --
@@ -87,9 +88,11 @@
 
       RETURN
       END SUBROUTINE DLAUUM
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DLAUU2( UPLO, N, A, LDA, INFO )
 *
 *  -- LAPACK auxiliary routine (version 3.0) --
@@ -152,5 +155,6 @@
 
       RETURN
       END SUBROUTINE DLAUU2
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DLAUUM_HELPER

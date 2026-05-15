@@ -12,6 +12,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DSYEV( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
       CHARACTER          JOBZ, UPLO
       INTEGER            INFO, LDA, LWORK, N
@@ -19,9 +20,11 @@
       CALL DSYEV_HELPER( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
       RETURN
       END SUBROUTINE DSYEV
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DSYTRD( UPLO, N, A, LDA, D, E, TAU, WORK, LWORK, INFO )
       CHARACTER          UPLO
       INTEGER            INFO, LDA, LWORK, N
@@ -31,9 +34,11 @@
      $                    INFO )
       RETURN
       END SUBROUTINE DSYTRD
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DORGTR( UPLO, N, A, LDA, TAU, WORK, LWORK, INFO )
       CHARACTER          UPLO
       INTEGER            INFO, LDA, LWORK, N
@@ -41,6 +46,7 @@
       CALL DORGTR_HELPER( UPLO, N, A, LDA, TAU, WORK, LWORK, INFO )
       RETURN
       END SUBROUTINE DORGTR
+! --- lapack_peeloff end --- !
 
 ! --- lapack_surgery end --- !
       END MODULE LAPACK_STD_EIG_1

@@ -16,6 +16,7 @@
 ! ##################################################################################################################################
 ! 001 LAPACK_LINEAR_EQN_DGB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGBTRF( M, N, KL, KU, AB, LDAB, IPIV, INFO )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -29,10 +30,12 @@
       RETURN
 
       END SUBROUTINE DGBTRF
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 002 LAPACK_LINEAR_EQN_DGB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGBTRS( TRANS, N, KL, KU, NRHS, AB, LDAB, IPIV, B, LDB,
      $                   INFO, dtbsv_msg )
 
@@ -49,10 +52,12 @@
       RETURN
 
       END SUBROUTINE DGBTRS
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 003 LAPACK_LINEAR_EQN_DGB
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGBTF2( M, N, KL, KU, AB, LDAB, IPIV, INFO )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -66,6 +71,7 @@
       RETURN
 
       END SUBROUTINE DGBTF2
+! --- lapack_peeloff end --- !
 
 ! --- lapack_surgery end --- !
       END MODULE LAPACK_LIN_EQN_DGB

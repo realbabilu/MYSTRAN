@@ -9,6 +9,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DGETRS_HELPER( TRANS, N, NRHS, A, LDA, IPIV, B, LDB,
      $                          INFO )
 
@@ -72,5 +73,6 @@
       RETURN
 
       END SUBROUTINE DGETRS_HELPER
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DGETRS_HELPER

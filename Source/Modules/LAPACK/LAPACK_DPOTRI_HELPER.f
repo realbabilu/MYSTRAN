@@ -10,6 +10,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPOTRI( UPLO, N, A, LDA, INFO )
 *
 *  -- LAPACK routine (version 3.0) --
@@ -49,5 +50,6 @@
 
       RETURN
       END SUBROUTINE DPOTRI
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DPOTRI_HELPER

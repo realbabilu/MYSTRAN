@@ -29,6 +29,7 @@
 ! ##################################################################################################################################
 ! 003 LAPACK_MISCEL
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DSTEV( JOBZ, N, D, E, Z, LDZ, WORK, INFO )
       CHARACTER          JOBZ
       INTEGER            INFO, LDZ, N
@@ -36,10 +37,12 @@
       CALL DSTEV_HELPER( JOBZ, N, D, E, Z, LDZ, WORK, INFO )
       RETURN
       END SUBROUTINE DSTEV
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 004 LAPACK_MISCEL
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DTRTRS( UPLO, TRANS, DIAG, N, NRHS, A, LDA, B, LDB,
      $                   INFO )
       CHARACTER          DIAG, TRANS, UPLO
@@ -49,6 +52,7 @@
      $                    INFO )
       RETURN
       END SUBROUTINE DTRTRS
+! --- lapack_peeloff end --- !
 
 ! --- lapack_surgery end --- !
       END MODULE LAPACK_MISCEL

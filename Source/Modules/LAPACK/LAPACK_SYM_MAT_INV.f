@@ -18,6 +18,7 @@
 ! ##################################################################################################################################
 ! 001 LAPACK_SYM_MAT_INV
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPOTRF( UPLO, N, A, LDA, INFO )
       CHARACTER          UPLO
       INTEGER            INFO, LDA, N
@@ -25,10 +26,12 @@
       CALL DPOTRF_HELPER( UPLO, N, A, LDA, INFO )
       RETURN
       END SUBROUTINE DPOTRF
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 002 LAPACK_SYM_MAT_INV
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPOTRI( UPLO, N, A, LDA, INFO )
       CHARACTER          UPLO
       INTEGER            INFO, LDA, N
@@ -36,10 +39,12 @@
       CALL DPOTRI_HELPER( UPLO, N, A, LDA, INFO )
       RETURN
       END SUBROUTINE DPOTRI
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 003 LAPACK_SYM_MAT_INV
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DLAUUM( UPLO, N, A, LDA, INFO )
       CHARACTER          UPLO
       INTEGER            INFO, LDA, N
@@ -47,10 +52,12 @@
       CALL DLAUUM_HELPER( UPLO, N, A, LDA, INFO )
       RETURN
       END SUBROUTINE DLAUUM
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 005 LAPACK_SYM_MAT_INV
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DLAUU2( UPLO, N, A, LDA, INFO )
 *
 *  -- LAPACK auxiliary routine (version 3.0) --
@@ -187,10 +194,12 @@
 *     End of DLAUU2
 *
       END SUBROUTINE DLAUU2
+! --- lapack_peeloff end --- !
 
 ! ##################################################################################################################################
 ! 006 LAPACK_SYM_MAT_INV
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DTRTI2( UPLO, DIAG, N, A, LDA, INFO )
       CHARACTER          DIAG, UPLO
       INTEGER            INFO, LDA, N
@@ -198,6 +207,7 @@
       CALL DTRTI2_HELPER( UPLO, DIAG, N, A, LDA, INFO )
       RETURN
       END SUBROUTINE DTRTI2
+! --- lapack_peeloff end --- !
 
 ! --- lapack_surgery end --- !
       END MODULE LAPACK_SYM_MAT_INV

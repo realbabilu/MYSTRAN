@@ -9,6 +9,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPBTRS( UPLO, N, KD, NRHS, AB, LDAB, B, LDB, INFO,
      &                   dtbsv_msg )
 
@@ -71,5 +72,6 @@
       RETURN
 
       END SUBROUTINE DPBTRS
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DPBTRS_HELPER

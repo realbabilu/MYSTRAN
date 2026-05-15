@@ -11,6 +11,7 @@
 
 ! ##################################################################################################################################
 
+! --- lapack_peeloff begin --- !
       SUBROUTINE DPOTRF( UPLO, N, A, LDA, INFO )
 *
 *  -- LAPACK routine (version 3.0) --
@@ -179,5 +180,6 @@
       RETURN
 *
       END SUBROUTINE DPOTRF
+! --- lapack_peeloff end --- !
 
       END MODULE LAPACK_DPOTRF_HELPER
