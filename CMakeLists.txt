@@ -354,6 +354,27 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
   "${CMAKE_SOURCE_DIR}/*.F03"
 )
 
+# ! --- lapack_surgery build order begin --- !
+# Fixed-form helper modules introduced by the LAPACK surgery are not always
+# dependency-scanned reliably by CMake/MinGW, so put them at the front of the
+# source list to ensure their .mod files exist before the wrapper units build.
+file(GLOB LAPACK_SURGERY_HELPERS
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*HELPER*.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*HELPER*.F"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*HELPER*.f90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*HELPER*.F90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*_ext.f90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*_ext.F90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*KERNEL*.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*KERNEL*.F"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*KERNEL*.f90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*KERNEL*.F90"
+)
+list(SORT LAPACK_SURGERY_HELPERS)
+list(REMOVE_ITEM ALL_FORTRAN_FILES ${LAPACK_SURGERY_HELPERS})
+set(ALL_FORTRAN_FILES ${LAPACK_SURGERY_HELPERS} ${ALL_FORTRAN_FILES})
+# ! --- lapack_surgery build order end --- !
+
 set_source_files_properties(
   "${PROJECT_SOURCE_DIR}/Source/LK4/EIGRL_EXTRACT_SOLVERS.F90"
   PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"
