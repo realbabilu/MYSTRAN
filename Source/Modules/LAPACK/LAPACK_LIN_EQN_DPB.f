@@ -174,6 +174,7 @@
 ! ##################################################################################################################################
 ! 007 LAPACK_LINEAR_EQN_DPB
 
+! --- arpack_surgery begin --- !
       SUBROUTINE DPTTRF_MYSTRAN( N, D, E, INFO )
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: subr_name = 'DPTTRF'
@@ -292,7 +293,7 @@
          E( I ) = EI / D( I )
          D( I+1 ) = D( I+1 ) - E( I )*EI
 *
-         IF( D( I ).EQ.ZERO ) THEN
+         IF( D( I+1 ).EQ.ZERO ) THEN
             INFO = I + 1
             GO TO 30
          END IF
@@ -303,7 +304,7 @@
          E( I+1 ) = EI / D( I+1 )
          D( I+2 ) = D( I+2 ) - E( I+1 )*EI
 *
-         IF( D( I ).EQ.ZERO ) THEN
+         IF( D( I+2 ).EQ.ZERO ) THEN
             INFO = I + 2
             GO TO 30
          END IF
@@ -314,7 +315,7 @@
          E( I+2 ) = EI / D( I+2 )
          D( I+3 ) = D( I+3 ) - E( I+2 )*EI
 *
-         IF( D( I ).EQ.ZERO ) THEN
+         IF( D( I+3 ).EQ.ZERO ) THEN
             INFO = I + 3
             GO TO 30
          END IF
@@ -326,9 +327,10 @@
          D( I+4 ) = D( I+4 ) - E( I+3 )*EI
    20 CONTINUE
 *
-*     Check d(n) for positive definiteness.
+*     Check d(n) for zero pivot only. Negative values are allowed here
+*     for the MYSTRAN eigen-counting use case.
 *
-      IF( D( N ).LE.ZERO )
+      IF( D( N ).EQ.ZERO )
      $   INFO = N
 *
    30 CONTINUE
@@ -344,6 +346,7 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE DPTTRF_MYSTRAN
+! --- arpack_surgery end --- !
 
 ! #################################################################################################################################
 ! 008 LAPACK_LINEAR_EQN_DPB
