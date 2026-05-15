@@ -55,6 +55,9 @@
       IMPLICIT NONE
 
       LOGICAL                         :: RVEC              ! = .TRUE. or .FALSE. Specifies whether eigenvectors are to be calculated
+      LOGICAL                         :: EST_NUM_EIGENS_VALID
+      LOGICAL                         :: EST_NUM_EIGENS_VALID1
+      LOGICAL                         :: EST_NUM_EIGENS_VALID2
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'EIG_LANCZOS_ARPACK'
@@ -120,16 +123,20 @@
       NUM_EST_EIGENS = 0
       NUM_NEG_TERMS1 = 0
       NUM_NEG_TERMS2 = 0
+      EST_NUM_EIGENS_VALID  = .FALSE.
+      EST_NUM_EIGENS_VALID1 = .TRUE.
+      EST_NUM_EIGENS_VALID2 = .FALSE.
 
 !xx   IF      (SOLLIB == 'BANDED  ') THEN
 
          IF (NDOFL < EIGESTL) THEN
             IF (EIG_FRQ2 > EPS1) THEN
                IF (EIG_FRQ1 > EPS1) THEN
-                  CALL EST_NUM_EIGENS_BANDED ( EIG_FRQ1, NUM_NEG_TERMS1 )
+                  CALL EST_NUM_EIGENS_BANDED ( EIG_FRQ1, NUM_NEG_TERMS1, EST_NUM_EIGENS_VALID1 )
                ENDIF
-               CALL EST_NUM_EIGENS_BANDED ( EIG_FRQ2, NUM_NEG_TERMS2 )
-               IF (NUM_NEG_TERMS2 > 0) THEN
+               CALL EST_NUM_EIGENS_BANDED ( EIG_FRQ2, NUM_NEG_TERMS2, EST_NUM_EIGENS_VALID2 )
+               EST_NUM_EIGENS_VALID = EST_NUM_EIGENS_VALID1 .AND. EST_NUM_EIGENS_VALID2
+               IF (EST_NUM_EIGENS_VALID .AND. (NUM_NEG_TERMS2 > 0)) THEN
                   NUM_EST_EIGENS = NUM_NEG_TERMS2 - NUM_NEG_TERMS1
                ELSE
                   ! ?
@@ -149,6 +156,10 @@
       IF (EIG_FRQ2 > EPS1) THEN
          WRITE(SC1,101) EIG_FRQ2, NUM_EST_EIGENS
          WRITE(F06,101) EIG_FRQ2, NUM_EST_EIGENS
+         IF (.NOT. EST_NUM_EIGENS_VALID) THEN
+            WRITE(SC1,'(A)') '       Lanczos eigen-count estimate unavailable; using fallback NEV logic'
+            WRITE(F06,'(A)') '       Lanczos eigen-count estimate unavailable; using fallback NEV logic'
+         ENDIF
       ENDIF
 
 ! Calc KMSM = KLL - EIG_SIGMA*MLL (or + EIG_SIGMA*KLLD for BUCKLING) where EIG_SIGMA = shift freq
@@ -595,7 +606,7 @@
 
 ! ##################################################################################################################################
 
-      SUBROUTINE EST_NUM_EIGENS_BANDED ( FREQ, NUM_NEG_TERMS )
+      SUBROUTINE EST_NUM_EIGENS_BANDED ( FREQ, NUM_NEG_TERMS, COUNT_VALID )
 
       USE LAPACK_GIV_MGIV_EIG
       USE LAPACK_LIN_EQN_DGE
@@ -603,7 +614,10 @@
 
       IMPLICIT NONE
 
-      INTEGER(LONG)                   :: INFO              !
+! --- arpack_surgery begin --- !
+      LOGICAL                         :: COUNT_VALID       !
+      INTEGER(LONG)                   :: INFO_DPTTRF       !
+      INTEGER(LONG)                   :: INFO_DSBTRD       !
       INTEGER(LONG)                   :: NUM_NEG_TERMS     ! Number of negative terms on the diagonal of RFAC
 
       REAL(DOUBLE)                    :: DIAG(NDOFL)       !
@@ -615,6 +629,7 @@
 
 ! **********************************************************************************************************************************
       NUM_NEG_TERMS = 0
+      COUNT_VALID = .FALSE.
       SIGMA = (TWO*PI*FREQ)**2
 
 ! Add KLL minus SIGMA*MLL used in Lanczos
@@ -653,15 +668,41 @@
 
 ! Reduce KMSM to tridiag form and do Cholesky L*D*L' decomp on it
 
-      CALL DSBTRD ( 'N', 'U', NDOFL, KMSM_SDIA, RFAC, KMSM_SDIA+1, DIAG, OFF_DIAG, QMAT, 1, WORK, INFO )
-      CALL DPTTRF_MYSTRAN ( NDOFL, DIAG, OFF_DIAG, INFO )
+      INFO_DSBTRD = 0
+      INFO_DPTTRF = 0
+
+      CALL DSBTRD ( 'N', 'U', NDOFL, KMSM_SDIA, RFAC, KMSM_SDIA+1, DIAG, OFF_DIAG, QMAT, 1, WORK, INFO_DSBTRD )
+      IF (INFO_DSBTRD /= 0) THEN
+         WARN_ERR = WARN_ERR + 1
+         WRITE(ERR,'(A,1ES14.6,A,I0)') ' WARNING: EST_NUM_EIGENS_BANDED skipped at FREQ=', FREQ,                  &
+                                       ' due to DSBTRD INFO=', INFO_DSBTRD
+         IF (SUPWARN == 'N') THEN
+            WRITE(F06,'(A,1ES14.6,A,I0)') ' WARNING: EST_NUM_EIGENS_BANDED skipped at FREQ=', FREQ,               &
+                                           ' due to DSBTRD INFO=', INFO_DSBTRD
+         ENDIF
+         GO TO 900
+      ENDIF
+
+      CALL DPTTRF_MYSTRAN ( NDOFL, DIAG, OFF_DIAG, INFO_DPTTRF )
+      IF (INFO_DPTTRF /= 0) THEN
+         WARN_ERR = WARN_ERR + 1
+         WRITE(ERR,'(A,1ES14.6,A,I0)') ' WARNING: EST_NUM_EIGENS_BANDED skipped at FREQ=', FREQ,                  &
+                                       ' due to DPTTRF_MYSTRAN INFO=', INFO_DPTTRF
+         IF (SUPWARN == 'N') THEN
+            WRITE(F06,'(A,1ES14.6,A,I0)') ' WARNING: EST_NUM_EIGENS_BANDED skipped at FREQ=', FREQ,               &
+                                           ' due to DPTTRF_MYSTRAN INFO=', INFO_DPTTRF
+         ENDIF
+         GO TO 900
+      ENDIF
       NUM_NEG_TERMS = 0
       DO I=1,NDOFL
          IF (DIAG(I) < ZERO) THEN
             NUM_NEG_TERMS = NUM_NEG_TERMS + 1
          ENDIF
       ENDDO
+      COUNT_VALID = .TRUE.
 
+  900 CONTINUE
       CALL DEALLOCATE_SPARSE_MAT ( 'KMSM' )
       CALL DEALLOCATE_LAPACK_MAT ( 'RFAC' )
 
@@ -673,12 +714,14 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE EST_NUM_EIGENS_BANDED
+! --- arpack_surgery end --- !
 
 ! ##################################################################################################################################
 
       SUBROUTINE DEBUG_EIG_LANCZOS
 
       WRITE(F06,'(A,I8)')    ' IN EIG_LANCZOS_ARPACK: NUM_EST_EIGENS       = ', NUM_EST_EIGENS
+      WRITE(F06,'(A,L8)')    '                      : EST_NUM_EIGENS_VALID = ', EST_NUM_EIGENS_VALID
       WRITE(F06,'(A,I8)')    '                      : EIG_LANCZOS_NEV_DELT = ', EIG_LANCZOS_NEV_DELT
       WRITE(F06,'(A,I8)')    '                      : EIG_N2               = ', EIG_N2
       WRITE(F06,'(A,I8)')    '                      : DARPACK              = ', DARPACK
