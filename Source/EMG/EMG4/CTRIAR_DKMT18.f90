@@ -29,6 +29,13 @@
 ! The CTRIAR DKMT18 kernel keeps the existing flat-shell algebra, but the
 ! local element frame is built from nodal SNORM data when that data exists.
 ! --- shell_renovation end --- !
+! --- cquadr_ctriar_composite begin --- !
+! Composite routing contract:
+!   - when PCOMP_PROPS = 'Y', SHELL_ABD_MATRICES has already populated the
+!     laminate-driven shell matrices.
+!   - CTRIAR should keep consuming that laminate basis here through DKMT18, so
+!     composite tri shells do not fall back to the generic legacy path.
+! --- cquadr_ctriar_composite end --- !
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06

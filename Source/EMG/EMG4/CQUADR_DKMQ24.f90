@@ -45,6 +45,13 @@
 !     underloaded the roof, while lumped translational mass restores the
 !     correct selfweight order without perturbing Static-24.
 ! --- shell_renovation end --- !
+! --- cquadr_ctriar_composite begin --- !
+! Composite routing contract:
+!   - when PCOMP_PROPS = 'Y', SHELL_ABD_MATRICES has already populated the
+!     laminate-driven SHELL_A / SHELL_D / SHELL_T matrices.
+!   - CQUADR should continue to consume those matrices here, so composite quad
+!     requests stay on the DKMQ24 path rather than a legacy fallback.
+! --- cquadr_ctriar_composite end --- !
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
