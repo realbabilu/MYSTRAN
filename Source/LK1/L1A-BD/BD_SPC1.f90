@@ -192,6 +192,15 @@
 
       ELSE IF ((TOKTYP == 'INTEGER ') .OR. (TOKTYP == 'BLANK   ')) THEN
 
+! --- spc1_fix begin --- !
+         IF (JCARD(10)(1:) /= ' ') THEN
+            JERR      = JERR + 1
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,1129) JCARD(1), JCARD(2)
+            WRITE(F06,1129) JCARD(1), JCARD(2)
+         ENDIF
+! --- spc1_fix end --- !
+
 ! Read and check data on parent card
 
          DO J=4,9                                          ! Read fields 4-9: Grid ID's.
@@ -278,6 +287,8 @@
  1127 FORMAT(' *ERROR  1127: INVALID DATA IN FIELD ',I2,' OF ',A,' CARD. FIELD MUST HAVE THRU OR A GRID NUMBER OR BE BLANK')
 
  1128 FORMAT(' *ERROR  1128: ON ',A,A,' THE IDs MUST BE IN INCREASING ORDER FOR THRU OPTION')
+
+ 1129 FORMAT(' *ERROR  1129: ',A,' ENTRY WITH ID = ',A,' HAS TRAILING DATA BEYOND FIELD 10. USE CONTINUATION CARDS OR THRU FORM')
 
  1163 FORMAT(' *ERROR  1163: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' TOO MANY ',A,' ENTRIES; LIMIT = ',I12)

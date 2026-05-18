@@ -153,7 +153,17 @@ loop1:   DO
 
                IFD = IFD+1
                JCT = 0
-               IF (IFD > 10) EXIT loop1
+! --- spc1_fix begin --- !
+               IF (IFD > 10) THEN
+                  WRITE(ERR,1003)
+                  WRITE(F06,1003)
+                  WRITE(ERR,129) CARD
+                  WRITE(F06,129) CARD
+                  IERR = 1
+                  FATAL_ERR = FATAL_ERR + 1
+                  EXIT loop1
+               ENDIF
+! --- spc1_fix end --- !
 
             ENDIF
 
@@ -189,6 +199,8 @@ loop1:   DO
 ! **********************************************************************************************************************************
  1002 FORMAT(' *ERROR  1002: TOO LONG AN ENTRY (MORE THAN 16 CHARS) ON THE FOLLOWING ENTRY (MAYBE A COMMA WAS FOUND WHERE ONE',    &
                            ' SHOULD NOT BE):')
+
+ 1003 FORMAT(' *ERROR  1003: TOO MANY FREE-FIELD ENTRIES ON ONE PHYSICAL BULK DATA LINE. USE A CONTINUATION CARD OR THRU FORM:')
 
   129 FORMAT(A)
 
