@@ -155,6 +155,14 @@
       CHARACTER(  1*BYTE)      :: PRTF06         =    'N'    ! 'Y', 'N' flag to write all f06 outputs regardless of other flags besides PRTALL
       CHARACTER(  1*BYTE)      :: PRTNEU         =    'N'    ! 'Y', 'N' flag to write all neu outputs regardless of other flags besides PRTALL
       CHARACTER(  1*BYTE)      :: PRTOP2         =    'N'    ! 'Y', 'N' flag to write all op2 outputs regardless of other flags besides PRTALL
+! --- response_spectra_add begin --- !
+      CHARACTER(  4*BYTE)      :: RSTYPE         = 'FRQG'    ! Response spectrum table type:
+!                                                              PERG = period vs Sa/g
+!                                                              PERA = period vs absolute acceleration
+!                                                              FRQG = frequency vs Sa/g
+!                                                              FRQA = frequency vs absolute acceleration
+      REAL(DOUBLE)             :: PARAM_GRAV     =  ZERO     ! Optional gravity magnitude from PARAM,GRAV for RS Sa/g conversion
+! --- response_spectra_add end --- !
 
 ! case 1: PRTALL=Y, PRTOP2=N -> all op2 output will be created and all neu output
 ! case 2: PRTALL=N, PRTOP2=Y -> all op2 output will be created

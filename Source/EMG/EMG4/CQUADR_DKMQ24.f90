@@ -26,7 +26,7 @@
 
       SUBROUTINE CQUADR_DKMQ24 ( OPT, INT_ELEM_ID )
 
-! --- CQUAD4R_CTRIAR_add begin --- !
+! --- shell_renovation begin --- !
 ! DKMQ24 shell element based on the Claude Python reference:
 !   E:\mystran17\claude_dkmq24\dkmq24_element_v2.py
 !
@@ -44,7 +44,7 @@
 !   - For MYSTRAN Static-22, the earlier consistent-mass scaffold badly
 !     underloaded the roof, while lumped translational mass restores the
 !     correct selfweight order without perturbing Static-24.
-! --- CQUAD4R_CTRIAR_add end --- !
+! --- shell_renovation end --- !
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -52,9 +52,11 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,   &
-                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T
+      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,&
+                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM
 
+      USE ELMDIS_Interface
+      USE ELEM_STRE_STRN_ARRAYS_Interface
       USE ORDER_GAUSS_Interface
       USE OUTA_HERE_Interface
 
@@ -71,15 +73,17 @@
       INTEGER(LONG), PARAMETER        :: NSHEAR = 2
       REAL(DOUBLE), PARAMETER         :: CQUADR_DRILL_SCALE = 1.0D0
 
-      INTEGER(LONG)                   :: I, J, K, GP, JSUB, STR_PT_NUM
+      INTEGER(LONG)                   :: I, J, K, GP, JSUB, STR_PT_NUM, IA, IB
       REAL(DOUBLE)                    :: XYZ(4,3), NORMALS(4,3), T24(24,24), T24T(24,24)
       REAL(DOUBLE)                    :: SS(MAX_ORDER_GAUSS), HH(MAX_ORDER_GAUSS)
       REAL(DOUBLE)                    :: XI, ETA, WT
       REAL(DOUBLE)                    :: TV1(3), TV2(3), NVEC(3), JDET, CO(2,2), BCMAT(2,2)
+      REAL(DOUBLE)                    :: DN_G(2,4), DNDX(4), DNDY(4), SIG0(2,2), KGVAL
       REAL(DOUBLE)                    :: AU(4,24), ADELTA(4,4), AINV_AU(4,24)
       REAL(DOUBLE)                    :: BMB(3,24), BBB(3,24), BSB(2,24)
       REAL(DOUBLE)                    :: BML(3,24), BBL(3,24), BSL(2,24)
       REAL(DOUBLE)                    :: KLOCAL(24,24), KBASIC(24,24), KMEM(24,24), KBEND(24,24), KSHEAR(24,24), KDRILL(24,24)
+      REAL(DOUBLE)                    :: KGLOCAL(24,24)
       REAL(DOUBLE)                    :: M1(4,4), MBASIC(24,24), MLOCAL(24,24), NVG(4), MDIAG(4), DENS_A
       REAL(DOUBLE)                    :: MASS_AREA_INT, MASS_ELEM_SUM
       REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24)
@@ -97,16 +101,10 @@
 
       XYZ = ZERO
 
-! Use basic coordinates from XEB-equivalent data already transformed into TE through ELMGM2.
-! TE is basic->element, but the DKMQ24 reference works in the original 3D coordinates.
-! XEL may be flat for warped quads, so rebuild from TE and the local coordinates is not sufficient.
-! The upstream shell routines keep the original coordinates in array XEB only inside ELMOUT, so here
-! we reconstruct from TE and the local coordinates already stored in EPROP-compatible geometry arrays
-! by relying on the fact ELMGM2 leaves the 3D corner coordinates in TE/XEL mapping through XEL usage
-! elsewhere. For phase-1 CQUADR we instead read the basic coordinates from the element transform rows
-! through the stored grid locations in BE arrays not being available here, so the caller must have
-! preserved basic geometry in XEB-like storage via ELMDAT/ELMGM. This routine assumes XEB is already
-! loaded into the common MODEL_STUF scratch arrays prior to call through ELMGM2.
+! The Katili/Maknun DKMQ24 reference is built from a shell-local frame at each
+! Gauss point, while MYSTRAN still assembles through the standard element
+! transform pipeline.  Keep that transform path explicit here so the branch can
+! be compared cleanly against the existing solver assembly.
 
       CALL LOAD_BASIC_COORDS ( XYZ )
       CALL CALC_NODAL_NORMALS ( XYZ, NORMALS )
@@ -131,7 +129,7 @@
       GBE2 = ZERO
       GBE3 = ZERO
 
-      IF ((OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(5) == 'Y') .OR. (OPT(1) == 'Y')) THEN
+      IF ((OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(5) == 'Y') .OR. (OPT(1) == 'Y') .OR. (OPT(6) == 'Y')) THEN
          CALL ORDER_GAUSS(2, SS, HH)
       ENDIF
 
@@ -254,7 +252,57 @@
          ENDDO
       ENDIF
 
+      IF (OPT(6) == 'Y') THEN
+         CALL ELMDIS
+
+         KGLOCAL = ZERO
+         DO I=1,2
+            DO J=1,2
+               XI  = SS(I)
+               ETA = SS(J)
+               WT  = HH(I)*HH(J)
+               CALL SHAPE_DN(XI, ETA, DN_G)
+               CALL GEOMETRY_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, NVEC, JDET, CO, BCMAT)
+               BMB = BM_AT(XI, ETA, TV1, TV2, CO)
+               BML = MATMUL(BMB, T24T)
+               BE1(1:3,1:24,1) = BML
+               CALL ELEM_STRE_STRN_ARRAYS ( 1 )
+
+               SIG0(1,1) = FCONV(1)*STRESS(1)
+               SIG0(2,2) = FCONV(1)*STRESS(2)
+               SIG0(1,2) = FCONV(1)*STRESS(3)
+               SIG0(2,1) = SIG0(1,2)
+               IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
+                  WRITE(F06,'(A,I8,A,I2,A,I2,A,3(1X,ES15.7))') 'CQUADR KGGD EID=', EID, ' I=', I, ' J=', J,                      &
+                                                               ' SIG0=', SIG0(1,1), SIG0(2,2), SIG0(1,2)
+                  WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CQUADR KGGD EID=', EID, ' NORMAL=', NVEC(1), NVEC(2), NVEC(3)
+               ENDIF
+
+               DO IA=1,4
+                  DNDX(IA) = DN_G(1,IA)*CO(1,1) + DN_G(2,IA)*CO(2,1)
+                  DNDY(IA) = DN_G(1,IA)*CO(1,2) + DN_G(2,IA)*CO(2,2)
+               ENDDO
+
+               DO IA=1,4
+                  DO IB=1,4
+                     KGVAL = WT*JDET*( DNDX(IA)*(SIG0(1,1)*DNDX(IB) + SIG0(1,2)*DNDY(IB)) +                         &
+                                      DNDY(IA)*(SIG0(2,1)*DNDX(IB) + SIG0(2,2)*DNDY(IB)) )
+                     KGLOCAL(6*(IA-1)+3,6*(IB-1)+3) = KGLOCAL(6*(IA-1)+3,6*(IB-1)+3) + KGVAL
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+
+         KED(1:24,1:24) = KGLOCAL
+      ENDIF
+
       IF (DEBUG(233) > 0) THEN
+         IF (EID <= 8) THEN
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR KE EID=', EID, ' KBASIC_NORM=', DSQRT(SUM(KBASIC*KBASIC))
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR KE EID=', EID, ' KMEM_NORM=', DSQRT(SUM(KMEM*KMEM))
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR KE EID=', EID, ' KBEND_NORM=', DSQRT(SUM(KBEND*KBEND))
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR KE EID=', EID, ' KSHEAR_NORM=', DSQRT(SUM(KSHEAR*KSHEAR))
+         ENDIF
          CALL DEBUG_PRINT_MATRIX('CQUADR KBASIC', KBASIC)
          CALL DEBUG_PRINT_MATRIX('CQUADR KLOCAL', KLOCAL)
          CALL DEBUG_PRINT_MATRIX('CQUADR KMEM', KMEM)
@@ -348,7 +396,8 @@
       SUBROUTINE CALC_NODAL_NORMALS ( XYZN, NORMS )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3)
       REAL(DOUBLE), INTENT(OUT) :: NORMS(4,3)
-      REAL(DOUBLE) :: A(3), B(3), N(3), NM
+      INTEGER(LONG) :: II
+      REAL(DOUBLE) :: A(3), B(3), N(3), NM, SN(3), SDOT
 
       A = XYZN(2,:) - XYZN(1,:)
       B = XYZN(4,:) - XYZN(1,:)
@@ -389,6 +438,34 @@
          NM = ONE
       ENDIF
       NORMS(4,:) = N / NM
+
+! --- shell_renovation begin --- !
+! SNORM support for explicit CQUADR/DKMQ24. GRID_SNORM is stored in basic
+! coordinates, matching the 3D coordinates used by this routine. If no SNORM is
+! present for a grid, keep the geometric midsurface normal computed above.
+      IF (ALLOCATED(GRID_SNORM)) THEN
+         DO II=1,4
+            IF ((BGRID(II) > 0) .AND. (BGRID(II) <= SIZE(GRID_SNORM,1))) THEN
+               SN = GRID_SNORM(BGRID(II),:)
+               NM = VNORM(SN)
+               IF (NM > 1.0D-15) THEN
+                  SN = SN / NM
+                  SDOT = DOT_PRODUCT(SN, NORMS(II,:))
+                  IF (SDOT < 1.0D-2) THEN
+                     NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+                     FATAL_ERR = FATAL_ERR + 1
+                     WRITE(ERR,'(A,A,A,I8,A,I2,A,ES14.6)') ' *ERROR: ', TRIM(SUBR_NAME), ' EID=', EID,                         &
+                        ' SNORM AT NODE ', II, ' IS TOO FAR FROM CQUADR MIDSURFACE NORMAL. DOT=', SDOT
+                     WRITE(F06,'(A,A,A,I8,A,I2,A,ES14.6)') ' *ERROR: ', TRIM(SUBR_NAME), ' EID=', EID,                         &
+                        ' SNORM AT NODE ', II, ' IS TOO FAR FROM CQUADR MIDSURFACE NORMAL. DOT=', SDOT
+                     CALL OUTA_HERE ( 'Y' )
+                  ENDIF
+                  NORMS(II,:) = SN
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDIF
+! --- shell_renovation end --- !
       END SUBROUTINE CALC_NODAL_NORMALS
 
       SUBROUTINE GEOMETRY_AT ( XYZN, NORMS, XI, ETA, T1, T2, NORMV, JAC, CO, BCM )

@@ -103,7 +103,7 @@
       CALL ELEPRO ( 'Y', JCARD_EDAT, 6, MEDAT_CQUAD, 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'N', 'N' )
 
       NUM_GRD = 4
-      ! --- CQUAD4R_CTRIAR_add begin --- !
+      ! --- shell_renovation begin --- !
       IF       (JCARD(1)(1:7) == 'CQUAD4K') THEN
          NCQUAD4K = NCQUAD4K + 1
          ETYPE(NELE) = 'QUAD4K  '
@@ -114,7 +114,7 @@
          NCQUADR = NCQUADR + 1
          ETYPE(NELE) = 'QUADR   '
       ENDIF
-      ! --- CQUAD4R_CTRIAR_add end --- !
+      ! --- shell_renovation end --- !
 
 ! Read material property orientation angle. It takes 2 values put into EDAT to cover all of the possibilities of field 8:
 !  (a) If field 8 is a real value it is the angle of the material axis relative to the element x axis.

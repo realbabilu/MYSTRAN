@@ -34,6 +34,9 @@
 ! --- mitc3plus_add begin --- !
       USE TPLT_MITC3P_Interface
 ! --- mitc3plus_add end --- !
+! --- snorm_director_add begin --- !
+      USE MITC_INITIALIZE_Interface
+! --- snorm_director_add end --- !
       USE outa_here_Interface
       USE MATMULT_FFF_Interface
       USE MATMULT_FFF_T_Interface

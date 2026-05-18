@@ -41,9 +41,9 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, TENTH, ONE, TWO, THREE, TWELVE
       USE PARAMS, ONLY                :  SUPWARN
-! --- mitc3plus_add begin --- !
+! --- shell_renovation begin --- !
       USE PARAMS, ONLY                :  TRIA3TYP
-! --- mitc3plus_add end --- !
+! --- shell_renovation end --- !
       USE MODEL_STUF, ONLY            :  EID, ELDOF, EMG_IWE, EMG_RWE, INTL_MID, KE, MASS_PER_UNIT_AREA, ME,                       &
                                          NUM_EMG_FATAL_ERRS, PCOMP_LAM, PCOMP_PROPS, SHELL_B, TYPE, XEB, XEL
       USE MODEL_STUF, ONLY            :  BENSUM, SHRSUM, PHI_SQ, PSI_HAT, XTB, XTL
@@ -80,6 +80,7 @@
       REAL(DOUBLE)                    :: M0                ! An intermediate variable used in calc elem mass, ME
       REAL(DOUBLE)                    :: PPV(9,NSUB)       ! The 9xNSUB  virgin thermal  load     matrix for MIN3
       REAL(DOUBLE)                    :: PTV(9,NTSUB)      ! The 9xNTSUB virgin pressure load     matrix for MIN3
+      CHARACTER(1*BYTE)              :: OPT_REC(6)        ! Recovery-only option vector for special MITC3+ stress matrices
       REAL(DOUBLE)                    :: S2V(3,9)          ! The 3x9     virgin stress   recovery matrix for MIN3 for bending
       REAL(DOUBLE)                    :: S3V(3,9)          ! The 3x9     virgin stress   recovery matrix for MIN3 for transv shear
       REAL(DOUBLE)                    :: X2E               ! x coord of elem node 2
@@ -171,7 +172,7 @@
       IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(5) == 'Y') .OR. (OPT(6) == 'Y')) THEN
 
          IF (TYPE(1:5) == 'TRIA3') THEN
-            IF (INTL_MID(1) /= 0) THEN
+            IF ((INTL_MID(1) /= 0) .AND. (TRIA3TYP /= 'MITC3+')) THEN
                CALL TMEM1 ( OPT, AREA, X2E, X3E, Y3E, 'Y', BIG_BM )
             ENDIF
          ENDIF
@@ -184,14 +185,32 @@
 
          IF (TYPE == 'TRIA3   ') THEN
             IF (INTL_MID(2) /= 0) THEN
-! --- mitc3plus_add begin --- !
+! --- shell_renovation begin --- !
                IF (TRIA3TYP == 'MITC3+') THEN
+! --- shell_renovation begin --- !
+                  CALL MITC_INITIALIZE ()
+! --- shell_renovation end --- !
                   CALL TPLT_MITC3P ( OPT, AREA, X2E, X3E, Y3E, BIG_BB )
                ELSE
                   CALL TPLT2 (OPT, AREA, X2E, X3E, Y3E, 'Y', IERROR, KV, PTV, PPV, B2V, B3V, S2V, S3V, BIG_BB, MN4T_QD, TRIA_NUM, PSI)
                ENDIF
-! --- mitc3plus_add end --- !
+! --- shell_renovation end --- !
             ENDIF
+
+! --- shell_renovation begin --- !
+! MITC3+ needs the plain triangle membrane stress recovery matrices for the LE5-style
+! adjacent-center stress check.  For buckling, keep OPT(6) active so TMEM1
+! contributes the same membrane-resultant KGGD convention used by MITC4/MITC4+,
+! without adding membrane elastic stiffness a second time.
+            IF ((TRIA3TYP == 'MITC3+') .AND. ((OPT(3) == 'Y') .OR. (OPT(6) == 'Y'))) THEN
+               OPT_REC = OPT
+               OPT_REC(2) = 'N'
+               OPT_REC(4) = 'N'
+               OPT_REC(5) = 'N'
+               OPT_REC(6) = OPT(6)
+               CALL TMEM1 ( OPT_REC, AREA, X2E, X3E, Y3E, 'N', BIG_BM )
+            ENDIF
+! --- shell_renovation end --- !
          ENDIF
 
       ENDIF

@@ -1,4 +1,4 @@
-! --- mitc3plus_add begin --- !
+! --- shell_renovation begin --- !
       SUBROUTINE TPLT_MITC3P ( OPT, AREA, X2E, X3E, Y3E, BIG_BB )
 
 ! Experimental MITC3+ triangular shell bending/shear kernel for PARAM,TRIA3TYP,MITC3+.
@@ -17,8 +17,11 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE
       USE PARAMS, ONLY                :  EPSIL
-      USE MODEL_STUF, ONLY            :  EID, ELDOF, KE, SHELL_D, SHELL_T, TYPE
+      USE MODEL_STUF, ONLY            :  EID, ELDOF, KE, SHELL_A, SHELL_D, SHELL_T, TYPE
+      USE MITC_STUF, ONLY             :  DIRECTOR
       USE OUTA_HERE_Interface
+      USE CROSS_Interface
+      USE MITC_COVARIANT_BASIS_Interface
 
       IMPLICIT NONE
 
@@ -30,15 +33,15 @@
       REAL(DOUBLE), INTENT(IN)        :: Y3E
       REAL(DOUBLE), INTENT(OUT)       :: BIG_BB(3,ELDOF,1)
 
-      INTEGER(LONG), PARAMETER        :: IDX_B(8) = (/ 4, 5, 10, 11, 16, 17, 19, 20 /)
-      INTEGER(LONG), PARAMETER        :: IDX_S(11)= (/ 3, 4, 5,  9, 10, 11, 15, 16, 17, 19, 20 /)
       INTEGER(LONG), PARAMETER        :: IDX_RZ(3)= (/ 6, 12, 18 /)
+      INTEGER(LONG), PARAMETER        :: IDX_M(6) = (/ 1, 2, 7, 8, 13, 14 /)
 
       INTEGER(LONG)                   :: I, J, K, L, GP
       REAL(DOUBLE)                    :: XY(3,2), JMAT(2,2), JINV(2,2), DETJ
       REAL(DOUBLE)                    :: COV_S(2,2), DRILL_PEN
       REAL(DOUBLE)                    :: KFULL(20,20), KAA(18,18), KAB(18,2), KBA(2,18), KBB(2,2), KBB_INV(2,2), KCOND(18,18)
-      REAL(DOUBLE)                    :: BB(3,8), BS(2,11), KEI, FACTOR
+      REAL(DOUBLE)                    :: KPHYS(18,18), KA(18,18), KOUT(18,18), TAE(18,18), TEA(18,18)
+      REAL(DOUBLE)                    :: BB(3,8), BS(2,11), BM(3,6), KEI, FACTOR
       REAL(DOUBLE)                    :: GAUSS_R(7), GAUSS_S(7), GAUSS_W(7)
       REAL(DOUBLE)                    :: DABS_SHELL
       REAL(DOUBLE)                    :: EPS1
@@ -58,7 +61,7 @@
       XY(3,1) = X3E
       XY(3,2) = Y3E
 
-! --- mitc3plus_add begin --- !
+! --- shell_renovation begin --- !
 ! Match the uploaded Python implementation's Jacobian layout:
 !   J = d(x,y)/d(r,s) with rows = parametric directions (r,s)
 ! so:
@@ -70,7 +73,7 @@
       JMAT(1,2) = ZERO
       JMAT(2,1) = X3E
       JMAT(2,2) = Y3E
-! --- mitc3plus_add end --- !
+! --- shell_renovation end --- !
       DETJ      = JMAT(1,1)*JMAT(2,2) - JMAT(1,2)*JMAT(2,1)
       IF (DABS(DETJ) <= EPS1) THEN
          WRITE(ERR,*) ' *ERROR: ', TYPE, ' ELEMENT ', EID, ' HAS SINGULAR JACOBIAN IN TPLT_MITC3P'
@@ -91,37 +94,46 @@
 
       KFULL = ZERO
       DO GP=1,7
+         CALL MITC3P_BM_AT(JINV, BM)
          CALL MITC3P_BB_AT(GAUSS_R(GP), GAUSS_S(GP), JINV, BB)
          CALL MITC3P_BS_AT(GAUSS_R(GP), GAUSS_S(GP), XY, JINV, JMAT, BS)
          FACTOR = GAUSS_W(GP)*DETJ
 
-         DO I=1,8
-            DO J=1,8
+         DO I=1,6
+            DO J=1,6
                KEI = ZERO
                DO K=1,3
                   DO L=1,3
-                     KEI = KEI + BB(K,I)*SHELL_D(K,L)*BB(L,J)
+                     KEI = KEI + BM(K,I)*SHELL_A(K,L)*BM(L,J)
                   ENDDO
                ENDDO
-               KFULL(IDX_B(I),IDX_B(J)) = KFULL(IDX_B(I),IDX_B(J)) + FACTOR*KEI
+               KFULL(IDX_M(I),IDX_M(J)) = KFULL(IDX_M(I),IDX_M(J)) + FACTOR*KEI
             ENDDO
          ENDDO
 
-         DO I=1,11
-            DO J=1,11
+         DO I=1,20
+            DO J=1,20
+               KEI = ZERO
+               DO K=1,3
+                  DO L=1,3
+                     KEI = KEI + MITC3P_BB_TERM(BB,K,I)*SHELL_D(K,L)*MITC3P_BB_TERM(BB,L,J)
+                  ENDDO
+               ENDDO
+               KFULL(I,J) = KFULL(I,J) + FACTOR*KEI
+            ENDDO
+         ENDDO
+
+         DO I=1,20
+            DO J=1,20
                KEI = ZERO
                DO K=1,2
                   DO L=1,2
-                     KEI = KEI + BS(K,I)*COV_S(K,L)*BS(L,J)
+                     KEI = KEI + MITC3P_BS_TERM(BS,K,I)*COV_S(K,L)*MITC3P_BS_TERM(BS,L,J)
                   ENDDO
                ENDDO
-               KFULL(IDX_S(I),IDX_S(J)) = KFULL(IDX_S(I),IDX_S(J)) + FACTOR*KEI
+               KFULL(I,J) = KFULL(I,J) + FACTOR*KEI
             ENDDO
          ENDDO
-      ENDDO
-
-      DO I=1,3
-         KFULL(IDX_RZ(I),IDX_RZ(I)) = KFULL(IDX_RZ(I),IDX_RZ(I)) + DRILL_PEN
       ENDDO
 
       KAA = KFULL(1:18,1:18)
@@ -131,37 +143,207 @@
       CALL MITC3P_INV2(KBB, KBB_INV)
       KCOND = KAA - MATMUL(KAB, MATMUL(KBB_INV, KBA))
 
-! --- mitc3plus_add begin --- !
-      BUGOUT = 'Y'
-      WRITE(ERR,*) 'MITC3P_DEBUG_BEGIN EID=', EID
-      CALL MITC3P_WRITE_MAT(ERR, 'SHELL_D', SHELL_D, 3, 3)
-      CALL MITC3P_WRITE_MAT(ERR, 'SHELL_T', SHELL_T, 2, 2)
-      CALL MITC3P_WRITE_MAT(ERR, 'COV_S',   COV_S  , 2, 2)
-      WRITE(ERR,'(A,1P,E16.8)') 'MITC3P_DRILL_PEN ', DRILL_PEN
-      CALL MITC3P_WRITE_MAT(ERR, 'KAA',   KAA,   18, 18)
-      CALL MITC3P_WRITE_MAT(ERR, 'KAB',   KAB,   18,  2)
-      CALL MITC3P_WRITE_MAT(ERR, 'KBB',   KBB,    2,  2)
-      CALL MITC3P_WRITE_MAT(ERR, 'KCOND', KCOND, 18, 18)
-      WRITE(ERR,*) 'MITC3P_DEBUG_END EID=', EID
-! --- mitc3plus_add end --- !
+      KPHYS = KCOND
+      DO I=1,3
+         KPHYS(6*(I-1)+4,:) = -KPHYS(6*(I-1)+4,:)
+         KPHYS(:,6*(I-1)+4) = -KPHYS(:,6*(I-1)+4)
+         KPHYS(6*(I-1)+5,:) = -KPHYS(6*(I-1)+5,:)
+         KPHYS(:,6*(I-1)+5) = -KPHYS(:,6*(I-1)+5)
+      ENDDO
+
+      CALL MITC3P_TRANSFORMS(JINV, TAE, TEA)
+      KA = MATMUL(TRANSPOSE(TAE), MATMUL(KPHYS, TAE))
+      CALL MITC3P_ADD_DRILLING(KA, AREA, DRILL_PEN)
+      KOUT = MATMUL(TRANSPOSE(TEA), MATMUL(KA, TEA))
 
       DO I=1,18
          DO J=1,18
-            KE(I,J) = KE(I,J) + KCOND(I,J)
+            KE(I,J) = KE(I,J) + 0.5D0*(KOUT(I,J) + KOUT(J,I))
          ENDDO
       ENDDO
 
       CALL MITC3P_BB_AT(ONE/THREE, ONE/THREE, JINV, BB)
-      DO I=1,3
-         BIG_BB(I, 4,1)  = BB(I,1)
-         BIG_BB(I, 5,1)  = BB(I,2)
-         BIG_BB(I,10,1)  = BB(I,3)
-         BIG_BB(I,11,1)  = BB(I,4)
-         BIG_BB(I,16,1)  = BB(I,5)
-         BIG_BB(I,17,1)  = BB(I,6)
-      ENDDO
+      BIG_BB(:,:,1) = ZERO
 
       CONTAINS
+
+      SUBROUTINE MITC3P_BM_AT(JI, BMOUT)
+         REAL(DOUBLE), INTENT(IN)  :: JI(2,2)
+         REAL(DOUBLE), INTENT(OUT) :: BMOUT(3,6)
+         REAL(DOUBLE) :: DH(3,2), DH_XY(3,2)
+         INTEGER(LONG) :: II
+         CALL MITC3P_DH(DH)
+         DH_XY = MATMUL(DH, TRANSPOSE(JI))
+         BMOUT = ZERO
+         DO II=1,3
+            BMOUT(1,2*II-1) = DH_XY(II,1)
+            BMOUT(2,2*II  ) = DH_XY(II,2)
+            BMOUT(3,2*II-1) = DH_XY(II,2)
+            BMOUT(3,2*II  ) = DH_XY(II,1)
+         ENDDO
+      END SUBROUTINE MITC3P_BM_AT
+
+      FUNCTION MITC3P_BB_TERM(BBIN, IR, IC) RESULT(VAL)
+         REAL(DOUBLE), INTENT(IN) :: BBIN(3,8)
+         INTEGER(LONG), INTENT(IN):: IR, IC
+         REAL(DOUBLE)             :: VAL
+         INTEGER(LONG)            :: INODE, LD
+         VAL = ZERO
+         IF (IC <= 18) THEN
+            INODE = (IC-1)/6 + 1
+            LD = IC - 6*(INODE-1)
+            IF (LD == 4) VAL = BBIN(IR,2*INODE-1)
+            IF (LD == 5) VAL = BBIN(IR,2*INODE  )
+         ELSEIF (IC == 19) THEN
+            VAL = BBIN(IR,7)
+         ELSEIF (IC == 20) THEN
+            VAL = BBIN(IR,8)
+         ENDIF
+      END FUNCTION MITC3P_BB_TERM
+
+      FUNCTION MITC3P_BS_TERM(BSIN, IR, IC) RESULT(VAL)
+         REAL(DOUBLE), INTENT(IN) :: BSIN(2,11)
+         INTEGER(LONG), INTENT(IN):: IR, IC
+         REAL(DOUBLE)             :: VAL
+         INTEGER(LONG)            :: INODE, LD
+         VAL = ZERO
+         IF (IC <= 18) THEN
+            INODE = (IC-1)/6 + 1
+            LD = IC - 6*(INODE-1)
+            IF (LD == 3) VAL = BSIN(IR,3*INODE-2)
+            IF (LD == 4) VAL = BSIN(IR,3*INODE-1)
+            IF (LD == 5) VAL = BSIN(IR,3*INODE  )
+         ELSEIF (IC == 19) THEN
+            VAL = BSIN(IR,10)
+         ELSEIF (IC == 20) THEN
+            VAL = BSIN(IR,11)
+         ENDIF
+      END FUNCTION MITC3P_BS_TERM
+
+      SUBROUTINE MITC3P_TRANSFORMS(JI, TAE, TEA)
+         REAL(DOUBLE), INTENT(IN)  :: JI(2,2)
+         REAL(DOUBLE), INTENT(OUT) :: TAE(18,18), TEA(18,18)
+         REAL(DOUBLE)              :: DH(3,2), GRAD(3,2), A(3,3,3), A33, M1, M2, A3
+         INTEGER(LONG)             :: INODE, JNODE, K3, RO, CO, CL, RW
+
+         CALL MITC3P_DH(DH)
+         GRAD = MATMUL(DH, TRANSPOSE(JI))
+
+         TAE = ZERO
+         TEA = ZERO
+
+         DO INODE=1,3
+            CALL MITC3P_ROTATION_FROM_E3(INODE, A(:,:,INODE))
+         ENDDO
+
+         DO INODE=1,3
+            RO = 6*(INODE-1)
+            DO RW=1,3
+               DO CL=1,3
+                  TAE(RO+RW,RO+CL) = A(RW,CL,INODE)
+                  TEA(RO+RW,RO+CL) = A(CL,RW,INODE)
+                  TEA(RO+3+RW,RO+3+CL) = A(CL,RW,INODE)
+               ENDDO
+            ENDDO
+
+            A33 = A(3,3,INODE)
+            IF (DABS(A33) < 1.0D-12) THEN
+               IF (A33 < ZERO) THEN
+                  A33 = -1.0D-12
+               ELSE
+                  A33 =  1.0D-12
+               ENDIF
+            ENDIF
+
+            DO CL=1,2
+               DO RW=1,2
+                  TAE(RO+3+RW,RO+3+CL) = A(RW,CL,INODE) - (A(RW,3,INODE)*A(CL,3,INODE))/A33
+               ENDDO
+            ENDDO
+
+            M1 = A(1,3,INODE)/A33
+            M2 = A(2,3,INODE)/A33
+            DO JNODE=1,3
+               CO = 6*(JNODE-1)
+               DO K3=1,3
+                  A3 = 0.5D0*(A(2,K3,INODE)*GRAD(JNODE,1) - A(1,K3,INODE)*GRAD(JNODE,2))
+                  TAE(RO+4,CO+K3) = TAE(RO+4,CO+K3) + M1*A3
+                  TAE(RO+5,CO+K3) = TAE(RO+5,CO+K3) + M2*A3
+               ENDDO
+            ENDDO
+         ENDDO
+      END SUBROUTINE MITC3P_TRANSFORMS
+
+      SUBROUTINE MITC3P_ROTATION_FROM_E3(INODE, A)
+         INTEGER(LONG), INTENT(IN)  :: INODE
+         REAL(DOUBLE), INTENT(OUT)  :: A(3,3)
+         REAL(DOUBLE)               :: N(3), V(3), VX(3,3), VX2(3,3), C, NN
+         REAL(DOUBLE), PARAMETER    :: COS_LIMIT = 0.8191520442889918D0
+
+         N = DIRECTOR(:,INODE)
+         NN = DSQRT(DOT_PRODUCT(N,N))
+         IF (NN <= EPS1) THEN
+            N = (/ ZERO, ZERO, ONE /)
+         ELSE
+            N = N/NN
+         ENDIF
+
+         C = N(3)
+         IF (C < COS_LIMIT) THEN
+            A = ZERO
+            A(1,1) = ONE
+            A(2,2) = ONE
+            A(3,3) = ONE
+            RETURN
+         ENDIF
+
+         IF (C > ONE - 1.0D-12) THEN
+            A = ZERO
+            A(1,1) = ONE
+            A(2,2) = ONE
+            A(3,3) = ONE
+            RETURN
+         ENDIF
+
+         IF (C < -ONE + 1.0D-12) THEN
+            A = ZERO
+            A(1,1) =  ONE
+            A(2,2) = -ONE
+            A(3,3) = -ONE
+            RETURN
+         ENDIF
+
+         V = (/ -N(2), N(1), ZERO /)
+         VX = ZERO
+         VX(1,2) = -V(3)
+         VX(1,3) =  V(2)
+         VX(2,1) =  V(3)
+         VX(2,3) = -V(1)
+         VX(3,1) = -V(2)
+         VX(3,2) =  V(1)
+         VX2 = MATMUL(VX,VX)
+
+         A = ZERO
+         A(1,1) = ONE
+         A(2,2) = ONE
+         A(3,3) = ONE
+         A = A + VX + VX2/(ONE + C)
+      END SUBROUTINE MITC3P_ROTATION_FROM_E3
+
+      SUBROUTINE MITC3P_ADD_DRILLING(KAIN, AREA_IN, CUSER)
+         REAL(DOUBLE), INTENT(INOUT) :: KAIN(18,18)
+         REAL(DOUBLE), INTENT(IN)    :: AREA_IN, CUSER
+         REAL(DOUBLE)                :: M(3,3), COEFF
+         INTEGER(LONG)               :: I3, J3
+
+         M = RESHAPE((/ TWO, ONE, ONE, ONE, TWO, ONE, ONE, ONE, TWO /), (/3,3/)) * (AREA_IN/12.0D0)
+         COEFF = CUSER/MAX(AREA_IN/THREE, 1.0D-30)
+         DO I3=1,3
+            DO J3=1,3
+               KAIN(IDX_RZ(I3),IDX_RZ(J3)) = KAIN(IDX_RZ(I3),IDX_RZ(J3)) + COEFF*M(I3,J3)
+            ENDDO
+         ENDDO
+      END SUBROUTINE MITC3P_ADD_DRILLING
 
       SUBROUTINE MITC3P_GAUSS_7PT(R, S, W)
          REAL(DOUBLE), INTENT(OUT) :: R(7), S(7), W(7)
@@ -307,7 +489,91 @@
          BSOUT(2,:) = CONST_EST + FAC_ST*CHAT
       END SUBROUTINE MITC3P_BS_AT
 
-! --- mitc3plus_add begin --- !
+! --- shell_renovation begin --- !
+      SUBROUTINE MITC3P_NODE_BASIS(INODE, REF1, REF2, V1, V2)
+         INTEGER(LONG), INTENT(IN)  :: INODE
+         REAL(DOUBLE), INTENT(IN)   :: REF1(3), REF2(3)
+         REAL(DOUBLE), INTENT(OUT)  :: V1(3), V2(3)
+         REAL(DOUBLE)               :: VN(3), REF(3), NORMV
+
+         VN = DIRECTOR(:,INODE)
+         NORMV = DSQRT(DOT_PRODUCT(VN,VN))
+         IF (NORMV <= EPS1) THEN
+            VN = (/ ZERO, ZERO, ONE /)
+         ELSE
+            VN = VN/NORMV
+         ENDIF
+
+         REF = REF1
+         V1 = REF - VN*DOT_PRODUCT(REF,VN)
+         NORMV = DSQRT(DOT_PRODUCT(V1,V1))
+         IF (NORMV <= 1.0D-12) THEN
+            REF = REF2
+            V1 = REF - VN*DOT_PRODUCT(REF,VN)
+            NORMV = DSQRT(DOT_PRODUCT(V1,V1))
+         ENDIF
+         IF (NORMV <= 1.0D-12) THEN
+            REF = (/ ONE, ZERO, ZERO /)
+            V1 = REF - VN*DOT_PRODUCT(REF,VN)
+            NORMV = DSQRT(DOT_PRODUCT(V1,V1))
+         ENDIF
+         IF (NORMV <= 1.0D-12) THEN
+            REF = (/ ZERO, ONE, ZERO /)
+            V1 = REF - VN*DOT_PRODUCT(REF,VN)
+            NORMV = DSQRT(DOT_PRODUCT(V1,V1))
+         ENDIF
+         V1 = V1/NORMV
+
+         CALL CROSS(VN, V1, V2)
+         NORMV = DSQRT(DOT_PRODUCT(V2,V2))
+         IF (NORMV > EPS1) V2 = V2/NORMV
+      END SUBROUTINE MITC3P_NODE_BASIS
+
+      SUBROUTINE MITC3P_EXPAND_BB_DIRECTOR(BBIN, REF1, REF2, BBOUT)
+         REAL(DOUBLE), INTENT(IN)  :: BBIN(3,8)
+         REAL(DOUBLE), INTENT(IN)  :: REF1(3), REF2(3)
+         REAL(DOUBLE), INTENT(OUT) :: BBOUT(3,20)
+         REAL(DOUBLE)              :: V1(3), V2(3)
+         INTEGER(LONG)             :: INODE, IR, IC
+
+         BBOUT = ZERO
+         DO INODE=1,3
+            CALL MITC3P_NODE_BASIS(INODE, REF1, REF2, V1, V2)
+            DO IR=1,3
+               DO IC=1,3
+                  BBOUT(IR,6*(INODE-1)+3+IC) = BBOUT(IR,6*(INODE-1)+3+IC) + BBIN(IR,2*INODE-1)*V1(IC) &
+                                                                                 + BBIN(IR,2*INODE  )*V2(IC)
+               ENDDO
+            ENDDO
+         ENDDO
+         BBOUT(:,19) = BBIN(:,7)
+         BBOUT(:,20) = BBIN(:,8)
+      END SUBROUTINE MITC3P_EXPAND_BB_DIRECTOR
+
+      SUBROUTINE MITC3P_EXPAND_BS_DIRECTOR(BSIN, REF1, REF2, BSOUT)
+         REAL(DOUBLE), INTENT(IN)  :: BSIN(2,11)
+         REAL(DOUBLE), INTENT(IN)  :: REF1(3), REF2(3)
+         REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,20)
+         REAL(DOUBLE)              :: V1(3), V2(3)
+         INTEGER(LONG)             :: INODE, IR, IC
+
+         BSOUT = ZERO
+         DO INODE=1,3
+            CALL MITC3P_NODE_BASIS(INODE, REF1, REF2, V1, V2)
+            DO IR=1,2
+               BSOUT(IR,6*(INODE-1)+3) = BSOUT(IR,6*(INODE-1)+3) + BSIN(IR,3*INODE-2)
+               DO IC=1,3
+                  BSOUT(IR,6*(INODE-1)+3+IC) = BSOUT(IR,6*(INODE-1)+3+IC) + BSIN(IR,3*INODE-1)*V1(IC) &
+                                                                                 + BSIN(IR,3*INODE  )*V2(IC)
+               ENDDO
+            ENDDO
+         ENDDO
+         BSOUT(:,19) = BSIN(:,10)
+         BSOUT(:,20) = BSIN(:,11)
+      END SUBROUTINE MITC3P_EXPAND_BS_DIRECTOR
+! --- shell_renovation end --- !
+
+! --- shell_renovation begin --- !
       SUBROUTINE MITC3P_WRITE_MAT(LU, NAME, MAT, NROW, NCOL)
          INTEGER(LONG), INTENT(IN)         :: LU, NROW, NCOL
          CHARACTER(*), INTENT(IN)          :: NAME
@@ -319,7 +585,7 @@
          ENDDO
          WRITE(LU,*) 'MITC3P_MATRIX_END ', TRIM(NAME)
       END SUBROUTINE MITC3P_WRITE_MAT
-! --- mitc3plus_add end --- !
+! --- shell_renovation end --- !
 
       END SUBROUTINE TPLT_MITC3P
-! --- mitc3plus_add end --- !
+! --- shell_renovation end --- !
