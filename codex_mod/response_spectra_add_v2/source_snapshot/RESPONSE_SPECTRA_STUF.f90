@@ -1,0 +1,260 @@
+! --- response_spectra_add begin --- !
+      MODULE RESPONSE_SPECTRA_STUF
+
+      USE PENTIUM_II_KIND, ONLY : LONG, DOUBLE
+      USE PARAMS, ONLY          : RSTYPE
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), PARAMETER :: MAX_RS_FREQ = 20000
+      INTEGER(LONG), PARAMETER :: MAX_RS_TAB  = 20000
+      INTEGER(LONG), PARAMETER :: MAX_RS_DIR  = 16
+      INTEGER(LONG), PARAMETER :: MAX_RS_MAP  = 512
+
+      INTEGER(LONG) :: RS_FREQ1_SID  = 0
+      INTEGER(LONG) :: RS_DLOAD_SID  = 0
+      INTEGER(LONG) :: RS_RLOAD1_SID = 0
+      INTEGER(LONG) :: RS_RLOAD1_EXCITE_SID = 0
+      INTEGER(LONG) :: RS_DAREA_SID  = 0
+      INTEGER(LONG) :: RS_TABLED1_ID = 0
+      REAL(DOUBLE)  :: RS_DAREA_COMP_SCALE(6) = 0.0D0
+
+      INTEGER(LONG) :: RS_NUM_FREQ = 0
+      INTEGER(LONG) :: RS_NUM_TAB  = 0
+      INTEGER(LONG) :: RS_NUM_DIR  = 0
+      INTEGER(LONG) :: RS_NUM_RLOAD1 = 0
+      INTEGER(LONG) :: RS_NUM_DLOAD_TERM = 0
+
+      CHARACTER(LEN=8) :: RS_MODAL_METHOD      = 'NONE'
+      CHARACTER(LEN=8) :: RS_DIRECTIONAL_METHOD= 'NONE'
+      REAL(DOUBLE)     :: RS_ORTHO_FACTOR      = 0.30D0
+
+      INTEGER(LONG) :: RS_DIR_SID(MAX_RS_DIR) = 0
+      INTEGER(LONG) :: RS_DIR_EXCITE_SID(MAX_RS_DIR) = 0
+      REAL(DOUBLE)  :: RS_DIR_COMP_SCALE(6,MAX_RS_DIR) = 0.0D0
+      REAL(DOUBLE)  :: RS_DIR_SCALE(MAX_RS_DIR) = 1.0D0
+      REAL(DOUBLE)  :: RS_DIR_DAMP(MAX_RS_DIR)  = 0.05D0
+      INTEGER(LONG) :: RS_DIR_TABLED1_ID(MAX_RS_DIR) = 0
+      INTEGER(LONG) :: RS_RLOAD1_SID_LIST(MAX_RS_MAP) = 0
+      INTEGER(LONG) :: RS_RLOAD1_EXCITE_LIST(MAX_RS_MAP) = 0
+      INTEGER(LONG) :: RS_DLOAD_SID_LIST(MAX_RS_MAP) = 0
+      INTEGER(LONG) :: RS_DLOAD_RLOAD1_LIST(MAX_RS_MAP) = 0
+
+      REAL(DOUBLE) :: RS_FREQS(MAX_RS_FREQ)     = 0.0D0
+      REAL(DOUBLE) :: RS_TAB_FREQ(MAX_RS_TAB)   = 0.0D0
+      REAL(DOUBLE) :: RS_TAB_AMP(MAX_RS_TAB)    = 0.0D0
+
+      CONTAINS
+
+      SUBROUTINE RS_ACCUM_DAREA ( SID, COMP, SCALE )
+      INTEGER(LONG), INTENT(IN) :: SID
+      INTEGER(LONG), INTENT(IN) :: COMP
+      REAL(DOUBLE),  INTENT(IN) :: SCALE
+      INTEGER(LONG)             :: I, IDX
+
+      IF ((COMP < 1) .OR. (COMP > 6)) RETURN
+
+      IDX = 0
+      DO I=1,RS_NUM_DIR
+         IF (RS_DIR_SID(I) == SID) THEN
+            IDX = I
+            EXIT
+         ENDIF
+      ENDDO
+
+      IF (IDX == 0) THEN
+         IF (RS_NUM_DIR < MAX_RS_DIR) THEN
+            RS_NUM_DIR = RS_NUM_DIR + 1
+            IDX = RS_NUM_DIR
+            RS_DIR_SID(IDX) = SID
+         ELSE
+            IDX = MAX_RS_DIR
+         ENDIF
+      ENDIF
+
+      RS_DIR_COMP_SCALE(COMP,IDX) = RS_DIR_COMP_SCALE(COMP,IDX) + SCALE
+      RS_DAREA_COMP_SCALE(COMP)   = RS_DAREA_COMP_SCALE(COMP)   + SCALE
+      RS_DAREA_SID = SID
+
+      END SUBROUTINE RS_ACCUM_DAREA
+
+      SUBROUTINE RS_SET_RLOAD1 ( RLOAD1_SID, EXCITE_SID, TABLED1_ID )
+      INTEGER(LONG), INTENT(IN) :: RLOAD1_SID, EXCITE_SID, TABLED1_ID
+      INTEGER(LONG)             :: I, IDX
+
+      RS_RLOAD1_SID        = RLOAD1_SID
+      RS_RLOAD1_EXCITE_SID = EXCITE_SID
+
+      IDX = 0
+      DO I=1,RS_NUM_RLOAD1
+         IF (RS_RLOAD1_SID_LIST(I) == RLOAD1_SID) THEN
+            IDX = I
+            EXIT
+         ENDIF
+      ENDDO
+      IF (IDX == 0) THEN
+         IF (RS_NUM_RLOAD1 < MAX_RS_MAP) THEN
+            RS_NUM_RLOAD1 = RS_NUM_RLOAD1 + 1
+            IDX = RS_NUM_RLOAD1
+         ELSE
+            IDX = MAX_RS_MAP
+         ENDIF
+      ENDIF
+      RS_RLOAD1_SID_LIST(IDX) = RLOAD1_SID
+      RS_RLOAD1_EXCITE_LIST(IDX) = EXCITE_SID
+
+      IDX = 0
+      DO I=1,RS_NUM_DIR
+         IF ((RS_DIR_SID(I) == EXCITE_SID) .OR. (RS_DIR_EXCITE_SID(I) == EXCITE_SID)) THEN
+            IDX = I
+            EXIT
+         ENDIF
+      ENDDO
+
+      IF (IDX == 0) THEN
+         IF (RS_NUM_DIR < MAX_RS_DIR) THEN
+            RS_NUM_DIR = RS_NUM_DIR + 1
+            IDX = RS_NUM_DIR
+            RS_DIR_SID(IDX) = EXCITE_SID
+         ELSE
+            IDX = MAX_RS_DIR
+         ENDIF
+      ENDIF
+
+      RS_DIR_EXCITE_SID(IDX) = EXCITE_SID
+      RS_DIR_TABLED1_ID(IDX) = TABLED1_ID
+
+      END SUBROUTINE RS_SET_RLOAD1
+
+      SUBROUTINE RS_ADD_DLOAD_TERM ( DLOAD_SID, RLOAD1_SID )
+      INTEGER(LONG), INTENT(IN) :: DLOAD_SID, RLOAD1_SID
+      INTEGER(LONG)             :: I
+
+      IF ((DLOAD_SID <= 0) .OR. (RLOAD1_SID <= 0)) RETURN
+
+      DO I=1,RS_NUM_DLOAD_TERM
+         IF ((RS_DLOAD_SID_LIST(I) == DLOAD_SID) .AND. (RS_DLOAD_RLOAD1_LIST(I) == RLOAD1_SID)) RETURN
+      ENDDO
+
+      IF (RS_NUM_DLOAD_TERM < MAX_RS_MAP) THEN
+         RS_NUM_DLOAD_TERM = RS_NUM_DLOAD_TERM + 1
+         RS_DLOAD_SID_LIST(RS_NUM_DLOAD_TERM) = DLOAD_SID
+         RS_DLOAD_RLOAD1_LIST(RS_NUM_DLOAD_TERM) = RLOAD1_SID
+      ENDIF
+
+      END SUBROUTINE RS_ADD_DLOAD_TERM
+
+      LOGICAL FUNCTION RS_DLOAD_USES_EXCITE ( DLOAD_SID, EXCITE_SID )
+      INTEGER(LONG), INTENT(IN) :: DLOAD_SID, EXCITE_SID
+      INTEGER(LONG)             :: I, J
+      LOGICAL                   :: HAS_DLOAD_ROWS
+
+      RS_DLOAD_USES_EXCITE = .TRUE.
+      IF ((DLOAD_SID <= 0) .OR. (EXCITE_SID <= 0)) RETURN
+
+      HAS_DLOAD_ROWS = .FALSE.
+      DO I=1,RS_NUM_DLOAD_TERM
+         IF (RS_DLOAD_SID_LIST(I) == DLOAD_SID) THEN
+            HAS_DLOAD_ROWS = .TRUE.
+            DO J=1,RS_NUM_RLOAD1
+               IF (RS_RLOAD1_SID_LIST(J) == RS_DLOAD_RLOAD1_LIST(I)) THEN
+                  IF (RS_RLOAD1_EXCITE_LIST(J) == EXCITE_SID) THEN
+                     RS_DLOAD_USES_EXCITE = .TRUE.
+                     RETURN
+                  ENDIF
+               ENDIF
+            ENDDO
+         ENDIF
+      ENDDO
+
+      IF (HAS_DLOAD_ROWS) THEN
+         RS_DLOAD_USES_EXCITE = .FALSE.
+      ELSE
+         RS_DLOAD_USES_EXCITE = .TRUE.
+      ENDIF
+
+      END FUNCTION RS_DLOAD_USES_EXCITE
+
+      SUBROUTINE RS_SET_TABLED1_ID ( TABLED1_ID )
+      INTEGER(LONG), INTENT(IN) :: TABLED1_ID
+      INTEGER(LONG)             :: I
+      RS_TABLED1_ID = TABLED1_ID
+      DO I=1,RS_NUM_DIR
+         IF ((RS_DIR_TABLED1_ID(I) == 0) .AND. (RS_DIR_SID(I) > 0)) THEN
+            RS_DIR_TABLED1_ID(I) = TABLED1_ID
+         ENDIF
+      ENDDO
+      END SUBROUTINE RS_SET_TABLED1_ID
+
+      SUBROUTINE RS_COMBINE_100_30 ( NDOF, RX, RY, RZ, ROUT )
+      INTEGER(LONG), INTENT(IN) :: NDOF
+      REAL(DOUBLE),  INTENT(IN) :: RX(NDOF), RY(NDOF), RZ(NDOF)
+      REAL(DOUBLE),  INTENT(OUT):: ROUT(NDOF)
+      INTEGER(LONG)             :: I
+      REAL(DOUBLE)              :: R1, R2, R3
+
+      DO I=1,NDOF
+         R1 = ABS(RX(I)) + RS_ORTHO_FACTOR*ABS(RY(I)) + RS_ORTHO_FACTOR*ABS(RZ(I))
+         R2 = ABS(RY(I)) + RS_ORTHO_FACTOR*ABS(RX(I)) + RS_ORTHO_FACTOR*ABS(RZ(I))
+         R3 = ABS(RZ(I)) + RS_ORTHO_FACTOR*ABS(RX(I)) + RS_ORTHO_FACTOR*ABS(RY(I))
+         ROUT(I) = MAX(R1, MAX(R2,R3))
+      ENDDO
+
+      END SUBROUTINE RS_COMBINE_100_30
+
+      REAL(DOUBLE) FUNCTION RS_INTERP_AMP ( FREQ_HZ, GACC )
+      REAL(DOUBLE), INTENT(IN) :: FREQ_HZ
+      REAL(DOUBLE), INTENT(IN) :: GACC
+      INTEGER(LONG) :: I
+      REAL(DOUBLE)  :: XVAL
+      REAL(DOUBLE)  :: AMP_RAW
+
+      RS_INTERP_AMP = 0.0D0
+      IF (RS_NUM_TAB <= 0) RETURN
+      IF (RS_NUM_TAB == 1) THEN
+         AMP_RAW = RS_TAB_AMP(1)
+         GO TO 100
+      ENDIF
+
+      IF (RSTYPE(1:3) == 'PER') THEN
+         XVAL = 1.0D0/MAX(FREQ_HZ,1.0D-12)
+      ELSE
+         XVAL = FREQ_HZ
+      ENDIF
+
+      IF (XVAL <= RS_TAB_FREQ(1)) THEN
+         AMP_RAW = RS_TAB_AMP(1)
+         GO TO 100
+      ENDIF
+      IF (XVAL >= RS_TAB_FREQ(RS_NUM_TAB)) THEN
+         AMP_RAW = RS_TAB_AMP(RS_NUM_TAB)
+         GO TO 100
+      ENDIF
+
+      AMP_RAW = RS_TAB_AMP(1)
+      DO I=1,RS_NUM_TAB-1
+         IF ((XVAL >= RS_TAB_FREQ(I)) .AND. (XVAL <= RS_TAB_FREQ(I+1))) THEN
+            IF (RS_TAB_FREQ(I+1) > RS_TAB_FREQ(I)) THEN
+               AMP_RAW = RS_TAB_AMP(I) + (RS_TAB_AMP(I+1)-RS_TAB_AMP(I))*(XVAL - RS_TAB_FREQ(I)) /                            &
+                         (RS_TAB_FREQ(I+1)-RS_TAB_FREQ(I))
+            ELSE
+               AMP_RAW = RS_TAB_AMP(I)
+            ENDIF
+            GO TO 100
+         ENDIF
+      ENDDO
+
+ 100  CONTINUE
+      IF (RSTYPE(4:4) == 'G') THEN
+         RS_INTERP_AMP = AMP_RAW*GACC
+      ELSE
+         RS_INTERP_AMP = AMP_RAW
+      ENDIF
+
+         RETURN
+
+      END FUNCTION RS_INTERP_AMP
+
+      END MODULE RESPONSE_SPECTRA_STUF
+! --- response_spectra_add end --- !
+
