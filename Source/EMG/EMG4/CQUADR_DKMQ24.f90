@@ -45,13 +45,13 @@
 !     underloaded the roof, while lumped translational mass restores the
 !     correct selfweight order without perturbing Static-24.
 ! --- shell_renovation end --- !
-! --- cquadr_ctriar_composite begin --- !
+! --- composite_cquadr_ctriar begin --- !
 ! Composite routing contract:
 !   - when PCOMP_PROPS = 'Y', SHELL_ABD_MATRICES has already populated the
 !     laminate-driven SHELL_A / SHELL_D / SHELL_T matrices.
 !   - CQUADR should continue to consume those matrices here, so composite quad
 !     requests stay on the DKMQ24 path rather than a legacy fallback.
-! --- cquadr_ctriar_composite end --- !
+! --- composite_cquadr_ctriar end --- !
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -60,7 +60,7 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,&
-                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM
+                                         TE, NUM_EMG_FATAL_ERRS, PCOMP_PROPS, SHELL_A, SHELL_B, SHELL_D, SHELL_T, FCONV, STRESS, STRAIN, BGRID, GRID_SNORM
 
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
@@ -95,6 +95,7 @@
       REAL(DOUBLE)                    :: MASS_AREA_INT, MASS_ELEM_SUM
       REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24)
       REAL(DOUBLE)                    :: GBE1(3,24,4), GBE2(3,24,4), GBE3(2,24,4)
+      REAL(DOUBLE)                    :: EPS0(3), KAP0(3), N0(3)
 
 ! **********************************************************************************************************************************
 
@@ -152,17 +153,13 @@
                 BBB = BB_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, CO, BCMAT, AINV_AU)
                 BSB = BS_AT(XYZ, XI, ETA, CO, AINV_AU, EPROP(1))
 
-                IF ((DEBUG(190) > 0) .AND. (I == 1) .AND. (J == 1)) THEN
-                   CALL DEBUG_PRINT_MATRIX('CQUADR GP11 BMB', BMB)
-                   CALL DEBUG_PRINT_MATRIX('CQUADR GP11 BBB', BBB)
-                   CALL DEBUG_PRINT_MATRIX('CQUADR GP11 BSB', BSB)
-                ENDIF
-
                 BML = MATMUL(BMB, T24T)
                 BBL = MATMUL(BBB, T24T)
                 BSL = MATMUL(BSB, T24T)
 
                KMEM   = KMEM   + WT*JDET*MATMUL(TRANSPOSE(BMB), MATMUL(SHELL_A, BMB))
+               KMEM   = KMEM   + WT*JDET*MATMUL(TRANSPOSE(BMB), MATMUL(SHELL_B, BBB))
+               KMEM   = KMEM   + WT*JDET*MATMUL(TRANSPOSE(BBB), MATMUL(SHELL_B, BMB))
                KBEND  = KBEND  + WT*JDET*MATMUL(TRANSPOSE(BBB), MATMUL(SHELL_D, BBB))
                KSHEAR = KSHEAR + WT*JDET*MATMUL(TRANSPOSE(BSB), MATMUL(SHELL_T, BSB))
                KBASIC = KMEM + KBEND + KSHEAR
@@ -275,9 +272,18 @@
                BE1(1:3,1:24,1) = BML
                CALL ELEM_STRE_STRN_ARRAYS ( 1 )
 
-               SIG0(1,1) = FCONV(1)*STRESS(1)
-               SIG0(2,2) = FCONV(1)*STRESS(2)
-               SIG0(1,2) = FCONV(1)*STRESS(3)
+               IF (PCOMP_PROPS == 'Y') THEN
+                  EPS0(1:3) = STRAIN(1:3)
+                  KAP0(1:3) = STRAIN(4:6)
+                  N0 = MATMUL(SHELL_A, EPS0) + MATMUL(SHELL_B, KAP0)
+                  SIG0(1,1) = N0(1)
+                  SIG0(2,2) = N0(2)
+                  SIG0(1,2) = N0(3)
+               ELSE
+                  SIG0(1,1) = FCONV(1)*STRESS(1)
+                  SIG0(2,2) = FCONV(1)*STRESS(2)
+                  SIG0(1,2) = FCONV(1)*STRESS(3)
+               ENDIF
                SIG0(2,1) = SIG0(1,2)
                IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
                   WRITE(F06,'(A,I8,A,I2,A,I2,A,3(1X,ES15.7))') 'CQUADR KGGD EID=', EID, ' I=', I, ' J=', J,                      &
@@ -785,3 +791,4 @@
       END SUBROUTINE DEBUG_PRINT_MATRIX
 
       END SUBROUTINE CQUADR_DKMQ24
+

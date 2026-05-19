@@ -49,12 +49,12 @@
          IF (EDAT(EPNTK+DEDAT_T3_SHELL_KEY) == 2) THEN
             PCOMP_PROPS = 'Y'
          ENDIF
-! --- cquadr_ctriar_composite begin --- !
+! --- composite_cquadr_ctriar begin --- !
       ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
          IF (EDAT(EPNTK+DEDAT_Q4_SHELL_KEY) == 2) THEN
             PCOMP_PROPS = 'Y'
          ENDIF
-! --- cquadr_ctriar_composite end --- !
+! --- composite_cquadr_ctriar end --- !
       ELSE IF (TYPE(1:5) == 'QUAD8') THEN
          IF (EDAT(EPNTK+DEDAT_Q8_SHELL_KEY) == 2) THEN
             PCOMP_PROPS = 'Y'
@@ -64,3 +64,4 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE IS_ELEM_PCOMP_PROPS
+

@@ -300,13 +300,13 @@
       IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR. (TYPE == 'QUADR   ') .OR.            &
           (TYPE(1:6) == 'SHEAR') .OR. (TYPE == 'USER1   ')) THEN
 ! --- shell_renovation end --- !
-! --- cquadr_ctriar_composite begin --- !
+! --- composite_cquadr_ctriar begin --- !
 ! Composite shell properties should be assembled once in the common shell ABD
 ! path, then consumed by the dedicated shell kernels below.  In particular:
 !   - PCOMP + CQUADR -> DKMQ24
 !   - PCOMP + CTRIAR -> DKMT18
 ! We keep that contract here by always building SHELL_A/D/T before dispatch.
-! --- cquadr_ctriar_composite end --- !
+! --- composite_cquadr_ctriar end --- !
          CALL SHELL_ABD_MATRICES ( INT_ELEM_ID, WRITE_WARN )
       ENDIF
 
@@ -358,11 +358,11 @@
 
 ! --- shell_renovation begin --- !
       ELSE IF (TYPE(1:5) == 'TRIA3') THEN
-! --- cquadr_ctriar_composite begin --- !
+! --- composite_cquadr_ctriar begin --- !
 ! CTRIAR is identified downstream by the thickness-key flag and must keep the
 ! laminated PCOMP route through DKMT18 rather than falling back to the generic
 ! flat-shell TRIAR/TREL1 path.
-! --- cquadr_ctriar_composite end --- !
+! --- composite_cquadr_ctriar end --- !
          IF (WRITE_WARN == 'Y') THEN
             IF (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18) THEN
                IF (PCOMP_PROPS == 'Y') THEN
@@ -394,11 +394,11 @@
       ! Keep CQUAD4 conservative: DKMQ24 is dispatched only for the explicit CQUADR card.
       ! Legacy CQUAD4 continues to use QUAD4TYP = MIN4T/MIN4/MITC4/MITC4+ only.
       ELSE IF (TYPE == 'QUADR   ') THEN
-! --- cquadr_ctriar_composite begin --- !
+! --- composite_cquadr_ctriar begin --- !
 ! CQUADR is the dedicated laminated quad route.  When PCOMP_PROPS = 'Y', the
 ! shell laminate stiffness has already been assembled in SHELL_ABD_MATRICES and
 ! this dispatch must continue into DKMQ24.
-! --- cquadr_ctriar_composite end --- !
+! --- composite_cquadr_ctriar end --- !
          IF (WRITE_WARN == 'Y') THEN
             IF (PCOMP_PROPS == 'Y') THEN
                WRITE(F06,1011) EID
@@ -995,3 +995,4 @@
       END SUBROUTINE EMG_CODEX_DUMP
 
       END SUBROUTINE EMG
+

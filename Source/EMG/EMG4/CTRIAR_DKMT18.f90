@@ -29,13 +29,13 @@
 ! The CTRIAR DKMT18 kernel keeps the existing flat-shell algebra, but the
 ! local element frame is built from nodal SNORM data when that data exists.
 ! --- shell_renovation end --- !
-! --- cquadr_ctriar_composite begin --- !
+! --- composite_cquadr_ctriar begin --- !
 ! Composite routing contract:
 !   - when PCOMP_PROPS = 'Y', SHELL_ABD_MATRICES has already populated the
 !     laminate-driven shell matrices.
 !   - CTRIAR should keep consuming that laminate basis here through DKMT18, so
 !     composite tri shells do not fall back to the generic legacy path.
-! --- cquadr_ctriar_composite end --- !
+! --- composite_cquadr_ctriar end --- !
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -43,7 +43,8 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE, FOUR, SIX, TWELVE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA,                       &
-                                         NUM_EMG_FATAL_ERRS, SHELL_A, TE, XEB, FCONV, STRESS, BGRID, GRID_SNORM
+                                         NUM_EMG_FATAL_ERRS, PCOMP_PROPS, SHELL_A, SHELL_B, SHELL_D, SHELL_T, TE, XEB, FCONV,   &
+                                         STRESS, STRAIN, BGRID, GRID_SNORM
 
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
@@ -69,8 +70,9 @@
       REAL(DOUBLE)                    :: BM(3,18), BB(3,18), BS(2,18), KTMP(18,18)
       REAL(DOUBLE)                    :: T1(3), T2(3), NVEC(3), A1(3), A2(3), A1C(3), A2C(3), NORMALS(3,3)
       REAL(DOUBLE)                    :: JAC, CO(2,2), BC(2,2), ADINV_AU(3,18)
-      REAL(DOUBLE)                    :: Hm(3,3), Hb(3,3), Hs(2,2)
+      REAL(DOUBLE)                    :: Hm(3,3), Hmb(3,3), Hb(3,3), Hs(2,2)
       REAL(DOUBLE)                    :: MASS_NODE
+      REAL(DOUBLE)                    :: EPS0(3), KAP0(3), N0(3)
 
       IF (ELGP /= 3) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -109,9 +111,17 @@
       NU = SHELL_A(1,2) / SHELL_A(1,1)
       E  = SHELL_A(1,1) * (ONE - NU*NU) / H
 
-      CALL BUILD_CONSTITUTIVE ( E, NU, H, Hb, Hm, Hs )
+      Hmb = ZERO
+      IF (PCOMP_PROPS == 'Y') THEN
+         Hm  = SHELL_A
+         Hmb = SHELL_B
+         Hb  = SHELL_D
+         Hs  = SHELL_T
+      ELSE
+         CALL BUILD_CONSTITUTIVE ( E, NU, H, Hb, Hm, Hs )
+      ENDIF
       CALL BUILD_ADELTA_INV_AU ( H, NU, NORMALS, ADINV_AU )
-      CALL BUILD_MAKNUN_K_STAGES ( H, E, NU, T1, T2, NVEC, JAC, CO, BC, NORMALS, ADINV_AU, Hm, Hb, Hs,                   &
+      CALL BUILD_MAKNUN_K_STAGES ( H, E, NU, T1, T2, NVEC, JAC, CO, BC, NORMALS, ADINV_AU, Hm, Hmb, Hb, Hs,              &
                                    KMEM, KBEND, KSHEAR, KFICT, K18 )
 
       TE = ZERO
@@ -152,9 +162,18 @@
          CALL ELMDIS
          CALL ELEM_STRE_STRN_ARRAYS ( 1 )
 
-         SIG0(1,1) = FCONV(1)*STRESS(1)
-         SIG0(2,2) = FCONV(1)*STRESS(2)
-         SIG0(1,2) = FCONV(1)*STRESS(3)
+         IF (PCOMP_PROPS == 'Y') THEN
+            EPS0(1:3) = STRAIN(1:3)
+            KAP0(1:3) = STRAIN(4:6)
+            N0 = MATMUL(SHELL_A, EPS0) + MATMUL(SHELL_B, KAP0)
+            SIG0(1,1) = N0(1)
+            SIG0(2,2) = N0(2)
+            SIG0(1,2) = N0(3)
+         ELSE
+            SIG0(1,1) = FCONV(1)*STRESS(1)
+            SIG0(2,2) = FCONV(1)*STRESS(2)
+            SIG0(1,2) = FCONV(1)*STRESS(3)
+         ENDIF
          SIG0(2,1) = SIG0(1,2)
 
          IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
@@ -197,6 +216,7 @@
          CALL BUILD_STAGE_B_MAKNUN ( T1, T2, CO, BM )
          CALL DEBUG_PRINT_MATRIX('CTRIAR BM PRE', BM)
          CALL DEBUG_PRINT_MATRIX('CTRIAR Hm', Hm)
+         CALL DEBUG_PRINT_MATRIX('CTRIAR Hmb', Hmb)
          CALL DEBUG_PRINT_MATRIX('CTRIAR Hb', Hb)
          CALL DEBUG_PRINT_MATRIX('CTRIAR Hs', Hs)
          CALL BUILD_STAGE_BB_MAKNUN ( XI0, ETA0, T1, T2, NVEC, CO, BC, NORMALS, ADINV_AU, BB )
@@ -397,10 +417,10 @@
       RNM(3,3) = ZERO
       END SUBROUTINE BUILD_RN_MATRIX
 
-      SUBROUTINE BUILD_MAKNUN_K_STAGES ( THICK, YOUNG, POIS, T1, T2, NVO, JACO, COO, BCO, NORMSO, ADINV_AU, HMO, HBO, HSO,   &
+      SUBROUTINE BUILD_MAKNUN_K_STAGES ( THICK, YOUNG, POIS, T1, T2, NVO, JACO, COO, BCO, NORMSO, ADINV_AU, HMO, HMBO, HBO, HSO,   &
                                          KMEMO, KBENDO, KSHEARO, KFICTO, K18O )
       REAL(DOUBLE), INTENT(IN)  :: THICK, YOUNG, POIS, T1(3), T2(3), NVO(3), JACO, COO(2,2), BCO(2,2), NORMSO(3,3), ADINV_AU(3,18)
-      REAL(DOUBLE), INTENT(IN)  :: HMO(3,3), HBO(3,3), HSO(2,2)
+      REAL(DOUBLE), INTENT(IN)  :: HMO(3,3), HMBO(3,3), HBO(3,3), HSO(2,2)
       REAL(DOUBLE), INTENT(OUT) :: KMEMO(18,18), KBENDO(18,18), KSHEARO(18,18), KFICTO(18,18), K18O(18,18)
       REAL(DOUBLE)              :: XI, ETA, WT, BM(3,18), BB(3,18), BS(2,18), FAC, KTMP(18,18)
 
@@ -418,6 +438,8 @@
          CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS )
          FAC = WT * JACO
          KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMO, BM))
+         KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMBO, BB))
+         KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BB), MATMUL(HMBO, BM))
          KTMP(1:3,1:18) = MATMUL(HBO, BB)
          KBENDO = KBENDO + FAC * MATMUL(TRANSPOSE(BB), KTMP(1:3,1:18))
          KTMP(1:2,1:18) = MATMUL(HSO, BS)
@@ -432,8 +454,10 @@
       CALL BUILD_STAGE_B_MAKNUN ( T1, T2, COO, BM )
       CALL BUILD_STAGE_BB_MAKNUN ( XI, ETA, T1, T2, NVO, COO, BCO, NORMSO, ADINV_AU, BB )
       CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS )
-      FAC = WT * JACO
+         FAC = WT * JACO
       KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMO, BM))
+      KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMBO, BB))
+      KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BB), MATMUL(HMBO, BM))
          KTMP(1:3,1:18) = MATMUL(HBO, BB)
          KBENDO = KBENDO + FAC * MATMUL(TRANSPOSE(BB), KTMP(1:3,1:18))
          KTMP(1:2,1:18) = MATMUL(HSO, BS)
@@ -450,6 +474,8 @@
       CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS )
       FAC = WT * JACO
       KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMO, BM))
+      KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMBO, BB))
+      KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BB), MATMUL(HMBO, BM))
          KTMP(1:3,1:18) = MATMUL(HBO, BB)
          KBENDO = KBENDO + FAC * MATMUL(TRANSPOSE(BB), KTMP(1:3,1:18))
          KTMP(1:2,1:18) = MATMUL(HSO, BS)
@@ -918,3 +944,4 @@
       END SUBROUTINE DEBUG_PRINT_MATRIX
 
       END SUBROUTINE CTRIAR_DKMT18
+

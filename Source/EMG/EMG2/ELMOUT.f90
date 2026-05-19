@@ -106,7 +106,7 @@
             WRITE(BUG,*)
          ENDIF
 
-! --- cquadr_ctriar_composite begin --- !
+! --- composite_cquadr_ctriar begin --- !
          IF (TYPE == 'QUADR   ') THEN
             IF (PCOMP_PROPS == 'Y') THEN
                WRITE(BUG,*) '  Shell routing: CQUADR composite path uses laminated DKMQ24 kernel'
@@ -122,7 +122,7 @@
             ENDIF
             WRITE(BUG,*)
          ENDIF
-! --- cquadr_ctriar_composite end --- !
+! --- composite_cquadr_ctriar end --- !
 
          WRITE(BUG,*) '  Internal element number,       INT_ELEM_ID  = ' ,INT_ELEM_ID
          WRITE(BUG,*) '  Number of grids elem is connected to, ELGP  = ' ,ELGP
@@ -849,3 +849,4 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE ELMOUT
+
