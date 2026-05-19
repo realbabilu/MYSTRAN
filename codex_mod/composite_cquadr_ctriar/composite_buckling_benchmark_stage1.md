@@ -219,3 +219,169 @@ stiffness path (`KG`) rather than to:
 - laminate `ABD/T` property construction,
 - isotropic/one-ply composite degeneration,
 - or static preload/resultant reproduction.
+
+## Unsym prescribed-state bridge update (2026-05-19)
+
+We also tested a more literal "Python-like" bridge for `unsym_crossply n=8`
+using MYSTRAN Case Control:
+
+- `ENFORCED = <file.enf>`
+
+with an `.enf` file that prescribes:
+
+- `u_x = eps_x * x`
+- `u_y = 0`
+- `u_z = 0`
+- `r_x = r_y = r_z = 0`
+
+for every grid, intending to mimic:
+
+- `eps0 = [-1e-5, 0, 0]`
+- `kappa0 = [0, 0, 0]`
+
+This route **does pass through the static preload chain**, but it is not yet a
+usable parity path for buckling because of a current MYSTRAN limitation:
+
+1. `ENFORCED` in the present implementation places **all DOFs** in the `SE`
+   set, not only the in-plane DOFs we would want for this benchmark.
+2. That collapses the remaining buckling problem to an ultra-small reduced
+   system (`KLL/KLLD` effectively `1x1` in the test run).
+3. LINK4 then crashes in the progress formatter while assembling the tiny
+   buckling operator:
+   - runtime failure in `COUNTER_PROGRESS.f90`
+   - seen during `PUT RFAC MATRIX IN ARPACK BAND FORM`
+
+Practical conclusion:
+
+- `ENFORCED` is useful as an experiment because it confirms MYSTRAN can ingest
+  a prescribed displacement field,
+- but it is **not yet the right production bridge** for the unsymmetric
+  composite buckling benchmark,
+- because we need a way to prescribe the membrane state without globally
+  enslaving all rotational/out-of-plane DOFs.
+
+So the clean next-step for `unsym` is now better defined:
+
+1. add a **partial enforced-state bridge** (in-plane only), or
+2. add a **direct benchmark preload injection path** for shell buckling that
+   feeds the intended `(eps0, kappa0)` state into the differential stiffness
+   construction without using a full static edge-load solve.
+
+## Unsym direct state injection update (2026-05-19)
+
+We then implemented the second option narrowly for the composite shell kernels
+only:
+
+- `CQUADR_DKMQ24.f90`
+- `CTRIAR_DKMT18.f90`
+
+using:
+
+- `DEBUG,239,1`
+
+as a benchmark-only toggle in the composite buckling `KED` path.
+
+When `PCOMP_PROPS = 'Y'` and `DEBUG(239) > 0`, the shell buckling differential
+stiffness now injects the Python-v5 prescribed laminate state directly:
+
+- `eps0   = [-1.0e-5, 0, 0]`
+- `kappa0 = [ 0,      0, 0]`
+
+without relying on the static edge-load solution for `STRAIN(1:6)`.
+
+This was rerun for `unsym_crossply n=8`:
+
+- Python anchors:
+  - `CompDKMQ24`: `9.4040`, `18.7418`, `39.0515`
+  - `CompDKMT18`: `9.7572`, `19.4696`, `41.6094`
+- MYSTRAN with direct state injection:
+  - `CQUADR + PCOMP`: `16.2808`, `33.7357`, `66.4137`
+  - `CTRIAR + PCOMP`: `16.4446`, `33.7769`, `67.0471`
+
+Interpretation:
+
+- this removes the old ambiguity about whether the `unsym` gap is caused only
+  by the static edge-load preload bridge,
+- because even with the Python-like prescribed laminate state injected
+  directly into `KED`, the MYSTRAN `unsym` benchmark remains much higher than
+  Python,
+- while the `sym_crossply n=8` case still matches closely.
+
+So the remaining `unsym` gap is now better localized:
+
+- not shell routing,
+- not `PCOMP` parsing,
+- not static composite stiffness parity,
+- not the crude edge-load state bridge alone,
+- but most likely the **laminated shell buckling operator under unsymmetric
+  `B`-coupled behavior** for `CQUADR/CTRIAR`.
+
+For clarity, the benchmark decks are now split into:
+
+- ordinary edge-load unsym benchmark:
+  - `comp_buckling_cquadr_pcomp_unsym_n8.dat`
+  - `comp_buckling_ctriar_pcomp_unsym_n8.dat`
+- Python-v5 prescribed-state benchmark:
+  - `comp_buckling_cquadr_pcomp_unsym_n8_pyv5.dat`
+  - `comp_buckling_ctriar_pcomp_unsym_n8_pyv5.dat`
+
+## Static K cross-check update (2026-05-19)
+
+Before going deeper into the unsymmetric buckling operator, we checked whether
+the composite static stiffness `K` itself was already healthy in MYSTRAN for
+`CQUADR` and `CTRIAR`.
+
+Added benchmark helpers:
+
+- `calc_field_patch_energy.py`
+- `composite_python_ref/make_mystran_composite_field_patch_decks.py`
+- `composite_python_ref/probe_composite_buckling_model.py`
+
+The field-patch generator now writes three exact enforced-field families:
+
+- `membrane`
+- `bending`
+- `coupled`
+
+Python reference energies from `composite_field_patch_tests.py` for `n=4`:
+
+- `sym_crossply, membrane`: `4.432525742087e+00`
+- `unsym_crossply, membrane`: `4.432525742087e+00`
+- `sym_crossply, bending`: `2.066868735223e-02`
+- `unsym_crossply, bending`: `1.477508580696e-02`
+- `sym_crossply, coupled`: `4.453194429440e+00`
+- `unsym_crossply, coupled`: `4.211556766084e+00`
+
+MYSTRAN energies reconstructed from `0.5 u^T f` using the enforced field and
+printed `SPC FORCE` reactions:
+
+### CQUADR
+
+- `sym_crossply, coupled`: `4.453194488075e+00`
+- `unsym_crossply, coupled`: `4.211557338275e+00`
+- `unsym_crossply, membrane`: `4.432525800000e+00`
+- `unsym_crossply, bending`: `1.477508565000e-02`
+
+### CTRIAR
+
+- `sym_crossply, coupled`: `4.453194488105e+00`
+- `unsym_crossply, coupled`: `4.211557339030e+00`
+- `unsym_crossply, membrane`: `4.432525800000e+00`
+- `unsym_crossply, bending`: `1.477508550510e-02`
+
+Small-model Python probe (`n=2`, prescribed `eps0=[-1e-5,0,0]`, `kappa0=0`)
+showed:
+
+- `KG_norm` is identical for `sym_crossply` and `unsym_crossply`
+- `K_norm` changes only slightly between `sym` and `unsym`
+- the `n=2` buckling eigenvalue is identical in Python for `sym` and `unsym`
+  for both `CompDKMQ24` and `CompDKMT18`
+
+Takeaway:
+
+- static composite `K` for `CQUADR` and `CTRIAR` is already matching Python to
+  very tight tolerance for membrane, bending, and coupled fields,
+- therefore the remaining `unsym_crossply` discrepancy is not a general
+  `PCOMP` or static stiffness problem,
+- the unresolved part is now isolated more tightly to the **buckling operator
+  path** for unsymmetric `B`-coupled laminates.

@@ -163,8 +163,21 @@
          CALL ELEM_STRE_STRN_ARRAYS ( 1 )
 
          IF (PCOMP_PROPS == 'Y') THEN
-            EPS0(1:3) = STRAIN(1:3)
-            KAP0(1:3) = STRAIN(4:6)
+! --- composite_cquadr_ctriar begin --- !
+! DEBUG(239) provides a narrow benchmark hook for the Python v5 composite
+! buckling operator. It injects the prescribed laminate state used there:
+!    eps0   = [-1.0e-5, 0, 0]
+!    kappa0 = [ 0,      0, 0]
+! This is intentionally limited to the composite buckling KED path for
+! CQUADR/CTRIAR and leaves the ordinary preload/static route unchanged.
+            IF (DEBUG(239) > 0) THEN
+               EPS0(1:3) = (/ -1.0D-5, ZERO, ZERO /)
+               KAP0(1:3) = ZERO
+            ELSE
+               EPS0(1:3) = STRAIN(1:3)
+               KAP0(1:3) = STRAIN(4:6)
+            ENDIF
+! --- composite_cquadr_ctriar end --- !
             N0 = MATMUL(SHELL_A, EPS0) + MATMUL(SHELL_B, KAP0)
             SIG0(1,1) = N0(1)
             SIG0(2,2) = N0(2)
@@ -179,6 +192,10 @@
          IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
             WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CTRIAR KGGD EID=', EID, ' SIG0=', SIG0(1,1), SIG0(2,2), SIG0(1,2)
             WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CTRIAR KGGD EID=', EID, ' NORMAL=', NVEC(1), NVEC(2), NVEC(3)
+            IF (DEBUG(239) > 0) THEN
+               WRITE(F06,'(A,I8,A,3(1X,ES15.7),A,3(1X,ES15.7))') 'CTRIAR KGGD EID=', EID,                                      &
+                    ' PYV5_STATE EPS0=', EPS0(1), EPS0(2), EPS0(3), ' KAP0=', KAP0(1), KAP0(2), KAP0(3)
+            ENDIF
          ENDIF
 
          DNP3 = ZERO
