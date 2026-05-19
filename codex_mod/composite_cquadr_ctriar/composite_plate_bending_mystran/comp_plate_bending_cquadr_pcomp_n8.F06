@@ -1,0 +1,1572 @@
+   519120808
+
+ MYSTRAN Version 18.0.0   APR 20 2026 MYSTRAN developed by Dr Bill Case
+*** Please report any problems to mystransolver@gmail.com ***                                                                                                                                                                                                   
+
+ >> MYSTRAN BEGIN  :  5/19/2026 at 12: 8: 8. 56 The input file is D:\fortran\mystran3\codex_mod\composite_plate_bending_mystran\comp_plate_bending_cquadr_pcomp_n8.dat                                                                                                                                                            
+
+
+ >> LINK  0 BEGIN
+
+
+ID COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                           
+SOL 1                                                                                                                                                                                                                                                           
+CEND                                                                                                                                                                                                                                                            
+TITLE = COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                      
+ECHO = NONE                                                                                                                                                                                                                                                     
+DISPLACEMENT(PRINT) = ALL                                                                                                                                                                                                                                       
+SPCFORCE(PRINT) = ALL                                                                                                                                                                                                                                           
+GPFORCE(PRINT) = ALL                                                                                                                                                                                                                                            
+OLOAD(PRINT) = ALL                                                                                                                                                                                                                                              
+ELDATA(0,PRINT) = ALL                                                                                                                                                                                                                                           
+SUBCASE 1                                                                                                                                                                                                                                                       
+  LABEL = COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                    
+  SPC = 1                                                                                                                                                                                                                                                       
+  LOAD = 10                                                                                                                                                                                                                                                     
+BEGIN BULK                                                                                                                                                                                                                                                      
+
+
+
+
+CMASSPROCDBG: CMASS / PMASS / RPMASS SNAPSHOT
+CMASSPROCDBG NCMASS =       0
+CMASSPROCDBG NPMASS =       0
+
+       O U T P U T   F R O M   T H E   G R I D   P O I N T   W E I G H T   G E N E R A T O R   F O R   O V E R A L L   M O D E L
+                                             (reference point is basic coord system origin)
+
+                                                      Total mass =  0.000000E+00
+
+                                                             X             Y             Z
+                                       C.G. location :  0.000000E+00  0.000000E+00  0.000000E+00
+                                        (relative to reference point in basic coordinate system)
+
+
+                             6x6 Rigid body mass matrix - about reference point in basic coordinate system
+                      ***                                                                                     ***
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00 -0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  * -0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00 -0.000000E+00  0.000000E+00  *
+                      *  ************  ************  ************  *  ************  ************  ************  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      ***                                                                                     ***
+
+
+                                    M.O.I. matrix - about reference point in basic coordinate system
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                  M.O.I. matrix - about above c.g. location in basic coordinate system
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                     M.O.I. matrix - about above c.g. location in principal directions
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                     Transformation from basic coordinates to principal directions
+                                             ***                                        ***
+                                             *  1.000000E+00  0.000000E+00  0.000000E+00  *
+                                             * -0.000000E+00  1.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  1.000000E+00  *
+                                             ***                                        ***
+
+
+
+ >> LINK  0 END
+
+
+ >> LINK  1 BEGIN
+
+MGGGRIDDBG I,GRID_NUM =      77      77
+MGGGRIDDBG I,GRID_NUM =      78      78
+MGGGRIDDBG I,GRID_NUM =      79      79
+MGGGRIDDBG I,GRID_NUM =      80      80
+MGGGRIDDBG I,GRID_NUM =      81      81
+ INFORMATION : CQUADR element        1 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        2 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        3 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        4 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        5 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        6 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        7 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        8 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        9 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       10 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       11 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       12 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       13 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       14 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       15 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       16 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       17 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       18 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       19 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       20 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       21 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       22 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       23 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       24 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       25 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       26 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       27 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       28 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       29 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       30 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       31 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       32 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       33 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       34 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       35 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       36 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       37 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       38 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       39 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       40 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       41 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       42 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       43 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       44 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       45 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       46 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       47 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       48 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       49 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       50 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       51 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       52 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       53 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       54 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       55 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       56 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       57 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       58 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       59 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       60 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       61 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       62 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       63 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       64 is using DKMQ24 composite shell path
+               DEALLOCATED  5.90E-01 MB MEMORY FROM ARRAY STF3
+
+               DEALLOCATED  1.94E-03 MB MEMORY FROM ARRAY STFKEY
+               DEALLOCATED  5.90E-01 MB MEMORY FROM ARRAY STF3
+
+ >> LINK  1 END
+
+
+ >> LINK  2 BEGIN
+
+
+ *INFORMATION: AUTOSPC Summary, Overall: after identification of all AUTOSPC's                                                               
+
+                                     AUTOSPC_RAT = 1.000000E-08
+
+                       Number of DOF's identified for AUTOSPC in component  1         =            0
+                       Number of DOF's identified for AUTOSPC in component  2         =            0
+                       Number of DOF's identified for AUTOSPC in component  3         =            0
+                       Number of DOF's identified for AUTOSPC in component  4         =            0
+                       Number of DOF's identified for AUTOSPC in component  5         =            0
+                       Number of DOF's identified for AUTOSPC in component  6         =            0
+                                                                                        ------------
+                       Total number of DOF's identified overall                       =            0
+
+
+ >> LINK  2 END
+
+
+ >> LINK  3 BEGIN
+
+ SUPERLU FACTORIZATION OF MATRIX KLL SUCCEEDED IN SUBR SYM_MAT_DECOMP_SUPRLU          
+
+ *INFORMATION: FOR INTERNAL SUBCASE NUMBER        1 EPSILON ERROR ESTIMATE            = -1.405092E-14 Based on U'*(K*U - P)/(U'*P)
+
+
+ >> LINK  3 END
+
+
+ >> LINK  5 BEGIN
+
+
+ >> LINK  5 END
+
+
+ >> LINK  9 BEGIN
+
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                              
+ COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                              
+
+                                                       D I S P L A C E M E N T S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0          -2.442827E-04  5.279092E-05  0.0         
+              2        0  0.0           0.0           0.0          -1.518909E-03  5.503576E-05  0.0         
+              3        0  0.0           0.0           0.0          -2.824546E-03  4.979713E-05  0.0         
+              4        0  0.0           0.0           0.0          -3.637191E-03  2.332559E-05  0.0         
+              5        0  0.0           0.0           0.0          -3.918078E-03 -9.754413E-18  0.0         
+              6        0  0.0           0.0           0.0          -3.637191E-03 -2.332559E-05  0.0         
+              7        0  0.0           0.0           0.0          -2.824546E-03 -4.979713E-05  0.0         
+              8        0  0.0           0.0           0.0          -1.518909E-03 -5.503576E-05  0.0         
+              9        0  0.0           0.0           0.0          -2.442827E-04 -5.279092E-05  0.0         
+             10        0  0.0           0.0           0.0          -2.238172E-04  1.538721E-03  0.0         
+             11        0  0.0           0.0          -1.884939E-04 -1.324444E-03  1.391064E-03  0.0         
+             12        0  0.0           0.0          -3.429336E-04 -2.484068E-03  1.019652E-03  0.0         
+             13        0  0.0           0.0          -4.424835E-04 -3.214948E-03  5.367427E-04  0.0         
+             14        0  0.0           0.0          -4.767547E-04 -3.469594E-03 -4.325968E-17  0.0         
+             15        0  0.0           0.0          -4.424835E-04 -3.214948E-03 -5.367427E-04  0.0         
+             16        0  0.0           0.0          -3.429336E-04 -2.484068E-03 -1.019652E-03  0.0         
+             17        0  0.0           0.0          -1.884939E-04 -1.324444E-03 -1.391064E-03  0.0         
+             18        0  0.0           0.0           0.0          -2.238172E-04 -1.538721E-03  0.0         
+             19        0  0.0           0.0           0.0          -1.628650E-04  2.744260E-03  0.0         
+             20        0  0.0           0.0          -3.336349E-04 -9.042400E-04  2.502558E-03  0.0         
+             21        0  0.0           0.0          -6.102817E-04 -1.714496E-03  1.863060E-03  0.0         
+             22        0  0.0           0.0          -7.904819E-04 -2.236443E-03  9.865265E-04  0.0         
+             23        0  0.0           0.0          -8.528178E-04 -2.421326E-03  1.244948E-16  0.0         
+             24        0  0.0           0.0          -7.904819E-04 -2.236443E-03 -9.865265E-04  0.0         
+             25        0  0.0           0.0          -6.102817E-04 -1.714496E-03 -1.863060E-03  0.0         
+             26        0  0.0           0.0          -3.336349E-04 -9.042400E-04 -2.502558E-03  0.0         
+             27        0  0.0           0.0           0.0          -1.628650E-04 -2.744260E-03  0.0         
+             28        0  0.0           0.0           0.0          -7.766691E-05  3.461396E-03  0.0         
+             29        0  0.0           0.0          -4.214866E-04 -4.519946E-04  3.165575E-03  0.0         
+             30        0  0.0           0.0          -7.728395E-04 -8.561328E-04  2.371743E-03  0.0         
+             31        0  0.0           0.0          -1.003181E-03 -1.119284E-03  1.263242E-03  0.0         
+             32        0  0.0           0.0          -1.083181E-03 -1.212801E-03  2.871591E-17  0.0         
+             33        0  0.0           0.0          -1.003181E-03 -1.119284E-03 -1.263242E-03  0.0         
+             34        0  0.0           0.0          -7.728395E-04 -8.561328E-04 -2.371743E-03  0.0         
+             35        0  0.0           0.0          -4.214866E-04 -4.519946E-04 -3.165575E-03  0.0         
+             36        0  0.0           0.0           0.0          -7.766691E-05 -3.461396E-03  0.0         
+             37        0  0.0           0.0           0.0           1.993482E-16  3.701386E-03  0.0         
+             38        0  0.0           0.0          -4.506571E-04  7.943485E-17  3.387977E-03  0.0         
+             39        0  0.0           0.0          -8.268365E-04 -3.005465E-16  2.543328E-03  0.0         
+             40        0  0.0           0.0          -1.073885E-03  5.955606E-18  1.356579E-03  0.0         
+             41        0  0.0           0.0          -1.159779E-03 -1.214593E-16 -3.306315E-17  0.0         
+             42        0  0.0           0.0          -1.073885E-03 -6.723520E-18 -1.356579E-03  0.0         
+             43        0  0.0           0.0          -8.268365E-04 -4.355024E-17 -2.543328E-03  0.0         
+             44        0  0.0           0.0          -4.506571E-04 -1.301313E-17 -3.387977E-03  0.0         
+             45        0  0.0           0.0           0.0          -1.288426E-17 -3.701386E-03  0.0         
+             46        0  0.0           0.0           0.0           7.766691E-05  3.461396E-03  0.0         
+             47        0  0.0           0.0          -4.214866E-04  4.519946E-04  3.165575E-03  0.0         
+             48        0  0.0           0.0          -7.728395E-04  8.561328E-04  2.371743E-03  0.0         
+             49        0  0.0           0.0          -1.003181E-03  1.119284E-03  1.263242E-03  0.0         
+             50        0  0.0           0.0          -1.083181E-03  1.212801E-03 -8.829571E-17  0.0         
+             51        0  0.0           0.0          -1.003181E-03  1.119284E-03 -1.263242E-03  0.0         
+             52        0  0.0           0.0          -7.728395E-04  8.561328E-04 -2.371743E-03  0.0         
+             53        0  0.0           0.0          -4.214866E-04  4.519946E-04 -3.165575E-03  0.0         
+             54        0  0.0           0.0           0.0           7.766691E-05 -3.461396E-03  0.0         
+             55        0  0.0           0.0           0.0           1.628650E-04  2.744260E-03  0.0         
+             56        0  0.0           0.0          -3.336349E-04  9.042400E-04  2.502558E-03  0.0         
+             57        0  0.0           0.0          -6.102817E-04  1.714496E-03  1.863060E-03  0.0         
+             58        0  0.0           0.0          -7.904819E-04  2.236443E-03  9.865265E-04  0.0         
+             59        0  0.0           0.0          -8.528178E-04  2.421326E-03 -9.403728E-18  0.0         
+             60        0  0.0           0.0          -7.904819E-04  2.236443E-03 -9.865265E-04  0.0         
+             61        0  0.0           0.0          -6.102817E-04  1.714496E-03 -1.863060E-03  0.0         
+             62        0  0.0           0.0          -3.336349E-04  9.042400E-04 -2.502558E-03  0.0         
+             63        0  0.0           0.0           0.0           1.628650E-04 -2.744260E-03  0.0         
+             64        0  0.0           0.0           0.0           2.238172E-04  1.538721E-03  0.0         
+             65        0  0.0           0.0          -1.884939E-04  1.324444E-03  1.391064E-03  0.0         
+             66        0  0.0           0.0          -3.429336E-04  2.484068E-03  1.019652E-03  0.0         
+             67        0  0.0           0.0          -4.424835E-04  3.214948E-03  5.367427E-04  0.0         
+             68        0  0.0           0.0          -4.767547E-04  3.469594E-03  2.302905E-18  0.0         
+             69        0  0.0           0.0          -4.424835E-04  3.214948E-03 -5.367427E-04  0.0         
+             70        0  0.0           0.0          -3.429336E-04  2.484068E-03 -1.019652E-03  0.0         
+             71        0  0.0           0.0          -1.884939E-04  1.324444E-03 -1.391064E-03  0.0         
+             72        0  0.0           0.0           0.0           2.238172E-04 -1.538721E-03  0.0         
+             73        0  0.0           0.0           0.0           2.442827E-04  5.279092E-05  0.0         
+             74        0  0.0           0.0           0.0           1.518909E-03  5.503576E-05  0.0         
+             75        0  0.0           0.0           0.0           2.824546E-03  4.979713E-05  0.0         
+             76        0  0.0           0.0           0.0           3.637191E-03  2.332559E-05  0.0         
+             77        0  0.0           0.0           0.0           3.918078E-03  1.130368E-17  0.0         
+             78        0  0.0           0.0           0.0           3.637191E-03 -2.332559E-05  0.0         
+             79        0  0.0           0.0           0.0           2.824546E-03 -4.979713E-05  0.0         
+             80        0  0.0           0.0           0.0           1.518909E-03 -5.503576E-05  0.0         
+             81        0  0.0           0.0           0.0           2.442827E-04 -5.279092E-05  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           0.0           3.918078E-03  3.701386E-03  0.0         
+                MIN* :    0.0           0.0          -1.159779E-03 -3.918078E-03 -3.701386E-03  0.0         
+
+                ABS* :    0.0           0.0           1.159779E-03  3.918078E-03  3.701386E-03  0.0         
+                *for output set
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                              
+ COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                              
+
+                                                     A P P L I E D    F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0          -3.906250E+00  0.0           0.0           0.0         
+              2        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+              3        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+              4        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+              5        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+              6        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+              7        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+              8        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+              9        0  0.0           0.0          -3.906250E+00  0.0           0.0           0.0         
+             10        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             11        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             12        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             13        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             14        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             15        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             16        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             17        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             18        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             19        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             20        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             21        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             22        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             23        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             24        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             25        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             26        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             27        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             28        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             29        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             30        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             31        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             32        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             33        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             34        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             35        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             36        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             37        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             38        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             39        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             40        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             41        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             42        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             43        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             44        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             45        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             46        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             47        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             48        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             49        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             50        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             51        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             52        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             53        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             54        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             55        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             56        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             57        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             58        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             59        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             60        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             61        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             62        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             63        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             64        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             65        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             66        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             67        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             68        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             69        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             70        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             71        0  0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+             72        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             73        0  0.0           0.0          -3.906250E+00  0.0           0.0           0.0         
+             74        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             75        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             76        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             77        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             78        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             79        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             80        0  0.0           0.0          -7.812500E+00  0.0           0.0           0.0         
+             81        0  0.0           0.0          -3.906250E+00  0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0          -3.906250E+00  0.0           0.0           0.0         
+                MIN* :    0.0           0.0          -1.562500E+01  0.0           0.0           0.0         
+
+                ABS* :    0.0           0.0           1.562500E+01  0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ APPLIED FORCE TOTALS:    0.0           0.0          -1.000000E+03  0.0           0.0           0.0         
+   (for output set)
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                              
+ COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                              
+
+                                                          S P C   F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0          -5.645269E+00  0.0           0.0           0.0         
+              2        0  0.0           0.0           1.387856E+01  0.0           0.0           0.0         
+              3        0  0.0           0.0           2.315353E+01  0.0           0.0           0.0         
+              4        0  0.0           0.0           2.900580E+01  0.0           0.0           0.0         
+              5        0  0.0           0.0           2.959686E+01  0.0           0.0           0.0         
+              6        0  0.0           0.0           2.900580E+01  0.0           0.0           0.0         
+              7        0  0.0           0.0           2.315353E+01  0.0           0.0           0.0         
+              8        0  0.0           0.0           1.387856E+01  0.0           0.0           0.0         
+              9        0  0.0           0.0          -5.645269E+00  0.0           0.0           0.0         
+             10        0  0.0           0.0           3.229394E+01  0.0           0.0           0.0         
+             18        0  0.0           0.0           3.229394E+01  0.0           0.0           0.0         
+             19        0  0.0           0.0           5.072790E+01  0.0           0.0           0.0         
+             27        0  0.0           0.0           5.072790E+01  0.0           0.0           0.0         
+             28        0  0.0           0.0           6.030311E+01  0.0           0.0           0.0         
+             36        0  0.0           0.0           6.030311E+01  0.0           0.0           0.0         
+             37        0  0.0           0.0           6.296799E+01  0.0           0.0           0.0         
+             45        0  0.0           0.0           6.296799E+01  0.0           0.0           0.0         
+             46        0  0.0           0.0           6.030311E+01  0.0           0.0           0.0         
+             54        0  0.0           0.0           6.030311E+01  0.0           0.0           0.0         
+             55        0  0.0           0.0           5.072790E+01  0.0           0.0           0.0         
+             63        0  0.0           0.0           5.072790E+01  0.0           0.0           0.0         
+             64        0  0.0           0.0           3.229394E+01  0.0           0.0           0.0         
+             72        0  0.0           0.0           3.229394E+01  0.0           0.0           0.0         
+             73        0  0.0           0.0          -5.645269E+00  0.0           0.0           0.0         
+             74        0  0.0           0.0           1.387856E+01  0.0           0.0           0.0         
+             75        0  0.0           0.0           2.315353E+01  0.0           0.0           0.0         
+             76        0  0.0           0.0           2.900580E+01  0.0           0.0           0.0         
+             77        0  0.0           0.0           2.959686E+01  0.0           0.0           0.0         
+             78        0  0.0           0.0           2.900580E+01  0.0           0.0           0.0         
+             79        0  0.0           0.0           2.315353E+01  0.0           0.0           0.0         
+             80        0  0.0           0.0           1.387856E+01  0.0           0.0           0.0         
+             81        0  0.0           0.0          -5.645269E+00  0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           6.296799E+01  0.0           0.0           0.0         
+                MIN* :    0.0           0.0          -5.645269E+00  0.0           0.0           0.0         
+
+                ABS* :    0.0           0.0           6.296799E+01  0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+     SPC FORCE TOTALS:    0.0           0.0           1.000000E+03  0.0           0.0           0.0         
+     (for output set)
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP PLATE BENDING CQUADR PCOMP N8                                                                                                                                                                                                                              
+ COMP PLATE BENDING CQUADR PCOMP N8                                                                                              
+
+
+
+                                           G R I D   P O I N T   F O R C E   B A L A N C E
+                                             (in global coordinate system at each grid)
+
+                                FORCE BALANCE FOR GRID POINT        1 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.906250E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -5.645269E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         1  0.000000E+00  0.000000E+00  9.551519E+00  1.399947E-13 -1.307143E-13  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.776357E-15  1.399947E-13 -1.307143E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        2 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  1.387856E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         1  0.000000E+00  0.000000E+00  5.574835E+00  1.193285E+00  4.581798E-01  0.000000E+00
+ QUADR    ELEM         2  0.000000E+00  0.000000E+00 -1.164090E+01 -1.193285E+00 -4.581798E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.309264E-14 -1.976197E-14  3.096412E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        3 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.315353E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         2  0.000000E+00  0.000000E+00 -5.311054E+00  7.524867E-01  8.934335E-01  0.000000E+00
+ QUADR    ELEM         3  0.000000E+00  0.000000E+00 -1.002998E+01 -7.524867E-01 -8.934335E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.296740E-13  1.298517E-12  2.006173E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        4 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.900580E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         3  0.000000E+00  0.000000E+00 -9.520870E+00  4.094535E-01  9.985235E-01  0.000000E+00
+ QUADR    ELEM         4  0.000000E+00  0.000000E+00 -1.167243E+01 -4.094535E-01 -9.985235E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  7.460699E-14 -1.793066E-12 -5.521139E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        5 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.959686E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         4  0.000000E+00  0.000000E+00 -1.089218E+01 -1.480508E-13  1.067890E+00  0.000000E+00
+ QUADR    ELEM         5  0.000000E+00  0.000000E+00 -1.089218E+01 -2.602424E-13 -1.067890E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -8.171241E-14 -4.082932E-13  2.779998E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        6 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.900580E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         5  0.000000E+00  0.000000E+00 -1.167243E+01 -4.094535E-01  9.985235E-01  0.000000E+00
+ QUADR    ELEM         6  0.000000E+00  0.000000E+00 -9.520870E+00  4.094535E-01 -9.985235E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  6.750156E-14 -2.503719E-12 -8.615331E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        7 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.315353E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         6  0.000000E+00  0.000000E+00 -1.002998E+01 -7.524867E-01  8.934335E-01  0.000000E+00
+ QUADR    ELEM         7  0.000000E+00  0.000000E+00 -5.311054E+00  7.524867E-01 -8.934335E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.440892E-14 -8.406609E-13 -5.317968E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        8 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  1.387856E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         7  0.000000E+00  0.000000E+00 -1.164090E+01 -1.193285E+00  4.581798E-01  0.000000E+00
+ QUADR    ELEM         8  0.000000E+00  0.000000E+00  5.574835E+00  1.193285E+00 -4.581798E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.440892E-15 -1.731948E-14  8.865131E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        9 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.906250E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -5.645269E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         8  0.000000E+00  0.000000E+00  9.551519E+00  2.797421E-14  1.753271E-14  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.973799E-14  2.797421E-14  1.753271E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       10 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  3.229394E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         1  0.000000E+00  0.000000E+00 -4.170331E+00 -1.710077E-01 -1.089049E+00  0.000000E+00
+ QUADR    ELEM         9  0.000000E+00  0.000000E+00 -2.031111E+01  1.710077E-01  1.089049E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.278977E-13 -3.272382E-13  8.748557E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       11 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         1  0.000000E+00  0.000000E+00 -1.095602E+01  8.685169E-01 -4.177943E-02  0.000000E+00
+ QUADR    ELEM         2  0.000000E+00  0.000000E+00  2.228512E+01 -1.744431E+00 -2.154243E+00  0.000000E+00
+ QUADR    ELEM         9  0.000000E+00  0.000000E+00  3.521163E+01  1.322700E+00  2.896253E+00  0.000000E+00
+ QUADR    ELEM        10  0.000000E+00  0.000000E+00 -3.091573E+01 -4.467861E-01 -7.002308E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.476419E-13 -8.157919E-13  1.124323E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       12 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         2  0.000000E+00  0.000000E+00 -5.333167E+00  6.623564E-02  3.884618E-01  0.000000E+00
+ QUADR    ELEM         3  0.000000E+00  0.000000E+00  1.873873E+01 -1.592191E+00 -2.288807E+00  0.000000E+00
+ QUADR    ELEM        10  0.000000E+00  0.000000E+00  2.274052E+01  1.332217E+00  4.051219E+00  0.000000E+00
+ QUADR    ELEM        11  0.000000E+00  0.000000E+00 -2.052108E+01  1.937376E-01 -2.150873E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -7.851497E-13  1.707245E-13  1.714184E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       13 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         3  0.000000E+00  0.000000E+00  8.121210E-01 -5.086321E-01  1.095124E+00  0.000000E+00
+ QUADR    ELEM         4  0.000000E+00  0.000000E+00  1.445444E+01 -1.397717E+00 -2.079559E+00  0.000000E+00
+ QUADR    ELEM        11  0.000000E+00  0.000000E+00  1.142181E+01  1.274424E+00  4.194400E+00  0.000000E+00
+ QUADR    ELEM        12  0.000000E+00  0.000000E+00 -1.106336E+01  6.319249E-01 -3.209965E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.824407E-13 -1.452505E-12 -2.779998E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       14 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         4  0.000000E+00  0.000000E+00  8.110176E+00 -1.013406E+00  1.662442E+00  0.000000E+00
+ QUADR    ELEM         5  0.000000E+00  0.000000E+00  8.110176E+00 -1.013406E+00 -1.662442E+00  0.000000E+00
+ QUADR    ELEM        12  0.000000E+00  0.000000E+00 -2.976758E-01  1.013406E+00  3.895519E+00  0.000000E+00
+ QUADR    ELEM        13  0.000000E+00  0.000000E+00 -2.976758E-01  1.013406E+00 -3.895519E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -6.299405E-13 -5.480061E-13  7.727152E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       15 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         5  0.000000E+00  0.000000E+00  1.445444E+01 -1.397717E+00  2.079559E+00  0.000000E+00
+ QUADR    ELEM         6  0.000000E+00  0.000000E+00  8.121210E-01 -5.086321E-01 -1.095124E+00  0.000000E+00
+ QUADR    ELEM        13  0.000000E+00  0.000000E+00 -1.106336E+01  6.319249E-01  3.209965E+00  0.000000E+00
+ QUADR    ELEM        14  0.000000E+00  0.000000E+00  1.142181E+01  1.274424E+00 -4.194400E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -6.821210E-13  1.783018E-13  1.394440E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       16 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         6  0.000000E+00  0.000000E+00  1.873873E+01 -1.592191E+00  2.288807E+00  0.000000E+00
+ QUADR    ELEM         7  0.000000E+00  0.000000E+00 -5.333167E+00  6.623564E-02 -3.884618E-01  0.000000E+00
+ QUADR    ELEM        14  0.000000E+00  0.000000E+00 -2.052108E+01  1.937376E-01  2.150873E+00  0.000000E+00
+ QUADR    ELEM        15  0.000000E+00  0.000000E+00  2.274052E+01  1.332217E+00 -4.051219E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.811884E-13 -2.966294E-12 -4.369838E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       17 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         7  0.000000E+00  0.000000E+00  2.228512E+01 -1.744431E+00  2.154243E+00  0.000000E+00
+ QUADR    ELEM         8  0.000000E+00  0.000000E+00 -1.095602E+01  8.685169E-01  4.177943E-02  0.000000E+00
+ QUADR    ELEM        15  0.000000E+00  0.000000E+00 -3.091573E+01 -4.467861E-01  7.002308E-01  0.000000E+00
+ QUADR    ELEM        16  0.000000E+00  0.000000E+00  3.521163E+01  1.322700E+00 -2.896253E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -3.481659E-13  1.731948E-14  3.836931E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       18 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  3.229394E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         8  0.000000E+00  0.000000E+00 -4.170331E+00 -1.710077E-01  1.089049E+00  0.000000E+00
+ QUADR    ELEM        16  0.000000E+00  0.000000E+00 -2.031111E+01  1.710077E-01 -1.089049E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.842171E-14 -9.298118E-15  1.834088E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       19 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  5.072790E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         9  0.000000E+00  0.000000E+00 -2.038266E+01 -2.583672E-01 -5.501228E-01  0.000000E+00
+ QUADR    ELEM        17  0.000000E+00  0.000000E+00 -2.253273E+01  2.583672E-01  5.501228E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -3.943512E-13 -7.801537E-13  2.334799E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       20 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM         9  0.000000E+00  0.000000E+00  5.482142E+00  6.272241E-01  1.651542E+00  0.000000E+00
+ QUADR    ELEM        10  0.000000E+00  0.000000E+00  3.349754E+00 -1.707824E+00 -2.774103E+00  0.000000E+00
+ QUADR    ELEM        17  0.000000E+00  0.000000E+00  3.223612E+01  9.883566E-01  3.186331E+00  0.000000E+00
+ QUADR    ELEM        18  0.000000E+00  0.000000E+00 -2.544302E+01  9.224372E-02 -2.063770E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.369838E-13 -1.881911E-12  5.559997E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       21 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        10  0.000000E+00  0.000000E+00  4.825454E+00 -1.995079E-01  2.868862E+00  0.000000E+00
+ QUADR    ELEM        11  0.000000E+00  0.000000E+00  4.588696E+00 -1.761915E+00 -3.859800E+00  0.000000E+00
+ QUADR    ELEM        18  0.000000E+00  0.000000E+00  2.172458E+01  1.251075E+00  5.002101E+00  0.000000E+00
+ QUADR    ELEM        19  0.000000E+00  0.000000E+00 -1.551373E+01  7.103487E-01 -4.011163E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -5.986323E-13  1.000977E-12 -1.432632E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       22 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        11  0.000000E+00  0.000000E+00  4.510578E+00 -8.436559E-01  3.807821E+00  0.000000E+00
+ QUADR    ELEM        12  0.000000E+00  0.000000E+00  5.961247E+00 -1.696246E+00 -4.329926E+00  0.000000E+00
+ QUADR    ELEM        19  0.000000E+00  0.000000E+00  1.203593E+01  1.426831E+00  5.757847E+00  0.000000E+00
+ QUADR    ELEM        20  0.000000E+00  0.000000E+00 -6.882751E+00  1.113070E+00 -5.235742E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.940670E-12 -2.329692E-12 -9.228174E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       23 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        12  0.000000E+00  0.000000E+00  5.399793E+00 -1.369215E+00  4.282136E+00  0.000000E+00
+ QUADR    ELEM        13  0.000000E+00  0.000000E+00  5.399793E+00 -1.369215E+00 -4.282136E+00  0.000000E+00
+ QUADR    ELEM        20  0.000000E+00  0.000000E+00  2.412707E+00  1.369215E+00  5.823562E+00  0.000000E+00
+ QUADR    ELEM        21  0.000000E+00  0.000000E+00  2.412707E+00  1.369215E+00 -5.823562E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.790124E-12 -1.548095E-12 -1.715961E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       24 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        13  0.000000E+00  0.000000E+00  5.961247E+00 -1.696246E+00  4.329926E+00  0.000000E+00
+ QUADR    ELEM        14  0.000000E+00  0.000000E+00  4.510578E+00 -8.436559E-01 -3.807821E+00  0.000000E+00
+ QUADR    ELEM        21  0.000000E+00  0.000000E+00 -6.882751E+00  1.113070E+00  5.235742E+00  0.000000E+00
+ QUADR    ELEM        22  0.000000E+00  0.000000E+00  1.203593E+01  1.426831E+00 -5.757847E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.867040E-12 -1.622036E-12  3.219647E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       25 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        14  0.000000E+00  0.000000E+00  4.588696E+00 -1.761915E+00  3.859800E+00  0.000000E+00
+ QUADR    ELEM        15  0.000000E+00  0.000000E+00  4.825454E+00 -1.995079E-01 -2.868862E+00  0.000000E+00
+ QUADR    ELEM        22  0.000000E+00  0.000000E+00 -1.551373E+01  7.103487E-01  4.011163E+00  0.000000E+00
+ QUADR    ELEM        23  0.000000E+00  0.000000E+00  2.172458E+01  1.251075E+00 -5.002101E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  8.064660E-13 -4.656275E-13 -4.645173E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       26 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        15  0.000000E+00  0.000000E+00  3.349754E+00 -1.707824E+00  2.774103E+00  0.000000E+00
+ QUADR    ELEM        16  0.000000E+00  0.000000E+00  5.482142E+00  6.272241E-01 -1.651542E+00  0.000000E+00
+ QUADR    ELEM        23  0.000000E+00  0.000000E+00 -2.544302E+01  9.224372E-02  2.063770E+00  0.000000E+00
+ QUADR    ELEM        24  0.000000E+00  0.000000E+00  3.223612E+01  9.883566E-01 -3.186331E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  4.831691E-13  8.104628E-14  8.109069E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       27 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  5.072790E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        16  0.000000E+00  0.000000E+00 -2.038266E+01 -2.583672E-01  5.501228E-01  0.000000E+00
+ QUADR    ELEM        24  0.000000E+00  0.000000E+00 -2.253273E+01  2.583672E-01 -5.501228E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -3.090861E-13  1.831868E-14  2.661205E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       28 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  6.030311E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        17  0.000000E+00  0.000000E+00 -2.530083E+01 -2.490586E-01 -3.128271E-01  0.000000E+00
+ QUADR    ELEM        25  0.000000E+00  0.000000E+00 -2.718977E+01  2.490586E-01  3.128271E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.806644E-13 -4.566070E-13  8.417156E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       29 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        17  0.000000E+00  0.000000E+00  1.559745E+01  2.152582E-01  2.555570E+00  0.000000E+00
+ QUADR    ELEM        18  0.000000E+00  0.000000E+00 -7.613429E+00 -1.326651E+00 -3.194963E+00  0.000000E+00
+ QUADR    ELEM        25  0.000000E+00  0.000000E+00  3.038425E+01  5.909157E-01  3.385146E+00  0.000000E+00
+ QUADR    ELEM        26  0.000000E+00  0.000000E+00 -2.274327E+01  5.204769E-01 -2.745752E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -6.039613E-14 -1.040723E-12  9.663381E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       30 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        18  0.000000E+00  0.000000E+00  1.133186E+01 -4.814718E-01  4.388687E+00  0.000000E+00
+ QUADR    ELEM        19  0.000000E+00  0.000000E+00 -3.607139E+00 -1.543294E+00 -4.956763E+00  0.000000E+00
+ QUADR    ELEM        26  0.000000E+00  0.000000E+00  2.170410E+01  1.011705E+00  5.519424E+00  0.000000E+00
+ QUADR    ELEM        27  0.000000E+00  0.000000E+00 -1.380382E+01  1.013061E+00 -4.951348E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  3.979039E-13 -1.501022E-13 -5.346834E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       31 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        19  0.000000E+00  0.000000E+00  7.084946E+00 -1.028611E+00  5.600188E+00  0.000000E+00
+ QUADR    ELEM        20  0.000000E+00  0.000000E+00  6.166214E-01 -1.612731E+00 -5.901161E+00  0.000000E+00
+ QUADR    ELEM        27  0.000000E+00  0.000000E+00  1.295354E+01  1.324629E+00  6.629992E+00  0.000000E+00
+ QUADR    ELEM        28  0.000000E+00  0.000000E+00 -5.030105E+00  1.316713E+00 -6.329019E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.158185E-12  5.462297E-13 -2.096101E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       32 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        20  0.000000E+00  0.000000E+00  3.853423E+00 -1.428310E+00  6.096607E+00  0.000000E+00
+ QUADR    ELEM        21  0.000000E+00  0.000000E+00  3.853423E+00 -1.428310E+00 -6.096607E+00  0.000000E+00
+ QUADR    ELEM        28  0.000000E+00  0.000000E+00  3.959077E+00  1.428310E+00  6.892369E+00  0.000000E+00
+ QUADR    ELEM        29  0.000000E+00  0.000000E+00  3.959077E+00  1.428310E+00 -6.892369E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  5.924150E-13  5.158096E-13 -3.135270E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       33 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        21  0.000000E+00  0.000000E+00  6.166214E-01 -1.612731E+00  5.901161E+00  0.000000E+00
+ QUADR    ELEM        22  0.000000E+00  0.000000E+00  7.084946E+00 -1.028611E+00 -5.600188E+00  0.000000E+00
+ QUADR    ELEM        29  0.000000E+00  0.000000E+00 -5.030105E+00  1.316713E+00  6.329019E+00  0.000000E+00
+ QUADR    ELEM        30  0.000000E+00  0.000000E+00  1.295354E+01  1.324629E+00 -6.629992E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  3.980816E-12 -1.538991E-12 -1.145750E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       34 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        22  0.000000E+00  0.000000E+00 -3.607139E+00 -1.543294E+00  4.956763E+00  0.000000E+00
+ QUADR    ELEM        23  0.000000E+00  0.000000E+00  1.133186E+01 -4.814718E-01 -4.388687E+00  0.000000E+00
+ QUADR    ELEM        30  0.000000E+00  0.000000E+00 -1.380382E+01  1.013061E+00  4.951348E+00  0.000000E+00
+ QUADR    ELEM        31  0.000000E+00  0.000000E+00  2.170410E+01  1.011705E+00 -5.519424E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.911360E-12 -2.300382E-13  3.259615E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       35 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        23  0.000000E+00  0.000000E+00 -7.613429E+00 -1.326651E+00  3.194963E+00  0.000000E+00
+ QUADR    ELEM        24  0.000000E+00  0.000000E+00  1.559745E+01  2.152582E-01 -2.555570E+00  0.000000E+00
+ QUADR    ELEM        31  0.000000E+00  0.000000E+00 -2.274327E+01  5.204769E-01  2.745752E+00  0.000000E+00
+ QUADR    ELEM        32  0.000000E+00  0.000000E+00  3.038425E+01  5.909157E-01 -3.385146E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.772804E-12  1.950662E-13  2.708944E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       36 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  6.030311E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        24  0.000000E+00  0.000000E+00 -2.530083E+01 -2.490586E-01  3.128271E-01  0.000000E+00
+ QUADR    ELEM        32  0.000000E+00  0.000000E+00 -2.718977E+01  2.490586E-01 -3.128271E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.973799E-13 -1.126876E-14  7.938095E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       37 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  6.296799E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        25  0.000000E+00  0.000000E+00 -2.757774E+01 -2.587569E-01  7.178041E-13  0.000000E+00
+ QUADR    ELEM        33  0.000000E+00  0.000000E+00 -2.757774E+01  2.587569E-01  6.627182E-13  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  3.268497E-13 -1.668166E-12  1.380522E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       38 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        25  0.000000E+00  0.000000E+00  2.438327E+01 -1.819078E-01  3.147967E+00  0.000000E+00
+ QUADR    ELEM        26  0.000000E+00  0.000000E+00 -1.657077E+01 -9.237736E-01 -3.147967E+00  0.000000E+00
+ QUADR    ELEM        33  0.000000E+00  0.000000E+00  2.438327E+01  1.819078E-01  3.147967E+00  0.000000E+00
+ QUADR    ELEM        34  0.000000E+00  0.000000E+00 -1.657077E+01  9.237736E-01 -3.147967E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -6.217249E-13 -1.959877E-12  1.611156E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       39 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        26  0.000000E+00  0.000000E+00  1.760994E+01 -7.383043E-01  5.288550E+00  0.000000E+00
+ QUADR    ELEM        27  0.000000E+00  0.000000E+00 -9.797436E+00 -1.277235E+00 -5.288550E+00  0.000000E+00
+ QUADR    ELEM        34  0.000000E+00  0.000000E+00  1.760994E+01  7.383043E-01  5.288550E+00  0.000000E+00
+ QUADR    ELEM        35  0.000000E+00  0.000000E+00 -9.797436E+00  1.277235E+00 -5.288550E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.824407E-13  5.591083E-13 -5.462297E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       40 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        27  0.000000E+00  0.000000E+00  1.064772E+01 -1.166741E+00  6.560064E+00  0.000000E+00
+ QUADR    ELEM        28  0.000000E+00  0.000000E+00 -2.835222E+00 -1.459263E+00 -6.560064E+00  0.000000E+00
+ QUADR    ELEM        35  0.000000E+00  0.000000E+00  1.064772E+01  1.166741E+00  6.560064E+00  0.000000E+00
+ QUADR    ELEM        36  0.000000E+00  0.000000E+00 -2.835222E+00  1.459263E+00 -6.560064E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  8.788525E-13 -1.240119E-12  1.616485E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       41 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        28  0.000000E+00  0.000000E+00  3.906250E+00 -1.419639E+00  6.979879E+00  0.000000E+00
+ QUADR    ELEM        29  0.000000E+00  0.000000E+00  3.906250E+00 -1.419639E+00 -6.979879E+00  0.000000E+00
+ QUADR    ELEM        36  0.000000E+00  0.000000E+00  3.906250E+00  1.419639E+00  6.979879E+00  0.000000E+00
+ QUADR    ELEM        37  0.000000E+00  0.000000E+00  3.906250E+00  1.419639E+00 -6.979879E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  6.181722E-13 -6.203926E-13  2.202682E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       42 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        29  0.000000E+00  0.000000E+00 -2.835222E+00 -1.459263E+00  6.560064E+00  0.000000E+00
+ QUADR    ELEM        30  0.000000E+00  0.000000E+00  1.064772E+01 -1.166741E+00 -6.560064E+00  0.000000E+00
+ QUADR    ELEM        37  0.000000E+00  0.000000E+00 -2.835222E+00  1.459263E+00  6.560064E+00  0.000000E+00
+ QUADR    ELEM        38  0.000000E+00  0.000000E+00  1.064772E+01  1.166741E+00 -6.560064E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.332268E-12 -6.745715E-13 -6.998846E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       43 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        30  0.000000E+00  0.000000E+00 -9.797436E+00 -1.277235E+00  5.288550E+00  0.000000E+00
+ QUADR    ELEM        31  0.000000E+00  0.000000E+00  1.760994E+01 -7.383043E-01 -5.288550E+00  0.000000E+00
+ QUADR    ELEM        38  0.000000E+00  0.000000E+00 -9.797436E+00  1.277235E+00  5.288550E+00  0.000000E+00
+ QUADR    ELEM        39  0.000000E+00  0.000000E+00  1.760994E+01  7.383043E-01 -5.288550E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  5.186962E-12  2.315925E-13  3.339551E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       44 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        31  0.000000E+00  0.000000E+00 -1.657077E+01 -9.237736E-01  3.147967E+00  0.000000E+00
+ QUADR    ELEM        32  0.000000E+00  0.000000E+00  2.438327E+01 -1.819078E-01 -3.147967E+00  0.000000E+00
+ QUADR    ELEM        39  0.000000E+00  0.000000E+00 -1.657077E+01  9.237736E-01  3.147967E+00  0.000000E+00
+ QUADR    ELEM        40  0.000000E+00  0.000000E+00  2.438327E+01  1.819078E-01 -3.147967E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  5.790923E-13  1.219858E-13 -5.062617E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       45 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  6.296799E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        32  0.000000E+00  0.000000E+00 -2.757774E+01 -2.587569E-01  5.452018E-14  0.000000E+00
+ QUADR    ELEM        40  0.000000E+00  0.000000E+00 -2.757774E+01  2.587569E-01 -3.407930E-14  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  3.907985E-13  3.735900E-14  2.044088E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       46 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  6.030311E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        33  0.000000E+00  0.000000E+00 -2.718977E+01 -2.490586E-01  3.128271E-01  0.000000E+00
+ QUADR    ELEM        41  0.000000E+00  0.000000E+00 -2.530083E+01  2.490586E-01 -3.128271E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.121148E-13 -6.252776E-13 -1.497691E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       47 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        33  0.000000E+00  0.000000E+00  3.038425E+01 -5.909157E-01  3.385146E+00  0.000000E+00
+ QUADR    ELEM        34  0.000000E+00  0.000000E+00 -2.274327E+01 -5.204769E-01 -2.745752E+00  0.000000E+00
+ QUADR    ELEM        41  0.000000E+00  0.000000E+00  1.559745E+01 -2.152582E-01  2.555570E+00  0.000000E+00
+ QUADR    ELEM        42  0.000000E+00  0.000000E+00 -7.613429E+00  1.326651E+00 -3.194963E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.820766E-13 -7.287504E-13  6.177281E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       48 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        34  0.000000E+00  0.000000E+00  2.170410E+01 -1.011705E+00  5.519424E+00  0.000000E+00
+ QUADR    ELEM        35  0.000000E+00  0.000000E+00 -1.380382E+01 -1.013061E+00 -4.951348E+00  0.000000E+00
+ QUADR    ELEM        42  0.000000E+00  0.000000E+00  1.133186E+01  4.814718E-01  4.388687E+00  0.000000E+00
+ QUADR    ELEM        43  0.000000E+00  0.000000E+00 -3.607139E+00  1.543294E+00 -4.956763E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -5.320189E-13 -1.446843E-12 -3.683276E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       49 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        35  0.000000E+00  0.000000E+00  1.295354E+01 -1.324629E+00  6.629992E+00  0.000000E+00
+ QUADR    ELEM        36  0.000000E+00  0.000000E+00 -5.030105E+00 -1.316713E+00 -6.329019E+00  0.000000E+00
+ QUADR    ELEM        43  0.000000E+00  0.000000E+00  7.084946E+00  1.028611E+00  5.600188E+00  0.000000E+00
+ QUADR    ELEM        44  0.000000E+00  0.000000E+00  6.166214E-01  1.612731E+00 -5.901161E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.650280E-12 -7.658318E-13  1.144862E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       50 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        36  0.000000E+00  0.000000E+00  3.959077E+00 -1.428310E+00  6.892369E+00  0.000000E+00
+ QUADR    ELEM        37  0.000000E+00  0.000000E+00  3.959077E+00 -1.428310E+00 -6.892369E+00  0.000000E+00
+ QUADR    ELEM        44  0.000000E+00  0.000000E+00  3.853423E+00  1.428310E+00  6.096607E+00  0.000000E+00
+ QUADR    ELEM        45  0.000000E+00  0.000000E+00  3.853423E+00  1.428310E+00 -6.096607E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  8.797407E-13 -1.709743E-12  4.014566E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       51 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        37  0.000000E+00  0.000000E+00 -5.030105E+00 -1.316713E+00  6.329019E+00  0.000000E+00
+ QUADR    ELEM        38  0.000000E+00  0.000000E+00  1.295354E+01 -1.324629E+00 -6.629992E+00  0.000000E+00
+ QUADR    ELEM        45  0.000000E+00  0.000000E+00  6.166214E-01  1.612731E+00  5.901161E+00  0.000000E+00
+ QUADR    ELEM        46  0.000000E+00  0.000000E+00  7.084946E+00  1.028611E+00 -5.600188E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.565237E-13  7.180923E-13 -3.685940E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       52 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        38  0.000000E+00  0.000000E+00 -1.380382E+01 -1.013061E+00  4.951348E+00  0.000000E+00
+ QUADR    ELEM        39  0.000000E+00  0.000000E+00  2.170410E+01 -1.011705E+00 -5.519424E+00  0.000000E+00
+ QUADR    ELEM        46  0.000000E+00  0.000000E+00 -3.607139E+00  1.543294E+00  4.956763E+00  0.000000E+00
+ QUADR    ELEM        47  0.000000E+00  0.000000E+00  1.133186E+01  4.814718E-01 -4.388687E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  3.975487E-12  6.187273E-13 -1.953993E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       53 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        39  0.000000E+00  0.000000E+00 -2.274327E+01 -5.204769E-01  2.745752E+00  0.000000E+00
+ QUADR    ELEM        40  0.000000E+00  0.000000E+00  3.038425E+01 -5.909157E-01 -3.385146E+00  0.000000E+00
+ QUADR    ELEM        47  0.000000E+00  0.000000E+00 -7.613429E+00  1.326651E+00  3.194963E+00  0.000000E+00
+ QUADR    ELEM        48  0.000000E+00  0.000000E+00  1.559745E+01 -2.152582E-01 -2.555570E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -6.981082E-13  1.283418E-13 -4.884981E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       54 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  6.030311E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        40  0.000000E+00  0.000000E+00 -2.718977E+01 -2.490586E-01 -3.128271E-01  0.000000E+00
+ QUADR    ELEM        48  0.000000E+00  0.000000E+00 -2.530083E+01  2.490586E-01  3.128271E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.207923E-13  2.137179E-14 -3.337330E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       55 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  5.072790E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        41  0.000000E+00  0.000000E+00 -2.253273E+01 -2.583672E-01  5.501228E-01  0.000000E+00
+ QUADR    ELEM        49  0.000000E+00  0.000000E+00 -2.038266E+01  2.583672E-01 -5.501228E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.298784E-13 -4.410361E-13 -1.376677E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       56 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        41  0.000000E+00  0.000000E+00  3.223612E+01 -9.883566E-01  3.186331E+00  0.000000E+00
+ QUADR    ELEM        42  0.000000E+00  0.000000E+00 -2.544302E+01 -9.224372E-02 -2.063770E+00  0.000000E+00
+ QUADR    ELEM        49  0.000000E+00  0.000000E+00  5.482142E+00 -6.272241E-01  1.651542E+00  0.000000E+00
+ QUADR    ELEM        50  0.000000E+00  0.000000E+00  3.349754E+00  1.707824E+00 -2.774103E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.059597E-12 -4.973799E-13 -3.486100E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       57 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        42  0.000000E+00  0.000000E+00  2.172458E+01 -1.251075E+00  5.002101E+00  0.000000E+00
+ QUADR    ELEM        43  0.000000E+00  0.000000E+00 -1.551373E+01 -7.103487E-01 -4.011163E+00  0.000000E+00
+ QUADR    ELEM        50  0.000000E+00  0.000000E+00  4.825454E+00  1.995079E-01  2.868862E+00  0.000000E+00
+ QUADR    ELEM        51  0.000000E+00  0.000000E+00  4.588696E+00  1.761915E+00 -3.859800E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.830536E-12 -1.403988E-12 -3.788525E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       58 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        43  0.000000E+00  0.000000E+00  1.203593E+01 -1.426831E+00  5.757847E+00  0.000000E+00
+ QUADR    ELEM        44  0.000000E+00  0.000000E+00 -6.882751E+00 -1.113070E+00 -5.235742E+00  0.000000E+00
+ QUADR    ELEM        51  0.000000E+00  0.000000E+00  4.510578E+00  8.436559E-01  3.807821E+00  0.000000E+00
+ QUADR    ELEM        52  0.000000E+00  0.000000E+00  5.961247E+00  1.696246E+00 -4.329926E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  9.325873E-13 -2.569278E-12  1.504574E-12  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       59 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        44  0.000000E+00  0.000000E+00  2.412707E+00 -1.369215E+00  5.823562E+00  0.000000E+00
+ QUADR    ELEM        45  0.000000E+00  0.000000E+00  2.412707E+00 -1.369215E+00 -5.823562E+00  0.000000E+00
+ QUADR    ELEM        52  0.000000E+00  0.000000E+00  5.399793E+00  1.369215E+00  4.282136E+00  0.000000E+00
+ QUADR    ELEM        53  0.000000E+00  0.000000E+00  5.399793E+00  1.369215E+00 -4.282136E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.314504E-13 -8.437695E-13 -7.860379E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       60 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        45  0.000000E+00  0.000000E+00 -6.882751E+00 -1.113070E+00  5.235742E+00  0.000000E+00
+ QUADR    ELEM        46  0.000000E+00  0.000000E+00  1.203593E+01 -1.426831E+00 -5.757847E+00  0.000000E+00
+ QUADR    ELEM        53  0.000000E+00  0.000000E+00  5.961247E+00  1.696246E+00  4.329926E+00  0.000000E+00
+ QUADR    ELEM        54  0.000000E+00  0.000000E+00  4.510578E+00  8.436559E-01 -3.807821E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -7.602807E-13  1.041167E-12 -2.557954E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       61 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        46  0.000000E+00  0.000000E+00 -1.551373E+01 -7.103487E-01  4.011163E+00  0.000000E+00
+ QUADR    ELEM        47  0.000000E+00  0.000000E+00  2.172458E+01 -1.251075E+00 -5.002101E+00  0.000000E+00
+ QUADR    ELEM        54  0.000000E+00  0.000000E+00  4.588696E+00  1.761915E+00  3.859800E+00  0.000000E+00
+ QUADR    ELEM        55  0.000000E+00  0.000000E+00  4.825454E+00  1.995079E-01 -2.868862E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.902745E-13  2.020328E-13 -9.325873E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       62 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        47  0.000000E+00  0.000000E+00 -2.544302E+01 -9.224372E-02  2.063770E+00  0.000000E+00
+ QUADR    ELEM        48  0.000000E+00  0.000000E+00  3.223612E+01 -9.883566E-01 -3.186331E+00  0.000000E+00
+ QUADR    ELEM        55  0.000000E+00  0.000000E+00  3.349754E+00  1.707824E+00  2.774103E+00  0.000000E+00
+ QUADR    ELEM        56  0.000000E+00  0.000000E+00  5.482142E+00 -6.272241E-01 -1.651542E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -6.847856E-13  1.343370E-14  2.642331E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       63 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  5.072790E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        48  0.000000E+00  0.000000E+00 -2.253273E+01 -2.583672E-01 -5.501228E-01  0.000000E+00
+ QUADR    ELEM        56  0.000000E+00  0.000000E+00 -2.038266E+01  2.583672E-01  5.501228E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -7.105427E-14  4.996004E-16 -7.349676E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       64 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  3.229394E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        49  0.000000E+00  0.000000E+00 -2.031111E+01 -1.710077E-01  1.089049E+00  0.000000E+00
+ QUADR    ELEM        57  0.000000E+00  0.000000E+00 -4.170331E+00  1.710077E-01 -1.089049E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -2.389200E-13 -4.202749E-13 -2.489120E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       65 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        49  0.000000E+00  0.000000E+00  3.521163E+01 -1.322700E+00  2.896253E+00  0.000000E+00
+ QUADR    ELEM        50  0.000000E+00  0.000000E+00 -3.091573E+01  4.467861E-01 -7.002308E-01  0.000000E+00
+ QUADR    ELEM        57  0.000000E+00  0.000000E+00 -1.095602E+01 -8.685169E-01 -4.177943E-02  0.000000E+00
+ QUADR    ELEM        58  0.000000E+00  0.000000E+00  2.228512E+01  1.744431E+00 -2.154243E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.486900E-14  6.883383E-14 -4.702905E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       66 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        50  0.000000E+00  0.000000E+00  2.274052E+01 -1.332217E+00  4.051219E+00  0.000000E+00
+ QUADR    ELEM        51  0.000000E+00  0.000000E+00 -2.052108E+01 -1.937376E-01 -2.150873E+00  0.000000E+00
+ QUADR    ELEM        58  0.000000E+00  0.000000E+00 -5.333167E+00 -6.623564E-02  3.884618E-01  0.000000E+00
+ QUADR    ELEM        59  0.000000E+00  0.000000E+00  1.873873E+01  1.592191E+00 -2.288807E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -5.684342E-13 -3.685940E-14  1.478817E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       67 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        51  0.000000E+00  0.000000E+00  1.142181E+01 -1.274424E+00  4.194400E+00  0.000000E+00
+ QUADR    ELEM        52  0.000000E+00  0.000000E+00 -1.106336E+01 -6.319249E-01 -3.209965E+00  0.000000E+00
+ QUADR    ELEM        59  0.000000E+00  0.000000E+00  8.121210E-01  5.086321E-01  1.095124E+00  0.000000E+00
+ QUADR    ELEM        60  0.000000E+00  0.000000E+00  1.445444E+01  1.397717E+00 -2.079559E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  6.750156E-14 -3.897105E-12  1.807443E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       68 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        52  0.000000E+00  0.000000E+00 -2.976758E-01 -1.013406E+00  3.895519E+00  0.000000E+00
+ QUADR    ELEM        53  0.000000E+00  0.000000E+00 -2.976758E-01 -1.013406E+00 -3.895519E+00  0.000000E+00
+ QUADR    ELEM        60  0.000000E+00  0.000000E+00  8.110176E+00  1.013406E+00  1.662442E+00  0.000000E+00
+ QUADR    ELEM        61  0.000000E+00  0.000000E+00  8.110176E+00  1.013406E+00 -1.662442E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  3.552714E-15  5.522249E-13  3.832490E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       69 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        53  0.000000E+00  0.000000E+00 -1.106336E+01 -6.319249E-01  3.209965E+00  0.000000E+00
+ QUADR    ELEM        54  0.000000E+00  0.000000E+00  1.142181E+01 -1.274424E+00 -4.194400E+00  0.000000E+00
+ QUADR    ELEM        61  0.000000E+00  0.000000E+00  1.445444E+01  1.397717E+00  2.079559E+00  0.000000E+00
+ QUADR    ELEM        62  0.000000E+00  0.000000E+00  8.121210E-01  5.086321E-01 -1.095124E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.518452E-12  8.704149E-14 -2.475797E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       70 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        54  0.000000E+00  0.000000E+00 -2.052108E+01 -1.937376E-01  2.150873E+00  0.000000E+00
+ QUADR    ELEM        55  0.000000E+00  0.000000E+00  2.274052E+01 -1.332217E+00 -4.051219E+00  0.000000E+00
+ QUADR    ELEM        62  0.000000E+00  0.000000E+00  1.873873E+01  1.592191E+00  2.288807E+00  0.000000E+00
+ QUADR    ELEM        63  0.000000E+00  0.000000E+00 -5.333167E+00 -6.623564E-02 -3.884618E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.776357E-13  3.637923E-13 -3.412270E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       71 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.562500E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        55  0.000000E+00  0.000000E+00 -3.091573E+01  4.467861E-01  7.002308E-01  0.000000E+00
+ QUADR    ELEM        56  0.000000E+00  0.000000E+00  3.521163E+01 -1.322700E+00 -2.896253E+00  0.000000E+00
+ QUADR    ELEM        63  0.000000E+00  0.000000E+00  2.228512E+01  1.744431E+00  2.154243E+00  0.000000E+00
+ QUADR    ELEM        64  0.000000E+00  0.000000E+00 -1.095602E+01 -8.685169E-01  4.177943E-02  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -9.414691E-14  1.820766E-14 -6.804973E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       72 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  3.229394E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        56  0.000000E+00  0.000000E+00 -2.031111E+01 -1.710077E-01 -1.089049E+00  0.000000E+00
+ QUADR    ELEM        64  0.000000E+00  0.000000E+00 -4.170331E+00  1.710077E-01  1.089049E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.637890E-13 -3.635980E-15 -1.065814E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       73 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.906250E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -5.645269E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        57  0.000000E+00  0.000000E+00  9.551519E+00  1.074540E-13  1.021498E-13  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -2.309264E-14  1.074540E-13  1.021498E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       74 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  1.387856E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        57  0.000000E+00  0.000000E+00  5.574835E+00 -1.193285E+00  4.581798E-01  0.000000E+00
+ QUADR    ELEM        58  0.000000E+00  0.000000E+00 -1.164090E+01  1.193285E+00 -4.581798E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.030287E-13  6.861178E-13 -4.972689E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       75 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.315353E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        58  0.000000E+00  0.000000E+00 -5.311054E+00 -7.524867E-01  8.934335E-01  0.000000E+00
+ QUADR    ELEM        59  0.000000E+00  0.000000E+00 -1.002998E+01  7.524867E-01 -8.934335E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -6.750156E-14 -1.069922E-12  5.877521E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       76 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.900580E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        59  0.000000E+00  0.000000E+00 -9.520870E+00 -4.094535E-01  9.985235E-01  0.000000E+00
+ QUADR    ELEM        60  0.000000E+00  0.000000E+00 -1.167243E+01  4.094535E-01 -9.985235E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  4.973799E-14 -5.443423E-13  9.825474E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       77 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.959686E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        60  0.000000E+00  0.000000E+00 -1.089218E+01  6.070552E-14  1.067890E+00  0.000000E+00
+ QUADR    ELEM        61  0.000000E+00  0.000000E+00 -1.089218E+01  2.640531E-14 -1.067890E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.545430E-13  8.711084E-14 -1.452172E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       78 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.900580E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        61  0.000000E+00  0.000000E+00 -1.167243E+01  4.094535E-01  9.985235E-01  0.000000E+00
+ QUADR    ELEM        62  0.000000E+00  0.000000E+00 -9.520870E+00 -4.094535E-01 -9.985235E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.403322E-13 -1.027511E-13 -9.514611E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       79 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  2.315353E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        62  0.000000E+00  0.000000E+00 -1.002998E+01  7.524867E-01  8.934335E-01  0.000000E+00
+ QUADR    ELEM        63  0.000000E+00  0.000000E+00 -5.311054E+00 -7.524867E-01 -8.934335E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -2.362555E-13 -6.949996E-14 -2.142730E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       80 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -7.812500E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  1.387856E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        63  0.000000E+00  0.000000E+00 -1.164090E+01  1.193285E+00  4.581798E-01  0.000000E+00
+ QUADR    ELEM        64  0.000000E+00  0.000000E+00  5.574835E+00 -1.193285E+00 -4.581798E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.749711E-13 -2.153833E-14 -8.992806E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       81 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.906250E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -5.645269E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ QUADR    ELEM        64  0.000000E+00  0.000000E+00  9.551519E+00 -8.849533E-16 -7.046691E-15  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.065814E-13 -8.849533E-16 -7.046691E-15  0.000000E+00
+ (should all be 0)
+
+
+
+ >> LINK  9 END
+
+    Total CPU time =  1.09E-01 seconds
+
+ >> MYSTRAN END    :  5/19/2026 at 12: 8: 8.171

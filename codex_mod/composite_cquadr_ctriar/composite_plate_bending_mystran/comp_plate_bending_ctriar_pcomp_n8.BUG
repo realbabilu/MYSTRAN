@@ -1,0 +1,2569 @@
+   519040743
+
+ MYSTRAN Version 18.0.0   APR 20 2026 MYSTRAN developed by Dr Bill Case
+*** Please report any problems to mystransolver@gmail.com ***                                                                                                                                                                                                   
+
+ >> MYSTRAN BEGIN  :  5/19/2026 at  4: 7:43.730 The input file is comp_plate_bending_ctriar_pcomp_n8.dat                                                                                                                                                                                                                          
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number        1
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =            1
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        1        1      1     0.000000E+00   0.000000E+00   0.000000E+00
+        2        2      2     1.250000E-01   0.000000E+00   0.000000E+00
+       11       11      3     1.250000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number        2
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =            2
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        1        1      1     0.000000E+00   0.000000E+00   0.000000E+00
+       11       11      2     1.250000E-01   1.250000E-01   0.000000E+00
+       10       10      3     0.000000E+00   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number        3
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =            3
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        2        2      1     1.250000E-01   0.000000E+00   0.000000E+00
+        3        3      2     2.500000E-01   0.000000E+00   0.000000E+00
+       12       12      3     2.500000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number        4
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =            4
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        2        2      1     1.250000E-01   0.000000E+00   0.000000E+00
+       12       12      2     2.500000E-01   1.250000E-01   0.000000E+00
+       11       11      3     1.250000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number        5
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =            5
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        3        3      1     2.500000E-01   0.000000E+00   0.000000E+00
+        4        4      2     3.750000E-01   0.000000E+00   0.000000E+00
+       13       13      3     3.750000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number        6
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =            6
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        3        3      1     2.500000E-01   0.000000E+00   0.000000E+00
+       13       13      2     3.750000E-01   1.250000E-01   0.000000E+00
+       12       12      3     2.500000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number        7
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =            7
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        4        4      1     3.750000E-01   0.000000E+00   0.000000E+00
+        5        5      2     5.000000E-01   0.000000E+00   0.000000E+00
+       14       14      3     5.000000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number        8
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =            8
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        4        4      1     3.750000E-01   0.000000E+00   0.000000E+00
+       14       14      2     5.000000E-01   1.250000E-01   0.000000E+00
+       13       13      3     3.750000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number        9
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =            9
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        5        5      1     5.000000E-01   0.000000E+00   0.000000E+00
+        6        6      2     6.250000E-01   0.000000E+00   0.000000E+00
+       15       15      3     6.250000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       10
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           10
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        5        5      1     5.000000E-01   0.000000E+00   0.000000E+00
+       15       15      2     6.250000E-01   1.250000E-01   0.000000E+00
+       14       14      3     5.000000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       11
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           11
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        6        6      1     6.250000E-01   0.000000E+00   0.000000E+00
+        7        7      2     7.500000E-01   0.000000E+00   0.000000E+00
+       16       16      3     7.500000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       12
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           12
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        6        6      1     6.250000E-01   0.000000E+00   0.000000E+00
+       16       16      2     7.500000E-01   1.250000E-01   0.000000E+00
+       15       15      3     6.250000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       13
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           13
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        7        7      1     7.500000E-01   0.000000E+00   0.000000E+00
+        8        8      2     8.750000E-01   0.000000E+00   0.000000E+00
+       17       17      3     8.750000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       14
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           14
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        7        7      1     7.500000E-01   0.000000E+00   0.000000E+00
+       17       17      2     8.750000E-01   1.250000E-01   0.000000E+00
+       16       16      3     7.500000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       15
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           15
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        8        8      1     8.750000E-01   0.000000E+00   0.000000E+00
+        9        9      2     1.000000E+00   0.000000E+00   0.000000E+00
+       18       18      3     1.000000E+00   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       16
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           16
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+        8        8      1     8.750000E-01   0.000000E+00   0.000000E+00
+       18       18      2     1.000000E+00   1.250000E-01   0.000000E+00
+       17       17      3     8.750000E-01   1.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       17
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           17
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       10       10      1     0.000000E+00   1.250000E-01   0.000000E+00
+       11       11      2     1.250000E-01   1.250000E-01   0.000000E+00
+       20       20      3     1.250000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       18
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           18
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       10       10      1     0.000000E+00   1.250000E-01   0.000000E+00
+       20       20      2     1.250000E-01   2.500000E-01   0.000000E+00
+       19       19      3     0.000000E+00   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       19
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           19
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       11       11      1     1.250000E-01   1.250000E-01   0.000000E+00
+       12       12      2     2.500000E-01   1.250000E-01   0.000000E+00
+       21       21      3     2.500000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       20
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           20
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       11       11      1     1.250000E-01   1.250000E-01   0.000000E+00
+       21       21      2     2.500000E-01   2.500000E-01   0.000000E+00
+       20       20      3     1.250000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       21
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           21
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       12       12      1     2.500000E-01   1.250000E-01   0.000000E+00
+       13       13      2     3.750000E-01   1.250000E-01   0.000000E+00
+       22       22      3     3.750000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       22
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           22
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       12       12      1     2.500000E-01   1.250000E-01   0.000000E+00
+       22       22      2     3.750000E-01   2.500000E-01   0.000000E+00
+       21       21      3     2.500000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       23
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           23
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       13       13      1     3.750000E-01   1.250000E-01   0.000000E+00
+       14       14      2     5.000000E-01   1.250000E-01   0.000000E+00
+       23       23      3     5.000000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       24
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           24
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       13       13      1     3.750000E-01   1.250000E-01   0.000000E+00
+       23       23      2     5.000000E-01   2.500000E-01   0.000000E+00
+       22       22      3     3.750000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       25
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           25
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       14       14      1     5.000000E-01   1.250000E-01   0.000000E+00
+       15       15      2     6.250000E-01   1.250000E-01   0.000000E+00
+       24       24      3     6.250000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       26
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           26
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       14       14      1     5.000000E-01   1.250000E-01   0.000000E+00
+       24       24      2     6.250000E-01   2.500000E-01   0.000000E+00
+       23       23      3     5.000000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       27
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           27
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       15       15      1     6.250000E-01   1.250000E-01   0.000000E+00
+       16       16      2     7.500000E-01   1.250000E-01   0.000000E+00
+       25       25      3     7.500000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       28
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           28
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       15       15      1     6.250000E-01   1.250000E-01   0.000000E+00
+       25       25      2     7.500000E-01   2.500000E-01   0.000000E+00
+       24       24      3     6.250000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       29
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           29
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       16       16      1     7.500000E-01   1.250000E-01   0.000000E+00
+       17       17      2     8.750000E-01   1.250000E-01   0.000000E+00
+       26       26      3     8.750000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       30
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           30
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       16       16      1     7.500000E-01   1.250000E-01   0.000000E+00
+       26       26      2     8.750000E-01   2.500000E-01   0.000000E+00
+       25       25      3     7.500000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       31
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           31
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       17       17      1     8.750000E-01   1.250000E-01   0.000000E+00
+       18       18      2     1.000000E+00   1.250000E-01   0.000000E+00
+       27       27      3     1.000000E+00   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       32
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           32
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       17       17      1     8.750000E-01   1.250000E-01   0.000000E+00
+       27       27      2     1.000000E+00   2.500000E-01   0.000000E+00
+       26       26      3     8.750000E-01   2.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       33
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           33
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       19       19      1     0.000000E+00   2.500000E-01   0.000000E+00
+       20       20      2     1.250000E-01   2.500000E-01   0.000000E+00
+       29       29      3     1.250000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       34
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           34
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       19       19      1     0.000000E+00   2.500000E-01   0.000000E+00
+       29       29      2     1.250000E-01   3.750000E-01   0.000000E+00
+       28       28      3     0.000000E+00   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       35
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           35
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       20       20      1     1.250000E-01   2.500000E-01   0.000000E+00
+       21       21      2     2.500000E-01   2.500000E-01   0.000000E+00
+       30       30      3     2.500000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       36
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           36
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       20       20      1     1.250000E-01   2.500000E-01   0.000000E+00
+       30       30      2     2.500000E-01   3.750000E-01   0.000000E+00
+       29       29      3     1.250000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       37
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           37
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       21       21      1     2.500000E-01   2.500000E-01   0.000000E+00
+       22       22      2     3.750000E-01   2.500000E-01   0.000000E+00
+       31       31      3     3.750000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       38
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           38
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       21       21      1     2.500000E-01   2.500000E-01   0.000000E+00
+       31       31      2     3.750000E-01   3.750000E-01   0.000000E+00
+       30       30      3     2.500000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       39
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           39
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       22       22      1     3.750000E-01   2.500000E-01   0.000000E+00
+       23       23      2     5.000000E-01   2.500000E-01   0.000000E+00
+       32       32      3     5.000000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       40
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           40
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       22       22      1     3.750000E-01   2.500000E-01   0.000000E+00
+       32       32      2     5.000000E-01   3.750000E-01   0.000000E+00
+       31       31      3     3.750000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       41
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           41
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       23       23      1     5.000000E-01   2.500000E-01   0.000000E+00
+       24       24      2     6.250000E-01   2.500000E-01   0.000000E+00
+       33       33      3     6.250000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       42
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           42
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       23       23      1     5.000000E-01   2.500000E-01   0.000000E+00
+       33       33      2     6.250000E-01   3.750000E-01   0.000000E+00
+       32       32      3     5.000000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       43
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           43
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       24       24      1     6.250000E-01   2.500000E-01   0.000000E+00
+       25       25      2     7.500000E-01   2.500000E-01   0.000000E+00
+       34       34      3     7.500000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       44
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           44
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       24       24      1     6.250000E-01   2.500000E-01   0.000000E+00
+       34       34      2     7.500000E-01   3.750000E-01   0.000000E+00
+       33       33      3     6.250000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       45
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           45
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       25       25      1     7.500000E-01   2.500000E-01   0.000000E+00
+       26       26      2     8.750000E-01   2.500000E-01   0.000000E+00
+       35       35      3     8.750000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       46
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           46
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       25       25      1     7.500000E-01   2.500000E-01   0.000000E+00
+       35       35      2     8.750000E-01   3.750000E-01   0.000000E+00
+       34       34      3     7.500000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       47
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           47
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       26       26      1     8.750000E-01   2.500000E-01   0.000000E+00
+       27       27      2     1.000000E+00   2.500000E-01   0.000000E+00
+       36       36      3     1.000000E+00   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       48
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           48
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       26       26      1     8.750000E-01   2.500000E-01   0.000000E+00
+       36       36      2     1.000000E+00   3.750000E-01   0.000000E+00
+       35       35      3     8.750000E-01   3.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       49
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           49
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       28       28      1     0.000000E+00   3.750000E-01   0.000000E+00
+       29       29      2     1.250000E-01   3.750000E-01   0.000000E+00
+       38       38      3     1.250000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       50
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           50
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       28       28      1     0.000000E+00   3.750000E-01   0.000000E+00
+       38       38      2     1.250000E-01   5.000000E-01   0.000000E+00
+       37       37      3     0.000000E+00   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       51
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           51
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       29       29      1     1.250000E-01   3.750000E-01   0.000000E+00
+       30       30      2     2.500000E-01   3.750000E-01   0.000000E+00
+       39       39      3     2.500000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       52
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           52
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       29       29      1     1.250000E-01   3.750000E-01   0.000000E+00
+       39       39      2     2.500000E-01   5.000000E-01   0.000000E+00
+       38       38      3     1.250000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       53
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           53
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       30       30      1     2.500000E-01   3.750000E-01   0.000000E+00
+       31       31      2     3.750000E-01   3.750000E-01   0.000000E+00
+       40       40      3     3.750000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       54
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           54
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       30       30      1     2.500000E-01   3.750000E-01   0.000000E+00
+       40       40      2     3.750000E-01   5.000000E-01   0.000000E+00
+       39       39      3     2.500000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       55
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           55
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       31       31      1     3.750000E-01   3.750000E-01   0.000000E+00
+       32       32      2     5.000000E-01   3.750000E-01   0.000000E+00
+       41       41      3     5.000000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       56
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           56
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       31       31      1     3.750000E-01   3.750000E-01   0.000000E+00
+       41       41      2     5.000000E-01   5.000000E-01   0.000000E+00
+       40       40      3     3.750000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       57
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           57
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       32       32      1     5.000000E-01   3.750000E-01   0.000000E+00
+       33       33      2     6.250000E-01   3.750000E-01   0.000000E+00
+       42       42      3     6.250000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       58
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           58
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       32       32      1     5.000000E-01   3.750000E-01   0.000000E+00
+       42       42      2     6.250000E-01   5.000000E-01   0.000000E+00
+       41       41      3     5.000000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       59
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           59
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       33       33      1     6.250000E-01   3.750000E-01   0.000000E+00
+       34       34      2     7.500000E-01   3.750000E-01   0.000000E+00
+       43       43      3     7.500000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       60
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           60
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       33       33      1     6.250000E-01   3.750000E-01   0.000000E+00
+       43       43      2     7.500000E-01   5.000000E-01   0.000000E+00
+       42       42      3     6.250000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       61
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           61
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       34       34      1     7.500000E-01   3.750000E-01   0.000000E+00
+       35       35      2     8.750000E-01   3.750000E-01   0.000000E+00
+       44       44      3     8.750000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       62
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           62
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       34       34      1     7.500000E-01   3.750000E-01   0.000000E+00
+       44       44      2     8.750000E-01   5.000000E-01   0.000000E+00
+       43       43      3     7.500000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       63
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           63
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       35       35      1     8.750000E-01   3.750000E-01   0.000000E+00
+       36       36      2     1.000000E+00   3.750000E-01   0.000000E+00
+       45       45      3     1.000000E+00   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       64
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           64
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       35       35      1     8.750000E-01   3.750000E-01   0.000000E+00
+       45       45      2     1.000000E+00   5.000000E-01   0.000000E+00
+       44       44      3     8.750000E-01   5.000000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       65
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           65
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       37       37      1     0.000000E+00   5.000000E-01   0.000000E+00
+       38       38      2     1.250000E-01   5.000000E-01   0.000000E+00
+       47       47      3     1.250000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       66
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           66
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       37       37      1     0.000000E+00   5.000000E-01   0.000000E+00
+       47       47      2     1.250000E-01   6.250000E-01   0.000000E+00
+       46       46      3     0.000000E+00   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       67
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           67
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       38       38      1     1.250000E-01   5.000000E-01   0.000000E+00
+       39       39      2     2.500000E-01   5.000000E-01   0.000000E+00
+       48       48      3     2.500000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       68
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           68
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       38       38      1     1.250000E-01   5.000000E-01   0.000000E+00
+       48       48      2     2.500000E-01   6.250000E-01   0.000000E+00
+       47       47      3     1.250000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       69
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           69
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       39       39      1     2.500000E-01   5.000000E-01   0.000000E+00
+       40       40      2     3.750000E-01   5.000000E-01   0.000000E+00
+       49       49      3     3.750000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       70
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           70
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       39       39      1     2.500000E-01   5.000000E-01   0.000000E+00
+       49       49      2     3.750000E-01   6.250000E-01   0.000000E+00
+       48       48      3     2.500000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       71
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           71
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       40       40      1     3.750000E-01   5.000000E-01   0.000000E+00
+       41       41      2     5.000000E-01   5.000000E-01   0.000000E+00
+       50       50      3     5.000000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       72
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           72
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       40       40      1     3.750000E-01   5.000000E-01   0.000000E+00
+       50       50      2     5.000000E-01   6.250000E-01   0.000000E+00
+       49       49      3     3.750000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       73
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           73
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       41       41      1     5.000000E-01   5.000000E-01   0.000000E+00
+       42       42      2     6.250000E-01   5.000000E-01   0.000000E+00
+       51       51      3     6.250000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       74
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           74
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       41       41      1     5.000000E-01   5.000000E-01   0.000000E+00
+       51       51      2     6.250000E-01   6.250000E-01   0.000000E+00
+       50       50      3     5.000000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       75
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           75
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       42       42      1     6.250000E-01   5.000000E-01   0.000000E+00
+       43       43      2     7.500000E-01   5.000000E-01   0.000000E+00
+       52       52      3     7.500000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       76
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           76
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       42       42      1     6.250000E-01   5.000000E-01   0.000000E+00
+       52       52      2     7.500000E-01   6.250000E-01   0.000000E+00
+       51       51      3     6.250000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       77
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           77
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       43       43      1     7.500000E-01   5.000000E-01   0.000000E+00
+       44       44      2     8.750000E-01   5.000000E-01   0.000000E+00
+       53       53      3     8.750000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       78
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           78
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       43       43      1     7.500000E-01   5.000000E-01   0.000000E+00
+       53       53      2     8.750000E-01   6.250000E-01   0.000000E+00
+       52       52      3     7.500000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       79
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           79
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       44       44      1     8.750000E-01   5.000000E-01   0.000000E+00
+       45       45      2     1.000000E+00   5.000000E-01   0.000000E+00
+       54       54      3     1.000000E+00   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       80
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           80
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       44       44      1     8.750000E-01   5.000000E-01   0.000000E+00
+       54       54      2     1.000000E+00   6.250000E-01   0.000000E+00
+       53       53      3     8.750000E-01   6.250000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       81
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           81
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       46       46      1     0.000000E+00   6.250000E-01   0.000000E+00
+       47       47      2     1.250000E-01   6.250000E-01   0.000000E+00
+       56       56      3     1.250000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       82
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           82
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       46       46      1     0.000000E+00   6.250000E-01   0.000000E+00
+       56       56      2     1.250000E-01   7.500000E-01   0.000000E+00
+       55       55      3     0.000000E+00   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       83
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           83
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       47       47      1     1.250000E-01   6.250000E-01   0.000000E+00
+       48       48      2     2.500000E-01   6.250000E-01   0.000000E+00
+       57       57      3     2.500000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       84
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           84
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       47       47      1     1.250000E-01   6.250000E-01   0.000000E+00
+       57       57      2     2.500000E-01   7.500000E-01   0.000000E+00
+       56       56      3     1.250000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       85
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           85
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       48       48      1     2.500000E-01   6.250000E-01   0.000000E+00
+       49       49      2     3.750000E-01   6.250000E-01   0.000000E+00
+       58       58      3     3.750000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       86
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           86
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       48       48      1     2.500000E-01   6.250000E-01   0.000000E+00
+       58       58      2     3.750000E-01   7.500000E-01   0.000000E+00
+       57       57      3     2.500000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       87
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           87
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       49       49      1     3.750000E-01   6.250000E-01   0.000000E+00
+       50       50      2     5.000000E-01   6.250000E-01   0.000000E+00
+       59       59      3     5.000000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       88
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           88
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       49       49      1     3.750000E-01   6.250000E-01   0.000000E+00
+       59       59      2     5.000000E-01   7.500000E-01   0.000000E+00
+       58       58      3     3.750000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       89
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           89
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       50       50      1     5.000000E-01   6.250000E-01   0.000000E+00
+       51       51      2     6.250000E-01   6.250000E-01   0.000000E+00
+       60       60      3     6.250000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       90
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           90
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       50       50      1     5.000000E-01   6.250000E-01   0.000000E+00
+       60       60      2     6.250000E-01   7.500000E-01   0.000000E+00
+       59       59      3     5.000000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       91
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           91
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       51       51      1     6.250000E-01   6.250000E-01   0.000000E+00
+       52       52      2     7.500000E-01   6.250000E-01   0.000000E+00
+       61       61      3     7.500000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       92
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           92
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       51       51      1     6.250000E-01   6.250000E-01   0.000000E+00
+       61       61      2     7.500000E-01   7.500000E-01   0.000000E+00
+       60       60      3     6.250000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       93
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           93
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       52       52      1     7.500000E-01   6.250000E-01   0.000000E+00
+       53       53      2     8.750000E-01   6.250000E-01   0.000000E+00
+       62       62      3     8.750000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       94
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           94
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       52       52      1     7.500000E-01   6.250000E-01   0.000000E+00
+       62       62      2     8.750000E-01   7.500000E-01   0.000000E+00
+       61       61      3     7.500000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       95
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           95
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       53       53      1     8.750000E-01   6.250000E-01   0.000000E+00
+       54       54      2     1.000000E+00   6.250000E-01   0.000000E+00
+       63       63      3     1.000000E+00   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       96
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           96
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       53       53      1     8.750000E-01   6.250000E-01   0.000000E+00
+       63       63      2     1.000000E+00   7.500000E-01   0.000000E+00
+       62       62      3     8.750000E-01   7.500000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       97
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           97
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       55       55      1     0.000000E+00   7.500000E-01   0.000000E+00
+       56       56      2     1.250000E-01   7.500000E-01   0.000000E+00
+       65       65      3     1.250000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       98
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           98
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       55       55      1     0.000000E+00   7.500000E-01   0.000000E+00
+       65       65      2     1.250000E-01   8.750000E-01   0.000000E+00
+       64       64      3     0.000000E+00   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number       99
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =           99
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       56       56      1     1.250000E-01   7.500000E-01   0.000000E+00
+       57       57      2     2.500000E-01   7.500000E-01   0.000000E+00
+       66       66      3     2.500000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      100
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          100
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       56       56      1     1.250000E-01   7.500000E-01   0.000000E+00
+       66       66      2     2.500000E-01   8.750000E-01   0.000000E+00
+       65       65      3     1.250000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      101
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          101
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       57       57      1     2.500000E-01   7.500000E-01   0.000000E+00
+       58       58      2     3.750000E-01   7.500000E-01   0.000000E+00
+       67       67      3     3.750000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      102
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          102
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       57       57      1     2.500000E-01   7.500000E-01   0.000000E+00
+       67       67      2     3.750000E-01   8.750000E-01   0.000000E+00
+       66       66      3     2.500000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      103
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          103
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       58       58      1     3.750000E-01   7.500000E-01   0.000000E+00
+       59       59      2     5.000000E-01   7.500000E-01   0.000000E+00
+       68       68      3     5.000000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      104
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          104
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       58       58      1     3.750000E-01   7.500000E-01   0.000000E+00
+       68       68      2     5.000000E-01   8.750000E-01   0.000000E+00
+       67       67      3     3.750000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      105
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          105
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       59       59      1     5.000000E-01   7.500000E-01   0.000000E+00
+       60       60      2     6.250000E-01   7.500000E-01   0.000000E+00
+       69       69      3     6.250000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      106
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          106
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       59       59      1     5.000000E-01   7.500000E-01   0.000000E+00
+       69       69      2     6.250000E-01   8.750000E-01   0.000000E+00
+       68       68      3     5.000000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      107
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          107
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       60       60      1     6.250000E-01   7.500000E-01   0.000000E+00
+       61       61      2     7.500000E-01   7.500000E-01   0.000000E+00
+       70       70      3     7.500000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      108
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          108
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       60       60      1     6.250000E-01   7.500000E-01   0.000000E+00
+       70       70      2     7.500000E-01   8.750000E-01   0.000000E+00
+       69       69      3     6.250000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      109
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          109
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       61       61      1     7.500000E-01   7.500000E-01   0.000000E+00
+       62       62      2     8.750000E-01   7.500000E-01   0.000000E+00
+       71       71      3     8.750000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      110
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          110
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       61       61      1     7.500000E-01   7.500000E-01   0.000000E+00
+       71       71      2     8.750000E-01   8.750000E-01   0.000000E+00
+       70       70      3     7.500000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      111
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          111
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       62       62      1     8.750000E-01   7.500000E-01   0.000000E+00
+       63       63      2     1.000000E+00   7.500000E-01   0.000000E+00
+       72       72      3     1.000000E+00   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      112
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          112
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       62       62      1     8.750000E-01   7.500000E-01   0.000000E+00
+       72       72      2     1.000000E+00   8.750000E-01   0.000000E+00
+       71       71      3     8.750000E-01   8.750000E-01   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      113
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          113
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       64       64      1     0.000000E+00   8.750000E-01   0.000000E+00
+       65       65      2     1.250000E-01   8.750000E-01   0.000000E+00
+       74       74      3     1.250000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      114
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          114
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       64       64      1     0.000000E+00   8.750000E-01   0.000000E+00
+       74       74      2     1.250000E-01   1.000000E+00   0.000000E+00
+       73       73      3     0.000000E+00   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      115
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          115
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       65       65      1     1.250000E-01   8.750000E-01   0.000000E+00
+       66       66      2     2.500000E-01   8.750000E-01   0.000000E+00
+       75       75      3     2.500000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      116
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          116
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       65       65      1     1.250000E-01   8.750000E-01   0.000000E+00
+       75       75      2     2.500000E-01   1.000000E+00   0.000000E+00
+       74       74      3     1.250000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      117
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          117
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       66       66      1     2.500000E-01   8.750000E-01   0.000000E+00
+       67       67      2     3.750000E-01   8.750000E-01   0.000000E+00
+       76       76      3     3.750000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      118
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          118
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       66       66      1     2.500000E-01   8.750000E-01   0.000000E+00
+       76       76      2     3.750000E-01   1.000000E+00   0.000000E+00
+       75       75      3     2.500000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      119
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          119
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       67       67      1     3.750000E-01   8.750000E-01   0.000000E+00
+       68       68      2     5.000000E-01   8.750000E-01   0.000000E+00
+       77       77      3     5.000000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      120
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          120
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       67       67      1     3.750000E-01   8.750000E-01   0.000000E+00
+       77       77      2     5.000000E-01   1.000000E+00   0.000000E+00
+       76       76      3     3.750000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      121
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          121
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       68       68      1     5.000000E-01   8.750000E-01   0.000000E+00
+       69       69      2     6.250000E-01   8.750000E-01   0.000000E+00
+       78       78      3     6.250000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      122
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          122
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       68       68      1     5.000000E-01   8.750000E-01   0.000000E+00
+       78       78      2     6.250000E-01   1.000000E+00   0.000000E+00
+       77       77      3     5.000000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      123
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          123
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       69       69      1     6.250000E-01   8.750000E-01   0.000000E+00
+       70       70      2     7.500000E-01   8.750000E-01   0.000000E+00
+       79       79      3     7.500000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      124
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          124
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       69       69      1     6.250000E-01   8.750000E-01   0.000000E+00
+       79       79      2     7.500000E-01   1.000000E+00   0.000000E+00
+       78       78      3     6.250000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      125
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          125
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       70       70      1     7.500000E-01   8.750000E-01   0.000000E+00
+       71       71      2     8.750000E-01   8.750000E-01   0.000000E+00
+       80       80      3     8.750000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      126
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          126
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       70       70      1     7.500000E-01   8.750000E-01   0.000000E+00
+       80       80      2     8.750000E-01   1.000000E+00   0.000000E+00
+       79       79      3     7.500000E-01   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      127
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          127
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       71       71      1     8.750000E-01   8.750000E-01   0.000000E+00
+       72       72      2     1.000000E+00   8.750000E-01   0.000000E+00
+       81       81      3     1.000000E+00   1.000000E+00   0.000000E+00
+
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ -----------------------------------------------------------------------------------------------------------------------------------
+ ELDATA( 0,PRINT) requests for TRIA3    element number      128
+ ==============================================================
+
+
+   Shell routing: CTRIAR composite path uses laminated DKMT18 kernel
+
+   Internal element number,       INT_ELEM_ID  =          128
+   Number of grids elem is connected to, ELGP  =            3
+   Number of DOFs  elem is connected to, ELDOF =           18
+
+   Actual & Internal G.P.s and basic coordinates (AGRID, BGRID, I, XEB)
+   --------------------------------------------------------------------
+          Grid Number                   Basic System Coordinates
+   Actual  Internal  Element        X              Y              Z
+       71       71      1     8.750000E-01   8.750000E-01   0.000000E+00
+       81       81      2     1.000000E+00   1.000000E+00   0.000000E+00
+       80       80      3     8.750000E-01   1.000000E+00   0.000000E+00
+
+
+ >> MYSTRAN END    :  5/19/2026 at  4: 7:43.838

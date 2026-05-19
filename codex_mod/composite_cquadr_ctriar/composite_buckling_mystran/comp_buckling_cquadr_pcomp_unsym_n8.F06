@@ -1,0 +1,1005 @@
+   519130635
+
+ MYSTRAN Version 18.0.0   APR 20 2026 MYSTRAN developed by Dr Bill Case
+*** Please report any problems to mystransolver@gmail.com ***                                                                                                                                                                                                   
+
+ >> MYSTRAN BEGIN  :  5/19/2026 at 13: 6:35.424 The input file is D:\fortran\mystran3\codex_mod\composite_buckling_mystran\comp_buckling_cquadr_pcomp_unsym_n8.dat                                                                                                                                                                
+
+
+ >> LINK  0 BEGIN
+
+
+ID COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                          
+SOL 5                                                                                                                                                                                                                                                           
+CEND                                                                                                                                                                                                                                                            
+TITLE = COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                     
+ECHO = NONE                                                                                                                                                                                                                                                     
+DISP(PRINT) = ALL                                                                                                                                                                                                                                               
+SPCFORCE(PRINT) = ALL                                                                                                                                                                                                                                           
+GPFORCE(PRINT) = ALL                                                                                                                                                                                                                                            
+OLOAD(PRINT) = ALL                                                                                                                                                                                                                                              
+STRESS(PRINT) = ALL                                                                                                                                                                                                                                             
+STRAIN(PRINT) = ALL                                                                                                                                                                                                                                             
+SUBCASE 1                                                                                                                                                                                                                                                       
+  SPC = 1                                                                                                                                                                                                                                                       
+  LOAD = 10                                                                                                                                                                                                                                                     
+SUBCASE 2                                                                                                                                                                                                                                                       
+  METHOD = 20                                                                                                                                                                                                                                                   
+BEGIN BULK                                                                                                                                                                                                                                                      
+
+
+
+
+
+CMASSPROCDBG: CMASS / PMASS / RPMASS SNAPSHOT
+CMASSPROCDBG NCMASS =       0
+CMASSPROCDBG NPMASS =       0
+
+       O U T P U T   F R O M   T H E   G R I D   P O I N T   W E I G H T   G E N E R A T O R   F O R   O V E R A L L   M O D E L
+                                             (reference point is basic coord system origin)
+
+                                                      Total mass =  0.000000E+00
+
+                                                             X             Y             Z
+                                       C.G. location :  0.000000E+00  0.000000E+00  0.000000E+00
+                                        (relative to reference point in basic coordinate system)
+
+
+                             6x6 Rigid body mass matrix - about reference point in basic coordinate system
+                      ***                                                                                     ***
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00 -0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  * -0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00 -0.000000E+00  0.000000E+00  *
+                      *  ************  ************  ************  *  ************  ************  ************  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      ***                                                                                     ***
+
+
+                                    M.O.I. matrix - about reference point in basic coordinate system
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                  M.O.I. matrix - about above c.g. location in basic coordinate system
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                     M.O.I. matrix - about above c.g. location in principal directions
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                     Transformation from basic coordinates to principal directions
+                                             ***                                        ***
+                                             *  1.000000E+00  0.000000E+00  0.000000E+00  *
+                                             * -0.000000E+00  1.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  1.000000E+00  *
+                                             ***                                        ***
+
+
+
+ >> LINK  0 END
+
+
+ >> LINK  1 BEGIN
+
+MGGGRIDDBG I,GRID_NUM =      77      77
+MGGGRIDDBG I,GRID_NUM =      78      78
+MGGGRIDDBG I,GRID_NUM =      79      79
+MGGGRIDDBG I,GRID_NUM =      80      80
+MGGGRIDDBG I,GRID_NUM =      81      81
+ INFORMATION : CQUADR element        1 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        2 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        3 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        4 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        5 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        6 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        7 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        8 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        9 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       10 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       11 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       12 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       13 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       14 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       15 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       16 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       17 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       18 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       19 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       20 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       21 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       22 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       23 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       24 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       25 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       26 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       27 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       28 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       29 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       30 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       31 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       32 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       33 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       34 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       35 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       36 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       37 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       38 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       39 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       40 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       41 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       42 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       43 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       44 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       45 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       46 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       47 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       48 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       49 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       50 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       51 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       52 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       53 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       54 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       55 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       56 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       57 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       58 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       59 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       60 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       61 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       62 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       63 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       64 is using DKMQ24 composite shell path
+               DEALLOCATED  5.90E-01 MB MEMORY FROM ARRAY STF3
+
+               DEALLOCATED  1.94E-03 MB MEMORY FROM ARRAY STFKEY
+               DEALLOCATED  5.90E-01 MB MEMORY FROM ARRAY STF3
+
+ >> LINK  1 END
+
+
+ >> LINK  2 BEGIN
+
+
+ *INFORMATION: AUTOSPC Summary, Overall: after identification of all AUTOSPC's                                                               
+
+                                     AUTOSPC_RAT = 1.000000E-08
+
+                       Number of DOF's identified for AUTOSPC in component  1         =            0
+                       Number of DOF's identified for AUTOSPC in component  2         =            0
+                       Number of DOF's identified for AUTOSPC in component  3         =            0
+                       Number of DOF's identified for AUTOSPC in component  4         =            0
+                       Number of DOF's identified for AUTOSPC in component  5         =            0
+                       Number of DOF's identified for AUTOSPC in component  6         =            0
+                                                                                        ------------
+                       Total number of DOF's identified overall                       =            0
+
+
+ >> LINK  2 END
+
+
+ >> LINK  3 BEGIN
+
+ *INFORMATION: MAXIMUM DIAGONAL TERM IN MATRIX         KLL                            =  1.038980E+09 Occurs in row/col no.       67
+ *INFORMATION: MINIMUM DIAGONAL TERM IN MATRIX         KLL                            =  8.043415E+01 Occurs in row/col no.      451
+ *INFORMATION: RATIO OF MAX TO MIN DIAGONALS IN MATRIX         KLL                    =  1.291715E+07
+
+ *INFORMATION: THE MAXIMUM ABSOLUTE VALUE OF THE RATIO OF MATRIX DIAGONAL TO FACTOR DIAG FOR MATRIX KLL =   6.884947E+03
+               THIS IS FOR ROW AND COL IN THE MATRIX FOR GRID POINT       73 COMP   1. THE CALLING SUBR WAS: LINK3                          
+
+
+ *INFORMATION: FOR INTERNAL SUBCASE NUMBER        1 EPSILON ERROR ESTIMATE            =  1.954238E-15 Based on U'*(K*U - P)/(U'*P)
+
+ *WARNING    : CANNOT CALCULATE EPSILON ERROR ESTIMATE FOR INTERNAL SUBCASE NUMBER        2
+               THE DOT PRODUCT OF DISPL AND LOAD VECTORS                     =    0.000000E+00 CANNOT BE INVERTED.
+               IT IS TOO SMALL COMPARED TO MACHINE SAFE MINIMUM (MACH_SFMIN) =    2.225074-308
+
+
+ >> LINK  3 END
+
+
+ >> LINK  5 BEGIN
+
+
+ >> LINK  5 END
+
+
+ >> LINK  9 BEGIN
+
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                             
+
+                                                       D I S P L A C E M E N T S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0          -1.099817E-05  6.300398E-05  0.0         
+              2        0 -1.326691E-06 -1.789308E-07  0.0          -1.816935E-04 -6.153822E-06  0.0         
+              3        0 -2.563330E-06 -2.581266E-07  0.0          -2.605726E-04  8.716028E-06  0.0         
+              4        0 -3.823828E-06 -2.936195E-07  0.0          -2.972323E-04  3.110410E-07  0.0         
+              5        0 -5.075861E-06 -3.054265E-07  0.0          -3.085385E-04  3.405558E-19  0.0         
+              6        0 -6.327894E-06 -2.936195E-07  0.0          -2.972323E-04 -3.110410E-07  0.0         
+              7        0 -7.588392E-06 -2.581266E-07  0.0          -2.605726E-04 -8.716028E-06  0.0         
+              8        0 -8.825030E-06 -1.789308E-07  0.0          -1.816935E-04  6.153822E-06  0.0         
+              9        0 -1.015172E-05  0.0           0.0          -1.099817E-05 -6.300398E-05  0.0         
+             10        0  2.015167E-07  7.071583E-09  0.0          -1.016106E-05  2.484890E-04  0.0         
+             11        0 -1.198820E-06 -1.421330E-07 -2.191925E-05 -1.491257E-04  1.097747E-04  0.0         
+             12        0 -2.514963E-06 -2.298216E-07 -3.156319E-05 -2.353116E-04  5.061487E-05  0.0         
+             13        0 -3.797591E-06 -2.681011E-07 -3.621487E-05 -2.740978E-04  2.336255E-05  0.0         
+             14        0 -5.075861E-06 -2.798412E-07 -3.764482E-05 -2.854639E-04  1.484333E-18  0.0         
+             15        0 -6.354130E-06 -2.681011E-07 -3.621487E-05 -2.740978E-04 -2.336255E-05  0.0         
+             16        0 -7.636758E-06 -2.298216E-07 -3.156319E-05 -2.353116E-04 -5.061487E-05  0.0         
+             17        0 -8.952902E-06 -1.421330E-07 -2.191925E-05 -1.491257E-04 -1.097747E-04  0.0         
+             18        0 -1.035324E-05  7.071583E-09  0.0          -1.016106E-05 -2.484890E-04  0.0         
+             19        0  3.435569E-07  1.762988E-08  0.0          -7.281658E-06  3.808962E-04  0.0         
+             20        0 -1.082292E-06 -7.550119E-08 -3.713293E-05 -9.098529E-05  2.189117E-04  0.0         
+             21        0 -2.450994E-06 -1.552372E-07 -5.726406E-05 -1.691005E-04  1.108505E-04  0.0         
+             22        0 -3.773030E-06 -1.953108E-07 -6.682057E-05 -2.079988E-04  4.638431E-05  0.0         
+             23        0 -5.075861E-06 -2.071618E-07 -6.966407E-05 -2.197769E-04  1.397937E-18  0.0         
+             24        0 -6.378692E-06 -1.953108E-07 -6.682057E-05 -2.079988E-04 -4.638431E-05  0.0         
+             25        0 -7.700728E-06 -1.552372E-07 -5.726406E-05 -1.691005E-04 -1.108505E-04  0.0         
+             26        0 -9.069430E-06 -7.550119E-08 -3.713293E-05 -9.098529E-05 -2.189117E-04  0.0         
+             27        0 -1.049528E-05  1.762988E-08  0.0          -7.281658E-06 -3.808962E-04  0.0         
+             28        0  4.219449E-07  2.769369E-08  0.0          -3.145585E-06  4.516031E-04  0.0         
+             29        0 -1.009168E-06 -1.956937E-08 -4.578265E-05 -4.492504E-05  2.844852E-04  0.0         
+             30        0 -2.398179E-06 -6.037223E-08 -7.321680E-05 -8.491157E-05  1.578494E-04  0.0         
+             31        0 -3.748965E-06 -8.796744E-08 -8.708498E-05 -1.112761E-04  6.768127E-05  0.0         
+             32        0 -5.075861E-06 -9.673892E-08 -9.122723E-05 -1.198101E-04 -1.580447E-18  0.0         
+             33        0 -6.402756E-06 -8.796744E-08 -8.708498E-05 -1.112761E-04 -6.768127E-05  0.0         
+             34        0 -7.753542E-06 -6.037223E-08 -7.321680E-05 -8.491157E-05 -1.578494E-04  0.0         
+             35        0 -9.142553E-06 -1.956937E-08 -4.578265E-05 -4.492504E-05 -2.844852E-04  0.0         
+             36        0 -1.057367E-05  2.769369E-08  0.0          -3.145585E-06 -4.516031E-04  0.0         
+             37        0  4.479857E-07  3.584105E-08  0.0          -2.398954E-19  4.751285E-04  0.0         
+             38        0 -9.849302E-07  3.584105E-08 -4.864415E-05 -2.940351E-18  3.064408E-04  0.0         
+             39        0 -2.379021E-06  3.584105E-08 -7.854038E-05 -4.900885E-18  1.751248E-04  0.0         
+             40        0 -3.738516E-06  3.584105E-08 -9.412608E-05 -3.121774E-18  7.697731E-05  0.0         
+             41        0 -5.075861E-06  3.584105E-08 -9.885046E-05 -2.318763E-18 -3.441949E-18  0.0         
+             42        0 -6.413206E-06  3.584105E-08 -9.412608E-05 -7.660484E-19 -7.697731E-05  0.0         
+             43        0 -7.772701E-06  3.584105E-08 -7.854038E-05  5.796366E-19 -1.751248E-04  0.0         
+             44        0 -9.166791E-06  3.584105E-08 -4.864415E-05  7.867201E-19 -3.064408E-04  0.0         
+             45        0 -1.059971E-05  3.584105E-08  0.0          -1.519819E-20 -4.751285E-04  0.0         
+             46        0  4.219449E-07  4.398842E-08  0.0           3.145585E-06  4.516031E-04  0.0         
+             47        0 -1.009168E-06  9.125148E-08 -4.578265E-05  4.492504E-05  2.844852E-04  0.0         
+             48        0 -2.398179E-06  1.320543E-07 -7.321680E-05  8.491157E-05  1.578494E-04  0.0         
+             49        0 -3.748965E-06  1.596495E-07 -8.708498E-05  1.112761E-04  6.768127E-05  0.0         
+             50        0 -5.075861E-06  1.684210E-07 -9.122723E-05  1.198101E-04 -4.290788E-18  0.0         
+             51        0 -6.402756E-06  1.596495E-07 -8.708498E-05  1.112761E-04 -6.768127E-05  0.0         
+             52        0 -7.753542E-06  1.320543E-07 -7.321680E-05  8.491157E-05 -1.578494E-04  0.0         
+             53        0 -9.142553E-06  9.125148E-08 -4.578265E-05  4.492504E-05 -2.844852E-04  0.0         
+             54        0 -1.057367E-05  4.398842E-08  0.0           3.145585E-06 -4.516031E-04  0.0         
+             55        0  3.435569E-07  5.405223E-08  0.0           7.281658E-06  3.808962E-04  0.0         
+             56        0 -1.082292E-06  1.471833E-07 -3.713293E-05  9.098529E-05  2.189117E-04  0.0         
+             57        0 -2.450994E-06  2.269193E-07 -5.726406E-05  1.691005E-04  1.108505E-04  0.0         
+             58        0 -3.773030E-06  2.669929E-07 -6.682057E-05  2.079988E-04  4.638431E-05  0.0         
+             59        0 -5.075861E-06  2.788439E-07 -6.966407E-05  2.197769E-04 -4.700204E-18  0.0         
+             60        0 -6.378692E-06  2.669929E-07 -6.682057E-05  2.079988E-04 -4.638431E-05  0.0         
+             61        0 -7.700728E-06  2.269193E-07 -5.726406E-05  1.691005E-04 -1.108505E-04  0.0         
+             62        0 -9.069430E-06  1.471833E-07 -3.713293E-05  9.098529E-05 -2.189117E-04  0.0         
+             63        0 -1.049528E-05  5.405223E-08  0.0           7.281658E-06 -3.808962E-04  0.0         
+             64        0  2.015167E-07  6.461053E-08  0.0           1.016106E-05  2.484890E-04  0.0         
+             65        0 -1.198820E-06  2.138151E-07 -2.191925E-05  1.491257E-04  1.097747E-04  0.0         
+             66        0 -2.514963E-06  3.015037E-07 -3.156319E-05  2.353116E-04  5.061487E-05  0.0         
+             67        0 -3.797591E-06  3.397832E-07 -3.621487E-05  2.740978E-04  2.336255E-05  0.0         
+             68        0 -5.075861E-06  3.515233E-07 -3.764482E-05  2.854639E-04 -2.864808E-18  0.0         
+             69        0 -6.354130E-06  3.397832E-07 -3.621487E-05  2.740978E-04 -2.336255E-05  0.0         
+             70        0 -7.636758E-06  3.015037E-07 -3.156319E-05  2.353116E-04 -5.061487E-05  0.0         
+             71        0 -8.952902E-06  2.138151E-07 -2.191925E-05  1.491257E-04 -1.097747E-04  0.0         
+             72        0 -1.035324E-05  6.461053E-08  0.0           1.016106E-05 -2.484890E-04  0.0         
+             73        0 -4.144595E-19  7.168211E-08  0.0           1.099817E-05  6.300398E-05  0.0         
+             74        0 -1.326691E-06  2.506129E-07  0.0           1.816935E-04 -6.153822E-06  0.0         
+             75        0 -2.563330E-06  3.298087E-07  0.0           2.605726E-04  8.716028E-06  0.0         
+             76        0 -3.823828E-06  3.653016E-07  0.0           2.972323E-04  3.110410E-07  0.0         
+             77        0 -5.075861E-06  3.771086E-07  0.0           3.085385E-04 -7.332270E-20  0.0         
+             78        0 -6.327894E-06  3.653016E-07  0.0           2.972323E-04 -3.110410E-07  0.0         
+             79        0 -7.588392E-06  3.298087E-07  0.0           2.605726E-04 -8.716028E-06  0.0         
+             80        0 -8.825030E-06  2.506129E-07  0.0           1.816935E-04  6.153822E-06  0.0         
+             81        0 -1.015172E-05  7.168211E-08  0.0           1.099817E-05 -6.300398E-05  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    4.479857E-07  3.771086E-07  0.0           3.085385E-04  4.751285E-04  0.0         
+                MIN* :   -1.059971E-05 -3.054265E-07 -9.885046E-05 -3.085385E-04 -4.751285E-04  0.0         
+
+                ABS* :    1.059971E-05  3.771086E-07  9.885046E-05  3.085385E-04  4.751285E-04  0.0         
+                *for output set
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                             
+
+                                                     A P P L I E D    F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  4.557719E+02  1.760222E+01  0.0           0.0           0.0           0.0         
+              2        0  0.0           3.520445E+01  0.0           0.0           0.0           0.0         
+              3        0  0.0           3.520445E+01  0.0           0.0           0.0           0.0         
+              4        0  0.0           3.520445E+01  0.0           0.0           0.0           0.0         
+              5        0  0.0           3.520445E+01  0.0           0.0           0.0           0.0         
+              6        0  0.0           3.520445E+01  0.0           0.0           0.0           0.0         
+              7        0  0.0           3.520445E+01  0.0           0.0           0.0           0.0         
+              8        0  0.0           3.520445E+01  0.0           0.0           0.0           0.0         
+              9        0 -4.557719E+02  1.760222E+01  0.0           0.0           0.0           0.0         
+             10        0  9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             18        0 -9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             19        0  9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             27        0 -9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             28        0  9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             36        0 -9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             37        0  9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             45        0 -9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             46        0  9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             54        0 -9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             55        0  9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             63        0 -9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             64        0  9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             72        0 -9.115437E+02  0.0           0.0           0.0           0.0           0.0         
+             73        0  4.557719E+02 -1.760222E+01  0.0           0.0           0.0           0.0         
+             74        0  0.0          -3.520445E+01  0.0           0.0           0.0           0.0         
+             75        0  0.0          -3.520445E+01  0.0           0.0           0.0           0.0         
+             76        0  0.0          -3.520445E+01  0.0           0.0           0.0           0.0         
+             77        0  0.0          -3.520445E+01  0.0           0.0           0.0           0.0         
+             78        0  0.0          -3.520445E+01  0.0           0.0           0.0           0.0         
+             79        0  0.0          -3.520445E+01  0.0           0.0           0.0           0.0         
+             80        0  0.0          -3.520445E+01  0.0           0.0           0.0           0.0         
+             81        0 -4.557719E+02 -1.760222E+01  0.0           0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    9.115437E+02  3.520445E+01  0.0           0.0           0.0           0.0         
+                MIN* :   -9.115437E+02 -3.520445E+01  0.0           0.0           0.0           0.0         
+
+                ABS* :    9.115437E+02  3.520445E+01  0.0           0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ APPLIED FORCE TOTALS:    0.0           3.552714E-15  0.0           0.0           0.0           0.0         
+   (for output set)
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                             
+
+                                                          S P C   F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  2.114575E-11  8.824941E-12 -5.189287E+00  0.0           0.0           0.0         
+              2        0  0.0           0.0           7.697165E+00  0.0           0.0           0.0         
+              3        0  0.0           0.0           1.939057E+00  0.0           0.0           0.0         
+              4        0  0.0           0.0           2.789494E+00  0.0           0.0           0.0         
+              5        0  0.0           0.0           2.076800E+00  0.0           0.0           0.0         
+              6        0  0.0           0.0           2.789494E+00  0.0           0.0           0.0         
+              7        0  0.0           0.0           1.939057E+00  0.0           0.0           0.0         
+              8        0  0.0           0.0           7.697165E+00  0.0           0.0           0.0         
+              9        0  0.0          -8.110845E-12 -5.189287E+00  0.0           0.0           0.0         
+             10        0  0.0           0.0          -5.005594E+00  0.0           0.0           0.0         
+             18        0  0.0           0.0          -5.005594E+00  0.0           0.0           0.0         
+             19        0  0.0           0.0          -1.667530E+00  0.0           0.0           0.0         
+             27        0  0.0           0.0          -1.667530E+00  0.0           0.0           0.0         
+             28        0  0.0           0.0          -1.079659E+00  0.0           0.0           0.0         
+             36        0  0.0           0.0          -1.079659E+00  0.0           0.0           0.0         
+             37        0  0.0           0.0          -1.044094E+00  0.0           0.0           0.0         
+             45        0  0.0           0.0          -1.044094E+00  0.0           0.0           0.0         
+             46        0  0.0           0.0          -1.079659E+00  0.0           0.0           0.0         
+             54        0  0.0           0.0          -1.079659E+00  0.0           0.0           0.0         
+             55        0  0.0           0.0          -1.667530E+00  0.0           0.0           0.0         
+             63        0  0.0           0.0          -1.667530E+00  0.0           0.0           0.0         
+             64        0  0.0           0.0          -5.005594E+00  0.0           0.0           0.0         
+             72        0  0.0           0.0          -5.005594E+00  0.0           0.0           0.0         
+             73        0  0.0           0.0          -5.189287E+00  0.0           0.0           0.0         
+             74        0  0.0           0.0           7.697165E+00  0.0           0.0           0.0         
+             75        0  0.0           0.0           1.939057E+00  0.0           0.0           0.0         
+             76        0  0.0           0.0           2.789494E+00  0.0           0.0           0.0         
+             77        0  0.0           0.0           2.076800E+00  0.0           0.0           0.0         
+             78        0  0.0           0.0           2.789494E+00  0.0           0.0           0.0         
+             79        0  0.0           0.0           1.939057E+00  0.0           0.0           0.0         
+             80        0  0.0           0.0           7.697165E+00  0.0           0.0           0.0         
+             81        0  0.0           0.0          -5.189287E+00  0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    2.114575E-11  8.824941E-12  7.697165E+00  0.0           0.0           0.0         
+                MIN* :    0.0          -8.110845E-12 -5.189287E+00  0.0           0.0           0.0         
+
+                ABS* :    2.114575E-11  8.824941E-12  7.697165E+00  0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+     SPC FORCE TOTALS:    2.114575E-11  7.140954E-13  5.491607E-12  0.0           0.0           0.0         
+     (for output set)
+
+ >> LINK  9 END
+
+ >> LINK  1 BEGIN
+
+MGGGRIDDBG I,GRID_NUM =      77      77
+MGGGRIDDBG I,GRID_NUM =      78      78
+MGGGRIDDBG I,GRID_NUM =      79      79
+MGGGRIDDBG I,GRID_NUM =      80      80
+MGGGRIDDBG I,GRID_NUM =      81      81
+ INFORMATION : CQUADR element        1 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        2 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        3 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        4 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        5 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        6 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        7 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        8 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element        9 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       10 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       11 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       12 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       13 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       14 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       15 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       16 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       17 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       18 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       19 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       20 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       21 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       22 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       23 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       24 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       25 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       26 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       27 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       28 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       29 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       30 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       31 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       32 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       33 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       34 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       35 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       36 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       37 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       38 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       39 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       40 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       41 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       42 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       43 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       44 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       45 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       46 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       47 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       48 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       49 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       50 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       51 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       52 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       53 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       54 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       55 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       56 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       57 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       58 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       59 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       60 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       61 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       62 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       63 is using DKMQ24 composite shell path
+ INFORMATION : CQUADR element       64 is using DKMQ24 composite shell path
+               DEALLOCATED  5.90E-01 MB MEMORY FROM ARRAY STF3
+               DEALLOCATED  1.94E-03 MB MEMORY FROM ARRAY STFKEY
+               DEALLOCATED  5.90E-01 MB MEMORY FROM ARRAY STF3
+
+ >> LINK  1 END
+
+
+ >> LINK  2 BEGIN
+
+ *INFORMATION: MAX DIAGONAL TERM IN THE KGGD MATRIX IS =  0.00E+00 WHICH IS TOO SMALL FOR CALCULATION OF MATRIX STATS
+               IN SUBR GET_MATRIX_DIAG_STATS          
+ *INFORMATION: MAX DIAGONAL TERM IN THE KNND MATRIX IS =  0.00E+00 WHICH IS TOO SMALL FOR CALCULATION OF MATRIX STATS
+               IN SUBR GET_MATRIX_DIAG_STATS          
+ *INFORMATION: MAX DIAGONAL TERM IN THE KAAD MATRIX IS =  0.00E+00 WHICH IS TOO SMALL FOR CALCULATION OF MATRIX STATS
+               IN SUBR GET_MATRIX_DIAG_STATS          
+ *INFORMATION: MAX DIAGONAL TERM IN THE KLLD MATRIX IS =  0.00E+00 WHICH IS TOO SMALL FOR CALCULATION OF MATRIX STATS
+               IN SUBR GET_MATRIX_DIAG_STATS          
+
+ >> LINK  2 END
+
+
+ >> LINK  4 BEGIN
+
+ *INFORMATION: ARPACK LINEAR BACKEND FOR MATRIX KMSM IN EIG_LANCZOS_ARPACK             : ARPACK + LAPACK GENERAL BAND
+               ARPKSOLV=SOLLIB   EFFECTIVE SOLLIB=BANDED USES DGBTRF/DGBTRS; NO AUTOMATIC SUPERLU FALLBACK IS ENABLED.
+
+
+ >> LINK  4 END
+
+
+ >> LINK  5 BEGIN
+
+
+                           E I G E N V A L U E   A N A L Y S I S   S U M M A R Y   (LANCZOS BANDED Mode 2 DGB, Shift eigen = -1.00E+00)
+                                                                      BANDED solution
+
+                                NUMBER OF EIGENVALUES EXTRACTED  . . . . . .         3
+
+                                EXTRACT BACKEND . . . . . . . . . . . . . . . . . . ARPACK
+                                  MODE = 2, LAP MAT = DGB, NCVFACL = 3, SHIFT = -1.0000E+00
+
+                                LARGEST OFF-DIAGONAL GENERALIZED MASS TERM     9.7E-11 (Vecs renormed to 1.0 for max value)
+
+                                                                       . . .         2
+                                          MODE PAIR . . . . . . . . . .
+                                                                       . . .         1
+
+                                NUMBER OF OFF DIAGONAL GENERALIZED MASS
+                                TERMS FAILING CRITERION OF  1.0E-04. . . . .         0
+
+
+
+                                            R E A L   E I G E N V A L U E S
+                                           (subcase 1 buckling load factors)
+
+                                         MODE  EXTRACTION      EIGENVALUE
+                                        NUMBER   ORDER
+
+                                             1       1        1.523864E+01
+                                             2       2        3.111967E+01
+                                             3       3        6.414426E+01
+
+
+
+ >> LINK  5 END
+
+
+ >> LINK  9 BEGIN
+
+
+
+ OUTPUT FOR EIGENVECTOR        1
+ COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                             
+
+                                                         E I G E N V E C T O R
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0           2.461157E-02 -2.462522E-02  0.0         
+              2        0  1.188991E-06  4.103476E-04  0.0           3.790571E-01 -2.418592E-02  0.0         
+              3        0  6.326168E-06  7.660394E-04  0.0           7.079417E-01 -1.985595E-02  0.0         
+              4        0  1.574583E-05  1.003347E-03  0.0           9.200281E-01 -9.968433E-03  0.0         
+              5        0  2.436798E-05  1.086342E-03  0.0           9.947987E-01 -4.909036E-15  0.0         
+              6        0  3.299012E-05  1.003347E-03  0.0           9.200281E-01  9.968433E-03  0.0         
+              7        0  4.240978E-05  7.660394E-04  0.0           7.079417E-01  1.985595E-02  0.0         
+              8        0  4.754696E-05  4.103476E-04  0.0           3.790571E-01  2.418592E-02  0.0         
+              9        0  4.873595E-05  0.0           0.0           2.461157E-02  2.462522E-02  0.0         
+             10        0 -4.107202E-04 -1.161852E-06  0.0           2.423201E-02 -3.794371E-01  0.0         
+             11        0 -3.750528E-04  3.757139E-04  4.690240E-02  3.485910E-01 -3.480059E-01  0.0         
+             12        0 -2.777030E-04  7.033710E-04  8.626477E-02  6.518868E-01 -2.627028E-01  0.0         
+             13        0 -1.379547E-04  9.216356E-04  1.122831E-01  8.468633E-01 -1.410586E-01  0.0         
+             14        0  2.436798E-05  9.979206E-04  1.213636E-01  9.156339E-01 -4.100732E-14  0.0         
+             15        0  1.866907E-04  9.216356E-04  1.122831E-01  8.468633E-01  1.410586E-01  0.0         
+             16        0  3.264389E-04  7.033710E-04  8.626477E-02  6.518868E-01  2.627028E-01  0.0         
+             17        0  4.237888E-04  3.757139E-04  4.690240E-02  3.485910E-01  3.480059E-01  0.0         
+             18        0  4.594562E-04 -1.161852E-06  0.0           2.423201E-02  3.794371E-01  0.0         
+             19        0 -7.683485E-04 -6.293940E-06  0.0           1.998838E-02 -7.100272E-01  0.0         
+             20        0 -7.036775E-04  2.797877E-04  8.644104E-02  2.646428E-01 -6.521073E-01  0.0         
+             21        0 -5.259920E-04  5.288656E-04  1.590067E-01  4.954946E-01 -4.927357E-01  0.0         
+             22        0 -2.706045E-04  6.944032E-04  2.069266E-01  6.432223E-01 -2.639709E-01  0.0         
+             23        0  2.436798E-05  7.521317E-04  2.236391E-01  6.953258E-01 -5.882382E-14  0.0         
+             24        0  3.193405E-04  6.944032E-04  2.069266E-01  6.432223E-01  2.639709E-01  0.0         
+             25        0  5.747280E-04  5.288656E-04  1.590067E-01  4.954946E-01  4.927357E-01  0.0         
+             26        0  7.524135E-04  2.797877E-04  8.644104E-02  2.646428E-01  6.521073E-01  0.0         
+             27        0  8.170845E-04 -6.293940E-06  0.0           1.998838E-02  7.100272E-01  0.0         
+             28        0 -1.008241E-03 -1.581216E-05  0.0           1.008534E-02 -9.242655E-01  0.0         
+             29        0 -9.239738E-04  1.396906E-04  1.127133E-01  1.427617E-01 -8.487479E-01  0.0         
+             30        0 -6.922049E-04  2.735843E-04  2.073230E-01  2.668833E-01 -6.409302E-01  0.0         
+             31        0 -3.594159E-04  3.626557E-04  2.697566E-01  3.463530E-01 -3.431187E-01  0.0         
+             32        0  2.436798E-05  3.935696E-04  2.915138E-01  3.742479E-01 -6.928686E-14  0.0         
+             33        0  4.081518E-04  3.626557E-04  2.697566E-01  3.463530E-01  3.431187E-01  0.0         
+             34        0  7.409408E-04  2.735843E-04  2.073230E-01  2.668833E-01  6.409302E-01  0.0         
+             35        0  9.727098E-04  1.396906E-04  1.127133E-01  1.427617E-01  8.487479E-01  0.0         
+             36        0  1.056977E-03 -1.581216E-05  0.0           1.008534E-02  9.242655E-01  0.0         
+             37        0 -1.092418E-03 -2.460629E-05  0.0          -3.239174E-14 -1.000000E+00  0.0         
+             38        0 -1.001286E-03 -2.460629E-05  1.219112E-01  4.427532E-14 -9.183467E-01  0.0         
+             39        0 -7.504938E-04 -2.460629E-05  2.242372E-01  1.392034E-14 -6.934554E-01  0.0         
+             40        0 -3.904304E-04 -2.460629E-05  2.917442E-01  1.864690E-14 -3.710538E-01  0.0         
+             41        0  2.436798E-05 -2.460629E-05  3.152594E-01  2.818821E-14 -3.974952E-14  0.0         
+             42        0  4.391664E-04 -2.460629E-05  2.917442E-01  9.229490E-14  3.710538E-01  0.0         
+             43        0  7.992298E-04 -2.460629E-05  2.242372E-01  5.070538E-14  6.934554E-01  0.0         
+             44        0  1.050022E-03 -2.460629E-05  1.219112E-01  3.233990E-14  9.183467E-01  0.0         
+             45        0  1.141154E-03 -2.460629E-05  0.0           1.667713E-14  1.000000E+00  0.0         
+             46        0 -1.008241E-03 -3.340042E-05  0.0          -1.008534E-02 -9.242655E-01  0.0         
+             47        0 -9.239738E-04 -1.889032E-04  1.127133E-01 -1.427617E-01 -8.487479E-01  0.0         
+             48        0 -6.922049E-04 -3.227969E-04  2.073230E-01 -2.668833E-01 -6.409302E-01  0.0         
+             49        0 -3.594159E-04 -4.118683E-04  2.697566E-01 -3.463530E-01 -3.431187E-01  0.0         
+             50        0  2.436798E-05 -4.427822E-04  2.915138E-01 -3.742479E-01 -9.454990E-14  0.0         
+             51        0  4.081518E-04 -4.118683E-04  2.697566E-01 -3.463530E-01  3.431187E-01  0.0         
+             52        0  7.409408E-04 -3.227969E-04  2.073230E-01 -2.668833E-01  6.409302E-01  0.0         
+             53        0  9.727098E-04 -1.889032E-04  1.127133E-01 -1.427617E-01  8.487479E-01  0.0         
+             54        0  1.056977E-03 -3.340042E-05  0.0          -1.008534E-02  9.242655E-01  0.0         
+             55        0 -7.683485E-04 -4.291864E-05  0.0          -1.998838E-02 -7.100272E-01  0.0         
+             56        0 -7.036775E-04 -3.290003E-04  8.644104E-02 -2.646428E-01 -6.521073E-01  0.0         
+             57        0 -5.259920E-04 -5.780782E-04  1.590067E-01 -4.954946E-01 -4.927357E-01  0.0         
+             58        0 -2.706045E-04 -7.436158E-04  2.069266E-01 -6.432223E-01 -2.639709E-01  0.0         
+             59        0  2.436798E-05 -8.013443E-04  2.236391E-01 -6.953258E-01 -3.553564E-14  0.0         
+             60        0  3.193405E-04 -7.436158E-04  2.069266E-01 -6.432223E-01  2.639709E-01  0.0         
+             61        0  5.747280E-04 -5.780782E-04  1.590067E-01 -4.954946E-01  4.927357E-01  0.0         
+             62        0  7.524135E-04 -3.290003E-04  8.644104E-02 -2.646428E-01  6.521073E-01  0.0         
+             63        0  8.170845E-04 -4.291864E-05  0.0          -1.998838E-02  7.100272E-01  0.0         
+             64        0 -4.107202E-04 -4.805073E-05  0.0          -2.423201E-02 -3.794371E-01  0.0         
+             65        0 -3.750528E-04 -4.249265E-04  4.690240E-02 -3.485910E-01 -3.480059E-01  0.0         
+             66        0 -2.777030E-04 -7.525836E-04  8.626477E-02 -6.518868E-01 -2.627028E-01  0.0         
+             67        0 -1.379547E-04 -9.708482E-04  1.122831E-01 -8.468633E-01 -1.410586E-01  0.0         
+             68        0  2.436798E-05 -1.047133E-03  1.213636E-01 -9.156339E-01 -2.171534E-14  0.0         
+             69        0  1.866907E-04 -9.708482E-04  1.122831E-01 -8.468633E-01  1.410586E-01  0.0         
+             70        0  3.264389E-04 -7.525836E-04  8.626477E-02 -6.518868E-01  2.627028E-01  0.0         
+             71        0  4.237888E-04 -4.249265E-04  4.690240E-02 -3.485910E-01  3.480059E-01  0.0         
+             72        0  4.594562E-04 -4.805073E-05  0.0          -2.423201E-02  3.794371E-01  0.0         
+             73        0  1.896482E-17 -4.921258E-05  0.0          -2.461157E-02 -2.462522E-02  0.0         
+             74        0  1.188991E-06 -4.595602E-04  0.0          -3.790571E-01 -2.418592E-02  0.0         
+             75        0  6.326168E-06 -8.152520E-04  0.0          -7.079417E-01 -1.985595E-02  0.0         
+             76        0  1.574583E-05 -1.052560E-03  0.0          -9.200281E-01 -9.968433E-03  0.0         
+             77        0  2.436798E-05 -1.135555E-03  0.0          -9.947987E-01 -7.126301E-16  0.0         
+             78        0  3.299012E-05 -1.052560E-03  0.0          -9.200281E-01  9.968433E-03  0.0         
+             79        0  4.240978E-05 -8.152520E-04  0.0          -7.079417E-01  1.985595E-02  0.0         
+             80        0  4.754696E-05 -4.595602E-04  0.0          -3.790571E-01  2.418592E-02  0.0         
+             81        0  4.873595E-05 -4.921258E-05  0.0          -2.461157E-02  2.462522E-02  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    1.141154E-03  1.086342E-03  3.152594E-01  9.947987E-01  1.000000E+00  0.0         
+                MIN* :   -1.092418E-03 -1.135555E-03  0.0          -9.947987E-01 -1.000000E+00  0.0         
+
+                ABS* :    1.141154E-03  1.135555E-03  3.152594E-01  9.947987E-01  1.000000E+00  0.0         
+                *for output set
+
+
+ OUTPUT FOR EIGENVECTOR        1
+ COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                             
+
+                                                          S P C   F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           6.353813E+01  0.0           0.0           0.0         
+              2        0  0.0           0.0          -8.618173E+00  0.0           0.0           0.0         
+              3        0  0.0           0.0          -6.651390E+00  0.0           0.0           0.0         
+              4        0  0.0           0.0          -6.290724E+00  0.0           0.0           0.0         
+              5        0  0.0           0.0          -6.179064E+00  0.0           0.0           0.0         
+              6        0  0.0           0.0          -6.290724E+00  0.0           0.0           0.0         
+              7        0  0.0           0.0          -6.651390E+00  0.0           0.0           0.0         
+              8        0  0.0           0.0          -8.618173E+00  0.0           0.0           0.0         
+              9        0  0.0           0.0           6.353813E+01  0.0           0.0           0.0         
+             10        0  0.0           0.0           3.719222E+02  0.0           0.0           0.0         
+             18        0  0.0           0.0           3.719222E+02  0.0           0.0           0.0         
+             19        0  0.0           0.0           6.987889E+02  0.0           0.0           0.0         
+             27        0  0.0           0.0           6.987889E+02  0.0           0.0           0.0         
+             28        0  0.0           0.0           9.158891E+02  0.0           0.0           0.0         
+             36        0  0.0           0.0           9.158891E+02  0.0           0.0           0.0         
+             37        0  0.0           0.0           9.918814E+02  0.0           0.0           0.0         
+             45        0  0.0           0.0           9.918814E+02  0.0           0.0           0.0         
+             46        0  0.0           0.0           9.158891E+02  0.0           0.0           0.0         
+             54        0  0.0           0.0           9.158891E+02  0.0           0.0           0.0         
+             55        0  0.0           0.0           6.987889E+02  0.0           0.0           0.0         
+             63        0  0.0           0.0           6.987889E+02  0.0           0.0           0.0         
+             64        0  0.0           0.0           3.719222E+02  0.0           0.0           0.0         
+             72        0  0.0           0.0           3.719222E+02  0.0           0.0           0.0         
+             73        0  0.0           0.0           6.353813E+01  0.0           0.0           0.0         
+             74        0  0.0           0.0          -8.618173E+00  0.0           0.0           0.0         
+             75        0  0.0           0.0          -6.651390E+00  0.0           0.0           0.0         
+             76        0  0.0           0.0          -6.290724E+00  0.0           0.0           0.0         
+             77        0  0.0           0.0          -6.179064E+00  0.0           0.0           0.0         
+             78        0  0.0           0.0          -6.290724E+00  0.0           0.0           0.0         
+             79        0  0.0           0.0          -6.651390E+00  0.0           0.0           0.0         
+             80        0  0.0           0.0          -8.618173E+00  0.0           0.0           0.0         
+             81        0  0.0           0.0           6.353813E+01  0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           9.918814E+02  0.0           0.0           0.0         
+                MIN* :    0.0           0.0          -8.618173E+00  0.0           0.0           0.0         
+
+                ABS* :    0.0           0.0           9.918814E+02  0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+     SPC FORCE TOTALS:    0.0           0.0           1.008572E+04  0.0           0.0           0.0         
+     (for output set)
+
+
+ OUTPUT FOR EIGENVECTOR        2
+ COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                             
+
+                                                         E I G E N V E C T O R
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0          -2.278288E-02  2.371153E-02  0.0         
+              2        0 -6.119372E-06 -3.785397E-04  0.0          -3.448659E-01  1.745776E-02  0.0         
+              3        0 -2.008929E-05 -5.547459E-04  0.0          -4.925193E-01  5.104125E-04  0.0         
+              4        0 -3.408016E-05 -3.964742E-04  0.0          -3.458610E-01 -1.880368E-02  0.0         
+              5        0 -3.841049E-05 -1.769849E-16  0.0          -1.490588E-13 -2.574480E-02  0.0         
+              6        0 -3.408016E-05  3.964742E-04  0.0           3.458610E-01 -1.880368E-02  0.0         
+              7        0 -2.008929E-05  5.547459E-04  0.0           4.925193E-01  5.104125E-04  0.0         
+              8        0 -6.119372E-06  3.785397E-04  0.0           3.448659E-01  1.745776E-02  0.0         
+              9        0  6.458456E-17  0.0           0.0           2.278288E-02  2.371153E-02  0.0         
+             10        0  3.990636E-04  5.076279E-06  0.0          -2.241954E-02  3.795044E-01  0.0         
+             11        0  2.737948E-04 -3.441332E-04 -4.319848E-02 -3.168932E-01  2.656633E-01  0.0         
+             12        0 -2.233854E-05 -5.076899E-04 -6.071073E-02 -4.531537E-01 -3.062242E-03  0.0         
+             13        0 -3.122056E-04 -3.632084E-04 -4.272339E-02 -3.179275E-01 -2.653303E-01  0.0         
+             14        0 -4.314770E-04 -1.430282E-16 -1.585986E-14 -1.125915E-13 -3.731696E-01  0.0         
+             15        0 -3.122056E-04  3.632084E-04  4.272339E-02  3.179275E-01 -2.653303E-01  0.0         
+             16        0 -2.233854E-05  5.076899E-04  6.071073E-02  4.531537E-01 -3.062242E-03  0.0         
+             17        0  2.737948E-04  3.441332E-04  4.319848E-02  3.168932E-01  2.656633E-01  0.0         
+             18        0  3.990636E-04 -5.076279E-06  0.0           2.241954E-02  3.795044E-01  0.0         
+             19        0  7.553409E-04  2.042818E-05  0.0          -1.844497E-02  7.097680E-01  0.0         
+             20        0  5.243009E-04 -2.491667E-04 -7.960658E-02 -2.403654E-01  4.974397E-01  0.0         
+             21        0 -2.218411E-05 -3.776872E-04 -1.118918E-01 -3.442204E-01 -5.609429E-03  0.0         
+             22        0 -5.564591E-04 -2.717110E-04 -7.870145E-02 -2.411601E-01 -4.973417E-01  0.0         
+             23        0 -7.750636E-04 -7.192972E-17 -2.835053E-14 -4.617837E-14 -6.984990E-01  0.0         
+             24        0 -5.564591E-04  2.717110E-04  7.870145E-02  2.411601E-01 -4.973417E-01  0.0         
+             25        0 -2.218411E-05  3.776872E-04  1.118918E-01  3.442204E-01 -5.609429E-03  0.0         
+             26        0  5.243009E-04  2.491667E-04  7.960658E-02  2.403654E-01  4.974397E-01  0.0         
+             27        0  7.553409E-04 -2.042818E-05  0.0           1.844497E-02  7.097680E-01  0.0         
+             28        0  9.983656E-04  4.446374E-05  0.0          -9.342144E-03  9.241126E-01  0.0         
+             29        0  6.971841E-04 -1.105809E-04 -1.038252E-01 -1.300477E-01  6.477542E-01  0.0         
+             30        0 -1.608569E-05 -1.880518E-04 -1.459420E-01 -1.860929E-01 -7.518537E-03  0.0         
+             31        0 -7.130859E-04 -1.388701E-04 -1.026203E-01 -1.303996E-01 -6.475045E-01  0.0         
+             32        0 -9.979060E-04 -3.782849E-17 -3.354305E-14 -2.230935E-14 -9.089622E-01  0.0         
+             33        0 -7.130859E-04  1.388701E-04  1.026203E-01  1.303996E-01 -6.475045E-01  0.0         
+             34        0 -1.608569E-05  1.880518E-04  1.459420E-01  1.860929E-01 -7.518537E-03  0.0         
+             35        0  6.971841E-04  1.105809E-04  1.038252E-01  1.300477E-01  6.477542E-01  0.0         
+             36        0  9.983656E-04 -4.446374E-05  0.0           9.342144E-03  9.241126E-01  0.0         
+             37        0  1.095043E-03  7.067085E-05  0.0           2.929225E-14  1.000000E+00  0.0         
+             38        0  7.693317E-04  5.300313E-05 -1.123227E-01 -1.053498E-14  7.010675E-01  0.0         
+             39        0 -2.354106E-06  3.533542E-05 -1.578972E-01  2.366706E-14 -8.092326E-03  0.0         
+             40        0 -7.564676E-04  1.766771E-05 -1.110215E-01  9.517071E-15 -7.008551E-01  0.0         
+             41        0 -1.064444E-03  1.544698E-17 -3.284227E-14  2.573486E-14 -9.837073E-01  0.0         
+             42        0 -7.564676E-04 -1.766771E-05  1.110215E-01  6.931128E-14 -7.008551E-01  0.0         
+             43        0 -2.354106E-06 -3.533542E-05  1.578972E-01  3.756841E-14 -8.092326E-03  0.0         
+             44        0  7.693317E-04 -5.300313E-05  1.123227E-01  7.837513E-15  7.010675E-01  0.0         
+             45        0  1.095043E-03 -7.067085E-05  0.0          -5.601089E-15  1.000000E+00  0.0         
+             46        0  1.033701E-03  9.687795E-05  0.0           9.342144E-03  9.241126E-01  0.0         
+             47        0  7.325195E-04  2.165872E-04 -1.038252E-01  1.300477E-01  6.477542E-01  0.0         
+             48        0  1.924973E-05  2.587227E-04 -1.459420E-01  1.860929E-01 -7.518537E-03  0.0         
+             49        0 -6.777505E-04  1.742055E-04 -1.026203E-01  1.303996E-01 -6.475045E-01  0.0         
+             50        0 -9.625706E-04  4.173902E-17 -2.829487E-14  5.003085E-14 -9.089622E-01  0.0         
+             51        0 -6.777505E-04 -1.742055E-04  1.026203E-01 -1.303996E-01 -6.475045E-01  0.0         
+             52        0  1.924973E-05 -2.587227E-04  1.459420E-01 -1.860929E-01 -7.518537E-03  0.0         
+             53        0  7.325195E-04 -2.165872E-04  1.038252E-01 -1.300477E-01  6.477542E-01  0.0         
+             54        0  1.033701E-03 -9.687795E-05  0.0          -9.342144E-03  9.241126E-01  0.0         
+             55        0  8.260118E-04  1.209135E-04  0.0           1.844497E-02  7.097680E-01  0.0         
+             56        0  5.949717E-04  3.551730E-04 -7.960658E-02  2.403654E-01  4.974397E-01  0.0         
+             57        0  4.848673E-05  4.483580E-04 -1.118918E-01  3.442204E-01 -5.609429E-03  0.0         
+             58        0 -4.857883E-04  3.070464E-04 -7.870145E-02  2.411601E-01 -4.973417E-01  0.0         
+             59        0 -7.043928E-04  6.804425E-17 -2.090433E-14  7.204441E-14 -6.984990E-01  0.0         
+             60        0 -4.857883E-04 -3.070464E-04  7.870145E-02 -2.411601E-01 -4.973417E-01  0.0         
+             61        0  4.848673E-05 -4.483580E-04  1.118918E-01 -3.442204E-01 -5.609429E-03  0.0         
+             62        0  5.949717E-04 -3.551730E-04  7.960658E-02 -2.403654E-01  4.974397E-01  0.0         
+             63        0  8.260118E-04 -1.209135E-04  0.0          -1.844497E-02  7.097680E-01  0.0         
+             64        0  5.050699E-04  1.362654E-04  0.0           2.241954E-02  3.795044E-01  0.0         
+             65        0  3.798011E-04  4.501395E-04 -4.319848E-02  3.168932E-01  2.656633E-01  0.0         
+             66        0  8.366773E-05  5.783608E-04 -6.071073E-02  4.531537E-01 -3.062242E-03  0.0         
+             67        0 -2.061993E-04  3.985439E-04 -4.272339E-02  3.179275E-01 -2.653303E-01  0.0         
+             68        0 -3.254707E-04  8.119064E-17 -1.105838E-14  8.250191E-14 -3.731696E-01  0.0         
+             69        0 -2.061993E-04 -3.985439E-04  4.272339E-02 -3.179275E-01 -2.653303E-01  0.0         
+             70        0  8.366773E-05 -5.783608E-04  6.071073E-02 -4.531537E-01 -3.062242E-03  0.0         
+             71        0  3.798011E-04 -4.501395E-04  4.319848E-02 -3.168932E-01  2.656633E-01  0.0         
+             72        0  5.050699E-04 -1.362654E-04  0.0          -2.241954E-02  3.795044E-01  0.0         
+             73        0  1.413417E-04  1.413417E-04  0.0           2.278288E-02  2.371153E-02  0.0         
+             74        0  1.352223E-04  4.845460E-04  0.0           3.448659E-01  1.745776E-02  0.0         
+             75        0  1.212524E-04  6.254167E-04  0.0           4.925193E-01  5.104125E-04  0.0         
+             76        0  1.072615E-04  4.318096E-04  0.0           3.458610E-01 -1.880368E-02  0.0         
+             77        0  1.029312E-04  9.155211E-17  0.0           9.237371E-14 -2.574480E-02  0.0         
+             78        0  1.072615E-04 -4.318096E-04  0.0          -3.458610E-01 -1.880368E-02  0.0         
+             79        0  1.212524E-04 -6.254167E-04  0.0          -4.925193E-01  5.104125E-04  0.0         
+             80        0  1.352223E-04 -4.845460E-04  0.0          -3.448659E-01  1.745776E-02  0.0         
+             81        0  1.413417E-04 -1.413417E-04  0.0          -2.278288E-02  2.371153E-02  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    1.095043E-03  6.254167E-04  1.578972E-01  4.925193E-01  1.000000E+00  0.0         
+                MIN* :   -1.064444E-03 -6.254167E-04 -1.578972E-01 -4.925193E-01 -9.837073E-01  0.0         
+
+                ABS* :    1.095043E-03  6.254167E-04  1.578972E-01  4.925193E-01  1.000000E+00  0.0         
+                *for output set
+
+
+ OUTPUT FOR EIGENVECTOR        2
+ COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                             
+
+                                                          S P C   F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0          -5.852048E+01  0.0           0.0           0.0         
+              2        0  0.0           0.0           3.146163E+01  0.0           0.0           0.0         
+              3        0  0.0           0.0           3.749330E+01  0.0           0.0           0.0         
+              4        0  0.0           0.0           2.513408E+01  0.0           0.0           0.0         
+              5        0  0.0           0.0           8.270717E-12  0.0           0.0           0.0         
+              6        0  0.0           0.0          -2.513408E+01  0.0           0.0           0.0         
+              7        0  0.0           0.0          -3.749330E+01  0.0           0.0           0.0         
+              8        0  0.0           0.0          -3.146163E+01  0.0           0.0           0.0         
+              9        0  0.0           0.0           5.852048E+01  0.0           0.0           0.0         
+             10        0  0.0           0.0          -3.425399E+02  0.0           0.0           0.0         
+             18        0  0.0           0.0           3.425399E+02  0.0           0.0           0.0         
+             19        0  0.0           0.0          -6.435785E+02  0.0           0.0           0.0         
+             27        0  0.0           0.0           6.435785E+02  0.0           0.0           0.0         
+             28        0  0.0           0.0          -8.436757E+02  0.0           0.0           0.0         
+             36        0  0.0           0.0           8.436757E+02  0.0           0.0           0.0         
+             37        0  0.0           0.0          -9.138034E+02  0.0           0.0           0.0         
+             45        0  0.0           0.0           9.138034E+02  0.0           0.0           0.0         
+             46        0  0.0           0.0          -8.436757E+02  0.0           0.0           0.0         
+             54        0  0.0           0.0           8.436757E+02  0.0           0.0           0.0         
+             55        0  0.0           0.0          -6.435785E+02  0.0           0.0           0.0         
+             63        0  0.0           0.0           6.435785E+02  0.0           0.0           0.0         
+             64        0  0.0           0.0          -3.425399E+02  0.0           0.0           0.0         
+             72        0  0.0           0.0           3.425399E+02  0.0           0.0           0.0         
+             73        0  0.0           0.0          -5.852048E+01  0.0           0.0           0.0         
+             74        0  0.0           0.0           3.146163E+01  0.0           0.0           0.0         
+             75        0  0.0           0.0           3.749330E+01  0.0           0.0           0.0         
+             76        0  0.0           0.0           2.513408E+01  0.0           0.0           0.0         
+             77        0  0.0           0.0          -1.847411E-13  0.0           0.0           0.0         
+             78        0  0.0           0.0          -2.513408E+01  0.0           0.0           0.0         
+             79        0  0.0           0.0          -3.749330E+01  0.0           0.0           0.0         
+             80        0  0.0           0.0          -3.146163E+01  0.0           0.0           0.0         
+             81        0  0.0           0.0           5.852048E+01  0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           9.138034E+02  0.0           0.0           0.0         
+                MIN* :    0.0           0.0          -9.138034E+02  0.0           0.0           0.0         
+
+                ABS* :    0.0           0.0           9.138034E+02  0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+     SPC FORCE TOTALS:    0.0           0.0          -8.487078E-10  0.0           0.0           0.0         
+     (for output set)
+
+
+ OUTPUT FOR EIGENVECTOR        3
+ COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                             
+
+                                                         E I G E N V E C T O R
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0           4.394322E-02 -4.418679E-02  0.0         
+              2        0  1.961328E-05  7.157672E-04  0.0           6.929318E-01 -3.204557E-02  0.0         
+              3        0  6.452926E-05  1.032457E-03  0.0           9.773524E-01 -2.527124E-04  0.0         
+              4        0  1.086632E-04  7.255396E-04  0.0           6.793624E-01  3.444642E-02  0.0         
+              5        0  1.242052E-04 -3.674712E-16  0.0          -1.865302E-13  4.656389E-02  0.0         
+              6        0  1.086632E-04 -7.255396E-04  0.0          -6.793624E-01  3.444642E-02  0.0         
+              7        0  6.452926E-05 -1.032457E-03  0.0          -9.773524E-01 -2.527124E-04  0.0         
+              8        0  1.961328E-05 -7.157672E-04  0.0          -6.929318E-01 -3.204557E-02  0.0         
+              9        0  2.435058E-16  0.0           0.0          -4.394322E-02 -4.418679E-02  0.0         
+             10        0 -7.215511E-04 -1.923399E-05  0.0           3.252594E-02 -6.979268E-01  0.0         
+             11        0 -4.770699E-04  4.853938E-04  7.997950E-02  4.874027E-01 -4.792951E-01  0.0         
+             12        0  7.972657E-05  7.099292E-04  1.109473E-01  6.868403E-01  1.729551E-02  0.0         
+             13        0  5.994531E-04  4.993489E-04  7.719672E-02  4.758873E-01  4.782036E-01  0.0         
+             14        0  8.079140E-04 -2.718589E-16 -1.419224E-14 -7.628410E-14  6.627780E-01  0.0         
+             15        0  5.994531E-04 -4.993489E-04 -7.719672E-02 -4.758873E-01  4.782036E-01  0.0         
+             16        0  7.972657E-05 -7.099292E-04 -1.109473E-01 -6.868403E-01  1.729551E-02  0.0         
+             17        0 -4.770699E-04 -4.853938E-04 -7.997950E-02 -4.874027E-01 -4.792951E-01  0.0         
+             18        0 -7.215511E-04  1.923399E-05  0.0          -3.252594E-02 -6.979268E-01  0.0         
+             19        0 -1.057405E-03 -6.482006E-05  0.0           1.107617E-03 -1.000000E+00  0.0         
+             20        0 -7.100758E-04 -6.488543E-05  1.127971E-01 -2.879631E-03 -6.865447E-01  0.0         
+             21        0  7.956054E-05 -5.670044E-05  1.562897E-01 -4.873312E-03  2.651874E-02  0.0         
+             22        0  8.115895E-04 -3.520472E-05  1.085025E-01 -5.390895E-03  6.857245E-01  0.0         
+             23        0  1.101785E-03 -4.382100E-16 -4.143483E-14 -2.459450E-13  9.466753E-01  0.0         
+             24        0  8.115895E-04  3.520472E-05 -1.085025E-01  5.390895E-03  6.857245E-01  0.0         
+             25        0  7.956054E-05  5.670044E-05 -1.562897E-01  4.873312E-03  2.651874E-02  0.0         
+             26        0 -7.100758E-04  6.488543E-05 -1.127971E-01  2.879631E-03 -6.865447E-01  0.0         
+             27        0 -1.057405E-03  6.482006E-05  0.0          -1.107617E-03 -1.000000E+00  0.0         
+             28        0 -7.536107E-04 -1.114956E-04  0.0          -3.492287E-02 -7.041255E-01  0.0         
+             29        0 -5.081774E-04 -6.095132E-04  7.960217E-02 -4.862889E-01 -4.830967E-01  0.0         
+             30        0  5.045478E-05 -8.125493E-04  1.102089E-01 -6.860327E-01  2.001672E-02  0.0         
+             31        0  5.655915E-04 -5.580447E-04  7.635398E-02 -4.752228E-01  4.823939E-01  0.0         
+             32        0  7.680858E-04  1.703425E-16 -4.758999E-14  2.964227E-13  6.638358E-01  0.0         
+             33        0  5.655915E-04  5.580447E-04 -7.635398E-02  4.752228E-01  4.823939E-01  0.0         
+             34        0  5.045478E-05  8.125493E-04 -1.102089E-01  6.860327E-01  2.001672E-02  0.0         
+             35        0 -5.081774E-04  6.095132E-04 -7.960217E-02  4.862889E-01 -4.830967E-01  0.0         
+             36        0 -7.536107E-04  1.114956E-04  0.0           3.492287E-02 -7.041255E-01  0.0         
+             37        0 -1.227061E-06 -1.285338E-04  0.0          -4.803446E-02 -1.096496E-12  0.0         
+             38        0 -1.227061E-06 -8.353231E-04  7.924224E-14 -6.866080E-01  2.728229E-13  0.0         
+             39        0 -1.227061E-06 -1.124785E-03 -2.943047E-14 -9.673254E-01  8.164736E-13  0.0         
+             40        0 -1.227061E-06 -7.730609E-04 -4.696653E-14 -6.683381E-01 -3.190508E-13  0.0         
+             41        0 -1.227061E-06 -7.214861E-17 -9.905381E-16  6.488306E-14 -1.527846E-13  0.0         
+             42        0 -1.227061E-06  7.730609E-04  9.883151E-16  6.683381E-01 -5.493337E-14  0.0         
+             43        0 -1.227061E-06  1.124785E-03  4.365847E-14  9.673254E-01 -4.806214E-13  0.0         
+             44        0 -1.227061E-06  8.353231E-04  7.122638E-14  6.866080E-01  1.824456E-13  0.0         
+             45        0 -1.227061E-06  1.285338E-04  0.0           4.803446E-02  7.919910E-13  0.0         
+             46        0  7.511566E-04 -1.114956E-04  0.0          -3.492287E-02  7.041255E-01  0.0         
+             47        0  5.057233E-04 -6.095132E-04 -7.960217E-02 -4.862889E-01  4.830967E-01  0.0         
+             48        0 -5.290890E-05 -8.125493E-04 -1.102089E-01 -6.860327E-01 -2.001672E-02  0.0         
+             49        0 -5.680456E-04 -5.580447E-04 -7.635398E-02 -4.752228E-01 -4.823939E-01  0.0         
+             50        0 -7.705399E-04 -2.824032E-16 -3.098292E-14 -1.311988E-13 -6.638358E-01  0.0         
+             51        0 -5.680456E-04  5.580447E-04  7.635398E-02  4.752228E-01 -4.823939E-01  0.0         
+             52        0 -5.290890E-05  8.125493E-04  1.102089E-01  6.860327E-01 -2.001672E-02  0.0         
+             53        0  5.057233E-04  6.095132E-04  7.960217E-02  4.862889E-01  4.830967E-01  0.0         
+             54        0  7.511566E-04  1.114956E-04  0.0           3.492287E-02  7.041255E-01  0.0         
+             55        0  1.054951E-03 -6.482006E-05  0.0           1.107617E-03  1.000000E+00  0.0         
+             56        0  7.076217E-04 -6.488543E-05 -1.127971E-01 -2.879631E-03  6.865447E-01  0.0         
+             57        0 -8.201467E-05 -5.670044E-05 -1.562897E-01 -4.873312E-03 -2.651874E-02  0.0         
+             58        0 -8.140436E-04 -3.520472E-05 -1.085025E-01 -5.390895E-03 -6.857245E-01  0.0         
+             59        0 -1.104239E-03 -2.705443E-17 -1.701141E-14  9.294465E-14 -9.466753E-01  0.0         
+             60        0 -8.140436E-04  3.520472E-05  1.085025E-01  5.390895E-03 -6.857245E-01  0.0         
+             61        0 -8.201467E-05  5.670044E-05  1.562897E-01  4.873312E-03 -2.651874E-02  0.0         
+             62        0  7.076217E-04  6.488543E-05  1.127971E-01  2.879631E-03  6.865447E-01  0.0         
+             63        0  1.054951E-03  6.482006E-05  0.0          -1.107617E-03  1.000000E+00  0.0         
+             64        0  7.190969E-04 -1.923399E-05  0.0           3.252594E-02  6.979268E-01  0.0         
+             65        0  4.746157E-04  4.853938E-04 -7.997950E-02  4.874027E-01  4.792951E-01  0.0         
+             66        0 -8.218069E-05  7.099292E-04 -1.109473E-01  6.868403E-01 -1.729551E-02  0.0         
+             67        0 -6.019072E-04  4.993489E-04 -7.719672E-02  4.758873E-01 -4.782036E-01  0.0         
+             68        0 -8.103681E-04 -1.141824E-16 -2.243633E-14 -6.262518E-15 -6.627780E-01  0.0         
+             69        0 -6.019072E-04 -4.993489E-04  7.719672E-02 -4.758873E-01 -4.782036E-01  0.0         
+             70        0 -8.218069E-05 -7.099292E-04  1.109473E-01 -6.868403E-01 -1.729551E-02  0.0         
+             71        0  4.746157E-04 -4.853938E-04  7.997950E-02 -4.874027E-01  4.792951E-01  0.0         
+             72        0  7.190969E-04  1.923399E-05  0.0          -3.252594E-02  6.979268E-01  0.0         
+             73        0 -2.454122E-06 -2.385536E-16  0.0           4.394322E-02  4.418679E-02  0.0         
+             74        0 -2.206740E-05  7.157672E-04  0.0           6.929318E-01  3.204557E-02  0.0         
+             75        0 -6.698338E-05  1.032457E-03  0.0           9.773524E-01  2.527124E-04  0.0         
+             76        0 -1.111173E-04  7.255396E-04  0.0           6.793624E-01 -3.444642E-02  0.0         
+             77        0 -1.266593E-04  1.943033E-16  0.0           2.801687E-13 -4.656389E-02  0.0         
+             78        0 -1.111173E-04 -7.255396E-04  0.0          -6.793624E-01 -3.444642E-02  0.0         
+             79        0 -6.698338E-05 -1.032457E-03  0.0          -9.773524E-01  2.527124E-04  0.0         
+             80        0 -2.206740E-05 -7.157672E-04  0.0          -6.929318E-01  3.204557E-02  0.0         
+             81        0 -2.454122E-06 -2.626565E-16  0.0          -4.394322E-02  4.418679E-02  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    1.101785E-03  1.124785E-03  1.562897E-01  9.773524E-01  1.000000E+00  0.0         
+                MIN* :   -1.104239E-03 -1.124785E-03 -1.562897E-01 -9.773524E-01 -1.000000E+00  0.0         
+
+                ABS* :    1.104239E-03  1.124785E-03  1.562897E-01  9.773524E-01  1.000000E+00  0.0         
+                *for output set
+
+
+ OUTPUT FOR EIGENVECTOR        3
+ COMP_BUCKLING_CQUADR_PCOMP_UNSYM_N8                                                                                                                                                                                                                             
+
+                                                          S P C   F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           1.083473E+02  0.0           0.0           0.0         
+              2        0  0.0           0.0          -6.007580E+01  0.0           0.0           0.0         
+              3        0  0.0           0.0          -6.832154E+01  0.0           0.0           0.0         
+              4        0  0.0           0.0          -4.384424E+01  0.0           0.0           0.0         
+              5        0  0.0           0.0           9.237056E-13  0.0           0.0           0.0         
+              6        0  0.0           0.0           4.384424E+01  0.0           0.0           0.0         
+              7        0  0.0           0.0           6.832154E+01  0.0           0.0           0.0         
+              8        0  0.0           0.0           6.007580E+01  0.0           0.0           0.0         
+              9        0  0.0           0.0          -1.083473E+02  0.0           0.0           0.0         
+             10        0  0.0           0.0           5.862363E+02  0.0           0.0           0.0         
+             18        0  0.0           0.0          -5.862363E+02  0.0           0.0           0.0         
+             19        0  0.0           0.0           8.429267E+02  0.0           0.0           0.0         
+             27        0  0.0           0.0          -8.429267E+02  0.0           0.0           0.0         
+             28        0  0.0           0.0           5.980983E+02  0.0           0.0           0.0         
+             36        0  0.0           0.0          -5.980983E+02  0.0           0.0           0.0         
+             37        0  0.0           0.0           6.370584E-10  0.0           0.0           0.0         
+             45        0  0.0           0.0           5.746585E-10  0.0           0.0           0.0         
+             46        0  0.0           0.0          -5.980983E+02  0.0           0.0           0.0         
+             54        0  0.0           0.0           5.980983E+02  0.0           0.0           0.0         
+             55        0  0.0           0.0          -8.429267E+02  0.0           0.0           0.0         
+             63        0  0.0           0.0           8.429267E+02  0.0           0.0           0.0         
+             64        0  0.0           0.0          -5.862363E+02  0.0           0.0           0.0         
+             72        0  0.0           0.0           5.862363E+02  0.0           0.0           0.0         
+             73        0  0.0           0.0          -1.083473E+02  0.0           0.0           0.0         
+             74        0  0.0           0.0           6.007580E+01  0.0           0.0           0.0         
+             75        0  0.0           0.0           6.832154E+01  0.0           0.0           0.0         
+             76        0  0.0           0.0           4.384424E+01  0.0           0.0           0.0         
+             77        0  0.0           0.0           5.684342E-13  0.0           0.0           0.0         
+             78        0  0.0           0.0          -4.384424E+01  0.0           0.0           0.0         
+             79        0  0.0           0.0          -6.832154E+01  0.0           0.0           0.0         
+             80        0  0.0           0.0          -6.007580E+01  0.0           0.0           0.0         
+             81        0  0.0           0.0           1.083473E+02  0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           8.429267E+02  0.0           0.0           0.0         
+                MIN* :    0.0           0.0          -8.429267E+02  0.0           0.0           0.0         
+
+                ABS* :    0.0           0.0           8.429267E+02  0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+     SPC FORCE TOTALS:    0.0           0.0           6.050271E-09  0.0           0.0           0.0         
+     (for output set)
+
+ >> LINK  9 END
+
+    Total CPU time =  1.88E-01 seconds
+
+ >> MYSTRAN END    :  5/19/2026 at 13: 6:35.638

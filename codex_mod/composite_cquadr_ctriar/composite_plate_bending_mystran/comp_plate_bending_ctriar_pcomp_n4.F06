@@ -1,0 +1,676 @@
+   519113749
+
+ MYSTRAN Version 18.0.0   APR 20 2026 MYSTRAN developed by Dr Bill Case
+*** Please report any problems to mystransolver@gmail.com ***                                                                                                                                                                                                   
+
+ >> MYSTRAN BEGIN  :  5/19/2026 at 11:37:49.282 The input file is D:\fortran\mystran3\codex_mod\composite_plate_bending_mystran\comp_plate_bending_ctriar_pcomp_n4.dat                                                                                                                                                            
+
+
+ >> LINK  0 BEGIN
+
+
+ID COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                           
+SOL 1                                                                                                                                                                                                                                                           
+CEND                                                                                                                                                                                                                                                            
+TITLE = COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                      
+ECHO = NONE                                                                                                                                                                                                                                                     
+DISPLACEMENT(PRINT) = ALL                                                                                                                                                                                                                                       
+SPCFORCE(PRINT) = ALL                                                                                                                                                                                                                                           
+GPFORCE(PRINT) = ALL                                                                                                                                                                                                                                            
+OLOAD(PRINT) = ALL                                                                                                                                                                                                                                              
+ELDATA(0,PRINT) = ALL                                                                                                                                                                                                                                           
+SUBCASE 1                                                                                                                                                                                                                                                       
+  LABEL = COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                    
+  SPC = 1                                                                                                                                                                                                                                                       
+  LOAD = 10                                                                                                                                                                                                                                                     
+BEGIN BULK                                                                                                                                                                                                                                                      
+
+
+
+
+CMASSPROCDBG: CMASS / PMASS / RPMASS SNAPSHOT
+CMASSPROCDBG NCMASS =       0
+CMASSPROCDBG NPMASS =       0
+
+       O U T P U T   F R O M   T H E   G R I D   P O I N T   W E I G H T   G E N E R A T O R   F O R   O V E R A L L   M O D E L
+                                             (reference point is basic coord system origin)
+
+                                                      Total mass =  0.000000E+00
+
+                                                             X             Y             Z
+                                       C.G. location :  0.000000E+00  0.000000E+00  0.000000E+00
+                                        (relative to reference point in basic coordinate system)
+
+
+                             6x6 Rigid body mass matrix - about reference point in basic coordinate system
+                      ***                                                                                     ***
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00 -0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  * -0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00 -0.000000E+00  0.000000E+00  *
+                      *  ************  ************  ************  *  ************  ************  ************  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      ***                                                                                     ***
+
+
+                                    M.O.I. matrix - about reference point in basic coordinate system
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                  M.O.I. matrix - about above c.g. location in basic coordinate system
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                     M.O.I. matrix - about above c.g. location in principal directions
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                     Transformation from basic coordinates to principal directions
+                                             ***                                        ***
+                                             *  1.000000E+00  0.000000E+00  0.000000E+00  *
+                                             * -0.000000E+00  1.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  1.000000E+00  *
+                                             ***                                        ***
+
+
+
+ >> LINK  0 END
+
+
+ >> LINK  1 BEGIN
+
+MGGGRIDDBG I,GRID_NUM =      21      21
+MGGGRIDDBG I,GRID_NUM =      22      22
+MGGGRIDDBG I,GRID_NUM =      23      23
+MGGGRIDDBG I,GRID_NUM =      24      24
+MGGGRIDDBG I,GRID_NUM =      25      25
+ INFORMATION : CTRIAR element        1 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        2 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        3 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        4 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        5 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        6 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        7 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        8 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        9 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       10 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       11 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       12 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       13 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       14 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       15 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       16 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       17 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       18 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       19 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       20 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       21 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       22 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       23 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       24 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       25 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       26 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       27 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       28 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       29 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       30 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       31 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       32 is using DKMT18 composite shell path
+               DEALLOCATED  1.66E-01 MB MEMORY FROM ARRAY STF3
+
+               DEALLOCATED  6.00E-04 MB MEMORY FROM ARRAY STFKEY
+               DEALLOCATED  1.66E-01 MB MEMORY FROM ARRAY STF3
+
+ >> LINK  1 END
+
+
+ >> LINK  2 BEGIN
+
+
+ *INFORMATION: AUTOSPC Summary, Overall: after identification of all AUTOSPC's                                                               
+
+                                     AUTOSPC_RAT = 1.000000E-08
+
+                       Number of DOF's identified for AUTOSPC in component  1         =            0
+                       Number of DOF's identified for AUTOSPC in component  2         =            0
+                       Number of DOF's identified for AUTOSPC in component  3         =            0
+                       Number of DOF's identified for AUTOSPC in component  4         =            0
+                       Number of DOF's identified for AUTOSPC in component  5         =            0
+                       Number of DOF's identified for AUTOSPC in component  6         =            0
+                                                                                        ------------
+                       Total number of DOF's identified overall                       =            0
+
+
+ >> LINK  2 END
+
+
+ >> LINK  3 BEGIN
+
+ SUPERLU FACTORIZATION OF MATRIX KLL SUCCEEDED IN SUBR SYM_MAT_DECOMP_SUPRLU          
+
+ *INFORMATION: FOR INTERNAL SUBCASE NUMBER        1 EPSILON ERROR ESTIMATE            = -3.407356E-16 Based on U'*(K*U - P)/(U'*P)
+
+
+ >> LINK  3 END
+
+
+ >> LINK  5 BEGIN
+
+
+ >> LINK  5 END
+
+
+ >> LINK  9 BEGIN
+
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                              
+ COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                              
+
+                                                       D I S P L A C E M E N T S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0          -3.738706E-05  3.738706E-05  0.0         
+              2        0  0.0           0.0           0.0          -1.467432E-03  7.014649E-05  0.0         
+              3        0  0.0           0.0           0.0          -2.006950E-03  9.309813E-05  0.0         
+              4        0  0.0           0.0           0.0          -1.420620E-03  4.427238E-05  0.0         
+              5        0  0.0           0.0           0.0          -1.310392E-05 -1.310392E-05  0.0         
+              6        0  0.0           0.0           0.0          -7.014649E-05  1.467432E-03  0.0         
+              7        0  0.0           0.0          -3.317559E-04 -1.021791E-03  1.021791E-03  0.0         
+              8        0  0.0           0.0          -4.585323E-04 -1.374829E-03  5.418228E-05  0.0         
+              9        0  0.0           0.0          -3.288466E-04 -9.502220E-04 -9.502220E-04  0.0         
+             10        0  0.0           0.0           0.0           4.427238E-05 -1.420620E-03  0.0         
+             11        0  0.0           0.0           0.0          -9.309813E-05  2.006950E-03  0.0         
+             12        0  0.0           0.0          -4.585323E-04 -5.418228E-05  1.374829E-03  0.0         
+             13        0  0.0           0.0          -6.381260E-04  3.966461E-18  4.783050E-18  0.0         
+             14        0  0.0           0.0          -4.585323E-04  5.418228E-05 -1.374829E-03  0.0         
+             15        0  0.0           0.0           0.0           9.309813E-05 -2.006950E-03  0.0         
+             16        0  0.0           0.0           0.0          -4.427238E-05  1.420620E-03  0.0         
+             17        0  0.0           0.0          -3.288466E-04  9.502220E-04  9.502220E-04  0.0         
+             18        0  0.0           0.0          -4.585323E-04  1.374829E-03 -5.418228E-05  0.0         
+             19        0  0.0           0.0          -3.317559E-04  1.021791E-03 -1.021791E-03  0.0         
+             20        0  0.0           0.0           0.0           7.014649E-05 -1.467432E-03  0.0         
+             21        0  0.0           0.0           0.0           1.310392E-05  1.310392E-05  0.0         
+             22        0  0.0           0.0           0.0           1.420620E-03 -4.427238E-05  0.0         
+             23        0  0.0           0.0           0.0           2.006950E-03 -9.309813E-05  0.0         
+             24        0  0.0           0.0           0.0           1.467432E-03 -7.014649E-05  0.0         
+             25        0  0.0           0.0           0.0           3.738706E-05 -3.738706E-05  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           0.0           2.006950E-03  2.006950E-03  0.0         
+                MIN* :    0.0           0.0          -6.381260E-04 -2.006950E-03 -2.006950E-03  0.0         
+
+                ABS* :    0.0           0.0           6.381260E-04  2.006950E-03  2.006950E-03  0.0         
+                *for output set
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                              
+ COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                              
+
+                                                     A P P L I E D    F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0          -2.083333E+01  0.0           0.0           0.0         
+              2        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+              3        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+              4        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+              5        0  0.0           0.0          -1.041667E+01  0.0           0.0           0.0         
+              6        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+              7        0  0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+              8        0  0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+              9        0  0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+             10        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+             11        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+             12        0  0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+             13        0  0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+             14        0  0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+             15        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+             16        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+             17        0  0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+             18        0  0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+             19        0  0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+             20        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+             21        0  0.0           0.0          -1.041667E+01  0.0           0.0           0.0         
+             22        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+             23        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+             24        0  0.0           0.0          -3.125000E+01  0.0           0.0           0.0         
+             25        0  0.0           0.0          -2.083333E+01  0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0          -1.041667E+01  0.0           0.0           0.0         
+                MIN* :    0.0           0.0          -6.250000E+01  0.0           0.0           0.0         
+
+                ABS* :    0.0           0.0           6.250000E+01  0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ APPLIED FORCE TOTALS:    0.0           0.0          -1.000000E+03  0.0           0.0           0.0         
+   (for output set)
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                              
+ COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                              
+
+                                                          S P C   F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0          -4.173627E+01  0.0           0.0           0.0         
+              2        0  0.0           0.0           9.254742E+01  0.0           0.0           0.0         
+              3        0  0.0           0.0           1.124265E+02  0.0           0.0           0.0         
+              4        0  0.0           0.0           9.140417E+01  0.0           0.0           0.0         
+              5        0  0.0           0.0          -5.101989E+01  0.0           0.0           0.0         
+              6        0  0.0           0.0           9.254742E+01  0.0           0.0           0.0         
+             10        0  0.0           0.0           9.140417E+01  0.0           0.0           0.0         
+             11        0  0.0           0.0           1.124265E+02  0.0           0.0           0.0         
+             15        0  0.0           0.0           1.124265E+02  0.0           0.0           0.0         
+             16        0  0.0           0.0           9.140417E+01  0.0           0.0           0.0         
+             20        0  0.0           0.0           9.254742E+01  0.0           0.0           0.0         
+             21        0  0.0           0.0          -5.101989E+01  0.0           0.0           0.0         
+             22        0  0.0           0.0           9.140417E+01  0.0           0.0           0.0         
+             23        0  0.0           0.0           1.124265E+02  0.0           0.0           0.0         
+             24        0  0.0           0.0           9.254742E+01  0.0           0.0           0.0         
+             25        0  0.0           0.0          -4.173627E+01  0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           1.124265E+02  0.0           0.0           0.0         
+                MIN* :    0.0           0.0          -5.101989E+01  0.0           0.0           0.0         
+
+                ABS* :    0.0           0.0           1.124265E+02  0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+     SPC FORCE TOTALS:    0.0           0.0           1.000000E+03  0.0           0.0           0.0         
+     (for output set)
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP PLATE BENDING CTRIAR PCOMP N4                                                                                                                                                                                                                              
+ COMP PLATE BENDING CTRIAR PCOMP N4                                                                                              
+
+
+
+                                           G R I D   P O I N T   F O R C E   B A L A N C E
+                                             (in global coordinate system at each grid)
+
+                                FORCE BALANCE FOR GRID POINT        1 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -2.083333E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -4.173627E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         1  0.000000E+00  0.000000E+00  3.128480E+01 -4.644208E+00 -4.644208E+00  0.000000E+00
+ TRIA3    ELEM         2  0.000000E+00  0.000000E+00  3.128480E+01  4.644208E+00  4.644208E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  7.105427E-15  8.881784E-16  8.881784E-16  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        2 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  9.254742E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         1  0.000000E+00  0.000000E+00 -7.329019E+01 -3.709125E-02 -7.154563E-02  0.000000E+00
+ TRIA3    ELEM         3  0.000000E+00  0.000000E+00  1.299176E+01 -2.328444E+00 -2.651201E+00  0.000000E+00
+ TRIA3    ELEM         4  0.000000E+00  0.000000E+00 -9.989858E-01  2.365535E+00  2.722747E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  7.116530E-14 -9.814372E-14 -3.552714E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        3 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  1.124265E+02  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         3  0.000000E+00  0.000000E+00 -4.113271E+01 -2.939709E-01 -1.543817E-01  0.000000E+00
+ TRIA3    ELEM         5  0.000000E+00  0.000000E+00 -1.250574E+01  9.240599E-01  5.860490E-01  0.000000E+00
+ TRIA3    ELEM         6  0.000000E+00  0.000000E+00 -2.753804E+01 -6.300890E-01 -4.316673E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.421085E-14  8.237855E-14 -2.003953E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        4 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  9.140417E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         5  0.000000E+00  0.000000E+00  1.075121E+01 -4.819645E-01  2.602908E-03  0.000000E+00
+ TRIA3    ELEM         7  0.000000E+00  0.000000E+00 -3.071828E+01  4.020855E+00  3.658716E+00  0.000000E+00
+ TRIA3    ELEM         8  0.000000E+00  0.000000E+00 -4.018709E+01 -3.538890E+00 -3.661318E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -3.552714E-14  2.442491E-14  1.332268E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        5 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.041667E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -5.101989E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         7  0.000000E+00  0.000000E+00  6.143656E+01 -7.731522E-17  4.024811E-17  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  0.000000E+00 -7.731522E-17  4.024811E-17  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        6 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  9.254742E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         2  0.000000E+00  0.000000E+00 -7.329019E+01  7.154563E-02  3.709125E-02  0.000000E+00
+ TRIA3    ELEM         9  0.000000E+00  0.000000E+00 -9.989858E-01 -2.722747E+00 -2.365535E+00  0.000000E+00
+ TRIA3    ELEM        10  0.000000E+00  0.000000E+00  1.299176E+01  2.651201E+00  2.328444E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -2.131628E-14  2.664535E-15 -1.287859E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        7 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -6.250000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         1  0.000000E+00  0.000000E+00  4.200539E+01 -5.820048E+00 -3.105446E+00  0.000000E+00
+ TRIA3    ELEM         2  0.000000E+00  0.000000E+00  4.200539E+01  3.105446E+00  5.820048E+00  0.000000E+00
+ TRIA3    ELEM         4  0.000000E+00  0.000000E+00 -1.551452E+01 -3.044428E+00 -2.628122E+00  0.000000E+00
+ TRIA3    ELEM         9  0.000000E+00  0.000000E+00 -1.551452E+01  2.628122E+00  3.044428E+00  0.000000E+00
+ TRIA3    ELEM        11  0.000000E+00  0.000000E+00  4.759134E+00 -1.159193E+00 -4.290101E+00  0.000000E+00
+ TRIA3    ELEM        12  0.000000E+00  0.000000E+00  4.759134E+00  4.290101E+00  1.159193E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.358913E-13 -5.773160E-14  3.907985E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        8 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -6.250000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         3  0.000000E+00  0.000000E+00  2.814095E+01 -4.412823E+00 -4.423575E-01  0.000000E+00
+ TRIA3    ELEM         4  0.000000E+00  0.000000E+00  1.651351E+01  4.291461E-01  4.033752E+00  0.000000E+00
+ TRIA3    ELEM         6  0.000000E+00  0.000000E+00  3.884068E+01 -4.087025E+00 -3.333589E+00  0.000000E+00
+ TRIA3    ELEM        11  0.000000E+00  0.000000E+00 -1.506392E+01  3.568213E+00  3.173977E+00  0.000000E+00
+ TRIA3    ELEM        13  0.000000E+00  0.000000E+00 -6.110065E-01  8.287938E-01 -3.093350E+00  0.000000E+00
+ TRIA3    ELEM        14  0.000000E+00  0.000000E+00 -5.320211E+00  3.673696E+00 -3.384318E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.282619E-13  1.394440E-13 -1.415534E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT        9 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -6.250000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         5  0.000000E+00  0.000000E+00  1.754538E+00 -8.807300E-01  2.537784E+00  0.000000E+00
+ TRIA3    ELEM         6  0.000000E+00  0.000000E+00 -1.130264E+01 -2.167396E+00  9.395974E-01  0.000000E+00
+ TRIA3    ELEM         8  0.000000E+00  0.000000E+00  8.037418E+01 -2.846564E+00 -2.846564E+00  0.000000E+00
+ TRIA3    ELEM        13  0.000000E+00  0.000000E+00  1.222013E+00  2.417308E+00  2.417308E+00  0.000000E+00
+ TRIA3    ELEM        15  0.000000E+00  0.000000E+00  1.754538E+00  2.537784E+00 -8.807300E-01  0.000000E+00
+ TRIA3    ELEM        16  0.000000E+00  0.000000E+00 -1.130264E+01  9.395974E-01 -2.167396E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.527667E-13 -7.860379E-14 -1.363354E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       10 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  9.140417E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         7  0.000000E+00  0.000000E+00 -3.071828E+01  3.658716E+00  4.020855E+00  0.000000E+00
+ TRIA3    ELEM         8  0.000000E+00  0.000000E+00 -4.018709E+01 -3.661318E+00 -3.538890E+00  0.000000E+00
+ TRIA3    ELEM        15  0.000000E+00  0.000000E+00  1.075121E+01  2.602908E-03 -4.819645E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.085621E-14  6.253678E-16 -6.661338E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       11 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  1.124265E+02  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        10  0.000000E+00  0.000000E+00 -4.113271E+01  1.543817E-01  2.939709E-01  0.000000E+00
+ TRIA3    ELEM        17  0.000000E+00  0.000000E+00 -2.753804E+01  4.316673E-01  6.300890E-01  0.000000E+00
+ TRIA3    ELEM        18  0.000000E+00  0.000000E+00 -1.250574E+01 -5.860490E-01 -9.240599E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -2.486900E-14 -7.882583E-15  7.549517E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       12 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -6.250000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM         9  0.000000E+00  0.000000E+00  1.651351E+01 -4.033752E+00 -4.291461E-01  0.000000E+00
+ TRIA3    ELEM        10  0.000000E+00  0.000000E+00  2.814095E+01  4.423575E-01  4.412823E+00  0.000000E+00
+ TRIA3    ELEM        12  0.000000E+00  0.000000E+00 -1.506392E+01 -3.173977E+00 -3.568213E+00  0.000000E+00
+ TRIA3    ELEM        17  0.000000E+00  0.000000E+00  3.884068E+01  3.333589E+00  4.087025E+00  0.000000E+00
+ TRIA3    ELEM        19  0.000000E+00  0.000000E+00 -5.320211E+00  3.384318E-01 -3.673696E+00  0.000000E+00
+ TRIA3    ELEM        20  0.000000E+00  0.000000E+00 -6.110065E-01  3.093350E+00 -8.287938E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.582068E-13 -1.776357E-14  4.218847E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       13 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -6.250000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        11  0.000000E+00  0.000000E+00  1.030479E+01 -4.985218E+00 -7.365883E-02  0.000000E+00
+ TRIA3    ELEM        12  0.000000E+00  0.000000E+00  1.030479E+01  7.365883E-02  4.985218E+00  0.000000E+00
+ TRIA3    ELEM        14  0.000000E+00  0.000000E+00  1.064042E+01 -4.665317E+00 -4.665317E+00  0.000000E+00
+ TRIA3    ELEM        19  0.000000E+00  0.000000E+00  1.064042E+01  4.665317E+00  4.665317E+00  0.000000E+00
+ TRIA3    ELEM        21  0.000000E+00  0.000000E+00  1.030479E+01 -7.365883E-02 -4.985218E+00  0.000000E+00
+ TRIA3    ELEM        22  0.000000E+00  0.000000E+00  1.030479E+01  4.985218E+00  7.365883E-02  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  4.938272E-13 -1.243450E-13 -1.543488E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       14 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -6.250000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        13  0.000000E+00  0.000000E+00 -6.110065E-01 -3.093350E+00  8.287938E-01  0.000000E+00
+ TRIA3    ELEM        14  0.000000E+00  0.000000E+00 -5.320211E+00 -3.384318E-01  3.673696E+00  0.000000E+00
+ TRIA3    ELEM        16  0.000000E+00  0.000000E+00  3.884068E+01 -3.333589E+00 -4.087025E+00  0.000000E+00
+ TRIA3    ELEM        21  0.000000E+00  0.000000E+00 -1.506392E+01  3.173977E+00  3.568213E+00  0.000000E+00
+ TRIA3    ELEM        23  0.000000E+00  0.000000E+00  2.814095E+01 -4.423575E-01 -4.412823E+00  0.000000E+00
+ TRIA3    ELEM        24  0.000000E+00  0.000000E+00  1.651351E+01  4.033752E+00  4.291461E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  3.090861E-13 -5.329071E-15 -2.173262E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       15 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  1.124265E+02  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        15  0.000000E+00  0.000000E+00 -1.250574E+01  5.860490E-01  9.240599E-01  0.000000E+00
+ TRIA3    ELEM        16  0.000000E+00  0.000000E+00 -2.753804E+01 -4.316673E-01 -6.300890E-01  0.000000E+00
+ TRIA3    ELEM        23  0.000000E+00  0.000000E+00 -4.113271E+01 -1.543817E-01 -2.939709E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -4.263256E-14  1.165734E-15 -2.197131E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       16 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  9.140417E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        18  0.000000E+00  0.000000E+00  1.075121E+01 -2.602908E-03  4.819645E-01  0.000000E+00
+ TRIA3    ELEM        25  0.000000E+00  0.000000E+00 -4.018709E+01  3.661318E+00  3.538890E+00  0.000000E+00
+ TRIA3    ELEM        26  0.000000E+00  0.000000E+00 -3.071828E+01 -3.658716E+00 -4.020855E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -5.684342E-14  0.000000E+00  8.881784E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       17 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -6.250000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        17  0.000000E+00  0.000000E+00 -1.130264E+01 -9.395974E-01  2.167396E+00  0.000000E+00
+ TRIA3    ELEM        18  0.000000E+00  0.000000E+00  1.754538E+00 -2.537784E+00  8.807300E-01  0.000000E+00
+ TRIA3    ELEM        20  0.000000E+00  0.000000E+00  1.222013E+00 -2.417308E+00 -2.417308E+00  0.000000E+00
+ TRIA3    ELEM        25  0.000000E+00  0.000000E+00  8.037418E+01  2.846564E+00  2.846564E+00  0.000000E+00
+ TRIA3    ELEM        27  0.000000E+00  0.000000E+00 -1.130264E+01  2.167396E+00 -9.395974E-01  0.000000E+00
+ TRIA3    ELEM        28  0.000000E+00  0.000000E+00  1.754538E+00  8.807300E-01 -2.537784E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  3.723688E-13 -7.327472E-15  1.421085E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       18 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -6.250000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        19  0.000000E+00  0.000000E+00 -5.320211E+00 -3.673696E+00  3.384318E-01  0.000000E+00
+ TRIA3    ELEM        20  0.000000E+00  0.000000E+00 -6.110065E-01 -8.287938E-01  3.093350E+00  0.000000E+00
+ TRIA3    ELEM        22  0.000000E+00  0.000000E+00 -1.506392E+01 -3.568213E+00 -3.173977E+00  0.000000E+00
+ TRIA3    ELEM        27  0.000000E+00  0.000000E+00  3.884068E+01  4.087025E+00  3.333589E+00  0.000000E+00
+ TRIA3    ELEM        29  0.000000E+00  0.000000E+00  1.651351E+01 -4.291461E-01 -4.033752E+00  0.000000E+00
+ TRIA3    ELEM        30  0.000000E+00  0.000000E+00  2.814095E+01  4.412823E+00  4.423575E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.842171E-14  1.421085E-14 -8.704149E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       19 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -6.250000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        21  0.000000E+00  0.000000E+00  4.759134E+00 -4.290101E+00 -1.159193E+00  0.000000E+00
+ TRIA3    ELEM        22  0.000000E+00  0.000000E+00  4.759134E+00  1.159193E+00  4.290101E+00  0.000000E+00
+ TRIA3    ELEM        24  0.000000E+00  0.000000E+00 -1.551452E+01 -2.628122E+00 -3.044428E+00  0.000000E+00
+ TRIA3    ELEM        29  0.000000E+00  0.000000E+00 -1.551452E+01  3.044428E+00  2.628122E+00  0.000000E+00
+ TRIA3    ELEM        31  0.000000E+00  0.000000E+00  4.200539E+01 -3.105446E+00 -5.820048E+00  0.000000E+00
+ TRIA3    ELEM        32  0.000000E+00  0.000000E+00  4.200539E+01  5.820048E+00  3.105446E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -3.694822E-13 -7.549517E-14 -2.930989E-14  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       20 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  9.254742E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        23  0.000000E+00  0.000000E+00  1.299176E+01 -2.651201E+00 -2.328444E+00  0.000000E+00
+ TRIA3    ELEM        24  0.000000E+00  0.000000E+00 -9.989858E-01  2.722747E+00  2.365535E+00  0.000000E+00
+ TRIA3    ELEM        31  0.000000E+00  0.000000E+00 -7.329019E+01 -7.154563E-02 -3.709125E-02  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -1.421085E-14  6.813994E-15  1.243172E-13  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       21 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -1.041667E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -5.101989E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        26  0.000000E+00  0.000000E+00  6.143656E+01  9.132166E-18  1.089258E-15  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  0.000000E+00  9.132166E-18  1.089258E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       22 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  9.140417E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        25  0.000000E+00  0.000000E+00 -4.018709E+01  3.538890E+00  3.661318E+00  0.000000E+00
+ TRIA3    ELEM        26  0.000000E+00  0.000000E+00 -3.071828E+01 -4.020855E+00 -3.658716E+00  0.000000E+00
+ TRIA3    ELEM        28  0.000000E+00  0.000000E+00  1.075121E+01  4.819645E-01 -2.602908E-03  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -5.329071E-15  2.053913E-15 -3.235259E-16  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       23 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  1.124265E+02  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        27  0.000000E+00  0.000000E+00 -2.753804E+01  6.300890E-01  4.316673E-01  0.000000E+00
+ TRIA3    ELEM        28  0.000000E+00  0.000000E+00 -1.250574E+01 -9.240599E-01 -5.860490E-01  0.000000E+00
+ TRIA3    ELEM        30  0.000000E+00  0.000000E+00 -4.113271E+01  2.939709E-01  1.543817E-01  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -2.842171E-14 -2.270406E-14 -2.581269E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       24 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -3.125000E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00  9.254742E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        29  0.000000E+00  0.000000E+00 -9.989858E-01 -2.365535E+00 -2.722747E+00  0.000000E+00
+ TRIA3    ELEM        30  0.000000E+00  0.000000E+00  1.299176E+01  2.328444E+00  2.651201E+00  0.000000E+00
+ TRIA3    ELEM        32  0.000000E+00  0.000000E+00 -7.329019E+01  3.709125E-02  7.154563E-02  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  2.842171E-14 -1.214306E-14 -4.482525E-15  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT       25 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00 -2.083333E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -4.173627E+01  0.000000E+00  0.000000E+00  0.000000E+00
+ TRIA3    ELEM        31  0.000000E+00  0.000000E+00  3.128480E+01 -4.644208E+00 -4.644208E+00  0.000000E+00
+ TRIA3    ELEM        32  0.000000E+00  0.000000E+00  3.128480E+01  4.644208E+00  4.644208E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00 -7.105427E-15  0.000000E+00  3.552714E-15  0.000000E+00
+ (should all be 0)
+
+
+
+ >> LINK  9 END
+
+    Total CPU time =  7.81E-02 seconds
+
+ >> MYSTRAN END    :  5/19/2026 at 11:37:49.384

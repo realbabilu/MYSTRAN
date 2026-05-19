@@ -1,0 +1,462 @@
+   519123918
+
+ MYSTRAN Version 18.0.0   APR 20 2026 MYSTRAN developed by Dr Bill Case
+*** Please report any problems to mystransolver@gmail.com ***                                                                                                                                                                                                   
+
+ >> MYSTRAN BEGIN  :  5/19/2026 at 12:39:18. 51 The input file is D:\fortran\mystran3\codex_mod\composite_buckling_mystran\comp_buckling_ctriar_oneply_iso_n4.dat                                                                                                                                                                 
+
+
+ >> LINK  0 BEGIN
+
+
+ID COMP_BUCKLING_CTRIAR_ONEPLY_ISO_N4                                                                                                                                                                                                                           
+SOL 5                                                                                                                                                                                                                                                           
+CEND                                                                                                                                                                                                                                                            
+TITLE = COMP_BUCKLING_CTRIAR_ONEPLY_ISO_N4                                                                                                                                                                                                                      
+ECHO = NONE                                                                                                                                                                                                                                                     
+DISP(PRINT) = ALL                                                                                                                                                                                                                                               
+SUBCASE 1                                                                                                                                                                                                                                                       
+  SPC = 1                                                                                                                                                                                                                                                       
+  LOAD = 10                                                                                                                                                                                                                                                     
+SUBCASE 2                                                                                                                                                                                                                                                       
+  METHOD = 20                                                                                                                                                                                                                                                   
+BEGIN BULK                                                                                                                                                                                                                                                      
+
+
+
+
+
+CMASSPROCDBG: CMASS / PMASS / RPMASS SNAPSHOT
+CMASSPROCDBG NCMASS =       0
+CMASSPROCDBG NPMASS =       0
+
+       O U T P U T   F R O M   T H E   G R I D   P O I N T   W E I G H T   G E N E R A T O R   F O R   O V E R A L L   M O D E L
+                                             (reference point is basic coord system origin)
+
+                                                      Total mass =  0.000000E+00
+
+                                                             X             Y             Z
+                                       C.G. location :  0.000000E+00  0.000000E+00  0.000000E+00
+                                        (relative to reference point in basic coordinate system)
+
+
+                             6x6 Rigid body mass matrix - about reference point in basic coordinate system
+                      ***                                                                                     ***
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00 -0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  * -0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00 -0.000000E+00  0.000000E+00  *
+                      *  ************  ************  ************  *  ************  ************  ************  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                      ***                                                                                     ***
+
+
+                                    M.O.I. matrix - about reference point in basic coordinate system
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                  M.O.I. matrix - about above c.g. location in basic coordinate system
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                     M.O.I. matrix - about above c.g. location in principal directions
+                                             ***                                        ***
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  0.000000E+00  *
+                                             ***                                        ***
+
+
+                                     Transformation from basic coordinates to principal directions
+                                             ***                                        ***
+                                             *  1.000000E+00  0.000000E+00  0.000000E+00  *
+                                             * -0.000000E+00  1.000000E+00  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  1.000000E+00  *
+                                             ***                                        ***
+
+
+
+ >> LINK  0 END
+
+
+ >> LINK  1 BEGIN
+
+MGGGRIDDBG I,GRID_NUM =      21      21
+MGGGRIDDBG I,GRID_NUM =      22      22
+MGGGRIDDBG I,GRID_NUM =      23      23
+MGGGRIDDBG I,GRID_NUM =      24      24
+MGGGRIDDBG I,GRID_NUM =      25      25
+ INFORMATION : CTRIAR element        1 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        2 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        3 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        4 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        5 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        6 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        7 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        8 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        9 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       10 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       11 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       12 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       13 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       14 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       15 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       16 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       17 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       18 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       19 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       20 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       21 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       22 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       23 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       24 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       25 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       26 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       27 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       28 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       29 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       30 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       31 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       32 is using DKMT18 composite shell path
+               DEALLOCATED  1.66E-01 MB MEMORY FROM ARRAY STF3
+
+               DEALLOCATED  6.00E-04 MB MEMORY FROM ARRAY STFKEY
+               DEALLOCATED  1.66E-01 MB MEMORY FROM ARRAY STF3
+
+ >> LINK  1 END
+
+
+ >> LINK  2 BEGIN
+
+
+ *INFORMATION: AUTOSPC Summary, Overall: after identification of all AUTOSPC's                                                               
+
+                                     AUTOSPC_RAT = 1.000000E-08
+
+                       Number of DOF's identified for AUTOSPC in component  1         =            0
+                       Number of DOF's identified for AUTOSPC in component  2         =            0
+                       Number of DOF's identified for AUTOSPC in component  3         =            0
+                       Number of DOF's identified for AUTOSPC in component  4         =            0
+                       Number of DOF's identified for AUTOSPC in component  5         =            0
+                       Number of DOF's identified for AUTOSPC in component  6         =            0
+                                                                                        ------------
+                       Total number of DOF's identified overall                       =            0
+
+
+ >> LINK  2 END
+
+
+ >> LINK  3 BEGIN
+
+ *INFORMATION: MAXIMUM DIAGONAL TERM IN MATRIX         KLL                            =  2.076923E+09 Occurs in row/col no.       28
+ *INFORMATION: MINIMUM DIAGONAL TERM IN MATRIX         KLL                            =  1.408077E+03 Occurs in row/col no.       22
+ *INFORMATION: RATIO OF MAX TO MIN DIAGONALS IN MATRIX         KLL                    =  1.475007E+06
+
+ *INFORMATION: THE MAXIMUM ABSOLUTE VALUE OF THE RATIO OF MATRIX DIAGONAL TO FACTOR DIAG FOR MATRIX KLL =   3.222517E+04
+               THIS IS FOR ROW AND COL IN THE MATRIX FOR GRID POINT        2 COMP   1. THE CALLING SUBR WAS: LINK3                          
+
+
+ *INFORMATION: FOR INTERNAL SUBCASE NUMBER        1 EPSILON ERROR ESTIMATE            =  3.119584E-16 Based on U'*(K*U - P)/(U'*P)
+
+ *WARNING    : CANNOT CALCULATE EPSILON ERROR ESTIMATE FOR INTERNAL SUBCASE NUMBER        2
+               THE DOT PRODUCT OF DISPL AND LOAD VECTORS                     =    0.000000E+00 CANNOT BE INVERTED.
+               IT IS TOO SMALL COMPARED TO MACHINE SAFE MINIMUM (MACH_SFMIN) =    2.225074-308
+
+
+ >> LINK  3 END
+
+
+ >> LINK  5 BEGIN
+
+
+ >> LINK  5 END
+
+
+ >> LINK  9 BEGIN
+
+
+
+ OUTPUT FOR SUBCASE        1
+ COMP_BUCKLING_CTRIAR_ONEPLY_ISO_N4                                                                                                                                                                                                                              
+
+                                                       D I S P L A C E M E N T S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0           0.0           0.0           0.0         
+              2        0 -2.500000E-06  1.457249E-13  0.0           0.0           0.0           0.0         
+              3        0 -5.000000E-06  1.791421E-13  0.0           0.0           0.0           0.0         
+              4        0 -7.500000E-06  1.556386E-13  0.0           0.0           0.0           0.0         
+              5        0 -1.000000E-05  0.0           0.0           0.0           0.0           0.0         
+              6        0 -4.442764E-14  1.007147E-13  0.0           0.0           0.0           0.0         
+              7        0 -2.500000E-06  1.586297E-13  0.0           0.0           0.0           0.0         
+              8        0 -5.000000E-06  1.866787E-13  0.0           0.0           0.0           0.0         
+              9        0 -7.500000E-06  1.772222E-13  0.0           0.0           0.0           0.0         
+             10        0 -1.000000E-05  1.229489E-13  0.0           0.0           0.0           0.0         
+             11        0 -6.109803E-14  1.786829E-13  0.0           0.0           0.0           0.0         
+             12        0 -2.500000E-06  1.826192E-13  0.0           0.0           0.0           0.0         
+             13        0 -5.000000E-06  1.915550E-13  0.0           0.0           0.0           0.0         
+             14        0 -7.500000E-06  2.004907E-13  0.0           0.0           0.0           0.0         
+             15        0 -1.000000E-05  2.044270E-13  0.0           0.0           0.0           0.0         
+             16        0 -5.722830E-14  2.601610E-13  0.0           0.0           0.0           0.0         
+             17        0 -2.500000E-06  2.058878E-13  0.0           0.0           0.0           0.0         
+             18        0 -5.000000E-06  1.964313E-13  0.0           0.0           0.0           0.0         
+             19        0 -7.500000E-06  2.244803E-13  0.0           0.0           0.0           0.0         
+             20        0 -1.000000E-05  2.823952E-13  0.0           0.0           0.0           0.0         
+             21        0  2.446542E-14  3.831099E-13  0.0           0.0           0.0           0.0         
+             22        0 -2.500000E-06  2.274713E-13  0.0           0.0           0.0           0.0         
+             23        0 -5.000000E-06  2.039679E-13  0.0           0.0           0.0           0.0         
+             24        0 -7.500000E-06  2.373850E-13  0.0           0.0           0.0           0.0         
+             25        0 -1.000000E-05  3.831099E-13  0.0           0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    2.446542E-14  3.831099E-13  0.0           0.0           0.0           0.0         
+                MIN* :   -1.000000E-05  0.0           0.0           0.0           0.0           0.0         
+
+                ABS* :    1.000000E-05  3.831099E-13  0.0           0.0           0.0           0.0         
+                *for output set
+
+ >> LINK  9 END
+
+ >> LINK  1 BEGIN
+
+MGGGRIDDBG I,GRID_NUM =      21      21
+MGGGRIDDBG I,GRID_NUM =      22      22
+MGGGRIDDBG I,GRID_NUM =      23      23
+MGGGRIDDBG I,GRID_NUM =      24      24
+MGGGRIDDBG I,GRID_NUM =      25      25
+ INFORMATION : CTRIAR element        1 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        2 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        3 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        4 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        5 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        6 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        7 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        8 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element        9 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       10 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       11 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       12 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       13 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       14 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       15 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       16 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       17 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       18 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       19 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       20 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       21 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       22 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       23 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       24 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       25 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       26 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       27 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       28 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       29 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       30 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       31 is using DKMT18 composite shell path
+ INFORMATION : CTRIAR element       32 is using DKMT18 composite shell path
+               DEALLOCATED  1.66E-01 MB MEMORY FROM ARRAY STF3
+               DEALLOCATED  6.00E-04 MB MEMORY FROM ARRAY STFKEY
+               DEALLOCATED  1.66E-01 MB MEMORY FROM ARRAY STF3
+
+ >> LINK  1 END
+
+
+ >> LINK  2 BEGIN
+
+ *INFORMATION: MAX DIAGONAL TERM IN THE KGGD MATRIX IS =  0.00E+00 WHICH IS TOO SMALL FOR CALCULATION OF MATRIX STATS
+               IN SUBR GET_MATRIX_DIAG_STATS          
+ *INFORMATION: MAX DIAGONAL TERM IN THE KNND MATRIX IS =  0.00E+00 WHICH IS TOO SMALL FOR CALCULATION OF MATRIX STATS
+               IN SUBR GET_MATRIX_DIAG_STATS          
+ *INFORMATION: MAX DIAGONAL TERM IN THE KAAD MATRIX IS =  0.00E+00 WHICH IS TOO SMALL FOR CALCULATION OF MATRIX STATS
+               IN SUBR GET_MATRIX_DIAG_STATS          
+ *INFORMATION: MAX DIAGONAL TERM IN THE KLLD MATRIX IS =  0.00E+00 WHICH IS TOO SMALL FOR CALCULATION OF MATRIX STATS
+               IN SUBR GET_MATRIX_DIAG_STATS          
+
+ >> LINK  2 END
+
+
+ >> LINK  4 BEGIN
+
+ *INFORMATION: ARPACK LINEAR BACKEND FOR MATRIX KMSM IN EIG_LANCZOS_ARPACK             : ARPACK + LAPACK GENERAL BAND
+               ARPKSOLV=SOLLIB   EFFECTIVE SOLLIB=BANDED USES DGBTRF/DGBTRS; NO AUTOMATIC SUPERLU FALLBACK IS ENABLED.
+
+
+ >> LINK  4 END
+
+
+ >> LINK  5 BEGIN
+
+
+                           E I G E N V A L U E   A N A L Y S I S   S U M M A R Y   (LANCZOS BANDED Mode 2 DGB, Shift eigen = -1.00E+00)
+                                                                      BANDED solution
+
+                                NUMBER OF EIGENVALUES EXTRACTED  . . . . . .         3
+
+                                EXTRACT BACKEND . . . . . . . . . . . . . . . . . . ARPACK
+                                  MODE = 2, LAP MAT = DGB, NCVFACL = 3, SHIFT = -1.0000E+00
+
+                                LARGEST OFF-DIAGONAL GENERALIZED MASS TERM     5.9E-12 (Vecs renormed to 1.0 for max value)
+
+                                                                       . . .         3
+                                          MODE PAIR . . . . . . . . . .
+                                                                       . . .         1
+
+                                NUMBER OF OFF DIAGONAL GENERALIZED MASS
+                                TERMS FAILING CRITERION OF  1.0E-04. . . . .         0
+
+
+
+                                            R E A L   E I G E N V A L U E S
+                                           (subcase 1 buckling load factors)
+
+                                         MODE  EXTRACTION      EIGENVALUE
+                                        NUMBER   ORDER
+
+                                             1       1        2.520744E+01
+                                             2       2        5.190013E+01
+                                             3       3        9.520485E+01
+
+
+
+ >> LINK  5 END
+
+
+ >> LINK  9 BEGIN
+
+
+
+ OUTPUT FOR EIGENVECTOR        1
+ COMP_BUCKLING_CTRIAR_ONEPLY_ISO_N4                                                                                                                                                                                                                              
+
+                                                         E I G E N V E C T O R
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0           1.278704E-02 -1.282463E-02  0.0         
+              2        0  2.904689E-19 -5.113800E-19  0.0           7.176795E-01 -3.951560E-02  0.0         
+              3        0  4.667842E-19  1.253254E-20  0.0           9.999592E-01 -4.530699E-02  0.0         
+              4        0  2.826118E-19  2.619489E-19  0.0           6.950467E-01 -2.148033E-02  0.0         
+              5        0  4.315795E-19  0.0           0.0           4.979689E-03  5.023646E-03  0.0         
+              6        0 -8.231466E-21 -5.047389E-19  0.0           3.949985E-02 -7.176904E-01  0.0         
+              7        0  2.270635E-19 -6.588318E-19  1.640954E-01  5.198006E-01 -5.197762E-01  0.0         
+              8        0  2.082089E-19 -4.256620E-19  2.304264E-01  7.063579E-01 -2.586651E-02  0.0         
+              9        0  3.200795E-19  3.912608E-20  1.618352E-01  4.784066E-01  4.783865E-01  0.0         
+             10        0 -5.917071E-19  8.222922E-19  0.0          -2.149878E-02  6.950469E-01  0.0         
+             11        0 -4.184408E-19 -1.124753E-18  0.0           4.530889E-02 -1.000000E+00  0.0         
+             12        0 -2.053037E-19 -1.713820E-19  2.304329E-01  2.586481E-02 -7.063480E-01  0.0         
+             13        0 -1.628286E-19 -1.560956E-19  3.258148E-01  4.517721E-15 -7.654835E-16  0.0         
+             14        0 -3.420247E-19  1.792649E-19  2.304329E-01 -2.586481E-02  7.063480E-01  0.0         
+             15        0 -2.795655E-19  1.087197E-18  0.0          -4.530889E-02  1.000000E+00  0.0         
+             16        0 -1.107571E-18 -3.697697E-19  0.0           2.149878E-02 -6.950469E-01  0.0         
+             17        0 -9.365966E-19 -8.801089E-19  1.618352E-01 -4.784066E-01 -4.783865E-01  0.0         
+             18        0 -1.698985E-18 -1.035724E-18  2.304264E-01 -7.063579E-01  2.586651E-02  0.0         
+             19        0 -9.444427E-19  2.024249E-19  1.640954E-01 -5.198006E-01  5.197762E-01  0.0         
+             20        0 -5.510795E-19  8.628272E-19  0.0          -3.949985E-02  7.176904E-01  0.0         
+             21        0 -1.592087E-18 -1.238292E-18  0.0          -4.979689E-03 -5.023646E-03  0.0         
+             22        0 -5.988510E-19 -7.507443E-19  0.0          -6.950467E-01  2.148033E-02  0.0         
+             23        0 -1.878126E-18 -1.014986E-18  0.0          -9.999592E-01  4.530699E-02  0.0         
+             24        0 -1.123912E-18  2.311206E-19  0.0          -7.176795E-01  3.951560E-02  0.0         
+             25        0 -1.127276E-18  9.015710E-19  0.0          -1.278704E-02  1.282463E-02  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    4.667842E-19  1.087197E-18  3.258148E-01  9.999592E-01  1.000000E+00  0.0         
+                MIN* :   -1.878126E-18 -1.238292E-18  0.0          -9.999592E-01 -1.000000E+00  0.0         
+
+                ABS* :    1.878126E-18  1.238292E-18  3.258148E-01  9.999592E-01  1.000000E+00  0.0         
+                *for output set
+
+
+ OUTPUT FOR EIGENVECTOR        2
+ COMP_BUCKLING_CTRIAR_ONEPLY_ISO_N4                                                                                                                                                                                                                              
+
+                                                         E I G E N V E C T O R
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0          -4.547115E-02 -1.304554E-01  0.0         
+              2        0  4.414528E-19  1.321876E-18  0.0           5.456974E-01 -4.561848E-02  0.0         
+              3        0 -1.503154E-18  2.083211E-18  0.0           2.617836E-02  7.203274E-02  0.0         
+              4        0 -3.992659E-19  1.965372E-19  0.0          -5.045122E-01  2.550013E-02  0.0         
+              5        0 -1.281100E-18  0.0           0.0          -3.528556E-02  1.902680E-02  0.0         
+              6        0 -1.427957E-18 -5.337654E-19  0.0           4.978911E-02 -7.912407E-01  0.0         
+              7        0 -1.204150E-19  1.660608E-18  1.286526E-01  3.762380E-01 -7.537562E-03  0.0         
+              8        0 -9.510183E-19  2.792111E-18 -1.273272E-03 -4.608021E-02  7.054756E-01  0.0         
+              9        0 -3.536604E-19 -4.183827E-19 -1.204491E-01 -3.747188E-01  1.628248E-02  0.0         
+             10        0 -1.562536E-18  3.518432E-19  0.0           5.109289E-02 -6.268930E-01  0.0         
+             11        0 -1.599443E-18  1.101988E-18  0.0           6.362232E-02 -9.998876E-01  0.0         
+             12        0 -1.156653E-18 -1.767395E-19  1.764554E-01 -1.967553E-02  6.702708E-03  0.0         
+             13        0  2.271874E-19  2.407501E-18  1.105479E-16 -6.192235E-02  1.000000E+00  0.0         
+             14        0 -7.906751E-19 -3.940951E-19 -1.764554E-01 -1.967553E-02  6.702708E-03  0.0         
+             15        0 -4.183539E-19 -3.168854E-19  0.0           6.362232E-02 -9.998876E-01  0.0         
+             16        0 -7.451471E-19  2.725735E-18  0.0           5.109289E-02 -6.268930E-01  0.0         
+             17        0 -1.073179E-18 -6.301635E-21  1.204491E-01 -3.747188E-01  1.628248E-02  0.0         
+             18        0 -1.497638E-18  8.467259E-19  1.273272E-03 -4.608021E-02  7.054756E-01  0.0         
+             19        0  4.746669E-19 -2.471781E-19 -1.286526E-01  3.762380E-01 -7.537562E-03  0.0         
+             20        0 -3.194552E-20 -4.859835E-19  0.0           4.978911E-02 -7.912407E-01  0.0         
+             21        0  9.101095E-20  3.061718E-18  0.0          -3.528556E-02  1.902680E-02  0.0         
+             22        0  6.008320E-20  1.347193E-19  0.0          -5.045122E-01  2.550013E-02  0.0         
+             23        0  9.912698E-19  3.001970E-18  0.0           2.617836E-02  7.203274E-02  0.0         
+             24        0  7.706119E-19 -1.118455E-18  0.0           5.456974E-01 -4.561848E-02  0.0         
+             25        0  7.603500E-19 -4.493836E-19  0.0          -4.547115E-02 -1.304554E-01  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    9.912698E-19  3.061718E-18  1.764554E-01  5.456974E-01  1.000000E+00  0.0         
+                MIN* :   -1.599443E-18 -1.118455E-18 -1.764554E-01 -5.045122E-01 -9.998876E-01  0.0         
+
+                ABS* :    1.599443E-18  3.061718E-18  1.764554E-01  5.456974E-01  1.000000E+00  0.0         
+                *for output set
+
+
+ OUTPUT FOR EIGENVECTOR        3
+ COMP_BUCKLING_CTRIAR_ONEPLY_ISO_N4                                                                                                                                                                                                                              
+
+                                                         E I G E N V E C T O R
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+              1        0  0.0           0.0           0.0          -1.332430E-01 -4.844975E-02  0.0         
+              2        0 -7.211551E-20 -9.278334E-19  0.0          -7.841508E-01  5.041700E-02  0.0         
+              3        0  5.849389E-18  7.715692E-18  0.0          -9.990107E-01  6.440926E-02  0.0         
+              4        0 -4.866083E-18  1.151330E-17  0.0          -6.297230E-01  5.035783E-02  0.0         
+              5        0 -6.308862E-18  0.0           0.0           1.845470E-02 -3.449616E-02  0.0         
+              6        0  1.819787E-18  8.210726E-18  0.0          -4.310462E-02  5.318376E-01  0.0         
+              7        0 -9.457638E-19 -1.533867E-18 -1.265801E-01  3.644866E-03  3.763637E-01  0.0         
+              8        0  2.383111E-18  5.831455E-18 -1.767182E-01  5.448541E-03 -9.592234E-03  0.0         
+              9        0  3.320749E-18  1.662932E-17 -1.216890E-01  5.255405E-03 -3.746121E-01  0.0         
+             10        0  2.645193E-18 -2.367321E-18  0.0           2.561152E-02 -5.109697E-01  0.0         
+             11        0 -1.742467E-18 -3.299758E-18  0.0           7.275467E-02  1.470940E-03  0.0         
+             12        0 -1.986136E-18 -5.866192E-18  5.875634E-03  7.033174E-01 -4.604612E-02  0.0         
+             13        0 -4.650384E-19 -3.501064E-18  4.846017E-16  1.000000E+00 -3.668119E-02  0.0         
+             14        0  6.359108E-18  4.355096E-18 -5.875634E-03  7.033174E-01 -4.604612E-02  0.0         
+             15        0  5.874774E-18 -1.119842E-18  0.0           7.275467E-02  1.470940E-03  0.0         
+             16        0  9.941026E-18  5.340150E-18  0.0           2.561152E-02 -5.109697E-01  0.0         
+             17        0  5.613902E-18 -3.245602E-18  1.216890E-01  5.255405E-03 -3.746121E-01  0.0         
+             18        0  2.356513E-19 -9.012788E-18  1.767182E-01  5.448541E-03 -9.592234E-03  0.0         
+             19        0  3.680721E-18 -2.552624E-18  1.265801E-01  3.644866E-03  3.763637E-01  0.0         
+             20        0  1.052301E-17  1.597627E-18  0.0          -4.310462E-02  5.318376E-01  0.0         
+             21        0  1.178245E-17  7.235533E-18  0.0           1.845470E-02 -3.449616E-02  0.0         
+             22        0  1.216228E-17 -1.020120E-18  0.0          -6.297230E-01  5.035783E-02  0.0         
+             23        0  7.535285E-18  1.256722E-19  0.0          -9.990107E-01  6.440926E-02  0.0         
+             24        0 -4.399384E-18 -4.475979E-18  0.0          -7.841508E-01  5.041700E-02  0.0         
+             25        0  2.508750E-19  8.320624E-18  0.0          -1.332430E-01 -4.844975E-02  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    1.216228E-17  1.662932E-17  1.767182E-01  1.000000E+00  5.318376E-01  0.0         
+                MIN* :   -6.308862E-18 -9.012788E-18 -1.767182E-01 -9.990107E-01 -5.109697E-01  0.0         
+
+                ABS* :    1.216228E-17  1.662932E-17  1.767182E-01  1.000000E+00  5.318376E-01  0.0         
+                *for output set
+
+ >> LINK  9 END
+
+    Total CPU time =  9.38E-02 seconds
+
+ >> MYSTRAN END    :  5/19/2026 at 12:39:18.164
