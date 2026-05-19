@@ -51,8 +51,13 @@
 
 ! **********************************************************************************************************************************
       NUM_PLIES = 1
+! --- warning_reduce-v2 begin --- !
+      I1 = 0
+! --- warning_reduce-v2 end --- !
+      TYPE = ETYPE(INT_ELEM_ID)
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
+! --- composite_cquadr_ctriar begin --- !
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
 
          EPNTK    = EPNT(INT_ELEM_ID)
          TYPE     = ETYPE(INT_ELEM_ID)                     ! NOTE: Must keep (this subr not always called when TYPE     is known)
@@ -74,6 +79,7 @@
          ENDIF
 
       ENDIF
+! --- composite_cquadr_ctriar end --- !
 
 
 
@@ -82,3 +88,4 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE GET_ELEM_NUM_PLIES
+

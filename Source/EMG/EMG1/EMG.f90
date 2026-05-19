@@ -54,7 +54,7 @@
       USE PARAMS, ONLY                :  SUPINFO, SUPWARN, QUAD4TYP
       USE CONSTANTS_1, ONLY           :  CONV_DEG_RAD, CONV_RAD_DEG, ZERO, ONE
       USE MODEL_STUF, ONLY            :  CAN_ELEM_TYPE_OFFSET, EDAT, EID, EPNT, ETYPE, ISOLID, MATANGLE, NUM_EMG_FATAL_ERRS,       &
-                                         PCOMP_PROPS, PLY_NUM, TE_IDENT, THETAM, TYPE, XEL, TE
+                                         PCOMP_PROPS, PLY_NUM, SKIP_K6ROT, TE_IDENT, THETAM, TYPE, XEL, TE
       USE MODEL_STUF, ONLY            :  BE1, BE2, BE3, ELDOF, ELGP, KE, ME, SE1, SE2, SE3
 
       USE EMG_USE_IFs
@@ -296,10 +296,17 @@
          CALL ELMOUT ( INT_ELEM_ID, DUM_BUG, CASE_NUM, OPT )
       ENDIF
 
-! --- CQUADR_DKMQ24 begin --- !
+! --- shell_renovation begin --- !
       IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR. (TYPE == 'QUADR   ') .OR.            &
           (TYPE(1:6) == 'SHEAR') .OR. (TYPE == 'USER1   ')) THEN
-! --- CQUADR_DKMQ24 end --- !
+! --- shell_renovation end --- !
+! --- composite_cquadr_ctriar begin --- !
+! Composite shell properties should be assembled once in the common shell ABD
+! path, then consumed by the dedicated shell kernels below.  In particular:
+!   - PCOMP + CQUADR -> DKMQ24
+!   - PCOMP + CTRIAR -> DKMT18
+! We keep that contract here by always building SHELL_A/D/T before dispatch.
+! --- composite_cquadr_ctriar end --- !
          CALL SHELL_ABD_MATRICES ( INT_ELEM_ID, WRITE_WARN )
       ENDIF
 
@@ -349,15 +356,29 @@
          CALL BUSH ( INT_ELEM_ID, OPT, WRITE_WARN )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
-! --- CQUAD4R_CTRIAR_add begin --- !
+! --- shell_renovation begin --- !
       ELSE IF (TYPE(1:5) == 'TRIA3') THEN
+! --- composite_cquadr_ctriar begin --- !
+! CTRIAR is identified downstream by the thickness-key flag and must keep the
+! laminated PCOMP route through DKMT18 rather than falling back to the generic
+! flat-shell TRIAR/TREL1 path.
+! --- composite_cquadr_ctriar end --- !
+         IF (WRITE_WARN == 'Y') THEN
+            IF (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18) THEN
+               IF (PCOMP_PROPS == 'Y') THEN
+                  WRITE(F06,1013) EID
+               ELSE
+                  WRITE(F06,1014) EID
+               ENDIF
+            ENDIF
+         ENDIF
          IF (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18) THEN
             CALL CTRIAR_DKMT18 ( OPT, INT_ELEM_ID )
          ELSE
             CALL TREL1 ( OPT, WRITE_WARN )
          ENDIF
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
-! --- CQUAD4R_CTRIAR_add end --- !
+! --- shell_renovation end --- !
 
       ELSE IF (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MIN4  ') .OR. (QUAD4TYP == 'MIN4T '))) .OR.                              &
                 (TYPE == 'QUAD4K  ') .OR.                                                                                          &
@@ -369,13 +390,25 @@
          CALL MITC4 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
-      ! --- CQUAD4R_CTRIAR_add begin --- !
+      ! --- shell_renovation begin --- !
       ! Keep CQUAD4 conservative: DKMQ24 is dispatched only for the explicit CQUADR card.
       ! Legacy CQUAD4 continues to use QUAD4TYP = MIN4T/MIN4/MITC4/MITC4+ only.
       ELSE IF (TYPE == 'QUADR   ') THEN
+! --- composite_cquadr_ctriar begin --- !
+! CQUADR is the dedicated laminated quad route.  When PCOMP_PROPS = 'Y', the
+! shell laminate stiffness has already been assembled in SHELL_ABD_MATRICES and
+! this dispatch must continue into DKMQ24.
+! --- composite_cquadr_ctriar end --- !
+         IF (WRITE_WARN == 'Y') THEN
+            IF (PCOMP_PROPS == 'Y') THEN
+               WRITE(F06,1011) EID
+            ELSE
+               WRITE(F06,1012) EID
+            ENDIF
+         ENDIF
          CALL CQUADR_DKMQ24 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
-      ! --- CQUAD4R_CTRIAR_add end --- !
+      ! --- shell_renovation end --- !
 
       ELSE IF (TYPE(1:5) == 'QUAD8') THEN
          CALL MITC8 ( OPT, INT_ELEM_ID )
@@ -429,11 +462,14 @@
 ! For plate elements, process offsets (since they are specified in local element coordinates)
 
       IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+         SKIP_K6ROT = 'N'
          IF ((TYPE(1:5) == 'TRIA3') .AND. (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18)) THEN
-            CONTINUE
-         ELSE
-            CALL ELMOFF ( OPT, WRITE_WARN )
+            SKIP_K6ROT = 'Y'
+         ELSE IF (TYPE == 'QUADR   ') THEN
+            SKIP_K6ROT = 'Y'
          ENDIF
+         CALL ELMOFF ( OPT, WRITE_WARN )
+         SKIP_K6ROT = 'N'
       ENDIF
 
       CALL EMG_CODEX_DUMP
@@ -472,6 +508,10 @@
             ,' INT42 = ',I8,I3)
 
  1003 FORMAT(' WARNING     : MATERIAL ANGLE FOR ',A,I8,' IS NOT USED FOR PLATE ELEMENTS WITH PCOMP PROPERTIES')
+ 1011 FORMAT(' INFORMATION : CQUADR element ',I8,' is using DKMQ24 composite shell path')
+ 1012 FORMAT(' INFORMATION : CQUADR element ',I8,' is using DKMQ24 isotropic shell path')
+ 1013 FORMAT(' INFORMATION : CTRIAR element ',I8,' is using DKMT18 composite shell path')
+ 1014 FORMAT(' INFORMATION : CTRIAR element ',I8,' is using DKMT18 isotropic shell path')
 
 ! ##################################################################################################################################
 
@@ -955,3 +995,4 @@
       END SUBROUTINE EMG_CODEX_DUMP
 
       END SUBROUTINE EMG
+

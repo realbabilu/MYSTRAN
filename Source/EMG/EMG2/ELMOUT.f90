@@ -32,15 +32,15 @@
       USE IOUNT1, ONLY                :  WRT_ERR, BUG
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ELDT_BUG_DAT1_BIT, ELDT_BUG_DAT2_BIT, ELDT_BUG_ME_BIT, ELDT_BUG_P_T_BIT,    &
                                          ELDT_BUG_SE_BIT, ELDT_BUG_KE_BIT, ELDT_BUG_U_P_BIT, MBUG, MDT, MELGP, METYPE,             &
-                                         MEMATR, MEMATC, MEPROP, MPRESS, NSUB, NTSUB, SOL_NAME
+                                         MEMATR, MEMATC, MEPROP, MPRESS, NSUB, NTSUB, SOL_NAME, DEDAT_T3_THICK_KEY
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  CONV_RAD_DEG, ZERO
       USE PARAMS, ONLY                :  CBMIN3, CBMIN4, ELFORCEN, QUADAXIS, QUAD4TYP
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  AGRID, BGRID, BE1, BE2, BE3, BENSUM, BMEANT, CAN_ELEM_TYPE_OFFSET, DOFPIN, DT, ELAS_COMP, &
-                                         EID, EB, EM, ES, ET, ELEM_LEN_AB, ELDOF, ELMTYP, ELGP, EMAT, EPROP, FCONV, HBAR, KE, KED, &
-                                         ME, MXWARP, NUM_PLIES, NUM_SEi, OFFDIS, OFFSET, PCOMP_PROPS, PEB, PEG, PEL, PHI_SQ,       &
-                                         PPE, PRESS, PSI_HAT, PTE, QUAD_DELTA, QUAD_GAMMA, QUAD_THETA, SE1, SE2, SE3,              &
+                                         EDAT, EID, EB, EM, EPNT, ES, ET, ELEM_LEN_AB, ELDOF, ELMTYP, ELGP, EMAT, EPROP, FCONV,    &
+                                         HBAR, KE, KED, ME, MXWARP, NUM_PLIES, NUM_SEi, OFFDIS, OFFSET, PCOMP_PROPS, PEB, PEG, PEL,&
+                                         PHI_SQ, PPE, PRESS, PSI_HAT, PTE, QUAD_DELTA, QUAD_GAMMA, QUAD_THETA, SE1, SE2, SE3,       &
                                          SHELL_T, SHRSUM, STE1, STE2, STE3, THETAM, TE, TYPE, UEB, UEG, UEL, XEB, XEL, SCNUM,      &
                                          SUBLOD, ULT_STRE, ULT_STRN
       USE ELMOUT_USE_IFs
@@ -62,6 +62,7 @@
       INTEGER(LONG)                   :: I,J,K               ! DO loop indices
       INTEGER(LONG)                   :: NUM_COMPS           ! No. displ components (1 for SPOINT, 6 for actual grid)
       INTEGER(LONG)                   :: NUM_STRESS_MATS     ! Number of SEi/BEi matrices for this element
+      INTEGER(LONG)                   :: EPNTK               ! Pointer into EDAT for this element
       INTEGER(LONG)                   :: TCASE2(NSUB)        ! TCASE2(I) gives the internal subcase no. for internal thermal case I
 !                                                              If there are 5 subcases and internal S/C 3 is the 1-st S/C to have
 !                                                              thermal load and internal S/C 5 is the 2-nd to have thermal load:
@@ -76,6 +77,8 @@
 
 ! **********************************************************************************************************************************
 ! Set GRID_TYPE
+
+      EPNTK = EPNT(INT_ELEM_ID)
 
       DO I=1,ELGP
          GRID_TYPE(I) = 'undefined   '
@@ -102,6 +105,24 @@
             WRITE(BUG,*) '  Bending portion of QUAD4 is based on QUAD4TYP formulation = ',QUAD4TYP
             WRITE(BUG,*)
          ENDIF
+
+! --- composite_cquadr_ctriar begin --- !
+         IF (TYPE == 'QUADR   ') THEN
+            IF (PCOMP_PROPS == 'Y') THEN
+               WRITE(BUG,*) '  Shell routing: CQUADR composite path uses laminated DKMQ24 kernel'
+            ELSE
+               WRITE(BUG,*) '  Shell routing: CQUADR isotropic path uses DKMQ24 kernel'
+            ENDIF
+            WRITE(BUG,*)
+         ELSE IF ((TYPE(1:5) == 'TRIA3') .AND. (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18)) THEN
+            IF (PCOMP_PROPS == 'Y') THEN
+               WRITE(BUG,*) '  Shell routing: CTRIAR composite path uses laminated DKMT18 kernel'
+            ELSE
+               WRITE(BUG,*) '  Shell routing: CTRIAR isotropic path uses DKMT18 kernel'
+            ENDIF
+            WRITE(BUG,*)
+         ENDIF
+! --- composite_cquadr_ctriar end --- !
 
          WRITE(BUG,*) '  Internal element number,       INT_ELEM_ID  = ' ,INT_ELEM_ID
          WRITE(BUG,*) '  Number of grids elem is connected to, ELGP  = ' ,ELGP
@@ -828,3 +849,4 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE ELMOUT
+
