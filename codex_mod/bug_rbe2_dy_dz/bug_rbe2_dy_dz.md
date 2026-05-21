@@ -1,4 +1,4 @@
-# RBE2 `dy/dz` Swap Bug
+# RBE2 `dy/dz` Swap Check
 
 ## Status
 
@@ -38,15 +38,35 @@ Static comparison after the deck fix:
 
 ## Current Source Cross-Check
 
-The active `RBE2_PROC` convention now matches the rigid-body reference builder in [RB_DISP_MATRIX_PROC.f90](C:/mystran3/wt_optimization_rcm_v2/Source/LK1/L1C/RB_DISP_MATRIX_PROC.f90):
+The current source should match the rigid-body reference builder in [RB_DISP_MATRIX_PROC.f90](C:/mystran3/wt_optimization_rcm_v2/Source/LK1/L1C/RB_DISP_MATRIX_PROC.f90):
 
 - `ux` couples to `+dz * ry - dy * rz`
 - `uy` couples to `-dz * rx + dx * rz`
 - `uz` couples to `+dy * rx - dx * ry`
 
-So the present source state is not the main proven issue for `1-024`.
+The decisive check is the tiny debug model:
+- [D:\fortran\mystran3\RS-verification\rbe2_delta_debug_123.bdf](D:/fortran/mystran3/RS-verification/rbe2_delta_debug_123.bdf)
+- [D:\fortran\mystran3\RS-verification\rbe2_delta_debug_123.F06](D:/fortran/mystran3/RS-verification/rbe2_delta_debug_123.F06)
 
-## Historical Wrong vs Correct Snippet
+For offset `(dx,dy,dz) = (1,2,3)`, rigid-body theory requires:
+
+```text
+[ 0   3  -2 ]
+[-3   0   1 ]
+[ 2  -1   0 ]
+```
+
+The swapped `dy/dz` patch produced instead:
+
+```text
+[ 0   2  -3 ]
+[-2   0   1 ]
+[ 3  -1   0 ]
+```
+
+That means the swapped patch does not follow `u = u0 + theta x r`. The source was therefore reverted to the original `dz,-dy` form.
+
+## Historical Wrong vs Reverted Snippet
 
 Pre-patch:
 
@@ -55,16 +75,18 @@ DELTA_0(1,2) =  (RGRID(GRID_ID_ROW_NUM_D,3) - RGRID(GRID_ID_ROW_NUM_I,3))
 DELTA_0(1,3) = -(RGRID(GRID_ID_ROW_NUM_D,2) - RGRID(GRID_ID_ROW_NUM_I,2))
 ```
 
-Post-patch:
+Swapped patch that was tested and rejected:
 
 ```fortran
 DELTA_0(1,2) =  (RGRID(GRID_ID_ROW_NUM_D,2) - RGRID(GRID_ID_ROW_NUM_I,2))
 DELTA_0(1,3) = -(RGRID(GRID_ID_ROW_NUM_D,3) - RGRID(GRID_ID_ROW_NUM_I,3))
 ```
 
-The rest of the block stays:
+Reverted source:
 
 ```fortran
+DELTA_0(1,2) =  (RGRID(GRID_ID_ROW_NUM_D,3) - RGRID(GRID_ID_ROW_NUM_I,3))
+DELTA_0(1,3) = -(RGRID(GRID_ID_ROW_NUM_D,2) - RGRID(GRID_ID_ROW_NUM_I,2))
 DELTA_0(2,1) = -DELTA_0(1,2)
 DELTA_0(2,3) =  (x_dep - x_ind)
 DELTA_0(3,1) = -DELTA_0(1,3)
