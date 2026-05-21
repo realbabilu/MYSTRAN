@@ -34,7 +34,7 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, ONE_HUNDRED, PI
       USE PARAMS, ONLY                :  PRTF06, PRTOP2
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, MEFFMASS
+      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, MEFFMASS, MPFACTOR_N6
       USE MODEL_STUF, ONLY            :  MEFM_RB_MASS, LABEL, STITLE, TITLE
       USE PARAMS, ONLY                :  EPSIL, GRDPNT, MEFMCORD, MEFMGRID, MEFMLOC, SUPINFO, WTMASS
 
@@ -45,14 +45,19 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'WRITE_MEFFMASS'
       CHARACTER(14*BYTE)              :: CHAR_PCT(6)       ! Character representation of MEFFMASS sum percents of total model mass
       CHARACTER(1*BYTE)               :: IHDR   = 'Y'      ! Indicator of whether to write an output header
+      CHARACTER(18*BYTE)              :: DIR_NAME(6)
+      CHARACTER(8*BYTE)               :: DIR_CODE(6)
 
       INTEGER(LONG)                   :: I,J               ! DO loop indices
 
 
       REAL(DOUBLE)                    :: CYCLES            ! Circular frequency of a mode
+      REAL(DOUBLE)                    :: PERIOD            ! Period of a mode
       REAL(DOUBLE)                    :: EPS1              ! Small number to compare against zero
       REAL(DOUBLE)                    :: MEFM_TOTALS(6)    ! Totals for the 6 modal effective masses over all modes
       REAL(DOUBLE)                    :: MODES_PCT(6)      ! Modal mass as % of total mass
+      REAL(DOUBLE)                    :: MASS_RATIO        ! Effective mass ratio to total model mass in a direction
+      REAL(DOUBLE)                    :: CUM_MASS_RATIO(6) ! Cumulative effective mass ratio
       !LOGICAL                        :: WRITE_F06  ! flag
       !LOGICAL                        :: WRITE_OP2  ! flag
       LOGICAL                         :: IS_LOW_PRECISION  ! Print MPFACTOR, MEFFMASS values with 2 decimal places of accuracy rather than 6
@@ -65,6 +70,18 @@
       !--------------------------------------------------
 
       EPS1 = EPSIL(1)
+      DIR_NAME(1) = 'X TRANSLATION'
+      DIR_NAME(2) = 'Y TRANSLATION'
+      DIR_NAME(3) = 'Z TRANSLATION'
+      DIR_NAME(4) = 'X ROTATION'
+      DIR_NAME(5) = 'Y ROTATION'
+      DIR_NAME(6) = 'Z ROTATION'
+      DIR_CODE(1) = 'T1'
+      DIR_CODE(2) = 'T2'
+      DIR_CODE(3) = 'T3'
+      DIR_CODE(4) = 'R1'
+      DIR_CODE(5) = 'R2'
+      DIR_CODE(6) = 'R3'
 
       ! Write output headers.
       IF (IHDR == 'Y') THEN
@@ -103,11 +120,16 @@
 
       DO I=1,NVEC
          CYCLES = DSQRT(DABS(EIGEN_VAL(I)))/(TWO*PI)
+         IF (CYCLES > ZERO) THEN
+            PERIOD = ONE/CYCLES
+         ELSE
+            PERIOD = ZERO
+         ENDIF
 
          IF (IS_LOW_PRECISION) THEN ! 6 digits
-            WRITE(F06,9110) I, CYCLES, (MEFFMASS(I,J)/WTMASS,J=1,6)
+            WRITE(F06,9110) I, CYCLES, PERIOD, (MEFFMASS(I,J)/WTMASS,J=1,6)
          ELSE ! low precision (2 digits)
-            WRITE(F06,9111) I, CYCLES, (MEFFMASS(I,J)/WTMASS,J=1,6)
+            WRITE(F06,9111) I, CYCLES, PERIOD, (MEFFMASS(I,J)/WTMASS,J=1,6)
          ENDIF
 
          DO J=1,6
@@ -223,6 +245,32 @@
       ENDIF
 
       WRITE(F06,9118) (CHAR_PCT(I),I=1,6)
+      WRITE(F06,*)
+      WRITE(F06,9120)
+      DO J=1,6
+         CUM_MASS_RATIO(J) = ZERO
+         WRITE(F06,9121) DIR_NAME(J), DIR_CODE(J)
+         WRITE(F06,9122)
+         DO I=1,NVEC
+            CYCLES = DSQRT(DABS(EIGEN_VAL(I)))/(TWO*PI)
+            IF (CYCLES > ZERO) THEN
+               PERIOD = ONE/CYCLES
+            ELSE
+               PERIOD = ZERO
+            ENDIF
+            MASS_RATIO = ZERO
+            IF (DABS(MEFM_RB_MASS(J,J)) > EPS1) THEN
+               MASS_RATIO = (MEFFMASS(I,J)/WTMASS)/MEFM_RB_MASS(J,J)
+            ENDIF
+            CUM_MASS_RATIO(J) = CUM_MASS_RATIO(J) + MASS_RATIO
+            IF (IS_LOW_PRECISION) THEN
+               WRITE(F06,9123) I, CYCLES, PERIOD, MPFACTOR_N6(I,J), MEFFMASS(I,J)/WTMASS, MASS_RATIO, CUM_MASS_RATIO(J)
+            ELSE
+               WRITE(F06,9124) I, CYCLES, PERIOD, MPFACTOR_N6(I,J), MEFFMASS(I,J)/WTMASS, MASS_RATIO, CUM_MASS_RATIO(J)
+            ENDIF
+         ENDDO
+         WRITE(F06,*)
+      ENDDO
 
 
 
@@ -260,31 +308,43 @@
 
  9106 FORMAT(14X,'                                    Reference point is grid ',I8,/)
 
- 9107 FORMAT(13X,'MODE     CYCLES          T1            T2            T3            R1            R2            R3',/,            &
+ 9107 FORMAT(13X,'MODE    FREQ(Hz)     PERIOD(s)        T1            T2            T3            R1            R2            R3',/,            &
              13X,' NUM')
 
- 9108 FORMAT(13X,'MODE       CYCLES          T1            T2            T3            R1            R2            R3',/,          &
+ 9108 FORMAT(13X,'MODE      FREQ(Hz)     PERIOD(s)        T1            T2            T3            R1            R2            R3',/,          &
              13X,' NUM')
 
- 9110 FORMAT(9X,I8,7(1ES14.6))
+ 9110 FORMAT(9X,I8,8(1ES14.6))
 
- 9111 FORMAT(9X,I8,7(1ES14.2))
+ 9111 FORMAT(9X,I8,8(1ES14.2))
 
- 9112 FORMAT(32X,' ------------  ------------  ------------  ------------  ------------  ------------',/,                          &
-             17X,'Sum all modes:',6(1ES14.6))
+ 9112 FORMAT(45X,' ------------  ------------  ------------  ------------  ------------  ------------',/,&
+             31X,'Sum all modes:',6(1ES14.6))
 
- 9113 FORMAT(32X,'     --------      --------      --------      --------      --------      --------',/,                          &
-             17X,'Sum all modes:',6(1ES14.2))
+ 9113 FORMAT(45X,'     --------      --------      --------      --------      --------      --------',/,&
+             31X,'Sum all modes:',6(1ES14.2))
 
- 9116 FORMAT(14X,'Total model mass:',6(1ES14.6))
+ 9116 FORMAT(28X,'Total model mass:',6(1ES14.6))
 
- 9117 FORMAT(14X,'Total model mass:',6(1ES14.2))
+ 9117 FORMAT(28X,'Total model mass:',6(1ES14.2))
 
- 9118 FORMAT(8X,'Modes % of total mass*:',6(A14),//,' *If all modes are calculated the % of total mass should be 100% of the '     &
+  9118 FORMAT(22X,'Modes % of total mass*:',6(A14),//,' *If all modes are calculated the % of total mass should be 100% of the '     &
                ,'free mass (i.e. not counting mass at constrained DOF''s).',/,                                                     &
                '  Percentages are only printed for components that have finite model mass.',/,                                     &
                '                                                               -----')
 
+  9120 FORMAT(14X,'D E T A I L E D   M O D A L   M A S S   P A R T I C I P A T I O N   T A B L E S',/)
+
+  9121 FORMAT(14X,A,'  (',A,')')
+
+  9122 FORMAT(13X,'MODE    FREQ(Hz)     PERIOD(s)    PARTIC.FACTOR    EFFECTIVE MASS     MASS FRACTION      CUMULATIVE',/,        &
+             13X,' NUM')
+
+  9123 FORMAT(9X,I8,6(1ES16.6))
+
+  9124 FORMAT(9X,I8,6(1ES16.8))
+
 ! **********************************************************************************************************************************
 
       END SUBROUTINE WRITE_MEFFMASS
+

@@ -1,3 +1,4 @@
+! --- response_spectra_add begin --- !
 ! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
@@ -65,7 +66,6 @@
       INTEGER(LONG)                   :: ISUBCASE          ! the current subcase ID
       INTEGER(LONG)                   :: TABLE_CODE        ! flag for the type of table
       INTEGER(LONG)                   :: ANALYSIS_CODE     ! flag for the solution type
-      INTEGER(LONG), DIMENSION(NUM)   :: G_OR_S            ! flag for the type of point
       INTEGER(LONG)                   :: DEVICE_CODE       ! flag for PLOT,PRINT,PUNCH
       INTEGER(LONG)                   :: MODE              ! mode number for an eigenvector solution
       REAL(DOUBLE)                    :: EIGENVALUE        ! the eigenvalue for an eigenvector solution
@@ -74,6 +74,7 @@
       INTEGER(LONG)                   :: NUM_WIDE          ! the width in bytes of a result
       INTEGER(LONG)                   :: NVALUES           ! the width in "words" of a result
       INTEGER(LONG)                   :: ISUBCASE_INDEX    ! the index into SCNUM
+      INTEGER(LONG), DIMENSION(NUM)   :: G_OR_S            ! flag for the type of point
 
 ! **********************************************************************************************************************************
       ! TODO: assuming PLOT
@@ -115,11 +116,27 @@
       ISUBCASE_INDEX = 0
       CALL GET_ANALYSIS_CODE_FIELD5_FIELD6(JSUB, ANALYSIS_CODE, MODE, EIGENVALUE, ISUBCASE_INDEX)
 
-      TITLEI = TITLE(INT_SC_NUM)
-      STITLEI = STITLE(INT_SC_NUM)
-      LABELI = LABEL(INT_SC_NUM)
+! --- op2_upgraded begin --- !
+      ! Fallback for modal-frequency response paths where analysis code is
+      ! not set by helper yet. Prefer the local MFREQ family code before
+      ! dropping all the way back to static semantics.
+      IF ((ANALYSIS_CODE < 0) .AND. (SOL_NAME(1:8) == 'MFREQ')) THEN
+         ANALYSIS_CODE = 5
+      ELSE IF (ANALYSIS_CODE < 0) THEN
+         ANALYSIS_CODE = 1
+      ENDIF
+
+      ! Guard against invalid subcase index from dynamic result paths.
+      ! Fallback to the current internal subcase when FIELD5/FIELD6 helper
+      ! does not provide a valid SCNUM index.
+      IF (ISUBCASE_INDEX < 1) THEN
+         ISUBCASE_INDEX = INT_SC_NUM
+      ENDIF
 
       ISUBCASE = SCNUM(ISUBCASE_INDEX)
+      TITLEI = TITLE(ISUBCASE_INDEX)
+      STITLEI = STITLE(ISUBCASE_INDEX)
+      LABELI = LABEL(ISUBCASE_INDEX)
       IF ((ANALYSIS_CODE == 1) .OR. (ANALYSIS_CODE == 10)) THEN
           ! static
           CALL WRITE_OUG3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, TABLE_CODE, NEW_RESULT, &
@@ -133,16 +150,14 @@
       ! Write accels, displ's, applied forces or SPC forces (also calc TOTALS for forces if that is being output)
       ! TOTALS(J) is summation of G.P. values of applied forces, SPC forces, or MFC forces, for each of the J=1,6 components.
 
-      ! fill the G_OR_S array
+      ! fill the G_OR_S array using the actual selected output rows
       CALL GET_G_OR_S ( NUM, G_OR_S )
 
       ! write the real "displacment" data
       NUM_WIDE = 8
- 100  FORMAT("*DEBUG:    NUM=",I8,"; NVALUES=",I8,"; NTOTAL=",I8)
 !      NGRID = NUM - 3
       NVALUES = NUM * NUM_WIDE
       NTOTAL = NVALUES * 4
-      WRITE(ERR,100) NUM,NVALUES,NTOTAL
       WRITE(OP2) NVALUES
       ! Nastran OP2 requires this write call be a one liner...so it's a little weird...
       ! translating:
@@ -213,38 +228,69 @@
 
 !==============================================================================
       SUBROUTINE GET_G_OR_S ( NUM, G_OR_S )
-      USE MODEL_STUF, ONLY       :  GRID
+      USE MODEL_STUF, ONLY       :  GRID, GRID_ID
       USE PENTIUM_II_KIND, ONLY  :  BYTE, LONG
+      USE LINK9_STUFF, ONLY      :  GID_OUT_ARRAY
+      USE GET_ARRAY_ROW_NUM_Interface
       IMPLICIT NONE
-      INTEGER(LONG), INTENT(IN)  :: NUM  ! The number of rows of OGEL to write out
-
-      INTEGER(LONG)                  :: I       ! DO loop index
-      INTEGER(LONG), DIMENSION(NUM)  :: G_OR_S  ! flag for the type of point
+      INTEGER(LONG), INTENT(IN)  :: NUM
+      INTEGER(LONG), DIMENSION(NUM), INTENT(OUT) :: G_OR_S
+      INTEGER(LONG)              :: I
+      INTEGER(LONG)              :: IGRID
+      LOGICAL                    :: CACHE_HIT
+      INTEGER(LONG), SAVE        :: CACHED_NUM = -1
+      INTEGER(LONG), ALLOCATABLE, SAVE :: CACHED_GIDS(:)
+      INTEGER(LONG), ALLOCATABLE, SAVE :: CACHED_GORS(:)
 
       ! putting this G/S calc into an array
+      ! type
+      ! 0 - H / SECTOR/HARMONIC/RING POINT
+      ! 1 - G / GRID
+      ! 2 - S / SPOINT
+      ! 3 - E / EXTRA POINT
+      ! 4 - M / MODAL POINT
+      ! 7 - L / RIGID POINT (e.g. RBE3)
+      CACHE_HIT = .FALSE.
+      IF (ALLOCATED(CACHED_GIDS) .AND. ALLOCATED(CACHED_GORS)) THEN
+         IF ((CACHED_NUM == NUM) .AND. (SIZE(CACHED_GIDS) == NUM) .AND. (SIZE(CACHED_GORS) == NUM)) THEN
+            IF (ALL(CACHED_GIDS == GID_OUT_ARRAY(1:NUM,1))) THEN
+               G_OR_S(:) = CACHED_GORS(:)
+               CACHE_HIT = .TRUE.
+            ENDIF
+         ENDIF
+      ENDIF
+      IF (CACHE_HIT) THEN
+         RETURN
+      ENDIF
+
       DO I=1,NUM
-         ! type
-         ! 0 - H / SECTOR/HARMONIC/RING POINT
-         ! 1 - G / GRID
-         ! 2 - S / SPOINT
-         ! 3 - E / EXTRA POINT
-         ! 4 - M / MODAL POINT
-         ! 7 - L / RIGID POINT (e.g. RBE3)
-         IF (GRID(I,6) == 1) THEN
+         CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', 'WRITE_GRD_OP2_OUTPUTS', SIZE(GRID_ID), GRID_ID, GID_OUT_ARRAY(I,1), IGRID )
+         IF (GRID(IGRID,6) == 1) THEN
             G_OR_S(I) = 2
-         ELSE IF (GRID(I,6) == 6) THEN
+         ELSE IF (GRID(IGRID,6) == 6) THEN
             G_OR_S(I) = 1
          ELSE
-            G_OR_S(I) = -1 ! error
+            G_OR_S(I) = -1
          ENDIF
       ENDDO
+      CACHED_NUM = NUM
+      IF (ALLOCATED(CACHED_GIDS)) THEN
+         IF (SIZE(CACHED_GIDS) /= NUM) DEALLOCATE(CACHED_GIDS)
+      ENDIF
+      IF (ALLOCATED(CACHED_GORS)) THEN
+         IF (SIZE(CACHED_GORS) /= NUM) DEALLOCATE(CACHED_GORS)
+      ENDIF
+      IF (.NOT. ALLOCATED(CACHED_GIDS)) ALLOCATE(CACHED_GIDS(NUM))
+      IF (.NOT. ALLOCATED(CACHED_GORS)) ALLOCATE(CACHED_GORS(NUM))
+      CACHED_GIDS(:) = GID_OUT_ARRAY(1:NUM,1)
+      CACHED_GORS(:) = G_OR_S(:)
       END SUBROUTINE GET_G_OR_S
 
 !==============================================================================
       SUBROUTINE GET_ANALYSIS_CODE_FIELD5_FIELD6(JSUB, ANALYSIS_CODE, MODE, EIGENVALUE, ISUBCASE_INDEX)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR
-      USE SCONTR, ONLY                :  SOL_NAME
+      USE SCONTR, ONLY                :  INT_SC_NUM, SOL_NAME
       USE EIGEN_MATRICES_1 , ONLY     :  EIGEN_VAL
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
 
@@ -282,9 +328,16 @@
       ELSE IF (SOL_NAME(1:8) == 'NLSTATIC') THEN
         ISUBCASE_INDEX = 1
         ANALYSIS_CODE = 10 ! nonlinear statics
+      ELSE IF (SOL_NAME(1:8) == 'MFREQ') THEN
+        ISUBCASE_INDEX = INT_SC_NUM
+        ANALYSIS_CODE = 5 ! frequency/response family in local MFREQ workflow
+        MODE = JSUB
+        EIGENVALUE = EIGEN_VAL(JSUB)
       ELSE
         ANALYSIS_CODE = -1 ! error
- 99     FORMAT("*ERROR: ANALYSIS_CODE=-1; SOL_NAME =",A)
+99     FORMAT("*ERROR: ANALYSIS_CODE=-1; SOL_NAME =",A)
         WRITE(ERR,99) SOL_NAME
       ENDIF
       END SUBROUTINE GET_ANALYSIS_CODE_FIELD5_FIELD6
+! --- op2_upgraded end --- !
+! --- response_spectra_add end --- !

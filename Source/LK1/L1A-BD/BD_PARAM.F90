@@ -64,6 +64,9 @@
                                          PRTYS           , PRTQSYS         ,                                                       &
                                          Q4SURFIT        , QUADAXIS        , QUAD4TYP        , TRIA3TYP        , RCONDK          , &
                                          RELINK3         ,                                                                          &
+! --- response_spectra_add begin --- !
+                                         RSTYPE          , PARAM_GRAV      ,                                                       &
+! --- response_spectra_add end --- !
                                          SEQPRT          , SEQQUIT         , SETLKTM         , SETLKTK         , SHRFXFAC        , &
                                          SKIPMGG         , SOLLIB          , SPARSE_FLAVOR   , SPARSTOR        ,                   &
                                          SPC1QUIT        , SORT_MAX        , SPC1SID         , STR_CID                           , &
@@ -840,6 +843,47 @@
       ELSE IF ((PARAM_NAME(1:8) == 'PRTOP2  ') .OR. (PARAM_NAME(1:8) == 'OP2     ')) THEN
          PARNAM = 'PRTOP2  '
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, PRTOP2)
+
+! --- response_spectra_add begin --- !
+      ELSE IF (PARAM_NAME(1:8) == 'RSTYPE  ') THEN
+         PARNAM = 'RSTYPE  '
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      (CHRPARM(1:4) == 'PERG') THEN
+               RSTYPE = 'PERG'
+            ELSE IF (CHRPARM(1:4) == 'PERA') THEN
+               RSTYPE = 'PERA'
+            ELSE IF (CHRPARM(1:4) == 'FRQG') THEN
+               RSTYPE = 'FRQG'
+            ELSE IF (CHRPARM(1:4) == 'FRQA') THEN
+               RSTYPE = 'FRQA'
+            ELSE
+               WRITE(ERR,1189) PARNAM,'PERG/PERA/FRQG/FRQA',CHRPARM,RSTYPE
+               IF (SUPWARN == 'N') THEN
+                  WRITE(F06,1189) PARNAM,'PERG/PERA/FRQG/FRQA',CHRPARM,RSTYPE
+               ENDIF
+            ENDIF
+         ENDIF
+
+      ELSE IF (PARAM_NAME(1:8) == 'GRAV    ') THEN
+         PARNAM = 'GRAV    '
+         CALL R8FLD ( JCARD(3), JF(3), R8PARM )
+         IF (IERRFL(3) == 'N') THEN
+            IF (R8PARM > ZERO) THEN
+               PARAM_GRAV = R8PARM
+            ELSE
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1173) PARNAM,'> 0.D0',R8PARM
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1173) PARNAM,'> 0.D0',R8PARM
+               ENDIF
+            ENDIF
+         ENDIF
 
       ! GRDPNT causes the grid point weight generator to be run to calculate mass of the model relative to G.P defined by PARAM GRDPNT.
       ELSE IF (JCARD(2)(1:8) == 'GRDPNT  ') THEN

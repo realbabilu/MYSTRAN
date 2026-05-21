@@ -35,7 +35,7 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  SPARSTOR, WTMASS
       USE TIMDAT, ONLY                :  TSEC
-      USE DOF_TABLES, ONLY            :  TDOF
+      USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE MODEL_STUF, ONLY            :  CMASS, GRID_ID, PMASS, RPMASS
       USE SPARSE_MATRICES, ONLY       :  I_MGGS, J_MGGS, MGGS
 
@@ -46,13 +46,14 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'MGGS_MASS_MATRIX'
       CHARACTER( 1*BYTE)              :: FOUND             ! 'Y'/'N' indicator of whether we found something
 
-      INTEGER(LONG)                   :: G_SET_DOF(NGRID)  ! G-set array with grid actual ID's for the grids that have scalar mass
       INTEGER(LONG)                   :: G_SET_COL         ! Col in TDOF where G-set exists
-      INTEGER(LONG)                   :: I,J,K             ! DO loop indices or counters
+      INTEGER(LONG)                   :: I,J               ! DO loop indices or counters
       INTEGER(LONG)                   :: IERROR            ! Local error count
       INTEGER(LONG)                   :: IDOF(NCMASS)      ! G-set DOF number
       INTEGER(LONG)                   :: KTERM_MGGS        ! Count of number of terma going into MGGS
+      INTEGER(LONG)                   :: NUM_COMPS         ! Number of displacement comps for selected point
       INTEGER(LONG)                   :: ROW_NUM           ! Row number in TDOF where data begins for IGRID
+      INTEGER(LONG)                   :: SCOMP(NCMASS)     ! Component number for a scalar mass attached to a grid
       INTEGER(LONG)                   :: SGRID(NCMASS)     ! Grid number for a scalar mass (from array CMASS)
       INTEGER(LONG)                   :: PMASS_ID(NCMASS)  ! Prop ID for the CMASS that is attached to SGRID(I) (from array PMASS)
 
@@ -72,32 +73,39 @@
       CALL ALLOCATE_L1_MGG ( 'MGGS', SUBR_NAME )
 
       CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
-      K = 0
-      DO I=1,NDOFG
-         IF (TDOF(I,2) == 1) THEN
-            K = K + 1
-            G_SET_DOF(K)  = TDOF(I,G_SET_COL)
-         ENDIF
-      ENDDO
 
       DO I=1,NCMASS
 
          IF (CMASS(I,4) /= 0) THEN                         ! The scalar point is in either col 4 or 6 in CMASS (checked in BD read)
             SGRID(I) = CMASS(I,4)
+            SCOMP(I) = CMASS(I,5)
          ELSE
             SGRID(I) = CMASS(I,6)
+            SCOMP(I) = CMASS(I,7)
          ENDIF
          PMASS_ID(I) = CMASS(I,3)
 
          ROW_NUM = -1
          CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, SGRID(I), ROW_NUM )
          IF (ROW_NUM /= -1) THEN
-            IDOF(I) = G_SET_DOF(ROW_NUM)
+            CALL GET_GRID_NUM_COMPS ( ROW_NUM, NUM_COMPS, SUBR_NAME )
+            IF (NUM_COMPS == 1) THEN
+               IDOF(I) = TDOF(TDOF_ROW_START(ROW_NUM), G_SET_COL)
+            ELSE
+               IF ((SCOMP(I) >= 1) .AND. (SCOMP(I) <= NUM_COMPS)) THEN
+                  IDOF(I) = 0
+               ELSE
+                  IERROR    = IERROR + 1
+                  FATAL_ERR = FATAL_ERR + 1
+                  WRITE(ERR,1361) 'GRID COMPONENT ON GRID ', SGRID(I), 'BULK DATA CMASS ENTRY'
+                  WRITE(F06,1361) 'GRID COMPONENT ON GRID ', SGRID(I), 'BULK DATA CMASS ENTRY'
+               ENDIF
+            ENDIF
          ELSE
             IERROR    = IERROR + 1
             FATAL_ERR = FATAL_ERR + 1
-            WRITE(ERR,1361) 'GRID OR SPOINT', SGRID, 'BULK DATA CMASS ENTRY'
-            WRITE(F06,1361) 'GRID OR SPOINT', SGRID, 'BULK DATA CMASS ENTRY'
+            WRITE(ERR,1361) 'GRID OR SPOINT', SGRID(I), 'BULK DATA CMASS ENTRY'
+            WRITE(F06,1361) 'GRID OR SPOINT', SGRID(I), 'BULK DATA CMASS ENTRY'
          ENDIF
 
       ENDDO

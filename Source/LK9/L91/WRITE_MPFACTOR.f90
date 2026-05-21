@@ -31,7 +31,7 @@
       USE IOUNT1, ONLY                :  WRT_ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, NDOFG, NDOFR, NVEC, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO, TWO, PI
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, MPFACTOR_NR, MPFACTOR_N6
       USE MODEL_STUF, ONLY            :  LABEL, STITLE, TITLE
@@ -54,6 +54,7 @@
 
 
       REAL(DOUBLE)                    :: CYCLES            ! Circular frequency of a mode
+      REAL(DOUBLE)                    :: PERIOD            ! Period of a mode
       !LOGICAL                        :: WRITE_F06  ! flag
       !LOGICAL                        :: WRITE_OP2  ! flag
       LOGICAL                         :: IS_LOW_PRECISION  ! Print MPFACTOR, MEFFMASS values with 2 decimal places of accuracy rather than 6
@@ -102,11 +103,16 @@
          DO I=1,NVEC
 
             CYCLES = DSQRT(DABS(EIGEN_VAL(I)))/(TWO*PI)
+            IF (CYCLES > ZERO) THEN
+               PERIOD = ONE/CYCLES
+            ELSE
+               PERIOD = ZERO
+            ENDIF
 
             IF (IS_LOW_PRECISION) THEN
-               WRITE(F06,9301) I, CYCLES, (MPFACTOR_NR(I,J),J=1,NDOFR)
+               WRITE(F06,9301) I, CYCLES, PERIOD, (MPFACTOR_NR(I,J),J=1,NDOFR)
             ELSE
-               WRITE(F06,9302) I, CYCLES, (MPFACTOR_NR(I,J),J=1,NDOFR)
+               WRITE(F06,9302) I, CYCLES, PERIOD, (MPFACTOR_NR(I,J),J=1,NDOFR)
             ENDIF
 
          ENDDO
@@ -135,11 +141,16 @@
          DO I=1,NVEC
 
             CYCLES = DSQRT(DABS(EIGEN_VAL(I)))/(TWO*PI)
+            IF (CYCLES > ZERO) THEN
+               PERIOD = ONE/CYCLES
+            ELSE
+               PERIOD = ZERO
+            ENDIF
 
             IF (IS_LOW_PRECISION) THEN
-               WRITE(F06,9503) I, CYCLES, (MPFACTOR_N6(I,J),J=1,6)
+               WRITE(F06,9503) I, CYCLES, PERIOD, (MPFACTOR_N6(I,J),J=1,6)
             ELSE
-               WRITE(F06,9504) I, CYCLES, (MPFACTOR_N6(I,J),J=1,6)
+               WRITE(F06,9504) I, CYCLES, PERIOD, (MPFACTOR_N6(I,J),J=1,6)
             ENDIF
 
          ENDDO
@@ -174,29 +185,29 @@
 
  9101 FORMAT(32X,32767(I8,6X))
 
- 9102 FORMAT(13X,'MODE     CYCLES  ',32767(2X,I8,'-',I1,2X))
+ 9102 FORMAT(13X,'MODE    FREQ(Hz)     PERIOD(s) ',32767(2X,I8,'-',I1,2X))
 
  9103 FORMAT(13X,' NUM')
 
  9201 FORMAT(34X,32767(I8,6X))
 
- 9202 FORMAT(13X,'MODE       CYCLES  ',32767(2X,I8,'-',I1,2X))
+ 9202 FORMAT(13X,'MODE      FREQ(Hz)     PERIOD(s) ',32767(2X,I8,'-',I1,2X))
 
  9203 FORMAT(13X,' NUM')
 
- 9301 FORMAT(9X,I8,32767(1ES14.6))
+ 9301 FORMAT(9X,I8,2(1ES14.6),32767(1ES14.6))
 
- 9302 FORMAT(9X,I8,32767(1ES14.2))
+ 9302 FORMAT(9X,I8,2(1ES14.2),32767(1ES14.2))
 
- 9501 FORMAT(13X,'MODE     CYCLES          T1            T2            T3            R1            R2            R3',/,            &
+ 9501 FORMAT(13X,'MODE    FREQ(Hz)     PERIOD(s)        T1            T2            T3            R1            R2            R3',/,            &
              13X,' NUM')
 
- 9502 FORMAT(13X,'MODE       CYCLES          T1            T2            T3            R1            R2            R3',/,          &
+ 9502 FORMAT(13X,'MODE      FREQ(Hz)     PERIOD(s)        T1            T2            T3            R1            R2            R3',/,          &
              13X,' NUM')
 
- 9503 FORMAT(9X,I8,7(1ES14.6))
+ 9503 FORMAT(9X,I8,8(1ES14.6))
 
- 9504 FORMAT(9X,I8,7(1ES14.2))
+ 9504 FORMAT(9X,I8,8(1ES14.2))
 
 ! **********************************************************************************************************************************
 

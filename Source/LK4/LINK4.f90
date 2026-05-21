@@ -60,13 +60,13 @@
                                          NTERM_MLL, NTERM_MLLn,                                                                    &
                                          NVEC, NUM_EIGENS, NUM_KLLD_DIAG_ZEROS, NUM_MLL_DIAG_ZEROS, SOL_NAME, WARN_ERR
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSTOR, SUPINFO
+      USE PARAMS, ONLY                :  EPSIL, PRTOP2, SOLLIB, SPARSTOR, SUPINFO
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, &
                                          EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ,    &
                                          MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT, EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, EIG_EXTRACT_SOURCE,  &
                                          EIG_CHASE_NEX, EIG_CHASE_MAX_ITER, EIG_CHASE_DEG, EIG_FEAST_M0, EIG_FEAST_TOL_DIGITS,      &
                                          EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR, EIG_SUBSPACE_NSUB, EIG_SUBSPACE_MAX_ITER,         &
-                                         EIG_DENSE_NEX, EIG_CHASE_TOL, EIG_FEAST_SEARCH_SCALE, EIG_SUBSPACE_TOL
+                                         EIG_DENSE_NEX, EIG_CHASE_TOL, EIG_FEAST_SEARCH_SCALE, EIG_SUBSPACE_TOL, LABEL, STITLE, TITLE
 
       USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_KLLD, J_KLLD, KLLD, I_KLLDn, J_KLLDn, KLLDn,                         &
                                          I_MLL, J_MLL, MLL, I_MLLn, J_MLLn, MLLn
@@ -88,8 +88,13 @@
 
       INTEGER(LONG)                   :: I,J                 ! DO loop indices or counters.
       INTEGER(LONG)                   :: IERROR              ! Error count when reading records from a file.
+      INTEGER(LONG)                   :: LAMA_ANALYSIS_CODE  ! OP2 analysis code for LAMA/BLAMA writer
       INTEGER(LONG)                   :: OUNT(2)             ! File units to write messages to. Input to subr UNFORMATTED_OPEN.
       INTEGER(LONG), PARAMETER        :: P_LINKNO = 2        ! Prior LINK no's that should have run before this LINK can execute.
+
+      CHARACTER(128*BYTE)             :: LABELI             ! Safe label passed to LAMA OP2 writer
+      CHARACTER(128*BYTE)             :: STITLEI            ! Safe subtitle passed to LAMA OP2 writer
+      CHARACTER(128*BYTE)             :: TITLEI             ! Safe title passed to LAMA OP2 writer
 
       REAL(DOUBLE)                    :: EPS1                ! Small number to compare variables against zero.
       REAL(DOUBLE)                    :: EIGEN_VEC_COL(NDOFL)! One eigenvector put into a 1-D array.
@@ -138,12 +143,15 @@
       ENDIF
 
       ! Make sure we have correct SOL
-      IF ((SOL_NAME(1:5) /= 'MODES') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL') .AND. (SOL_NAME(1:8) /= 'BUCKLING')) THEN
-         WRITE(ERR,999) 'MODES or BUCKLING or GEN CB MODEL', SOL_NAME
-         WRITE(F06,999) 'MODES or BUCKLING or GEN CB MODEL', SOL_NAME
+! --- response_spectra_add begin --- !
+      IF ((SOL_NAME(1:5) /= 'MODES') .AND. (SOL_NAME(1:8) /= 'MFREQ') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL') .AND.             &
+          (SOL_NAME(1:8) /= 'BUCKLING')) THEN
+         WRITE(ERR,999) 'MODES or MFREQ or BUCKLING or GEN CB MODEL', SOL_NAME
+         WRITE(F06,999) 'MODES or MFREQ or BUCKLING or GEN CB MODEL', SOL_NAME
          FATAL_ERR = FATAL_ERR + 1
          CALL OUTA_HERE ( 'Y' )
       ENDIF
+! --- response_spectra_add end --- !
 
 ! **********************************************************************************************************************************
       ! Read data from file LINK1M
@@ -293,6 +301,11 @@
 
       ELSE IF (EIG_METH(1:7) == 'LANCZOS') THEN
 ! --- chase_feast_add --- begin !
+! --- response_spectra_add begin --- !
+! Keep method selection from deck/PARAM (DENSE/SUBSP/FEAST/CHASE) for
+! MFREQ/MODES verification sweeps. Dense remains default in generated decks.
+! FEAST/CHASE are kept native for direct validation in MFREQ/MODES sweeps.
+! --- response_spectra_add end --- !
          IF (EIG_EXTRACT_METHOD(1:5) == 'CHASE') THEN
             CALL EIG_LANCZOS_CHASE
          ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'FEAST') THEN
@@ -476,3 +489,9 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE LINK4
+
+
+
+
+
+

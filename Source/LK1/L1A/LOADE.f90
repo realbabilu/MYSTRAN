@@ -61,7 +61,7 @@
       CHARACTER( 8*BYTE)              :: TOKTYP(3)         ! Description of the TOKEN's returned from subr STOKEN
 
                                                            ! Proper SOL number
-      CHARACTER( 10*BYTE)             :: SOL_NUM_SHOULD_BE = '1, 3 or 31'
+      CHARACTER( 20*BYTE)             :: SOL_NUM_SHOULD_BE = '1, 3, 31 or 112'
       CHARACTER( 1*BYTE)              :: ANY_OU4_NAME_BAD  ! 'Y'/'N' if requested OUTPUT4 matrix name is valid
 
       INTEGER(LONG)                   :: CHAR_COL          ! Column number on CARD where character CHAR is found
@@ -191,6 +191,13 @@
                      SOL_NAME(1:5)  =  'MODES'
                      SOL_INT        = 3
 
+! --- response_spectra_add begin --- !
+                  ELSE IF ((TOKEN(1) == 'MFREQ   ') .OR. (TOKEN(1) == 'SEMFREQ ')) THEN
+                     SOL_NAME(1:LEN(SOL_NAME)) = ' '
+                     SOL_NAME(1:8)  =  'MFREQ'
+                     SOL_INT        = 111
+! --- response_spectra_add end --- !
+
                   ELSE IF ((TOKEN(1) == 'DIFFEREN') .OR. (TOKEN(1) == 'DIFF STI')) THEN
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
                      SOL_NAME(1:8)  =  'DIFFEREN'
@@ -205,6 +212,13 @@
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
                      SOL_NAME(1:8)  =  'NLSTATIC'
                      SOL_INT        = 106
+
+! --- response_spectra_add begin --- !
+                  ELSE IF ((TOKEN(1) == 'DFREQ   ') .OR. (TOKEN(1) == 'SEDFREQ ')) THEN
+                     SOL_NAME(1:LEN(SOL_NAME)) = ' '
+                     SOL_NAME(1:8)  =  'MFREQ'
+                     SOL_INT        = 112
+! --- response_spectra_add end --- !
 
                   ELSE IF (TOKEN(1)(1:3) == 'GEN') THEN
                      CALL STOKEN ( SUBR_NAME, CARD1, ISTART, TOKLEN, NTOKEN, IERROR, TOKTYP, TOKEN, ERRTOK, THRU, EXCEPT )
@@ -239,6 +253,11 @@
                   ELSE IF ((SOL_INT == 3 ) .OR. (SOL_INT == 103))  THEN
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
                      SOL_NAME(1:5) = 'MODES'
+! --- response_spectra_add begin --- !
+                  ELSE IF (SOL_INT == 111) THEN
+                     SOL_NAME(1:LEN(SOL_NAME)) = ' '
+                     SOL_NAME(1:8) = 'MFREQ'
+! --- response_spectra_add end --- !
                   ELSE IF ((SOL_INT == 4 ) .OR. (SOL_INT == 104)) THEN
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
                      SOL_NAME(1:8) = 'DIFFEREN'
@@ -251,6 +270,11 @@
                   ELSE IF ((SOL_INT == 66) .OR. (SOL_INT == 106)) THEN
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
                      SOL_NAME      = 'NLSTATIC'
+! --- response_spectra_add begin --- !
+                  ELSE IF (SOL_INT == 112) THEN
+                     SOL_NAME(1:LEN(SOL_NAME)) = ' '
+                     SOL_NAME(1:8) = 'MFREQ'
+! --- response_spectra_add end --- !
                   ELSE
                      WRITE(ERR,999) SOL_NUM_SHOULD_BE, SOL_INT
                      WRITE(F06,999) SOL_NUM_SHOULD_BE, SOL_INT
@@ -387,3 +411,8 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE LOADE
+
+
+
+
+

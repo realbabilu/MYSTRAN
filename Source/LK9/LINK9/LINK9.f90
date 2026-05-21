@@ -63,14 +63,19 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  DISP_OUT, ACCE_OUT, OLOA_OUT, SPCF_OUT, MPCF_OUT, FORC_OUT, GPFO_OUT, STRE_OUT, STRN_OUT
       USE TIMDAT, ONLY                :  STIME
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  EPSIL, MPFOUT, SUPINFO, SUPWARN, WTMASS, PRTF06, PRTOP2, PRTNEU
+      USE PARAMS, ONLY                :  EPSIL, MPFOUT, SUPINFO, SUPWARN, WTMASS, PARAM_GRAV, PRTF06, PRTOP2, PRTNEU
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE COL_VECS, ONLY              :  FG_COL, UG_COL, PG_COL, PM_COL, PS_COL, QSYS_COL, QGm_COL, QGr_COL, QGs_COL, QR_COL,      &
                                          PHIXG_COL, PHIXN_COL
-      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MODE_NUM
+      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MODE_NUM, MPFACTOR_N6
       USE OUTPUT4_MATRICES, ONLY      :  NUM_OU4_REQUESTS, OU4_PART_MAT_NAMES, HAS_OU4_MAT_BEEN_PROCESSED, OU4_PART_MAT_NAMES
       USE OUTPUT4_MATRICES, ONLY      :  OTM_ACCE, OTM_DISP, OTM_MPCF, OTM_SPCF, OTM_ELFE, OTM_ELFN, OTM_STRE, OTM_STRN,           &
                                          TXT_ACCE, TXT_DISP, TXT_MPCF, TXT_SPCF, TXT_ELFE, TXT_ELFN, TXT_STRE, TXT_STRN
+! --- response_spectra_add begin --- !
+      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_NUM_TAB, RS_NUM_DIR, RS_INTERP_AMP, RS_DAREA_COMP_SCALE, RS_DIR_COMP_SCALE,           &
+                                         RS_DIR_EXCITE_SID, RS_COMBINE_100_30, RS_DLOAD_USES_EXCITE, RS_DLOAD_SID,                 &
+                                         RS_MODAL_METHOD, RS_DIRECTIONAL_METHOD, RS_DIR_DAMP
+! --- response_spectra_add end --- !
 
       USE SPARSE_MATRICES, ONLY       :  I_GMN , J_GMN , GMN , I_GMNt, J_GMNt, GMNt, I_HMN , J_HMN , HMN ,                         &
                                          I_KSF , J_KSF , KSF , I_KSFD, J_KSFD, KSFD, I_LMN , J_LMN , LMN ,                         &
@@ -83,8 +88,8 @@
 
       USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_MPCF_OUTPUT, ANY_SPCF_OUTPUT, ANY_OLOA_OUTPUT,      &
                                          ANY_GPFO_OUTPUT, ANY_ELFE_OUTPUT, ANY_ELFN_OUTPUT, ANY_STRE_OUTPUT, ANY_STRN_OUTPUT,      &
-                                         OELDT, OELOUT, OGROUT, GRID, GROUT, MEFFMASS_CALC, MPFACTOR_CALC, SCNUM, SUBLOD, TITLE,   &
-                                         STITLE, LABEL
+                                         OELDT, OELOUT, OGROUT, GRID, RGRID, GROUT, MEFFMASS_CALC, MPFACTOR_CALC, SCNUM, SUBLOD,   &
+                                         TITLE, STITLE, LABEL
       USE LINK9_STUFF, ONLY           :  MAXREQ
 
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -162,6 +167,43 @@
       REAL(DOUBLE)                    :: EPS1              ! Small number to compare against zero
       REAL(DOUBLE)                    :: UGV               ! A G-set vector read from file L5A
       REAL(DOUBLE)                    :: PHIXGV            ! A G-set vector read from file L5B
+! --- response_spectra_add begin --- !
+      REAL(DOUBLE)                    :: MODE_OM
+      REAL(DOUBLE)                    :: RS_AMP
+      REAL(DOUBLE)                    :: RS_GAMMA
+      REAL(DOUBLE)                    :: RS_SD
+      REAL(DOUBLE)                    :: RS_GACC
+      REAL(DOUBLE)                    :: RS_MAX_COORD
+      REAL(DOUBLE)                    :: RS_DAREA_NORM
+      REAL(DOUBLE)                    :: RS_MAX_SRSS
+      REAL(DOUBLE)                    :: RS_MAX_ORTHO
+      REAL(DOUBLE)                    :: RS_MAX_DIR(3)
+      REAL(DOUBLE), ALLOCATABLE       :: UG_RS_SRSS(:)
+      REAL(DOUBLE), ALLOCATABLE       :: RS_MODE_FREQ(:)
+      REAL(DOUBLE), ALLOCATABLE       :: RS_MODE_RESP(:,:)
+      REAL(DOUBLE)                    :: RS_GAMMA_DIR(3)
+      REAL(DOUBLE)                    :: RS_DAREA_NORM_DIR(3)
+      REAL(DOUBLE), ALLOCATABLE       :: UG_RS_DIR1(:)
+      REAL(DOUBLE), ALLOCATABLE       :: UG_RS_DIR2(:)
+      REAL(DOUBLE), ALLOCATABLE       :: UG_RS_DIR3(:)
+      REAL(DOUBLE)                    :: RS_ZETA
+      REAL(DOUBLE)                    :: RS_OMEGA_I
+      REAL(DOUBLE)                    :: RS_OMEGA_J
+      REAL(DOUBLE)                    :: RS_BETA
+      REAL(DOUBLE)                    :: RS_RHO
+      REAL(DOUBLE)                    :: RS_CQC_SUM
+      REAL(DOUBLE)                    :: RS_GROUP_SUM
+      REAL(DOUBLE)                    :: RS_PREV_OMEGA
+      INTEGER(LONG)                   :: NDIR_USE = 0
+      INTEGER(LONG)                   :: NMODE_RS = 0
+      INTEGER(LONG)                   :: IMODE = 0
+      INTEGER(LONG)                   :: JMODE = 0
+      INTEGER(LONG)                   :: IDIR = 0
+      INTEGER(LONG)                   :: RS_ACTIVE_DLOAD = 0
+      INTEGER(LONG)                   :: RS_DIR_SLOT(3) = 0
+      LOGICAL                         :: RS_DIR_IS_ACTIVE = .FALSE.
+      LOGICAL                         :: RS_NEEDS_MPFACTOR = .FALSE.
+! --- response_spectra_add end --- !
       INTEGER(LONG)                   :: ITABLE            !
       LOGICAL                         :: NEW_RESULT        ! Is this a new result
 
@@ -396,7 +438,7 @@
 
             IF (NTERM_MFS > 0) THEN
 
-               IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+               IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
 
                                                               ! Allocate and read MSF
                   CALL LINK_MESSAGE('ALLOCATE ARRAYS FOR, AND READ, MSF')
@@ -478,7 +520,7 @@
       ENDIF
 
       ! Read MGG mass matrix if this is a dynamics solution and GP force balance is requested
-      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
          IF (ANY_GPFO_OUTPUT > 0) THEN
             CALL LINK_MESSAGE('ALLOCATE SPARSE ARRAYS FOR MGG MASS ARRAYS')
             CALL ALLOCATE_SPARSE_MAT ( 'MGG', NDOFG, NTERM_MGG, SUBR_NAME )
@@ -492,7 +534,7 @@
       ENDIF
 
       ! Read MLL mass matrix if this is a dynamics solution and GP force balance is requested.
-      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
          IF (ANY_GPFO_OUTPUT > 0) THEN
             CALL LINK_MESSAGE('ALLOCATE SPARSE ARRAYS FOR MLL MASS ARRAYS')
             CALL ALLOCATE_SPARSE_MAT ( 'MLL', NDOFL, NTERM_MLL, SUBR_NAME )
@@ -518,13 +560,14 @@
       ! or modal participation factors (but only do this if not a CB soln since MPFACTOR and MEFFMASS were calc'd in LINK6 for CB)
       ! EIGEN_VAL was not deallocated in LINK4 (see LINK4 comment 01/11/19) so we do not allocate it here anymore
       ZERO_GEN_STIFF = 'N'
-      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
                                                         ! MODE_NUM is not used to det gen stiff but it is read in subr READ_L1M
          CALL ALLOCATE_EIGEN1_MAT ( 'MODE_NUM' , NUM_EIGENS, 1, SUBR_NAME )
 !xx      CALL ALLOCATE_EIGEN1_MAT ( 'EIGEN_VAL', NUM_EIGENS, 1, SUBR_NAME )
          CALL ALLOCATE_EIGEN1_MAT ( 'GEN_MASS' , NUM_EIGENS, 1, SUBR_NAME )
          IERROR = 0
          CALL READ_L1M ( IERROR )
+         RS_NEEDS_MPFACTOR = ((SOL_NAME(1:8) == 'MFREQ') .AND. (RS_NUM_TAB > 0))
          CALL DEALLOCATE_EIGEN1_MAT ( 'MODE_NUM' )
          IF (IERROR /= 0) THEN
             WRITE(ERR,9995) LINKNO,IERROR
@@ -542,10 +585,10 @@
             ENDDO
 
             IF (ZERO_GEN_STIFF == 'N') THEN                ! No zero gen stiff, so allocate arrays for eff mass, mpf if requested
-               IF (MEFFMASS_CALC == 'Y') THEN
+               IF ((MEFFMASS_CALC == 'Y') .OR. RS_NEEDS_MPFACTOR) THEN
                   CALL ALLOCATE_EIGEN1_MAT ( 'MEFFMASS', NVEC, 6, SUBR_NAME )
                ENDIF
-               IF (MPFACTOR_CALC  == 'Y') THEN
+               IF ((MPFACTOR_CALC  == 'Y') .OR. RS_NEEDS_MPFACTOR) THEN
                   IF (MPFOUT == '6') THEN
                      CALL ALLOCATE_EIGEN1_MAT ( 'MPFACTOR_N6', NVEC, 6, SUBR_NAME )
                   ELSE
@@ -605,7 +648,7 @@
 
          ENDIF
 
-      ELSE IF  (SOL_NAME(1:5) == 'MODES') THEN
+      ELSE IF  ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ')) THEN
          NUM_SOLNS = NVEC
 
       ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
@@ -663,6 +706,71 @@
 
       ENDIF
 
+! --- response_spectra_add begin --- !
+      IF ((SOL_NAME(1:8) == 'MFREQ') .AND. (RS_NUM_TAB > 0)) THEN
+         ALLOCATE(UG_RS_SRSS(NDOFG))
+         ALLOCATE(RS_MODE_FREQ(NUM_SOLNS))
+         ALLOCATE(RS_MODE_RESP(NDOFG,NUM_SOLNS))
+         ALLOCATE(UG_RS_DIR1(NDOFG))
+         ALLOCATE(UG_RS_DIR2(NDOFG))
+         ALLOCATE(UG_RS_DIR3(NDOFG))
+         NDIR_USE = MIN(3,RS_NUM_DIR)
+         DO I=1,NDOFG
+            UG_RS_SRSS(I) = ZERO
+            DO JVEC=1,NUM_SOLNS
+               RS_MODE_RESP(I,JVEC) = ZERO
+            ENDDO
+            UG_RS_DIR1(I) = ZERO
+            UG_RS_DIR2(I) = ZERO
+            UG_RS_DIR3(I) = ZERO
+         ENDDO
+         DO JVEC=1,NUM_SOLNS
+            RS_MODE_FREQ(JVEC) = ZERO
+         ENDDO
+         NMODE_RS = 0
+         RS_ZETA = 0.05D0
+         IF (INDEX(TITLE(1),'CQC') > 0) THEN
+            RS_MODAL_METHOD = 'CQC'
+         ELSE IF (INDEX(TITLE(1),'ABS') > 0) THEN
+            RS_MODAL_METHOD = 'ABS'
+         ELSE IF ((INDEX(TITLE(1),'10PCT') > 0) .OR. (INDEX(TITLE(1),'10 PERCENT') > 0)) THEN
+            RS_MODAL_METHOD = '10PCT'
+         ELSE IF (INDEX(TITLE(1),'SRSS') > 0) THEN
+            RS_MODAL_METHOD = 'SRSS'
+         ELSE
+            RS_MODAL_METHOD = 'NONE'
+         ENDIF
+! --- response_spectra_add begin --- !
+         IF (PARAM_GRAV > EPS1) THEN
+            RS_GACC = PARAM_GRAV
+         ELSE IF (WTMASS > EPS1) THEN
+            RS_GACC = ONE/WTMASS
+         ELSE
+            RS_GACC = 386.4D0
+            RS_MAX_COORD = ZERO
+            DO I=1,NGRID
+               RS_MAX_COORD = MAX(RS_MAX_COORD, DABS(RGRID(I,1)))
+               RS_MAX_COORD = MAX(RS_MAX_COORD, DABS(RGRID(I,2)))
+               RS_MAX_COORD = MAX(RS_MAX_COORD, DABS(RGRID(I,3)))
+            ENDDO
+            IF (RS_MAX_COORD > 40.0D0) THEN
+               RS_GACC = 32.2D0
+            ENDIF
+         ENDIF
+! --- response_spectra_add end --- !
+         RS_MAX_SRSS = ZERO
+         RS_MAX_ORTHO = ZERO
+         RS_MAX_DIR(1) = ZERO
+         RS_MAX_DIR(2) = ZERO
+         RS_MAX_DIR(3) = ZERO
+         RS_DIR_SLOT(1) = 0
+         RS_DIR_SLOT(2) = 0
+         RS_DIR_SLOT(3) = 0
+      ELSE
+         RS_GACC = 386.4D0
+      ENDIF
+! --- response_spectra_add end --- !
+
 ! Loop on the number of subcases, or eigenvectors or CB vecs (as the case may be) for all output (except CB accel - processed later)
 
 j_do: DO JVEC=1,NUM_SOLNS
@@ -674,7 +782,7 @@ j_do: DO JVEC=1,NUM_SOLNS
             INT_SC_NUM   = LK9_PROC_NUM
             FEMAP_SET_ID = LK9_PROC_NUM
 
-         ELSE IF (SOL_NAME(1: 5) == 'MODES') THEN
+         ELSE IF ((SOL_NAME(1: 5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ')) THEN
             INT_SC_NUM   = 1
             FEMAP_SET_ID = JVEC
 
@@ -725,7 +833,7 @@ j_do: DO JVEC=1,NUM_SOLNS
                  ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1))) THEN
             CALL LINK_MESSAGE_I('READ G-SET DISPLACEMENTS,                      Subcase', JVEC)
 
-         ELSE IF ((SOL_NAME(1: 5) == 'MODES') .OR. ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2))) THEN
+         ELSE IF ((SOL_NAME(1: 5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2))) THEN
             CALL LINK_MESSAGE_I('READ G-SET EIGENVECTORS,                      Eigenvec', JVEC)
 
          ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
@@ -788,9 +896,11 @@ j_do: DO JVEC=1,NUM_SOLNS
 
          ! Process displacement output requests
          IF ((SC_DISP_OUTPUT > 0) .OR. (WRITE_NEU)) THEN
-            CALL LINK_MESSAGE_I('PROCESS DISPL OUTPUT REQUESTS,                    "',JVEC)
-            CALL OFP1 ( JVEC, 'DISP', SC_DISP_OUTPUT, FEMAP_SET_ID, ITG, OT4_GROW, ITABLE, NEW_RESULT )
-!           NEW_RESULT = .FALSE.
+            IF (.NOT. ((SOL_NAME(1:8) == 'MFREQ') .AND. (RS_NUM_TAB > 0))) THEN
+               CALL LINK_MESSAGE_I('PROCESS DISPL OUTPUT REQUESTS,                    "',JVEC)
+               CALL OFP1 ( JVEC, 'DISP', SC_DISP_OUTPUT, FEMAP_SET_ID, ITG, OT4_GROW, ITABLE, NEW_RESULT )
+!              NEW_RESULT = .FALSE.
+            ENDIF
          ENDIF
          !CALL END_OP2_TABLE(ITABLE)
 
@@ -813,7 +923,7 @@ j_do: DO JVEC=1,NUM_SOLNS
         ! participation factor output is requested. Calc anyway if there are any DOF's in the SA (AUTOSPC) set
         NEW_RESULT = .TRUE.
         ITABLE = -1
-         IF (SOL_NAME(1:5) == 'MODES') THEN
+         IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ')) THEN
             IF (NDOFS == 0) THEN
                IF ((MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y')) THEN
                   WRITE(ERR,111)
@@ -845,8 +955,99 @@ j_do: DO JVEC=1,NUM_SOLNS
 
             CALL LINK_MESSAGE_I('PROCESS SPC FORCE OUTPUT REQUESTS,                "',JVEC)
             CALL ALLOCATE_COL_VEC ( 'QGs_COL', NDOFG, SUBR_NAME )
-           CALL OFP2 ( JVEC, 'SPCF', SC_SPCF_OUTPUT, ZERO_GEN_STIFF, FEMAP_SET_ID, ITG, OT4_GROW, ITABLE, NEW_RESULT )
+            CALL OFP2 ( JVEC, 'SPCF', SC_SPCF_OUTPUT, ZERO_GEN_STIFF, FEMAP_SET_ID, ITG, OT4_GROW, ITABLE, NEW_RESULT )
 !           NEW_RESULT = .FALSE.
+            IF ((SOL_NAME(1:8) == 'MFREQ') .AND. (RS_NUM_TAB > 0)) THEN
+               RS_ACTIVE_DLOAD = SUBLOD(INT_SC_NUM,1)
+               IF (RS_ACTIVE_DLOAD <= 0) RS_ACTIVE_DLOAD = RS_DLOAD_SID
+               RS_DIR_SLOT(1) = 0
+               RS_DIR_SLOT(2) = 0
+               RS_DIR_SLOT(3) = 0
+               NDIR_USE = 0
+               DO IDIR=1,RS_NUM_DIR
+                  RS_DIR_IS_ACTIVE = RS_DLOAD_USES_EXCITE(RS_ACTIVE_DLOAD, RS_DIR_EXCITE_SID(IDIR))
+                  IF (RS_DIR_IS_ACTIVE) THEN
+                     IF (NDIR_USE < 3) THEN
+                        NDIR_USE = NDIR_USE + 1
+                        RS_DIR_SLOT(NDIR_USE) = IDIR
+                     ENDIF
+                  ENDIF
+               ENDDO
+
+               MODE_OM = SQRT(ABS(EIGEN_VAL(JVEC)))/6.283185307179586D0
+               RS_MODE_FREQ(JVEC) = SQRT(ABS(EIGEN_VAL(JVEC)))
+               NMODE_RS = MAX(NMODE_RS, JVEC)
+! --- response_spectra_add begin --- !
+               RS_AMP  = RS_INTERP_AMP(MODE_OM, RS_GACC)
+               RS_SD   = RS_AMP/MAX(ABS(EIGEN_VAL(JVEC)),EPS1)
+! --- response_spectra_add end --- !
+               RS_GAMMA = ZERO
+               RS_DAREA_NORM = ZERO
+               IF (NDIR_USE > 0) THEN
+                  DO IDIR=1,NDIR_USE
+                     DO K=1,6
+                        RS_GAMMA = RS_GAMMA + RS_DIR_COMP_SCALE(K,RS_DIR_SLOT(IDIR))*MPFACTOR_N6(JVEC,K)
+                        RS_DAREA_NORM = RS_DAREA_NORM + RS_DIR_COMP_SCALE(K,RS_DIR_SLOT(IDIR))*RS_DIR_COMP_SCALE(K,RS_DIR_SLOT(IDIR))
+                     ENDDO
+                  ENDDO
+               ELSE
+                  DO K=1,6
+                     RS_GAMMA = RS_GAMMA + RS_DAREA_COMP_SCALE(K)*MPFACTOR_N6(JVEC,K)
+                     RS_DAREA_NORM = RS_DAREA_NORM + RS_DAREA_COMP_SCALE(K)*RS_DAREA_COMP_SCALE(K)
+                  ENDDO
+               ENDIF
+               RS_DAREA_NORM = SQRT(RS_DAREA_NORM)
+               IF (RS_DAREA_NORM > EPS1) THEN
+                  RS_GAMMA = RS_GAMMA/RS_DAREA_NORM
+               ENDIF
+               IF (DABS(RS_GAMMA) < EPS1) THEN
+                  RS_GAMMA = ZERO
+                  IF (NDIR_USE > 0) THEN
+                     DO IDIR=1,NDIR_USE
+                        DO K=1,6
+                           RS_GAMMA = RS_GAMMA + DABS(RS_DIR_COMP_SCALE(K,RS_DIR_SLOT(IDIR)))
+                        ENDDO
+                     ENDDO
+                  ELSE
+                     DO K=1,6
+                        RS_GAMMA = RS_GAMMA + DABS(RS_DAREA_COMP_SCALE(K))
+                     ENDDO
+                  ENDIF
+               ENDIF
+               DO I=1,NDOFG
+                  RS_MODE_RESP(I,JVEC) = RS_GAMMA*RS_SD*UG_COL(I)
+                  IF (RS_MODAL_METHOD(1:3) == 'ABS') THEN
+                     UG_RS_SRSS(I) = UG_RS_SRSS(I) + DABS(RS_MODE_RESP(I,JVEC))
+                  ELSE
+                     UG_RS_SRSS(I) = UG_RS_SRSS(I) + RS_MODE_RESP(I,JVEC)*RS_MODE_RESP(I,JVEC)
+                  ENDIF
+               ENDDO
+
+               DO IDIR=1,NDIR_USE
+                  RS_GAMMA_DIR(IDIR) = ZERO
+                  RS_DAREA_NORM_DIR(IDIR) = ZERO
+                  DO K=1,6
+                     RS_GAMMA_DIR(IDIR) = RS_GAMMA_DIR(IDIR) + RS_DIR_COMP_SCALE(K,RS_DIR_SLOT(IDIR))*MPFACTOR_N6(JVEC,K)
+                     RS_DAREA_NORM_DIR(IDIR) = RS_DAREA_NORM_DIR(IDIR) + RS_DIR_COMP_SCALE(K,RS_DIR_SLOT(IDIR))*RS_DIR_COMP_SCALE(K,RS_DIR_SLOT(IDIR))
+                  ENDDO
+                  RS_DAREA_NORM_DIR(IDIR) = SQRT(RS_DAREA_NORM_DIR(IDIR))
+                  IF (RS_DAREA_NORM_DIR(IDIR) > EPS1) THEN
+                     RS_GAMMA_DIR(IDIR) = RS_GAMMA_DIR(IDIR)/RS_DAREA_NORM_DIR(IDIR)
+                  ENDIF
+               ENDDO
+
+               DO I=1,NDOFG
+                  IF (RS_MODAL_METHOD(1:3) == 'ABS') THEN
+                     IF (NDIR_USE >= 1) UG_RS_DIR1(I) = UG_RS_DIR1(I) + DABS(RS_GAMMA_DIR(1)*RS_SD*UG_COL(I))
+                     IF (NDIR_USE >= 2) UG_RS_DIR2(I) = UG_RS_DIR2(I) + DABS(RS_GAMMA_DIR(2)*RS_SD*UG_COL(I))
+                     IF (NDIR_USE >= 3) UG_RS_DIR3(I) = UG_RS_DIR3(I) + DABS(RS_GAMMA_DIR(3)*RS_SD*UG_COL(I))
+                  ELSE
+                     IF (NDIR_USE >= 1) UG_RS_DIR1(I) = UG_RS_DIR1(I) + (RS_GAMMA_DIR(1)*RS_SD*UG_COL(I))*(RS_GAMMA_DIR(1)*RS_SD*UG_COL(I))
+                     IF (NDIR_USE >= 2) UG_RS_DIR2(I) = UG_RS_DIR2(I) + (RS_GAMMA_DIR(2)*RS_SD*UG_COL(I))*(RS_GAMMA_DIR(2)*RS_SD*UG_COL(I))
+                     IF (NDIR_USE >= 3) UG_RS_DIR3(I) = UG_RS_DIR3(I) + (RS_GAMMA_DIR(3)*RS_SD*UG_COL(I))*(RS_GAMMA_DIR(3)*RS_SD*UG_COL(I))
+                  ENDIF
+               ENDDO
+            ENDIF
          ENDIF
 
          ! Process MPC force output requests, if there are any
@@ -879,7 +1080,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          IF (SC_GPFO_OUTPUT > 0) THEN
             CALL ALLOCATE_COL_VEC ( 'FG_COL', NDOFG, SUBR_NAME )
                                                            ! Accel load is Mgg*Ug_ddot = -EIGEN_VAL*Mgg*Ug in eigen analyses.
-            IF (SOL_NAME(1:5) == 'MODES') THEN
+            IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ')) THEN
                CALL MATMULT_SFF ( 'MGG', NDOFG, NDOFG, NTERM_MGG, SYM_MGG, I_MGG, J_MGG, MGG, 'UG', NDOFG, 1, UG_COL, 'Y',         &
                                   'FG', -EIGEN_VAL(JVEC), FG_COL )
                                                            ! DEBUG(191): calc FG_COL as if all inertia force due to MAA*UA_DDOT
@@ -998,6 +1199,116 @@ j_do: DO JVEC=1,NUM_SOLNS
          ENDIF
 
       ENDDO j_do
+
+! --- response_spectra_add begin --- !
+      IF ((SOL_NAME(1:8) == 'MFREQ') .AND. (RS_NUM_TAB > 0)) THEN
+         IF (RS_MODAL_METHOD(1:3) == 'CQC') THEN
+            IF (NDIR_USE >= 1) RS_ZETA = MAX(RS_DIR_DAMP(RS_DIR_SLOT(1)), 1.0D-6)
+            DO I=1,NDOFG
+               RS_CQC_SUM = ZERO
+               DO IMODE=1,NMODE_RS
+                  RS_OMEGA_I = RS_MODE_FREQ(IMODE)
+                  IF (RS_OMEGA_I <= EPS1) CYCLE
+                  DO JMODE=1,NMODE_RS
+                     RS_OMEGA_J = RS_MODE_FREQ(JMODE)
+                     IF (RS_OMEGA_J <= EPS1) CYCLE
+                     IF (IMODE == JMODE) THEN
+                        RS_RHO = ONE
+                     ELSE
+                        RS_BETA = RS_OMEGA_J/RS_OMEGA_I
+                        RS_RHO = (8.0D0*RS_ZETA*RS_ZETA*(1.0D0+RS_BETA)*(RS_BETA**1.5D0))/                                  &
+                                 (((1.0D0-RS_BETA*RS_BETA)*(1.0D0-RS_BETA*RS_BETA)) +                                         &
+                                  (4.0D0*RS_ZETA*RS_ZETA*RS_BETA*((1.0D0+RS_BETA)*(1.0D0+RS_BETA))))
+                     ENDIF
+                     RS_CQC_SUM = RS_CQC_SUM + RS_RHO*RS_MODE_RESP(I,IMODE)*RS_MODE_RESP(I,JMODE)
+                  ENDDO
+               ENDDO
+               UG_RS_SRSS(I) = MAX(RS_CQC_SUM, ZERO)
+            ENDDO
+         ELSE IF (RS_MODAL_METHOD(1:5) == '10PCT') THEN
+            DO I=1,NDOFG
+               RS_CQC_SUM = ZERO
+               RS_GROUP_SUM = ZERO
+               RS_PREV_OMEGA = -ONE
+               DO IMODE=1,NMODE_RS
+                  RS_OMEGA_I = RS_MODE_FREQ(IMODE)
+                  IF (RS_OMEGA_I <= EPS1) CYCLE
+                  IF (RS_PREV_OMEGA <= EPS1) THEN
+                     RS_GROUP_SUM = DABS(RS_MODE_RESP(I,IMODE))
+                  ELSE IF ((DABS(RS_OMEGA_I - RS_PREV_OMEGA)/MAX(RS_OMEGA_I,RS_PREV_OMEGA)) <= 0.10D0) THEN
+                     RS_GROUP_SUM = RS_GROUP_SUM + DABS(RS_MODE_RESP(I,IMODE))
+                  ELSE
+                     RS_CQC_SUM = RS_CQC_SUM + RS_GROUP_SUM*RS_GROUP_SUM
+                     RS_GROUP_SUM = DABS(RS_MODE_RESP(I,IMODE))
+                  ENDIF
+                  RS_PREV_OMEGA = RS_OMEGA_I
+               ENDDO
+               RS_CQC_SUM = RS_CQC_SUM + RS_GROUP_SUM*RS_GROUP_SUM
+               UG_RS_SRSS(I) = MAX(RS_CQC_SUM, ZERO)
+            ENDDO
+            IF (NDIR_USE == 1) THEN
+               DO I=1,NDOFG
+                  UG_RS_DIR1(I) = UG_RS_SRSS(I)
+               ENDDO
+            ENDIF
+         ENDIF
+         IF (RS_MODAL_METHOD(1:3) /= 'ABS') THEN
+            DO I=1,NDOFG
+               UG_RS_SRSS(I) = SQRT(MAX(UG_RS_SRSS(I),ZERO))
+               UG_RS_DIR1(I) = SQRT(MAX(UG_RS_DIR1(I),ZERO))
+               UG_RS_DIR2(I) = SQRT(MAX(UG_RS_DIR2(I),ZERO))
+               UG_RS_DIR3(I) = SQRT(MAX(UG_RS_DIR3(I),ZERO))
+            ENDDO
+         ENDIF
+         IF ((NDIR_USE >= 2) .AND. (RS_DIRECTIONAL_METHOD(1:5) == 'ORTHO')) THEN
+            CALL RS_COMBINE_100_30 ( NDOFG, UG_RS_DIR1, UG_RS_DIR2, UG_RS_DIR3, UG_COL )
+         ELSE IF (NDIR_USE >= 1) THEN
+            DO I=1,NDOFG
+               UG_COL(I) = UG_RS_DIR1(I)
+            ENDDO
+         ELSE
+            DO I=1,NDOFG
+               UG_COL(I) = UG_RS_SRSS(I)
+            ENDDO
+         ENDIF
+         DO I=1,NDOFG
+            RS_MAX_SRSS = MAX(RS_MAX_SRSS, UG_RS_SRSS(I))
+            RS_MAX_ORTHO = MAX(RS_MAX_ORTHO, UG_COL(I))
+            RS_MAX_DIR(1) = MAX(RS_MAX_DIR(1), UG_RS_DIR1(I))
+            RS_MAX_DIR(2) = MAX(RS_MAX_DIR(2), UG_RS_DIR2(I))
+            RS_MAX_DIR(3) = MAX(RS_MAX_DIR(3), UG_RS_DIR3(I))
+         ENDDO
+         IF (RS_MODAL_METHOD(1:3) == 'CQC') THEN
+             WRITE(ERR,'(A,1ES24.16)') ' INFO: MFREQ/SOL111 RS CQC max(|UG|) = ', RS_MAX_SRSS
+          ELSE IF (RS_MODAL_METHOD(1:3) == 'ABS') THEN
+             WRITE(ERR,'(A,1ES24.16)') ' INFO: MFREQ/SOL111 RS ABS max(|UG|) = ', RS_MAX_SRSS
+          ELSE IF (RS_MODAL_METHOD(1:5) == '10PCT') THEN
+             WRITE(ERR,'(A,1ES24.16)') ' INFO: MFREQ/SOL111 RS 10PCT max(|UG|) = ', RS_MAX_SRSS
+          ELSE IF (RS_MODAL_METHOD(1:4) == 'SRSS') THEN
+             WRITE(ERR,'(A,1ES24.16)') ' INFO: MFREQ/SOL111 RS SRSS max(|UG|) = ', RS_MAX_SRSS
+         ELSE IF (NDIR_USE >= 1) THEN
+            WRITE(ERR,'(A,1ES24.16)') ' INFO: MFREQ/SOL111 RS DIR1 max(|UG|) = ', RS_MAX_DIR(1)
+         ELSE
+            WRITE(ERR,'(A,1ES24.16)') ' INFO: MFREQ/SOL111 RS UNCOMBINED max(|UG|) = ', RS_MAX_SRSS
+         ENDIF
+         IF ((NDIR_USE >= 2) .AND. (RS_DIRECTIONAL_METHOD(1:5) == 'ORTHO')) THEN
+            WRITE(ERR,'(A,1ES24.16)') ' INFO: MFREQ/SOL111 RS ORTHO100/30 max(|UG|) = ', RS_MAX_ORTHO
+            WRITE(ERR,'(A,3(1X,1ES16.8))') ' INFO: MFREQ/SOL111 RS DIR_MAX [X Y Z] = ', RS_MAX_DIR(1), RS_MAX_DIR(2), RS_MAX_DIR(3)
+         ENDIF
+         NEW_RESULT = .TRUE.
+         ITABLE = -1
+         IF ((SC_DISP_OUTPUT > 0) .OR. (WRITE_NEU)) THEN
+            CALL LINK_MESSAGE('PROCESS DISPL OUTPUT REQUESTS, RS COMBINED')
+            CALL OFP1 ( 1, 'DISP', SC_DISP_OUTPUT, 1, ITG, OT4_GROW, ITABLE, NEW_RESULT )
+         ENDIF
+         DEALLOCATE(UG_RS_SRSS)
+         DEALLOCATE(RS_MODE_FREQ)
+         DEALLOCATE(RS_MODE_RESP)
+         DEALLOCATE(UG_RS_DIR1)
+         DEALLOCATE(UG_RS_DIR2)
+         DEALLOCATE(UG_RS_DIR3)
+      ENDIF
+! --- response_spectra_add end --- !
 
       !IF (POST /= 0) THEN
       !ENDIF
@@ -1137,11 +1448,11 @@ j_do: DO JVEC=1,NUM_SOLNS
 !-----------------------------------------------------------------------------------------------------------------------------------
 ! If sol is eigens (not CB) then MPFACTOR, MEFFMASS were calc'd in OFP2
 
-      IF ((MPFACTOR_CALC  == 'Y') .AND. (ZERO_GEN_STIFF == 'N')) THEN
+      IF (((MPFACTOR_CALC  == 'Y') .OR. RS_NEEDS_MPFACTOR) .AND. (ZERO_GEN_STIFF == 'N')) THEN
          CALL WRITE_MPFACTOR
       ENDIF
 
-      IF ((MEFFMASS_CALC == 'Y') .AND. (ZERO_GEN_STIFF == 'N')) THEN
+      IF (((MEFFMASS_CALC == 'Y') .OR. RS_NEEDS_MPFACTOR) .AND. (ZERO_GEN_STIFF == 'N')) THEN
          IF (DABS(WTMASS) < EPS1) THEN
             WRITE(ERR,9991)
             IF (SUPINFO == 'N') THEN
@@ -1167,7 +1478,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          CALL WRITE_OTM_TO_F06
       ENDIF
 
-      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
          CALL DEALLOCATE_EIGEN1_MAT ( 'EIGEN_VAL' )
          CALL DEALLOCATE_EIGEN1_MAT ( 'GEN_MASS' )
          CALL DEALLOCATE_EIGEN1_MAT ( 'MODE_NUM' )
@@ -1764,3 +2075,6 @@ j_do: DO JVEC=1,NUM_SOLNS
       END SUBROUTINE GET_FG_INERTIA_FORCES
 
       END SUBROUTINE LINK9
+
+
+

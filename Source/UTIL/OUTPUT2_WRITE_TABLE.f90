@@ -94,7 +94,6 @@
       SUBTITLE2 = SUBTITLE(1:67)
       LABEL2 = LABEL(1:100)
 
-      WRITE(*,*) NEW_RESULT, itable
       IF(NEW_RESULT .AND. (ITABLE .NE. -3)) THEN
 !        header = [
 !          4, 146, 4,
@@ -173,6 +172,15 @@
 
         ! TODO gotta figure out the appropriate value
         FIELD7 = 0.0
+! --- response_spectra_add begin --- !
+      ELSE IF(ANALYSIS_CODE == 5) THEN
+!       frequency / response family (SOL 111/112 local MFREQ path)
+        IF (DABS(FIELD6) > 0.0D0) THEN
+           FIELD7 = SQRT(ABS(FIELD6))
+        ELSE
+           FIELD7 = 0.0D0
+        ENDIF
+! --- response_spectra_add end --- !
       ELSE
         WRITE(ERR,100) ANALYSIS_CODE
         STOP
@@ -207,3 +215,4 @@
 
  100  FORMAT(" analysis_code=", i4, " is not supported...stopping")
       END SUBROUTINE WRITE_OUG3
+
