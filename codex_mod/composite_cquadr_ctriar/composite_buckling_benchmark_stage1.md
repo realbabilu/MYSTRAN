@@ -385,3 +385,37 @@ Takeaway:
   `PCOMP` or static stiffness problem,
 - the unresolved part is now isolated more tightly to the **buckling operator
   path** for unsymmetric `B`-coupled laminates.
+
+## Unsym n=4 update (2026-05-21)
+
+To check whether the `unsym` gap appears only at larger meshes, the narrow
+`DEBUG,239,1` prescribed-state benchmark was also rerun for `n=4`.
+
+Python `v5` anchors for `unsym_crossply n=4`:
+
+- `CompDKMQ24`: `9.650901686627`, `22.95096430089`, `46.13741023666`
+- `CompDKMT18`: `10.58824015653`, `24.57931337449`, `53.05078124380`
+
+MYSTRAN `pyv5` decks for `n=4`:
+
+- `comp_buckling_cquadr_pcomp_unsym_n4_pyv5.dat`
+- `comp_buckling_ctriar_pcomp_unsym_n4_pyv5.dat`
+
+Observed MYSTRAN buckling factors:
+
+- `CQUADR`: `16.52759`, `38.33469`, `72.81417`
+- `CTRIAR`: `16.75128`, `37.11808`, `69.74302`
+
+This confirms that the unsymmetric laminated buckling gap is already present at
+`n=4`; it is not something that only appears at `n=8`.
+
+Practical verdict at this stage:
+
+- `static composite`: pass
+- `sym_crossply buckling`: pass
+- `unsym_crossply buckling`: not yet matched to Python `v5`
+
+So the `composite_cquadr_ctriar` branch is now in a good stopping state for
+this topic: the remaining issue is explicitly narrowed to the unsymmetric
+laminated buckling operator/global behavior, and can be resumed later without
+re-opening routing, `PCOMP`, or static-stiffness questions.
