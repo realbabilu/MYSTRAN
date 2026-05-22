@@ -74,6 +74,10 @@
 
 ! **********************************************************************************************************************************
 ! CQUAD8 element Bulk Data Card routine
+! --- warning_reduce-v2 begin --- !
+      INT41 = 0
+      INT42 = 0
+! --- warning_reduce-v2 end --- !
 
 !   FIELD   ITEM           ARRAY ELEMENT
 !   -----   ------------   -------------

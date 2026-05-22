@@ -57,6 +57,9 @@
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      KEEP_IT = 'N'
+! --- warning_reduce-v2 end --- !
 !  TEMP Bulk Data card check (for format checking only)
 
 !    FIELD   ITEM
@@ -94,7 +97,6 @@
 
       IF (JERR == 0) THEN                                  ! Overall format is OK
 
-         KEEP_IT = 'N'
          CALL I4FLD ( JCARD(2), JF(2), I4INP )             ! Read set ID
          IF (IERRFL(2) == 'N') THEN
             SID = I4INP

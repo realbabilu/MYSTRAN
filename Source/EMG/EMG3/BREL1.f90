@@ -73,6 +73,9 @@
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
+! --- warning_reduce-v2 begin --- !
+      NSM  = ZERO
+! --- warning_reduce-v2 end --- !
 
 ! Set element property and material constants
 

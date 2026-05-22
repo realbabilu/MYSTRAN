@@ -41,6 +41,9 @@
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MEFFMASS, MPFACTOR_N6
       USE MODEL_STUF, ONLY            :  ANY_SPCF_OUTPUT, ANY_MPCF_OUTPUT, GRID, GRID_ID, GROUT, MEFFMASS_CALC, MPFACTOR_CALC
       USE PARAMS, ONLY                :  AUTOSPC_SPCF, EPSIL, MEFMCORD, OTMSKIP, PRTNEU
+! --- response_spectra_add begin --- !
+      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_NUM_TAB
+! --- response_spectra_add end --- !
 
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE SPARSE_MATRICES, ONLY       :  I_GMN  , J_GMN  , GMN    , I_GMNt  , J_GMNt , GMNt   , I_HMN, J_HMN, HMN,                 &
@@ -117,6 +120,9 @@
       REAL(DOUBLE)                    :: QSA_MAX_ABS(6)    ! Max abs value of any QS force on an AUTOSPC'd DOF
       REAL(DOUBLE)                    :: QSA_SUM(6)        ! Sum of all QS forces on AUTOSPC'd DOF's
       LOGICAL                         :: WRITE_NEU
+! --- response_spectra_add begin --- !
+      LOGICAL                         :: RS_NEEDS_MPFACTOR
+! --- response_spectra_add end --- !
 
       INTRINSIC IAND
       WRITE(ERR,9000) "OFP2 - SPC and MPC force"
@@ -125,6 +131,9 @@
 
 
       WRITE_NEU = (PRTNEU == 'Y')
+! --- response_spectra_add begin --- !
+      RS_NEEDS_MPFACTOR = ((SOL_NAME(1:8) == 'MFREQ') .AND. (RS_NUM_TAB > 0))
+! --- response_spectra_add end --- !
 
 ! **********************************************************************************************************************************
       DO I=1,MAXREQ
@@ -146,7 +155,7 @@
       WRITE(ERR,9003) ITABLE
 
          SPCF_MEFM_MPF = 'N'
-         IF ((MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y')) THEN
+         IF ((MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y') .OR. RS_NEEDS_MPFACTOR) THEN
             IF (SOL_NAME(1:12) /= 'GEN CB MODEL') THEN
                SPCF_MEFM_MPF = 'Y'
             ENDIF
@@ -326,7 +335,7 @@
 
          IF (SPCF_MEFM_MPF == 'Y') THEN                    ! NOTE: this would not be true if CB soln due to its value set above
 
-            IF ((MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y')) THEN
+            IF ((MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y') .OR. RS_NEEDS_MPFACTOR) THEN
                IF (ZERO_GEN_STIFF == 'N') THEN
                   CALL CONVERT_VEC_COORD_SYS ( 'Eigenvector', QGs_COL, QGs_MEFM, MEFMCORD )
                   DO J=1,6
@@ -343,10 +352,10 @@
                   DEN = EIGEN_VAL(JVEC)*GEN_MASS(JVEC)
                   DO J=1,6
                      MPF = QGs_MEFM_SUM(J)/DEN
-                     IF (MPFACTOR_CALC == 'Y') THEN
+                     IF ((MPFACTOR_CALC == 'Y') .OR. RS_NEEDS_MPFACTOR) THEN
                         MPFACTOR_N6(JVEC,J) = MPF
                      ENDIF
-                     IF (MEFFMASS_CALC == 'Y') THEN
+                     IF ((MEFFMASS_CALC == 'Y') .OR. RS_NEEDS_MPFACTOR) THEN
                         MEFFMASS(JVEC,J) = GEN_MASS(JVEC)*MPF*MPF
                      ENDIF
                   ENDDO

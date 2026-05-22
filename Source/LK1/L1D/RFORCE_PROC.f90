@@ -176,6 +176,12 @@
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      ICID = 0
+      DO J=1,3
+         RA(J) = ZERO
+      ENDDO
+! --- warning_reduce-v2 end --- !
       NAME = 'RFORCE  '
 
 ! Make units for writing errors the error file and output file

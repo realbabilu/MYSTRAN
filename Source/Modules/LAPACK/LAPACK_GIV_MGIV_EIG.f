@@ -2763,6 +2763,8 @@
 
 *
       INFO = 0
+      WLU  = ZERO
+      WUL  = ZERO
 *
 *     Decode RANGE
 *
@@ -3402,6 +3404,7 @@
 *     Test the input parameters.
 *
       INFO = 0
+      XJM = ZERO
       DO 10 I = 1, M
          IFAIL( I ) = 0
    10 CONTINUE

@@ -46,13 +46,14 @@
       INTEGER(LONG) , INTENT(IN)      :: NUM_COLS          ! Number of MAX, MIN, ABS to calc (number of cols in OGEL)
 
 
-      REAL(DOUBLE) , INTENT(OUT)      :: ABS_ANS(NUM_COLS) ! Max ABS for all grids output for each of the 6 disp components
-      REAL(DOUBLE) , INTENT(OUT)      :: MAX_ANS(NUM_COLS) ! Max for all grids output for each of the 6 disp components
-      REAL(DOUBLE) , INTENT(OUT)      :: MIN_ANS(NUM_COLS) ! Min for all grids output for each of the 6 disp components
+! --- warning_reduce-v2 begin --- !
+      REAL(DOUBLE) , INTENT(OUT)      :: ABS_ANS(:)        ! Max ABS for all grids output for each of the 6 disp components
+      REAL(DOUBLE) , INTENT(OUT)      :: MAX_ANS(:)        ! Max for all grids output for each of the 6 disp components
+      REAL(DOUBLE) , INTENT(OUT)      :: MIN_ANS(:)        ! Min for all grids output for each of the 6 disp components
+! --- warning_reduce-v2 end --- !
 
       END SUBROUTINE GET_MAX_MIN_ABS_STR
 
    END INTERFACE
 
    END MODULE GET_MAX_MIN_ABS_STR_Interface
-

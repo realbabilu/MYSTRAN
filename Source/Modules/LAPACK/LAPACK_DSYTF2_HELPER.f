@@ -162,6 +162,8 @@
 *     Test the input parameters.
 *
       INFO = 0
+      IMAX = 1
+      JMAX = 1
       UPPER = LSAME( UPLO, 'U' )
       IF( .NOT.UPPER .AND. .NOT.LSAME( UPLO, 'L' ) ) THEN
          INFO = -1

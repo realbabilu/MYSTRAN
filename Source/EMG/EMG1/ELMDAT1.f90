@@ -440,6 +440,9 @@
             EPROP( 6) = RPSHEL(INTL_PID, 6)                ! ZS(2)
 
             THICK_AVG = ZERO                               ! DELTA locates where thickness key is in EDAT (rel to EID) for plates
+! --- warning_reduce-v2 begin --- !
+            DELTA = 0
+! --- warning_reduce-v2 end --- !
             IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                DELTA = DEDAT_Q4_THICK_KEY
             ELSE IF (TYPE(1:5) == 'TRIA3') THEN

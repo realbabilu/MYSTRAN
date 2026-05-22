@@ -73,6 +73,9 @@
       ENDIF
 
       NTERM_NONZERO = 0
+! --- warning_reduce-v2 begin --- !
+      JSTART = 1
+! --- warning_reduce-v2 end --- !
 
       DO I=1,NROWS
          IF      (SYM == 'N') THEN

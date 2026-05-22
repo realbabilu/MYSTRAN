@@ -47,6 +47,36 @@ NASTRAN. It is an independent program written in modern Fortran 95.
 - Support for Classical Laminated Plate Theory
 - OP2 Support
 
+# Patched Distribution Notes
+
+This branch is maintained as the active `MYSTRAN 18.0.0` patched distribution.
+It tracks the working source stack used by the current Windows build and keeps
+internal Codex notes, validation packs, and scratch artifacts out of the public
+repository tree.
+
+Major patch groups currently included in the source tree:
+
+- Response spectrum modernization:
+  `SDAMP`, `TABDMP1`, `DTI,SPECSEL`, `PARAM,OPTION` modal combination control,
+  effective mass participation reporting, and initial `SOL SEMODES` alias
+  support with explicit "Not supported yet" guards for unsupported NX-style
+  features.
+- LAPACK / ARPACK peel-off and helper split:
+  helper entry points for dense, banded, and tridiagonal kernels, plus Lanczos
+  and eigen extraction updates used by the current optimized solver path.
+- Shell formulation work:
+  ongoing MITC and shell buckling improvements, shell material/orientation
+  cleanup, and related FEMAP/output updates.
+- Composite shell support:
+  active source support for laminated shell routing and benchmarked
+  `CQUADR` / `CTRIAR` composite paths.
+- Solid element work:
+  active source updates related to the current solid element stack, including
+  the newer pyramid/solid integration work present in this distribution.
+- Parser and load-processing hardening:
+  fixes around continuation handling, load processing, mass assembly, and
+  supporting utility routines required by the current benchmarked workflows.
+
 # Get EXE or Make Binary
 
 Windows EXE (executable) for can be found in the "Releases" section of this page (right hand pane).

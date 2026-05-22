@@ -38,7 +38,10 @@
       USE CONSTANTS_1, ONLY           :  ZERO, TWO, PI
       USE EIGEN_MATRICES_1, ONLY      :  GEN_MASS, MODE_NUM, EIGEN_VAL
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_GRID, EIG_LAP_MAT_TYPE, EIG_METH, EIG_MODE, EIG_N2, EIG_NORM,     &
-                                         EIG_SIGMA, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
+                                         EIG_SIGMA, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT, EIG_EXTRACT_METHOD,                     &
+                                         EIG_CHASE_NEX, EIG_CHASE_MAX_ITER, EIG_CHASE_DEG, EIG_CHASE_TOL, EIG_FEAST_M0,             &
+                                         EIG_FEAST_TOL_DIGITS, EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR, EIG_FEAST_SEARCH_SCALE,      &
+                                         EIG_SUBSPACE_NSUB, EIG_SUBSPACE_MAX_ITER, EIG_SUBSPACE_TOL, EIG_DENSE_NEX, EIG_NCVFACL
 
       USE EIG_SUMMARY_USE_IFs
 
@@ -48,6 +51,8 @@
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'EIG_SUMMARY'
       CHARACTER( 1*BYTE)              :: ASTERISK = '*'    ! Used for denoting negative eigenvalues
+      CHARACTER(LEN=24)               :: EIG_SUMMARY_KIND
+      CHARACTER(LEN=24)               :: EIG_STORAGE_KIND
 
       INTEGER(LONG)                   :: I                 ! DO loop index
       INTEGER(LONG)                   :: NUM_FINITE_EIGENS ! Number of eigenvalues that are finite (excluding zero mass modes)
@@ -67,24 +72,15 @@
       OUNT(2) = F06
 
 
-      IF (EIG_METH == 'LANCZOS') THEN
+      CALL GET_EIG_SUMMARY_LABELS ( EIG_SUMMARY_KIND, EIG_STORAGE_KIND )
 
-         IF      (SOLLIB == 'BANDED  ') THEN
-            WRITE(F06,90001) EIG_METH, EIG_MODE, TRIM(EIG_LAP_MAT_TYPE), EIG_SIGMA, '(BANDED solution)'
-         ELSE IF (SOLLIB == 'SPARSE  ') THEN
-            WRITE(F06,90001) EIG_METH, EIG_MODE, TRIM(EIG_LAP_MAT_TYPE), EIG_SIGMA, '(SPARSE solution)'
-         ENDIF
-
+      IF (EIG_EXTRACT_METHOD(1:6) == 'ARPACK') THEN
+         WRITE(F06,90001) TRIM(EIG_SUMMARY_KIND), EIG_MODE, TRIM(EIG_LAP_MAT_TYPE), EIG_SIGMA, TRIM(EIG_STORAGE_KIND)
       ELSE
-
-         IF      (SOLLIB == 'BANDED  ') THEN
-            WRITE(F06,90003) EIG_METH, '(BANDED solution)'
-         ELSE IF (SOLLIB == 'SPARSE  ') THEN
-            WRITE(F06,90003) EIG_METH, '(SPARSE solution)'
-         ENDIF
-
+         WRITE(F06,90003) TRIM(EIG_SUMMARY_KIND), TRIM(EIG_STORAGE_KIND)
       ENDIF
       WRITE(F06,90004) NUM_EIGENS
+      CALL WRITE_EIG_EXTRACT_OPTIONS
 
       IF (NVEC > 0) THEN
 
@@ -213,12 +209,27 @@
 ! **********************************************************************************************************************************
 99001 FORMAT(A1)
 
-90001 FORMAT(/,27X,'E I G E N V A L U E   A N A L Y S I S   S U M M A R Y',3X,'(',A8,' Mode',I2,1X,A,', Shift eigen = ',1ES9.2,')',&
+90001 FORMAT(/,27X,'E I G E N V A L U E   A N A L Y S I S   S U M M A R Y',3X,'(',A,' Mode',I2,1X,A,', Shift eigen = ',1ES9.2,')',&
              /,70X,A,/)
 
-90003 FORMAT(/,27X,'E I G E N V A L U E   A N A L Y S I S   S U M M A R Y',3X,'(',A8,')',/,A,/)
+90003 FORMAT(/,27X,'E I G E N V A L U E   A N A L Y S I S   S U M M A R Y',3X,'(',A,')',/,70X,A,/)
 
 90004 FORMAT(32X,'NUMBER OF EIGENVALUES EXTRACTED  . . . . . .',2X,I8,/)
+
+90005 FORMAT(32X,'EXTRACT BACKEND . . . . . . . . . . . . . . . . . . ',A,/,                                                                        &
+             32X,'  MODE = ',I0,', LAP MAT = ',A,', NCVFACL = ',I0,', SHIFT = ',1ES11.4,/)
+
+90006 FORMAT(32X,'EXTRACT BACKEND . . . . . . . . . . . . . . . . . . ',A,/,                                                                        &
+             32X,'  NEX = ',I0,', DEG = ',I0,', MAX_ITER = ',I0,', TOL = ',1ES11.4,/)
+
+90007 FORMAT(32X,'EXTRACT BACKEND . . . . . . . . . . . . . . . . . . ',A,/,                                                                        &
+             32X,'  M0 = ',I0,', N_CONTOUR = ',I0,', MAX_LOOP = ',I0,', TOL_DIGITS = ',I0,', SEARCH_SCALE = ',1ES11.4,/)
+
+90008 FORMAT(32X,'EXTRACT BACKEND . . . . . . . . . . . . . . . . . . ',A,/,                                                                        &
+             32X,'  NSUB = ',I0,', MAX_ITER = ',I0,', TOL = ',1ES11.4,/)
+
+90009 FORMAT(32X,'EXTRACT BACKEND . . . . . . . . . . . . . . . . . . ',A,/,                                                                        &
+             32X,'  NEX = ',I0,/)
 
 91001 FORMAT(32X,'LARGEST OFF-DIAGONAL GENERALIZED MASS TERM  ',1ES10.1,' (Vecs renormed to 1.0 for gen masses)',/)
 
@@ -288,5 +299,80 @@
                                   ,' A-SET)')
 
 ! **********************************************************************************************************************************
+
+      CONTAINS
+
+! ##################################################################################################################################
+
+      SUBROUTINE GET_EIG_SUMMARY_LABELS ( SUMMARY_KIND, STORAGE_KIND )
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(OUT)   :: SUMMARY_KIND
+      CHARACTER(LEN=*), INTENT(OUT)   :: STORAGE_KIND
+
+      SUMMARY_KIND = TRIM(EIG_METH)
+      STORAGE_KIND = ' '
+
+      IF (SOLLIB == 'BANDED  ') THEN
+         STORAGE_KIND = 'BANDED solution'
+      ELSE IF (SOLLIB == 'SPARSE  ') THEN
+         STORAGE_KIND = 'SPARSE solution'
+      ENDIF
+
+      IF (EIG_METH == 'LANCZOS') THEN
+         IF (EIG_EXTRACT_METHOD(1:6) == 'ARPACK') THEN
+            IF (SOLLIB == 'BANDED  ') THEN
+               SUMMARY_KIND = 'LANCZOS BANDED'
+            ELSE IF (SOLLIB == 'SPARSE  ') THEN
+               SUMMARY_KIND = 'LANCZOS SPARSE'
+            ELSE
+               SUMMARY_KIND = 'LANCZOS'
+            ENDIF
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'CHASE') THEN
+            SUMMARY_KIND = 'CHASE'
+            STORAGE_KIND = 'DENSE reference'
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'FEAST') THEN
+            SUMMARY_KIND = 'FEAST'
+            STORAGE_KIND = 'DENSE reference'
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'SUBSP') THEN
+            SUMMARY_KIND = 'SUBSPACE'
+            STORAGE_KIND = 'DENSE reference'
+         ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'DENSE') THEN
+            SUMMARY_KIND = 'DENSE'
+            STORAGE_KIND = 'DENSE reference'
+         ENDIF
+      ENDIF
+
+      END SUBROUTINE GET_EIG_SUMMARY_LABELS
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_EIG_EXTRACT_OPTIONS
+
+      IMPLICIT NONE
+
+      IF (EIG_METH /= 'LANCZOS') THEN
+         RETURN
+      ENDIF
+
+      IF (EIG_EXTRACT_METHOD(1:6) == 'ARPACK') THEN
+         WRITE(F06,'(32X,''EXTRACT BACKEND . . . . . . . . . . . . . . . . . . '',A,/,32X,''  MODE = '',I0,'', LAP MAT = '',A,'', NCVFACL = '',I0,'', SHIFT = '',1ES11.4,/)') &
+                    TRIM(EIG_EXTRACT_METHOD), EIG_MODE, TRIM(EIG_LAP_MAT_TYPE), EIG_NCVFACL, EIG_SIGMA
+      ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'CHASE') THEN
+         WRITE(F06,'(32X,''EXTRACT BACKEND . . . . . . . . . . . . . . . . . . '',A,/,32X,''  NEX = '',I0,'', DEG = '',I0,'', MAX_ITER = '',I0,'', TOL = '',1ES11.4,/)') &
+                    TRIM(EIG_EXTRACT_METHOD), EIG_CHASE_NEX, EIG_CHASE_DEG, EIG_CHASE_MAX_ITER, EIG_CHASE_TOL
+      ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'FEAST') THEN
+         WRITE(F06,'(32X,''EXTRACT BACKEND . . . . . . . . . . . . . . . . . . '',A,/,32X,''  M0 = '',I0,'', N_CONTOUR = '',I0,'', MAX_LOOP = '',I0,'', TOL_DIGITS = '',I0,'', SEARCH_SCALE = '',1ES11.4,/)') &
+                    TRIM(EIG_EXTRACT_METHOD), EIG_FEAST_M0, EIG_FEAST_N_CONTOUR, EIG_FEAST_MAX_LOOP, EIG_FEAST_TOL_DIGITS, EIG_FEAST_SEARCH_SCALE
+      ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'SUBSP') THEN
+         WRITE(F06,'(32X,''EXTRACT BACKEND . . . . . . . . . . . . . . . . . . '',A,/,32X,''  NSUB = '',I0,'', MAX_ITER = '',I0,'', TOL = '',1ES11.4,/)') &
+                    TRIM(EIG_EXTRACT_METHOD), EIG_SUBSPACE_NSUB, EIG_SUBSPACE_MAX_ITER, EIG_SUBSPACE_TOL
+      ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'DENSE') THEN
+         WRITE(F06,'(32X,''EXTRACT BACKEND . . . . . . . . . . . . . . . . . . '',A,/,32X,''  NEX = '',I0,/)') &
+                    TRIM(EIG_EXTRACT_METHOD), EIG_DENSE_NEX
+      ENDIF
+
+      END SUBROUTINE WRITE_EIG_EXTRACT_OPTIONS
 
       END SUBROUTINE EIG_SUMMARY

@@ -34,7 +34,7 @@
 ! overwritten with the values in basic coords at the mass point at the close of this subr.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1Y
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1Y, SC1
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, DATA_NAM_LEN, FATAL_ERR, MCMASS, MCONM2, MPMASS, MRCONM2, MRPMASS, NCMASS,  &
                                          NCONM2, NCORD, NGRID, NPMASS, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
@@ -325,6 +325,16 @@ j_loop1:    DO J=1,NCORD
 
 
 
+      WRITE(SC1,*) 'CMASSPROCDBG NCMASS=', NCMASS, ' NPMASS=', NPMASS
+      WRITE(F06,'(/,A)') 'CMASSPROCDBG: CMASS / PMASS / RPMASS SNAPSHOT'
+      WRITE(F06,'(A,I8)') 'CMASSPROCDBG NCMASS =', NCMASS
+      DO I=1,NCMASS
+         WRITE(F06,'(A,I8,A,7I8)') 'CMASSPROCDBG ROW ', I, ' =', CMASS(I,1), CMASS(I,2), CMASS(I,3), CMASS(I,4), CMASS(I,5), CMASS(I,6), CMASS(I,7)
+      ENDDO
+      WRITE(F06,'(A,I8)') 'CMASSPROCDBG NPMASS =', NPMASS
+      DO I=1,NPMASS
+         WRITE(F06,'(A,I8,A,I8,A,ES14.6)') 'CMASSPROCDBG PMASS ROW ', I, ' PID ', PMASS(I,1), ' MASS ', RPMASS(I,1)
+      ENDDO
       RETURN
 
 ! **********************************************************************************************************************************
@@ -393,3 +403,5 @@ j_loop1:    DO J=1,NCORD
       END SUBROUTINE CONM2_PROC_1_DEB
 
       END SUBROUTINE CONM2_PROC_1
+
+

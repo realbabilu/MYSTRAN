@@ -136,7 +136,9 @@
             CALL OUTA_HERE ( 'Y' )
          ENDIF
 
-      ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
+! --- response_spectra_add begin --- !
+      ELSE IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ')) THEN
+! --- response_spectra_add end --- !
 
          P_LINKNO = 4
          IF (COMM(P_LINKNO) /= 'C') THEN
@@ -237,7 +239,7 @@
 
       IF (NDOFSE > 0) THEN
 
-         IF ((SOL_NAME(1:7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'NLSTATIC') .OR.                                                  &
+         IF (((SOL_NAME(1:7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'DFREQ')) .OR. (SOL_NAME(1:8) == 'NLSTATIC') .OR.                                                  &
             ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1))) THEN
 
             CALL FILE_OPEN ( L1H, LINK1H, OUNT, 'OLD', L1H_MSG, 'READ_STIME', 'UNFORMATTED', 'READ', 'REWIND', 'Y', 'N' )
@@ -274,7 +276,7 @@
 ! EIGEN_VAL was not deallocated in LINK4 (see LINK4 comment 01/11/19) so we do not allocate it here anymore
 
       DO_IT = 'N'
-      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
          DO_IT = 'Y'
       ENDIF
       IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
@@ -315,9 +317,9 @@
 
 ! Set NUM_SOLNS for use in loop (below) to get outputs for each subcase/solution vector
 
-      IF      ((SOL_NAME(1:7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'NLSTATIC')) THEN
+      IF      (((SOL_NAME(1:7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'DFREQ')) .OR. (SOL_NAME(1:8) == 'NLSTATIC')) THEN
          NUM_SOLNS = NSUB
-      ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
+      ELSE IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ')) THEN
          NUM_SOLNS = NVEC
       ELSE IF (SOL_NAME(1:8) == 'BUCKLING') THEN
          IF (LOAD_ISTEP == 1) THEN
@@ -331,7 +333,7 @@
 
 ! Allocate memory to EIGEN_VEC so that we can write the G-set eigenvectors to it for possible OUTPUT4 later
 
-      IF (SOL_NAME(1:5) == 'MODES') THEN
+      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ')) THEN
          CALL ALLOCATE_EIGEN1_MAT ( 'EIGEN_VEC', NDOFG, NUM_SOLNS, SUBR_NAME )
       ENDIF
 
@@ -344,7 +346,7 @@
 ! Check for renorm = MAX or POINT.
 
       DO_IT = 'N'
-      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
          DO_IT = 'Y'
       ENDIF
       IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
@@ -536,7 +538,7 @@ j_do: DO J = 1,NUM_SOLNS
          IF (J <= NVEC) THEN
 
             DO_IT = 'N'
-            IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+            IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
                DO_IT = 'Y'
             ENDIF
             IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
@@ -618,7 +620,7 @@ j_do: DO J = 1,NUM_SOLNS
 ! Write eigen analysis summary if we have renormed vectors here in LINK5
 
       DO_IT = 'N'
-      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
          DO_IT = 'Y'
       ENDIF
       IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
@@ -950,3 +952,5 @@ j_do: DO J = 1,NUM_SOLNS
       END SUBROUTINE READ_EIGNORM2
 
       END SUBROUTINE LINK5
+
+

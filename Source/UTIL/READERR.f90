@@ -51,6 +51,9 @@
 ! **********************************************************************************************************************************
 ! First, truncate trailing blanks in MESSAG
 
+! --- warning_reduce-v2 begin --- !
+      IEND = LEN(MESSAG)
+! --- warning_reduce-v2 end --- !
       DO I=LEN(MESSAG),1,-1
          IF (MESSAG(I:I) == ' ') THEN
             CYCLE

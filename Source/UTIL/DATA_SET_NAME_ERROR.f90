@@ -46,6 +46,10 @@
       INTEGER(LONG)                   :: NAME_ShouldBe_LEN ! Length of DATA_NAME_ShouldBe without trailing blanks
 
 ! **********************************************************************************************************************************
+! --- reduced_warning begin --- !
+      NAME_Is_LEN       = LEN(DATA_NAME_Is)
+      NAME_ShouldBe_LEN = LEN(DATA_NAME_ShouldBe)
+! --- reduced_warning end --- !
       DO I=LEN(DATA_NAME_Is),1,-1
          IF (DATA_NAME_Is(I:I) == ' ') THEN
             CYCLE

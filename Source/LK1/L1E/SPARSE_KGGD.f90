@@ -86,6 +86,10 @@
          WRITE(F06,9200) SUBR_NAME
          CALL OUTA_HERE ( 'Y' )
       ENDIF
+! --- warning_reduce-v2 begin --- !
+      RJ   = 0
+      RSTF = ZERO
+! --- warning_reduce-v2 end --- !
 
 ! Pass # 1: Determine final NTERM_KGGD (may be less due to terms stripped)
 

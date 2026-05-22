@@ -47,15 +47,23 @@
       INTEGER(LONG)                   :: I,J,K             ! DO loop indices or counters
 
 
-      REAL(DOUBLE) , INTENT(OUT)      :: ABS_ANS(NUM_COLS) ! Max ABS for all grids output for each of the 6 disp components
-      REAL(DOUBLE) , INTENT(OUT)      :: MAX_ANS(NUM_COLS) ! Max for all grids output for each of the 6 disp components
-      REAL(DOUBLE) , INTENT(OUT)      :: MIN_ANS(NUM_COLS) ! Min for all grids output for each of the 6 disp components
+! --- warning_reduce-v2 begin --- !
+      REAL(DOUBLE) , INTENT(OUT)      :: ABS_ANS(:)        ! Max ABS for all grids output for each of the 6 disp components
+      REAL(DOUBLE) , INTENT(OUT)      :: MAX_ANS(:)        ! Max for all grids output for each of the 6 disp components
+      REAL(DOUBLE) , INTENT(OUT)      :: MIN_ANS(:)        ! Min for all grids output for each of the 6 disp components
+! --- warning_reduce-v2 end --- !
 
-      INTRINSIC                       :: MAX, MIN, DABS
+      INTRINSIC                       :: MAX, MIN, DABS, SIZE
 
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      IF ((SIZE(MAX_ANS) < NUM_COLS) .OR. (SIZE(MIN_ANS) < NUM_COLS) .OR. (SIZE(ABS_ANS) < NUM_COLS)) THEN
+         WRITE(*,*) 'GET_MAX_MIN_ABS_STR: output array smaller than NUM_COLS =', NUM_COLS
+         STOP 1
+      ENDIF
+! --- warning_reduce-v2 end --- !
       DO J=1,NUM_COLS
          ABS_ANS(J) =  ZERO
          MAX_ANS(J) = -MACH_LARGE_NUM
@@ -119,4 +127,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE GET_MAX_MIN_ABS_STR
-

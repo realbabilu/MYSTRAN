@@ -270,8 +270,10 @@ iters:      DO
                   ELSE
                      COMM(3) = 'C'                         ! Need to do this, otherwise LINK5 will fail
                   ENDIF
-               ELSE IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+! --- response_spectra_add begin --- !
+               ELSE IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:8) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
                   CALL LINK4
+! --- response_spectra_add end --- !
                ENDIF
 
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN

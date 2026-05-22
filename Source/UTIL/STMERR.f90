@@ -48,6 +48,9 @@
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      IEND = LEN(FILNAM)
+! --- warning_reduce-v2 end --- !
       DO I=FILE_NAM_MAXLEN,1,-1
          IF (FILNAM(I:I) /= ' ') THEN
             IEND = I

@@ -175,12 +175,16 @@
             DELTA_0(I,J) = ZERO
          ENDDO
       ENDDO
+! --- bug_rbe2_dy_dz begin --- !
+! RBE2 rigid-arm coupling follows u = u0 + theta x r in basic coordinates.
+! The first row therefore couples ux to +dz*ry - dy*rz.
       DELTA_0(1,2) =  (RGRID(GRID_ID_ROW_NUM_D,3) - RGRID(GRID_ID_ROW_NUM_I,3))
       DELTA_0(1,3) = -(RGRID(GRID_ID_ROW_NUM_D,2) - RGRID(GRID_ID_ROW_NUM_I,2))
       DELTA_0(2,1) = -DELTA_0(1,2)
       DELTA_0(2,3) =  (RGRID(GRID_ID_ROW_NUM_D,1) - RGRID(GRID_ID_ROW_NUM_I,1))
       DELTA_0(3,1) = -DELTA_0(1,3)
       DELTA_0(3,2) = -DELTA_0(2,3)
+! --- bug_rbe2_dy_dz end --- !
 
 ! The global constraint equations are
 !                                           | UN |
@@ -345,4 +349,5 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE RBE2_PROC
+
 

@@ -84,6 +84,9 @@
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      DO_WHICH_CODE_FRAG = 1
+! --- warning_reduce-v2 end --- !
 ! Determine if we need to keep any OUTPUT4 matrices allocated until after they are processed in LINK2
 
       IF (NUM_OU4_REQUESTS > 0) THEN

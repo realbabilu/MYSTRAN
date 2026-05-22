@@ -66,6 +66,9 @@
                                          PRTSTIFD        , PRTSTIFF        , PRTUO0          ,                                     &
                                          PRTYS           , PRTQSYS         ,                                                       &
                                          Q4SURFIT        , QUADAXIS        , QUAD4TYP        , RCONDK          , RELINK3         , &
+! --- response_spectra_add begin --- !
+                                         RSTYPE          , PARAM_GRAV      ,                                                      &
+! --- response_spectra_add end --- !
                                          SEQPRT          , SEQQUIT         , SETLKTM         , SETLKTK         , SHRFXFAC        , &
                                          SKIPMGG         , SOLLIB          , SPARSE_FLAVOR   , SPARSTOR        ,                   &
                                          SPC1QUIT        , SORT_MAX        , SPC1SID         , STR_CID                           , &

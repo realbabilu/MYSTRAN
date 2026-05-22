@@ -63,6 +63,9 @@
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      JCOL = 1
+! --- warning_reduce-v2 end --- !
       IF      (WHAT == 'ACCE') THEN;   OUTPUT_TYPE( 1) = 'ACCE';   JCOL =  1;
       ELSE IF (WHAT == 'DISP') THEN;   OUTPUT_TYPE( 2) = 'DISP';   JCOL =  2;
       ELSE IF (WHAT == 'ELFO') THEN;   OUTPUT_TYPE( 3) = 'ELFO';   JCOL =  3;
@@ -381,4 +384,3 @@ jdo_1:   DO J=1,NUM_POSS_CCD
 ! **********************************************************************************************************************************
 
       END SUBROUTINE CHK_CC_CMD_DESCRIBERS
-

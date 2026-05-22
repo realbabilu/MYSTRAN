@@ -914,6 +914,9 @@ D_do1:   DO J=2,9                                          ! --- Read cross-sect
       REAL(DOUBLE)                    :: YSHR              ! Location of shear center relative to center of top of hat
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      YSHR = ZERO
+! --- warning_reduce-v2 end --- !
       JERR = 0
 
       H  = D(1)

@@ -563,7 +563,8 @@ c     %---------------%
 c     | Local Scalars |
 c     %---------------%
 c
-      integer          ido, i, j, type, imid, itop, ibot, ierr
+      integer          ido, i, j, type, imid, itop, ibot, ierr,
+     &                 mass_rank, ncv_eff, seed_count
 c
 c     %------------%
 c     | Parameters |
@@ -754,33 +755,62 @@ c
 c
       end if
 
-      IF (EIG_MSGLVL > 0) THEN
-         IF (SOL_NAME(1:8) == 'BUCKLING') THEN
+      IF (SOL_NAME(1:8) == 'BUCKLING') THEN
+         DO I=1,N
+            IF (I_KLLDn(I) == I_KLLDn(I+1)) THEN
+               KLLDn_DIAG(I) = ZERO
+            ELSE
+               KLLDn_DIAG(I) = KLLDn(I_KLLDn(I))
+            ENDIF
+            IF (I_KMSMn(I) == I_KMSMn(I+1)) THEN
+               KMSMn_DIAG(I) = ZERO
+            ELSE
+               KMSMn_DIAG(I) = KMSMn(I_KMSMn(I))
+            ENDIF
+         ENDDO
+      ELSE
+         DO I=1,N
+            IF (I_MLLn(I) == I_MLLn(I+1)) THEN
+               MLLn_DIAG(I) = ZERO
+            ELSE
+               MLLn_DIAG(I) = MLLn(I_MLLn(I))
+            ENDIF
+            IF (I_KMSMn(I) == I_KMSMn(I+1)) THEN
+               KMSMn_DIAG(I) = ZERO
+            ELSE
+               KMSMn_DIAG(I) = KMSMn(I_KMSMn(I))
+            ENDIF
+         ENDDO
+      ENDIF
+
+      IF ((BMAT .EQ. 'G') .AND. (SOL_NAME(1:8) .NE. 'BUCKLING')) THEN
+         mass_rank = 0
+         DO I=1,N
+            IF (MLLn_DIAG(I) .NE. ZERO) THEN
+               mass_rank = mass_rank + 1
+            ENDIF
+         ENDDO
+         IF (mass_rank > 0) THEN
+            ncv_eff = MAX(2, MIN(NCV, mass_rank + 1))
+            IF (ncv_eff < NCV) NCV = ncv_eff
             DO I=1,N
-               IF (I_KLLDn(I) == I_KLLDn(I+1)) THEN
-                  KLLDn_DIAG(I) = ZERO
-               ELSE
-                  KLLDn_DIAG(I) = KLLDn(I_KLLDn(I))
-               ENDIF
-               IF (I_KMSMn(I) == I_KMSMn(I+1)) THEN
-                  KMSMn_DIAG(I) = ZERO
-               ELSE
-                  KMSMn_DIAG(I) = KMSMn(I_KMSMn(I))
+               RESID(I) = ZERO
+            ENDDO
+            seed_count = 0
+            DO I=1,N
+               IF (MLLn_DIAG(I) .NE. ZERO) THEN
+                  seed_count = seed_count + 1
+                  RESID(I) = ONE + DBLE(seed_count-1)
+     &                              / DBLE(MAX(1,mass_rank))
                ENDIF
             ENDDO
-         ELSE
-            DO I=1,N
-               IF (I_MLLn(I) == I_MLLn(I+1)) THEN
-                  MLLn_DIAG(I) = ZERO
-               ELSE
-                  MLLn_DIAG(I) = MLLn(I_MLLn(I))
-               ENDIF
-               IF (I_KMSMn(I) == I_KMSMn(I+1)) THEN
-                  KMSMn_DIAG(I) = ZERO
-               ELSE
-                  KMSMn_DIAG(I) = KMSMn(I_KMSMn(I))
-               ENDIF
-            ENDDO
+            INFO = 1
+            IF (EIG_MSGLVL > 0) THEN
+               WRITE(F06,'(A,I8,A,I8)') ' *INFORMATION: ARPACK MASS '
+     &                    //'RANK = ', mass_rank, ', NCV = ', NCV
+               WRITE(F06,'(15X,A)') 'MASS-SUPPORTED INITIAL '
+     &                    //'RESIDUAL (BMAT=''G'').'
+            ENDIF
          ENDIF
       ENDIF
 c
@@ -1132,6 +1162,15 @@ c        %--------------------------------------%
 c        | Either we have convergence, or error |
 c        %--------------------------------------%
 c
+         if ((info .eq. -9999) .and. (iparam(5) .ge. nev)) then
+            if (EIG_MSGLVL > 0) then
+               WRITE(F06,'(A,I8,A,I8)') ' *INFORMATION: '
+     &              //'ACCEPTING PARTIAL ARNOLDI BASIS. NCONV = ',
+     &              IPARAM(5), ', NEV = ', NEV
+            endif
+            info = 1
+         endif
+
          if ( info .lt. 0) then
 c
             call arpack_info_msg ('dsaupd',info,iparam,lworkl,nev,ncv)
@@ -1280,6 +1319,10 @@ c
      &--   ------------')
 
 98713 FORMAT(I8,12X,1ES14.6,9X,1ES14.6,1X,1ES14.6)
+
+98714 FORMAT(' *INFORMATION: ARPACK MASS RANK = ',I8,
+     &       ', NCV = ',I8,/,
+     &       15X,'MASS-SUPPORTED INITIAL RESIDUAL (BMAT=''G'').')
 
 98721 FORMAT('                  Diagonal of matrix:',/,
      &' L-set DOF  tridiag factor of [KLL-sig*MLL]    WORKD1(J)      WOR
@@ -3122,14 +3165,12 @@ c
 
 ! B 05/24/04 //////////////////////////////////////////////////////////B
 
-! --- reduced_warning begin --- !
       integer(long) n, numout, num_left, jj, jstart, nev_user
       real(double)  sigma
       real(double) eigout(n)
       real(double) eig_new(n)
       real(double) eig_old(n)
       real(double) eig_pc(n)
-! --- reduced_warning end --- !
 
 ! E ///////////////////////////////////////////////////////////////////E
 
@@ -3227,11 +3268,6 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! --- reduced_warning begin --- !
-      numout   = 0
-      num_left = 0
-      jstart   = 1
-! --- reduced_warning end --- !
 
 
 ! **********************************************************************************************************************************
