@@ -1,4 +1,4 @@
-! ###############################################################################################################################
+! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 !
@@ -22,23 +22,29 @@
 !
 ! End MIT license text.
 
-   MODULE BD_DLOAD_Interface
+      SUBROUTINE CC_SDAMP ( CARD )
 
-   INTERFACE
+! Processes Case Control SDAMP cards for response spectrum damping selection
 
-      SUBROUTINE BD_DLOAD ( CARD, CC_LOAD_FND )
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM
+      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_SET_SDAMP_ID
 
-      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
-      USE SCONTR, ONLY                :  BD_ENTRY_LEN, LSUB
-      USE PENTIUM_II_KIND, ONLY       :  BYTE
+      USE CC_SDAMP_USE_IFs
 
       IMPLICIT NONE
 
-      CHARACTER(LEN=BD_ENTRY_LEN), INTENT(IN) :: CARD
-      CHARACTER(1*BYTE), INTENT(INOUT)        :: CC_LOAD_FND(LSUB,2)
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CC_SDAMP'
+      CHARACTER(LEN=*), INTENT(IN)    :: CARD
 
-      END SUBROUTINE BD_DLOAD
+      INTEGER(LONG)                   :: SETID
 
-   END INTERFACE
+! **********************************************************************************************************************************
+! --- rsa_nastran begin --- !
+      CALL GET_SETID ( CARD, SETID )
+      CALL RS_SET_SDAMP_ID ( SETID )
+! --- rsa_nastran end --- !
 
-   END MODULE BD_DLOAD_Interface
+      RETURN
+
+      END SUBROUTINE CC_SDAMP

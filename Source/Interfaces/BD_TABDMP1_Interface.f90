@@ -7,7 +7,7 @@
 ! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 ! associated documentation files (the "Software"), to deal in the Software without restriction, including
 ! without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
+! copies of the Software and to permit persons to whom the Software is furnished to do so, subject to
 ! the following conditions:
 !
 ! The above copyright notice and this permission notice shall be included in all copies or substantial
@@ -22,23 +22,21 @@
 !
 ! End MIT license text.
 
-   MODULE BD_DLOAD_Interface
+   MODULE BD_TABDMP1_Interface
 
    INTERFACE
 
-      SUBROUTINE BD_DLOAD ( CARD, CC_LOAD_FND )
+      SUBROUTINE BD_TABDMP1 ( CARD )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
-      USE SCONTR, ONLY                :  BD_ENTRY_LEN, LSUB
-      USE PENTIUM_II_KIND, ONLY       :  BYTE
+      USE SCONTR, ONLY                :  BD_ENTRY_LEN
 
       IMPLICIT NONE
 
-      CHARACTER(LEN=BD_ENTRY_LEN), INTENT(IN) :: CARD
-      CHARACTER(1*BYTE), INTENT(INOUT)        :: CC_LOAD_FND(LSUB,2)
+      CHARACTER(LEN=BD_ENTRY_LEN), INTENT(INOUT) :: CARD
 
-      END SUBROUTINE BD_DLOAD
+      END SUBROUTINE BD_TABDMP1
 
    END INTERFACE
 
-   END MODULE BD_DLOAD_Interface
+   END MODULE BD_TABDMP1_Interface

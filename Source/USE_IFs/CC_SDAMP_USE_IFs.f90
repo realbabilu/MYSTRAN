@@ -1,4 +1,3 @@
-! ###############################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 !
@@ -22,23 +21,10 @@
 !
 ! End MIT license text.
 
-   MODULE BD_DLOAD_Interface
+      MODULE CC_SDAMP_USE_IFs
 
-   INTERFACE
+! USE Interface statements for all subroutines called by SUBROUTINE CC_SDAMP
 
-      SUBROUTINE BD_DLOAD ( CARD, CC_LOAD_FND )
+      USE GET_SETID_Interface
 
-      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
-      USE SCONTR, ONLY                :  BD_ENTRY_LEN, LSUB
-      USE PENTIUM_II_KIND, ONLY       :  BYTE
-
-      IMPLICIT NONE
-
-      CHARACTER(LEN=BD_ENTRY_LEN), INTENT(IN) :: CARD
-      CHARACTER(1*BYTE), INTENT(INOUT)        :: CC_LOAD_FND(LSUB,2)
-
-      END SUBROUTINE BD_DLOAD
-
-   END INTERFACE
-
-   END MODULE BD_DLOAD_Interface
+      END MODULE CC_SDAMP_USE_IFs

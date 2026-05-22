@@ -41,6 +41,7 @@
       USE CC_LABE_Interface
       USE CC_LOAD_Interface
       USE CC_METH_Interface
+      USE CC_SDAMP_Interface
       USE CC_MPC_Interface
       USE CC_MPCF_Interface
       USE CC_NLPARM_Interface

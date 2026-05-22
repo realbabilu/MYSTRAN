@@ -4,7 +4,7 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE SCONTR, ONLY                :  BD_ENTRY_LEN, JCARD_LEN, JF, IERRFL
-      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_SET_TABLED1_ID, RS_NUM_TAB, RS_TAB_FREQ, RS_TAB_AMP, MAX_RS_TAB
+      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_SET_TABLED1_ID, RS_APPEND_TABLED1_POINT
       USE MKJCARD_Interface
       USE I4FLD_Interface
       USE R8FLD_Interface
@@ -26,21 +26,13 @@
       CALL R8FLD ( JCARD(3), JF(3), F1 )
       CALL R8FLD ( JCARD(4), JF(4), A1 )
       IF ((JCARD(3)(1:) /= ' ') .AND. (JCARD(4)(1:) /= ' ') .AND. (IERRFL(3) == 'N') .AND. (IERRFL(4) == 'N')) THEN
-         IF (RS_NUM_TAB < MAX_RS_TAB) THEN
-            RS_NUM_TAB = RS_NUM_TAB + 1
-            RS_TAB_FREQ(RS_NUM_TAB) = F1
-            RS_TAB_AMP (RS_NUM_TAB) = A1
-         ENDIF
+         CALL RS_APPEND_TABLED1_POINT ( F1, A1 )
       ENDIF
 
       CALL R8FLD ( JCARD(5), JF(5), F2 )
       CALL R8FLD ( JCARD(6), JF(6), A2 )
       IF ((JCARD(5)(1:) /= ' ') .AND. (JCARD(6)(1:) /= ' ') .AND. (IERRFL(5) == 'N') .AND. (IERRFL(6) == 'N')) THEN
-         IF (RS_NUM_TAB < MAX_RS_TAB) THEN
-            RS_NUM_TAB = RS_NUM_TAB + 1
-            RS_TAB_FREQ(RS_NUM_TAB) = F2
-            RS_TAB_AMP (RS_NUM_TAB) = A2
-         ENDIF
+         CALL RS_APPEND_TABLED1_POINT ( F2, A2 )
       ENDIF
 
       DO
@@ -52,21 +44,13 @@
          CALL R8FLD ( JCARD(2), JF(2), F1 )
          CALL R8FLD ( JCARD(3), JF(3), A1 )
          IF ((JCARD(2)(1:) /= ' ') .AND. (JCARD(3)(1:) /= ' ') .AND. (IERRFL(2) == 'N') .AND. (IERRFL(3) == 'N')) THEN
-            IF (RS_NUM_TAB < MAX_RS_TAB) THEN
-               RS_NUM_TAB = RS_NUM_TAB + 1
-               RS_TAB_FREQ(RS_NUM_TAB) = F1
-               RS_TAB_AMP (RS_NUM_TAB) = A1
-            ENDIF
+            CALL RS_APPEND_TABLED1_POINT ( F1, A1 )
          ENDIF
 
          CALL R8FLD ( JCARD(4), JF(4), F2 )
          CALL R8FLD ( JCARD(5), JF(5), A2 )
          IF ((JCARD(4)(1:) /= ' ') .AND. (JCARD(5)(1:) /= ' ') .AND. (IERRFL(4) == 'N') .AND. (IERRFL(5) == 'N')) THEN
-            IF (RS_NUM_TAB < MAX_RS_TAB) THEN
-               RS_NUM_TAB = RS_NUM_TAB + 1
-               RS_TAB_FREQ(RS_NUM_TAB) = F2
-               RS_TAB_AMP (RS_NUM_TAB) = A2
-            ENDIF
+            CALL RS_APPEND_TABLED1_POINT ( F2, A2 )
          ENDIF
       ENDDO
 

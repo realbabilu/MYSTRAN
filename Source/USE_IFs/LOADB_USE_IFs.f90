@@ -61,6 +61,7 @@
       USE BD_CUSERIN_Interface
       USE BD_DAREA_Interface
       USE BD_DEBUG_Interface
+      USE BD_DTI_SPECSEL_Interface
       USE BD_EIGR_Interface
       USE BD_EIGRL_Interface
       USE BD_FORMOM_Interface
@@ -116,6 +117,7 @@
       USE BD_TEMPD_Interface
       USE BD_TEMPRP_Interface
       USE BD_TABLED1_Interface
+      USE BD_TABDMP1_Interface
       USE BD_USET_Interface
       USE BD_USET1_Interface
       USE ALLOCATE_MODEL_STUF_Interface

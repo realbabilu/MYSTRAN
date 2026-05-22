@@ -65,7 +65,7 @@
                                          Q4SURFIT        , QUADAXIS        , QUAD4TYP        , TRIA3TYP        , RCONDK          , &
                                          RELINK3         ,                                                                          &
 ! --- response_spectra_add begin --- !
-                                         RSTYPE          , PARAM_GRAV      ,                                                       &
+                                         RSTYPE          , RSOPTION        , PARAM_GRAV      ,                                     &
 ! --- response_spectra_add end --- !
                                          SEQPRT          , SEQQUIT         , SETLKTM         , SETLKTK         , SHRFXFAC        , &
                                          SKIPMGG         , SOLLIB          , SPARSE_FLAVOR   , SPARSTOR        ,                   &
@@ -864,6 +864,34 @@
                   WRITE(F06,1189) PARNAM,'PERG/PERA/FRQG/FRQA',CHRPARM,RSTYPE
                ENDIF
             ENDIF
+         ENDIF
+
+      ELSE IF (PARAM_NAME(1:8) == 'OPTION  ') THEN
+         PARNAM = 'OPTION  '
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+! --- rsa_nastran begin --- !
+            IF      (CHRPARM(1:3) == 'CQC') THEN
+               RSOPTION = 'CQC'
+            ELSE IF (CHRPARM(1:4) == 'SRSS') THEN
+               RSOPTION = 'SRSS'
+            ELSE IF (CHRPARM(1:3) == 'ABS') THEN
+               RSOPTION = 'ABS'
+            ELSE IF ((CHRPARM(1:5) == '10PCT') .OR. (CHRPARM(1:10) == '10 PERCENT')) THEN
+               RSOPTION = '10PCT'
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'CQC/SRSS/ABS/10PCT',CHRPARM,RSOPTION
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'CQC/SRSS/ABS/10PCT',CHRPARM,RSOPTION
+               ENDIF
+            ENDIF
+! --- rsa_nastran end --- !
          ENDIF
 
       ELSE IF (PARAM_NAME(1:8) == 'GRAV    ') THEN

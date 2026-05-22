@@ -63,7 +63,7 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  DISP_OUT, ACCE_OUT, OLOA_OUT, SPCF_OUT, MPCF_OUT, FORC_OUT, GPFO_OUT, STRE_OUT, STRN_OUT
       USE TIMDAT, ONLY                :  STIME
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  EPSIL, MPFOUT, SUPINFO, SUPWARN, WTMASS, PARAM_GRAV, PRTF06, PRTOP2, PRTNEU
+      USE PARAMS, ONLY                :  EPSIL, MPFOUT, SUPINFO, SUPWARN, WTMASS, PARAM_GRAV, PRTF06, PRTOP2, PRTNEU, RSOPTION
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE COL_VECS, ONLY              :  FG_COL, UG_COL, PG_COL, PM_COL, PS_COL, QSYS_COL, QGm_COL, QGr_COL, QGs_COL, QR_COL,      &
                                          PHIXG_COL, PHIXN_COL
@@ -72,9 +72,11 @@
       USE OUTPUT4_MATRICES, ONLY      :  OTM_ACCE, OTM_DISP, OTM_MPCF, OTM_SPCF, OTM_ELFE, OTM_ELFN, OTM_STRE, OTM_STRN,           &
                                          TXT_ACCE, TXT_DISP, TXT_MPCF, TXT_SPCF, TXT_ELFE, TXT_ELFN, TXT_STRE, TXT_STRN
 ! --- response_spectra_add begin --- !
-      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_NUM_TAB, RS_NUM_DIR, RS_INTERP_AMP, RS_DAREA_COMP_SCALE, RS_DIR_COMP_SCALE,           &
+      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_NUM_TAB, RS_NUM_DIR, RS_INTERP_AMP, RS_INTERP_SPECSEL_AMP,                           &
+                                         RS_DAREA_COMP_SCALE, RS_DIR_COMP_SCALE,                                                   &
                                          RS_DIR_EXCITE_SID, RS_COMBINE_100_30, RS_DLOAD_USES_EXCITE, RS_DLOAD_SID,                 &
-                                         RS_MODAL_METHOD, RS_DIRECTIONAL_METHOD, RS_DIR_DAMP
+                                         RS_MODAL_METHOD, RS_DIRECTIONAL_METHOD, RS_DIR_DAMP, RS_SDAMP_SID, RS_TABDMP1_ID,        &
+                                         RS_INTERP_DAMP, RS_NUM_SPEC
 ! --- response_spectra_add end --- !
 
       USE SPARSE_MATRICES, ONLY       :  I_GMN , J_GMN , GMN , I_GMNt, J_GMNt, GMNt, I_HMN , J_HMN , HMN ,                         &
@@ -187,6 +189,7 @@
       REAL(DOUBLE), ALLOCATABLE       :: UG_RS_DIR2(:)
       REAL(DOUBLE), ALLOCATABLE       :: UG_RS_DIR3(:)
       REAL(DOUBLE)                    :: RS_ZETA
+      REAL(DOUBLE)                    :: RS_MODE_ZETA
       REAL(DOUBLE)                    :: RS_OMEGA_I
       REAL(DOUBLE)                    :: RS_OMEGA_J
       REAL(DOUBLE)                    :: RS_BETA
@@ -729,7 +732,16 @@
          ENDDO
          NMODE_RS = 0
          RS_ZETA = 0.05D0
-         IF (INDEX(TITLE(1),'CQC') > 0) THEN
+! --- rsa_nastran begin --- !
+         IF (RSOPTION(1:3) == 'CQC') THEN
+            RS_MODAL_METHOD = 'CQC'
+         ELSE IF (RSOPTION(1:4) == 'SRSS') THEN
+            RS_MODAL_METHOD = 'SRSS'
+         ELSE IF (RSOPTION(1:3) == 'ABS') THEN
+            RS_MODAL_METHOD = 'ABS'
+         ELSE IF (RSOPTION(1:5) == '10PCT') THEN
+            RS_MODAL_METHOD = '10PCT'
+         ELSE IF (INDEX(TITLE(1),'CQC') > 0) THEN
             RS_MODAL_METHOD = 'CQC'
          ELSE IF (INDEX(TITLE(1),'ABS') > 0) THEN
             RS_MODAL_METHOD = 'ABS'
@@ -740,6 +752,7 @@
          ELSE
             RS_MODAL_METHOD = 'NONE'
          ENDIF
+! --- rsa_nastran end --- !
 ! --- response_spectra_add begin --- !
          IF (PARAM_GRAV > EPS1) THEN
             RS_GACC = PARAM_GRAV
@@ -978,7 +991,18 @@ j_do: DO JVEC=1,NUM_SOLNS
                RS_MODE_FREQ(JVEC) = SQRT(ABS(EIGEN_VAL(JVEC)))
                NMODE_RS = MAX(NMODE_RS, JVEC)
 ! --- response_spectra_add begin --- !
-               RS_AMP  = RS_INTERP_AMP(MODE_OM, RS_GACC)
+               IF ((RS_SDAMP_SID > 0) .AND. (RS_TABDMP1_ID == RS_SDAMP_SID)) THEN
+                  RS_MODE_ZETA = MAX(RS_INTERP_DAMP(MODE_OM), 1.0D-6)
+               ELSE IF (NDIR_USE >= 1) THEN
+                  RS_MODE_ZETA = MAX(RS_DIR_DAMP(RS_DIR_SLOT(1)), 1.0D-6)
+               ELSE
+                  RS_MODE_ZETA = 0.05D0
+               ENDIF
+               IF (RS_NUM_SPEC > 0) THEN
+                  RS_AMP  = RS_INTERP_SPECSEL_AMP(MODE_OM, RS_GACC, RS_MODE_ZETA)
+               ELSE
+                  RS_AMP  = RS_INTERP_AMP(MODE_OM, RS_GACC)
+               ENDIF
                RS_SD   = RS_AMP/MAX(ABS(EIGEN_VAL(JVEC)),EPS1)
 ! --- response_spectra_add end --- !
                RS_GAMMA = ZERO
@@ -1203,7 +1227,6 @@ j_do: DO JVEC=1,NUM_SOLNS
 ! --- response_spectra_add begin --- !
       IF ((SOL_NAME(1:8) == 'MFREQ') .AND. (RS_NUM_TAB > 0)) THEN
          IF (RS_MODAL_METHOD(1:3) == 'CQC') THEN
-            IF (NDIR_USE >= 1) RS_ZETA = MAX(RS_DIR_DAMP(RS_DIR_SLOT(1)), 1.0D-6)
             DO I=1,NDOFG
                RS_CQC_SUM = ZERO
                DO IMODE=1,NMODE_RS
@@ -1215,6 +1238,15 @@ j_do: DO JVEC=1,NUM_SOLNS
                      IF (IMODE == JMODE) THEN
                         RS_RHO = ONE
                      ELSE
+! --- rsa_nastran begin --- !
+                        IF ((RS_SDAMP_SID > 0) .AND. (RS_TABDMP1_ID == RS_SDAMP_SID)) THEN
+                           RS_ZETA = MAX(0.5D0*(RS_INTERP_DAMP(RS_OMEGA_I) + RS_INTERP_DAMP(RS_OMEGA_J)), 1.0D-6)
+                        ELSE IF (NDIR_USE >= 1) THEN
+                           RS_ZETA = MAX(RS_DIR_DAMP(RS_DIR_SLOT(1)), 1.0D-6)
+                        ELSE
+                           RS_ZETA = 0.05D0
+                        ENDIF
+! --- rsa_nastran end --- !
                         RS_BETA = RS_OMEGA_J/RS_OMEGA_I
                         RS_RHO = (8.0D0*RS_ZETA*RS_ZETA*(1.0D0+RS_BETA)*(RS_BETA**1.5D0))/                                  &
                                  (((1.0D0-RS_BETA*RS_BETA)*(1.0D0-RS_BETA*RS_BETA)) +                                         &
@@ -1225,6 +1257,11 @@ j_do: DO JVEC=1,NUM_SOLNS
                ENDDO
                UG_RS_SRSS(I) = MAX(RS_CQC_SUM, ZERO)
             ENDDO
+            IF (NDIR_USE == 1) THEN
+               DO I=1,NDOFG
+                  UG_RS_DIR1(I) = UG_RS_SRSS(I)
+               ENDDO
+            ENDIF
          ELSE IF (RS_MODAL_METHOD(1:5) == '10PCT') THEN
             DO I=1,NDOFG
                RS_CQC_SUM = ZERO
@@ -2075,6 +2112,3 @@ j_do: DO JVEC=1,NUM_SOLNS
       END SUBROUTINE GET_FG_INERTIA_FORCES
 
       END SUBROUTINE LINK9
-
-
-
