@@ -196,12 +196,18 @@
          NSM_A  = RPBEAM(NPBEAM,6)
       ENDIF
 
-! Call subr to check sensibility of I1, I2, I12 combinations
-
+! --- bug_cbeam_fix1 begin --- !
+! Check the just-read end-A values before writing them back into the retained
+! property store. The historical bug path validated zeroed work variables here,
+! which collapsed the active bending inertias.
+      I1  = I1_A
+      I2  = I2_A
+      I12 = I12_A
       CALL CHECK_BAR_MOIs ( 'PBEAM', ID, I1, I2, I12, IERR )
       RPBEAM(NPBEAM,2) = I1
       RPBEAM(NPBEAM,3) = I2
       RPBEAM(NPBEAM,4) = I12
+! --- bug_cbeam_fix1 end --- !
       IF (IERR /= 0) THEN
          FATAL_ERR = FATAL_ERR + 1
       ENDIF

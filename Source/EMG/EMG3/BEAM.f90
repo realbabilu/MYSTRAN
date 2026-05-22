@@ -544,15 +544,21 @@
       ENDIF
 
 ! **********************************************************************************************************************************
-! Reuse the existing 1D geometric stiffness pattern so nonlinear branches do not fail.
+  ! Reuse the existing 1D geometric stiffness pattern so nonlinear branches do not fail.
 
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
 
+! --- bug_cbeam_fix1 begin --- !
+! For the second buckling pass, derive local element end forces directly from
+! the local stiffness times the local element displacement vector. This avoids
+! the broader helper path that was unstable for the validated CBEAM buckling
+! family while preserving the existing geometric stiffness assembly.
          CALL ELMDIS
-         CALL CALC_ELEM_NODE_FORCES
+         PEL(1:ELDOF) = MATMUL(KE(1:ELDOF,1:ELDOF), UEL(1:ELDOF))
+! --- bug_cbeam_fix1 end --- !
 
-         M1A = -PEL(6)
-         M2A =  PEL(5)
+          M1A = -PEL(6)
+          M2A =  PEL(5)
          M1B = -PEL(6) + PEL(2)*L
          M2B =  PEL(5) + PEL(3)*L
          V1  = -PEL(2)
