@@ -60,6 +60,9 @@
       CHARACTER(  1*BYTE)            :: IMB_BLANK(2:9)   = (/('N', I=2, 9)/) ! 'Y', 'N' indicates imbedded blanks in B.D. field
       CHARACTER(  1*BYTE)            :: PRINTENV         = 'N'               ! 'Y' if Software Passport env vars are to be printed
       CHARACTER(  1*BYTE)            :: RESTART          = 'N'               ! 'Y' if run is a restart
+! --- rsa_nastran begin --- !
+      CHARACTER(  1*BYTE)            :: RSA_NX_SEMODES   = 'N'               ! 'Y' if SOL SEMODES alias was requested
+! --- rsa_nastran end --- !
       CHARACTER( 16*BYTE)            :: SOL_NAME         = '                '! Name for the solution (e.g. 'STATICS')
       CHARACTER( 2*BYTE)             :: TSET_CHR_LEN     = '  '              ! Char len of entries in TSET
 

@@ -126,11 +126,13 @@ outer:DO
          ELSE IF (CARD1(1:4) == 'LABE'    ) THEN
             CALL CC_LABE   ( CARD1 )
 
-         ELSE IF (CARD1(1:4) == 'LOAD'    ) THEN
+         ELSE IF ((CARD1(1:4) == 'LOAD'    ) .OR. (CARD1(1:5) == 'DLOAD'   )) THEN
             CALL CC_LOAD   ( CARD1 )
 
          ELSE IF (CARD1(1:8) == 'MEFFMASS') THEN
-            IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+! --- rsa_nastran begin --- !
+            IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:5) == 'MFREQ') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+! --- rsa_nastran end --- !
                MEFFMASS_CALC = 'Y'
             ENDIF
 
@@ -177,6 +179,9 @@ inner:         DO
 
          ELSE IF (CARD1(1:3) == 'SET'     ) THEN
             CALL CC_SET    ( CARD1 )
+
+         ELSE IF (CARD1(1:5) == 'SDAMP'   ) THEN
+            CALL CC_SDAMP  ( CARD1 )
 
          ELSE IF((CARD1(1:3) == 'SPC'     ) .AND. (CARD1(1:4) /= 'SPCF'    )) THEN
             CALL CC_SPC    ( CARD1 )
@@ -343,6 +348,12 @@ inner:         DO
       ENDDO
 
 
+! --- rsa_nastran begin --- !
+      IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:5) == 'MFREQ')) THEN
+! --- rsa_nastran end --- !
+         MEFFMASS_CALC = 'Y'
+         MPFACTOR_CALC = 'Y'
+      ENDIF
 
       RETURN
 
@@ -389,3 +400,4 @@ inner:         DO
 ! **********************************************************************************************************************************
 
       END SUBROUTINE LOADC
+

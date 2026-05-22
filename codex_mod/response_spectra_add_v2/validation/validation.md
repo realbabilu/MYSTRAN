@@ -43,4 +43,46 @@
    - `max_rel_diff = 0.0`
    - status: `same`
 
+## Added Benchmark Packs
+
+### Problem 1-020
+- folder:
+  - `validation/problem_1_020`
+- purpose:
+  - validated modal basis plus deterministic SRSS reconstruction reference
+- key files:
+  - `problem_1_020_validated.md`
+  - `problem_1_020_modal.dat`
+  - `benchmark_1_020_modal.py`
+  - `benchmark_1_020_validate.py`
+- use:
+  - keep `1-020` as the lightweight modal/SRSS reference while `rsa_nastran` migrates input semantics
+
+### Problem 1-024
+- folder:
+  - `validation/problem_1_024`
+- purpose:
+  - validated modal/static benchmark plus direct-reference RSA decks
+- key files:
+  - `problem_1_024_validated.md`
+  - `problem_1_024_mystran_dense_modal_beam_swap.dat`
+  - `problem_1_024_static_unit_load.dat`
+  - `problem_1_024_sol112_srss_directref_beamz.bdf`
+  - `problem_1_024_sol112_cqc_directref_beamz.bdf`
+  - `problem_1_024_sol112_abs_directref_beamz.bdf`
+  - `problem_1_024_sol112_10pct_directref_beamz.bdf`
+- use:
+  - `1-024` is the direct-reference RSA checkpoint for the corrected beam-axis and parser-safe benchmark set
+
+### Problem 1-025
+- primary working benchmark remains:
+  - `docs/problem_1_025_stage1_note.md`
+- use:
+  - `1-025` is the active migration benchmark for `rsa_nastran` features:
+    - `SDAMP`
+    - `TABDMP1`
+    - `DTI,SPECSEL`
+    - `PARAM,OPTION`
+    - active mass participation
+
 ! --- response_spectrum_mystran_add end --- !

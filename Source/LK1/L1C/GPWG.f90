@@ -119,7 +119,9 @@
       XREF(2)    = ZERO
       XREF(3)    = ZERO
 
-      IF ((SOL_NAME(1:5) == 'MODES') .AND. (MEFFMASS_CALC == 'Y')) THEN
+! --- rsa_nastran begin --- !
+      IF (((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:5) == 'MFREQ')) .AND. (MEFFMASS_CALC == 'Y')) THEN
+! --- rsa_nastran end --- !
          REFPNT = MEFMGRID
       ELSE
          REFPNT = GRDPNT
@@ -380,8 +382,10 @@ userin:        IF ((WHICH(1:8) == 'OA MODEL') .OR. (WHICH(1:6) == 'USERIN')) THE
          ENDDO
       ENDDO
 
-      ! Calc MEFM_RB_MASS here for MODES. It is calc'd in CALC_MRRcb for CB
-      IF ((SOL_NAME(1:5) == 'MODES') .AND. (MEFFMASS_CALC == 'Y')) THEN
+      ! Calc MEFM_RB_MASS here for modal-style runs that write effective mass tables.
+! --- rsa_nastran begin --- !
+      IF (((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:5) == 'MFREQ')) .AND. (MEFFMASS_CALC == 'Y')) THEN
+! --- rsa_nastran end --- !
          DO I=1,6
             DO J=1,6
                MEFM_RB_MASS(I,J) = RB_MASS_BASIC(I,J)

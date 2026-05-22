@@ -161,6 +161,8 @@
 !                                                              PERA = period vs absolute acceleration
 !                                                              FRQG = frequency vs Sa/g
 !                                                              FRQA = frequency vs absolute acceleration
+      CHARACTER(  8*BYTE)      :: RSOPTION       = '        ' ! RSA modal combination override:
+!                                                              CQC, SRSS, ABS, or 10PCT
       REAL(DOUBLE)             :: PARAM_GRAV     =  ZERO     ! Optional gravity magnitude from PARAM,GRAV for RS Sa/g conversion
 ! --- response_spectra_add end --- !
 

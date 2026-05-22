@@ -35,7 +35,7 @@
                                          MELGP, MELDOF, MMPC, MOFFSET, NBAROR, NBEAMOR, NFORCE,NGRAV, NGRDSET, NGRID, NLOAD, NMPC, &
                                          NMPCADD, NPCOMP, NRBAR, NRBE1, NRBE2, NRFORCE, NRSPLINE, NSLOAD, NSPOINT, NSPC, NSPC1,    &
                                          NSPCADD, NPBAR, NPBARL, NPLOAD, NSUB, NUM_MPCSIDS, NUM_PARTVEC_RECORDS, PROG_NAME,        &
-                                         SOL_NAME, NCBAR, NCBEAM, NCBUSH, NCHEXA20, NCHEXA8, NCPENTA15, NCPENTA6, NCPYRA14,       &
+                                         SOL_NAME, RSA_NX_SEMODES, NCBAR, NCBEAM, NCBUSH, NCHEXA20, NCHEXA8, NCPENTA15, NCPENTA6, NCPYRA14,       &
                                          NCPYRA5, NCQUAD4,                                                                         &
                                          NCQUAD4K, NCQUAD8, NCQUADR, NCROD, NCSHEAR, NCTETRA10, NCTETRA4, NCTRIA3, NCTRIA3K, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
@@ -426,8 +426,13 @@ bdf:  DO
          ELSE IF (CARD(1:5) == 'DAREA'   )  THEN
             CALL BD_DAREA   ( CARD )
 
+! --- rsa_nastran begin --- !
+         ELSE IF (CARD(1:3) == 'DTI'     )  THEN
+            CALL BD_DTI_SPECSEL ( CARD )
+! --- rsa_nastran end --- !
+
          ELSE IF (CARD(1:5) == 'DLOAD'   )  THEN
-            CALL BD_DLOAD   ( CARD )
+            CALL BD_DLOAD   ( CARD, CC_LOAD_FND )
 
          ELSE IF((CARD(1:5) == 'EIGR '   ) .OR. (CARD(1:5) == 'EIGR*'   ))  THEN
             CALL BD_EIGR    ( CARD, LARGE_FLD_INP, EIGFND )
@@ -609,10 +614,21 @@ bdf:  DO
             CALL BD_SPOINT  ( CARD )
 
          ELSE IF (CARD(1:6) == 'SUPORT'  )  THEN
-            CALL BD_SUPORT  ( CARD )
+! --- rsa_nastran begin --- !
+            IF (RSA_NX_SEMODES == 'Y') THEN
+               WRITE(ERR,1901) 'SUPORT'
+               WRITE(F06,1901) 'SUPORT'
+               FATAL_ERR = FATAL_ERR + 1
+            ELSE
+               CALL BD_SUPORT  ( CARD )
+            ENDIF
+! --- rsa_nastran end --- !
 
          ELSE IF (CARD(1:7) == 'TABLED1' )  THEN
             CALL BD_TABLED1 ( CARD )
+
+         ELSE IF (CARD(1:7) == 'TABDMP1' )  THEN
+            CALL BD_TABDMP1 ( CARD )
 
          ELSE IF((CARD(1:5) == 'TEMP '   ) .OR. (CARD(1:5) == 'TEMP*'   ))  THEN
             CALL BD_TEMP    ( CARD, CC_LOAD_FND )
@@ -1087,11 +1103,14 @@ j_do2:            DO J=2,LMPCADDC
 
  1199 format(32767(1es14.6))
 
- 1805 FORMAT(' *ERROR  1805: THERE WERE ',I8,' PARTN REQUEST(S) FOR PARTITIONING OUTPUT4 MATRICES IN EXEC CONTROL BUT NO',         &
+  1805 FORMAT(' *ERROR  1805: THERE WERE ',I8,' PARTN REQUEST(S) FOR PARTITIONING OUTPUT4 MATRICES IN EXEC CONTROL BUT NO',         &
                            ' PARTITIONING'                                                                                         &
                     ,/,14X,' VECTORS (BULK DATA PARVEC OR PARVEC1 ENTRIES) WERE FOUND IN THE BULK DATA DECK')
+! --- rsa_nastran begin --- !
+ 1901 FORMAT(' *ERROR  1901: NX-style SOL SEMODES feature "',A,'" is not supported yet in MYSTRAN rsa_nastran alias.')
+! --- rsa_nastran end --- !
 
- 9993 FORMAT(' *LOADB-WARNING    : PRIOR ENTRY NOT PROCESSED BY ',A)
+  9993 FORMAT(' *LOADB-WARNING    : PRIOR ENTRY NOT PROCESSED BY ',A)
 
  9994 FORMAT(' *WARNING    : Due to the presence of ',I8,' scalar points (SPOINT''s) the user should be aware of the following:'   &
                     ,/,14X,'    a) They have no geometry; however their displ, forces, etc are reported in F06 as T1 components'   &
@@ -1230,6 +1249,3 @@ j_do2:            DO J=2,LMPCADDC
 
   101 FORMAT(A)
       END SUBROUTINE READ_BDF_LINE
-
-
-

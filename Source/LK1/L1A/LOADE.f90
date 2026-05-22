@@ -30,7 +30,7 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, IN1
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, EC_ENTRY_LEN, CHKPNT, FATAL_ERR, WARN_ERR, JCARD_LEN, JF,     &
-                                         PROG_NAME, SOL_NAME, RESTART
+                                         PROG_NAME, SOL_NAME, RESTART, RSA_NX_SEMODES
       USE TIMDAT, ONLY                :  TSEC
       USE PARAMS, ONLY                :  SUPWARN
       use debug_parameters, only      :  debug
@@ -61,7 +61,7 @@
       CHARACTER( 8*BYTE)              :: TOKTYP(3)         ! Description of the TOKEN's returned from subr STOKEN
 
                                                            ! Proper SOL number
-      CHARACTER( 10*BYTE)             :: SOL_NUM_SHOULD_BE = '1, 3 or 31'
+      CHARACTER( 32*BYTE)             :: SOL_NUM_SHOULD_BE = '1, 3, 31, 111, 112 or SEMODES'
       CHARACTER( 1*BYTE)              :: ANY_OU4_NAME_BAD  ! 'Y'/'N' if requested OUTPUT4 matrix name is valid
 
       INTEGER(LONG)                   :: CHAR_COL          ! Column number on CARD where character CHAR is found
@@ -167,6 +167,7 @@
          ELSE IF (CARD1(1: 3) == 'SOL'       ) THEN
 
             SOL_NAME(1:LEN(SOL_NAME)) = ' '
+            RSA_NX_SEMODES = 'N'
             ISTART = 4
             TOKLEN = LEN(CARD1)
             CALL STOKEN ( SUBR_NAME, CARD1, ISTART, TOKLEN, NTOKEN, IERROR, TOKTYP, TOKEN, ERRTOK, THRU, EXCEPT )
@@ -186,10 +187,25 @@
                      SOL_NAME(1:7)  =  'STATICS'
                      SOL_INT        = 1
 
-                  ELSE IF ((TOKEN(1) == 'MODAL   ') .OR. (TOKEN(1) == 'MODES   ') .OR. (TOKEN(1) == 'NORMAL M').OR.                &
-                           (TOKEN(1) == 'SEMODES ')) THEN
+                  ELSE IF ((TOKEN(1) == 'MODAL   ') .OR. (TOKEN(1) == 'MODES   ') .OR. (TOKEN(1) == 'NORMAL M')) THEN
                      SOL_NAME(1:5)  =  'MODES'
                      SOL_INT        = 3
+
+! --- rsa_nastran begin --- !
+                  ELSE IF (TOKEN(1) == 'SEMODES ') THEN
+                     SOL_NAME(1:LEN(SOL_NAME)) = ' '
+                     SOL_NAME(1:8)  = 'MFREQ'
+                     SOL_INT        = 111
+                     RSA_NX_SEMODES = 'Y'
+! --- rsa_nastran end --- !
+
+! --- response_spectra_add begin --- !
+                  ELSE IF ((TOKEN(1) == 'MFREQ   ') .OR. (TOKEN(1) == 'SEMFREQ ')) THEN
+                     SOL_NAME(1:LEN(SOL_NAME)) = ' '
+                     SOL_NAME(1:8)  =  'MFREQ'
+                     SOL_INT        = 111
+                     RSA_NX_SEMODES = 'N'
+! --- response_spectra_add end --- !
 
                   ELSE IF ((TOKEN(1) == 'DIFFEREN') .OR. (TOKEN(1) == 'DIFF STI')) THEN
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
@@ -205,6 +221,14 @@
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
                      SOL_NAME(1:8)  =  'NLSTATIC'
                      SOL_INT        = 106
+
+! --- response_spectra_add begin --- !
+                  ELSE IF ((TOKEN(1) == 'DFREQ   ') .OR. (TOKEN(1) == 'SEDFREQ ')) THEN
+                     SOL_NAME(1:LEN(SOL_NAME)) = ' '
+                     SOL_NAME(1:8)  =  'MFREQ'
+                     SOL_INT        = 112
+                     RSA_NX_SEMODES = 'N'
+! --- response_spectra_add end --- !
 
                   ELSE IF (TOKEN(1)(1:3) == 'GEN') THEN
                      CALL STOKEN ( SUBR_NAME, CARD1, ISTART, TOKLEN, NTOKEN, IERROR, TOKTYP, TOKEN, ERRTOK, THRU, EXCEPT )
@@ -239,6 +263,13 @@
                   ELSE IF ((SOL_INT == 3 ) .OR. (SOL_INT == 103))  THEN
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
                      SOL_NAME(1:5) = 'MODES'
+                     RSA_NX_SEMODES = 'N'
+! --- response_spectra_add begin --- !
+                  ELSE IF (SOL_INT == 111) THEN
+                     SOL_NAME(1:LEN(SOL_NAME)) = ' '
+                     SOL_NAME(1:8) = 'MFREQ'
+                     RSA_NX_SEMODES = 'N'
+! --- response_spectra_add end --- !
                   ELSE IF ((SOL_INT == 4 ) .OR. (SOL_INT == 104)) THEN
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
                      SOL_NAME(1:8) = 'DIFFEREN'
@@ -251,6 +282,12 @@
                   ELSE IF ((SOL_INT == 66) .OR. (SOL_INT == 106)) THEN
                      SOL_NAME(1:LEN(SOL_NAME)) = ' '
                      SOL_NAME      = 'NLSTATIC'
+! --- response_spectra_add begin --- !
+                  ELSE IF (SOL_INT == 112) THEN
+                     SOL_NAME(1:LEN(SOL_NAME)) = ' '
+                     SOL_NAME(1:8) = 'MFREQ'
+                     RSA_NX_SEMODES = 'N'
+! --- response_spectra_add end --- !
                   ELSE
                      WRITE(ERR,999) SOL_NUM_SHOULD_BE, SOL_INT
                      WRITE(F06,999) SOL_NUM_SHOULD_BE, SOL_INT
@@ -387,3 +424,7 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE LOADE
+
+
+
+
