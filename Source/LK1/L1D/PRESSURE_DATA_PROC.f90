@@ -108,9 +108,10 @@
          RSID(I) = ZERO
       ENDDO
 
-isubc:DO I=1,NSUB                                          ! Loop through the S/C's
+      NPDAT = 0                                            ! PDATA must remain valid across all subcases because PPNT stores
+                                                            ! per-(element,subcase) pointers into one shared pressure buffer.
 
-         NPDAT = 0                                         ! 09/21/21: Init NPDAT before each S/C. Otherwise can get error 1523
+isubc:DO I=1,NSUB                                          ! Loop through the S/C's
 
          IF (SUBLOD(I,1) == 0) THEN                        ! If no load for this S/C, CYCLE
             CYCLE isubc
@@ -199,8 +200,16 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
 
                READ(JCARD(6),'(F16.0)') X1
                READ(JCARD(7),'(F16.0)') RPDAT
-               READ(JCARD(8),'(F16.0)') X2
-               READ(JCARD(9),'(F16.0)') RPDAT2
+               IF (JCARD(8) == '        ') THEN
+                  X2 = X1
+               ELSE
+                  READ(JCARD(8),'(F16.0)') X2
+               ENDIF
+               IF (JCARD(9) == '        ') THEN
+                  RPDAT2 = RPDAT
+               ELSE
+                  READ(JCARD(9),'(F16.0)') RPDAT2
+               ENDIF
 
                IF (PLOAD1_SCALE /= 'FR') THEN
                   WRITE(ERR,1524) TRIM(PLOAD1_SCALE), EID, SETID
@@ -239,6 +248,9 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
                   PDATA(IPPNT+1) = SCALE*RPDAT2
                   PDATA(IPPNT+2) = X1
                   PDATA(IPPNT+3) = X2
+                  IF ((PLOAD1_TYPE == 'FY') .OR. (PLOAD1_TYPE == 'Y')) THEN
+                     PDATA(IPPNT+24) = ONE
+                  ENDIF
                ELSE IF ((PLOAD1_TYPE == 'FZ') .OR. (PLOAD1_TYPE == 'FZE') .OR. (PLOAD1_TYPE == 'Z')) THEN
                   IF (PDATA(IPPNT+6) >= ZERO) THEN
                      WRITE(ERR,1528) EID, SETID, 'FZE/FZ/Z'
@@ -251,6 +263,9 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
                   PDATA(IPPNT+5) = SCALE*RPDAT2
                   PDATA(IPPNT+6) = X1
                   PDATA(IPPNT+7) = X2
+                  IF ((PLOAD1_TYPE == 'FZ') .OR. (PLOAD1_TYPE == 'Z')) THEN
+                     PDATA(IPPNT+25) = ONE
+                  ENDIF
                ELSE IF (PLOAD1_TYPE == 'FXE') THEN
                   IF (PDATA(IPPNT+10) >= ZERO) THEN
                      WRITE(ERR,1528) EID, SETID, 'FXE'

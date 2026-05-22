@@ -74,10 +74,14 @@
       ! concatenate the strings
       DISP_OUT = TRIM(FOUND_PRINT) // TRIM(FOUND_PLOT) // TRIM(FOUND_PUNCH) // TRIM(FOUND_NEU) // TRIM(FOUND_CSV)
 
-      ! default to print
+! --- cbeam_stations begin --- !
+      ! For bare "DISP = ALL" requests, default to PRINT+PLOT so classic
+      ! OP2 displacement (OUGV1) is emitted without requiring explicit
+      ! "(PLOT)" qualifiers on the Case Control entry.
       IF (DISP_OUT(1:5) == 'NNNNN') THEN
-        DISP_OUT = 'YNNNN'
+        DISP_OUT = 'YYNNN'
       ENDIF
+! --- cbeam_stations end --- !
 
 
       ! Set CASE CONTROL output request variable to SETID

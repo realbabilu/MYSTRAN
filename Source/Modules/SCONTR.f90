@@ -490,19 +490,20 @@
       INTEGER(LONG), PARAMETER :: MMSPRNT             =   3      ! No. cols allowed in dimensioning array MSPRNT
       INTEGER(LONG), PARAMETER :: MOGEL               =  12      ! No. cols allowed in dimensioning array OGEL
 ! --- cbeam_add begin --- !
-      INTEGER(LONG), PARAMETER :: MPDAT_PLOAD1        =  24      ! Beam/bar PLOAD1 data slots (6 comps x [P1,P2,X1,X2])
+      INTEGER(LONG), PARAMETER :: MPDAT_PLOAD1        =  26      ! Beam/bar PLOAD1 data slots (6 comps x [P1,P2,X1,X2]) + 2 legacy dir flags
       INTEGER(LONG), PARAMETER :: MPDAT_PLOAD2        =   1      ! No. pressures on PLOAD2 Bulk Data card
       INTEGER(LONG), PARAMETER :: MPDAT_PLOAD4        =   4      ! No. pressuresa on PLOAD4 Bulk Data card
       INTEGER(LONG), PARAMETER :: MPBAR               =   3      ! No. cols allowed in dimensioning array PBAR
       INTEGER(LONG), PARAMETER :: MPBARLU             =   6      ! Max num of dec places in format for writing PBAR equivs of PBARL
       INTEGER(LONG), PARAMETER :: MPBEAM              =   4      ! No. cols allowed in dimensioning array PBEAM
+      INTEGER(LONG), PARAMETER :: MPBEAM_STATIONS     =  11      ! Max stored x/L stations for NX-style PBEAM/CBEAM output
       INTEGER(LONG), PARAMETER :: MPBUSH              =   2      ! No. cols allowed in dimensioning array PBUSH
       INTEGER(LONG), PARAMETER :: MPLOAD4_3D_DATA     =   5      ! No. cols allowed for array PLOAD4_3D_DATA
       INTEGER(LONG), PARAMETER :: MPCOMP0             =   6      ! No. integer data on PCOMP parent entry (PID,FT,LAM) + NUM_LAYERS
       INTEGER(LONG), PARAMETER :: MPCOMP_PLIES        =   2      ! No. integer data for each layer on PCOMP (MIDi, SOUTi)
       INTEGER(LONG), PARAMETER :: MPELAS              =   1      ! No. cols allowed in dimensioning array PELAS
       INTEGER(LONG), PARAMETER :: MPMASS              =   1      ! No. cols allowed in dimensioning array PMASS
-      INTEGER(LONG), PARAMETER :: MPRESS              =  24      ! No. rows allowed in dimensioning array PRESS
+      INTEGER(LONG), PARAMETER :: MPRESS              =  26      ! No. rows allowed in dimensioning array PRESS
 ! --- cbeam_add end --- !
       INTEGER(LONG), PARAMETER :: MPROD               =   2      ! No. cols allowed in dimensioning array PROD
       INTEGER(LONG), PARAMETER :: MPSHEAR             =   2      ! No. cols allowed in dimensioning array PSHEAR

@@ -42,7 +42,8 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  EPSIL, ART_KED, ART_ROT_KED, ART_TRAN_KED
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  DOFPIN, DT, EID, KE, KED, PEL, PPE, PRESS, PTE, SE1, SE2, STE1, STE2
+      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CBEAM_FORCE_B1, CBEAM_FORCE_B2, DOFPIN, DT, EID,&
+                                         ELDOF, KE, KED, PEL, PPE, PRESS, PTE, SE1, SE2, STE1, STE2, TE, UEL, ZS
 
       USE BEAM_USE_IFs
 
@@ -52,6 +53,8 @@
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
 
       INTEGER(LONG)                   :: I,J
+      INTEGER(LONG)                   :: ISTA
+      INTEGER(LONG)                   :: NSTA
       INTEGER(LONG)                   :: NUM_PFLAG_DOFS
 
       REAL(DOUBLE), INTENT(IN)        :: ALPHA
@@ -114,9 +117,14 @@
       REAL(DOUBLE)                    :: V1
       REAL(DOUBLE)                    :: V2
       REAL(DOUBLE)                    :: WGT
+      REAL(DOUBLE)                    :: FBASIC(3)
+      REAL(DOUBLE)                    :: MBASIC(3)
+      REAL(DOUBLE)                    :: P1_LOC
+      REAL(DOUBLE)                    :: P2_LOC
       REAL(DOUBLE)                    :: X1L
       REAL(DOUBLE)                    :: X2L
       REAL(DOUBLE)                    :: XI
+      REAL(DOUBLE)                    :: XI_STA
       REAL(DOUBLE)                    :: XI_GAUSS(3)
       REAL(DOUBLE)                    :: XI_SCALE
       REAL(DOUBLE)                    :: XI_WGT(3)
@@ -325,8 +333,14 @@
             X1L = PRESS(3,J)
             X2L = PRESS(4,J)
             IF (X1L >= ZERO) THEN
+               P1_LOC = P1
+               P2_LOC = P2
+               IF (PRESS(25,J) > 0.5D0) THEN
+                  P1_LOC = TE(2,2)*P1
+                  P2_LOC = TE(2,2)*P2
+               ENDIF
                IF (DABS(X2L - X1L) <= EPS1) THEN
-                  PC = P1
+                  PC = P1_LOC
                   N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
                   N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
                   N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
@@ -340,7 +354,40 @@
                   DO I=1,3
                      XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
                      WGT = XI_WGT(I)
-                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     QT  = P1_LOC + (P2_LOC-P1_LOC)*(XI-X1L)/(X2L-X1L)
+                     N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
+                     N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
+                     N3 = THREE*XI*XI - TWO*XI*XI*XI
+                     N4 = L*(-XI*XI + XI*XI*XI)
+                     PPE( 2,J) = PPE( 2,J) + QT*L*WGT*XI_SCALE*N1
+                     PPE( 6,J) = PPE( 6,J) + QT*L*WGT*XI_SCALE*N2
+                     PPE( 8,J) = PPE( 8,J) + QT*L*WGT*XI_SCALE*N3
+                     PPE(12,J) = PPE(12,J) + QT*L*WGT*XI_SCALE*N4
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            IF ((PRESS(26,J) > 0.5D0) .AND. (PRESS(7,J) >= ZERO)) THEN
+               P1_LOC = TE(2,3)*PRESS(5,J)
+               P2_LOC = TE(2,3)*PRESS(6,J)
+               X1L    = PRESS(7,J)
+               X2L    = PRESS(8,J)
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1_LOC
+                  N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
+                  N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
+                  N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
+                  N4 = L*(-X1L*X1L + X1L*X1L*X1L)
+                  PPE( 2,J) = PPE( 2,J) + PC*N1
+                  PPE( 6,J) = PPE( 6,J) + PC*N2
+                  PPE( 8,J) = PPE( 8,J) + PC*N3
+                  PPE(12,J) = PPE(12,J) + PC*N4
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1_LOC + (P2_LOC-P1_LOC)*(XI-X1L)/(X2L-X1L)
                      N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
                      N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
                      N3 = THREE*XI*XI - TWO*XI*XI*XI
@@ -358,8 +405,14 @@
             X1L = PRESS(7,J)
             X2L = PRESS(8,J)
             IF (X1L >= ZERO) THEN
+               P1_LOC = P1
+               P2_LOC = P2
+               IF (PRESS(26,J) > 0.5D0) THEN
+                  P1_LOC = TE(3,3)*P1
+                  P2_LOC = TE(3,3)*P2
+               ENDIF
                IF (DABS(X2L - X1L) <= EPS1) THEN
-                  PC = P1
+                  PC = P1_LOC
                   N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
                   N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
                   N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
@@ -373,7 +426,40 @@
                   DO I=1,3
                      XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
                      WGT = XI_WGT(I)
-                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     QT  = P1_LOC + (P2_LOC-P1_LOC)*(XI-X1L)/(X2L-X1L)
+                     N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
+                     N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
+                     N3 = THREE*XI*XI - TWO*XI*XI*XI
+                     N4 = L*(-XI*XI + XI*XI*XI)
+                     PPE( 3,J) = PPE( 3,J) + QT*L*WGT*XI_SCALE*N1
+                     PPE( 5,J) = PPE( 5,J) - QT*L*WGT*XI_SCALE*N2
+                     PPE( 9,J) = PPE( 9,J) + QT*L*WGT*XI_SCALE*N3
+                     PPE(11,J) = PPE(11,J) - QT*L*WGT*XI_SCALE*N4
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            IF ((PRESS(25,J) > 0.5D0) .AND. (PRESS(3,J) >= ZERO)) THEN
+               P1_LOC = TE(3,2)*PRESS(1,J)
+               P2_LOC = TE(3,2)*PRESS(2,J)
+               X1L    = PRESS(3,J)
+               X2L    = PRESS(4,J)
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1_LOC
+                  N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
+                  N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
+                  N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
+                  N4 = L*(-X1L*X1L + X1L*X1L*X1L)
+                  PPE( 3,J) = PPE( 3,J) + PC*N1
+                  PPE( 5,J) = PPE( 5,J) - PC*N2
+                  PPE( 9,J) = PPE( 9,J) + PC*N3
+                  PPE(11,J) = PPE(11,J) - PC*N4
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1_LOC + (P2_LOC-P1_LOC)*(XI-X1L)/(X2L-X1L)
                      N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
                      N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
                      N3 = THREE*XI*XI - TWO*XI*XI*XI
@@ -470,6 +556,9 @@
                ENDIF
             ENDIF
          ENDDO
+
+! --- CBEAM_standard begin --- !
+! --- CBEAM_standard end --- !
       ENDIF
 
 ! **********************************************************************************************************************************
@@ -506,21 +595,43 @@
          B2(3,4) = -SCOEFF/JTOR
       ENDIF
 
+      CBEAM_FORCE_B1(:,:) = B1(:,:)
+      CBEAM_FORCE_B2(:,:) = B2(:,:)
+
       CALL MATMULT_FFF ( B1, KAA, 3, 6, 6, S11 )
       CALL MATMULT_FFF ( B1, KAB, 3, 6, 6, S12 )
       CALL MATMULT_FFF ( B2, KAA, 3, 6, 6, S21 )
       CALL MATMULT_FFF ( B2, KAB, 3, 6, 6, S22 )
 
-      DO I=1,3
+! --- cbeam_stations begin --- !
+      NSTA = CBEAM_ACTIVE_NSTATIONS
+      IF (NSTA <= 0) NSTA = 1
+
+      DO ISTA=1,NSTA
+         XI_STA = CBEAM_ACTIVE_XL(ISTA)
+         IF (NSTA == 1) XI_STA = ZERO
+
          DO J=1,6
-            SE1(I,J,1) = S11(I,J)
-            SE2(I,J,1) = S21(I,J)
+            SE1(1,J,ISTA) = S11(1,J)
+            SE2(3,J,ISTA) = S21(3,J)
+
+            SE1(2,J,ISTA) = (ONE - XI_STA)*S11(2,J) + XI_STA*S21(1,J)
+            SE1(3,J,ISTA) = (ONE - XI_STA)*S11(3,J) + XI_STA*S21(2,J)
+            SE2(1,J,ISTA) = SE1(2,J,ISTA)
+            SE2(2,J,ISTA) = SE1(3,J,ISTA)
          ENDDO
+
          DO J=7,12
-            SE1(I,J,1) = S12(I,J-6)
-            SE2(I,J,1) = S22(I,J-6)
+            SE1(1,J,ISTA) = S12(1,J-6)
+            SE2(3,J,ISTA) = S22(3,J-6)
+
+            SE1(2,J,ISTA) = (ONE - XI_STA)*S12(2,J-6) + XI_STA*S22(1,J-6)
+            SE1(3,J,ISTA) = (ONE - XI_STA)*S12(3,J-6) + XI_STA*S22(2,J-6)
+            SE2(1,J,ISTA) = SE1(2,J,ISTA)
+            SE2(2,J,ISTA) = SE1(3,J,ISTA)
          ENDDO
       ENDDO
+! --- cbeam_stations end --- !
 
       IF (NTSUB > 0) THEN
          DO I=1,3
@@ -535,12 +646,22 @@
 
          CALL MATMULT_FFF ( BT1, TPRIME, 3, 5, NTSUB, DUM1 )
          CALL MATMULT_FFF ( BT2, TPRIME, 3, 5, NTSUB, DUM2 )
-         DO I=1,3
+! --- cbeam_stations begin --- !
+         DO ISTA=1,NSTA
+            XI_STA = CBEAM_ACTIVE_XL(ISTA)
+            IF (NSTA == 1) XI_STA = ZERO
+
             DO J=1,NTSUB
-               STE1(I,J,1) = DUM1(I,J)
-               STE2(I,J,1) = DUM2(I,J)
+               STE1(1,J,ISTA) = DUM1(1,J)
+               STE2(3,J,ISTA) = DUM2(3,J)
+
+               STE1(2,J,ISTA) = (ONE - XI_STA)*DUM1(2,J) + XI_STA*DUM2(1,J)
+               STE1(3,J,ISTA) = (ONE - XI_STA)*DUM1(3,J) + XI_STA*DUM2(2,J)
+               STE2(1,J,ISTA) = STE1(2,J,ISTA)
+               STE2(2,J,ISTA) = STE1(3,J,ISTA)
             ENDDO
          ENDDO
+! --- cbeam_stations end --- !
       ENDIF
 
 ! **********************************************************************************************************************************
@@ -548,8 +669,14 @@
 
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
 
+! --- bug_cbeam_fix1 begin --- !
+! For the second buckling pass, derive local element end forces directly from
+! the local stiffness times the local element displacement vector. This avoids
+! the broader helper path that was unstable for the validated CBEAM buckling
+! family while preserving the existing geometric stiffness assembly.
          CALL ELMDIS
-         CALL CALC_ELEM_NODE_FORCES
+         PEL(1:ELDOF) = MATMUL(KE(1:ELDOF,1:ELDOF), UEL(1:ELDOF))
+! --- bug_cbeam_fix1 end --- !
 
          M1A = -PEL(6)
          M2A =  PEL(5)
@@ -675,7 +802,6 @@
  1997 FORMAT('************************************************************')
  1998 FORMAT(A, 1ES14.6)
  1999 FORMAT(A, 1ES14.6)
-
       END SUBROUTINE DEBUG_BEAM
 
       END SUBROUTINE BEAM

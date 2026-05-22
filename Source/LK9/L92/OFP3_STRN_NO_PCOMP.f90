@@ -80,20 +80,20 @@
       INTEGER(LONG)                   :: NUM_PTS(METYPE)   ! Num diff strain points for one element (3rd dim in arrays SEi, STEi)
 
                                                            ! Strain index (1 through 9) where poly fit err is max
-      INTEGER(LONG)                   :: STRAIN_OUT_ERR_INDEX(MAX_STRESS_POINTS)
+      INTEGER(LONG)                   :: STRAIN_OUT_ERR_INDEX(MAX_STRESS_POINTS+1)
 
 
 
                                                            ! Array of %errs from subr POLYNOM_FIT_STRE_STRN (only NUM_PTS vals used)
-      REAL(DOUBLE)                    :: STRAIN_OUT_PCT_ERR(MAX_STRESS_POINTS)
+      REAL(DOUBLE)                    :: STRAIN_OUT_PCT_ERR(MAX_STRESS_POINTS+1)
 
       REAL(DOUBLE)                    :: PCT_ERR_MAX       ! Max value from array STRAIN_OUT_PCT_ERR
 
                                                            ! Array of values from array STRAIN for all stress points
-      REAL(DOUBLE)                    :: STRAIN_RAW(9,MAX_STRESS_POINTS)
+      REAL(DOUBLE)                    :: STRAIN_RAW(9,MAX_STRESS_POINTS+1)
 
                                                            ! Array of output stress values after surface fit
-      REAL(DOUBLE)                    :: STRAIN_OUT(9,MAX_STRESS_POINTS)
+      REAL(DOUBLE)                    :: STRAIN_OUT(9,MAX_STRESS_POINTS+1)
       REAL(DOUBLE)                    :: TEL(3,3)          ! Transformation matrix from cartesian local (L) to element (E) coordinates.
 
       ! OP2 stuff

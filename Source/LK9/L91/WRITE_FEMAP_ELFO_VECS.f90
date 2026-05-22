@@ -26,13 +26,14 @@
 
       SUBROUTINE WRITE_FEMAP_ELFO_VECS ( ELEM_TYP, NUM_FEMAP_ROWS, FEMAP_SET_ID )
 
-! Writes element engineering forces to FEMAP neutral file for ROD, BAR,TRIA3, QUAD4, SHEAR
+! Writes element engineering forces to FEMAP neutral file for ROD, BAR, BEAM, TRIA3, QUAD4, SHEAR
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, NEU
       USE PARAMS, ONLY                :  SUPWARN
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, NGRID, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
+      USE CONSTANTS_1, ONLY           :  ZERO
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
 
       USE WRITE_FEMAP_ELFO_VECS_USE_IFs
@@ -47,7 +48,7 @@
       CHARACTER( 1*BYTE)              :: OUT_TYPE = '3'         ! FEMAP value for record 6
       CHARACTER(LEN=*), INTENT(IN)    :: ELEM_TYP               ! Element type
       CHARACTER(LEN=LEN(ELEM_TYP))    :: ELEM_NAME              ! ELEM_TYP with trailing blanks stripped
-      CHARACTER(25*BYTE)              :: TITLE_E(12)            ! Titles for vectors written to NEU
+      CHARACTER(25*BYTE)              :: TITLE_E(14)            ! Titles for vectors written to NEU
 
       INTEGER(LONG), INTENT(IN)       :: NUM_FEMAP_ROWS         ! Number of rows of FEMAP data to write
       INTEGER(LONG), INTENT(IN)       :: FEMAP_SET_ID           ! FEMAP set ID to write out
@@ -88,12 +89,14 @@
          ENDIF
       ENDDO
 
-      ALLOCATE ( ELEM_NUMS(NUM_FEMAP_ROWS), ELEM_VECS(NUM_FEMAP_ROWS,12), ELEM_VEC(NUM_FEMAP_ROWS) )
+      ALLOCATE ( ELEM_NUMS(NUM_FEMAP_ROWS), ELEM_VECS(NUM_FEMAP_ROWS,14), ELEM_VEC(NUM_FEMAP_ROWS) )
 
       IF      (ELEM_TYP == 'ROD     ') THEN
          VEC_ID_OFFSET = 50100
       ELSE IF (ELEM_TYP == 'BAR     ') THEN
          VEC_ID_OFFSET = 50200
+      ELSE IF (ELEM_TYP == 'BEAM    ') THEN
+         VEC_ID_OFFSET = 3013
       ELSE IF (ELEM_TYP == 'TRIA3K  ') THEN
          VEC_ID_OFFSET = 50300
       ELSE IF (ELEM_TYP == 'TRIA3   ') THEN
@@ -124,16 +127,16 @@
 
 ! Process BAR and ROD elements
 
-      IF ((ELEM_TYP == 'BAR     ') .OR. (ELEM_TYP == 'ROD     ')) THEN
+      IF ((ELEM_TYP == 'BAR     ') .OR. (ELEM_TYP == 'ROD     ') .OR. (ELEM_TYP == 'BEAM    ')) THEN
 
          TITLE_E( 1) = 'EndA Plane1 Moment'
-         TITLE_E( 2) = 'EndB Plane1 Moment'
-         TITLE_E( 3) = 'EndA Plane2 Moment'
+         TITLE_E( 2) = 'EndA Plane2 Moment'
+         TITLE_E( 3) = 'EndB Plane1 Moment'
          TITLE_E( 4) = 'EndB Plane2 Moment'
 
          TITLE_E( 5) = 'EndA Pl1 Shear Force'
-         TITLE_E( 6) = 'EndB Pl1 Shear Force'
-         TITLE_E( 7) = 'EndA Pl2 Shear Force'
+         TITLE_E( 6) = 'EndA Pl2 Shear Force'
+         TITLE_E( 7) = 'EndB Pl1 Shear Force'
          TITLE_E( 8) = 'EndB Pl2 Shear Force'
 
          TITLE_E( 9) = 'EndA Axial Force'
@@ -141,24 +144,43 @@
 
          TITLE_E(11) = 'EndA Torque'
          TITLE_E(12) = 'EndB Torque'
-
+         TITLE_E(13) = 'EndA Warping Torque'
+         TITLE_E(14) = 'EndB Warping Torque'
          DO I=1,NUM_FEMAP_ROWS
 
-            ELEM_VECS(I, 1) = FEMAP_EL_VECS(I,1)         ! M1a
-            ELEM_VECS(I, 2) = FEMAP_EL_VECS(I,2)         ! M1b
-            ELEM_VECS(I, 3) = FEMAP_EL_VECS(I,3)         ! M2a
-            ELEM_VECS(I, 4) = FEMAP_EL_VECS(I,4)         ! M2b
-
-            ELEM_VECS(I, 5) = FEMAP_EL_VECS(I,5)         ! V1a
-            ELEM_VECS(I, 6) = FEMAP_EL_VECS(I,5)         ! V1b
-            ELEM_VECS(I, 7) = FEMAP_EL_VECS(I,6)         ! V2a
-            ELEM_VECS(I, 8) = FEMAP_EL_VECS(I,6)         ! V2b
-
-            ELEM_VECS(I, 9) = FEMAP_EL_VECS(I,7)         ! Fa
-            ELEM_VECS(I,10) = FEMAP_EL_VECS(I,7)         ! Fb
-
-            ELEM_VECS(I,11) = FEMAP_EL_VECS(I,8)         ! Ta
-            ELEM_VECS(I,12) = FEMAP_EL_VECS(I,8)         ! Tb
+! --- CBEAM_standard begin --- !
+            IF (ELEM_TYP == 'BEAM    ') THEN
+               ELEM_VECS(I, 1) = FEMAP_EL_VECS(I, 1)     ! EndA Plane1 Moment
+               ELEM_VECS(I, 2) = FEMAP_EL_VECS(I, 2)     ! EndA Plane2 Moment
+               ELEM_VECS(I, 3) = FEMAP_EL_VECS(I, 3)     ! EndB Plane1 Moment
+               ELEM_VECS(I, 4) = FEMAP_EL_VECS(I, 4)     ! EndB Plane2 Moment
+               ELEM_VECS(I, 5) = FEMAP_EL_VECS(I, 5)     ! EndA Pl1 Shear Force
+               ELEM_VECS(I, 6) = FEMAP_EL_VECS(I, 6)     ! EndA Pl2 Shear Force
+               ELEM_VECS(I, 7) = FEMAP_EL_VECS(I, 7)     ! EndB Pl1 Shear Force
+               ELEM_VECS(I, 8) = FEMAP_EL_VECS(I, 8)     ! EndB Pl2 Shear Force
+               ELEM_VECS(I, 9) = FEMAP_EL_VECS(I, 9)     ! EndA Axial Force
+               ELEM_VECS(I,10) = FEMAP_EL_VECS(I,10)     ! EndB Axial Force
+               ELEM_VECS(I,11) = FEMAP_EL_VECS(I,11)     ! EndA Torque
+               ELEM_VECS(I,12) = FEMAP_EL_VECS(I,12)     ! EndB Torque
+               ELEM_VECS(I,13) = ZERO                    ! EndA Warping Torque
+               ELEM_VECS(I,14) = ZERO                    ! EndB Warping Torque
+            ELSE
+               ELEM_VECS(I, 1) = FEMAP_EL_VECS(I,1)      ! M1a
+               ELEM_VECS(I, 2) = FEMAP_EL_VECS(I,3)      ! M2a
+               ELEM_VECS(I, 3) = FEMAP_EL_VECS(I,2)      ! M1b
+               ELEM_VECS(I, 4) = FEMAP_EL_VECS(I,4)      ! M2b
+               ELEM_VECS(I, 5) = FEMAP_EL_VECS(I,5)      ! V1a
+               ELEM_VECS(I, 6) = FEMAP_EL_VECS(I,6)      ! V2a
+               ELEM_VECS(I, 7) = FEMAP_EL_VECS(I,5)      ! V1b
+               ELEM_VECS(I, 8) = FEMAP_EL_VECS(I,6)      ! V2b
+               ELEM_VECS(I, 9) = FEMAP_EL_VECS(I,7)      ! Fa
+               ELEM_VECS(I,10) = FEMAP_EL_VECS(I,7)      ! Fb
+               ELEM_VECS(I,11) = FEMAP_EL_VECS(I,8)      ! Ta
+               ELEM_VECS(I,12) = FEMAP_EL_VECS(I,8)      ! Tb
+               ELEM_VECS(I,13) = ZERO                    ! Twa
+               ELEM_VECS(I,14) = ZERO                    ! Twb
+            ENDIF
+! --- CBEAM_standard end --- !
 
          ENDDO
 
@@ -275,6 +297,80 @@
                WRITE(NEU,1008)
 
             ENDDO
+
+         ELSE IF (ELEM_TYP == 'BEAM    ') THEN
+! --- neu_upgrade begin --- !
+            DO J=1,14
+
+               VEC_ID = VEC_ID_OFFSET + J
+               WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
+               WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
+               DO I=1,NUM_FEMAP_ROWS
+                  ELEM_VEC(I)  = ELEM_VECS(I,J)
+                  ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
+               ENDDO
+               CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
+               WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
+               DO I=1,20
+                  ID(I) = 0
+               ENDDO
+               IF (J == 1) THEN
+                  ID(1) = 3014
+                  ID(2) = 3016
+               ELSE IF (J == 2) THEN
+                  ID(1) = 3015
+                  ID(2) = 3017
+               ELSE IF (J == 3) THEN
+                  ID(1) = 3014
+                  ID(2) = 3016
+               ELSE IF (J == 4) THEN
+                  ID(1) = 3015
+                  ID(2) = 3017
+               ELSE IF (J == 5) THEN
+                  ID(1) = 3018
+                  ID(2) = 3020
+               ELSE IF (J == 6) THEN
+                  ID(1) = 3019
+                  ID(2) = 3021
+               ELSE IF (J == 7) THEN
+                  ID(1) = 3018
+                  ID(2) = 3020
+               ELSE IF (J == 8) THEN
+                  ID(1) = 3019
+                  ID(2) = 3021
+               ELSE IF (J == 9) THEN
+                  ID(1) = 3022
+                  ID(2) = 3023
+               ELSE IF (J == 10) THEN
+                  ID(1) = 3022
+                  ID(2) = 3023
+               ELSE IF (J == 11) THEN
+                  ID(1) = 3024
+                  ID(2) = 3025
+               ELSE IF (J == 12) THEN
+                  ID(1) = 3024
+                  ID(2) = 3025
+               ELSE IF (J == 13) THEN
+                  ID(1) = 3026
+                  ID(2) = 3027
+               ELSE IF (J == 14) THEN
+                  ID(1) = 3026
+                  ID(2) = 3027
+               ENDIF
+               WRITE(NEU,1004) (ID(I),I= 1,10)
+               WRITE(NEU,1004) (ID(I),I=11,20)
+               WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
+               CALC_WARN  = '0'
+               COMP_DIR   = '3'
+               CENT_TOTAL = '1'
+               WRITE(NEU,1006) CALC_WARN, COMP_DIR, CENT_TOTAL
+               DO I=1,NUM_FEMAP_ROWS
+                  WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
+               ENDDO
+               WRITE(NEU,1008)
+
+            ENDDO
+! --- neu_upgrade end --- !
 
          ENDIF
 

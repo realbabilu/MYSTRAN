@@ -41,7 +41,7 @@
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'WRITE_FEMAP_GRID_VECS'
       CHARACTER(LEN=*), INTENT(IN)    :: WHAT              ! Indicator if GRID_VEC is DISP, OLOA, SPCF or MPCF
-      CHARACTER(LEN= 3*BYTE)          :: TITLE1(4,2)       ! Titles for vectors written to NEU
+      CHARACTER(LEN= 5*BYTE)          :: TITLE1(4,2)       ! Titles for vectors written to NEU
       CHARACTER(LEN=20*BYTE)          :: TITLE2(2)         ! Titles for vectors written to NEU
 
       INTEGER(LONG), INTENT(IN)       :: FEMAP_SET_ID      ! FEMAP set ID to write out
@@ -81,9 +81,6 @@
 
 
 ! **********************************************************************************************************************************
-! --- warning_reduce-v2 begin --- !
-      VEC_ID_OFFSET = 0
-! --- warning_reduce-v2 end --- !
       TITLE1(1,1) = 'RSS'
       TITLE1(2,1) = 'T1'
       TITLE1(3,1) = 'T2'
@@ -94,17 +91,27 @@
       TITLE1(4,2) = 'R3'
 
       IF      (WHAT == 'DISP') THEN
-         VEC_ID_OFFSET = 10000
-         TITLE2(1) = ' translation'
-         TITLE2(2) = ' rotation'
+! --- neu_upgrade begin --- !
+         VEC_ID_OFFSET = 0
+         TITLE1(1,1) = 'Total'
+         TITLE1(1,2) = 'Total'
+         TITLE2(1) = ' Translation'
+         TITLE2(2) = ' Rotation'
+! --- neu_upgrade end --- !
       ELSE IF (WHAT == 'OLOA') THEN
          VEC_ID_OFFSET = 20000
-         TITLE2(1) = ' applied force'
-         TITLE2(2) = ' applied moment'
+          TITLE1(1,1) = 'Total'
+          TITLE1(1,2) = 'Total'
+          TITLE2(1) = ' Applied Force'
+          TITLE2(2) = ' Applied Moment'
       ELSE IF (WHAT == 'SPCF') THEN
          VEC_ID_OFFSET = 30000
-         TITLE2(1) = ' SPC force'
-         TITLE2(2) = ' SPC moment'
+! --- neu_upgrade begin --- !
+          TITLE1(1,1) = 'Total'
+          TITLE1(1,2) = 'Total'
+         TITLE2(1) = ' Constraint Force'
+         TITLE2(2) = ' Constraint Moment'
+! --- neu_upgrade end --- !
       ELSE IF (WHAT == 'MPCF') THEN
          VEC_ID_OFFSET = 40000
          TITLE2(1) = ' MPC force'

@@ -32,7 +32,7 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE CONSTANTS_1, ONLY           :  ONEPM4, ZERO, TEN, ONE
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_ENTRY_LEN, JCARD_LEN, MELDTS, MEMATR, MEMATC, MEPROP, METYPE,            &
-                                         MPSOLID, MEFE, MEFEI, MEFER, MEWE, MEWEI, MEWER, MAX_STRESS_POINTS
+                                         MPSOLID, MEFE, MEFEI, MEFER, MEWE, MEWEI, MEWER, MAX_STRESS_POINTS, MPBEAM_STATIONS
 
       IMPLICIT NONE
 
@@ -601,6 +601,9 @@
       INTEGER(LONG), ALLOCATABLE      :: MATL   (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PBAR   (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PBEAM  (:,:)         ! See description below
+! --- CBEAM_standard begin --- !
+      INTEGER(LONG), ALLOCATABLE      :: PBEAM_NSTATIONS(:)   ! Number of stored station x/L values for each PBEAM property
+! --- CBEAM_standard end --- !
       INTEGER(LONG), ALLOCATABLE      :: PBUSH  (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PCOMP  (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PELAS  (:,:)         ! See description below
@@ -614,6 +617,9 @@
       REAL(DOUBLE) , ALLOCATABLE      :: RMATL  (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPBAR  (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPBEAM (:,:)         ! See description below
+! --- CBEAM_standard begin --- !
+      REAL(DOUBLE) , ALLOCATABLE      :: PBEAM_XL(:,:)        ! Stored station x/L values for each PBEAM property
+! --- CBEAM_standard end --- !
       REAL(DOUBLE) , ALLOCATABLE      :: RPBUSH (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPCOMP (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPELAS (:,:)         ! See description below
@@ -648,6 +654,9 @@
 !  PBEAM  = Array of integer data from PBEAM Bulk Data entries. Each row is for one PBEAM entry read in B.D. and contains:
 !             ( 1) Col  1: Property ID
 !             ( 2) Col  2: Material ID
+!
+!  PBEAM_NSTATIONS = Number of station x/L values stored for each PBEAM property. For NX-oriented beam work this includes:
+!                    station 1 = 0.0 at end A, followed by each continuation station found on the PBEAM entry.
 
 !  RPBEAM = Array of real data from PBEAM Bulk Data entries. Each row is for one PBEAM entry read in B.D. and contains:
 !             ( 1) Col  1: Cross sectional area, A       : end A          , (parent        entry, field 4)
@@ -694,6 +703,9 @@
 !             (42) Col 42: z coord of neutral axis for end A, N2(A)       , (optional  6th entry, field 7)
 !             (43) Col 43: y coord of neutral axis for end B, N1(B)       , (optional  6th entry, field 8)
 !             (44) Col 44: z coord of neutral axis for end B, N2(B)       , (optional  6th entry, field 9)
+!
+!  PBEAM_XL = Stored x/L station values for each PBEAM property. Phase-1 beam redevelopment stores the continuation chain explicitly
+!             so that CBEAM output can later be made station-aware independently of legacy CBAR end-only output.
 
 !  PBUSH  = Array of integer data from PBUSH Bulk Data entries
 !             ( 1) Col  1: PID          Prop ID
@@ -1105,6 +1117,18 @@
 ! BEAM element specific data
 ! --------------------------
 
+! --- cbeam_stations begin --- !
+      INTEGER(LONG)                   :: CBEAM_ACTIVE_NSTATIONS = 0
+                                                             ! Number of active x/L stations copied into the current BEAM runtime state
+
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_XL(MPBEAM_STATIONS) = (/ (ZERO, I=1,MPBEAM_STATIONS) /)
+                                                             ! Active x/L station positions for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_FORCE_B1(3,6) = ZERO
+                                                             ! Beam section-force-to-stress map at the reference side
+      REAL(DOUBLE)                    :: CBEAM_FORCE_B2(3,6) = ZERO
+                                                             ! Beam section-force-to-stress map used in station interpolation
+! --- cbeam_stations end --- !
+
       CHARACTER( 9*BYTE)              :: BEAMOR_VVEC_TYPE    = '         '
                                                              ! Indicator of type of V vec on BEAMOR B.D. entry (grid or vector)
 
@@ -1266,7 +1290,9 @@
 
                                                              ! Array of number of stress recovery points for various elem types
       INTEGER(LONG)                   :: NUM_SEi(METYPE)     =  (/ 1,             & ! BAR      1
-                                                                   1,             & ! BEAM     2
+! --- cbeam_stations begin --- !
+                                                                  10,             & ! BEAM     2
+! --- cbeam_stations end --- !
                                                                    1,             & ! BUSH     3
                                                                    1,             & ! ELAS1    4
                                                                    1,             & ! ELAS2    5
@@ -1345,13 +1371,11 @@
       INTEGER(LONG)                   :: ELNO                = 0
                                                              ! The internal elem ID ( 1 to NELE) of the current element
 
-! --- warning_reduce-v2 begin --- !
-      INTEGER(LONG)                   :: EMG_IFE(MEFE,MEFEI) = RESHAPE ( (/(0, I=1,MEFE*MEFEI)/), (/MEFE,MEFEI/) )
+      INTEGER(LONG)                   :: EMG_IFE(MEFE,MEFEI) = RESHAPE ( (/(ZERO, I=1,MEFE*MEFEI)/), (/MEFE,MEFEI/) )
                                                               ! Array of integer data for EMG errors
 
-      INTEGER(LONG)                   :: EMG_IWE(MEWE,MEWEI) = RESHAPE ( (/(0, I=1,MEWE*MEWEI)/), (/MEWE,MEWEI/) )
+      INTEGER(LONG)                   :: EMG_IWE(MEWE,MEWEI) = RESHAPE ( (/(ZERO, I=1,MEWE*MEWEI)/), (/MEWE,MEWEI/) )
                                                              ! Array of integer data for EMG warnings
-! --- warning_reduce-v2 end --- !
 
       INTEGER(LONG)                   :: NUM_EMG_FATAL_ERRS  = 0
                                                              ! The number of errors found in one execution of subr EMG

@@ -1,206 +1,221 @@
-# Building MYSTRAN from source
+# Building MYSTRAN 18 (public patched distribution)
 
-###### Last updated 2023-12-18.
+This branch is published as a whole patched MYSTRAN 18 source tree. It does **not** bundle third-party binary libraries. Build scripts and wrapper sources are included, but the external `.a` / `.dll` artifacts must be provided by the builder.
 
-## Setting up a build environment
+## Supported Windows workflow
 
-In order to build (compile) MYSTRAN using CMake, you first have to set up a
-proper build environment (i.e. toolchain and required programs/libraries).
+The primary Windows workflow for this distribution is:
 
-You can skip this part if you've done it already (or if you really know what
-you're doing).
+- MinGW toolchain from equation.com (or another compatible MinGW GCC/GFortran toolchain)
+- CMake
+- out-of-tree build directory
+- explicit external library paths
 
-### Steps for Windows (x86_64)
+The root example script is:
 
-First, download and install MSYS2 from the
-[official site](https://www.msys2.org/).
+- `example_nometis.bat`
 
-Open the MSYS2 terminal and run the following commands:
+That script creates a `build` directory, changes into it, configures CMake, and builds `mystran.exe`.
 
-  1. **`pacman -Syu`**
-This updates repository information and installed packages, and might require
-you close and reopen MSYS2 terminals.
-  1. **`pacman -S mingw-w64-x86_64-gcc-fortran mingw-w64-x86_64-cmake mingw-w64-x86_64-make git`**
-This installs the required compilers (the GNU C and Fortran compilers), CMake
-itself, and `git`.
-  1. **`export PATH="/mingw64/bin:$PATH"`**
-This makes the MinGW toolchain programs (such as `make` and the compilers)
-visible so CMake can find them more easily. Note that this command's effects
-are lost when you reopen the terminal, so you might want to append it to your
-`~/.bashrc` to save time.
+## Build requirements
 
-### Steps for Linux (any)
+1. A C/C++ and Fortran toolchain:
+   - GCC/GFortran from Equation.com, or
+   - Intel oneAPI HPC C++ and Fortran Compiler for Windows, or
+   - another compatible GCC/GFortran toolchain on other platforms
+2. A build driver:
+   - `make`, `mingw32-make`, `nmake`, or `ninja`
+3. `cmake`
+4. A BLAS implementation:
+   - OpenBLAS, MKL, AOCL, or BLIS/FLAME
+5. Pre-compiled SuperLU:
+   - with or without METIS, depending on your chosen build
+6. Optional pre-compiled libraries:
+   - MUMPS for the optional sparse solver path
+   - FEAST 4.0 for the optional eigensolver path
 
-Follow your distribution's steps to install the following programs/libraries:
-  - **`gcc`**
-  - **`g++`**
-  - **`gfortran`**
-  - **`make`**
-  - **`cmake`**
-  - **`git`**
+Notes:
 
-All of those are fairly common, so get in touch in the MYSTRAN Forums or
-MYSTRAN Discord if you have trouble installing any of them. Also, note that
-most distros have a "base" package group for developers (e.g. Arch's
-`base-devel` or Ubuntu's `build-essential`) that includes necessary tooling
-such as `gcc` and `make`. If that's the case, install it!
+- `mystran.exe` in this branch is documented around an external SuperLU path.
+- BLAS is required.
+- MUMPS and FEAST are optional.
+- CHASE is not part of the documented public build path here.
 
-If your distribution doesn't ship CMake 3.18+ yet, check if your distro has a
-some sort of testing/unstable channel before attempting to
-[install it manually](https://cmake.org/install/).
+## BLAS is mandatory
 
-For WSL (Linux for Windows)
-===========================
-Mystran won't work with Ubuntu 20.04, hasn't been tested on 22.04 and should work on 24.04 (what we're testing).
+This distribution must be linked with a BLAS implementation. Use one of:
 
-If you're upgrading your WSL, open PowerShell as Administrator and run:
-```
-wsl --update
-wsl --install --distribution Ubuntu-24.04
+- OpenBLAS
+- Intel MKL
+- AMD AOCL
+- BLIS/FLAME
+
+For the MinGW example in this repository, BLAS is passed explicitly with:
+
+```bat
+-DTPL_BLAS_LIBRARIES="C:/gcc/openblas32/lib/libopenblas.dll.a"
 ```
 
-Now that you've got into a modern version of Ubuntu
+At runtime you must also make sure the corresponding BLAS DLL is visible on `PATH` when your BLAS package uses shared libraries.
+
+## External libraries used in this branch
+
+### 1. SuperLU
+
+This public branch is centered on the external SuperLU path.
+
+Relevant CMake options:
+
+```bat
+-DMYSTRAN_USE_EXTERNAL_SUPERLU=ON
+-DMYSTRAN_EXTERNAL_SUPERLU_LIB="C:/gcc/libsuperlu/libsuperlu.a"
+-DMYSTRAN_EXTERNAL_SUPERLU_INCLUDE_DIR="C:/gcc/libsuperlu/include"
+-DMYSTRAN_EXTERNAL_SUPERLU_CONFIG_DIR="C:/gcc/libsuperlu"
+-DMYSTRAN_EXTERNAL_SUPERLU_DRIVER="%SRC%/superlu/FORTRAN/c_fortran_dgssv.c"
 ```
-sudo apt update
-sudo apt upgrade
-apt install gcc g++ gfortran make cmake git
+
+Required pieces:
+
+- SuperLU static or import library, typically `libsuperlu.a`
+- SuperLU headers
+- SuperLU config directory if your build exports one
+- the Fortran/C wrapper source `c_fortran_dgssv.c`
+
+If your SuperLU build depends on METIS, enable the METIS options shown below.
+
+### 2. METIS (optional)
+
+Only enable this if your SuperLU or MUMPS build actually requires external METIS/GKlib.
+
+```bat
+-DTPL_ENABLE_METISLIB=ON
+-DTPL_METIS_INCLUDE_DIRS="C:/gcc/libmetis/include"
+-DTPL_METIS_LIBRARIES="C:/gcc/libmetis/libmetis.a;C:/gcc/libmetis/libGKlib.a"
 ```
 
----
+The default sample script keeps this off:
 
-## Building MYSTRAN
+```bat
+-DTPL_ENABLE_METISLIB=OFF
+```
 
-If your build environment is already set up, building MYSTRAN is quite
-straightforward.
+### 3. FEAST (optional)
 
-### Steps for Windows (any)
+```bat
+-DMYSTRAN_USE_EXTERNAL_FEAST=ON
+-DMYSTRAN_FEAST_EXTRA_LIBS="C:/gcc/feast32/libfeast.a"
+```
 
-  1. Open the MSYS2 shell.
-  2. Re-run step #3 of the previous section if needed.
-  3. Fetch the source code if you haven't already. If you're using Git, you can
-  clone the repo with
-  **`git clone https://github.com/MYSTRANsolver/MYSTRAN.git`**.
-  4. Move the terminal to the MYSTRAN folder. If you've just run `git clone`,
-     just do a **`cd MYSTRAN`**.
-  5. Generate the build scripts by running **`cmake -G "MinGW Makefiles" .`**.
-  6. Compile with **`mingw32-make`**. If you have an N-core processor, running
-  **`mingw32-make -Oline -jN`** will probably be much faster. A good choice of N is
-  printed in the previous step, right before the end. The `-Oline` argument prevents garbled output when `N` > 1.
-  7. The executable will reside at **`Binaries/mystran.exe`**.
+Add any extra BLAS/LAPACK-related libraries required by your FEAST package.
 
-### Steps for Linux (any)
+### 4. MUMPS / DMUMPS (optional)
 
-  1. Open a terminal.
-  2. Fetch the source code if you haven't already. If you're using Git, you can
-  clone the repo with
-  **`git clone https://github.com/MYSTRANsolver/MYSTRAN.git`**.
-  3. Move the terminal to the MYSTRAN folder. If you've just run `git clone`,
-  just do a **`cd MYSTRAN`**.
-  1. Generate the build scripts by running **`cmake .`**.
-  2. Compile with **`make`**. If you have an N-core processor, running
-  **`make -jN`** will probably me much faster. A good choice of N is printed in
-  the previous step, right before the end. You can also find the number of
-  cores/threads with the `nproc` command (not all distros ship it
-  out-of-the-box though).
-  1. The executable will reside at **`Binaries/mystran`**.
+```bat
+-DMYSTRAN_USE_DMUMPS_SOLVER=ON
+-DMYSTRAN_DMUMPS_INCLUDE_DIR="C:/gcc/libmumps/include"
+-DMYSTRAN_DMUMPS_EXTRA_LIBS="C:/gcc/mumps32_nonmpi/libdmumps.a;C:/gcc/mumps32_nonmpi/libmpiseq.a;C:/gcc/mumps32_nonmpi/libmumps_common.a;C:/gcc/mumps32_nonmpi/libpord.a;C:/gcc/mumps32_nonmpi/libsmumps.a"
+```
 
----
+Typical pieces needed for a non-MPI MinGW build:
 
-## Troubleshooting
+- `libdmumps.a`
+- `libmumps_common.a`
+- `libmpiseq.a`
+- `libpord.a`
+- any precision-specific archives required by your package
+- MUMPS headers such as `dmumps_struc.h`
 
-While this process is meant to be straightforward, here is a list of some of
-the more common issues that can arise. Other issues users find might be added
-here if they're not too specific.
+### 5. FEAST wrapper note
 
-If your issue isn't here, you can always ask for help at the
-[MYSTRAN forums](https://www.mystran.com/forums/) or the
-[Discord server](https://discord.gg/9k76SkHpHM)
+FEAST does **not** use a small standalone wrapper source file in the same style as the external SuperLU path.
 
----
+In this tree, FEAST is wired directly inside the MYSTRAN source, mainly through:
 
-### "I'm getting "file not found" errors when running the step #2 setup command!"
+- `Source/LK4/EIGRL_EXTRACT_SOLVERS.F90`
 
-Run a **`pacman -Syyu`** (note the two 'y's) and try again.
+So for FEAST, the public branch documents:
 
----
+- compile-time enable with `-DMYSTRAN_USE_EXTERNAL_FEAST=ON`
+- link-time library list with `-DMYSTRAN_FEAST_EXTRA_LIBS=...`
+- no separate `wrapper/feast/*.c` shim is required in the current public path
 
-### "CMake is complaining about not being able to find the toolchain or the Fortran compiler or the "make" command!"
+### 6. Intel oneAPI on Windows
 
-Try running the commands `make`/`mingw32-make`, `gcc`, and `gfortran`. If any
-of these comes up as a "command not found", make sure they've been installed.
-If you're **sure** they are, they might not be in the PATH.
+If you build third-party libraries with Intel oneAPI on Windows and then link them into a MinGW MYSTRAN build, pay close attention to symbol naming and runtime compatibility.
 
-Windows users, have a look at step #3 of the setup. Linux users, check out your
-distro documentation, because whatever's happening should not be happening at
-all.
+For the external SuperLU path, the practical convention for this branch is:
 
----
+- keep `slu_Cnames.h` in an `UPCASE`-only configuration for the active build path
+- remove or disable the other naming convention branches used in your local third-party package if they conflict with your Fortran/C symbol binding choice
 
-### "CMake complains about `ARCHIVE_EXTRACT`!"
+In other words, for this public MYSTRAN branch the SuperLU interface should be treated as a single naming-convention build, not a many-convention package.
 
-Check out the output of `cmake --version`. You must have version 3.18 or newer.
-If you don't, first ensure it's up to date -- perform a system-wide update.
-Windows users should not find this issue relevant -- MSYS2 ships CMake 3.27.1
-as of this writing. Linux users should use their own package manager.
+The relevant files are typically:
 
-If your system is up to date and you still run into this issue, that means your
-distro ships CMake 3.17 or older. Bad luck there. Here's what you can do:
+- `superlu/SRC/slu_Cnames.h`
+- `superlu/CBLAS/slu_Cnames.h`
 
-  1. Enable a testing/unstable package channel (not all distros have one)
-  2. Install the latest CMake [manually](https://cmake.org/install/)
-  (might piss off your package manager)
-  1. Download and extract `libf2c.zip` yourself, and comment out the
-  `ARCHIVE_EXTRACT` stuff in `CMakeLists.txt`.
+If your external SuperLU package was prepared separately, make sure it matches the naming convention expected by the wrapper source and your selected Fortran compiler.
 
----
+## Example MinGW / equation.com build
 
-### "I'm getting random SuperLU build errors!"
+From a shell where `gcc`, `g++`, `gfortran`, and `cmake` are available:
 
-SuperLU is included as a submodule. A recent update to the submodule might
-require a clean build. Run `make clean` and delete the `superlu` subdirectory
-and run the appropriate `cmake` command again.
+```bat
+@echo off
+setlocal
 
----
+if not exist build mkdir build
+cd /d build
 
-### "I'm getting cryptic linker errors related to BLAS!"
+set "SRC=..\MYSTRANSolver-18.0.0"
 
-SuperLU requires BLAS. Its build script can look for and link against your
-system's installed BLAS implementation (we recommend OpenBLAS). However, your
-install might be lacking the appropriate static (`.a`) library files.
+cmake -G "MinGW Makefiles" ^
+  -DCMAKE_BUILD_TYPE=Release ^
+  -DCMAKE_C_COMPILER=gcc.exe ^
+  -DCMAKE_CXX_COMPILER=g++.exe ^
+  -DCMAKE_Fortran_COMPILER=gfortran.exe ^
+  -DCMAKE_C_FLAGS_RELEASE="-O3 -march=znver4" ^
+  -DCMAKE_CXX_FLAGS_RELEASE="-O3 -march=znver4" ^
+  -DCMAKE_Fortran_FLAGS_RELEASE="-O3 -march=znver4" ^
+  -DMYSTRAN_DISABLE_NDEBUG=ON ^
+  -DTPL_BLAS_LIBRARIES="C:/gcc/openblas32/lib/libopenblas.dll.a" ^
+  -DMYSTRAN_USE_EXTERNAL_SUPERLU=ON ^
+  -DMYSTRAN_EXTERNAL_SUPERLU_LIB="C:/gcc/libsuperlu/libsuperlu.a" ^
+  -DMYSTRAN_EXTERNAL_SUPERLU_INCLUDE_DIR="C:/gcc/libsuperlu/include" ^
+  -DMYSTRAN_EXTERNAL_SUPERLU_CONFIG_DIR="C:/gcc/libsuperlu" ^
+  -DMYSTRAN_EXTERNAL_SUPERLU_DRIVER="%SRC%/superlu/FORTRAN/c_fortran_dgssv.c" ^
+  -DTPL_ENABLE_METISLIB=OFF ^
+  -DMYSTRAN_USE_EXTERNAL_FEAST=ON ^
+  -DMYSTRAN_FEAST_EXTRA_LIBS="C:/gcc/feast32/libfeast.a" ^
+  -DMYSTRAN_USE_DMUMPS_SOLVER=ON ^
+  -DMYSTRAN_DMUMPS_INCLUDE_DIR="C:/gcc/libmumps/include" ^
+  -DMYSTRAN_DMUMPS_EXTRA_LIBS="C:/gcc/mumps32_nonmpi/libdmumps.a;C:/gcc/mumps32_nonmpi/libmpiseq.a;C:/gcc/mumps32_nonmpi/libmumps_common.a;C:/gcc/mumps32_nonmpi/libpord.a;C:/gcc/mumps32_nonmpi/libsmumps.a" ^
+  "%SRC%"
 
-If you don't know how to fix that and just want to build, you can use the
-integrated BLAS subroutines bundled with the SuperLU source. To do that, run
-the appropriate `cmake` command with the extra option
-`-Denable_internal_blaslib=YES` *before* the `.` argument.
+cmake --build . --config Release
+```
 
-Please be aware that the bundled CBLAS might be slow when compared to a proper
-BLAS install. That might have an impact on the time it takes to run larger
-models.
+The executable is produced at:
 
----
+- `Binaries\mystran.exe`
 
-### "I want to build offline, but the CMake script attempts to download stuff!"
+## Runtime DLL note
 
-Download the `superlu` submodule and `libf2c.zip` beforehand, and you should be
-fine.
+If you linked against import libraries such as `libopenblas.dll.a`, the corresponding runtime DLLs must be available when launching `mystran.exe`.
 
----
+Typical examples include:
 
-### "The terminal output is garbled during compilation!"
+- OpenBLAS DLL
+- MinGW runtime DLLs from the selected GCC toolchain
 
-Multiple threads are printing to standard output simultaneously. That issue can
-sometimes happen as a result of running `make` instead of `mingw32-make` on
-Windows, but it can affect both. It's annoying, but harmless.
+## Wrapper sources
 
-However, if you *really* need compiler output to be readable, ensure `make`
-only runs with one thread by passing the option `-j1`. This will make
-compilation slower, but at least you'll be able to read the output.
+This repository may include source-only wrappers under `wrapper/` for public build reference. These are provided as source shims only; the actual third-party libraries are not bundled in this branch.
 
-And if it's errors you're looking for, you can build fast with `-j[number]`,
-and then `-j1` just to see the error again.
+## Licensing note
 
----
+Third-party license texts and notices used by this public distribution are collected in:
 
-If your issue isn't here, you can always ask for help at the
-[MYSTRAN forums](https://www.mystran.com/forums/) or the
-[Discord server](https://discord.gg/9k76SkHpHM)
+- `LICENSE/`
+

@@ -55,7 +55,8 @@
 ! **********************************************************************************************************************************
 ! Calculate STRAIN for shell and solid elements
 
-      IF      ((TYPE(1:3) == 'BAR'  ) .OR. (TYPE(1:4) == 'BUSH') .OR. (TYPE(1:4) == 'ELAS') .OR. (TYPE(1:3) == 'ROD'  )) THEN
+      IF      ((TYPE(1:3) == 'BAR'  ) .OR. (TYPE(1:4) == 'BEAM') .OR. (TYPE(1:4) == 'BUSH') .OR.                                  &
+               (TYPE(1:4) == 'ELAS') .OR. (TYPE(1:3) == 'ROD'  )) THEN
          CALL ONE_D_STRAIN_OUTPUTS ( SIZE_ALLOCATED, NUM1, NUM_FEMAP_ROWS, WRITE_OGEL, WRITE_FEMAP )
 
 ! --- CQUADR_DKMQ24 begin --- !

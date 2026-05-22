@@ -36,14 +36,14 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
-      USE SCONTR, ONLY                :  FATAL_ERR, NTSUB, BLNK_SUB_NAM, SOL_NAME
+      USE SCONTR, ONLY                :  FATAL_ERR, NSUB, NTSUB, BLNK_SUB_NAM, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, TEN, TWELVE
       USE DEBUG_PARAMETERS
       USE PARAMS, ONLY                :  EPSIL, ART_KED, ART_ROT_KED, ART_TRAN_KED
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  ELDOF, DOFPIN, DT, EID, NUM_EMG_FATAL_ERRS, KE, KED, PEL, PTE, SE1, SE2, STE1, STE2, TYPE,&
-                                         UEL
+      USE MODEL_STUF, ONLY            :  ELDOF, DOFPIN, DT, EID, NUM_EMG_FATAL_ERRS, KE, KED, PEL, PPE, PRESS, PTE, SE1, SE2,      &
+                                         STE1, STE2, TE, TYPE, UEL
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
       USE BAR1_USE_IFs
@@ -104,6 +104,12 @@
       REAL(DOUBLE)                    :: K4T               ! Intermediate variable used in calc terms for the stiff matrix, KE
       REAL(DOUBLE)                    :: PTA(6,NTSUB)      ! Thermal loads at end a of BAR (rows 1- 6 of PTE)
       REAL(DOUBLE)                    :: PTb(6,NTSUB)      ! Thermal loads at end b of BAR (rows 7-12 of PTE)
+      REAL(DOUBLE)                    :: P1                ! PLOAD1 value at x1
+      REAL(DOUBLE)                    :: P2                ! PLOAD1 value at x2
+      REAL(DOUBLE)                    :: P1_LOC            ! PLOAD1 value resolved to local component at x1
+      REAL(DOUBLE)                    :: P2_LOC            ! PLOAD1 value resolved to local component at x2
+      REAL(DOUBLE)                    :: PC                ! Concentrated force/moment value for x1=x2
+      REAL(DOUBLE)                    :: QT                ! Interpolated distributed load intensity
       REAL(DOUBLE)                    :: R0                ! Intermediate variable used in calc terms for the stiff matrix, KE
       REAL(DOUBLE)                    :: R1                ! Intermediate variable used in calc terms for the stiff matrix, KE
       REAL(DOUBLE)                    :: R1D               ! Intermediate variable used in calc terms for the stiff matrix, KE
@@ -116,6 +122,17 @@
       REAL(DOUBLE)                    :: S21(3,6)          ! Intermediate matrix used in calculating SE2 stress matrix
       REAL(DOUBLE)                    :: S22(3,6)          ! Intermediate matrix used in calculating SE2 stress matrix
       REAL(DOUBLE)                    :: TBAR              ! Average elem temperature
+      REAL(DOUBLE)                    :: WGT               ! Gauss quadrature weight
+      REAL(DOUBLE)                    :: X1L               ! PLOAD1 start fraction
+      REAL(DOUBLE)                    :: X2L               ! PLOAD1 end fraction
+      REAL(DOUBLE)                    :: XI                ! Integration location in [0,1]
+      REAL(DOUBLE)                    :: XI_GAUSS(3)       ! 3-point Gauss abscissae
+      REAL(DOUBLE)                    :: XI_SCALE          ! Mapping scale from [-1,1] to [x1,x2]
+      REAL(DOUBLE)                    :: XI_WGT(3)         ! 3-point Gauss weights
+      REAL(DOUBLE)                    :: N1                ! Hermite shape value at end a translation
+      REAL(DOUBLE)                    :: N2                ! Hermite shape value at end a rotation
+      REAL(DOUBLE)                    :: N3                ! Hermite shape value at end b translation
+      REAL(DOUBLE)                    :: N4                ! Hermite shape value at end b rotation
 
 ! The following are used for the differential stiffness matrix calc. See NASTRAN Prog's Manual (COSMIC 1972) page 4.87.30
 
@@ -363,6 +380,248 @@
          ENDIF
 
 !     ENDIF
+
+! **********************************************************************************************************************************
+! Determine element pressure loads from local/basic PLOAD1 data.
+
+      IF (OPT(5) == 'Y') THEN
+         XI_GAUSS(1) = -0.774596669241483D0
+         XI_GAUSS(2) =  ZERO
+         XI_GAUSS(3) =  0.774596669241483D0
+         XI_WGT(1)   =  0.555555555555556D0
+         XI_WGT(2)   =  0.888888888888889D0
+         XI_WGT(3)   =  0.555555555555556D0
+
+         DO J=1,NSUB
+            P1  = PRESS(1,J)
+            P2  = PRESS(2,J)
+            X1L = PRESS(3,J)
+            X2L = PRESS(4,J)
+            IF (X1L >= ZERO) THEN
+               P1_LOC = P1
+               P2_LOC = P2
+               IF (PRESS(25,J) > 0.5D0) THEN
+                  P1_LOC = TE(2,2)*P1
+                  P2_LOC = TE(2,2)*P2
+               ENDIF
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1_LOC
+                  N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
+                  N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
+                  N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
+                  N4 = L*(-X1L*X1L + X1L*X1L*X1L)
+                  PPE( 2,J) = PPE( 2,J) + PC*N1
+                  PPE( 6,J) = PPE( 6,J) + PC*N2
+                  PPE( 8,J) = PPE( 8,J) + PC*N3
+                  PPE(12,J) = PPE(12,J) + PC*N4
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1_LOC + (P2_LOC-P1_LOC)*(XI-X1L)/(X2L-X1L)
+                     N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
+                     N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
+                     N3 = THREE*XI*XI - TWO*XI*XI*XI
+                     N4 = L*(-XI*XI + XI*XI*XI)
+                     PPE( 2,J) = PPE( 2,J) + QT*L*WGT*XI_SCALE*N1
+                     PPE( 6,J) = PPE( 6,J) + QT*L*WGT*XI_SCALE*N2
+                     PPE( 8,J) = PPE( 8,J) + QT*L*WGT*XI_SCALE*N3
+                     PPE(12,J) = PPE(12,J) + QT*L*WGT*XI_SCALE*N4
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            IF ((PRESS(26,J) > 0.5D0) .AND. (PRESS(7,J) >= ZERO)) THEN
+               P1_LOC = TE(2,3)*PRESS(5,J)
+               P2_LOC = TE(2,3)*PRESS(6,J)
+               X1L    = PRESS(7,J)
+               X2L    = PRESS(8,J)
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1_LOC
+                  N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
+                  N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
+                  N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
+                  N4 = L*(-X1L*X1L + X1L*X1L*X1L)
+                  PPE( 2,J) = PPE( 2,J) + PC*N1
+                  PPE( 6,J) = PPE( 6,J) + PC*N2
+                  PPE( 8,J) = PPE( 8,J) + PC*N3
+                  PPE(12,J) = PPE(12,J) + PC*N4
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1_LOC + (P2_LOC-P1_LOC)*(XI-X1L)/(X2L-X1L)
+                     N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
+                     N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
+                     N3 = THREE*XI*XI - TWO*XI*XI*XI
+                     N4 = L*(-XI*XI + XI*XI*XI)
+                     PPE( 2,J) = PPE( 2,J) + QT*L*WGT*XI_SCALE*N1
+                     PPE( 6,J) = PPE( 6,J) + QT*L*WGT*XI_SCALE*N2
+                     PPE( 8,J) = PPE( 8,J) + QT*L*WGT*XI_SCALE*N3
+                     PPE(12,J) = PPE(12,J) + QT*L*WGT*XI_SCALE*N4
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            P1  = PRESS(5,J)
+            P2  = PRESS(6,J)
+            X1L = PRESS(7,J)
+            X2L = PRESS(8,J)
+            IF (X1L >= ZERO) THEN
+               P1_LOC = P1
+               P2_LOC = P2
+               IF (PRESS(26,J) > 0.5D0) THEN
+                  P1_LOC = TE(3,3)*P1
+                  P2_LOC = TE(3,3)*P2
+               ENDIF
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1_LOC
+                  N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
+                  N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
+                  N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
+                  N4 = L*(-X1L*X1L + X1L*X1L*X1L)
+                  PPE( 3,J) = PPE( 3,J) + PC*N1
+                  PPE( 5,J) = PPE( 5,J) - PC*N2
+                  PPE( 9,J) = PPE( 9,J) + PC*N3
+                  PPE(11,J) = PPE(11,J) - PC*N4
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1_LOC + (P2_LOC-P1_LOC)*(XI-X1L)/(X2L-X1L)
+                     N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
+                     N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
+                     N3 = THREE*XI*XI - TWO*XI*XI*XI
+                     N4 = L*(-XI*XI + XI*XI*XI)
+                     PPE( 3,J) = PPE( 3,J) + QT*L*WGT*XI_SCALE*N1
+                     PPE( 5,J) = PPE( 5,J) - QT*L*WGT*XI_SCALE*N2
+                     PPE( 9,J) = PPE( 9,J) + QT*L*WGT*XI_SCALE*N3
+                     PPE(11,J) = PPE(11,J) - QT*L*WGT*XI_SCALE*N4
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            IF ((PRESS(25,J) > 0.5D0) .AND. (PRESS(3,J) >= ZERO)) THEN
+               P1_LOC = TE(3,2)*PRESS(1,J)
+               P2_LOC = TE(3,2)*PRESS(2,J)
+               X1L    = PRESS(3,J)
+               X2L    = PRESS(4,J)
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1_LOC
+                  N1 = ONE - THREE*X1L*X1L + TWO*X1L*X1L*X1L
+                  N2 = L*(X1L - TWO*X1L*X1L + X1L*X1L*X1L)
+                  N3 = THREE*X1L*X1L - TWO*X1L*X1L*X1L
+                  N4 = L*(-X1L*X1L + X1L*X1L*X1L)
+                  PPE( 3,J) = PPE( 3,J) + PC*N1
+                  PPE( 5,J) = PPE( 5,J) - PC*N2
+                  PPE( 9,J) = PPE( 9,J) + PC*N3
+                  PPE(11,J) = PPE(11,J) - PC*N4
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1_LOC + (P2_LOC-P1_LOC)*(XI-X1L)/(X2L-X1L)
+                     N1 = ONE - THREE*XI*XI + TWO*XI*XI*XI
+                     N2 = L*(XI - TWO*XI*XI + XI*XI*XI)
+                     N3 = THREE*XI*XI - TWO*XI*XI*XI
+                     N4 = L*(-XI*XI + XI*XI*XI)
+                     PPE( 3,J) = PPE( 3,J) + QT*L*WGT*XI_SCALE*N1
+                     PPE( 5,J) = PPE( 5,J) - QT*L*WGT*XI_SCALE*N2
+                     PPE( 9,J) = PPE( 9,J) + QT*L*WGT*XI_SCALE*N3
+                     PPE(11,J) = PPE(11,J) - QT*L*WGT*XI_SCALE*N4
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            P1  = PRESS(9 ,J)
+            P2  = PRESS(10,J)
+            X1L = PRESS(11,J)
+            X2L = PRESS(12,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  PPE( 1,J) = PPE( 1,J) + PC*(ONE - X1L)
+                  PPE( 7,J) = PPE( 7,J) + PC*X1L
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     PPE( 1,J) = PPE( 1,J) + QT*L*WGT*XI_SCALE*(ONE - XI)
+                     PPE( 7,J) = PPE( 7,J) + QT*L*WGT*XI_SCALE*XI
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            P1  = PRESS(13,J)
+            P2  = PRESS(14,J)
+            X1L = PRESS(15,J)
+            X2L = PRESS(16,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  PPE( 4,J) = PPE( 4,J) + PC*(ONE - X1L)
+                  PPE(10,J) = PPE(10,J) + PC*X1L
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     PPE( 4,J) = PPE( 4,J) + QT*L*WGT*XI_SCALE*(ONE - XI)
+                     PPE(10,J) = PPE(10,J) + QT*L*WGT*XI_SCALE*XI
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            P1  = PRESS(17,J)
+            P2  = PRESS(18,J)
+            X1L = PRESS(19,J)
+            X2L = PRESS(20,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  PPE( 5,J) = PPE( 5,J) + PC*(ONE - X1L)
+                  PPE(11,J) = PPE(11,J) + PC*X1L
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     PPE( 5,J) = PPE( 5,J) + QT*L*WGT*XI_SCALE*(ONE - XI)
+                     PPE(11,J) = PPE(11,J) + QT*L*WGT*XI_SCALE*XI
+                  ENDDO
+               ENDIF
+            ENDIF
+
+            P1  = PRESS(21,J)
+            P2  = PRESS(22,J)
+            X1L = PRESS(23,J)
+            X2L = PRESS(24,J)
+            IF (X1L >= ZERO) THEN
+               IF (DABS(X2L - X1L) <= EPS1) THEN
+                  PC = P1
+                  PPE( 6,J) = PPE( 6,J) + PC*(ONE - X1L)
+                  PPE(12,J) = PPE(12,J) + PC*X1L
+               ELSE
+                  XI_SCALE = (X2L - X1L)/TWO
+                  DO I=1,3
+                     XI  = XI_SCALE*XI_GAUSS(I) + (X2L + X1L)/TWO
+                     WGT = XI_WGT(I)
+                     QT  = P1 + (P2-P1)*(XI-X1L)/(X2L-X1L)
+                     PPE( 6,J) = PPE( 6,J) + QT*L*WGT*XI_SCALE*(ONE - XI)
+                     PPE(12,J) = PPE(12,J) + QT*L*WGT*XI_SCALE*XI
+                  ENDDO
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDIF
 
 ! **********************************************************************************************************************************
 ! Calculate SE matrices for stress data recovery.

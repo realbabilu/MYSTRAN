@@ -95,10 +95,6 @@
          JERR = JERR + 1
       ENDIF
 
-! Read pressure value
-
-      CALL R8FLD ( JCARD(3), JF(3), RPRESS )
-
 ! Check for the 2 options on specifying data on the card. Either all data are PLOAD_ELID's or the THRU  option is used in
 ! which case field 5 will have "THRU".
 
@@ -146,6 +142,8 @@
          CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
          CALL CRDERR ( CARD )
       ELSE IF ((JCARD(1)(1:7) == 'PLOAD2 ') .OR. (JCARD(1)(1:7) == 'PLOAD2*')) THEN
+
+         CALL R8FLD ( JCARD(3), JF(3), RPRESS )
 
          THRU = 'N'
          TOKEN = JCARD(5)(1:8)                             ! Only send the 1st 8 chars of this JCARD. It has been left justified

@@ -37,7 +37,8 @@
       USE PARAMS, ONLY                :  STR_CID
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
+      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL
+      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE MODEL_STUF, ONLY            :  ELEM_ONAME, ELMTYP, LABEL, SCNUM, STITLE, TITLE, TYPE
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, STRE_OUT
 
@@ -66,12 +67,19 @@
       INTEGER(LONG)                   :: BDY_DOF_NUM       ! DOF number for BDY_GRID/BDY_COMP
       INTEGER(LONG)                   :: I,J,L             ! DO loop indices
       INTEGER(LONG)                   :: K                 ! Counter
+      INTEGER(LONG)                   :: IBEG, IEND, IELEM, ISTA, NSTA_ELEM, NROW_ELEM
       INTEGER(LONG)                   :: NCOLS             ! Num of cols to write out
 
 
       REAL(DOUBLE)                    :: ABS_ANS(11)       ! Max ABS for all element output
       REAL(DOUBLE)                    :: MAX_ANS(11)       ! Max for all element output
       REAL(DOUBLE)                    :: MIN_ANS(11)       ! Min for all element output
+      REAL(DOUBLE)                    :: TINT, XI_STD, XI0, XI1
+      REAL(DOUBLE)                    :: XI_RAW(11), SXC_RAW(11), SXD_RAW(11), SXE_RAW(11), SXF_RAW(11), SMAX_RAW(11),            &
+                                         SMIN_RAW(11), MST_RAW(11), MSC_RAW(11)
+      REAL(DOUBLE), ALLOCATABLE       :: BEAM_XI(:,:), BEAM_SXC(:,:), BEAM_SXD(:,:), BEAM_SXE(:,:), BEAM_SXF(:,:),               &
+                                         BEAM_SMAX(:,:), BEAM_SMIN(:,:), BEAM_MST(:,:), BEAM_MSC(:,:)
+      INTEGER(LONG), ALLOCATABLE      :: BEAM_EID(:), BEAM_GRID(:,:)
 
       ! op2 info
       CHARACTER( 8*BYTE)              :: TABLE_NAME             ! the name of the op2 table
@@ -107,8 +115,6 @@
       ! Initialize
       DEVICE_CODE = 1  ! PLOT
       STRESS_CODE = 0
- 1    FORMAT("WRITE OES F06/OP2; ITABLE=",I8," (should be -4, -6, ...)")
-      WRITE(ERR,1) ITABLE
       FILL(1:) = ' '
 
       DO I=1,MAX_NUM_STR
@@ -169,14 +175,21 @@
             ISUBCASE_INDEX = 2  ! modes
             ANALYSIS_CODE = 7
             FIELD5_INT_MODE = JSUB
-            ! FIELD6_EIGENVALUE = ????
+            FIELD6_EIGENVALUE = EIGEN_VAL(JSUB)
             IF (WRITE_F06) WRITE(F06,102) JSUB
 
          ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
             ISUBCASE_INDEX = 1  ! modes
             ANALYSIS_CODE = 2
             FIELD5_INT_MODE = JSUB
-            ! FIELD6_EIGENVALUE = ????
+            FIELD6_EIGENVALUE = EIGEN_VAL(JSUB)
+            IF (WRITE_F06) WRITE(F06,102) JSUB
+
+         ELSE IF (SOL_NAME(1:8) == 'MFREQ') THEN
+            ISUBCASE_INDEX = INT_SC_NUM
+            ANALYSIS_CODE = 5
+            FIELD5_INT_MODE = JSUB
+            FIELD6_EIGENVALUE = EIGEN_VAL(JSUB)
             IF (WRITE_F06) WRITE(F06,102) JSUB
 
          ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
@@ -322,6 +335,13 @@
                   WRITE(F06,1102) FILL(1:1), FILL(1:1)
                ENDIF
 
+            ELSE IF (TYPE == 'BEAM    ') THEN
+               IF (BARTOR == 'Y') THEN
+                  WRITE(F06,1104) FILL(1:1), FILL(1:1)
+               ELSE
+                  WRITE(F06,1105) FILL(1:1), FILL(1:1)
+               ENDIF
+
             ELSE IF (TYPE(1:4) == 'ELAS') THEN
                WRITE(F06,1201) FILL(1:1), FILL(1:1)
 
@@ -371,9 +391,154 @@
       ENDIF
 
       ! Write the element stress output
+! --- cbeam_stations begin --- !
       IF      (TYPE == 'BAR     ') THEN
          CALL WRITE_BAR(NUM, FILL(1:1), ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI, &
                         FIELD5_INT_MODE, FIELD6_EIGENVALUE, WRITE_F06)
+
+      ELSE IF (TYPE == 'BEAM    ') THEN
+! --- CBEAM_standard begin --- !
+         IF (WRITE_OP2) THEN
+            NELEMENTS = 0
+            I = 1
+            DO WHILE (I <= NUM)
+               NELEMENTS = NELEMENTS + 1
+               J = EID_OUT_ARRAY(I,1)
+               DO WHILE ((I <= NUM) .AND. (EID_OUT_ARRAY(I,1) == J))
+                  I = I + 1
+               ENDDO
+            ENDDO
+
+            ALLOCATE ( BEAM_EID(NELEMENTS), BEAM_GRID(NELEMENTS,11), BEAM_XI(NELEMENTS,11), BEAM_SXC(NELEMENTS,11),               &
+                       BEAM_SXD(NELEMENTS,11), BEAM_SXE(NELEMENTS,11), BEAM_SXF(NELEMENTS,11), BEAM_SMAX(NELEMENTS,11),            &
+                       BEAM_SMIN(NELEMENTS,11), BEAM_MST(NELEMENTS,11), BEAM_MSC(NELEMENTS,11) )
+
+            BEAM_GRID(:,:) = 0
+            BEAM_XI(:,:)   = 0.0D0
+            BEAM_SXC(:,:)  = 0.0D0
+            BEAM_SXD(:,:)  = 0.0D0
+            BEAM_SXE(:,:)  = 0.0D0
+            BEAM_SXF(:,:)  = 0.0D0
+            BEAM_SMAX(:,:) = 0.0D0
+            BEAM_SMIN(:,:) = 0.0D0
+            BEAM_MST(:,:)  = 0.0D0
+            BEAM_MSC(:,:)  = 0.0D0
+
+            I = 1
+            IELEM = 0
+            DO WHILE (I <= NUM)
+               IELEM = IELEM + 1
+               BEAM_EID(IELEM) = EID_OUT_ARRAY(I,1)
+               IBEG = I
+               DO WHILE ((I <= NUM) .AND. (EID_OUT_ARRAY(I,1) == BEAM_EID(IELEM)))
+                  I = I + 1
+               ENDDO
+               IEND = I - 1
+               NROW_ELEM = IEND - IBEG + 1
+               NSTA_ELEM = NROW_ELEM
+               IF (NSTA_ELEM > 11) NSTA_ELEM = 11
+
+! --- CBEAM_standard begin --- !
+               ! Populate station grid ids for OP2 CBEAM stress records.
+               ! Keep interior stations at zero and identify only the beam
+               ! endpoint stations with the element end grids.
+               BEAM_GRID(IELEM,:) = 0
+               BEAM_GRID(IELEM,1)  = GID_OUT_ARRAY(IBEG,2)
+               BEAM_GRID(IELEM,11) = GID_OUT_ARRAY(IBEG,3)
+! --- CBEAM_standard end --- !
+
+               DO ISTA=1,NSTA_ELEM
+! --- CBEAM_standard begin --- !
+                  ! For beam stress, EID_OUT_ARRAY/CBEAM_XL_OUT are stored once per
+                  ! station, but OGEL stores two rows per station (top/bottom style
+                  ! beam section stress output). Convert the station index into the
+                  ! corresponding OGEL row pair explicitly.
+                  K = 2*(IBEG + ISTA - 2) + 1
+                  XI_RAW  (ISTA) = CBEAM_XL_OUT(IBEG + ISTA - 1)
+                  SXC_RAW (ISTA) = OGEL(K    ,1)
+                  SXD_RAW (ISTA) = OGEL(K    ,2)
+                  SXE_RAW (ISTA) = OGEL(K    ,3)
+                  SXF_RAW (ISTA) = OGEL(K    ,4)
+                  SMAX_RAW(ISTA) = OGEL(K    ,6)
+                  SMIN_RAW(ISTA) = OGEL(K    ,7)
+                  MST_RAW (ISTA) = OGEL(K    ,8)
+                  MSC_RAW (ISTA) = OGEL(K + 1,8)
+                  IF (MST_RAW(ISTA) <= -0.999D0) MST_RAW(ISTA) = 0.0D0
+                  IF (MSC_RAW(ISTA) <= -0.999D0) MSC_RAW(ISTA) = 0.0D0
+! --- CBEAM_standard end --- !
+               ENDDO
+
+               DO ISTA=1,11
+                  XI_STD = DBLE(ISTA - 1)/10.0D0
+                  BEAM_XI(IELEM,ISTA) = XI_STD
+                  IF (NSTA_ELEM <= 1) THEN
+                     BEAM_SXC (IELEM,ISTA) = SXC_RAW (1)
+                     BEAM_SXD (IELEM,ISTA) = SXD_RAW (1)
+                     BEAM_SXE (IELEM,ISTA) = SXE_RAW (1)
+                     BEAM_SXF (IELEM,ISTA) = SXF_RAW (1)
+                     BEAM_SMAX(IELEM,ISTA) = SMAX_RAW(1)
+                     BEAM_SMIN(IELEM,ISTA) = SMIN_RAW(1)
+                     BEAM_MST (IELEM,ISTA) = MST_RAW (1)
+                     BEAM_MSC (IELEM,ISTA) = MSC_RAW (1)
+                  ELSE IF (XI_STD <= XI_RAW(1)) THEN
+                     BEAM_SXC (IELEM,ISTA) = SXC_RAW (1)
+                     BEAM_SXD (IELEM,ISTA) = SXD_RAW (1)
+                     BEAM_SXE (IELEM,ISTA) = SXE_RAW (1)
+                     BEAM_SXF (IELEM,ISTA) = SXF_RAW (1)
+                     BEAM_SMAX(IELEM,ISTA) = SMAX_RAW(1)
+                     BEAM_SMIN(IELEM,ISTA) = SMIN_RAW(1)
+                     BEAM_MST (IELEM,ISTA) = MST_RAW (1)
+                     BEAM_MSC (IELEM,ISTA) = MSC_RAW (1)
+                  ELSE IF (XI_STD >= XI_RAW(NSTA_ELEM)) THEN
+                     BEAM_SXC (IELEM,ISTA) = SXC_RAW (NSTA_ELEM)
+                     BEAM_SXD (IELEM,ISTA) = SXD_RAW (NSTA_ELEM)
+                     BEAM_SXE (IELEM,ISTA) = SXE_RAW (NSTA_ELEM)
+                     BEAM_SXF (IELEM,ISTA) = SXF_RAW (NSTA_ELEM)
+                     BEAM_SMAX(IELEM,ISTA) = SMAX_RAW(NSTA_ELEM)
+                     BEAM_SMIN(IELEM,ISTA) = SMIN_RAW(NSTA_ELEM)
+                     BEAM_MST (IELEM,ISTA) = MST_RAW (NSTA_ELEM)
+                     BEAM_MSC (IELEM,ISTA) = MSC_RAW (NSTA_ELEM)
+                  ELSE
+                     DO K=1,NSTA_ELEM-1
+                        XI0 = XI_RAW(K)
+                        XI1 = XI_RAW(K+1)
+                        IF ((XI_STD >= XI0) .AND. (XI_STD <= XI1)) THEN
+                           TINT = (XI_STD - XI0)/(XI1 - XI0)
+                           BEAM_SXC (IELEM,ISTA) = (1.0D0 - TINT)*SXC_RAW (K) + TINT*SXC_RAW (K+1)
+                           BEAM_SXD (IELEM,ISTA) = (1.0D0 - TINT)*SXD_RAW (K) + TINT*SXD_RAW (K+1)
+                           BEAM_SXE (IELEM,ISTA) = (1.0D0 - TINT)*SXE_RAW (K) + TINT*SXE_RAW (K+1)
+                           BEAM_SXF (IELEM,ISTA) = (1.0D0 - TINT)*SXF_RAW (K) + TINT*SXF_RAW (K+1)
+                           BEAM_SMAX(IELEM,ISTA) = (1.0D0 - TINT)*SMAX_RAW(K) + TINT*SMAX_RAW(K+1)
+                           BEAM_SMIN(IELEM,ISTA) = (1.0D0 - TINT)*SMIN_RAW(K) + TINT*SMIN_RAW(K+1)
+                           BEAM_MST (IELEM,ISTA) = (1.0D0 - TINT)*MST_RAW (K) + TINT*MST_RAW (K+1)
+                           BEAM_MSC (IELEM,ISTA) = (1.0D0 - TINT)*MSC_RAW (K) + TINT*MSC_RAW (K+1)
+                           EXIT
+                        ENDIF
+                     ENDDO
+                  ENDIF
+               ENDDO
+            ENDDO
+
+            ELEMENT_TYPE = 2
+            NUM_WIDE = 111
+            CALL GET_STRESS_CODE( STRESS_CODE, 1, 0, 0 )
+            CALL WRITE_OES3_STATIC_AC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
+                                    TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+            DO IELEM=1,NELEMENTS
+               NVALUES = NUM_WIDE
+               WRITE(OP2) NVALUES
+               WRITE(OP2) BEAM_EID(IELEM)*10+DEVICE_CODE,                                                                           &
+                         (BEAM_GRID(IELEM,ISTA), REAL(BEAM_XI(IELEM,ISTA),4), REAL(BEAM_SXC(IELEM,ISTA),4),                      &
+                           REAL(BEAM_SXD(IELEM,ISTA),4), REAL(BEAM_SXE(IELEM,ISTA),4), REAL(BEAM_SXF(IELEM,ISTA),4),            &
+                           REAL(BEAM_SMAX(IELEM,ISTA),4), REAL(BEAM_SMIN(IELEM,ISTA),4),                                          &
+                           REAL(BEAM_MST(IELEM,ISTA),4), REAL(BEAM_MSC(IELEM,ISTA),4), ISTA=1,11)
+            ENDDO
+            DEALLOCATE ( BEAM_EID, BEAM_GRID, BEAM_XI, BEAM_SXC, BEAM_SXD, BEAM_SXE, BEAM_SXF, BEAM_SMAX, BEAM_SMIN,              &
+                         BEAM_MST, BEAM_MSC )
+         ENDIF
+! --- CBEAM_standard end --- !
+         CALL WRITE_CBEAM_STRESS(NUM, WRITE_F06)
+! --- cbeam_stations end --- !
 
       ELSE IF (TYPE(1:4) == 'ELAS') THEN
          IF (WRITE_OP2) THEN
@@ -728,6 +893,18 @@
          1X,A,'Element      SA1           SA2           SA3           SA4          Axial         SA-Max        SA-Min      M.S.-T' &
       ,/,1X,A,'   ID        SB1           SB2           SB3           SB4          Stress        SB-Max        SB-Min      M.S.-C')
 
+ 1104 FORMAT(                                                                                                                      &
+         1X,A,'Element   Station      SA1           SA2           SA3           SA4           Axial        SA-Max        SA-Min'  &
+         ,'      M.S.-T     Torsional'                                                                                             &
+      ,/,1X,A,'   ID        x/L        SB1           SB2           SB3           SB4          Stress        SB-Max        SB-Min' &
+         ,'      M.S.-C   Stress/Margin')
+
+ 1105 FORMAT(                                                                                                                      &
+         1X,A,'Element   Station      SA1           SA2           SA3           SA4          Axial         SA-Max        SA-Min'   &
+         ,'      M.S.-T'                                                                                                           &
+      ,/,1X,A,'   ID        x/L        SB1           SB2           SB3           SB4          Stress        SB-Max        SB-Min'  &
+         ,'      M.S.-C')
+
 ! ELAS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  1201 FORMAT(1X,A,'Element     Stress     Element     Stress     Element     Stress     Element     Stress     Element     Stress' &
           ,/,1X,A,'   ID                     ID                     ID                     ID                     ID')
@@ -843,7 +1020,6 @@
 ! >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  9300 FORMAT(' *ERROR  9300: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' NO OUTPUT FORMAT AVAILABLE FOR ELEMENT TYPE = ',A)
-
 ! **********************************************************************************************************************************
       END SUBROUTINE WRITE_ELEM_STRESSES
 !==============================================================================
@@ -875,6 +1051,7 @@
       REAL(DOUBLE)                    :: FIELD6_EIGENVALUE      ! float value for field 6
 
       INTEGER(LONG)               :: DEVICE_CODE  ! PLOT, PRINT, PUNCH flag
+      INTEGER(LONG)               :: ANALYSIS_CODE = 1 ! static fallback for OP2 table-3 header
       INTEGER(LONG)               :: NUM_WIDE = 4     ! the number of "words" for an element
       INTEGER(LONG)               :: NVALUES          ! the number of "words" for all the elments
       INTEGER(LONG)               :: NTOTAL           ! the number of bytes for all NVALUES
@@ -974,6 +1151,7 @@
       REAL(DOUBLE)                    :: FIELD6_EIGENVALUE      ! float value for field 6
 
       INTEGER(LONG)               :: DEVICE_CODE = 1   ! PLOT, PRINT, PUNCH flag; set as PLOT
+      INTEGER(LONG)               :: ANALYSIS_CODE = 1 ! static fallback for OP2 table-3 header
       INTEGER(LONG), PARAMETER    :: NUM_WIDE = 17     ! the number of "words" for an element
       INTEGER(LONG)               :: NVALUES           ! the number of "words" for all the elments
       INTEGER(LONG)               :: NTOTAL            ! the number of bytes for all NVALUES
@@ -1039,7 +1217,6 @@
       WRITE(F06,1705) MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),MAX_ANS(10),                 &
                       MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),MIN_ANS(10),                 &
                       ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),ABS_ANS(10)
-
 
       END SUBROUTINE WRITE_OES_CTRIA3
 

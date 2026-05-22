@@ -40,7 +40,7 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  FATAL_ERR, MEDAT0_CUSERIN, MELGP, MEMATC, MEMATR, MEPROP, METYPE, MOFFSET, MRMATLC,       &
                                          MRPBAR, MRPBEAM, MRPBUSH, MRPELAS, MRPROD, MRPSHEAR, MRPUSER1, MPSOLID, BLNK_SUB_NAM,     &
-                                         NCORD, NGRID, SOL_NAME
+                                         MPBEAM_STATIONS, NCORD, NGRID, SOL_NAME
       USE SCONTR, ONLY                :  DEDAT_Q4_MATANG_KEY, DEDAT_Q4_THICK_KEY, DEDAT_Q4_POFFS_KEY,                              &
                                          DEDAT_T3_MATANG_KEY, DEDAT_T3_THICK_KEY, DEDAT_T3_POFFS_KEY,                              &
                                                               DEDAT_Q8_THICK_KEY, DEDAT_Q8_POFFS_KEY
@@ -49,12 +49,12 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONEPM4, ONE, TWO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE MODEL_STUF, ONLY            :  AGRID, BAROFF, BUSH_CID, BUSH_OCID, BUSH_VVEC, BUSH_VVEC_OR_CID, BUSHOFF, BGRID,          &
-                                         CAN_ELEM_TYPE_OFFSET, CORD, DOFPIN, EDAT, EID, ELAS_COMP, ELDOF, ELEM_LEN_12, ELGP,       &
-                                         ELMTYP, EMAT, EOFF, NUM_EMG_FATAL_ERRS, EPROP, EPNT, ETYPE, GRID, RGRID, GRID_ID,         &
-                                         INTL_MID, INTL_PID, ISOLID, MATANGLE, MATL, MTRL_TYPE, NUM_SEi, OFFDIS, OFFDIS_O, OFFSET, &
-                                         PBAR, PBEAM, PCOMP, PCOMP_PROPS, PLATEOFF, PLATETHICK, PROD, PSHEAR, PSHEL, PSOLID,       &
-                                         PUSER1, PUSERIN, RMATL, RPBAR, RPBEAM, RPBUSH, RPELAS, RPROD, RPSHEAR, RPSHEL, RPUSER1,   &
-                                         TYPE, VVEC, XEB, ZOFFS
+                                         CAN_ELEM_TYPE_OFFSET, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CORD, DOFPIN, EDAT, EID,    &
+                                         ELAS_COMP, ELDOF, ELEM_LEN_12, ELGP, ELMTYP, EMAT, EOFF, NUM_EMG_FATAL_ERRS, EPROP, EPNT, &
+                                         ETYPE, GRID, RGRID, GRID_ID, INTL_MID, INTL_PID, ISOLID, MATANGLE, MATL, MTRL_TYPE,       &
+                                         NUM_SEi, OFFDIS, OFFDIS_O, OFFSET, PBAR, PBEAM, PBEAM_NSTATIONS, PBEAM_XL, PCOMP,          &
+                                         PCOMP_PROPS, PLATEOFF, PLATETHICK, PROD, PSHEAR, PSHEL, PSOLID, PUSER1, PUSERIN, RMATL,   &
+                                         RPBAR, RPBEAM, RPBUSH, RPELAS, RPROD, RPSHEAR, RPSHEL, RPUSER1, TYPE, VVEC, XEB, ZOFFS
 
       USE MODEL_STUF, ONLY            :  USERIN_ACT_GRIDS, USERIN_ACT_COMPS, USERIN_CID0, USERIN_IN4_INDEX,                        &
                                          USERIN_MAT_NAMES, USERIN_NUM_BDY_DOF, USERIN_NUM_ACT_GRDS, USERIN_NUM_SPOINTS,            &
@@ -76,6 +76,7 @@
 !                                                             row number in array EDAT where data begins for this element.
 
       INTEGER(LONG)                   :: IPNTR              ! Pointer into an array
+      INTEGER(LONG)                   :: ISTA               ! Loop index for active CBEAM station metadata
       INTEGER(LONG)                   :: VVEC_FLAG          ! Either actual grid ID for V vector or -IVVEC
 
       INTEGER(LONG)                   :: I,J                ! DO loop indices
@@ -116,6 +117,13 @@
       EID       = EDAT(EPNTK)
       INTL_PID  = EDAT(EPNTK+1)
 
+! --- cbeam_stations begin --- !
+      CBEAM_ACTIVE_NSTATIONS = 0
+      DO ISTA=1,MPBEAM_STATIONS
+         CBEAM_ACTIVE_XL(ISTA) = ZERO
+      ENDDO
+! --- cbeam_stations end --- !
+
 ! ELGP is the number of G.P.'s for this elem. Call GET_ELGP to find out how many grids there are for elem type TYPE
 
       CALL GET_ELGP ( INT_ELEM_ID )
@@ -126,7 +134,11 @@
       IF (TYPE(1:6) /= 'USERIN') THEN
          DO J=1,METYPE
             IF (ELMTYP(J) == TYPE) THEN
-               IF (NUM_SEi(J) > (ELGP + 1)) THEN
+! --- cbeam_stations begin --- !
+               IF ((TYPE == 'BEAM    ') .AND. (NUM_SEi(J) > 0)) THEN
+                  CONTINUE
+               ELSE IF (NUM_SEi(J) > (ELGP + 1)) THEN
+! --- cbeam_stations end --- !
                   WRITE(ERR,1957) SUBR_NAME, TYPE, NUM_SEi(J), ELGP
                   WRITE(F06,1957) SUBR_NAME, TYPE, NUM_SEi(J), ELGP
                   FATAL_ERR = FATAL_ERR + 1
@@ -334,6 +346,26 @@
          DO I=1,MRPBEAM
             EPROP(I) = RPBEAM(INTL_PID,I)
          ENDDO
+! --- cbeam_stations begin --- !
+         CBEAM_ACTIVE_NSTATIONS = PBEAM_NSTATIONS(INTL_PID)
+         IF (CBEAM_ACTIVE_NSTATIONS > MPBEAM_STATIONS) CBEAM_ACTIVE_NSTATIONS = MPBEAM_STATIONS
+         IF (CBEAM_ACTIVE_NSTATIONS <= 1) THEN
+            CBEAM_ACTIVE_NSTATIONS = 5
+            CBEAM_ACTIVE_XL(1) = ZERO
+            CBEAM_ACTIVE_XL(2) = 0.25D0
+            CBEAM_ACTIVE_XL(3) = 0.50D0
+            CBEAM_ACTIVE_XL(4) = 0.75D0
+            CBEAM_ACTIVE_XL(5) = ONE
+         ELSE
+            DO ISTA=1,CBEAM_ACTIVE_NSTATIONS
+               CBEAM_ACTIVE_XL(ISTA) = PBEAM_XL(INTL_PID,ISTA)
+            ENDDO
+         ENDIF
+         IF ((DEBUG(233) > 0) .AND. ((EID == 14) .OR. (EID == 15))) THEN
+            WRITE(F06,*) '*CBEAM XL DEBUG:', EID, INTL_PID, PBEAM_NSTATIONS(INTL_PID), CBEAM_ACTIVE_NSTATIONS,                    &
+                           (CBEAM_ACTIVE_XL(ISTA), ISTA=1,CBEAM_ACTIVE_NSTATIONS)
+         ENDIF
+! --- cbeam_stations end --- !
 
       ELSE IF (TYPE == 'BUSH    ') THEN
          DO I=1,MRPBUSH
@@ -440,9 +472,6 @@
             EPROP( 6) = RPSHEL(INTL_PID, 6)                ! ZS(2)
 
             THICK_AVG = ZERO                               ! DELTA locates where thickness key is in EDAT (rel to EID) for plates
-! --- warning_reduce-v2 begin --- !
-            DELTA = 0
-! --- warning_reduce-v2 end --- !
             IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                DELTA = DEDAT_Q4_THICK_KEY
             ELSE IF (TYPE(1:5) == 'TRIA3') THEN
@@ -490,7 +519,7 @@
 ! **********************************************************************************************************************************
 ! Generate ISOLID array of solid element integer data (matl coord system, integration order, stress location, scheme)
 
-      IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
          DO I=1,MPSOLID
             ISOLID(I) = PSOLID(INTL_PID,I)
          ENDDO
@@ -513,10 +542,6 @@
             NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
             FATAL_ERR = FATAL_ERR + 1
         ELSE IF (TYPE == 'PENTA15') THEN
-            ISOLID(4) = 3
-        ELSE IF (TYPE == 'PYRA5'  ) THEN
-            ISOLID(4) = 2
-        ELSE IF (TYPE == 'PYRA14' ) THEN
             ISOLID(4) = 3
         ELSE IF (TYPE == 'TETRA4' ) THEN
             ISOLID(4) = 2
@@ -544,8 +569,7 @@
 
       IF (ISOLID(6) == -3) then ! -3 means ISOP = 1
 
-        IF ((TYPE == 'HEXA8'  ) .OR. (TYPE == 'HEXA20' ) .OR. (TYPE == 'PENTA6' ) .OR. (TYPE == 'PENTA15') .OR.                  &
-            (TYPE == 'PYRA5'  ) .OR. (TYPE == 'PYRA14' )) THEN
+        IF ((TYPE == 'HEXA8'  ) .OR. (TYPE == 'HEXA20' ) .OR. (TYPE == 'PENTA6' ) .OR. (TYPE == 'PENTA15')) THEN
           ISOLID(6) = 1
         ELSE IF ((TYPE == 'TETRA4' ) .OR. (TYPE == 'TETRA10')) THEN
             WRITE(ERR,1965) "ISOP","1",TYPE
@@ -561,8 +585,7 @@
 
       ELSE IF (ISOLID(6) == -2) then ! -2 means ISOP = 0
 
-        IF ((TYPE == 'HEXA8'  ) .OR. (TYPE == 'HEXA20' ) .OR. (TYPE == 'PENTA6' ) .OR. (TYPE == 'PENTA15') .OR.                  &
-            (TYPE == 'PYRA5'  ) .OR. (TYPE == 'PYRA14' )) THEN
+        IF ((TYPE == 'HEXA8'  ) .OR. (TYPE == 'HEXA20' ) .OR. (TYPE == 'PENTA6' ) .OR. (TYPE == 'PENTA15')) THEN
           ISOLID(6) = 0
         ELSE IF ((TYPE == 'TETRA4' ) .OR. (TYPE == 'TETRA10')) THEN
             WRITE(ERR,1965) "ISOP","0",TYPE
@@ -578,8 +601,7 @@
 
       ELSE IF (ISOLID(6) == -1) then ! -1 means ISOP = blank
 
-        IF ((TYPE == 'HEXA8'  ) .OR. (TYPE == 'HEXA20' ) .OR. (TYPE == 'PENTA6' ) .OR. (TYPE == 'PENTA15') .OR.                  &
-            (TYPE == 'PYRA5'  ) .OR. (TYPE == 'PYRA14' )) THEN
+        IF ((TYPE == 'HEXA8'  ) .OR. (TYPE == 'HEXA20' ) .OR. (TYPE == 'PENTA6' ) .OR. (TYPE == 'PENTA15')) THEN
           ISOLID(6) = 0
         ELSE IF ((TYPE == 'TETRA4' ) .OR. (TYPE == 'TETRA10')) THEN
           ISOLID(6) = 1
@@ -640,7 +662,7 @@
          ENDIF
          NUMMAT = 1
 
-      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 
          INTL_MID(1) = PSOLID(INTL_PID,2)
          MTRL_TYPE(1) = MATL(INTL_MID(1),2)                ! Must be MAT1 or MAT9 for solids

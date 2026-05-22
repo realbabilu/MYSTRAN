@@ -35,7 +35,8 @@
       USE CONSTANTS_1, ONLY           :  ZERO
       USE DEBUG_PARAMETERS
       USE MODEL_STUF, ONLY            :  AGRID, BGRID, CORD, EID, ELAS_COMP, ELDOF, ELGP, GRID, KE, KEG, KEO_BUSH,                &
-                                         PEB, PE_GA_GB, PEG, PEL, PTE, RCORD, SCNUM, SUBLOD, TYPE, UEB, UEG, UEL, TE, TE_GA_GB
+                                         PEB, PE_GA_GB, PEG, PEL, PPE, PTE, RCORD, SCNUM, SUBLOD, TYPE, UEB, UEG, UEL, TE,       &
+                                         TE_GA_GB
 
       USE CALC_ELEM_NODE_FORCES_USE_IFs
 
@@ -88,6 +89,11 @@
             PEL(1) = -PTE(1,JTSUB)
             PEL(7) = -PTE(7,JTSUB)
          ENDIF
+
+         PEL(1)  = PEL(1)  - PPE(1 ,INT_SC_NUM)
+         PEL(4)  = PEL(4)  - PPE(4 ,INT_SC_NUM)
+         PEL(7)  = PEL(7)  - PPE(7 ,INT_SC_NUM)
+         PEL(10) = PEL(10) - PPE(10,INT_SC_NUM)
 
          PEL( 1) = PEL(1) + KE( 1, 1)*UEL( 1) + KE( 1, 7)*UEL( 7)
          PEL( 4) =          KE( 4, 4)*UEL( 4) + KE( 4,10)*UEL(10)
@@ -199,6 +205,8 @@
             IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
                PEL(I) = -PTE(I,JTSUB)
             ENDIF
+
+            PEL(I) = PEL(I) - PPE(I,INT_SC_NUM)
 
             DO J=1,NCOLS
                PEL(I) = PEL(I) + KE(I,J)*UEL(J)

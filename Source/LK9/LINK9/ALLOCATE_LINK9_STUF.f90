@@ -33,7 +33,7 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MELGP, MMSPRNT, MOGEL, TOT_MB_MEM_ALLOC
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE TIMDAT, ONLY                :  TSEC
-      USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, EID_OUT_ARRAY, FTNAME, MAXREQ, MSPRNT, OGEL, POLY_FIT_ERR,                 &
+      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, GID_OUT_ARRAY, EID_OUT_ARRAY, FTNAME, MAXREQ, MSPRNT, OGEL, POLY_FIT_ERR,   &
                                          POLY_FIT_ERR_INDEX
 
       USE ALLOCATE_LINK9_STUF_USE_IFs
@@ -116,6 +116,31 @@
                EID_OUT_ARRAY(I,1) = 0
                EID_OUT_ARRAY(I,2) = 1                      ! Set number of plies to 1 so that we don't have to worry about it
             ENDDO                                          ! except for 2D elems (which will be set in another subr)
+         ELSE
+            WRITE(ERR,991) MB_ALLOCATED,NAME,SUBR_NAME,IERR
+            WRITE(F06,991) MB_ALLOCATED,NAME,SUBR_NAME,IERR
+            FATAL_ERR = FATAL_ERR + 1
+            JERR = JERR + 1
+         ENDIF
+      ENDIF
+
+! Allocate array for CBEAM_XL_OUT
+
+      NAME = 'CBEAM_XL_OUT'
+      NCOLS = 1
+      IF (ALLOCATED(CBEAM_XL_OUT)) THEN
+         WRITE(ERR,990) SUBR_NAME, NAME
+         WRITE(F06,990) SUBR_NAME, NAME
+         FATAL_ERR = FATAL_ERR + 1
+         JERR = JERR + 1
+      ELSE
+         ALLOCATE (CBEAM_XL_OUT(MAXREQ),STAT=IERR)
+         MB_ALLOCATED = RDOUBLE*REAL(MAXREQ)/ONEPP6
+         IF (IERR == 0) THEN
+            CALL ALLOCATED_MEMORY ( NAME, MB_ALLOCATED, 'ALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+            DO I=1,MAXREQ
+               CBEAM_XL_OUT(I) = ZERO
+            ENDDO
          ELSE
             WRITE(ERR,991) MB_ALLOCATED,NAME,SUBR_NAME,IERR
             WRITE(F06,991) MB_ALLOCATED,NAME,SUBR_NAME,IERR

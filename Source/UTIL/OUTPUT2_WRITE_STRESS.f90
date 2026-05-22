@@ -163,6 +163,30 @@
       END SUBROUTINE WRITE_OES3_STATIC
 
 ! ##################################################################################################################################
+      SUBROUTINE WRITE_OES3_STATIC_AC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEM_TYPE, NUM_WIDE, STRESS_CODE, &
+                                      TITLE, LABEL, SUBTITLE, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      IMPLICIT NONE
+      INTEGER(LONG), INTENT(INOUT) :: ITABLE
+      INTEGER(LONG), INTENT(IN) :: ISUBCASE
+      INTEGER(LONG), INTENT(IN) :: DEVICE_CODE
+      INTEGER(LONG), INTENT(IN) :: ANALYSIS_CODE
+      INTEGER(LONG), INTENT(IN) :: ELEM_TYPE
+      INTEGER(LONG), INTENT(IN) :: NUM_WIDE
+      INTEGER(LONG), INTENT(IN) :: STRESS_CODE
+      CHARACTER(LEN=128), INTENT(IN) :: TITLE
+      CHARACTER(LEN=128), INTENT(IN) :: SUBTITLE
+      CHARACTER(LEN=128), INTENT(IN) :: LABEL
+      INTEGER(LONG), INTENT(IN)      :: FIELD5_INT_MODE
+      REAL(DOUBLE), INTENT(IN)       :: FIELD6_EIGENVALUE
+      INTEGER(LONG)                  :: FORMAT_CODE
+
+      FORMAT_CODE = 1
+      CALL WRITE_OES3(ITABLE, ANALYSIS_CODE, ISUBCASE, DEVICE_CODE, FORMAT_CODE, ELEM_TYPE, NUM_WIDE, STRESS_CODE, &
+                      TITLE, LABEL, SUBTITLE, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+      END SUBROUTINE WRITE_OES3_STATIC_AC
+
+! ##################################################################################################################################
       SUBROUTINE WRITE_OES3(ITABLE, ANALYSIS_CODE, ISUBCASE, DEVICE_CODE, FORMAT_CODE, ELEM_TYPE, NUM_WIDE, STRESS_CODE, &
                             TITLE, LABEL, SUBTITLE, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
 !      Parameters
@@ -201,8 +225,6 @@
       LABEL2 = LABEL(1:100)
 
       CALL WRITE_ITABLE(ITABLE)  ! write the -3, -5, ... subtable header
- 1    FORMAT("WRITE_OES3: ITABLE_START=",I8)
-      WRITE(ERR,1) ITABLE
 
       IF ((ANALYSIS_CODE == 1) .OR. (ANALYSIS_CODE == 10)) THEN
         ! statics
@@ -226,9 +248,7 @@
       THERMAL = 0
 
       APPROACH_CODE = ANALYSIS_CODE * 10 + DEVICE_CODE
-2     FORMAT(" APPROACH_CODE=",I4," TABLE_CODE=",I4," ELEM_TYPE=",I4," ISUBCASE=",I4)
       ! 584 bytes
-      WRITE(ERR,2) APPROACH_CODE, TABLE_CODE, ELEM_TYPE, ISUBCASE
       WRITE(OP2) APPROACH_CODE, TABLE_CODE, ELEM_TYPE, ISUBCASE, FIELD5_INT_MODE, &
             REAL(FIELD6_EIGENVALUE, 4), REAL(FIELD7, 4),                          &
             LOAD_SET, FORMAT_CODE, NUM_WIDE, &
@@ -240,8 +260,6 @@
             TITLE2, SUBTITLE2, LABEL2
 
       ITABLE = ITABLE - 1        ! flip it to -4, -6, ... so we don't have to do this later
- 3    FORMAT("WRITE_OES3: ITABLE_END=",I8)
-      WRITE(ERR,3) ITABLE
       CALL WRITE_ITABLE(ITABLE)
       ITABLE = ITABLE - 1
       END SUBROUTINE WRITE_OES3

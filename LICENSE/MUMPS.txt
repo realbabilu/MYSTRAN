@@ -1,0 +1,23 @@
+MUMPS (MUltifrontal Massively Parallel Solver)
+==============================================
+
+Upstream project:
+https://mumps-solver.org/
+
+Official upstream license notice (MUMPS download page / user guide):
+
+This version of MUMPS is provided free of charge. It is released under the
+CeCILL-C license (see the upstream references below), except for variants of
+AMD ordering and `[sdcz]MUMPS_TRUNCATED_RRQR` derived from the LAPACK package
+distributed under the BSD 3-clause license, and except for the external and
+optional ordering PORD provided in a separate directory with its own license
+information.
+
+Primary upstream license references:
+
+- https://mumps-solver.org/index.php?page=dwnld
+- https://mumps-solver.org/doc/userguide_5.8.1.pdf
+- https://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
+
+This repository does not modify the CeCILL-C license text. Refer to the
+official CeCILL site above for the authoritative full license text.

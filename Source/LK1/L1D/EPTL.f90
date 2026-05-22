@@ -38,9 +38,10 @@
       USE CONSTANTS_1, ONLY           :  ZERO
       USE PARAMS, ONLY                :  EPSIL
       USE TIMDAT, ONLY                :  TSEC
+      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
-      USE MODEL_STUF, ONLY            :  ELDOF, ELDT, GRID, GRID_ID, CORD, AGRID, ELGP, NUM_EMG_FATAL_ERRS, OELDT, PLY_NUM, PPE,   &
-                                         PTE, SYS_LOAD, TYPE, SUBLOD
+      USE MODEL_STUF, ONLY            :  EID, ELDOF, ELDT, GRID, GRID_ID, CORD, AGRID, ELGP, NUM_EMG_FATAL_ERRS, OELDT, PLY_NUM,  &
+                                         PPE, PTE, SYS_LOAD, TYPE, SUBLOD
 
       USE EPTL_USE_IFs
 
