@@ -76,6 +76,9 @@
 ! Initialize
 
       IERR =  0
+! --- warning_reduce-v2 begin --- !
+      JBEG = 1
+! --- warning_reduce-v2 end --- !
 
       DO I=1,3
          DATA_16(I)(1:) = ' '

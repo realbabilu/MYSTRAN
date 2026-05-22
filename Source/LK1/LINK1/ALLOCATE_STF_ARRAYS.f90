@@ -206,7 +206,9 @@
 ! --- BANDED_optimizisation -begin-- !
          IF ((WINAMEM > ZERO) .AND. (MB_NEEDED >= WINAMEM)) THEN
 ! --- BANDED_optimizisation -end-- !
-            NTERMS = MEMAFAC*(WINAMEM/MB_NEEDED)*NTERMS
+! --- warning_reduce-v2 begin --- !
+            NTERMS = INT(MEMAFAC*(WINAMEM/MB_NEEDED)*REAL(NTERMS,DOUBLE),LONG)
+! --- warning_reduce-v2 end --- !
          ENDIF
          ALLOC_ATTEMPT_NUM = 1
          ALLOC_SUCCESS     = 'N'
@@ -226,7 +228,9 @@
                WRITE(SC1,*) CR13
             ELSE
 i_do:          DO
-                  NTERMS = MEMAFAC*NTERMS
+! --- warning_reduce-v2 begin --- !
+                  NTERMS = INT(MEMAFAC*REAL(NTERMS,DOUBLE),LONG)
+! --- warning_reduce-v2 end --- !
                   ALLOCATE (STF3(NTERMS),STAT=IERR)
                   IF (ALLOC_ATTEMPT_NUM <= MXALLOCA) THEN
                      MB_ALLOCATED = RDOUBLE*REAL(NTERMS)/ONEPP6 + TWO*RLONG*REAL(NTERMS)/ONEPP6

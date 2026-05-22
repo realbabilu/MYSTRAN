@@ -27,6 +27,7 @@
 
 
       USE PENTIUM_II_KIND, ONLY       :  DOUBLE
+      USE CONSTANTS_1, ONLY           :  ONE, ZERO
       USE MODEL_STUF, ONLY            :  ELGP, TYPE
       USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  FATAL_ERR
@@ -63,6 +64,22 @@
             PSH(3) = DUM2(1)
             PSH(4) = DUM2(2)
          ENDIF
+
+      ELSEIF (TYPE(1:5) == 'TRIA3') THEN
+
+         PSH(:)    = ZERO
+         DPSHG(:,:) = ZERO
+
+         PSH(1) = ONE - R - S
+         PSH(2) = R
+         PSH(3) = S
+
+         DPSHG(1,1) = -ONE
+         DPSHG(2,1) = -ONE
+         DPSHG(1,2) =  ONE
+         DPSHG(2,2) =  ZERO
+         DPSHG(1,3) =  ZERO
+         DPSHG(2,3) =  ONE
 
       ELSE
 

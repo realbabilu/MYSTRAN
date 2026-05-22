@@ -110,6 +110,9 @@
 ! **********************************************************************************************************************************
 ! Depending on whether this is a BUCKLING soln (and LOAD_ISTEP value) or not, one or another segment of code will be run
 
+! --- warning_reduce-v2 begin --- !
+      DO_WHICH_CODE_FRAG = 1
+! --- warning_reduce-v2 end --- !
       IF ((SOL_NAME(1:8) == 'BUCKLING')) THEN
          IF      (LOAD_ISTEP == 1) THEN
             DO_WHICH_CODE_FRAG = 1
@@ -592,6 +595,13 @@
       OUNT(1) = ERR
       OUNT(2) = F06
 
+! --- warning_reduce-v2 begin --- !
+      ALLOCATE ( N_SET_TDOFI_ROW(1), STAT=IOCHK )
+      IF (IOCHK == 0) THEN
+         N_SET_TDOFI_ROW(1) = 0
+      ENDIF
+! --- warning_reduce-v2 end --- !
+
 ! Open file SPC to write SPC1 records if this subr finds singularities and user wants SPCFIL written
 
       IF (NUM_PCHD_SPC1 > 0) THEN                          ! Subr KGG_SINGULARITY_PROC already opened and wrote to this file
@@ -610,6 +620,7 @@
       CALL TDOF_COL_NUM ( 'S ',  S_SET_COL )
 
       IF (NDOFN > 0) THEN
+         IF (ALLOCATED(N_SET_TDOFI_ROW)) DEALLOCATE ( N_SET_TDOFI_ROW, STAT=IOCHK )
          ALLOCATE ( N_SET_TDOFI_ROW(NDOFN), STAT=IOCHK )
          IF (IOCHK /= 0) THEN
             WRITE(ERR,*) ' *ERROR: ALLOCATING N_SET_TDOFI_ROW IN ', SUBR_NAME

@@ -582,6 +582,13 @@
 
         ENDDO
 
+        IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
+          WRITE(F06,'(A,I8,A,ES15.7)') 'QMEM1 KGGD EID=', EID, ' TPLY=', TPLY
+          DO GAUSS_PT=1,IORD_STRESS_Q4*IORD_STRESS_Q4
+            WRITE(F06,'(A,I2,3(1X,ES15.7))') 'QMEM1 FORCE GP', GAUSS_PT, FORCEx(GAUSS_PT), FORCEy(GAUSS_PT), FORCExy(GAUSS_PT)
+          ENDDO
+        ENDIF
+
 
 ! Accoring to:
 !   Robert D. Cook, David S. Malkus, Michael E. Plesha Concepts and Applications of Finite Element Analysis, 3rd Edition  1989
@@ -654,6 +661,11 @@
             KED(ID2(3*(I-1) + 3),ID2(3*(J-1) + 3)) = KS(I,J)
           ENDDO
         ENDDO
+
+        IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
+          WRITE(F06,'(A,I8,A,ES15.7)') 'QMEM1 KGGD EID=', EID, ' KS_NORM=', DSQRT(SUM(KS*KS))
+          WRITE(F06,'(A,I8,A,ES15.7)') 'QMEM1 KGGD EID=', EID, ' KED_NORM=', DSQRT(SUM(KED(1:6*ELGP,1:6*ELGP)*KED(1:6*ELGP,1:6*ELGP)))
+        ENDIF
 
       ENDIF
 

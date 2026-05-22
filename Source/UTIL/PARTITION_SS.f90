@@ -359,6 +359,11 @@ i_do: DO I=1,NROW_A                                        ! Matrix partition lo
       INTEGER(LONG)                   :: I,J,K                  ! Local loop indices
 
 ! **********************************************************************************************************************************
+! --- reduced_warning begin --- !
+      I = 0
+      J = 0
+      K = 0
+! --- reduced_warning end --- !
       IF      (WHICH == '1') THEN
 
          WRITE(F06,*)

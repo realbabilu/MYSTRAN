@@ -354,6 +354,86 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
   "${CMAKE_SOURCE_DIR}/*.F03"
 )
 
+# ! --- lapack_surgery build order begin --- !
+# Fixed-form helper modules introduced by the LAPACK surgery are not always
+# dependency-scanned reliably by CMake/MinGW, so put them at the front of the
+# source list to ensure their .mod files exist before the wrapper units build.
+file(GLOB LAPACK_SURGERY_HELPERS
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*HELPER*.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*HELPER*.F"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*HELPER*.f90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*HELPER*.F90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*_ext.f90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*_ext.F90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*KERNEL*.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*KERNEL*.F"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*KERNEL*.f90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/*KERNEL*.F90"
+)
+list(SORT LAPACK_SURGERY_HELPERS)
+list(REMOVE_ITEM ALL_FORTRAN_FILES ${LAPACK_SURGERY_HELPERS})
+set(ALL_FORTRAN_FILES ${LAPACK_SURGERY_HELPERS} ${ALL_FORTRAN_FILES})
+# ! --- lapack_surgery build order end --- !
+
+# ! --- reduced_warning begin --- !
+# Legacy LAPACK surgery files are intentionally close to upstream bodies and
+# trigger a lot of noisy GNU warnings that obscure newer MYSTRAN issues.
+# Keep suppression narrow and file-scoped so the rest of the tree still builds
+# with the stronger warning set.
+function(mystran_append_source_flags flag)
+  foreach(_src IN LISTS ARGN)
+    get_source_file_property(_existing "${_src}" COMPILE_FLAGS)
+    if(_existing STREQUAL "NOTFOUND")
+      set(_existing "")
+    endif()
+    string(APPEND _existing " ${flag}")
+    string(STRIP "${_existing}" _existing)
+    set_source_files_properties("${_src}" PROPERTIES COMPILE_FLAGS "${_existing}")
+  endforeach()
+endfunction()
+
+set(LAPACK_SURGERY_NOISY_FUNCTION_ELIM_FILES
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_BLAS_AUX.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DGETRS_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DLAUUM_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DLAN_HELPER.f90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DPBCON_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DPBEQU_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DPBTF2_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DPBTRF_KERNEL.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DPBTRS_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DPOTRF_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DPOTRI_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DSTEV_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DSYTF2_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DTRTI2_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DTRTRS_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_GIV_MGIV_EIG.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_LANCZOS_EIG_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_LIN_EQN_DGB_KERNEL.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_POTF2_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_STD_EIG_1.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_STD_EIG_1_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_SYM_MAT_INV.f"
+)
+mystran_append_source_flags("-Wno-function-elimination" ${LAPACK_SURGERY_NOISY_FUNCTION_ELIM_FILES})
+
+set(LAPACK_SURGERY_NOISY_UNINIT_FILES
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_BLAS_AUX.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DLAN_HELPER.f90"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_DSYTF2_HELPER.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_GIV_MGIV_EIG.f"
+)
+mystran_append_source_flags("-Wno-maybe-uninitialized" ${LAPACK_SURGERY_NOISY_UNINIT_FILES})
+
+set(LAPACK_SURGERY_NOISY_CONVERSION_FILES
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_BLAS_AUX.f"
+  "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_STD_EIG_1_HELPER.f"
+)
+mystran_append_source_flags("-Wno-conversion" ${LAPACK_SURGERY_NOISY_CONVERSION_FILES})
+mystran_append_source_flags("-Wno-do-subscript" "${CMAKE_SOURCE_DIR}/Modules/LAPACK/LAPACK_GIV_MGIV_EIG.f")
+# ! --- reduced_warning end --- !
+
 set_source_files_properties(
   "${PROJECT_SOURCE_DIR}/Source/LK4/EIGRL_EXTRACT_SOLVERS.F90"
   PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"

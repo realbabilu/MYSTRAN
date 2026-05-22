@@ -1325,6 +1325,9 @@
       CHARACTER(8*BYTE)               :: TE_IDENT            = 'N'
                                                              ! If 'Y' then TE element transformation matrix is an identity matrix
 
+      CHARACTER(1*BYTE)               :: SKIP_K6ROT          = 'N'
+                                                             ! Shell offset helper flag to suppress K6ROT tweaks in selected shell paths
+
       CHARACTER(8*BYTE)               :: TYPE                = '        '
                                                              ! The type of the specific elem being processed (value from ELMTYP)
 
@@ -1342,11 +1345,13 @@
       INTEGER(LONG)                   :: ELNO                = 0
                                                              ! The internal elem ID ( 1 to NELE) of the current element
 
-      INTEGER(LONG)                   :: EMG_IFE(MEFE,MEFEI) = RESHAPE ( (/(ZERO, I=1,MEFE*MEFEI)/), (/MEFE,MEFEI/) )
+! --- warning_reduce-v2 begin --- !
+      INTEGER(LONG)                   :: EMG_IFE(MEFE,MEFEI) = RESHAPE ( (/(0, I=1,MEFE*MEFEI)/), (/MEFE,MEFEI/) )
                                                               ! Array of integer data for EMG errors
 
-      INTEGER(LONG)                   :: EMG_IWE(MEWE,MEWEI) = RESHAPE ( (/(ZERO, I=1,MEWE*MEWEI)/), (/MEWE,MEWEI/) )
+      INTEGER(LONG)                   :: EMG_IWE(MEWE,MEWEI) = RESHAPE ( (/(0, I=1,MEWE*MEWEI)/), (/MEWE,MEWEI/) )
                                                              ! Array of integer data for EMG warnings
+! --- warning_reduce-v2 end --- !
 
       INTEGER(LONG)                   :: NUM_EMG_FATAL_ERRS  = 0
                                                              ! The number of errors found in one execution of subr EMG

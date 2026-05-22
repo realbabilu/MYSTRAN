@@ -79,6 +79,9 @@
 
       KTERM = 0
       I_MATOUT(1) = 1
+! --- reduced_warning begin --- !
+      JSTART = 1
+! --- reduced_warning end --- !
       DO I=1,N
          ROW_I_NTERMS = 0
          I_MATOUT(I+1) = I_MATOUT(I)

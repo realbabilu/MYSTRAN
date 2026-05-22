@@ -159,6 +159,11 @@
 ! **********************************************************************************************************************************
 ! Initialize
 
+! --- warning_reduce-v2 begin --- !
+      ICID      = 0
+      CID_RID0  = 0
+      MAGVJ     = ZERO
+! --- warning_reduce-v2 end --- !
       EPS1    = DABS(EPSIL(1))
 
       DO I=1,NCORD

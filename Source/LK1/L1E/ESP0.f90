@@ -68,6 +68,9 @@
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      LTERM = 0
+! --- warning_reduce-v2 end --- !
       IF      (SETLKTK == 0) THEN                          ! LTERM based on full elem stiffness matrices unconnected
 
           CALL ESP0_0 ( LTERM )

@@ -64,6 +64,9 @@
 ! **********************************************************************************************************************************
       MB_ALLOCATED = ZERO
       JERR = 0
+! --- warning_reduce-v2 begin --- !
+      NROWS = 0
+! --- warning_reduce-v2 end --- !
 
       IF (NAME == 'DLR') THEN                              ! Allocate array I2_DLR
          NROWS = NTERM_DLR

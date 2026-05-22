@@ -67,6 +67,9 @@
 ! **********************************************************************************************************************************
       MB_ALLOCATED = ZERO
       JERR = 0
+! --- warning_reduce-v2 begin --- !
+      NROWS = 0
+! --- warning_reduce-v2 end --- !
 
       IF      (SET == 'G ') THEN                           ! Allocate array for G-set rigid body disp matrix
 

@@ -109,6 +109,9 @@
 ! **********************************************************************************************************************************
 ! Calc T1P matrix from eqn 3.3-7 in Ref 1. (with order 1,2,3,4,5,6 changed to 1,2,3,6,4,5 to account for the fact that Ref (1) has
 ! the 6 position for xy stress whereas it is the 4th position here)
+! --- warning_reduce-v2 begin --- !
+      MATL_AXES_ROTATE = ZERO
+! --- warning_reduce-v2 end --- !
 
       RADIANS_ROT = CONV_DEG_RAD*THETA                     ! THETA is angle (deg) from elem matl axis to ply K longitudinal axis
 
@@ -366,4 +369,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE ROT_COMP_ELEM_AXES
-

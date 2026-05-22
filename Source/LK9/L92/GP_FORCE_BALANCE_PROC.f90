@@ -77,7 +77,7 @@
       INTEGER(LONG)                   :: TDOF_ROW          ! Row no. in array TDOF to find GDOF DOF number
 
 
-      INTEGER(SHORT), DIMENSION(1)    :: Udd = (/0220/)    ! 0220 is the 4 digit ASCII code for a capital U double-dot
+      INTEGER(SHORT), DIMENSION(1)    :: Udd = (/INT(220,SHORT)/) ! 0220 is the 4 digit ASCII code for a capital U double-dot
 
       REAL(DOUBLE)                    :: DUM_KE(MELDOF,MELDOF)
       REAL(DOUBLE)                    :: FG1(6)            ! The 6 vals from FG_COL (grid inertia forces) for 1 grid point
@@ -121,11 +121,23 @@
 
       INTEGER, ALLOCATABLE            :: GPFORCE_NID_EID(:,:)    ! currently unused
       CHARACTER*8, ALLOCATABLE        :: GPFORCE_ETYPE(:)        ! currently unused
-      REAL, ALLOCATABLE               :: GPFORCE_FXYZ_MXYZ(:,:)  ! currently unused
+      REAL(DOUBLE), ALLOCATABLE       :: GPFORCE_FXYZ_MXYZ(:,:)  ! currently unused
 
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      NROWS = 0
+      NCOLS = 0
+      IERR  = 0
+      ALLOCATE (GPFORCE_NID_EID(1,2), GPFORCE_ETYPE(1), GPFORCE_FXYZ_MXYZ(1,6), STAT=IERR)
+      IF (IERR == 0) THEN
+         GPFORCE_NID_EID(1,1) = 0
+         GPFORCE_NID_EID(1,2) = 0
+         GPFORCE_ETYPE(1) = "NA"
+         GPFORCE_FXYZ_MXYZ(1,1:6) = ZERO
+      ENDIF
+! --- warning_reduce-v2 end --- !
 
       ! GPFORCE is unsupported for buckling decks
       IF (SOL_NAME(1:8) == "BUCKLING") THEN
@@ -341,6 +353,9 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
       !KTSTACK(5500,3)
       !
       IF(WRITE_OP2) THEN
+          IF (ALLOCATED(GPFORCE_NID_EID))  DEALLOCATE(GPFORCE_NID_EID ,STAT=IERR)
+          IF (ALLOCATED(GPFORCE_ETYPE))    DEALLOCATE(GPFORCE_ETYPE   ,STAT=IERR)
+          IF (ALLOCATED(GPFORCE_FXYZ_MXYZ)) DEALLOCATE(GPFORCE_FXYZ_MXYZ,STAT=IERR)
           NROWS = NNODE_GPFORCE
           NCOLS = 2
           ALLOCATE (GPFORCE_NID_EID(NROWS,2),STAT=IERR)

@@ -61,6 +61,12 @@
       INTEGER(LONG)                   :: ROW
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      I = 0
+      J = 0
+      K = 0
+      L = 0
+! --- warning_reduce-v2 end --- !
 
 ! Reference [2]:
 !  MITC4 paper "A continuum mechanics based four-node shell element for general nonlinear analysis"

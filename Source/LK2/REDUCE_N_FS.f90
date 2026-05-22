@@ -146,6 +146,9 @@
 ! **********************************************************************************************************************************
 ! Depending on whether this is a BUCKLING soln (and LOAD_ISTEP value) or not, one or another segment of code will be run
 
+! --- warning_reduce-v2 begin --- !
+      DO_WHICH_CODE_FRAG = 1
+! --- warning_reduce-v2 end --- !
       IF ((SOL_NAME(1:8) == 'BUCKLING')) THEN
          IF      (LOAD_ISTEP == 1) THEN
             DO_WHICH_CODE_FRAG = 1

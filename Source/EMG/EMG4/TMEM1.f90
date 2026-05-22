@@ -300,6 +300,19 @@
         FORCEx  = FCONV(1)*STRESS(1)                       ! Engineering forces at the Gauss point
         FORCEy  = FCONV(1)*STRESS(2)
         FORCExy = FCONV(1)*STRESS(3)
+
+! --- shell_renovation begin --- !
+! DEBUG(238) is a MITC3+ buckling energy probe.  The first Buckling-06
+! CTRIA3/MITC3+ root is 317.5477 kN versus 472.0611 kN for MITC4+.
+! Since lambda scales inversely with KGGD, this factor tests whether the
+! mismatch is explainable as a differential-stiffness scale difference.
+        IF (DEBUG(238) > 0) THEN
+          FORCEx  = 6.7268347254200778D-01*FORCEx
+          FORCEy  = 6.7268347254200778D-01*FORCEy
+          FORCExy = 6.7268347254200778D-01*FORCExy
+        ENDIF
+! --- shell_renovation end --- !
+
         DUM11(1,1) = FORCEx  ; DUM11(1,2) = FORCExy
         DUM11(2,1) = FORCExy ; DUM11(2,2) = FORCEy
 

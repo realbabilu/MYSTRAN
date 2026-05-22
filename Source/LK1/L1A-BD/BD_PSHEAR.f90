@@ -52,6 +52,9 @@
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      J = 3
+! --- warning_reduce-v2 end --- !
 ! PSHEAR element Bulk Data Card routine
 
 !    FIELD   ITEM           ARRAY ELEMENT
@@ -94,8 +97,8 @@
             PSHEAR(NPSHEAR,2) = MATERIAL_ID
          ELSE
             FATAL_ERR = FATAL_ERR + 1
-            WRITE(ERR,1193) JF(J),JCARD(1),MATERIAL_ID
-            WRITE(F06,1193) JF(J),JCARD(1),MATERIAL_ID
+            WRITE(ERR,1193) JF(3),JCARD(1),MATERIAL_ID
+            WRITE(F06,1193) JF(3),JCARD(1),MATERIAL_ID
          ENDIF
       ENDIF
 

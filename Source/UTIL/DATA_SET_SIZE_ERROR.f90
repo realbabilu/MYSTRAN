@@ -48,6 +48,10 @@
       INTEGER(LONG)                   :: IEND2             ! Index
 
 ! **********************************************************************************************************************************
+! --- reduced_warning begin --- !
+      IEND1 = LEN(FILNAM)
+      IEND2 = LEN(DATA_SET_NAME)
+! --- reduced_warning end --- !
       DO I=LEN(FILNAM),1,-1
          IF (FILNAM(I:I) /= ' ') THEN
             IEND1 = I

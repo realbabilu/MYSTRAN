@@ -69,7 +69,14 @@
 
       INTRINSIC DMAX1,DMIN1
 
-
+! --- reduced_warning begin --- !
+      MS1  = ZERO
+      MS2  = ZERO
+      MS3  = ZERO
+      MSP1 = ' '
+      MSP2 = ' '
+      MSP3 = ' '
+! --- reduced_warning end --- !
       WRITE_NEU = (PRTNEU == 'Y')
 ! **********************************************************************************************************************************
 ! Calc engineering strains from array STRAIN and put into array OGEL

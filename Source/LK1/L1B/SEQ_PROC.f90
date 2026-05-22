@@ -415,7 +415,9 @@
       IF (ASTAT /= 0) GOTO 900
 
       NODE_ELEM_LIST = 0
-      NODE_ELEM_WRK  = NODE_ELEM_PTR(1:NGRID)
+! --- warning_reduce-v2 begin --- !
+      NODE_ELEM_WRK(:) = NODE_ELEM_PTR(1:NGRID)
+! --- warning_reduce-v2 end --- !
       DEGREE         = 0
       MARK           = 0
       ORDER          = 0

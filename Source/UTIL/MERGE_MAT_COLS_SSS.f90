@@ -176,6 +176,11 @@
       INTEGER(LONG)                   :: I,J,K             ! Local loop indices
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      I = 0
+      J = 0
+      K = 0
+! --- warning_reduce-v2 end --- !
       IF (WHICH == '0') THEN
          WRITE(F06,99870) MAT_A_NAME, MAT_B_NAME, MAT_C_NAME
       ENDIF

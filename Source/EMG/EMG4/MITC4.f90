@@ -42,6 +42,7 @@
                                          FCONV, EPROP, PTE, ALPVEC, TREF, DT, PPE, PRESS, MASS_PER_UNIT_AREA,                      &
                                          NUM_PLIES, PCOMP_LAM, PLY_NUM, TPLY, STRESS, KED
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
+      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
       USE MITC_INITIALIZE_Interface
       USE ORDER_GAUSS_Interface
@@ -570,6 +571,10 @@
             ENDDO
          ENDDO
 
+         IF ((DEBUG(233) > 0) .AND. (INT_ELEM_ID <= 8)) THEN
+            WRITE(F06,'(A,I8,A,ES15.7)') 'MITC4 KE INT_ELEM_ID=', INT_ELEM_ID, ' KE_NORM=', DSQRT(SUM(KE(1:6*ELGP,1:6*ELGP)*KE(1:6*ELGP,1:6*ELGP)))
+         ENDIF
+
 
 
 
@@ -674,6 +679,13 @@
 
          ENDDO
 
+         IF ((DEBUG(233) > 0) .AND. (INT_ELEM_ID <= 8)) THEN
+            WRITE(F06,'(A,I8,A,ES15.7)') 'MITC4 KGGD INT_ELEM_ID=', INT_ELEM_ID, ' TPLY=', TPLY
+            DO GAUSS_PT=1,IORD_STRESS_Q4*IORD_STRESS_Q4
+               WRITE(F06,'(A,I2,3(1X,ES15.7))') 'MITC4 FORCE RAW GP', GAUSS_PT, FORCEx(GAUSS_PT), FORCEy(GAUSS_PT), FORCExy(GAUSS_PT)
+            ENDDO
+         ENDIF
+
 
                                                            ! Transform force from element coordinates to cartesian local
                                                            ! This isn't quite right for non-flat elements becuase all the z
@@ -706,6 +718,12 @@
             FORCEy(GAUSS_PT) = DUM14(2,2)
             FORCExy(GAUSS_PT) = DUM14(1,2)
          ENDDO
+
+         IF ((DEBUG(233) > 0) .AND. (INT_ELEM_ID <= 8)) THEN
+            DO GAUSS_PT=1,IORD_STRESS_Q4*IORD_STRESS_Q4
+               WRITE(F06,'(A,I2,3(1X,ES15.7))') 'MITC4 FORCE CLB GP', GAUSS_PT, FORCEx(GAUSS_PT), FORCEy(GAUSS_PT), FORCExy(GAUSS_PT)
+            ENDDO
+         ENDIF
 
 
 ! Accoring to:
@@ -793,6 +811,15 @@
                KED(KI + 3, KJ + 3) = KS(I,J)
             ENDDO
          ENDDO
+
+         IF ((DEBUG(233) > 0) .AND. (INT_ELEM_ID <= 8)) THEN
+            WRITE(F06,'(A,I8,A,ES15.7)') 'MITC4 KGGD INT_ELEM_ID=', INT_ELEM_ID, ' KS_NORM=', DSQRT(SUM(KS*KS))
+            WRITE(F06,'(A,I8,A,ES15.7)') 'MITC4 KGGD INT_ELEM_ID=', INT_ELEM_ID, ' KED_NORM=', DSQRT(SUM(KED(1:6*ELGP,1:6*ELGP)*KED(1:6*ELGP,1:6*ELGP)))
+            WRITE(F06,'(A,I8)') 'MITC4 KGGD KS INT_ELEM_ID=', INT_ELEM_ID
+            DO I=1,ELGP
+               WRITE(F06,'(4(1X,ES15.7))') (KS(I,J), J=1,ELGP)
+            ENDDO
+         ENDIF
 
 
       ENDIF

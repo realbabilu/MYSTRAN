@@ -29,6 +29,7 @@
 
       USE PENTIUM_II_KIND, ONLY       :  LONG, DOUBLE
       USE MODEL_STUF, ONLY            :  ELGP, EPROP, XEL, BGRID, GRID_SNORM, TYPE, TE
+      USE PARAMS, ONLY                :  TRIA3TYP
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE MITC_STUF, ONLY             :  DIRECTOR, DIR_THICKNESS, GP_RS
       USE IOUNT1, ONLY                :  ERR, F06
@@ -89,6 +90,23 @@
          GP_RS(2,7) =  ONE
          GP_RS(2,8) =  ZERO
 
+! --- shell_renovation begin --- !
+      ELSEIF (TYPE(1:5) == 'TRIA3') THEN
+
+         ! Linear triangle coordinates matching TPLT_MITC3P:
+         ! node 1 = (0,0), node 2 = (1,0), node 3 = (0,1).
+         GP_RS(:,:) = ZERO
+
+         GP_RS(1,1) = ZERO
+         GP_RS(2,1) = ZERO
+
+         GP_RS(1,2) = ONE
+         GP_RS(2,2) = ZERO
+
+         GP_RS(1,3) = ZERO
+         GP_RS(2,3) = ONE
+
+! --- shell_renovation end --- !
       ELSE
 
          WRITE(ERR,*) ' *ERROR: INCORRECT ELEMENT TYPE ', TYPE
@@ -127,8 +145,12 @@
          NORMAL = GRID_SNORM(BGRID(GP),:)
 
                                                            ! Use the midsurface normal unless SNORM exists and it's
-                                                           ! a linear element.
-         IF (ANY(NORMAL /= ZERO) .AND. (TYPE(1:5) == 'QUAD4')) THEN
+                                                           ! an enabled linear element.
+! --- shell_renovation begin --- !
+                                                           ! MITC3+ SNORM uses the same nodal-normal input as the
+                                                           ! Python mitc3plus_snorm.py nodal-triad transform.
+         IF (ANY(NORMAL /= ZERO) .AND. ((TYPE(1:5) == 'QUAD4') .OR. ((TYPE(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'MITC3+')))) THEN
+! --- shell_renovation end --- !
                                                            ! Transform SNORM from basic to XEL element coordinates.
             CALL MATMULT_FFF(TE, NORMAL, 3, 3, 1, DIRECTOR(:,GP))
          ELSE

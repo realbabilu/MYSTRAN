@@ -108,6 +108,9 @@
       CARD2 = CARD1(ECOL+1:)
       DOLLAR_COL = INDEX(CARD2(1:),'$')
 
+! --- warning_reduce-v2 begin --- !
+      ISTART = 1
+! --- warning_reduce-v2 end --- !
       DO I=1,FILE_NAM_MAXLEN
          IF (CARD2(I:I) /= ' ') THEN
             ISTART = I
@@ -120,6 +123,9 @@
          JEND = DOLLAR_COL-1
       ENDIF
 
+! --- warning_reduce-v2 begin --- !
+      IEND = ISTART
+! --- warning_reduce-v2 end --- !
       DO I=JEND,ISTART,-1
          IF (CARD2(I:I) == ' ') THEN
             CYCLE

@@ -162,7 +162,10 @@
          IN4_COL_MAP(I) = 0
       ENDDO
 
+! --- warning_reduce-v2 begin --- !
       K = 0
+      ELDOF_INDEX = 0
+! --- warning_reduce-v2 end --- !
       DO I=1,USERIN_NUM_ACT_GRDS                           ! Get IN4_COL_MAP for elem DOF's due to physical grid dislp components
          CALL RDOF ( USERIN_ACT_COMPS(I), CDOF )
          DO J=1,6

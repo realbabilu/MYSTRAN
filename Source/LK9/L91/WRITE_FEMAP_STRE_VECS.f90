@@ -76,6 +76,9 @@
 
 
 ! **********************************************************************************************************************************
+! --- warning_reduce-v2 begin --- !
+      VEC_ID_OFFSET = 0
+! --- warning_reduce-v2 end --- !
       ELEM_NAME_LEN = LEN(ELEM_TYP)
       ELEM_NAME(1:) = ELEM_TYP(1:)
       DO I=LEN(ELEM_TYP),1,-1

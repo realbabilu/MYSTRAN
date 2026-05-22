@@ -62,6 +62,9 @@
 ! **********************************************************************************************************************************
 ! Initialize
 
+! --- reduced_warning begin --- !
+      NUM_IN_SET = 0
+! --- reduced_warning end --- !
       NUM_NULL = 0
       ALLOCATE ( GRID_NUM(NDOFG), COMP_NUM(NDOFG) )
 

@@ -178,7 +178,7 @@
       NUM_DOUBLINGS = 0
 
       ! Calculate maximum NEV: MAX[?] of (NDOFL-1, EIG_N2 if specified, or NDOFL-1)
-      MAX_NEV = NDOFL - NUM_MLL_DIAG_ZEROS - 1
+      MAX_NEV = MAX(1, NDOFL - NUM_MLL_DIAG_ZEROS - 1)
       IF (EIG_N2 > 0) THEN
          MAX_NEV = MAX(MAX_NEV, EIG_N2)
       ENDIF
@@ -386,11 +386,13 @@
          WRITE(SC1,1015) EIG_FRQ1, EIG_FRQ2
          WRITE(SC1,1016) OMEGA_FRQ1_SQ, OMEGA_FRQ2_SQ, SIGMA
 
-         MIN_NCV = NEV + 2
-         MAX_NCV = NDOFL - NUM_MLL_DIAG_ZEROS - 2
+         MIN_NCV = MIN(NEV + 2, NDOFL)
+         MAX_NCV = NDOFL
 
          ! sanity check on feasible NCV range
          IF (MIN_NCV > MAX_NCV) THEN
+            WRITE(ERR,'(A,4(I0,1X))') ' *DEBUG 9776 ARPADAPT: NDOFL NEV MIN_NCV MAX_NCV = ', NDOFL, NEV, MIN_NCV, MAX_NCV
+            WRITE(F06,'(A,4(I0,1X))') ' *DEBUG 9776 ARPADAPT: NDOFL NEV MIN_NCV MAX_NCV = ', NDOFL, NEV, MIN_NCV, MAX_NCV
             WRITE(ERR,9776) NDOFL, NEV
             WRITE(F06,9776) NDOFL, NEV
             FATAL_ERR = FATAL_ERR + 1
@@ -407,7 +409,7 @@
 
          ! still invalid? (too large OR too small)
          IF (NCV > MAX_NCV .OR. NCV < MIN_NCV) THEN
-            DO I=5,2,-1
+            DO I=5,0,-1
                NCV = NEV+I
                IF (NCV >= MIN_NCV .AND. NCV <= MAX_NCV) THEN
                   EXIT
@@ -889,7 +891,7 @@
 
  9777 FORMAT(' *ERROR  9777: UNABLE TO DETERMINE KRYLOV SUBSPACE SIZE NCV. NDOFL=',I0,', NEV=',I0,'.',/,15X,&
              'USER HAS LIKELY REQUESTED TOO MANY EIGENVALUES FOR THIS MODEL.',/,15X,&
-             'NCV MUST BE AT LEAST NEV+2, BUT NO MORE THAN NDOFL-2.')
+             'NCV MUST BE AT LEAST NEV+2, BUT NO MORE THAN NDOFL.')
 
 
 12345 FORMAT(A,10X,A)

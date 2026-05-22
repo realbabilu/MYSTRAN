@@ -113,9 +113,9 @@
 
       TYPE  = ETYPE(INT_ELEM_ID)
 
-! --- CQUADR_DKMQ24 begin --- !
+! --- shell_renovation begin --- !
       IF ((TYPE(1:5) /= 'TRIA3') .AND. (TYPE(1:5) /= 'QUAD4') .AND. (TYPE(1:5) /= 'QUAD8') .AND. (TYPE(1:5) /= 'QUADR') .AND. (TYPE(1:5) /= 'SHEAR')) THEN
-! --- CQUADR_DKMQ24 end --- !
+! --- shell_renovation end --- !
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
          FATAL_ERR = FATAL_ERR + 1
          WRITE(ERR,1946) TYPE, SUBR_NAME
@@ -152,9 +152,9 @@ pcom0:IF (PCOMP_PROPS == 'N') THEN                         ! Element is not a co
             FCONV(3)          =  TS
          ENDIF
 
-! --- CQUADR_DKMQ24 begin --- !
+! --- shell_renovation begin --- !
          IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUADR') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA3')) THEN
-! --- CQUADR_DKMQ24 end --- !
+! --- shell_renovation end --- !
             MASS_PER_UNIT_AREA = (RHO(1)*TM + NSM)
          ENDIF
 
@@ -245,9 +245,9 @@ pcom0:IF (PCOMP_PROPS == 'N') THEN                         ! Element is not a co
             PCOMP_LAM = 'SYM'
          ELSE
             PCOMP_LAM = 'NON'                              ! If nonsym layup, make sure int order = 2 (BIG_BB, BIG_BM for QUAD)
-! --- CQUADR_DKMQ24 begin --- !
+! --- shell_renovation begin --- !
             IF (((TYPE(1:6) == 'QUAD4 ') .OR. (TYPE(1:6) == 'QUADR ')) .AND. (QUAD4TYP == 'MIN4T ')) THEN
-! --- CQUADR_DKMQ24 end --- !
+! --- shell_renovation end --- !
                IF (IORQ1M /= 2) THEN
                   WARN_ERR = WARN_ERR + 1
                   WRITE(ERR, 1948) 'IORQ1M', IORQ1M

@@ -164,7 +164,7 @@
                FATAL_ERR = FATAL_ERR + 1
             ENDIF
                                                            ! Process property ID's for shell elements
-! --- CQUADR_DKMQ24 begin --- !
+! --- shell_renovation begin --- !
          ELSE IF ((ETYPE(I)(1:5) == 'QUAD4') .OR. (ETYPE(I) == 'QUADR   ') .OR. (ETYPE(I)(1:5) == 'TRIA3') .OR. (ETYPE(I)(1:5) == 'QUAD8')) THEN
             PROPERTY_ID = EDAT(EPNTK+1)
             FOUND_PSHEL = 'N'
@@ -297,7 +297,7 @@
             FATAL_ERR = FATAL_ERR + 1
             CALL OUTA_HERE ( 'Y' )                         ! Coding error (elem type not valid), so quit
 
-! --- CQUADR_DKMQ24 end --- !
+! --- shell_renovation end --- !
          ENDIF
 
       ENDDO

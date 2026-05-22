@@ -286,6 +286,11 @@ l_do:          DO L=B_COL_BEG,B_COL_END
       INTEGER(LONG)                   :: I,J,K                  ! Local loop indices
 
 ! **********************************************************************************************************************************
+! --- reduced_warning begin --- !
+      I = 0
+      J = 0
+      K = 0
+! --- reduced_warning end --- !
       IF      (WHICH == '1') THEN
 
          WRITE(F06,*)

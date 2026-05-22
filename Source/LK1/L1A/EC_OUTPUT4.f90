@@ -84,6 +84,11 @@
       IERR             =  0
       VALID_OU4_NAME   = 'Y'
       ANY_OU4_NAME_BAD = 'N'
+! --- warning_reduce-v2 begin --- !
+      DATA_BEG         = 1
+      JBEG             = 1
+      ROW_NUM          = 0
+! --- warning_reduce-v2 end --- !
 
       DO I=1,5
          DATA_16(I)(1:) = ' '
@@ -235,8 +240,11 @@ nerr: IF (IERR == 0) THEN
             DO I=1,5                                       ! Update list of requested OUTPUT4 matrices. Don't enter duplicates
                IF (DATA_16(I)(1:16) /= ' ') THEN
                   IF (NUM_OU4_REQUESTS+1 <= NUM_OU4_VALID_NAMES) THEN
+! --- warning_reduce-v2 begin --- !
+                     ROW_NUM = 0
+! --- warning_reduce-v2 end --- !
                      CALL CHECK_MATRIX_NAME ( MYSTRAN_NAME(I), ROW_NUM )
-                     IF ((VALID_OU4_NAME == 'Y') .AND. (DUPLICATE == 'N')) THEN
+                     IF ((VALID_OU4_NAME == 'Y') .AND. (DUPLICATE == 'N') .AND. (ROW_NUM > 0)) THEN
                         NUM_OU4_REQUESTS = NUM_OU4_REQUESTS + 1
                         ACT_OU4_OUTPUT_NAMES(NUM_OU4_REQUESTS)  = OUTPUT_NAME(I)
                         ACT_OU4_MYSTRAN_NAMES(NUM_OU4_REQUESTS) = ALLOW_OU4_MYSTRAN_NAMES(ROW_NUM)
@@ -420,6 +428,10 @@ nerr: IF (IERR == 0) THEN
 ! Check requested OUTPUT4 names to make sure they are in the list of valid names
 
       VALID_OU4_NAME = 'Y'
+! --- warning_reduce-v2 begin --- !
+      INDEX = 0
+      FOUND = 'N'
+! --- warning_reduce-v2 end --- !
       DO JJ=1,NUM_OU4_VALID_NAMES
          FOUND = 'N'
          IF ((MYSTRAN_NAME == ALLOW_OU4_MYSTRAN_NAMES(JJ)) .OR. (MYSTRAN_NAME == ALLOW_OU4_OUTPUT_NAMES(JJ))) THEN

@@ -197,7 +197,7 @@ loop1:   DO
       RETURN
 
 ! **********************************************************************************************************************************
-  1002 FORMAT(' *ERROR  1002: TOO LONG AN ENTRY (MORE THAN 16 CHARS) ON THE FOLLOWING ENTRY (MAYBE A COMMA WAS FOUND WHERE ONE',    &
+ 1002 FORMAT(' *ERROR  1002: TOO LONG AN ENTRY (MORE THAN 16 CHARS) ON THE FOLLOWING ENTRY (MAYBE A COMMA WAS FOUND WHERE ONE',    &
                            ' SHOULD NOT BE):')
 
  1003 FORMAT(' *ERROR  1003: TOO MANY FREE-FIELD ENTRIES ON ONE PHYSICAL BULK DATA LINE. USE A CONTINUATION CARD OR THRU FORM:')

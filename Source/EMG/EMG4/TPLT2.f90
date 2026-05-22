@@ -551,7 +551,9 @@
          ENDDO
          IF (DEBUG(54) == 1) THEN
             IF (MN4T_QD == 'Y') THEN
-               WRITE(F06,'(A,I2,A,A,I8))') ' KV, in TPLT2 for MIN4T QUAD4: tria ', TRIA_NUM, ' of 4 for ',TRIM(TYPE), EID
+! --- warning_reduce-v2 begin --- !
+               WRITE(F06,'(A,I2,A,A,I8)') ' KV, in TPLT2 for MIN4T QUAD4: tria ', TRIA_NUM, ' of 4 for ',TRIM(TYPE), EID
+! --- warning_reduce-v2 end --- !
             ELSE
                WRITE(F06,'(A,I8)') ' KV in TPLT2 for TRIA3 ', EID
             ENDIF

@@ -29,7 +29,7 @@
       INTEGER(LONG), DIMENSION(NCROD, 4)    :: CROD
       INTEGER(LONG), DIMENSION(NCTRIA3, 4)  :: CTRIA3
       INTEGER(LONG), DIMENSION(NCQUAD4, 4)  :: CQUAD4
-      INTEGER(LONG), DIMENSION(NCSHEAR, 4)  :: CSHEAR
+      INTEGER(LONG), DIMENSION(NCSHEAR, 6)  :: CSHEAR
 !      INTEGER(LONG), DIMENSION(:, :), allocatable :: CTETRA
 !      INTEGER(LONG), DIMENSION(:, :), allocatable :: CPENTA
 !      INTEGER(LONG), DIMENSION(:, :), allocatable  :: CHEXA
@@ -146,7 +146,7 @@
 
       INTEGER(LONG), INTENT(INOUT), DIMENSION(NCTRIA3, 4)  :: CTRIA3
       INTEGER(LONG), INTENT(INOUT), DIMENSION(NCQUAD4, 4)  :: CQUAD4
-      INTEGER(LONG), INTENT(INOUT), DIMENSION(NCSHEAR, 4)  :: CSHEAR
+      INTEGER(LONG), INTENT(INOUT), DIMENSION(NCSHEAR, 6)  :: CSHEAR
       INTEGER(LONG), INTENT(INOUT), DIMENSION(NCROD)       :: CROD_INDEX, CONROD_INDEX
 !      INTEGER(LONG), INTENT(INOUT), DIMENSION(NCTETRA, 12) :: CTETRA
 !      INTEGER(LONG), INTENT(INOUT), DIMENSION(NCPENTA, 17) :: CPENTA
@@ -221,10 +221,12 @@
         ELSE IF (ETYPE(I)(1:3) .EQ. 'ROD') THEN
           !WRITE(ERR,4) "CROD?", (EDAT(EPNTK-1+J), J=1,4)
           ! 4 fields
-          CROD(ICROD, J) = EDAT(EPNTK)   ! eid
-          CROD(ICROD, J) = EDAT(EPNTK+1) ! pid
-          CROD(ICROD, J) = EDAT(EPNTK+2) ! ga
-          CROD(ICROD, J) = EDAT(EPNTK+3) ! gb
+! --- warning_reduce-v2 begin --- !
+          CROD(ICROD, 1) = EDAT(EPNTK)   ! eid
+          CROD(ICROD, 2) = EDAT(EPNTK+1) ! pid
+          CROD(ICROD, 3) = EDAT(EPNTK+2) ! ga
+          CROD(ICROD, 4) = EDAT(EPNTK+3) ! gb
+! --- warning_reduce-v2 end --- !
           IPROD = EDAT(EPNTK+1) ! CROD(ICROD,2)
 
           ! PROD: I=   1; PID=      20; MID=       1; A=  1.0000; J=  0.0000
@@ -254,10 +256,10 @@
 
         ELSE IF (ETYPE(I)(1:5) .EQ. 'SHEAR') THEN
           ! 6 fields
-          ICSHEAR = ICSHEAR + 1
           DO J=1,6
             CSHEAR(ICSHEAR, J) = EDAT(EPNTK-1+J)
           ENDDO
+          ICSHEAR = ICSHEAR + 1
           !WRITE(ERR,6) ETYPE(I)(1:5), (EDAT(EPNTK-1+J), J=1,6)
 
 !        ELSE IF (ETYPE(I)(1:5) .EQ. 'TETRA4') THEN

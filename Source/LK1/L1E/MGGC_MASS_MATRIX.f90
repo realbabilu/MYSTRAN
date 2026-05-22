@@ -30,11 +30,11 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06, SC1, WRT_ERR
-      USE SCONTR, ONLY                :  NGRID, NTERM_MGGC, BLNK_SUB_NAM
+      USE SCONTR, ONLY                :  NCMASS, NGRID, NPMASS, NTERM_MGGC, BLNK_SUB_NAM
       USE CONSTANTS_1, ONLY           :  ZERO
       USE PARAMS, ONLY                :  EPSIL, SPARSTOR, WTMASS
       USE TIMDAT, ONLY                :  TSEC
-      USE MODEL_STUF, ONLY            :  AGRID, GRID_ID, INV_GRID_SEQ
+      USE MODEL_STUF, ONLY            :  AGRID, CMASS, GRID_ID, INV_GRID_SEQ, PMASS, RPMASS
       USE SPARSE_MATRICES, ONLY       :  I_MGGC, J_MGGC, MGGC
 
       USE MGGC_MASS_MATRIX_USE_IFs
@@ -80,6 +80,9 @@ i_do1:DO I=1,NGRID
 
          GRID_NUM = GRID_ID(INV_GRID_SEQ(I))               ! GRID_NUM's are in TDOFI order (internal DOF order)
          CALL MGG_CONM2_PROC ( I, GRID_NUM, MGG_CONM2, MGG_CONM2_NONZERO )
+         IF (I >= NGRID-4) THEN
+            WRITE(F06,'(A,2I8)') 'MGGGRIDDBG I,GRID_NUM =', I, GRID_NUM
+         ENDIF
          CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
 
          IF (MGG_CONM2_NONZERO == 'Y') THEN
@@ -125,6 +128,9 @@ i_do1:DO I=1,NGRID
 
 
 
+      IF ((GRID_NUM == 28) .OR. (GRID_NUM == 29)) THEN
+         WRITE(F06,'(A,I8,A,6ES14.6)') 'CMASSDBG DIAG GRID ', GRID_NUM, ' = ', MGG_CONM2(1,1), MGG_CONM2(2,2), MGG_CONM2(3,3), MGG_CONM2(4,4), MGG_CONM2(5,5), MGG_CONM2(6,6)
+      ENDIF
       RETURN
 
 ! ##################################################################################################################################
@@ -139,10 +145,10 @@ i_do1:DO I=1,NGRID
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
-      USE SCONTR, ONLY                :  NCONM2, NGRID, BLNK_SUB_NAM
+      USE SCONTR, ONLY                :  NCMASS, NCONM2, NGRID, NPMASS, BLNK_SUB_NAM
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
-      USE MODEL_STUF, ONLY            :  CONM2, RCONM2
+      USE MODEL_STUF, ONLY            :  CMASS, CONM2, PMASS, RCONM2, RPMASS
       USE PARAMS, ONLY                :  ART_MASS, ART_ROT_MASS, ART_TRAN_MASS
 
       IMPLICIT NONE
@@ -153,10 +159,13 @@ i_do1:DO I=1,NGRID
       INTEGER(LONG), INTENT(IN)       :: INT_GRID_ID       ! The internal grid number for which we create a 6 x 6 mass matrix for
 !                                                            one CONM2 (if one exists for this grid)
       INTEGER(LONG), INTENT(IN)       :: GRID_NUM          ! The actual grid number for internal grid ID INT_GRID_ID
+      INTEGER(LONG)                   :: CMASS_COMP        ! Structural component number for CMASS attached to this grid
       INTEGER(LONG)                   :: I,J,L             ! DO loop indices or counters
+      INTEGER(LONG)                   :: PMASS_ID          ! Property id backing one CMASS row
 
 
       REAL(DOUBLE) , INTENT(OUT)      :: MGG_CONM2(6,6)    ! 6 X 6 mass matrix in global coords for one CONM2
+      REAL(DOUBLE)                    :: SCALAR_MASS       ! Mass value from PMASS/RPMASS for one CMASS row
 
 
 
@@ -230,6 +239,42 @@ i_do1:DO I=1,NGRID
 
       ENDDO
 
+! Process CMASS entries attached directly to structural grid components for this grid.
+! These need to behave like directional concentrated structural masses, not like generic scalar-point masses.
+
+      DO L=1,NCMASS
+
+         IF ((GRID_NUM == 28) .OR. (GRID_NUM == 29)) THEN
+            WRITE(F06,'(A,I8,A,I8,A,4I8)') 'CMASSDBG CAND GRID ', GRID_NUM, ' ROW ', L, ' C(4:7)=', CMASS(L,4), CMASS(L,5), CMASS(L,6), CMASS(L,7)
+            WRITE(SC1,'(A,I8,A,I8,A,4I8)') 'CMASSDBG CAND GRID ', GRID_NUM, ' ROW ', L, ' C(4:7)=', CMASS(L,4), CMASS(L,5), CMASS(L,6), CMASS(L,7)
+         ENDIF
+         CMASS_COMP = 0
+         IF (CMASS(L,4) == GRID_NUM) THEN
+            CMASS_COMP = CMASS(L,5)
+         ELSE IF (CMASS(L,6) == GRID_NUM) THEN
+            CMASS_COMP = CMASS(L,7)
+         ENDIF
+
+         IF ((CMASS_COMP >= 1) .AND. (CMASS_COMP <= 6)) THEN
+            PMASS_ID = CMASS(L,3)
+            SCALAR_MASS = ZERO
+            DO J=1,NPMASS
+               IF (PMASS(J,1) == PMASS_ID) THEN
+                  SCALAR_MASS = RPMASS(J,1)
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (SCALAR_MASS /= ZERO) THEN
+               MGG_CONM2(CMASS_COMP,CMASS_COMP) = MGG_CONM2(CMASS_COMP,CMASS_COMP) + SCALAR_MASS
+               MGG_CONM2_NONZERO = 'Y'
+            ENDIF
+               IF ((GRID_NUM == 28) .OR. (GRID_NUM == 29)) THEN
+                  WRITE(F06,'(A,I8,A,I8,A,ES14.6)') 'CMASSDBG ADD GRID ', GRID_NUM, ' COMP ', CMASS_COMP, ' MASS ', SCALAR_MASS
+               ENDIF
+         ENDIF
+
+      ENDDO
+
 
 
       RETURN
@@ -242,3 +287,4 @@ i_do1:DO I=1,NGRID
       END SUBROUTINE MGG_CONM2_PROC
 
       END SUBROUTINE MGGC_MASS_MATRIX
+
