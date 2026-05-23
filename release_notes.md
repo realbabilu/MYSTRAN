@@ -1,3 +1,79 @@
+## 18.0.0 Patched Distribution (2026/05/23)
+
+
+This branch is maintained as the active patched `MYSTRAN 18.0.0` public
+distribution. It includes the local source stack currently used for Windows
+builds and solver validation, while keeping internal development archives out of
+the repository tree.
+
+Added:
+ - Response spectrum modernization and NX-style groundwork:
+   - `SDAMP`
+   - `TABDMP1`
+   - `DTI,SPECSEL`
+   - `PARAM,OPTION` support for `SRSS`, `CQC`, `ABS`, and `10PCT`
+   - active/effective modal mass reporting for response spectrum workflows
+   - initial `SOL SEMODES` alias with explicit fatal errors for unsupported
+     NX-style features
+ - Native `PBEAML` parser support for selected section types mapped onto the
+   internal `PBEAM` station runtime:
+   - validated smoke coverage for `I`, `BAR`, `BOX`, `ROD`, `TUBE`, and `TUBE2`
+ - `NLSTATIC` routing state for the current `pdelta_add` baseline
+ - `CBEAM` station-based stress/force recovery and export support, including:
+   - dedicated `WRITE_CBEAM_STRESS`
+   - OP2 beam stress writing path updates
+   - FEMAP `NEU` beam force/stress export updates
+ - External build documentation for the public branch:
+   - MinGW/Equation.com workflow
+   - Intel oneAPI notes
+   - external SuperLU path
+   - optional FEAST and MUMPS path
+ - Third-party license bundle for the public branch:
+   - ARPACK
+   - CHASE
+   - FEAST 4.0
+   - MUMPS
+
+Changed:
+ - Reworked the public branch layout around a patched `18.0.0` distribution
+   branch (`mystran18-main`) rather than the earlier internal staging branches.
+ - Expanded LAPACK/ARPACK helper split and peel-off integration already present
+   in the optimized local source stack.
+ - Updated the public build path to document mandatory BLAS usage
+   (`OpenBLAS`, `MKL`, `AOCL`, or `BLIS/FLAME`) together with external sparse
+   solver options.
+
+Fixed:
+ - `CBEAM` recovery and export issues:
+   - corrected fixed-end load contribution in 1D element recovery
+   - corrected subcase-specific pressure/load pointer handling
+   - corrected `Static-06` parity against the preserved NX/FEMAP validation
+     reference for `F06`, `NEU`, and `OP2`
+ - `CBEAM`/`PBEAM` integration issues:
+   - `PBEAM` inertia validation now uses the correct just-read section values
+   - second-pass `CBEAM` buckling path uses the corrected local force route
+ - Parser and continuation hardening:
+   - `SPC1` continuation handling improvements
+   - `RBE2` continuation handling cleanup
+   - `PLOAD1` / pressure processing fixes required by the current 1D and
+     response-spectrum validation decks
+ - Response spectrum single-direction `CQC` output path:
+   - corrected combined output so written grid results match the actual modal
+     combination instead of a pre-combination buffer
+ - `RBE2` rigid-body mapping cleanup:
+   - reverted the incorrect `dy/dz` swap experiment so the active source again
+     matches rigid-body cross-product theory
+
+Validated benchmark groups used during this branch build-out included:
+ - Response spectrum:
+   - `Problem 1-024`
+   - `Problem 1-025`
+ - `CBEAM` export parity:
+   - `Static-06`
+ - Native `PBEAML` to internal `PBEAM` mapping:
+   - cantilever smoke decks for `I`, `BAR`, `BOX`, `ROD`, `TUBE`, and `TUBE2`
+
+
 ## 17.0.0 (2025/08/24)
 
 

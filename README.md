@@ -1,6 +1,8 @@
 MYSTRAN
 =======
 
+Patched MYSTRAN 18.0.0 A 23-05-2026
+
 MYSTRAN is an acronym for “My Structural Analysis” (https://www.mystran.com)
 
 
