@@ -85,7 +85,8 @@
       USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC, YEAR, MONTH, DAY, STIME,                                        &
                                          START_HOUR, START_MINUTE, START_SEC, START_SFRAC, START_YEAR, START_MONTH, START_DAY
 
-      USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP, NL_ITER_NUM, NL_MAXITER, NL_NORM, NL_NUM_LOAD_STEPS
+      USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP, NL_ITER_NUM, NL_MAXITER, NL_NORM, NL_NUM_LOAD_STEPS,                        &
+                                         NL_MODE_ACTIVE, NL_MODE_NAME, NL_MODE_NONE, NL_MODE_106, NL_MODE_400
 
       USE PARAMS, ONLY                :  EPSIL, RELINK3, SUPWARN
       USE CONSTANTS_1, ONLY           :  ZERO
@@ -217,6 +218,18 @@
          CALL LINK0                                        ! Call LINK's to process input and solve problem.
 
       ENDIF
+
+! --- codex_mod sol106_add begin ---
+      NL_MODE_ACTIVE = NL_MODE_NONE
+      NL_MODE_NAME   = 'NONE            '
+      IF (SOL_NAME(1:8) == 'NLSTATIC') THEN
+         NL_MODE_ACTIVE = NL_MODE_106
+         NL_MODE_NAME   = 'SOL 106-like    '
+         WRITE(SC1,'(1X,A)') 'NLSTATIC routing mode: SOL 106-like (NLSTATIC_PDELTA baseline)'
+         WRITE(F06,'(/,1X,A)') 'NLSTATIC routing mode: SOL 106-like (NLSTATIC_PDELTA baseline)'
+         WRITE(ERR,'(/,1X,A)') 'NLSTATIC routing mode: SOL 106-like (NLSTATIC_PDELTA baseline)'
+      ENDIF
+! --- codex_mod sol106_add end ---
 
       IF ((SOL_NAME(1:8) == 'DIFFEREN') .OR. (SOL_NAME(1:8) == 'NLSTATIC')) THEN
          ALLOCATE(UG_NORM(NL_NUM_LOAD_STEPS,NL_MAXITER))

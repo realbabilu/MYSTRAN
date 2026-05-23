@@ -35,10 +35,18 @@
       SAVE
 
       CHARACTER(10*BYTE)              :: NL_NORM   = 'INFINITY  '! Method to use when getting the vector norm of UG_COL
+      CHARACTER(16*BYTE)              :: NL_MODE_NAME = 'NONE            '
 
       INTEGER(LONG)                   :: LOAD_ISTEP        = 0   ! In nonlinear statics, the load step number
 !                                                                  In BUCKLING: 1 is the linear static sol'n,
 !                                                                               2 is the BUCKLING eigen step
+
+! --- codex_mod sol106_add begin ---
+      INTEGER(LONG), PARAMETER        :: NL_MODE_NONE = 0
+      INTEGER(LONG), PARAMETER        :: NL_MODE_106  = 106
+      INTEGER(LONG), PARAMETER        :: NL_MODE_400  = 400
+      INTEGER(LONG)                   :: NL_MODE_ACTIVE = NL_MODE_NONE
+! --- codex_mod sol106_add end ---
 
       INTEGER(LONG)                   :: NL_ITER_NUM       = 0   ! Iteration number within any 1 load step
       INTEGER(LONG)                   :: NL_MAXITER        = 25  ! Max number of iterations per load step

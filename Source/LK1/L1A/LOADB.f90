@@ -177,6 +177,10 @@ bdf:  DO
             WRITE(F06,101) CARD1
          ENDIF
 
+         IF ((CARD1(1:1) == '+') .OR. (CARD1(1:1) == '*')) THEN
+            CYCLE bdf
+         ENDIF
+
          ! Determine if the card is large or small format
          LARGE_FLD_INP = 'N'
          DO I=1,8
@@ -507,6 +511,9 @@ bdf:  DO
             CALL BD_PBARL    ( CARD, LARGE_FLD_INP, SEC_TYPE )
             IPBARL = IPBARL + 1
             PBARL_SEC_TYPES(IPBARL) = SEC_TYPE
+
+         ELSE IF (CARD(1:6) == 'PBEAML'  )  THEN
+            CALL BD_PBEAML  ( CARD, LARGE_FLD_INP )
 
          ELSE IF (CARD(1:5) == 'PBEAM'   )  THEN
             CALL BD_PBEAM   ( CARD, LARGE_FLD_INP )

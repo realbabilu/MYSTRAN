@@ -59,6 +59,7 @@
 
       CHARACTER(LEN=BD_ENTRY_LEN)     :: CARD1             ! BD card (a small field card or the 1st half of a large field card)
       CHARACTER(LEN=BD_ENTRY_LEN)     :: CARD2             ! 2nd half of a large field card
+      CHARACTER(LEN=BD_ENTRY_LEN)     :: RAW_LINE          ! Raw continuation line used to skip native PBEAML chains
       CHARACTER( 9*BYTE)              :: DECK_NAME   = 'BULK DATA'
       CHARACTER( 1*BYTE)              :: LARGE_FLD_INP     ! If 'Y', card is in large field format
 
@@ -79,6 +80,7 @@
       INTEGER(LONG)                   :: IRSPLINE          ! Number of fields that can have a grid or comp num on an RSPLINE entry
       INTEGER(LONG)                   :: ISPCADD           ! Number of SPC set ID's defined on 1 B.D. SPCADD card
       INTEGER(LONG)                   :: IPLIES            ! Number of composite layers on 1 B.D. PCOMP card
+      INTEGER(LONG)                   :: IFIRST            ! First nonblank column on a raw line
       INTEGER(LONG)                   :: NG_USERIN         ! Number of grids found on USERIN elems (not incl SPOINT's)
       INTEGER(LONG)                   :: NS_USERIN         ! Number of SPOINT's found on USERIN elems
 
@@ -132,6 +134,10 @@
 
          IF (COMMENT_COL > 1) THEN
             CARD1(COMMENT_COL:) = ' '
+         ENDIF
+
+         IF ((CARD1(1:1) == '+') .OR. (CARD1(1:1) == '*')) THEN
+            CYCLE
          ENDIF
 
          ! Determine if the card is large or small format
@@ -396,6 +402,32 @@
          ELSE IF (CARD(1:5) == 'PBARL'   )  THEN
             LPBAR  = LPBAR  + 1
             NPBARL = NPBARL + 1
+
+         ELSE IF (CARD(1:6) == 'PBEAML'  )  THEN
+            LPBEAM = LPBEAM + 1
+skip_pbeaml0: DO
+               CALL READ_BDF_LINE(IN1, IOCHK, RAW_LINE)
+               IF (IOCHK < 0) EXIT skip_pbeaml0
+               IF (IOCHK > 0) THEN
+                  WRITE(ERR,1010) DECK_NAME
+                  WRITE(F06,1010) DECK_NAME
+                  WRITE(F06,'(A)') RAW_LINE
+                  FATAL_ERR = FATAL_ERR + 1
+                  EXIT skip_pbeaml0
+               ENDIF
+               IFIRST = 0
+               DO I=1,BD_ENTRY_LEN
+                  IF (RAW_LINE(I:I) /= ' ') THEN
+                     IFIRST = I
+                     EXIT
+                  ENDIF
+               ENDDO
+               IF (IFIRST == 0) CYCLE skip_pbeaml0
+               IF (RAW_LINE(IFIRST:IFIRST) /= '+') THEN
+                  BACKSPACE(IN1)
+                  EXIT skip_pbeaml0
+               ENDIF
+            ENDDO skip_pbeaml0
 
          ELSE IF (CARD(1:5) == 'PBEAM'   )  THEN
             LPBEAM = LPBEAM + 1
