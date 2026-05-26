@@ -1257,8 +1257,8 @@
                                                                  'U S E R 1    ', & !         22
                                                                  'U S E R I N  ', & !         23
                                                                  'C Q U A D R  ', & !         24
-                                                                 'P Y R A  5   ', & !         25
-                                                                 'P Y R A  14  '/)  !         26
+                                                                 'C P Y R A M 5', & !         25
+                                                                 'C P Y R A M14'/)  !         26
 
                                                              ! Array of number of grid points for the various element types
       INTEGER(LONG)                   :: NELGP(METYPE)       =  (/ 2,             & ! BAR      1
@@ -1315,8 +1315,8 @@
                                                                    1,             & ! USER1   22
                                                                    0,             & ! USERIN  23
                                                                    5,             & ! QUADR   24
-                                                                   1,             & ! PYRA5   25
-                                                                   1/)              ! PYRA14  26
+                                                                   6,             & ! PYRA5   25
+                                                                  15/)              ! PYRA14  26
 
 ! **********************************************************************************************************************************
 ! Individual element data generated one element at a time (in subr EMG)

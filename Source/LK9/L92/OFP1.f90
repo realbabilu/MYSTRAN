@@ -84,9 +84,6 @@
       LOGICAL                         :: WRITE_NEU
 
       INTRINSIC IAND
-      WRITE(ERR,9000) "OFP1 - disp, accel and applied force output"
- 9000 FORMAT(' *DEBUG:    RUNNING=', A)
-
       WRITE_NEU = (PRTNEU == 'Y')
 
 
@@ -107,7 +104,6 @@
 ! Process acceleration output requests for CB sol.
 
 !      TODO: where is the velocity output?
- 9002 FORMAT(" *DEBUG:      WHAT=",A,"; NGRID",I8, "; NREQ=",I8, "; SC_OUT_REQ=",I8)
       IF (WHAT == 'ACCE') THEN
 
          IROW_FILE = 0
@@ -136,7 +132,6 @@
          ENDDO
 
          NUM  = 0
-         write(ERR,9002) WHAT, NGRID, NREQ, SC_OUT_REQ
          DO I=1,NGRID                                      ! Prepare OGEL so subr WRITE_GRD_PRT_OUTPUTS can output requested items
             IB = IAND(GROUT(I,INT_SC_NUM),IBIT(GROUT_ACCE_BIT))
             IF (IB > 0) THEN
@@ -223,7 +218,6 @@
 
          ! Prepare OGEL so subr WRITE_GRD_PRT_OUTPUTS can output requested items
          NUM  = 0
-         write(ERR,9002) WHAT, NGRID, NREQ, SC_OUT_REQ
          DO I=1,NGRID
             IB = IAND(GROUT(I,INT_SC_NUM),IBIT(GROUT_DISP_BIT))
             IF (IB > 0) THEN
@@ -306,7 +300,6 @@
          ENDDO
 
          NUM = 0
-         write(ERR,9002) WHAT, NGRID, NREQ, SC_OUT_REQ
          DO I=1,NGRID                                      !
             IB = IAND(GROUT(I,INT_SC_NUM),IBIT(GROUT_OLOA_BIT))
             IF (IB > 0) THEN

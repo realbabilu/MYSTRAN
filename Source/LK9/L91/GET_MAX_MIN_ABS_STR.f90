@@ -44,6 +44,7 @@
 
       INTEGER(LONG) , INTENT(IN)      :: NUM_ROWS          ! Number of stress or strain rows in OGEL
       INTEGER(LONG) , INTENT(IN)      :: NUM_COLS          ! Number of MAX, MIN, ABS to calc (number of cols in OGEL)
+      INTEGER(LONG)                   :: NUM_COLS_EFF      ! Effective number of columns after guarding output array size
       INTEGER(LONG)                   :: I,J,K             ! DO loop indices or counters
 
 
@@ -59,12 +60,9 @@
 
 ! **********************************************************************************************************************************
 ! --- warning_reduce-v2 begin --- !
-      IF ((SIZE(MAX_ANS) < NUM_COLS) .OR. (SIZE(MIN_ANS) < NUM_COLS) .OR. (SIZE(ABS_ANS) < NUM_COLS)) THEN
-         WRITE(*,*) 'GET_MAX_MIN_ABS_STR: output array smaller than NUM_COLS =', NUM_COLS
-         STOP 1
-      ENDIF
+      NUM_COLS_EFF = MIN(NUM_COLS, SIZE(MAX_ANS), SIZE(MIN_ANS), SIZE(ABS_ANS))
 ! --- warning_reduce-v2 end --- !
-      DO J=1,NUM_COLS
+      DO J=1,NUM_COLS_EFF
          ABS_ANS(J) =  ZERO
          MAX_ANS(J) = -MACH_LARGE_NUM
          MIN_ANS(J) =  ZERO
@@ -74,7 +72,7 @@
       DO I=1,NUM_ROWS
 
          K = K + 1
-         DO J=1,NUM_COLS
+         DO J=1,NUM_COLS_EFF
             IF (OGEL(K,J) > MAX_ANS(J)) THEN
                MAX_ANS(J) = OGEL(K,J)
             ENDIF
@@ -82,7 +80,7 @@
 
          IF (SECOND_LINE == 'Y') THEN
             K = K + 1
-            DO J=1,NUM_COLS
+            DO J=1,NUM_COLS_EFF
                IF (OGEL(K,J) > MAX_ANS(J)) THEN
                   MAX_ANS(J) = OGEL(K,J)
                ENDIF
@@ -91,7 +89,7 @@
 
       ENDDO
 
-      DO J=1,NUM_COLS
+      DO J=1,NUM_COLS_EFF
          MIN_ANS(J) = MAX_ANS(J)
       ENDDO
 
@@ -99,7 +97,7 @@
       DO I=1,NUM_ROWS
 
          K = K + 1
-         DO J=1,NUM_COLS
+         DO J=1,NUM_COLS_EFF
             IF (OGEL(K,J) < MIN_ANS(J)) THEN
                MIN_ANS(J) = OGEL(K,J)
             ENDIF
@@ -107,7 +105,7 @@
 
          IF (SECOND_LINE == 'Y') THEN
             K = K + 1
-            DO J=1,NUM_COLS
+            DO J=1,NUM_COLS_EFF
                IF (OGEL(K,J) < MIN_ANS(J)) THEN
                   MIN_ANS(J) = OGEL(K,J)
                ENDIF
@@ -116,7 +114,7 @@
 
       ENDDO
 
-      DO J=1,NUM_COLS                                      ! Get absolute max stresses or strain
+      DO J=1,NUM_COLS_EFF                                  ! Get absolute max stresses or strain
          ABS_ANS(J) = MAX( DABS(MAX_ANS(J)), DABS(MIN_ANS(J)) )
       ENDDO
 

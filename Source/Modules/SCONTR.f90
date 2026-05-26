@@ -437,7 +437,7 @@
       INTEGER(LONG), PARAMETER :: DEDAT_Q8_POFFS_KEY  =  12      ! Delta in EDAT for QUAD8 to get from EID to the offset key
       INTEGER(LONG), PARAMETER :: DEDAT_Q8_SHELL_KEY  =  13      ! Delta in EDAT for QUAD8 to get from EID to the shell/pcomp key
       INTEGER(LONG), PARAMETER :: DEDAT_Q8_THICK_KEY  =  14      ! Delta in EDAT for QUAD8 to get from EID to the thickness key
-      INTEGER(LONG), PARAMETER :: MAX_FEMAP_COLS      =  22      ! Max number of columns for array FEMAP_ELEM_VECS
+      INTEGER(LONG), PARAMETER :: MAX_FEMAP_COLS      =  24      ! Max number of columns for array FEMAP_ELEM_VECS
       INTEGER(LONG), PARAMETER :: MAX_NUM_STR         =   9      ! Number of different stresses/strains
       INTEGER(LONG), PARAMETER :: MAX_ORDER_GAUSS     =  10      ! Max order that can be used when subr ORDER_GAUSS is called
       INTEGER(LONG), PARAMETER :: MAX_ORDER_TETRA     =   4      ! Max order that can be used when subr ORDER_TETRA is called
@@ -484,7 +484,7 @@
       INTEGER(LONG), PARAMETER :: METYPE              =  26      ! Max number of element types
       INTEGER(LONG), PARAMETER :: MFIJ                =   5      ! Max number of disk files for WRT_FIJ (F21, F22, etc files)
       INTEGER(LONG), PARAMETER :: MGRID               =   6      ! No. cols allowed in dimensioning array GRID
-      INTEGER(LONG), PARAMETER :: MGROUTS             =   6      ! No. of types of grid related outputs
+      INTEGER(LONG), PARAMETER :: MGROUTS             =   7      ! No. of types of grid related outputs
 !                                                                  (ACCE, DISP, OLOA, SPCF, GPFO, MPCF)
       INTEGER(LONG), PARAMETER :: MMATL               =   2      ! No. cols allowed in dimensioning array MATL
       INTEGER(LONG), PARAMETER :: MMSPRNT             =   3      ! No. cols allowed in dimensioning array MSPRNT

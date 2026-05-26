@@ -42,7 +42,7 @@
       IMPLICIT NONE
 
       INTEGER(LONG), PARAMETER         :: NUM_POSS_CCD = 31 ! Number of possible CC command describers (incl all MSC ones as well)
-      INTEGER(LONG), PARAMETER         :: NUM_OUT_TYP  =  9 ! Number of OUTPUT_TYPE's
+      INTEGER(LONG), PARAMETER         :: NUM_OUT_TYP  = 9  ! Number of OUTPUT_TYPE's
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)) :: SUBR_NAME = 'CHK_CC_CMD_DESCRIBERS'
       CHARACTER(LEN=*), INTENT(IN)     :: WHAT              ! What Case Control output is this call for (e.g. 'DISP')
@@ -59,6 +59,7 @@
       INTEGER(LONG)                    :: I,J               ! DO loop indices
       INTEGER(LONG)                    :: JCOL              ! Designator of a column in an array
 
+      LOGICAL                          :: HAS_CENTER, HAS_CORNER
       LOGICAL                          :: IS_PLOT, IS_PRINT, IS_PUNCH
 
 
@@ -83,7 +84,7 @@
       ENDIF
 
       IS_PLOT = ((WHAT == 'ACCE') .OR. (WHAT == 'DISP') .OR. (WHAT == 'ELFO') .OR. (WHAT == 'GPFO')  .OR.  &
-                 (WHAT == 'MPCF') .OR. (WHAT == 'OLOA') .OR. (WHAT == 'SPCF') .OR.  &
+                 (WHAT == 'MPCF') .OR. (WHAT == 'OLOA') .OR. (WHAT == 'SPCF') .OR. &
                  (WHAT == 'STRE') .OR. (WHAT == 'STRN'))
 
       ! same as plot
@@ -112,9 +113,9 @@
       ALLOW_CC_CMD_DESCR(12, 1) = '        ' ; ALLOW_CC_CMD_DESCR(12, 2) = '        ' ; ALLOW_CC_CMD_DESCR(12, 3) = '        '
       ALLOW_CC_CMD_DESCR(13, 1) = '        ' ; ALLOW_CC_CMD_DESCR(13, 2) = '        ' ; ALLOW_CC_CMD_DESCR(13, 3) = '        '
       ALLOW_CC_CMD_DESCR(14, 1) = '        ' ; ALLOW_CC_CMD_DESCR(14, 2) = '        ' ; ALLOW_CC_CMD_DESCR(14, 3) = '        '
-      ALLOW_CC_CMD_DESCR(15, 1) = '        ' ; ALLOW_CC_CMD_DESCR(15, 2) = '        ' ; ALLOW_CC_CMD_DESCR(15, 3) = '        '
-      ALLOW_CC_CMD_DESCR(16, 1) = '        ' ; ALLOW_CC_CMD_DESCR(16, 2) = '        ' ; ALLOW_CC_CMD_DESCR(16, 3) = '        '
-      ALLOW_CC_CMD_DESCR(17, 1) = '        ' ; ALLOW_CC_CMD_DESCR(17, 2) = '        ' ; ALLOW_CC_CMD_DESCR(17, 3) = '        '
+      ALLOW_CC_CMD_DESCR(15, 1) = '        ' ; ALLOW_CC_CMD_DESCR(15, 2) = '        ' ; ALLOW_CC_CMD_DESCR(15, 3) = 'CENTER  '
+      ALLOW_CC_CMD_DESCR(16, 1) = '        ' ; ALLOW_CC_CMD_DESCR(16, 2) = '        ' ; ALLOW_CC_CMD_DESCR(16, 3) = 'CORNER  '
+      ALLOW_CC_CMD_DESCR(17, 1) = '        ' ; ALLOW_CC_CMD_DESCR(17, 2) = '        ' ; ALLOW_CC_CMD_DESCR(17, 3) = 'BILIN   '
       ALLOW_CC_CMD_DESCR(18, 1) = '        ' ; ALLOW_CC_CMD_DESCR(18, 2) = '        ' ; ALLOW_CC_CMD_DESCR(18, 3) = '        '
       ALLOW_CC_CMD_DESCR(19, 1) = '        ' ; ALLOW_CC_CMD_DESCR(19, 2) = '        ' ; ALLOW_CC_CMD_DESCR(19, 3) = '        '
       ALLOW_CC_CMD_DESCR(20, 1) = 'PSDF    ' ; ALLOW_CC_CMD_DESCR(20, 2) = 'PSDF    ' ; ALLOW_CC_CMD_DESCR(20, 3) = 'PSDF    '
@@ -199,6 +200,7 @@
 ! Check that every word that is in CC_CMD_DESCRIBERS is a member of ALLOW_CC_CMD_DESCR.
 
 ido_1:DO I=1,NUM_WORDS
+         IF (IS_PLOT .AND. (CC_CMD_DESCRIBERS(I)(1:4) == 'POST')) CYCLE ido_1
 jdo_1:   DO J=1,NUM_POSS_CCD
             FOUND = 'N'
             IF (CC_CMD_DESCRIBERS(I) == ALLOW_CC_CMD_DESCR(J,JCOL)) THEN
@@ -293,15 +295,17 @@ jdo_1:   DO J=1,NUM_POSS_CCD
 
       IF (WHAT == 'STRE' ) THEN
 
+         HAS_CENTER = .FALSE.
+         HAS_CORNER = .FALSE.
+
          DO I=1,NUM_WORDS
 
-            ! TODO: CEN is valid for CENTER (test this)
             IF      (CC_CMD_DESCRIBERS(I)(1:6) == 'CENTER') THEN
-               STRE_LOC = 'CENTER'
+               HAS_CENTER = .TRUE.
             ELSE IF (CC_CMD_DESCRIBERS(I)(1:6) == 'CORNER') THEN
-               STRE_LOC = 'CORNER'
+               HAS_CORNER = .TRUE.
             ELSE IF (CC_CMD_DESCRIBERS(I)(1:5) == 'BILIN' ) THEN
-               STRE_LOC = 'CORNER'
+               HAS_CORNER = .TRUE.
             ENDIF
 
             ! TODO: MISES is valid for VONMISES (test this...)
@@ -315,18 +319,26 @@ jdo_1:   DO J=1,NUM_POSS_CCD
 
          ENDDO
 
+         IF (HAS_CORNER) THEN
+            STRE_LOC = 'CORNER'
+         ELSE IF (HAS_CENTER) THEN
+            STRE_LOC = 'CENTER'
+         ENDIF
+
       ENDIF
 
       IF (WHAT == 'STRN' ) THEN
 
+         HAS_CENTER = .FALSE.
+         HAS_CORNER = .FALSE.
+
          DO I=1,NUM_WORDS
-            ! TODO: CEN is valid for CENTER (test this)
             IF      (CC_CMD_DESCRIBERS(I)(1:6) == 'CENTER') THEN
-               STRN_LOC = 'CENTER'
+               HAS_CENTER = .TRUE.
             ELSE IF (CC_CMD_DESCRIBERS(I)(1:6) == 'CORNER') THEN
-               STRN_LOC = 'CORNER'
+               HAS_CORNER = .TRUE.
             ELSE IF (CC_CMD_DESCRIBERS(I)(1:5) == 'BILIN' ) THEN
-               STRN_LOC = 'CORNER'
+               HAS_CORNER = .TRUE.
             ENDIF
 
             ! TODO: MISES is valid for VONMISES (test this...)
@@ -340,22 +352,36 @@ jdo_1:   DO J=1,NUM_POSS_CCD
 
          ENDDO
 
+         IF (HAS_CORNER) THEN
+            STRN_LOC = 'CORNER'
+         ELSE IF (HAS_CENTER) THEN
+            STRN_LOC = 'CENTER'
+         ENDIF
+
       ENDIF
 
       IF (WHAT == 'ELFO' ) THEN
 
+         HAS_CENTER = .FALSE.
+         HAS_CORNER = .FALSE.
+
          DO I=1,NUM_WORDS
 
-            ! TODO: CEN is valid for CENTER (test this)
             IF      (CC_CMD_DESCRIBERS(I)(1:6) == 'CENTER') THEN
-               FORC_LOC = 'CENTER'
+               HAS_CENTER = .TRUE.
             ELSE IF (CC_CMD_DESCRIBERS(I)(1:6) == 'CORNER') THEN
-               FORC_LOC = 'CORNER'
+               HAS_CORNER = .TRUE.
             ELSE IF (CC_CMD_DESCRIBERS(I)(1:5) == 'BILIN' ) THEN
-               FORC_LOC = 'CORNER'
+               HAS_CORNER = .TRUE.
             ENDIF
 
          ENDDO
+
+         IF (HAS_CORNER) THEN
+            FORC_LOC = 'CORNER'
+         ELSE IF (HAS_CENTER) THEN
+            FORC_LOC = 'CENTER'
+         ENDIF
 
       ENDIF
 

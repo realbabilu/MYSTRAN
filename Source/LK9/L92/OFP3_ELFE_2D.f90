@@ -32,7 +32,8 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_BUG, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ELOUT_ELFE_BIT, FATAL_ERR, IBIT, INT_SC_NUM, MBUG, MOGEL,                   &
-                                         WARN_ERR, NELE, NCQUAD4, NCQUAD4K, NCSHEAR, NCTRIA3, NCTRIA3K, SOL_NAME, MAX_STRESS_POINTS
+                                         WARN_ERR, NELE, NCQUAD4, NCQUAD4K, NCQUADR, NCSHEAR, NCTRIA3, NCTRIA3K, SOL_NAME,         &
+                                         MAX_STRESS_POINTS
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, FOUR
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
@@ -136,7 +137,8 @@
       num_pcomp_elems = 0                                  ! Remove lower case code when I fix engr force output for PCOMP's
       DO I=1,METYPE
          DO J=1,NELE
-            IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J)(1:5) == 'QUAD8') .OR.                     &
+            IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J)(1:5) == 'QUADR') .OR.                   &
+               (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                                                     &
                (ETYPE(J)(1:5) == 'SHEAR') .OR. (ETYPE(J)(1:6) == 'USERIN')) THEN
                IF (ETYPE(J) == ELMTYP(I)) THEN
                   call is_elem_pcomp_props ( j )
@@ -188,12 +190,14 @@ elems_3: DO J = 1,NELE
             if (pcomp_props == 'N') then
                EID   = EDAT(EPNT(J))
                TYPE  = ETYPE(J)
-               IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J)(1:5) == 'QUAD8') .OR.                  &
+               IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J)(1:5) == 'QUADR') .OR.                 &
+                  (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                                                  &
                   (ETYPE(J)(1:5) == 'SHEAR') .OR. (ETYPE(J)(1:6) == 'USERIN')) THEN
                   IF (ETYPE(J) == ELMTYP(I)) THEN
                      ELOUT_ELFE = IAND(ELOUT(J,INT_SC_NUM),IBIT(ELOUT_ELFE_BIT))
                      IF (ELOUT_ELFE > 0) THEN
-                        IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J)(1:5) == 'QUAD8') .OR.         &
+                        IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J)(1:5) == 'QUADR') .OR.        &
+                           (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                                         &
                            (ETYPE(J)(1:5) == 'SHEAR')) THEN
                            OPT(4) = 'Y'
                         ENDIF
@@ -220,7 +224,7 @@ elems_3: DO J = 1,NELE
                         IF ((FORC_LOC == 'CORNER  ') .OR.                                                                          &
                             (ETYPE(J)(1:5) == 'QUAD8')) THEN
 
-                           IF (TYPE(1:5) == 'QUAD4') THEN
+                           IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
 
                                                            ! Extrapolate stress to corners
                               CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS(I), STRESS_OUT, STRESS_OUT_PCT_ERR,              &
@@ -280,11 +284,7 @@ elems_3: DO J = 1,NELE
 
                         IF (NUM_OGEL_ROWS == NELREQ(I)) THEN
                            CALL CHK_OGEL_ZEROS ( NUM_OGEL )
-
- 100                       FORMAT("*DEBUG:      ",A,"; ELEMENT_TYPE=",A,"; TABLE_NAME=",A,"; ITABLE=",I8)
-                           WRITE(ERR,100) "F3",ETYPE(J),TABLE_NAME,ITABLE
                            CALL SET_OEF_TABLE_NAME(ETYPE(J), TABLE_NAME, ITABLE)
-                           WRITE(ERR,100) "F4",ETYPE(J),TABLE_NAME,ITABLE
                            CALL WRITE_ELEM_ENGR_FORCE ( JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS(I), ITABLE )
                            EXIT
                         ENDIF
@@ -295,8 +295,6 @@ elems_3: DO J = 1,NELE
          ENDDO elems_3
       ENDDO reqs3
 
- 10   FORMAT("*DEBUG:      OEF_END 2D:    TABLE_NAME",A)
-      WRITE(ERR,10) TABLE_NAME
       IF ((TABLE_NAME .NE. "OEF ERR ") .AND. (ITABLE < 0)) THEN
         CALL END_OP2_TABLE(ITABLE)
       ENDIF
@@ -412,11 +410,11 @@ elems_3: DO J = 1,NELE
          CALL DEALLOCATE_FEMAP_DATA
 
          NUM_FROWS= 0
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCQUAD4, 8, SUBR_NAME )
-         DO J=1,NELE                                       ! Write out QUAD4 engineering forces
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCQUAD4 + NCQUADR, 8, SUBR_NAME )
+         DO J=1,NELE                                       ! Write out QUAD4/CQUADR engineering forces
             EID   = EDAT(EPNT(J))
             TYPE  = ETYPE(J)
-            IF (ETYPE(J)(1:6) == 'QUAD4 ') THEN
+            IF ((ETYPE(J)(1:6) == 'QUAD4 ') .OR. (ETYPE(J) == 'QUADR   ')) THEN
                NUM_FROWS= NUM_FROWS+ 1
                OPT(4) = 'Y'
                DO K=0,MBUG-1
@@ -443,7 +441,7 @@ elems_3: DO J = 1,NELE
             ENDIF
          ENDDO
          IF (NUM_FROWS > 0) THEN
-            CALL WRITE_FEMAP_ELFO_VECS ( 'QUAD4   ', NUM_FROWS, FEMAP_SET_ID )
+            CALL WRITE_FEMAP_ELFO_VECS ( 'QUADR   ', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
 

@@ -34,7 +34,7 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
       USE MODEL_STUF, ONLY            :  EDAT, ELMTYP, ELOUT, EPNT, ESORT2, ETYPE, GROUT, MEFFMASS_CALC, MPFACTOR_CALC, NELGP,     &
-                                         NUM_PLIES, PBEAM_NSTATIONS, PCOMP_PROPS, SCNUM, TYPE
+                                         NUM_PLIES, PBEAM_NSTATIONS, PCOMP_PROPS, OGROUT, SCNUM, TYPE
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC
       USE LINK9_STUFF, ONLY           :  MAXREQ
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -278,7 +278,7 @@
             ELSE
                NUMBER_ROWS(K) = 2*NUM_SEi(LETYPE)          !    CQUAD8 stress output is CORNER even if CENTER is specified.
             ENDIF
-         ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+         ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
             NUMBER_ROWS(K) = NUM_SEi(LETYPE)
          ENDIF
 
@@ -305,7 +305,7 @@
                   NUMBER_ROWS(K) = 2*NUM_SEi(LETYPE)
                ENDIF
             ENDIF
-         ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+         ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
             NUMBER_ROWS(K) = NUM_SEi(LETYPE)
          ENDIF
 

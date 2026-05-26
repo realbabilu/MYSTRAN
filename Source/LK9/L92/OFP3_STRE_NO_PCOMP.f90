@@ -30,21 +30,23 @@
 ! for stresses for Craig-Bampton models)
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_BUG, ERR, F06
+      USE IOUNT1, ONLY                :  WRT_BUG, ERR, F06, NEU
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ELOUT_STRE_BIT, FATAL_ERR, IBIT, INT_SC_NUM,                                &
                                          MAX_STRESS_POINTS, MBUG, MOGEL,                                                           &
-                                         NELE, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20,      &
+                                         NELE, NGRID, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20,&
                                          NCPENTA6,                                                                                   &
-                                         NCPENTA15,NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCROD, NCSHEAR, NCTRIA3, NCTRIA3K,      &
+                                         NCPENTA15, NCPYRA5, NCPYRA14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, NCROD,    &
+                                         NCSHEAR,                                                                                     &
+                                         NCTRIA3, NCTRIA3K,                                                                         &
                                          SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO, ONE, FOUR
+      USE CONSTANTS_1, ONLY           :  ZERO, HALF, ONE, THREE, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
       USE PARAMS, ONLY                :  OTMSKIP, PRTNEU
       USE MODEL_STUF, ONLY            :  AGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
-                                         ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, PCOMP_PROPS, PLY_NUM, STRESS,   &
-                                         PBEAM_NSTATIONS, TYPE, SHELL_STR_ANGLE, ZS
+                                         ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, OGROUT, PCOMP_PROPS, PLY_NUM,   &
+                                         STRESS, PBEAM_NSTATIONS, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRE, TXT_STRE
@@ -96,7 +98,6 @@
       REAL(DOUBLE)                    :: C1,C2,D1,D2,E1,E2,F1,F2
       REAL(DOUBLE)                    :: EA0,EA1,EA2,EA3,EA4,EAMAX,EAMIN
       REAL(DOUBLE)                    :: EB0,EB1,EB2,EB3,EB4,EBMAX,EBMIN
-
                                                            ! Array of values from array STRESS for all stress points
       REAL(DOUBLE)                    :: STRESS_RAW(9,MAX_STRESS_POINTS+1)
 
@@ -152,6 +153,7 @@
                      IF ((STRE_LOC == 'CORNER  ') .OR.                                                                            &
                          (STRE_LOC == 'GAUSS   ') .OR.                                                                            &
                          (ETYPE(J)(1:4) == 'HEXA') .OR.                                                                           &
+                         (ETYPE(J)(1:4) == 'PYRA') .OR.                                                                           &
                          (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'QUAD8')) THEN
@@ -234,11 +236,12 @@ elems_5: DO J = 1,NELE
                   IF ((STRE_LOC == 'CORNER  ') .OR.                                                                                &
                       (STRE_LOC == 'GAUSS   ') .OR.                                                                                &
                       (TYPE(1:4) == 'HEXA') .OR.                                                                                   &
+                      (TYPE(1:4) == 'PYRA') .OR.                                                                                   &
                       (TYPE(1:5) == 'PENTA') .OR.                                                                                  &
                       (TYPE(1:5) == 'TETRA') .OR.                                                                                  &
                       (TYPE(1:5) == 'QUAD8')) THEN
 
-                     IF (TYPE(1:5) == 'QUAD4') THEN
+                     IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                          CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS_CUR, STRESS_OUT, STRESS_OUT_PCT_ERR,                  &
                                                       STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
 
@@ -257,6 +260,7 @@ elems_5: DO J = 1,NELE
                         STRESS_OUT(:,1) = (STRESS_OUT(:,2) + STRESS_OUT(:,3) + STRESS_OUT(:,4) + STRESS_OUT(:,5)) / FOUR
 
                      ELSE IF ((TYPE(1:4) == 'HEXA') .OR.                                                                           &
+                              (TYPE(1:4) == 'PYRA') .OR.                                                                           &
                               (TYPE(1:5) == 'PENTA') .OR.                                                                          &
                               (TYPE(1:5) == 'TETRA')) THEN
 ! Stresses are directly evaluated at the corner grid points. If they are going to be evaluated at Gauss points
@@ -287,7 +291,7 @@ elems_5: DO J = 1,NELE
                                  IF (JVEC == 1) THEN
                                     IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ')) THEN
                                        IF (M == 1) THEN
-                                          IF (TYPE(1:5) == 'QUAD4') THEN
+                                          IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                                              WRITE(TXT_STRE(OT4_EROW),9190) OT4_EROW, OT4_DESCRIPTOR, TYPE, EID,                   &
                                                                            STRESS_ITEM(K+(L-1)*NUM_OTM_ENTRIES)
                                           ELSE
@@ -334,7 +338,7 @@ elems_5: DO J = 1,NELE
 ! --- cbeam_stations end --- !
                      GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                      IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ')) THEN
-                        IF (TYPE(1:5) == 'QUAD4') THEN
+                        IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                            POLY_FIT_ERR(NUM_OGEL_ROWS)       = STRESS_OUT_PCT_ERR(M)
                            POLY_FIT_ERR_INDEX(NUM_OGEL_ROWS) = STRESS_OUT_ERR_INDEX(M)
                         ENDIF
@@ -348,11 +352,8 @@ elems_5: DO J = 1,NELE
                   IF (ETYPE(J)(1:5) /='USER1') THEN
                      IF (NUM_OGEL_ROWS == NELREQ(I)) THEN
                         CALL CHK_OGEL_ZEROS ( NUM_OGEL )
- 100                    FORMAT("*DEBUG:      ",A,"; ELEMENT_TYPE=",A,"; TABLE_NAME=",A,"; ITABLE=",I8)
-                        WRITE(ERR,100) "A",TYPE,TABLE_NAME,ITABLE
                         CALL SET_OES_TABLE_NAME(TYPE, TABLE_NAME, ITABLE)
-                        WRITE(ERR,100) "B",TYPE,TABLE_NAME,ITABLE
-                        CALL WRITE_ELEM_STRESSES ( JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS(I), ITABLE )
+                        CALL WRITE_ELEM_STRESSES ( JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS_CUR, ITABLE )
                         EXIT
                      ENDIF
                   ENDIF
@@ -679,7 +680,7 @@ elems_5: DO J = 1,NELE
 
          NDUM = 0
          NUM_FROWS= 0                                      ! Write out TRIA3K stresses
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCTRIA3K, 22, SUBR_NAME )
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCTRIA3K, 24, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
@@ -710,7 +711,7 @@ elems_5: DO J = 1,NELE
 
          NDUM = 0
          NUM_FROWS= 0                                      ! Write out TRIA3 stresses
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCTRIA3, 22, SUBR_NAME )
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCTRIA3, 24, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
@@ -741,7 +742,7 @@ elems_5: DO J = 1,NELE
 
          NDUM = 0
          NUM_FROWS= 0                                      ! Write out QUAD4K stresses
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCQUAD4K, 22, SUBR_NAME )
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCQUAD4K, 24, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
@@ -771,14 +772,14 @@ elems_5: DO J = 1,NELE
          CALL DEALLOCATE_FEMAP_DATA
 
          NDUM = 0
-         NUM_FROWS= 0                                      ! Write out QUAD4 stresses
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCQUAD4, 22, SUBR_NAME )
+         NUM_FROWS= 0                                      ! Write out QUAD4/CQUADR stresses
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCQUAD4 + NCQUADR, 24, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
                EID   = EDAT(EPNT(J))
                TYPE  = ETYPE(J)
-               IF (ETYPE(J)(1:6) == 'QUAD4 ') THEN
+               IF ((ETYPE(J)(1:6) == 'QUAD4 ') .OR. (ETYPE(J) == 'QUADR   ')) THEN
                   NUM_FROWS= NUM_FROWS+ 1
                   DO K=0,MBUG-1
                      WRT_BUG(K) = 0
@@ -797,7 +798,69 @@ elems_5: DO J = 1,NELE
             ENDIF
          ENDDO
          IF (NUM_FROWS > 0) THEN
-            CALL WRITE_FEMAP_STRE_VECS ( 'QUAD4   ', 'N', NUM_FROWS, FEMAP_SET_ID )
+            CALL WRITE_FEMAP_STRE_VECS ( 'QUADR   ', 'N', NUM_FROWS, FEMAP_SET_ID )
+         ENDIF
+         CALL DEALLOCATE_FEMAP_DATA
+
+         NDUM = 0
+         NUM_FROWS= 0                                      ! Write out PYRA5 stresses
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCPYRA5, 12, SUBR_NAME )
+         DO J=1,NELE
+            CALL IS_ELEM_PCOMP_PROPS ( J )
+            IF (PCOMP_PROPS == 'N') THEN
+               EID   = EDAT(EPNT(J))
+               TYPE  = ETYPE(J)
+               IF (ETYPE(J)(1:6) == 'PYRA5 ') THEN
+                  NUM_FROWS= NUM_FROWS+ 1
+                  DO K=0,MBUG-1
+                     WRT_BUG(K) = 0
+                  ENDDO
+                  PLY_NUM = 1
+                  CALL EMG ( J   , OPT, 'N', SUBR_NAME, 'N' )
+                  FEMAP_EL_NUMS(NUM_FROWS,1) = EID
+                  IF (NUM_EMG_FATAL_ERRS > 0) THEN
+                     IERROR = IERROR + 1
+                     CYCLE
+                  ENDIF
+                  CALL ELMDIS
+                  CALL ELEM_STRE_STRN_ARRAYS ( 1 )
+                  CALL CALC_ELEM_STRESSES ( NCPYRA5, NDUM, NUM_FROWS, 'N', 'Y' )
+               ENDIF
+            ENDIF
+         ENDDO
+         IF (NUM_FROWS > 0) THEN
+            CALL WRITE_FEMAP_STRE_VECS ( 'CPYRAM5 ', 'N', NUM_FROWS, FEMAP_SET_ID )
+         ENDIF
+         CALL DEALLOCATE_FEMAP_DATA
+
+         NDUM = 0
+         NUM_FROWS= 0                                      ! Write out PYRA14 stresses
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCPYRA14, 12, SUBR_NAME )
+         DO J=1,NELE
+            CALL IS_ELEM_PCOMP_PROPS ( J )
+            IF (PCOMP_PROPS == 'N') THEN
+               EID   = EDAT(EPNT(J))
+               TYPE  = ETYPE(J)
+               IF (ETYPE(J)(1:6) == 'PYRA14') THEN
+                  NUM_FROWS= NUM_FROWS+ 1
+                  DO K=0,MBUG-1
+                     WRT_BUG(K) = 0
+                  ENDDO
+                  PLY_NUM = 1
+                  CALL EMG ( J   , OPT, 'N', SUBR_NAME, 'N' )
+                  FEMAP_EL_NUMS(NUM_FROWS,1) = EID
+                  IF (NUM_EMG_FATAL_ERRS > 0) THEN
+                     IERROR = IERROR + 1
+                     CYCLE
+                  ENDIF
+                  CALL ELMDIS
+                  CALL ELEM_STRE_STRN_ARRAYS ( 1 )
+                  CALL CALC_ELEM_STRESSES ( NCPYRA14, NDUM, NUM_FROWS, 'N', 'Y' )
+               ENDIF
+            ENDIF
+         ENDDO
+         IF (NUM_FROWS > 0) THEN
+            CALL WRITE_FEMAP_STRE_VECS ( 'CPYRAM14', 'N', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
 
@@ -989,7 +1052,7 @@ elems_5: DO J = 1,NELE
 
          NDUM = 0
          NUM_FROWS= 0                                      ! Write out SHEAR stresses
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCSHEAR, 22, SUBR_NAME )
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCSHEAR, 24, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
@@ -1044,6 +1107,14 @@ elems_5: DO J = 1,NELE
  9201 FORMAT(' *ERROR  9201: DUE TO ABOVE LISTED ERRORS, CANNOT CALCULATE ',A,' REQUESTS FOR ',A,' ELEMENT ID = ',I8)
 
  9233 FORMAT(' *CBEAM STRE DEBUG: EID=',I8,' NUM_PTS(I)=',I8,' ACTIVE=',I8,' CUR=',I8,' XL=',21(1X,ES12.5))
+
+ 1001 FORMAT(2(I8,','),'       1,')
+ 1002 FORMAT(A)
+ 1003 FORMAT(3(1ES17.6,','))
+ 1004 FORMAT(10(I8,','))
+ 1005 FORMAT(2(I8,','),'       1,       7,',/,'       1,       1,       1')
+ 1006 FORMAT(I8,',',1ES17.6,',')
+ 1007 FORMAT('      -1,     0.          ,')
 
 ! ##################################################################################################################################
 
@@ -1116,7 +1187,7 @@ elems_5: DO J = 1,NELE
          STRESS_ITEM( 8) = '*** Not Defined ****'
          STRESS_ITEM( 9) = '*** Not Defined ****'
 
-      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
          NUM_OTM_ENTRIES = 8
          STRESS_ITEM( 1) = 'Normal x Stress     '
          STRESS_ITEM( 2) = 'Normal y Stress     '

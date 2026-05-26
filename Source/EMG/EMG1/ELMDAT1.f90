@@ -662,7 +662,7 @@
          ENDIF
          NUMMAT = 1
 
-      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 
          INTL_MID(1) = PSOLID(INTL_PID,2)
          MTRL_TYPE(1) = MATL(INTL_MID(1),2)                ! Must be MAT1 or MAT9 for solids

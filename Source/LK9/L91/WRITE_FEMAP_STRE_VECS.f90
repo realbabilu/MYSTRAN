@@ -88,6 +88,14 @@
          ENDIF
       ENDDO
 
+      IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4') .OR. (ELEM_TYP == 'QUADR   ') .OR.                         &
+          (ELEM_TYP == 'SHEAR   ') .OR. (ELEM_TYP == 'HEXA8   ') .OR. (ELEM_TYP == 'HEXA20  ') .OR.                             &
+          (ELEM_TYP == 'PENTA6  ') .OR. (ELEM_TYP == 'PENTA15 ') .OR. (ELEM_TYP == 'TETRA4  ') .OR.                             &
+          (ELEM_TYP == 'TETRA10 ') .OR. (ELEM_TYP == 'CPYRAM5 ') .OR. (ELEM_TYP == 'CPYRAM14')) THEN
+         ELEM_NAME(1:1) = ' '
+         ELEM_NAME_LEN  = 1
+      ENDIF
+
       ALLOCATE ( ELEM_NUMS(NUM_FEMAP_ROWS), ELEM_VEC(NUM_FEMAP_ROWS) )
 
       IF     (ELEM_TYP(1:4) == 'ELAS') THEN
@@ -118,6 +126,10 @@
          VEC_ID_OFFSET = 61200
       ELSE IF (ELEM_TYP == 'TETRA10 ') THEN
          VEC_ID_OFFSET = 61300
+      ELSE IF (ELEM_TYP == 'CPYRAM5 ') THEN
+         VEC_ID_OFFSET = 61500
+      ELSE IF (ELEM_TYP == 'CPYRAM14') THEN
+         VEC_ID_OFFSET = 61600
       ELSE IF (ELEM_TYP == 'SHEAR   ') THEN
          VEC_ID_OFFSET = 61400
       ELSE
@@ -411,40 +423,45 @@
          ENDDO
 ! --- neu_upgrade end --- !
 
-      ELSE IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4')) THEN
+      ELSE IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4') .OR. (ELEM_TYP == 'QUADR   ')) THEN
 
          IF (IS_PCOMP == 'N') THEN
 
-            TITLE_E( 1) = 'Top X Direct Stress' ;   CALC_WARN( 1) = '0';   COMP_DIR( 1) = '0';   CENT_TOTAL( 1) = '1'
-            TITLE_E( 2) = 'Top Y Direct Stress' ;   CALC_WARN( 2) = '0';   COMP_DIR( 2) = '0';   CENT_TOTAL( 2) = '1'
-            TITLE_E( 3) = 'Top XY Shear Stress' ;   CALC_WARN( 3) = '0';   COMP_DIR( 3) = '0';   CENT_TOTAL( 3) = '1'
-            TITLE_E( 4) = 'Top Maj Prn Stress'  ;   CALC_WARN( 4) = '1';   COMP_DIR( 4) = '0';   CENT_TOTAL( 4) = '1'
-            TITLE_E( 5) = 'Top Min Prn Stress'  ;   CALC_WARN( 5) = '1';   COMP_DIR( 5) = '0';   CENT_TOTAL( 5) = '1'
-            TITLE_E( 6) = 'Top Prn Str Angle'   ;   CALC_WARN( 6) = '1';   COMP_DIR( 6) = '0';   CENT_TOTAL( 6) = '1'
-            TITLE_E( 7) = 'Top Mean Stress'     ;   CALC_WARN( 7) = '1';   COMP_DIR( 7) = '0';   CENT_TOTAL( 7) = '1'
-            TITLE_E( 8) = 'Top Max Shear Stress';   CALC_WARN( 8) = '1';   COMP_DIR( 8) = '0';   CENT_TOTAL( 8) = '1'
-            TITLE_E( 9) = 'Top Von Mises Stress';   CALC_WARN( 9) = '1';   COMP_DIR( 9) = '0';   CENT_TOTAL( 9) = '1'
-            TITLE_E(10) = 'Top XZ Shear Stress' ;   CALC_WARN(10) = '0';   COMP_DIR(10) = '0';   CENT_TOTAL(10) = '1'
-            TITLE_E(11) = 'Top YZ Shear Stress' ;   CALC_WARN(11) = '0';   COMP_DIR(11) = '0';   CENT_TOTAL(11) = '1'
+            TITLE_E( 1) = 'Plate Top Fiber'           ;   CALC_WARN( 1) = '0';   COMP_DIR( 1) = '0';   CENT_TOTAL( 1) = '1'
+            TITLE_E( 2) = 'Plate Bottom Fiber'        ;   CALC_WARN( 2) = '0';   COMP_DIR( 2) = '0';   CENT_TOTAL( 2) = '1'
+            TITLE_E( 3) = 'Plate Top X Normal Stress' ;   CALC_WARN( 3) = '0';   COMP_DIR( 3) = '0';   CENT_TOTAL( 3) = '1'
+            TITLE_E( 4) = 'Plate Top Y Normal Stress' ;   CALC_WARN( 4) = '0';   COMP_DIR( 4) = '0';   CENT_TOTAL( 4) = '1'
+            TITLE_E( 5) = 'Plate Top XY Shear Stress' ;   CALC_WARN( 5) = '0';   COMP_DIR( 5) = '0';   CENT_TOTAL( 5) = '1'
+            TITLE_E( 6) = 'Plate Top MajorPrn Stress' ;   CALC_WARN( 6) = '1';   COMP_DIR( 6) = '0';   CENT_TOTAL( 6) = '1'
+            TITLE_E( 7) = 'Plate Top MinorPrn Stress' ;   CALC_WARN( 7) = '1';   COMP_DIR( 7) = '0';   CENT_TOTAL( 7) = '1'
+            TITLE_E( 8) = 'Plate Top PrnStress Angle' ;   CALC_WARN( 8) = '1';   COMP_DIR( 8) = '0';   CENT_TOTAL( 8) = '1'
+            TITLE_E( 9) = 'Plate Top Mean Stress'     ;   CALC_WARN( 9) = '1';   COMP_DIR( 9) = '0';   CENT_TOTAL( 9) = '1'
+            TITLE_E(10) = 'Plate Top MaxShear Stress' ;   CALC_WARN(10) = '1';   COMP_DIR(10) = '0';   CENT_TOTAL(10) = '1'
+            TITLE_E(11) = 'Plate Top VonMises Stress' ;   CALC_WARN(11) = '1';   COMP_DIR(11) = '0';   CENT_TOTAL(11) = '1'
+            TITLE_E(12) = 'Plate Bot X Normal Stress' ;   CALC_WARN(12) = '0';   COMP_DIR(12) = '0';   CENT_TOTAL(12) = '1'
+            TITLE_E(13) = 'Plate Bot Y Normal Stress' ;   CALC_WARN(13) = '0';   COMP_DIR(13) = '0';   CENT_TOTAL(13) = '1'
+            TITLE_E(14) = 'Plate Bot XY Shear Stress' ;   CALC_WARN(14) = '0';   COMP_DIR(14) = '0';   CENT_TOTAL(14) = '1'
+            TITLE_E(15) = 'Plate Bot MajorPrn Stress' ;   CALC_WARN(15) = '1';   COMP_DIR(15) = '0';   CENT_TOTAL(15) = '1'
+            TITLE_E(16) = 'Plate Bot MinorPrn Stress' ;   CALC_WARN(16) = '1';   COMP_DIR(16) = '0';   CENT_TOTAL(16) = '1'
+            TITLE_E(17) = 'Plate Bot PrnStress Angle' ;   CALC_WARN(17) = '1';   COMP_DIR(17) = '0';   CENT_TOTAL(17) = '1'
+            TITLE_E(18) = 'Plate Bot Mean Stress'     ;   CALC_WARN(18) = '1';   COMP_DIR(18) = '0';   CENT_TOTAL(18) = '1'
+            TITLE_E(19) = 'Plate Bot MaxShear Stress' ;   CALC_WARN(19) = '1';   COMP_DIR(19) = '0';   CENT_TOTAL(19) = '1'
+            TITLE_E(20) = 'Plate Bot VonMises Stress' ;   CALC_WARN(20) = '1';   COMP_DIR(20) = '0';   CENT_TOTAL(20) = '1'
 
-            TITLE_E(12) = 'Bot X Direct Stress' ;   CALC_WARN(12) = '0';   COMP_DIR(12) = '0';   CENT_TOTAL(12) = '1'
-            TITLE_E(13) = 'Bot Y Direct Stress' ;   CALC_WARN(13) = '0';   COMP_DIR(13) = '0';   CENT_TOTAL(13) = '1'
-            TITLE_E(14) = 'Bot XY Shear Stress' ;   CALC_WARN(14) = '0';   COMP_DIR(14) = '0';   CENT_TOTAL(14) = '1'
-            TITLE_E(15) = 'Bot Maj Prn Stress'  ;   CALC_WARN(15) = '1';   COMP_DIR(15) = '0';   CENT_TOTAL(15) = '1'
-            TITLE_E(16) = 'Bot Min Prn Stress'  ;   CALC_WARN(16) = '1';   COMP_DIR(16) = '0';   CENT_TOTAL(16) = '1'
-            TITLE_E(17) = 'Bot Prn Stress Angle';   CALC_WARN(17) = '1';   COMP_DIR(17) = '0';   CENT_TOTAL(17) = '1'
-            TITLE_E(18) = 'Bot Mean Stress'     ;   CALC_WARN(18) = '1';   COMP_DIR(18) = '0';   CENT_TOTAL(18) = '1'
-            TITLE_E(19) = 'Bot Max Shear Stress';   CALC_WARN(19) = '1';   COMP_DIR(19) = '0';   CENT_TOTAL(19) = '1'
-            TITLE_E(20) = 'Bot Von Mises Stress';   CALC_WARN(20) = '1';   COMP_DIR(20) = '0';   CENT_TOTAL(20) = '1'
-            TITLE_E(21) = 'Bot XZ Shear Stress' ;   CALC_WARN(21) = '0';   COMP_DIR(21) = '0';   CENT_TOTAL(21) = '1'
-            TITLE_E(22) = 'Bot YZ Shear Stress' ;   CALC_WARN(22) = '0';   COMP_DIR(22) = '0';   CENT_TOTAL(22) = '1'
-
-            DO J=1,22
+            DO J=1,20
                VEC_ID = VEC_ID_OFFSET + J
                WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
                WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
                DO I=1,NUM_FEMAP_ROWS
-                  ELEM_VEC(I)  = FEMAP_EL_VECS(I,J)
+                  IF (J == 1) THEN
+                     ELEM_VEC(I) = FEMAP_EL_VECS(I, 1)
+                  ELSE IF (J == 2) THEN
+                     ELEM_VEC(I) = FEMAP_EL_VECS(I,13)
+                  ELSE IF ((J >= 3) .AND. (J <= 11)) THEN
+                     ELEM_VEC(I) = FEMAP_EL_VECS(I,J-1)
+                  ELSE
+                     ELEM_VEC(I) = FEMAP_EL_VECS(I,J+2)
+                  ENDIF
                   ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
                ENDDO
                CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
@@ -517,26 +534,27 @@
          ENDIF
 
       ELSE IF ((ELEM_TYP == 'HEXA8   ') .OR. (ELEM_TYP == 'PENTA6  ') .OR. (ELEM_TYP == 'TETRA4  ') .OR.                           &
-               (ELEM_TYP == 'HEXA20  ') .OR. (ELEM_TYP == 'PENTA15 ') .OR. (ELEM_TYP == 'TETRA10 ')) THEN
+               (ELEM_TYP == 'HEXA20  ') .OR. (ELEM_TYP == 'PENTA15 ') .OR. (ELEM_TYP == 'TETRA10 ') .OR.                           &
+               (ELEM_TYP == 'CPYRAM5 ') .OR. (ELEM_TYP == 'CPYRAM14')) THEN
 
-         TITLE_E( 1) = 'X Direct Stress' ;   CALC_WARN( 1) = '0';   COMP_DIR( 1) = '0';   CENT_TOTAL( 1) = '1'
-         TITLE_E( 2) = 'Y Direct Stress' ;   CALC_WARN( 2) = '0';   COMP_DIR( 2) = '0';   CENT_TOTAL( 2) = '1'
-         TITLE_E( 3) = 'Z Direct Stress' ;   CALC_WARN( 3) = '0';   COMP_DIR( 3) = '0';   CENT_TOTAL( 3) = '1'
-         TITLE_E( 4) = 'XY Shear Stress' ;   CALC_WARN( 4) = '0';   COMP_DIR( 4) = '0';   CENT_TOTAL( 4) = '1'
-         TITLE_E( 5) = 'YZ Shear Stress' ;   CALC_WARN( 5) = '0';   COMP_DIR( 5) = '0';   CENT_TOTAL( 5) = '1'
-         TITLE_E( 6) = 'ZX Shear Stress' ;   CALC_WARN( 6) = '0';   COMP_DIR( 6) = '0';   CENT_TOTAL( 6) = '1'
+         TITLE_E( 1) = 'Solid X Normal Stress' ; CALC_WARN( 1) = '0'; COMP_DIR( 1) = '0'; CENT_TOTAL( 1) = '1'
+         TITLE_E( 2) = 'Solid Y Normal Stress' ; CALC_WARN( 2) = '0'; COMP_DIR( 2) = '0'; CENT_TOTAL( 2) = '1'
+         TITLE_E( 3) = 'Solid Z Normal Stress' ; CALC_WARN( 3) = '0'; COMP_DIR( 3) = '0'; CENT_TOTAL( 3) = '1'
+         TITLE_E( 4) = 'Solid XY Shear Stress' ; CALC_WARN( 4) = '0'; COMP_DIR( 4) = '0'; CENT_TOTAL( 4) = '1'
+         TITLE_E( 5) = 'Solid YZ Shear Stress' ; CALC_WARN( 5) = '0'; COMP_DIR( 5) = '0'; CENT_TOTAL( 5) = '1'
+         TITLE_E( 6) = 'Solid ZX Shear Stress' ; CALC_WARN( 6) = '0'; COMP_DIR( 6) = '0'; CENT_TOTAL( 6) = '1'
 
-         TITLE_E( 7) = 'Prin Stress-1'   ;   CALC_WARN( 7) = '0';   COMP_DIR( 7) = '0';   CENT_TOTAL( 7) = '1'
-         TITLE_E( 8) = 'Prin Stress-2'   ;   CALC_WARN( 8) = '0';   COMP_DIR( 8) = '0';   CENT_TOTAL( 8) = '1'
-         TITLE_E( 9) = 'Prin Stress-3'   ;   CALC_WARN( 9) = '0';   COMP_DIR( 9) = '0';   CENT_TOTAL( 9) = '1'
-         TITLE_E(10) = 'Mean Stress'     ;   CALC_WARN(10) = '0';   COMP_DIR(10) = '0';   CENT_TOTAL(10) = '1'
+         TITLE_E( 7) = 'Solid MajorPrn Stress' ; CALC_WARN( 7) = '0'; COMP_DIR( 7) = '0'; CENT_TOTAL( 7) = '1'
+         TITLE_E( 8) = 'Solid MidPrn Stress'   ; CALC_WARN( 8) = '0'; COMP_DIR( 8) = '0'; CENT_TOTAL( 8) = '1'
+         TITLE_E( 9) = 'Solid MinorPrn Stress' ; CALC_WARN( 9) = '0'; COMP_DIR( 9) = '0'; CENT_TOTAL( 9) = '1'
+         TITLE_E(10) = 'Solid Mean Stress'     ; CALC_WARN(10) = '0'; COMP_DIR(10) = '0'; CENT_TOTAL(10) = '1'
 
          IF (STRE_OPT == 'VONMISES') THEN
-            TITLE_E(11) = 'von Mises Stress';   CALC_WARN(11) = '1';   COMP_DIR(11) = '0';   CENT_TOTAL(11) = '1'
-            TITLE_E(12) = '  (null field)  ';   CALC_WARN(12) = '1';   COMP_DIR(12) = '0';   CENT_TOTAL(12) = '1'
+            TITLE_E(11) = 'Solid VonMises Stress'; CALC_WARN(11) = '1'; COMP_DIR(11) = '0'; CENT_TOTAL(11) = '1'
+            TITLE_E(12) = '  (null field)  ';      CALC_WARN(12) = '1'; COMP_DIR(12) = '0'; CENT_TOTAL(12) = '1'
          ELSE
-            TITLE_E(11) = 'Oct Dir Stress'  ;   CALC_WARN(11) = '1';   COMP_DIR(11) = '0';   CENT_TOTAL(11) = '1'
-            TITLE_E(12) = 'Oct Shear Stress';   CALC_WARN(12) = '1';   COMP_DIR(12) = '0';   CENT_TOTAL(12) = '1'
+            TITLE_E(11) = 'Solid OctDir Stress'  ; CALC_WARN(11) = '1'; COMP_DIR(11) = '0'; CENT_TOTAL(11) = '1'
+            TITLE_E(12) = 'Solid OctShear Stress'; CALC_WARN(12) = '1'; COMP_DIR(12) = '0'; CENT_TOTAL(12) = '1'
          ENDIF
 
          DO J=1,12

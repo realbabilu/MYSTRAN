@@ -89,6 +89,12 @@
          ENDIF
       ENDDO
 
+      IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4') .OR. (ELEM_TYP == 'QUADR   ') .OR.                         &
+          (ELEM_TYP == 'SHEAR   ')) THEN
+         ELEM_NAME(1:1) = ' '
+         ELEM_NAME_LEN  = 1
+      ENDIF
+
       ALLOCATE ( ELEM_NUMS(NUM_FEMAP_ROWS), ELEM_VECS(NUM_FEMAP_ROWS,14), ELEM_VEC(NUM_FEMAP_ROWS) )
 
       IF      (ELEM_TYP == 'ROD     ') THEN
@@ -379,14 +385,14 @@
       ELSE IF ((ELEM_TYP == 'TRIA3K  ') .OR. (ELEM_TYP == 'TRIA3   ') .OR.                                                         &
                (ELEM_TYP == 'QUAD4K  ') .OR. ((ELEM_TYP == 'QUAD4   ') .OR. (ELEM_TYP == 'QUADR   ')) .OR. (ELEM_TYP == 'SHEAR   ')) THEN
 
-         TITLE_E( 1) = 'X  Membrane Force'
-         TITLE_E( 2) = 'Y  Membrane Force'
-         TITLE_E( 3) = 'XY Membrane Force'
-         TITLE_E( 4) = 'X  Moment'
-         TITLE_E( 5) = 'Y  Moment'
-         TITLE_E( 6) = 'XY Moment'
-         TITLE_E( 7) = 'X  TransShear Force'
-         TITLE_E( 8) = 'Y  TransShear Force'
+         TITLE_E( 1) = 'Plate X Membrane Force'
+         TITLE_E( 2) = 'Plate Y Membrane Force'
+         TITLE_E( 3) = 'Plate XY Membrane Force'
+         TITLE_E( 4) = 'Plate X Bending Moment'
+         TITLE_E( 5) = 'Plate Y Bending Moment'
+         TITLE_E( 6) = 'Plate XY Bending Moment'
+         TITLE_E( 7) = 'Plate X TransShear Force'
+         TITLE_E( 8) = 'Plate Y TransShear Force'
 
          DO J=1,8
             VEC_ID = VEC_ID_OFFSET + J

@@ -44,12 +44,9 @@
 !===================================================================================================================================
       SUBROUTINE  END_OP2_TABLE(ITABLE)
       USE PENTIUM_II_KIND, ONLY       :  LONG
-      USE IOUNT1, ONLY                :  ERR, OP2
+      USE IOUNT1, ONLY                :  OP2
       IMPLICIT NONE
       INTEGER(LONG) :: ITABLE
-      WRITE(ERR,9114) ITABLE
-
- 9114 FORMAT(" *DEBUG:       END_OP2_TABLE; ITABLE=", I8)
       WRITE(OP2) ITABLE
       WRITE(OP2) 1
       WRITE(OP2) 0
@@ -58,11 +55,9 @@
 
 !===================================================================================================================================
       SUBROUTINE  END_OP2_TABLES()
-      USE IOUNT1, ONLY                :  ERR, OP2, OP2FIL
+      USE IOUNT1, ONLY                :  OP2, OP2FIL
       IMPLICIT NONE
       LOGICAL                         :: FILE_OPND
- 9115 FORMAT(" *DEBUG:       END_OP2_TABLES", A)
-      WRITE(ERR,9115) " "
       INQUIRE ( FILE=OP2FIL, OPENED=FILE_OPND )
       IF (FILE_OPND) THEN
         WRITE(OP2) 0
@@ -72,7 +67,7 @@
 !===================================================================================================================================
       SUBROUTINE WRITE_OP2_GEOM()
       USE PENTIUM_II_KIND, ONLY       :  LONG, BYTE
-      USE IOUNT1, ONLY                :  ERR, OP2
+      USE IOUNT1, ONLY                :  OP2
 
       ! GEOM1 - GRID/COORDs
       USE SCONTR, ONLY                :  NGRID
@@ -119,10 +114,7 @@
 ! Each row of RGRID is for one grid point and contains:
 !          After Bulk Data has been read: the 3 coords of the grid in the coord sys defined in col 2 of array GRID for this G.P.
 !          After subr GRID_PROC has run : the 3 coords of the grid in the basic (0) coord sys of the model
- 1    FORMAT("****DEBUG:   WRITE_OP2 GEOM ngrid",i4)
       IF (IS_GEOM1) THEN
-        WRITE(ERR,1) NGRID
-
         TABLE_NAME = "GEOM1"
         CALL WRITE_OP2_GEOM_HEADER(TABLE_NAME, ITABLE)
 
@@ -163,23 +155,15 @@
       USE PENTIUM_II_KIND, ONLY   :  LONG
       USE SCONTR, ONLY            :  NPROD
       USE MODEL_STUF, ONLY        :  PROD
-      USE IOUNT1, ONLY            :  ERR
-
       INTEGER(LONG), INTENT(IN)    :: PID
       INTEGER(LONG), INTENT(INOUT) :: IPROD
       INTEGER(LONG)                :: I
-      WRITE(ERR,1) PID,IPROD
       DO I=1,NPROD
         IF (PROD(I,1) == PID) THEN
           IPROD = I
-          WRITE(ERR,2) PID
           EXIT  ! break statement
         ENDIF
       ENDDO
-      WRITE(ERR,3) PID,IPROD,PROD(IPROD,1)
- 1    FORMAT("GET_PROD_INDEX START:  PID=",i4,"; IPROD=",i4)
- 2    FORMAT("GET_PROD_INDEX MID:  *********FOUND PID=",i4)
- 3    FORMAT("GET_PROD_INDEX END:  PID=",i4,"; IPROD=",i4,"; PROD(I,1)=",i4)
       END SUBROUTINE GET_PROD_INDEX
 
 !===================================================================================================================================
@@ -371,13 +355,10 @@
 !===================================================================================================================================
       SUBROUTINE WRITE_OP2_GEOM_HEADER(TABLE_NAME, ITABLE)
       USE PENTIUM_II_KIND, ONLY         :  LONG, BYTE
-      USE IOUNT1, ONLY                  :  ERR,OP2
+      USE IOUNT1, ONLY                  :  OP2
       IMPLICIT NONE
       CHARACTER(LEN=8*BYTE),INTENT(IN)  :: TABLE_NAME
       INTEGER(LONG),INTENT(INOUT)       :: ITABLE
- 1    FORMAT("writing table_name ",A)
-      WRITE(ERR,1) TABLE_NAME
-
       CALL WRITE_TABLE_HEADER(TABLE_NAME)
       !WRITE(OP2) 7
       !WRITE(OP2) 1, 2, 3, 4, 5, 6, 7

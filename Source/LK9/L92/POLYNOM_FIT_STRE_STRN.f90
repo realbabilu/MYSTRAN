@@ -115,7 +115,7 @@
 
 ! Calc actual coords of the points for which the BEi, SEi matrices were calculated
 
-      IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUADR')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
 
          IF (NCOL /= 5) THEN                               ! Number of stress/strain points = number of corner points+1
             WRITE(ERR,9202) SUBR_NAME, TYPE, NCOL, 4+1
@@ -204,4 +204,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE POLYNOM_FIT_STRE_STRN
-

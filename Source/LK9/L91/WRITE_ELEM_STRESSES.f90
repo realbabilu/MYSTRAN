@@ -260,7 +260,7 @@
                ENDIF
                WRITE(F06,401) FILL(1: 40), ONAME
 
-            ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+            ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
                IF (STRE_OPT == 'VONMISES') THEN
                   IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                      IF(STR_CID == -2) THEN
@@ -345,7 +345,7 @@
             ELSE IF (TYPE(1:4) == 'ELAS') THEN
                WRITE(F06,1201) FILL(1:1), FILL(1:1)
 
-            ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+            ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
                IF (STRE_OPT == 'VONMISES') THEN
                   WRITE(F06,1301) FILL(1: 1), FILL(1: 1)
                ELSE
@@ -560,11 +560,12 @@
 
          IF(WRITE_F06) WRITE(F06,1103) (FILL(1:1), EID_OUT_ARRAY(I,1), OGEL(I,1),I=1,NUM)
 
-      ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
          !       12345
-         ! 39 : CTETRA
-         ! 67 : CHEXA
-         ! 68 : CPENTA
+         ! 39  : CTETRA
+         ! 67  : CHEXA
+         ! 68  : CPENTA
+         ! 255 : CPYRAM
          IF (TYPE(1:4) == "HEXA") THEN
              ELEMENT_TYPE = 67
              NNODES = 9
@@ -574,9 +575,13 @@
          ELSE IF (TYPE(1:5) == "PENTA") THEN
              ELEMENT_TYPE = 68
              NNODES = 7
+         ELSE IF (TYPE(1:4) == "PYRA") THEN
+             ELEMENT_TYPE = 255
+             NNODES = 6
          ENDIF
-         NUM_WIDE = 4 + 21 * NNODES
-         NVALUES = NUM_WIDE * NUM
+         NUM_WIDE = 4 + 21*NNODES
+         NELEMENTS = NUM / NUM_PTS
+         NVALUES = NUM_WIDE * NELEMENTS
 
          IF (WRITE_OP2) THEN
            !CALL GET_STRESS_CODE(STRESS_CODE, IS_VON_MISES, IS_STRAIN, IS_FIBER_DISTANCE)
@@ -605,20 +610,13 @@
            !  Element    Sigma-xx      Sigma-yy      Sigma-zz       Tau-xy        Tau-yz        Tau-zx      von Mises
            !     ID
 
-           ! TODO: we repeat the center node N times because the corner results have not been calculated
-           WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, CID, CEN_WORD, NNODES-1,             &
-                        ! grid_id
-                        ! 21
-                       (GID_OUT_ARRAY(I,J),                                                    &
-                        ! oxx             txy                s1                  a1  a2  a3
-                       REAL(OGEL(I,1),4), REAL(OGEL(I,4),4), REAL(OGEL(I,9), 4), 0., 0., 0.,   &
-                        ! p                   ovm
-                       REAL(OGEL(I,12),4), REAL(OGEL(I,7),4),  &
-                        ! syy             tyz                s2                  b1  b2  b3
-                       REAL(OGEL(I,2),4), REAL(OGEL(I,5),4), REAL(OGEL(I,10),4), 0., 0., 0.,   &
-                        ! szz             txz                s3                  c1  c2  c3
-                       REAL(OGEL(I,3),4), REAL(OGEL(I,6),4), REAL(OGEL(I,11),4), 0., 0., 0.,   &
-                       J=1,NNODES), I=1,NUM)
+           WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, CID, CEN_WORD, NNODES-1,                                       &
+                       (GID_OUT_ARRAY(I,J),                                                                              &
+                        REAL(OGEL(I+J-1,1),4), REAL(OGEL(I+J-1,4),4), REAL(OGEL(I+J-1,9), 4), 0., 0., 0.,              &
+                        REAL(OGEL(I+J-1,12),4), REAL(OGEL(I+J-1,7),4),                                                    &
+                        REAL(OGEL(I+J-1,2),4), REAL(OGEL(I+J-1,5),4), REAL(OGEL(I+J-1,10),4), 0., 0., 0.,              &
+                        REAL(OGEL(I+J-1,3),4), REAL(OGEL(I+J-1,6),4), REAL(OGEL(I+J-1,11),4), 0., 0., 0.,              &
+                        J=1,NNODES), I=1,NUM,NUM_PTS)
          ENDIF  ! end of op2
 
          IF (STRE_OPT == 'VONMISES') THEN
@@ -660,10 +658,7 @@
          IF (WRITE_OP2) THEN
            IF ((STRE_LOC == 'CENTER  ') .AND. (TYPE(1:5) /= 'QUAD8')) THEN
               ! CQUAD4-33
-  2           FORMAT(' *DEBUG:  WRITE_CQUAD4-33:  NUM=',I4, " NUM_PTS=", I4, " STRE_LOC=",A,"ITABLE=",I4)
-              WRITE(ERR,2) NUM,NUM_PTS,STRE_LOC,ITABLE
-
-              !(eid_device,
+               !(eid_device,
               ! fd1, sx1, sy1, txy1, angle1, major1, minor1, vm1,
               ! fd2, sx2, sy2, txy2, angle2, major2, minor2, vm2,) = out; n=17
               NUM_WIDE = 17
@@ -678,9 +673,7 @@
               WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
            ELSE
               ! CQUAD4-144
- 3            FORMAT(' *DEBUG:  WRITE_CQUAD4-144:  NUM=',I4, " NUM_PTS=", I4, " STRE_LOC=",A,"ITABLE=",I4)
-              WRITE(ERR,3) NUM,NUM_PTS,STRE_LOC,ITABLE
-              ELEMENT_TYPE = 144
+               ELEMENT_TYPE = 144
               NUM_WIDE = 87 ! 2 + 17 * (4+1)  ! 4 nodes + 1 centroid
 
               ! TODO: probably wrong...divide NUM by NUM_PTS?
@@ -695,7 +688,7 @@
               !  fd1, sx1, sy1, txy1, angle1, major1, minor1, vm1,
               !  fd2, sx2, sy2, txy2, angle2, major2, minor2, vm2,)*4 = n = 17*4
               CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
-                                     TITLEI, STITLE, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+                                     TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
               WRITE(OP2) NVALUES
               ! see the CQUAD4-33 stress/strain (the IF part of this IF-ELSE block)
               ! writing before trying to understand this...
@@ -715,9 +708,7 @@
 
          K = 0
          DO I=1,NUM,NUM_PTS
- 4          FORMAT(' *DEBUG:  WRITE_CQUAD4-144:  I=',I4, " K=", I4)
             K = K + 1
-            WRITE(ERR,4) I,K
             IF (WRITE_F06) WRITE(F06,*)
             IF (WRITE_F06) WRITE(F06,1403) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
             K = K + 1
@@ -725,7 +716,6 @@
 
             DO L=1,NUM_PTS-1
                K = K + 1
-               WRITE(ERR,4) I,K
                IF (WRITE_F06) WRITE(F06,*)
                IF (DABS(POLY_FIT_ERR(I+L)) >= 0.01D0) THEN
                   IF (WRITE_F06) THEN
@@ -1132,8 +1122,10 @@
                                     WRITE_F06, WRITE_OP2)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06, OP2
-      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, OGEL
+      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
+      USE GET_MAX_MIN_ABS_STR_Interface
       IMPLICIT NONE
       !
       INTEGER(LONG), INTENT(IN)       :: NUM               ! the number of elements
@@ -1152,27 +1144,36 @@
 
       INTEGER(LONG)               :: DEVICE_CODE = 1   ! PLOT, PRINT, PUNCH flag; set as PLOT
       INTEGER(LONG)               :: ANALYSIS_CODE = 1 ! static fallback for OP2 table-3 header
-      INTEGER(LONG), PARAMETER    :: NUM_WIDE = 17     ! the number of "words" for an element
+      INTEGER(LONG)               :: NUM_WIDE          ! the number of "words" for an element
       INTEGER(LONG)               :: NVALUES           ! the number of "words" for all the elments
       INTEGER(LONG)               :: NTOTAL            ! the number of bytes for all NVALUES
-      INTEGER(LONG)               :: ELEMENT_TYPE = 74 ! the OP2 flag for the element
+      INTEGER(LONG)               :: ELEMENT_TYPE      ! the OP2 flag for the element
       INTEGER(LONG)               :: STRESS_CODE = 1   ! the OP2 flag for the stress; preallocate
       REAL(DOUBLE)                :: ABS_ANS(11)       ! Max ABS for output
       REAL(DOUBLE)                :: MAX_ANS(11)       ! Max for output
       REAL(DOUBLE)                :: MIN_ANS(11)       ! Min for output
-      INTEGER(LONG)               :: I, J, K           ! DO loop indices
+      INTEGER(LONG)               :: I, J, K, L, NELEMENTS, NUM_PTS_TRI           ! DO loop indices
 
       ! [eid, fiber_dist/curvature, oxx, oyy, txy, angle, omax, omin, ovm/max_shear,   ! upper
       !       fiber_dist/curvature, oxx, oyy, txy, angle, omax, omin, ovm/max_shear,   ! lower
       !]
-      NVALUES = NUM * NUM_WIDE
       K = 0
 
- 100  FORMAT("*DEBUG: WRITE_CTRIA3    ITABLE=",I8, "; NUM=",I8,"; NVALUES=",I8,"; NTOTAL=",I8)
+!100  FORMAT("*DEBUG: WRITE_CTRIA3    ITABLE=",I8, "; NUM=",I8,"; NVALUES=",I8,"; NTOTAL=",I8)
 !101  FORMAT("*DEBUG: WRITE_CTRIA3    ITABLE=",I8," (should be -5, -7,...)")
-      NVALUES = NUM * NUM_WIDE
+      IF (STRE_LOC == 'CENTER  ') THEN
+         NUM_WIDE = 17
+         ELEMENT_TYPE = 74
+         NVALUES = NUM * NUM_WIDE
+      ELSE
+         NUM_PTS_TRI = 1
+         NUM_WIDE = 70
+         ELEMENT_TYPE = 70
+         NELEMENTS = NUM
+         NVALUES = NELEMENTS * NUM_WIDE
+      ENDIF
       NTOTAL = NVALUES * 4
-      WRITE(ERR,100) ITABLE,NUM,NVALUES,NTOTAL
+!      WRITE(ERR,100) ITABLE,NUM,NVALUES,NTOTAL
 
       IF (WRITE_OP2) THEN
           !CALL GET_STRESS_CODE(STRESS_CODE, IS_VON_MISES, IS_STRAIN, IS_FIBER_DISTANCE)
@@ -1186,14 +1187,23 @@
 !              ,/,1X,A,'   ID                   Distance     Normal-X     Normal-Y      Shear-XY     Angle     Major        Minor',   &
 !              '      Shear-XY     Shear-XZ     Shear-YZ',/,1X,123X,'(max through thickness)')
 
-          ! op2 version of the upper & lower layers all in one call, but without the transverse shear
-          WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), &
-                     (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
+          IF (STRE_LOC == 'CENTER  ') THEN
+             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), &
+                        (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
+          ELSE
+             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, "CEN/", 3,                                                      &
+                         (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                                      &
+                         GID_OUT_ARRAY(I,2), (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                 &
+                         GID_OUT_ARRAY(I,3), (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                 &
+                         GID_OUT_ARRAY(I,4), (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                 &
+                         I=1,NELEMENTS)
+          ENDIF
       ENDIF  ! write op2
 
  1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
 
  1704 FORMAT(13X,'in elem',3X,4(1ES13.5),0PF9.3,5(1ES13.5))
+ 1706 FORMAT(1X,A,I8,4X,4(1ES13.5),0PF9.3,5(1ES13.5))
 
  1705 FORMAT(37X,'------------ ------------ ------------          ------------ ------------ ------------ ------------',            &
                  ' ------------',/,                                                                                                &
@@ -1202,15 +1212,28 @@
              1X,'ABS* : ',28x,3(ES13.5),9X,5(ES13.5),/,                                                                            &
              1X,'*for output set')
 
-      DO I=1,NUM
-         K = K + 1
-         WRITE(F06,*)
-         ! the J=1,10 loop is the upper layer & 2 transverse shear
-         WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
-         K = K + 1
-         ! the J=1,8 loop is the lower layer
-         WRITE(F06,1704) (OGEL(K,J),J=1,8)
-      ENDDO
+      IF (STRE_LOC == 'CENTER  ') THEN
+         DO I=1,NUM
+            K = K + 1
+            WRITE(F06,*)
+            WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
+            K = K + 1
+            WRITE(F06,1704) (OGEL(K,J),J=1,8)
+         ENDDO
+      ELSE
+         DO I=1,NUM
+            K = 2*I - 1
+            WRITE(F06,*)
+            WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
+            K = K + 1
+            WRITE(F06,1704) (OGEL(K,J),J=1,8)
+            DO L=1,3
+               WRITE(F06,*)
+               WRITE(F06,1706) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(2*I-1,J),J=1,10)
+               WRITE(F06,1704) (OGEL(K,J),J=1,8)
+            ENDDO
+         ENDDO
+      ENDIF
 
       CALL GET_MAX_MIN_ABS_STR ( NUM, 10, 'Y', MAX_ANS, MIN_ANS, ABS_ANS )
 
