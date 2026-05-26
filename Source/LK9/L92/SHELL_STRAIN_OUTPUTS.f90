@@ -228,17 +228,18 @@
 !                 FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+10) = SXZ
 !                 FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+11) = SYZ
 
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+ 1) = SX
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+ 2) = SY
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+ 3) = SXY
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+ 4) = SMAJ
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+ 5) = SMIN
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+ 6) = ANGLE
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+ 7) = MEAN
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+ 8) = SXYMAX
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+ 9) = VONMISES
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+10) = SXZ
-                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,11*(I-1)+11) = SYZ
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+ 1) = ZS(I)
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+ 2) = SX
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+ 3) = SY
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+ 4) = SXY
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+ 5) = SMAJ
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+ 6) = SMIN
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+ 7) = ANGLE
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+ 8) = MEAN
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+ 9) = SXYMAX
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+10) = VONMISES
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+11) = SXZ
+                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,12*(I-1)+12) = SYZ
 
 !xx               IF (STRN_OPT == 'VONMISES') THEN
 !xx                  FEMAP_EL_VECS(NUM_FEMAP_ROWS,9*(I-1)+8) = VONMISES

@@ -68,7 +68,7 @@
 ! **********************************************************************************************************************************
 ! Calc engineering strains from array STRAIN and put into array OGEL
 
-      IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA') .OR. (TYPE(1:4) == 'PYRA')) THEN
          CALL PRINCIPAL_3D ( STRAIN, PRINCIPAL_STRAIN, MEAN, VONMISES, SIG_OCT, TAU_OCT )
          IF (WRITE_OGEL == 'Y') THEN
             NUM1 = NUM1 + 1

@@ -125,11 +125,6 @@
 ! --- response_spectra_add end --- !
 
       INTRINSIC IAND
-      WRITE(ERR,9000) "OFP2 - SPC and MPC force"
- 9000 FORMAT(' *DEBUG:    RUNNING=', A)
- 9003 FORMAT(' *DEBUG:    ITABLE BAD=', i4)
-
-
       WRITE_NEU = (PRTNEU == 'Y')
 ! --- response_spectra_add begin --- !
       RS_NEEDS_MPFACTOR = ((SOL_NAME(1:8) == 'MFREQ') .AND. (RS_NUM_TAB > 0))
@@ -151,8 +146,6 @@
       ! Process SPC force requests
       NEW_RESULT = .TRUE.
       IF (WHAT == 'SPCF') THEN
-      WRITE(ERR,9000) "OFP2 - SPC"
-      WRITE(ERR,9003) ITABLE
 
          SPCF_MEFM_MPF = 'N'
          IF ((MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y') .OR. RS_NEEDS_MPFACTOR) THEN
@@ -438,7 +431,6 @@
 !     Process MPC force requests
 
       ELSE IF (WHAT == 'MPCF') THEN
-         WRITE(ERR,9000) "OFP2 - MPC"
          !IF (.NOT. NEW_RESULT) THEN
          !IF (NEW_RESULT .EQV. .FALSE.) THEN
          !IF (NEW_RESULT .EQ. .FALSE.) THEN    ! bad
@@ -447,7 +439,6 @@
            NEW_RESULT = .TRUE.
            ITABLE = -1
          ENDIF
-         WRITE(ERR,9003) ITABLE
 
          ! Initialize the array for MPC forces for this solution vector
          IROW_FILE = 0

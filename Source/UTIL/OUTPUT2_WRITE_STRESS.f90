@@ -27,8 +27,6 @@
       ! TODO: mak sure the TABLE_NAME_NEW is correct...
       !
       USE PENTIUM_II_KIND, ONLY        :  BYTE, LONG
-      USE IOUNT1, ONLY                 :  ERR
-
       CHARACTER(8*BYTE), INTENT(IN)    :: ETYPE          ! name of element type
       CHARACTER(8*BYTE), INTENT(INOUT) :: TABLE_NAME     ! name of the op2 table name
       CHARACTER(8*BYTE), INTENT(IN)    :: TABLE_NAME_BAR ! name of table for bars
@@ -37,28 +35,23 @@
       CHARACTER(8*BYTE)                :: TABLE_NAME_NEW ! name of the op2 table name
       LOGICAL                          :: RETURN_FLAG    ! return from the subroutine early
 
- 1    FORMAT("*DEBUG:      OUTPUT2_WRITE_STRESS: ", A)
- 2    FORMAT("*DEBUG:      OUTPUT2_WRITE_STRESS: ", A, "; TABLE_NAME= ", A,";ITABLE=", I8)
- 3    FORMAT("*DEBUG:      OUTPUT2_WRITE_STRESS: ", A, " ",A)
       RETURN_FLAG = .TRUE.
       IF      ((ETYPE == 'BAR     ') .OR. (ETYPE == 'BEAM    ')) THEN
         TABLE_NAME_NEW= TABLE_NAME_BAR !"OES1X   "
         RETURN_FLAG = .FALSE.
       ELSE IF ((ETYPE == 'ELAS1   ') .OR. (ETYPE == 'ELAS2   ') .OR. (ETYPE == 'ELAS3   ') .OR. (ETYPE == 'ELAS4   ') .OR.         &
                (ETYPE == 'BUSH    ') .OR. (ETYPE == 'ROD     ') .OR.                                                               &
-               (ETYPE == 'TRIA3   ') .OR. (ETYPE == 'QUAD4   ') .OR. (ETYPE == 'SHEAR   ') .OR.                                    &
-               (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'TETRA4  ') .OR.                                    &
-               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'TETRA10 ')) THEN
+               (ETYPE == 'TRIA3   ') .OR. (ETYPE == 'QUAD4   ') .OR. (ETYPE == 'QUADR   ') .OR. (ETYPE == 'QUAD8   ') .OR.        &
+               (ETYPE == 'SHEAR   ') .OR.                                                                                           &
+               (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'PYRA5   ') .OR. (ETYPE == 'TETRA4  ') .OR.        &
+               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRA14  ') .OR. (ETYPE == 'TETRA10 ')) THEN
         TABLE_NAME_NEW= TABLE_NAME_SHELL_SOLID !"OES1X1  "
-        WRITE(ERR,3) "OES1X1 found",ETYPE
         RETURN_FLAG = .FALSE.
       ELSE
-        WRITE(ERR,3) "ERROR STATE",ETYPE
         ! we're now in an error state
         ! also let's close the old table
         TABLE_NAME_NEW= "OES ERR "
         IF (ITABLE < -1) THEN
-          WRITE(ERR,2) "closing stress table", TABLE_NAME,ITABLE
           CALL END_OP2_TABLE(ITABLE)   ! close the previous
         ENDIF
 !        WRITE(ERR,2) "invalidated tableA",TABLE_NAME,ITABLE
@@ -73,18 +66,15 @@
         IF (TABLE_NAME /= TABLE_NAME_NEW) THEN
         ! first let's find out if we need to close off the previous table
           IF (ITABLE < -1) THEN
-            WRITE(ERR,2) "closing stress table",TABLE_NAME,ITABLE
             CALL END_OP2_TABLE(ITABLE)   ! close the previous
           ENDIF
           ! we're now at the beginning
           TABLE_NAME = TABLE_NAME_NEW
           ITABLE = -1
-          WRITE(ERR,2) "will create stress table",TABLE_NAME,ITABLE
         ENDIF
 
         ! if we started/restarted, we need to write the TABLE_NAME
         IF (ITABLE == -1) THEN
-          WRITE(ERR,2) "creating stress table",TABLE_NAME,ITABLE
           CALL WRITE_TABLE_HEADER(TABLE_NAME)
           ITABLE = -3
         ENDIF

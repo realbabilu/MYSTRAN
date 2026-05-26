@@ -68,7 +68,7 @@
 ! **********************************************************************************************************************************
 ! Calc engineering stresses from array STRESS and put into array OGEL
 
-      IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA') .OR. (TYPE(1:4) == 'PYRA')) THEN
          CALL PRINCIPAL_3D ( STRESS, PRINCIPAL_STRESS, MEAN, VONMISES, SIG_OCT, TAU_OCT )
          IF (WRITE_OGEL == 'Y') THEN
             NUM1 = NUM1 + 1

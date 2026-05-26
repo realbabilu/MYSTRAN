@@ -320,7 +320,7 @@ bdf:  DO
             ENDIF
 
 ! --- solids_add begin --- !
-         ELSE IF (CARD(1:5) == 'CPYRA'   ) THEN
+         ELSE IF ((CARD(1:5) == 'CPYRA'   ) .OR. (CARD(1:7) == 'CPYRAM ')) THEN
             CALL BD_CPYRA   ( CARD, LARGE_FLD_INP, ELEM_NUM_GRDS )
             ELEM_NUM_DOFS = 6*ELEM_NUM_GRDS
             IF (MELGP < ELEM_NUM_GRDS) THEN

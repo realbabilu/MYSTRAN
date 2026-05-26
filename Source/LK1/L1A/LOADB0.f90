@@ -292,7 +292,7 @@
             LEDAT = LEDAT + DELTA_LEDAT
 
 ! --- solids_add begin --- !
-         ELSE IF (CARD(1:5) == 'CPYRA'   ) THEN
+         ELSE IF ((CARD(1:5) == 'CPYRA'   ) .OR. (CARD(1:7) == 'CPYRAM ')) THEN
             LELE  = LELE + 1
             CALL BD_CPYRA0 ( CARD, LARGE_FLD_INP, DELTA_LEDAT )
             LEDAT = LEDAT + DELTA_LEDAT

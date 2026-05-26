@@ -72,7 +72,8 @@
                                          MELDTS, MELOUTS, METYPE, MGROUTS, NELE, NGRID, NSUB
 
       USE SCONTR, ONLY                :  GROUT_ACCE_BIT, GROUT_DISP_BIT, GROUT_GPFO_BIT, GROUT_MPCF_BIT, GROUT_OLOA_BIT,           &
-                                         GROUT_SPCF_BIT, ELOUT_ELFE_BIT, ELOUT_ELFN_BIT, ELOUT_STRE_BIT, ELOUT_STRN_BIT
+                                         GROUT_SPCF_BIT, ELOUT_ELFE_BIT, ELOUT_ELFN_BIT, ELOUT_STRE_BIT,                           &
+                                         ELOUT_STRN_BIT
 
       USE PARAMS, ONLY                :  PRTSCP, SUPWARN
       USE TIMDAT, ONLY                :  TSEC
@@ -82,7 +83,8 @@
                                          SCNUM, STITLE, TITLE, SUBLOD, GRID, GRID_ID, ESORT1, ETYPE
 
       USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_MPCF_OUTPUT, ANY_SPCF_OUTPUT, ANY_OLOA_OUTPUT,      &
-                                         ANY_GPFO_OUTPUT, ANY_ELFE_OUTPUT, ANY_ELFN_OUTPUT, ANY_STRE_OUTPUT, ANY_STRN_OUTPUT
+                                         ANY_GPFO_OUTPUT, ANY_ELFE_OUTPUT, ANY_ELFN_OUTPUT, ANY_STRE_OUTPUT,                        &
+                                         ANY_STRN_OUTPUT
       USE SUBCASE_PROC_USE_IFs
 
       IMPLICIT NONE

@@ -66,7 +66,7 @@
       FOUND_CSV   = 'N'
       DO I=1,NCCCD
          IF (CC_CMD_DESCRIBERS(I)(1:5) == 'PRINT') FOUND_PRINT = 'Y'
-         IF (CC_CMD_DESCRIBERS(I)(1:4) == 'PLOT')  FOUND_PLOT  = 'Y'
+         IF ((CC_CMD_DESCRIBERS(I)(1:4) == 'PLOT') .OR. (CC_CMD_DESCRIBERS(I)(1:4) == 'POST')) FOUND_PLOT  = 'Y'
          IF (CC_CMD_DESCRIBERS(I)(1:5) == 'PUNCH') FOUND_PUNCH = 'Y'
          IF (CC_CMD_DESCRIBERS(I)(1:3) == 'NEU')   FOUND_NEU   = 'Y'
          IF (CC_CMD_DESCRIBERS(I)(1:3) == 'CSV')   FOUND_CSV   = 'Y'

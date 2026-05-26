@@ -35,7 +35,9 @@
       USE POLYNOM_FIT_STRE_STRN_Interface
       USE CALC_ELEM_STRESSES_Interface
       USE CHK_OGEL_ZEROS_Interface
+      USE GET_VEC_MIN_MAX_ABS_Interface
       USE WRITE_ELEM_STRESSES_Interface
+      USE PRINCIPAL_3D_Interface
       USE ALLOCATE_FEMAP_DATA_Interface
       USE WRITE_FEMAP_STRE_VECS_Interface
       USE DEALLOCATE_FEMAP_DATA_Interface
