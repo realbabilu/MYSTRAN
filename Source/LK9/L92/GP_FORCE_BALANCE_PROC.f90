@@ -44,6 +44,7 @@
       USE COL_VECS, ONLY              :  FG_COL, PG_COL, QGm_COL, QGs_COL, QGr_COL, UG_COL
       USE PARAMS, ONLY                :  EPSIL
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  GPFO_OUT
+      USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
 
       USE GP_FORCE_BALANCE_PROC_USE_IFs
 
@@ -139,11 +140,6 @@
       ENDIF
 ! --- warning_reduce-v2 end --- !
 
-      ! GPFORCE is unsupported for buckling decks
-      IF (SOL_NAME(1:8) == "BUCKLING") THEN
-         RETURN
-      ENDIF
-
       ! Print some summary info for max abs value of GP force balance for each solution vector
       IS_GPFORCE_SUMMARY_INFO = (DEBUG(192) > 0)
 
@@ -203,6 +199,20 @@
             !FIELD5_INT_MODE = 1  ! temp
             FIELD5_INT_MODE = SCNUM(JVEC)
             IF (WRITE_F06)  WRITE(F06,9101) SCNUM(JVEC)
+
+! --- validation_fix10 begin --- !
+         ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
+            ISUBCASE_INDEX = JVEC
+            ANALYSIS_CODE = 1
+            FIELD5_INT_MODE = SCNUM(JVEC)
+            IF (WRITE_F06)  WRITE(F06,9101) SCNUM(JVEC)
+
+         ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
+            ISUBCASE_INDEX = 1
+            ANALYSIS_CODE = 2
+            FIELD5_INT_MODE = JVEC
+            IF (WRITE_F06)  WRITE(F06,9102) JVEC
+! --- validation_fix10 end --- !
 
          ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
             ISUBCASE_INDEX = 1  ! modes
