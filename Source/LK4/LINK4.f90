@@ -82,6 +82,9 @@
 
       INTEGER(LONG)                   :: I,J                 ! DO loop indices or counters.
       INTEGER(LONG)                   :: IERROR              ! Error count when reading records from a file.
+! --- arpack_surgery begin --- !
+      INTEGER(LONG)                   :: NVEC_USED           ! Safe vector count limited by allocated EIGEN_VEC columns.
+! --- arpack_surgery end --- !
       INTEGER(LONG)                   :: OUNT(2)             ! File units to write messages to. Input to subr UNFORMATTED_OPEN.
       INTEGER(LONG), PARAMETER        :: P_LINKNO = 2        ! Prior LINK no's that should have run before this LINK can execute.
 
@@ -340,9 +343,18 @@
       ! Open and set up file L3A (used to hold eigenvectors)
       CALL FILE_OPEN ( L3A, LINK3A, OUNT, 'REPLACE', L3A_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N' )
 
+! --- arpack_surgery begin --- !
+      NVEC_USED = MIN( NVEC, NUM_EIGENS )
+      IF (ALLOCATED(EIGEN_VEC)) THEN
+         NVEC_USED = MIN( NVEC_USED, SIZE(EIGEN_VEC,2) )
+      ELSE
+         NVEC_USED = 0
+      ENDIF
+! --- arpack_surgery end --- !
+
       ! Write out computed eigenvectors to L3A
       CALL LINK_MESSAGE('WRITE EIGENVECTORS TO DISK FILE')
-      DO J=1,NVEC
+      DO J=1,NVEC_USED
          DO I=1,NDOFL
            WRITE(L3A) EIGEN_VEC(I,J)
          ENDDO
@@ -351,7 +363,7 @@
 
       ! Optional eigenvector debug output
       IF (DEBUG(43) == 1) THEN
-         DO J=1,NVEC
+         DO J=1,NVEC_USED
             DO I=1,NDOFL
                EIGEN_VEC_COL(I) = EIGEN_VEC(I,J)
             ENDDO
