@@ -39,19 +39,27 @@ endif()
 # ==============================================================================
 # FIND OPENBLAS
 # ==============================================================================
+option(MYSTRAN_FORCE_INTERNAL_BLAS "Skip OpenBLAS autodetect and build/use the internal BLAS + f2c path" OFF)
 set(OpenBLAS_DIR "C:/gcc/openblas32/lib/cmake/openblas")
-find_package(OpenBLAS QUIET)
-
-if(OpenBLAS_FOUND)
-    message(STATUS "Using OpenBLAS: ${OpenBLAS_LIBRARIES}")
-    set(MYSTRAN_USE_OPENBLAS ON)
-    set(enable_internal_blaslib OFF CACHE BOOL "" FORCE)
-    set(TPL_BLAS_LIBRARIES "${OpenBLAS_LIBRARIES}" CACHE FILEPATH "" FORCE)
-else()
-    message(STATUS "OpenBLAS not found, will use internal BLAS")
+if(MYSTRAN_FORCE_INTERNAL_BLAS)
+    message(STATUS "MYSTRAN_FORCE_INTERNAL_BLAS=ON: skipping OpenBLAS autodetect and using internal BLAS")
     set(MYSTRAN_USE_OPENBLAS OFF)
     set(enable_internal_blaslib ON CACHE BOOL "" FORCE)
     unset(TPL_BLAS_LIBRARIES CACHE)
+else()
+    find_package(OpenBLAS QUIET)
+
+    if(OpenBLAS_FOUND)
+        message(STATUS "Using OpenBLAS: ${OpenBLAS_LIBRARIES}")
+        set(MYSTRAN_USE_OPENBLAS ON)
+        set(enable_internal_blaslib OFF CACHE BOOL "" FORCE)
+        set(TPL_BLAS_LIBRARIES "${OpenBLAS_LIBRARIES}" CACHE FILEPATH "" FORCE)
+    else()
+        message(STATUS "OpenBLAS not found, will use internal BLAS")
+        set(MYSTRAN_USE_OPENBLAS OFF)
+        set(enable_internal_blaslib ON CACHE BOOL "" FORCE)
+        unset(TPL_BLAS_LIBRARIES CACHE)
+    endif()
 endif()
 # ! --- hijack mode for extern blas end--- !
 

@@ -64,8 +64,10 @@
       INTEGER(LONG), PARAMETER        :: IORD_IJ = 3       ! Integration order for stiffness matrix
       INTEGER(LONG), PARAMETER        :: IORD_K = 2        ! Integration order for stiffness matrix in thickness direction
       INTEGER(LONG), PARAMETER        :: IORD_STRESS_Q8 = 2! Gauss integration order for stress/strain recovery matrices
+      INTEGER(LONG), PARAMETER        :: DBG_EID_MAX = 8   ! Limit debug output to first few elements
       INTEGER(LONG)                   :: I,J,K,L,M         ! DO loop indices
       INTEGER(LONG)                   :: STR_PT_NUM        ! Stress recovery point number
+      INTEGER(LONG)                   :: DBG_STATUS        ! Env var lookup status
 
       REAL(DOUBLE)                    :: HH_IJ(MAX_ORDER_GAUSS) ! Gauss weights for integration in in-layer directions
       REAL(DOUBLE)                    :: SS_IJ(MAX_ORDER_GAUSS) ! Gauss abscissa's for integration in in-layer directions
@@ -87,6 +89,9 @@
       REAL(DOUBLE)                    :: ZL(3)
       REAL(DOUBLE)                    :: XE(3)
       REAL(DOUBLE)                    :: CROSS_XLE(3)
+      REAL(DOUBLE)                    :: BE1NORM, BE2NORM, BE3NORM
+      CHARACTER(16*BYTE)              :: DBG_MITC8_ENV
+      LOGICAL                          :: DBG_MITC8
 
 ! **********************************************************************************************************************************
 
@@ -147,6 +152,17 @@
 ! Initialize
       PHI_SQ  = ONE                                        ! Not used for this element
       CALL MITC_INITIALIZE ()
+      DBG_MITC8 = .FALSE.
+      DBG_MITC8_ENV = ' '
+      CALL GET_ENVIRONMENT_VARIABLE('MYSTRAN_DEBUG_MITC8', DBG_MITC8_ENV, STATUS=DBG_STATUS)
+      IF (DBG_STATUS == 0) THEN
+         IF ((TRIM(DBG_MITC8_ENV) /= '') .AND. (TRIM(DBG_MITC8_ENV) /= '0') .AND. (TRIM(DBG_MITC8_ENV) /= 'OFF')) THEN
+            DBG_MITC8 = .TRUE.
+         ENDIF
+      ENDIF
+      IF (DBG_MITC8 .AND. (INT_ELEM_ID <= DBG_EID_MAX)) THEN
+         WRITE(F06,'(A,I8,A,6A1)') 'MITC8DBG START EID=', INT_ELEM_ID, ' OPT=', OPT(1),OPT(2),OPT(3),OPT(4),OPT(5),OPT(6)
+      ENDIF
 
 
       IF (PCOMP_PROPS == 'Y') THEN
@@ -234,6 +250,13 @@
                                                   ! Transverse shear strain. Note reversed order of rows.
                BE3(1,:,STR_PT_NUM) = (BI2(6,:) + BI1(6,:)) / TWO           ! zx
                BE3(2,:,STR_PT_NUM) = (BI2(5,:) + BI1(5,:)) / TWO           ! yz
+               IF (DBG_MITC8 .AND. (INT_ELEM_ID <= DBG_EID_MAX)) THEN
+                  BE1NORM = DSQRT(SUM(BE1(:,:,STR_PT_NUM)*BE1(:,:,STR_PT_NUM)))
+                  BE2NORM = DSQRT(SUM(BE2(:,:,STR_PT_NUM)*BE2(:,:,STR_PT_NUM)))
+                  BE3NORM = DSQRT(SUM(BE3(:,:,STR_PT_NUM)*BE3(:,:,STR_PT_NUM)))
+                  WRITE(F06,'(A,I8,A,I2,A,2(1X,ES13.5),A,3(1X,ES13.5))') 'MITC8DBG STR EID=', INT_ELEM_ID, ' GP=', STR_PT_NUM, &
+                    ' RS=', R, S, ' NORM=', BE1NORM, BE2NORM, BE3NORM
+               ENDIF
 
             ENDDO
          ENDDO
@@ -256,6 +279,9 @@
 
             CALL CROSS( XL, XE, CROSS_XLE )
             SHELL_STR_ANGLE( STR_PT_NUM ) = ATAN2(DOT_PRODUCT( ZL, CROSS_XLE ), DOT_PRODUCT( XL, XE ))
+            IF (DBG_MITC8 .AND. (INT_ELEM_ID <= DBG_EID_MAX)) THEN
+               WRITE(F06,'(A,I8,A,I2,A,1X,ES13.5)') 'MITC8DBG ANG EID=', INT_ELEM_ID, ' PT=', STR_PT_NUM, ' =', SHELL_STR_ANGLE(STR_PT_NUM)
+            ENDIF
 
          ENDDO
 
@@ -306,9 +332,16 @@
                   DETJ = MITC_DETJ ( R, S, T )
                   INTFAC = DETJ*HH_IJ(I)*HH_IJ(J)*HH_K(K)
                   KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
+                  IF (DBG_MITC8 .AND. (INT_ELEM_ID <= DBG_EID_MAX)) THEN
+                     WRITE(F06,'(A,I8,A,I1,A,I1,A,I1,A,1X,ES13.5,A,1X,ES13.5,A,1X,ES13.5)') 'MITC8DBG KE EID=', INT_ELEM_ID, &
+                       ' I=', I, ' J=', J, ' K=', K, ' DETJ=', DETJ, ' INTFAC=', INTFAC, ' D2N=', DSQRT(SUM(DUM2*DUM2))
+                  ENDIF
                ENDDO
             ENDDO
          ENDDO
+         IF (DBG_MITC8 .AND. (INT_ELEM_ID <= DBG_EID_MAX)) THEN
+            WRITE(F06,'(A,I8,A,1X,ES13.5)') 'MITC8DBG KE_NORM EID=', INT_ELEM_ID, ' =', DSQRT(SUM(KE*KE))
+         ENDIF
 
 
 
@@ -346,6 +379,9 @@
 
 
 
+      IF (DBG_MITC8 .AND. (INT_ELEM_ID <= DBG_EID_MAX)) THEN
+         WRITE(F06,'(A,I8)') 'MITC8DBG END EID=', INT_ELEM_ID
+      ENDIF
       RETURN
 
 ! **********************************************************************************************************************************

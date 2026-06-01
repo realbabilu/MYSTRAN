@@ -89,6 +89,7 @@
       INTEGER(LONG)                   :: I,J                 ! DO loop indices or counters.
       INTEGER(LONG)                   :: IERROR              ! Error count when reading records from a file.
       INTEGER(LONG)                   :: LAMA_ANALYSIS_CODE  ! OP2 analysis code for LAMA/BLAMA writer
+      INTEGER(LONG)                   :: NVEC_USED           ! Safe vector count limited by allocated EIGEN_VEC columns
       INTEGER(LONG)                   :: OUNT(2)             ! File units to write messages to. Input to subr UNFORMATTED_OPEN.
       INTEGER(LONG), PARAMETER        :: P_LINKNO = 2        ! Prior LINK no's that should have run before this LINK can execute.
 
@@ -348,9 +349,28 @@
       MIJ_ROW       = 0
       MIJ_COL       = 0
 
+      NVEC_USED = MIN( NVEC, NUM_EIGENS )
+      IF (ALLOCATED(EIGEN_VEC)) THEN
+         NVEC_USED = MIN( NVEC_USED, SIZE(EIGEN_VEC,2) )
+      ELSE
+         NVEC_USED = 0
+      ENDIF
+      IF (ALLOCATED(MODE_NUM)) THEN
+         NVEC_USED = MIN( NVEC_USED, SIZE(MODE_NUM) )
+      ELSE
+         NVEC_USED = 0
+      ENDIF
+      IF (ALLOCATED(EIGEN_VAL)) THEN
+         NVEC_USED = MIN( NVEC_USED, SIZE(EIGEN_VAL) )
+      ELSE
+         NVEC_USED = 0
+      ENDIF
+      NVEC       = NVEC_USED
+      NUM_EIGENS = NVEC_USED
+
       CALL ALLOCATE_EIGEN1_MAT ( 'GEN_MASS', NUM_EIGENS, 1, SUBR_NAME )
 
-      IF (NVEC > 0) THEN
+      IF (NVEC_USED > 0) THEN
                                                            ! Calc gen mass
          CALL LINK_MESSAGE('CALCULATE GENERALIZED MASS')
          CALL CALC_GEN_MASS
@@ -358,7 +378,7 @@
          IF (EIG_NORM == 'MASS') THEN
                                                            ! Renorm vecs to mass if user asked for 'MASS'.
             CALL LINK_MESSAGE('RENORMALIZE EIGENVECTORS TO UNIT GEN MASS')
-            CALL RENORM_ON_MASS ( NVEC, EPS1 )
+            CALL RENORM_ON_MASS ( NVEC_USED, EPS1 )
          ENDIF
 
       ELSE
@@ -391,16 +411,18 @@
 
       ! Write out computed eigenvectors to L3A
       CALL LINK_MESSAGE('WRITE EIGENVECTORS TO DISK FILE')
-      DO J=1,NVEC
+      DO J=1,NVEC_USED
          DO I=1,NDOFL
            WRITE(L3A) EIGEN_VEC(I,J)
          ENDDO
       ENDDO
+      WRITE(SC1,'(A)') 'L4DBG before FILE_CLOSE(L3A)'
       CALL FILE_CLOSE ( L3A, LINK3A, 'KEEP' )
+      WRITE(SC1,'(A)') 'L4DBG after FILE_CLOSE(L3A)'
 
       ! Optional eigenvector debug output
       IF (DEBUG(43) == 1) THEN
-         DO J=1,NVEC
+         DO J=1,NVEC_USED
             DO I=1,NDOFL
                EIGEN_VEC_COL(I) = EIGEN_VEC(I,J)
             ENDDO
@@ -411,22 +433,28 @@
 
       ! Call OUTPUT4 processor to process output requests for OUTPUT4 matrices generated in this link
       IF (NUM_OU4_REQUESTS > 0) THEN
+         WRITE(SC1,'(A,I0)') 'L4DBG before OUTPUT4_PROC, NUM_OU4_REQUESTS=', NUM_OU4_REQUESTS
          CALL LINK_MESSAGE('WRITE OUTPUT4 NATRICES      ')
          WRITE(F06,*)
          CALL OUTPUT4_PROC ( SUBR_NAME )
+         WRITE(SC1,'(A)') 'L4DBG after OUTPUT4_PROC'
       ENDIF
 
       ! Deallocate arrays
+      WRITE(SC1,'(A)') 'L4DBG before DEALLOCATE RFAC'
       CALL DEALLOCATE_LAPACK_MAT ( 'RFAC' )
+      WRITE(SC1,'(A)') 'L4DBG after DEALLOCATE RFAC'
 
       ! leave EIGEN_VAL until LINK9 since it may be needed there
 !xx   CALL DEALLOCATE_EIGEN1_MAT ( 'EIGEN_VAL' )
       CALL DEALLOCATE_EIGEN1_MAT ( 'GEN_MASS' )
       CALL DEALLOCATE_EIGEN1_MAT ( 'EIGEN_VEC' )
       CALL DEALLOCATE_EIGEN1_MAT ( 'MODE_NUM' )
+      WRITE(SC1,'(A)') 'L4DBG after DEALLOCATE EIGEN mats'
 
       CALL DEALLOCATE_LAPACK_MAT ( 'ABAND' )
       CALL DEALLOCATE_LAPACK_MAT ( 'BBAND' )
+      WRITE(SC1,'(A)') 'L4DBG after DEALLOCATE ABAND/BBAND'
 
       ! Process is now complete so set COMM(LINKNO)
       COMM(LINKNO) = 'C'
@@ -489,9 +517,5 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE LINK4
-
-
-
-
 
 

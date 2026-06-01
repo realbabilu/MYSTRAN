@@ -308,7 +308,6 @@ iters:DO
             IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
 
                INFO = 0
-
                CALL FBS_SUPRLU ( SUBR_NAME, 'KMSM', NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, ITER_NUM, MVEC, INFO )
 
             ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN

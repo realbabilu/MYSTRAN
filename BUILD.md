@@ -175,9 +175,9 @@ cmake -G "MinGW Makefiles" ^
   -DCMAKE_C_COMPILER=gcc.exe ^
   -DCMAKE_CXX_COMPILER=g++.exe ^
   -DCMAKE_Fortran_COMPILER=gfortran.exe ^
-  -DCMAKE_C_FLAGS_RELEASE="-O3 -march=znver4" ^
-  -DCMAKE_CXX_FLAGS_RELEASE="-O3 -march=znver4" ^
-  -DCMAKE_Fortran_FLAGS_RELEASE="-O3 -march=znver4" ^
+  -DCMAKE_C_FLAGS_RELEASE="-O3" ^
+  -DCMAKE_CXX_FLAGS_RELEASE="-O3" ^
+  -DCMAKE_Fortran_FLAGS_RELEASE="-O3 -ffree-line-length-none" ^
   -DMYSTRAN_DISABLE_NDEBUG=ON ^
   -DTPL_BLAS_LIBRARIES="C:/gcc/openblas32/lib/libopenblas.dll.a" ^
   -DMYSTRAN_USE_EXTERNAL_SUPERLU=ON ^

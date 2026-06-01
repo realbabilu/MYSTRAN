@@ -96,6 +96,10 @@
       REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24)
       REAL(DOUBLE)                    :: GBE1(3,24,4), GBE2(3,24,4), GBE3(2,24,4)
       REAL(DOUBLE)                    :: EPS0(3), KAP0(3), N0(3)
+      CHARACTER(16*BYTE)              :: DBG_CQUADR_ENV
+      LOGICAL                          :: DBG_CQUADR
+      INTEGER(LONG)                   :: DBG_STATUS
+      INTEGER(LONG), PARAMETER        :: DBG_EID_MAX = 8
 
 ! **********************************************************************************************************************************
 
@@ -105,6 +109,16 @@
          WRITE(ERR,9001) SUBR_NAME, EID, ELGP
          WRITE(F06,9001) SUBR_NAME, EID, ELGP
          CALL OUTA_HERE ( 'Y' )
+      ENDIF
+
+      DBG_CQUADR = .FALSE.
+      DBG_CQUADR_ENV = ' '
+      DBG_STATUS = 1
+      CALL GET_ENVIRONMENT_VARIABLE('MYSTRAN_DEBUG_CQUADR', DBG_CQUADR_ENV, STATUS=DBG_STATUS)
+      IF (DBG_STATUS == 0) THEN
+         IF ((TRIM(DBG_CQUADR_ENV) /= '') .AND. (TRIM(DBG_CQUADR_ENV) /= '0') .AND. (TRIM(DBG_CQUADR_ENV) /= 'OFF')) THEN
+            DBG_CQUADR = .TRUE.
+         ENDIF
       ENDIF
 
       XYZ = ZERO
@@ -118,6 +132,14 @@
       CALL CALC_NODAL_NORMALS ( XYZ, NORMALS )
       CALL BUILD_T24 ( TE, T24 )
       T24T = TRANSPOSE(T24)
+
+      IF (DBG_CQUADR .AND. (EID <= DBG_EID_MAX)) THEN
+         WRITE(F06,'(A,I8)') 'CQUADRDBG START EID=', EID
+         WRITE(F06,'(A,3(1X,ES15.7))') 'CQUADRDBG XYZ1', XYZ(1,1), XYZ(1,2), XYZ(1,3)
+         WRITE(F06,'(A,3(1X,ES15.7))') 'CQUADRDBG XYZ2', XYZ(2,1), XYZ(2,2), XYZ(2,3)
+         WRITE(F06,'(A,3(1X,ES15.7))') 'CQUADRDBG XYZ3', XYZ(3,1), XYZ(3,2), XYZ(3,3)
+         WRITE(F06,'(A,3(1X,ES15.7))') 'CQUADRDBG XYZ4', XYZ(4,1), XYZ(4,2), XYZ(4,3)
+      ENDIF
 
       AU = BUILD_AU(XYZ, NORMALS)
       ADELTA = BUILD_ADELTA(XYZ, EPROP(1))
@@ -269,6 +291,10 @@
                CALL GEOMETRY_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, NVEC, JDET, CO, BCMAT)
                BMB = BM_AT(XI, ETA, TV1, TV2, CO)
                BML = MATMUL(BMB, T24T)
+               IF (DBG_CQUADR .AND. (EID <= DBG_EID_MAX)) THEN
+                  WRITE(F06,'(A,I8,A,I2,A,I2,A,1X,ES15.7)') 'CQUADRDBG GP EID=', EID, ' I=', I, ' J=', J, ' JDET=', JDET
+                  WRITE(F06,'(A,I8,A,1X,ES15.7)') 'CQUADRDBG BM_NORM EID=', EID, ' =', DSQRT(SUM(BMB*BMB))
+               ENDIF
                BE1(1:3,1:24,1) = BML
                CALL ELEM_STRE_STRN_ARRAYS ( 1 )
 
@@ -317,6 +343,10 @@
                   DO IB=1,4
                      KGVAL = WT*JDET*( DNDX(IA)*(SIG0(1,1)*DNDX(IB) + SIG0(1,2)*DNDY(IB)) +                         &
                                       DNDY(IA)*(SIG0(2,1)*DNDX(IB) + SIG0(2,2)*DNDY(IB)) )
+                     IF (DBG_CQUADR .AND. (EID <= DBG_EID_MAX) .AND. (IA == 1) .AND. (IB == 1)) THEN
+                        WRITE(F06,'(A,I8,A,I2,A,I2,A,1X,ES15.7,A,1X,ES15.7,A,1X,ES15.7)') 'CQUADRDBG KG11 EID=', EID,     &
+                             ' I=', I, ' J=', J, ' SIG11=', SIG0(1,1), ' SIG22=', SIG0(2,2), ' KGVAL=', KGVAL
+                     ENDIF
                      KGLOCAL(6*(IA-1)+3,6*(IB-1)+3) = KGLOCAL(6*(IA-1)+3,6*(IB-1)+3) + KGVAL
                   ENDDO
                ENDDO
@@ -324,6 +354,10 @@
          ENDDO
 
          KED(1:24,1:24) = KGLOCAL
+         IF (DBG_CQUADR .AND. (EID <= DBG_EID_MAX)) THEN
+            WRITE(F06,'(A,I8,A,1X,ES15.7)') 'CQUADRDBG KED_NORM EID=', EID, ' =', DSQRT(SUM(KED*KED))
+            WRITE(F06,'(A,I8)') 'CQUADRDBG END EID=', EID
+         ENDIF
       ENDIF
 
       IF (DEBUG(233) > 0) THEN

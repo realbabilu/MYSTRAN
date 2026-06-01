@@ -114,13 +114,15 @@
                WRITE(BUG,*) '  Shell routing: CQUADR isotropic path uses DKMQ24 kernel'
             ENDIF
             WRITE(BUG,*)
-         ELSE IF ((TYPE(1:5) == 'TRIA3') .AND. (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18)) THEN
-            IF (PCOMP_PROPS == 'Y') THEN
-               WRITE(BUG,*) '  Shell routing: CTRIAR composite path uses laminated DKMT18 kernel'
-            ELSE
-               WRITE(BUG,*) '  Shell routing: CTRIAR isotropic path uses DKMT18 kernel'
+         ELSE IF (TYPE(1:5) == 'TRIA3') THEN
+            IF (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18) THEN
+               IF (PCOMP_PROPS == 'Y') THEN
+                  WRITE(BUG,*) '  Shell routing: CTRIAR composite path uses laminated DKMT18 kernel'
+               ELSE
+                  WRITE(BUG,*) '  Shell routing: CTRIAR isotropic path uses DKMT18 kernel'
+               ENDIF
+               WRITE(BUG,*)
             ENDIF
-            WRITE(BUG,*)
          ENDIF
 ! --- composite_cquadr_ctriar end --- !
 

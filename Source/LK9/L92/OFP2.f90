@@ -29,7 +29,7 @@
       ! Processes SPC and MPC force output requests for 1 subcase.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, OT4
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, OT4, SC1
 
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, GROUT_SPCF_BIT, GROUT_MPCF_BIT, GROUT_GPFO_BIT, IBIT, INT_SC_NUM,&
                                          MELGP, MOGEL, NGRID, NDOFF, NDOFG, NDOFM, NDOFN, NDOFS, NDOFSA, NTERM_GMN,                &
@@ -146,6 +146,7 @@
       ! Process SPC force requests
       NEW_RESULT = .TRUE.
       IF (WHAT == 'SPCF') THEN
+         WRITE(SC1,'(A,I0,A,I0,A,I0,A,I0)') 'OFP2DBG SPCF start JVEC=',JVEC,', SC_OUT_REQ=',SC_OUT_REQ,', NDOFS=',NDOFS,', NDOFG=',NDOFG
 
          SPCF_MEFM_MPF = 'N'
          IF ((MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y') .OR. RS_NEEDS_MPFACTOR) THEN
@@ -162,6 +163,7 @@
          DO I=1,NDOFS
             QS_COL(I) = ZERO
          ENDDO
+         WRITE(SC1,'(A)') 'OFP2DBG SPCF after QS alloc'
 
          CALL ALLOCATE_COL_VEC ('UF_COL', NDOFF, SUBR_NAME)! Get UF_COL to calc (KFS - EIGEN_VAL*MFS)*UF
          IF ((NTERM_KFS > 0) .OR. (NTERM_MFS > 0)) THEN
@@ -198,6 +200,7 @@
             ENDIF
          ENDIF
          CALL DEALLOCATE_COL_VEC ( 'UF_COL' )
+         WRITE(SC1,'(A)') 'OFP2DBG SPCF after UF->QSK/QSM'
 
          DO I=1,NDOFS                                      ! Add (QSYS - PS) to QS to get  final QS
             IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
@@ -206,6 +209,7 @@
                QS_COL(I) = QSK_COL(I) + QSM_COL(I) + QSYS_COL(I) - PS_COL(I)
             ENDIF
          ENDDO
+         WRITE(SC1,'(A)') 'OFP2DBG SPCF after QS assemble'
 
          SPCF_ALL_SAME_CID = 'Y'                           ! Check if all grids, for which there will be output, have same coord sys
          DO I=1,NGRID-1                                    ! If not, then we won't write SPC output totals
@@ -227,6 +231,7 @@
          ENDDO
 
          NUM  = 0                                          ! Put QS into 2-d output array OGEL for this subcase (NDOFS x 6).
+         WRITE(SC1,'(A,I0,A,I0)') 'OFP2DBG SPCF before grid loop NGRID=',NGRID,', NREQ=',NREQ
          DO I=1,NGRID
 
             IB1 = IAND(GROUT(I,INT_SC_NUM),IBIT(GROUT_SPCF_BIT))
@@ -290,20 +295,24 @@
                ENDDO
 
                IF ((NUM == NREQ) .AND. (SC_OUT_REQ > 0)) THEN
+                  WRITE(SC1,'(A,I0,A,I0,A,I0)') 'OFP2DBG SPCF writing outputs JVEC=',JVEC,', NUM=',NUM,', NREQ=',NREQ
 
                   WRITE_F06 = (SPCF_OUT(1:1) == 'Y')
                   WRITE_OP2 = (SPCF_OUT(2:2) == 'Y')
                   WRITE_PCH = (SPCF_OUT(3:3) == 'Y')
                   IF (WRITE_OP2) THEN
+                     WRITE(SC1,'(A)') 'OFP2DBG SPCF calling WRITE_GRD_OP2_OUTPUTS'
                      CALL WRITE_GRD_OP2_OUTPUTS ( JVEC, NUM, WHAT, ITABLE, NEW_RESULT )
                      NEW_RESULT = .FALSE.
                   ENDIF
 
                   IF (WRITE_PCH) THEN
+                     WRITE(SC1,'(A)') 'OFP2DBG SPCF calling WRITE_GRD_PCH_OUTPUTS'
                      CALL WRITE_GRD_PCH_OUTPUTS ( JVEC, NUM, WHAT )
                   ENDIF
 
                   IF (WRITE_F06) THEN
+                     WRITE(SC1,'(A)') 'OFP2DBG SPCF calling WRITE_GRD_PRT_OUTPUTS'
                      CALL CHK_OGEL_ZEROS ( NUM )
                      CALL WRITE_GRD_PRT_OUTPUTS ( JVEC, NUM, WHAT, IHDR, SPCF_ALL_SAME_CID, WRITE_OGEL )
                   ENDIF
@@ -422,10 +431,12 @@
          ENDIF
 
          IF (WRITE_NEU .AND. (ANY_SPCF_OUTPUT > 0)) THEN
+            WRITE(SC1,'(A)') 'OFP2DBG SPCF calling WRITE_FEMAP_GRID_VECS'
             CALL WRITE_FEMAP_GRID_VECS ( QGs_COL, FEMAP_SET_ID, 'SPCF' )
          ENDIF
 
          CALL DEALLOCATE_COL_VEC ( 'QS_COL' )
+         WRITE(SC1,'(A,I0)') 'OFP2DBG SPCF end JVEC=',JVEC
 
 ! ---------------------------------------------------------------------------------------------------------------------------------
 !     Process MPC force requests

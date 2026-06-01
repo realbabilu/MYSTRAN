@@ -739,7 +739,10 @@
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate KMSM  ', CR13
       CALL DEALLOCATE_SPARSE_MAT ( 'KMSM' )
       CALL DEALLOCATE_LAPACK_MAT ( 'IWORK' )
-      CALL DEALLOCATE_LAPACK_MAT ( 'RFAC' )
+! --- validation_fix5 begin --- !
+! RFAC ownership is in LINK4 cleanup; avoid duplicate deallocation here.
+!      CALL DEALLOCATE_LAPACK_MAT ( 'RFAC' )
+! --- validation_fix5 end --- !
       CALL DEALLOCATE_LAPACK_MAT ( 'RESID' )
       CALL DEALLOCATE_LAPACK_MAT ( 'SELECT' )
       CALL DEALLOCATE_LAPACK_MAT ( 'VBAS' )

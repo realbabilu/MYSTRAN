@@ -96,6 +96,7 @@
       INTEGER(LONG)                   :: NUM_NEG_TERMS2    ! Number of negative terms on the diagonal of RFAC for EIG_FRQ2
       INTEGER(LONG)                   :: NUM_EST_EIGENS    ! Number of estimated eigens in the freq interval (EIG_FRQ2 - EIG_FRQ1)
       INTEGER(LONG)                   :: NUM_KMSM_DIAG_0   ! Number of zero diagonal terms in KMSM
+      INTEGER(LONG)                   :: NVEC_SAFE         ! Safe converged-vector count bounded by allocated eigen arrays
 
       INTEGER(LONG)                   :: MIN_NCV, MAX_NCV, LNONZEROS
 
@@ -356,8 +357,22 @@
          NEV = MAX(1,NUM1-1)
       ENDIF
 
-      MIN_NCV = MIN(NEV + 2, NDOFL)
-      MAX_NCV = NDOFL
+! --- validation_fix6 begin --- !
+! Keep ARPACK Krylov size bounded by effective nonzero DOF count.
+! Using NDOFL directly can over-size NCV for constrained/released systems.
+      MIN_NCV = NEV + 2
+      MAX_NCV = LNONZEROS - 2
+! --- validation_fix6 end --- !
+
+! --- validation_fix7 begin --- !
+! Some small mode-2 Lanczos decks legitimately request all finite modes even when
+! the mass matrix has zero diagonal rows on rotational DOF's. In those cases the
+! LNONZEROS-based NCV ceiling becomes infeasible (MIN_NCV > MAX_NCV) even though
+! ARPACK can still run with an NDOFL-based Krylov size.
+      IF (MIN_NCV > MAX_NCV) THEN
+         MAX_NCV = NDOFL - 2
+      ENDIF
+! --- validation_fix7 end --- !
 
       ! sanity check on feasible NCV range
       IF (MIN_NCV > MAX_NCV) THEN
@@ -370,6 +385,7 @@
       END IF
 
       ! NCV determination step (try user factor first)
+      NCV = MIN_NCV
       DO I=EIG_NCVFACL,2,-1
          NCV = I*NEV
          IF (NCV >= MIN_NCV .AND. NCV <= MAX_NCV) THEN
@@ -379,7 +395,7 @@
 
       ! still invalid? (too large OR too small)
       IF (NCV > MAX_NCV .OR. NCV < MIN_NCV) THEN
-         DO I=5,0,-1
+         DO I=5,2,-1
             NCV = NEV+I
             IF (NCV >= MIN_NCV .AND. NCV <= MAX_NCV) THEN
                EXIT
@@ -459,14 +475,18 @@
          CALL DMUMPS_FREE_FACTORS()
       ENDIF
 
-      NVEC       = IPARAM(5)                               ! With HOWMNY = 'A' we are calc'ing eigenvecs for all eigenvalues found
-      NUM_EIGENS = IPARAM(5)
+      NVEC_SAFE  = MIN( IPARAM(5), NEV, SIZE(EIGEN_VEC,2), SIZE(EIGEN_VAL), SIZE(MODE_NUM) )
+      NVEC       = NVEC_SAFE                               ! Bound converged count to what was actually allocated/returned
+      NUM_EIGENS = NVEC_SAFE
 
 !xx   WRITE(SC1, * ) '     DEALLOCATE SOME ARRAYS'
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate KMSMn ', CR13   ;   CALL DEALLOCATE_SPARSE_MAT ( 'KMSMn' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate IWORK ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'IWORK' )
-      WRITE(SC1,12345,ADVANCE='NO') '       Deallocate RFAC  ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'RFAC' )
+! --- validation_fix5 begin --- !
+! RFAC ownership is in LINK4 cleanup; avoid duplicate deallocation here.
+!      WRITE(SC1,12345,ADVANCE='NO') '       Deallocate RFAC  ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'RFAC' )
+! --- validation_fix5 end --- !
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate RESID ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'RESID' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate SELECT', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'SELECT' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate VBAS  ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'VBAS' )

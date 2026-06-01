@@ -33,7 +33,7 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
       USE IOUNT1, ONLY                :  WRT_ERR
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, LPDAT, MPDAT_PLOAD1, MPRESS, MDT, MTDAT_TEMPRB, NSUB, NTSUB
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, LPDAT, MPRESS, MDT, MTDAT_TEMPRB, NSUB, NTSUB
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, QUARTER, THIRD
       USE MODEL_STUF, ONLY            :  BGRID, DT, ELGP, ETYPE, GTEMP, PDATA, PPNT, PTYPE, PRESS, TDATA, TPNT, TYPE
@@ -122,24 +122,7 @@
                ENDDO
             ENDDO
 
-! --- cbeam_add begin --- !
-            IF ((TYPE == 'BAR     ') .OR. (TYPE == 'BART    ') .OR. (TYPE == 'BEAM    ')) THEN
-
-               IF (PTYPE(INT_ELEM_ID) == '2') THEN
-
-                  DO I=1,NSUB
-                     IPPN = PPNT(INT_ELEM_ID,I)
-                     IF (IPPN /= 0) THEN
-                        DO J=1,MPDAT_PLOAD1
-                           PRESS(J,I) = PDATA(IPPN+J-1)
-                        ENDDO
-                     ENDIF
-                  ENDDO
-
-               ENDIF
-
-            ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))) THEN
-! --- cbeam_add end --- !
+            IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
 
                IF      (PTYPE(INT_ELEM_ID) == '1') THEN
 
@@ -170,8 +153,7 @@
 
                ENDIF
 
-            ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:4) == 'PYRA') .OR.                           &
-                     (TYPE(1:5) == 'TETRA')) THEN
+            ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 
                IF (PTYPE(INT_ELEM_ID) == '3') THEN
 

@@ -206,6 +206,7 @@
       INTEGER(LONG)                   :: RS_DIR_SLOT(3) = 0
       LOGICAL                         :: RS_DIR_IS_ACTIVE = .FALSE.
       LOGICAL                         :: RS_NEEDS_MPFACTOR = .FALSE.
+      LOGICAL                         :: NEED_SINGLE_ELEM
 ! --- response_spectra_add end --- !
       INTEGER(LONG)                   :: ITABLE            !
       LOGICAL                         :: NEW_RESULT        ! Is this a new result
@@ -840,6 +841,11 @@ j_do: DO JVEC=1,NUM_SOLNS
          SC_SPCF_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_SPCF_BIT))
          SC_MPCF_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_MPCF_BIT))
          SC_GPFO_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_GPFO_BIT))
+         SC_ELFE_OUTPUT = IAND(OELOUT(INT_SC_NUM),IBIT(ELOUT_ELFE_BIT))
+         SC_ELFN_OUTPUT = IAND(OELOUT(INT_SC_NUM),IBIT(ELOUT_ELFN_BIT))
+         SC_STRE_OUTPUT = IAND(OELOUT(INT_SC_NUM),IBIT(ELOUT_STRE_BIT))
+         SC_STRN_OUTPUT = IAND(OELOUT(INT_SC_NUM),IBIT(ELOUT_STRN_BIT))
+         NEED_SINGLE_ELEM = (WRITE_NEU .OR. (SC_ELFE_OUTPUT > 0) .OR. (SC_ELFN_OUTPUT > 0) .OR. (SC_STRE_OUTPUT > 0) .OR. (SC_STRN_OUTPUT > 0))
 
                                                            ! Write message to screen
          IF      ((SOL_NAME(1: 7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'NLSTATIC') .OR.                                            &
@@ -889,7 +895,16 @@ j_do: DO JVEC=1,NUM_SOLNS
 
         ! Process acceleration output requests
         ! 10/01/14: Need BGRID for Femap displs to transform from global to basic
-        CALL ALLOCATE_MODEL_STUF ( 'SINGLE ELEMENT ARRAYS', SUBR_NAME )
+         IF (NEED_SINGLE_ELEM) THEN
+            WRITE(SC1,'(A,I0,A)') 'L9DBG before ALLOCATE_MODEL_STUF JVEC=',JVEC,', stage=single-element-arrays'
+! --- validation_fix4 begin --- !
+            WRITE(SC1,'(A,I0)') 'L9DBG before pre-clean DEALLOCATE_MODEL_STUF JVEC=',JVEC
+            CALL DEALLOCATE_MODEL_STUF ( 'SINGLE ELEMENT ARRAYS' )
+            WRITE(SC1,'(A,I0)') 'L9DBG after pre-clean DEALLOCATE_MODEL_STUF JVEC=',JVEC
+! --- validation_fix4 end --- !
+            CALL ALLOCATE_MODEL_STUF ( 'SINGLE ELEMENT ARRAYS', SUBR_NAME )
+            WRITE(SC1,'(A,I0)') 'L9DBG after ALLOCATE_MODEL_STUF JVEC=',JVEC
+         ENDIF
 
         NEW_RESULT = .TRUE.
         ITABLE = -1
@@ -967,6 +982,12 @@ j_do: DO JVEC=1,NUM_SOLNS
             ENDIF
 
             CALL LINK_MESSAGE_I('PROCESS SPC FORCE OUTPUT REQUESTS,                "',JVEC)
+! --- validation_fix4 begin --- !
+            IF (ALLOCATED(QGs_COL)) THEN
+               WRITE(SC1,'(A,I0)') 'L9DBG deallocating stale QGs_COL before SPCF, JVEC=', JVEC
+               CALL DEALLOCATE_COL_VEC ( 'QGs_COL' )
+            ENDIF
+! --- validation_fix4 end --- !
             CALL ALLOCATE_COL_VEC ( 'QGs_COL', NDOFG, SUBR_NAME )
             CALL OFP2 ( JVEC, 'SPCF', SC_SPCF_OUTPUT, ZERO_GEN_STIFF, FEMAP_SET_ID, ITG, OT4_GROW, ITABLE, NEW_RESULT )
 !           NEW_RESULT = .FALSE.
@@ -1153,9 +1174,14 @@ j_do: DO JVEC=1,NUM_SOLNS
          ENDIF
 
          CALL DEALLOCATE_COL_VEC ( 'PM_COL' )
+         WRITE(SC1,'(A,I0)') 'L9DBG before deallocate PS_COL/QGs_COL JVEC=',JVEC
          CALL DEALLOCATE_COL_VEC ( 'PS_COL' )
          CALL DEALLOCATE_COL_VEC ( 'QGs_COL' )
+         WRITE(SC1,'(A,I0)') 'L9DBG after deallocate PS_COL/QGs_COL JVEC=',JVEC
+         WRITE(SC1,'(A,I0)') 'L9DBG before deallocate QGm_COL JVEC=',JVEC
          CALL DEALLOCATE_COL_VEC ( 'QGm_COL' )
+         WRITE(SC1,'(A,I0)') 'L9DBG after deallocate QGm_COL JVEC=',JVEC
+         WRITE(SC1,'(A,I0,A,I0)') 'L9DBG before element-output flags JVEC=',JVEC,', INT_SC_NUM=',INT_SC_NUM
          WRITE(SC1,*) CR13
 
          ! Process element force/stress output requests
@@ -1163,6 +1189,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          SC_ELFN_OUTPUT = IAND(OELOUT(INT_SC_NUM),IBIT(ELOUT_ELFN_BIT))
          SC_STRE_OUTPUT = IAND(OELOUT(INT_SC_NUM),IBIT(ELOUT_STRE_BIT))
          SC_STRN_OUTPUT = IAND(OELOUT(INT_SC_NUM),IBIT(ELOUT_STRN_BIT))
+         WRITE(SC1,'(A,I0,A,I0,A,I0,A,I0,A,L1)') 'L9DBG element flags: ELFE=',SC_ELFE_OUTPUT,', ELFN=',SC_ELFN_OUTPUT,', STRE=',SC_STRE_OUTPUT,', STRN=',SC_STRN_OUTPUT,', WRITE_NEU=',WRITE_NEU
          IF((SC_ELFE_OUTPUT > 0) .OR. (SC_ELFN_OUTPUT > 0) .OR. (SC_STRE_OUTPUT > 0) .OR. (SC_STRN_OUTPUT > 0) .OR.                &
             ! (ANY_U_P_OUTPUT > 0) .OR.
             (WRITE_NEU)) THEN
@@ -1189,7 +1216,9 @@ j_do: DO JVEC=1,NUM_SOLNS
             CALL OFP3 ( JVEC, FEMAP_SET_ID, ITE, OT4_EROW )
 !           NEW_RESULT = .FALSE.
          ENDIF
-         CALL DEALLOCATE_MODEL_STUF ( 'SINGLE ELEMENT ARRAYS' )
+         IF (NEED_SINGLE_ELEM) THEN
+            CALL DEALLOCATE_MODEL_STUF ( 'SINGLE ELEMENT ARRAYS' )
+         ENDIF
 
          ! Rewind files containing G-set & S-set loads and read STIME so we can read loads file again for next subcase
          INQUIRE ( FILE=LINK1E, EXIST=LEXIST, OPENED=LOPEN )

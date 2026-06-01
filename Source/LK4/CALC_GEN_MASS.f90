@@ -61,6 +61,7 @@
 
 
       INTEGER(LONG)                   :: I,J,K             ! DO loop indices
+      INTEGER(LONG)                   :: NVEC_USED         ! Safe number of vectors available in EIGEN_VEC/GEN_MASS
 
       REAL(DOUBLE)                    :: DMIJ              ! DABS of MIJ
       REAL(DOUBLE)                    :: MAX               ! Temporary variable used in finding MAXMIJ
@@ -81,8 +82,9 @@
       MIJ_COL       = 1
       MAX           = ZERO
       MAXMIJ        = ZERO
-      CALL COUNTER_INIT('     Diag term for eigenvector ', NVEC)
-      DO I=1,NVEC
+      NVEC_USED = MIN( NVEC, SIZE(EIGEN_VEC,2), SIZE(GEN_MASS) )
+      CALL COUNTER_INIT('     Diag term for eigenvector ', NVEC_USED)
+      DO I=1,NVEC_USED
 
          DO K=1,NDOFL                                      ! Calc diag terms
             OUTVECI(K,1) = EIGEN_VEC(K,I)

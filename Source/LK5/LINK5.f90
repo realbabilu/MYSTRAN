@@ -40,7 +40,7 @@
                                          NDOFN, NDOFO, NDOFR, NDOFS, NDOFSE, NGRID, NSUB, NTERM_GMN, NTERM_GOA, NTERM_PO,          &
                                          NUM_CB_DOFS, NUM_EIGENS, NVEC, SOL_NAME, WARN_ERR
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  EIGNORM2, SUPINFO, SUPWARN
+      USE PARAMS, ONLY                :  EIGNORM2, EPSIL, SUPINFO, SUPWARN
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE EIGEN_MATRICES_1 , ONLY     :  EIGEN_VAL, EIGEN_VEC, GEN_MASS, MODE_NUM
       USE FULL_MATRICES, ONLY         :  PHIZG_FULL
@@ -83,10 +83,16 @@
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to. Input to subr UNFORMATTED_OPEN
       INTEGER(LONG)                   :: P_LINKNO          ! Prior LINK no's that should have run before this LINK can execute
       INTEGER(LONG)                   :: REC_NO            ! Record number when reading a file
+      INTEGER(LONG)                   :: SIGN_ANCHOR_DOF   ! G-set DOF used to canonicalize eigenvector sign
 
+      REAL(DOUBLE)                    :: ABS_TOL           ! Tolerance for comparing near-tied abs values
+      REAL(DOUBLE)                    :: ANCHOR_RATIO      ! Ratio of 2nd-largest abs entry to anchor abs entry
+      REAL(DOUBLE)                    :: EPS1              ! Small number to compare variables against zero
       REAL(DOUBLE)                    :: MIJ_COL_SCALE=ZERO! Scale fac for a col of gen mass matrix to renorm MAXMIJ from LINK4
       REAL(DOUBLE)                    :: MIJ_ROW_SCALE=ZERO! Scale fac for a col of gen mass matrix to renorm MAXMIJ from LINK4
       REAL(DOUBLE)                    :: PHI_SCALE_FAC     ! Scale factor that the eigenvector was renormalized to in subr RENORM
+      REAL(DOUBLE)                    :: SIGN_ANCHOR_ABS   ! Largest abs value used to canonicalize eigenvector sign
+      REAL(DOUBLE)                    :: SECOND_ANCHOR_ABS ! Second-largest abs value used to judge anchor stability
 
 ! **********************************************************************************************************************************
       LINKNO = 5
@@ -125,6 +131,7 @@
 ! Read LINK1A file
 
       CALL READ_L1A ( 'KEEP' )
+      EPS1 = EPSIL(1)
 ! Check COMM for successful completion of prior LINKs
 
       IF (SOL_NAME(1:7) == 'STATICS') THEN
@@ -502,7 +509,7 @@ j_do: DO J = 1,NUM_SOLNS
          CALL BUILD_N_FS
          CALL DEALLOCATE_COL_VEC ( 'UF_COL' )
          CALL DEALLOCATE_COL_VEC ( 'US_COL' )
-                                                           ! Build UG from UN and UM
+                                                            ! Build UG from UN and UM
          CALL DEALLOCATE_COL_VEC ( 'UG_COL' )
          CALL ALLOCATE_COL_VEC ( 'UG_COL', NDOFG, SUBR_NAME )
          CALL ALLOCATE_COL_VEC ( 'UM_COL', NDOFM, SUBR_NAME )
@@ -568,6 +575,68 @@ j_do: DO J = 1,NUM_SOLNS
                   UG_COL(I) = -UG_COL(I)
                ENDDO
             ENDIF
+         ENDIF
+
+! --- validation_fix8 begin --- !
+! Canonicalize arbitrary Lanczos mode phase so validation is not dominated by
+! whole-vector sign flips. Use the largest-magnitude G-set component as anchor
+! and force that anchor positive. For near-tied maxima, prefer the later DOF so
+! symmetric +/- pairs resolve deterministically.
+! --- validation_fix9 begin --- !
+! Only apply the global sign rule when the mode is not near-zero and the anchor
+! is clearly dominant. This avoids over-forcing sign on free-free Lanczos modes
+! whose largest component is numerically unstable.
+          IF ((J <= NVEC) .AND. (SOL_NAME(1:5) == 'MODES') .AND. (EIG_NORM == 'MASS    ')) THEN
+             SIGN_ANCHOR_DOF = 0
+             SIGN_ANCHOR_ABS = ZERO
+             SECOND_ANCHOR_ABS = ZERO
+             DO I=1,NDOFG
+                ABS_TOL = MAX(EPS1, 1.0D-10*MAX(ONE, SIGN_ANCHOR_ABS))
+                IF (DABS(UG_COL(I)) > (SIGN_ANCHOR_ABS + ABS_TOL)) THEN
+                   SECOND_ANCHOR_ABS = SIGN_ANCHOR_ABS
+                   SIGN_ANCHOR_DOF = I
+                   SIGN_ANCHOR_ABS = DABS(UG_COL(I))
+                ELSE IF (DABS(DABS(UG_COL(I)) - SIGN_ANCHOR_ABS) <= ABS_TOL) THEN
+                   IF (DABS(UG_COL(I)) > SECOND_ANCHOR_ABS) THEN
+                      SECOND_ANCHOR_ABS = DABS(UG_COL(I))
+                   ENDIF
+                   IF (SIGN_ANCHOR_DOF == 0) THEN
+                      SIGN_ANCHOR_DOF = I
+                      SIGN_ANCHOR_ABS = DABS(UG_COL(I))
+                   ELSE IF (I > SIGN_ANCHOR_DOF) THEN
+                      SIGN_ANCHOR_DOF = I
+                      SIGN_ANCHOR_ABS = DABS(UG_COL(I))
+                   ENDIF
+                ELSE IF (DABS(UG_COL(I)) > SECOND_ANCHOR_ABS) THEN
+                   SECOND_ANCHOR_ABS = DABS(UG_COL(I))
+                ENDIF
+             ENDDO
+             ANCHOR_RATIO = ONE
+             IF (SIGN_ANCHOR_ABS > MAX(EPS1, 1.0D-14)) THEN
+                ANCHOR_RATIO = SECOND_ANCHOR_ABS / SIGN_ANCHOR_ABS
+             ENDIF
+             IF ((SIGN_ANCHOR_DOF > 0)                                                        .AND. &
+                 (DABS(EIGEN_VAL(J)) > 1.0D-8)                                                .AND. &
+                 (SIGN_ANCHOR_ABS > MAX(EPS1, 1.0D-14))                                       .AND. &
+                 (ANCHOR_RATIO < 8.5D-1)                                                      .AND. &
+                 (UG_COL(SIGN_ANCHOR_DOF) < ZERO)) THEN
+                DO I=1,NDOFG
+                   UG_COL(I) = -UG_COL(I)
+                ENDDO
+             ENDIF
+          ENDIF
+! --- validation_fix9 end --- !
+! --- validation_fix8 end --- !
+
+                                                           ! Keep stored modal vectors consistent with any sign changes above
+         IF      (SOL_NAME(1: 5) == 'MODES'       ) THEN
+            DO I=1,NDOFG
+               EIGEN_VEC(I,J)  = UG_COL(I)
+            ENDDO
+         ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
+            DO I=1,NDOFG
+               PHIZG_FULL(I,J) = UG_COL(I)
+            ENDDO
          ENDIF
 
                                                            ! Write UG displs for this subcase to file LINK5A
@@ -952,5 +1021,3 @@ j_do: DO J = 1,NUM_SOLNS
       END SUBROUTINE READ_EIGNORM2
 
       END SUBROUTINE LINK5
-
-
