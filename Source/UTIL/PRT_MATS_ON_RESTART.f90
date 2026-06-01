@@ -88,16 +88,18 @@
       INTEGER(LONG)                   :: I,J               ! DO loop indices
       INTEGER(LONG)                   :: IERROR            ! Error count
       INTEGER(LONG)                   :: IOCHK             ! IOSTAT error number when opening/reading a file
+      INTEGER(LONG)                   :: MEMERROR          ! Error indicator for local ALLOCATE
       INTEGER(LONG)                   :: NTERM_KSF         ! Number of nonzeros in sparse matrix KSF (= NTERM_KFS)
       INTEGER(LONG)                   :: NUM_SOLNS         ! NSUB for statics, NVEC for eigenvalues, etc
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to. Input to subr UNFORMATTED_OPEN
       INTEGER(LONG)                   :: REC_NO            ! Record number when reading a file
 
 
-      REAL(DOUBLE)                    :: KAA_DIAG(NDOFA)   ! Diagonal of KAA
-      REAL(DOUBLE)                    :: KGG_DIAG(NDOFG)   ! Diagonal of KGG
-      REAL(DOUBLE)                    :: KLL_DIAG(NDOFL)   ! Diagonal of KLL
-      REAL(DOUBLE)                    :: KRR_DIAG(NDOFR)   ! Diagonal of KRR
+! !--- memory heap fix --- begin!
+      REAL(DOUBLE), ALLOCATABLE       :: KAA_DIAG(:)       ! Diagonal of KAA
+      REAL(DOUBLE), ALLOCATABLE       :: KGG_DIAG(:)       ! Diagonal of KGG
+      REAL(DOUBLE), ALLOCATABLE       :: KLL_DIAG(:)       ! Diagonal of KLL
+      REAL(DOUBLE), ALLOCATABLE       :: KRR_DIAG(:)       ! Diagonal of KRR
 
       REAL(DOUBLE)                    :: KAA_MAX_DIAG      ! Max diag term from KAA
       REAL(DOUBLE)                    :: KGG_MAX_DIAG      ! Max diag term from KGG
@@ -118,6 +120,14 @@
 
       OUNT(1) = ERR
       OUNT(2) = F06
+
+      ALLOCATE ( KAA_DIAG(NDOFA), KGG_DIAG(NDOFG), KLL_DIAG(NDOFL), KRR_DIAG(NDOFR), STAT=MEMERROR )
+! !--- memory heap fix --- end!
+      IF (MEMERROR /= 0) THEN
+         WRITE(ERR,9200) SUBR_NAME
+         WRITE(F06,9200) SUBR_NAME
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
 
 !xx   WRITE(SC1, * ) '    ALLOCATE/DEALLOCATE SOME ARRAYS'
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages
@@ -755,7 +765,20 @@
 
       ENDIF
 
-
+! !--- memory heap fix --- begin!
+      IF (ALLOCATED(KAA_DIAG)) THEN
+         DEALLOCATE ( KAA_DIAG )
+      ENDIF
+      IF (ALLOCATED(KGG_DIAG)) THEN
+         DEALLOCATE ( KGG_DIAG )
+      ENDIF
+      IF (ALLOCATED(KLL_DIAG)) THEN
+         DEALLOCATE ( KLL_DIAG )
+      ENDIF
+      IF (ALLOCATED(KRR_DIAG)) THEN
+         DEALLOCATE ( KRR_DIAG )
+      ENDIF
+! !--- memory heap fix --- end!
 
       RETURN
 
@@ -767,6 +790,8 @@
  9995 FORMAT(/,' PROCESSING ENDED DUE TO ABOVE ',I8,' ERRORS')
 
 12345 FORMAT(A,10X,A)
+
+ 9200 FORMAT(' *ERROR  9200: CANNOT ALLOCATE LOCAL DIAGNOSTIC ARRAYS IN SUBROUTINE ',A)
 
 ! **********************************************************************************************************************************
 

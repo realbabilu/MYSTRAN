@@ -79,12 +79,14 @@
       INTEGER(LONG)                   :: NZERO   = 0        ! Count on zero terms in array STF
       INTEGER(LONG)                   :: OUNT(2)            ! File units to write messages to. Input to subr UNFORMATTED_OPEN
       INTEGER(LONG)                   :: ROW_NUM_START      ! DOF number where TDOF data begins for a grid
-      INTEGER(LONG)                   :: RJ(NDOFG)          ! Column numbers corresponding to the terms in RSTF(I).
+! !--- memory heap fix --- begin!
+      INTEGER(LONG), ALLOCATABLE      :: RJ(:)              ! Column numbers corresponding to the terms in RSTF(I).
+      INTEGER(LONG)                   :: MEMERROR           ! Error indicator for local ALLOCATE
 
 
       REAL(DOUBLE)                    :: EPS1               ! A small number to compare real zero
       REAL(DOUBLE)                    :: KGG_II(6,6)        ! 6 x 6 diagonal stiffness matrices for 1 grid
-      REAL(DOUBLE)                    :: RSTF(NDOFG)        ! 1D array of terms from STF(I) pertaining to one row of the G-set
+      REAL(DOUBLE), ALLOCATABLE       :: RSTF(:)            ! 1D array of terms from STF(I) pertaining to one row of the G-set
 !                                                             stiffness matrix. Initially, the cols are not in increasing global
 !                                                             DOF order. RSTF is sorted, prior to writing the G-set stiff matrix
 !                                                             to file LINK1L, so that the cols are in increasing DOF order.
@@ -96,6 +98,15 @@
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
+
+      ALLOCATE ( RJ(NDOFG), RSTF(NDOFG), STAT=MEMERROR )
+! !--- memory heap fix --- end!
+      IF (MEMERROR /= 0) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,9200) SUBR_NAME
+         WRITE(F06,9200) SUBR_NAME
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
 
 ! Pass # 1: Determine final NTERM_KGG (may be less due to terms stripped)
 
@@ -336,6 +347,15 @@ j_do4:   DO J=1,NIND_GRDS_MPCS                           ! on MPC's since they m
          WRITE(F06,101) NUM_MAX
       ENDIF
 
+! !--- memory heap fix --- begin!
+      IF (ALLOCATED(RJ)) THEN
+         DEALLOCATE ( RJ )
+      ENDIF
+      IF (ALLOCATED(RSTF)) THEN
+         DEALLOCATE ( RSTF )
+      ENDIF
+! !--- memory heap fix --- end!
+
 
 
       RETURN
@@ -361,6 +381,8 @@ j_do4:   DO J=1,NIND_GRDS_MPCS                           ! on MPC's since they m
                     ,/,14X,' THE NUMBER OF G-SET STIFFNESS MATRIX RECORDS WRITTEN TO FILE:'                                        &
                     ,/,15X,A                                                                                                       &
                     ,/,14X,' WAS KTERM_KGG = ',I12,'. IT SHOULD HAVE BEEN NTERM_KGG = ',I12)
+
+  9200 FORMAT(' *ERROR  9200: CANNOT ALLOCATE LOCAL ROW-WORK ARRAYS IN SUBROUTINE ',A)
 
  9901 FORMAT(' __________________________________________________________________________________________________________________',&
              '_________________'                                                                                               ,//,&
