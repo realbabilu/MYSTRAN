@@ -37,20 +37,16 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_BUG, ERR, F06, INFILE, L3A, SC1, LINK3A, L3A_MSG
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, COMM, FATAL_ERR, KLL_SDIA, LINKNO, MBUG, NDOFL, NSUB,                       &
-                                         NTERM_KLL, NTERM_PL, NTERM_RMG, NMPC, NRIGEL, RESTART, SOL_NAME, WARN_ERR
-      USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, TEN, ONEPP6
-      USE PARAMS, ONLY                :  BAILOUT, CRS_CCS, EPSERR, EPSIL, KLLRAT, RELINK3, RCONDK, SOLLIB, SUPINFO, SUPWARN,     &
-                                         SPARSE_FLAVOR, WINAMEM
-      USE FULL_MATRICES, ONLY         :  DUM1
-      USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_PL, J_PL, PL
+                                         NTERM_KLL, NTERM_PL, RESTART,  SOL_NAME, WARN_ERR
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, TEN
+      USE PARAMS, ONLY                :  CRS_CCS, EPSERR, EPSIL, KLLRAT, RELINK3, RCONDK, SOLLIB, SUPWARN, SPARSE_FLAVOR
+      USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_PL, J_PL, PL, SYM_KLL
       USE LAPACK_DPB_MATRICES, ONLY   :  RES
       USE COL_VECS, ONLY              :  UL_COL, PL_COL
       USE MACHINE_PARAMS, ONLY        :  MACH_EPS, MACH_SFMIN
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE LAPACK_BLAS_AUX
       USE LAPACK_LIN_EQN_DPB
-      USE LAPACK_LIN_EQN_DGB
-      USE LAPACK_LIN_EQN_DGE
       USE SCRATCH_MATRICES, ONLY      :  I_CCS1, J_CCS1, CCS1
       USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO
 
@@ -58,54 +54,35 @@
 ! which is "USE'd" above
 
 !     USE LINK3_USE_IFs
-      USE ALLOCATE_FULL_MAT_Interface
-      USE BANDGEN_LAPACK_DGB_Interface
-      USE BANDSIZ_Interface
-      USE DEALLOCATE_FULL_MAT_Interface
       USE LINK_MESSAGE_Interface
-      USE SPARSE_CRS_TO_FULL_Interface
-      USE WRITE_MATRIX_MARKET_VECTOR_Interface
 
       IMPLICIT NONE
+
+! --- MUMPS_COO add begin --- !
+#ifdef DMUMPS_Solver
+      INCLUDE 'dmumps_struc.h'
+      INCLUDE 'mpif.h'
+#endif
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'LINK3'
       CHARACTER(  2*BYTE)             :: L_SET    = 'L '   ! L-set designator
       CHARACTER(  1*BYTE)             :: EQUED             ! 'Y' if the stiff matrix was equilibrated in subr EQUILIBRATE
-      CHARACTER(LEN=LEN(INFILE))      :: INPUT_FILE_PATH   ! Full path of the current input deck
       CHARACTER(  1*BYTE)             :: NULL_COL          ! 'Y' if a col of KAO(transpose) is null
 
       INTEGER(LONG)                   :: DEB_PRT(2)        ! Debug numbers to say whether to write ABAND and/or its decomp to output
 !                                                            file in called subr SYM_MAT_DECOMP_LAPACK (ABAND = band form of KLL)
 
-      INTEGER(LONG)                   :: ASTAT             ! Allocation status for DGB fallback
       INTEGER(LONG)                   :: IER_DECOMP        ! Overall error indicator
       INTEGER(LONG)                   :: ISUB              ! DO loop index for subcases
       INTEGER(LONG)                   :: INFO     = 0      ! Info output from some routine that has been called
-      INTEGER(LONG)                   :: INFO_DGB = 0      ! Info from DGBTRF/DGBTRS fallback
-      INTEGER(LONG)                   :: INFO_DGE = 0      ! Info from DGETRF/DGETRS fallback
       INTEGER(LONG)                   :: I,J               ! DO loop indices
-      INTEGER(LONG)                   :: KLL_COST_SDIA     ! Number of sub/super diagonals in KLL for dispatch cost gate
-      INTEGER(LONG)                   :: KTERM             ! Sparse term index used in SPD pre-check
-      INTEGER(LONG)                   :: KL_DGB            ! Number of subdiagonals for DGB fallback
-      INTEGER(LONG)                   :: KU_DGB            ! Number of superdiagonals for DGB fallback
-      INTEGER(LONG)                   :: LDRFAC_DGB        ! Leading dimension for DGB fallback matrix
-      INTEGER(LONG)                   :: NUM_NONPOS_KLL_DIAG ! Count of KLL diagonal entries <= EPS1
-      INTEGER(LONG)                   :: NUM_ZERO_KLL_DIAG ! Count of KLL diagonal entries <= ZERO
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to. Input to subr UNFORMATTED_OPEN
       INTEGER(LONG), PARAMETER        :: P_LINKNO = 2      ! Prior LINK no's that should have run before this LINK can execute
 
       REAL(DOUBLE)                    :: BETA              ! Multiple for rhs for use in subr FBS
       REAL(DOUBLE)                    :: DEN               ! K_INORM*UL_INORM + PL_INORM
-      REAL(DOUBLE)                    :: DIAG_VAL          ! KLL diagonal value used in SPD pre-check
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare real zero
-      REAL(DOUBLE)                    :: KLL_BAND_MB_EST   ! Compact band memory estimate for KLL
-      REAL(DOUBLE)                    :: KLL_BAND_RATIO    ! KLL band width divided by matrix order
-      REAL(DOUBLE)                    :: MB_DUM1_FULL      ! MB required for dense full fallback matrix
-      REAL(DOUBLE)                    :: MB_RFAC_DGB       ! MB required for RFAC_DGB allocation
-      REAL(DOUBLE), PARAMETER         :: MAX_DPBTRF_BAND_MB = 512.0D0
-      REAL(DOUBLE), PARAMETER         :: MAX_DPBTRF_BAND_RATIO = 0.35D0
-      INTEGER(LONG), PARAMETER        :: MIN_DPBTRF_RATIO_GATE_NDOFL = 1000
 
       REAL(DOUBLE)                    :: EQUIL_SCALE_FACS(NDOFL)
                                                            ! LAPACK_S values returned from subr SYM_MAT_DECOMP_LAPACK
@@ -119,26 +96,38 @@
       REAL(DOUBLE)                    :: RCOND             ! Recrip of cond no. of the KLL. Det in  subr COND_NUM
       REAL(DOUBLE)                    :: UL_INORM          ! Inf norm of displacement vector
 
+#ifdef DMUMPS_Solver
+      TYPE(DMUMPS_STRUC)              :: MUMPS_PAR
+      INTEGER                         :: MUMPS_COMM
+      INTEGER                         :: MUMPS_INFOG1
+      INTEGER                         :: MUMPS_MPI_IERR
+      INTEGER, ALLOCATABLE, TARGET    :: MUMPS_IRN(:), MUMPS_JCN(:)
+      REAL(DOUBLE), ALLOCATABLE, TARGET :: MUMPS_A(:)
+      LOGICAL                         :: MUMPS_ACTIVE
+      LOGICAL                         :: MUMPS_MPI_ACTIVE
+#endif
+! --- MUMPS_COO add end --- !
+
       INTRINSIC                       :: DABS
 
-      CHARACTER( 1*BYTE)              :: TRANS_DGE         ! TRANS argument for DGETRS
-      LOGICAL                         :: FOUND_DIAG        ! True if current KLL row has an explicit diagonal term
-      LOGICAL                         :: FORCE_BANDED_ABORT ! True for explicit BANDED BAILOUT validation decks
-      LOGICAL                         :: FORCE_DEGRADED_SLU ! True for SPARSE BAILOUT -1 decks that keep legacy partial solve
-      LOGICAL                         :: HAS_CONSTRAINT_RESCUE ! True when constraint machinery justifies sparse KLL rescue
-      LOGICAL                         :: SKIP_DPBTRF_COST  ! True when KLL band form is too expensive for DPBTRF
-      LOGICAL                         :: SPD_READY_KLL     ! Quick SPD-ready flag for KLL dispatch
-      LOGICAL                         :: USE_DGB_FALLBACK  ! Use DGBTRF/DGBTRS if DPBTRF fails
-      LOGICAL                         :: USE_DENSE_FALLBACK ! Use DGETRF/DGETRS if DGBTRF fails
-      LOGICAL                         :: USE_SPARSE_FALLBACK ! Use SuperLU fallback if banded paths fail
-      REAL(DOUBLE), ALLOCATABLE       :: RFAC_DGB(:,:)     ! General band matrix for DGB fallback
-      INTEGER(LONG), ALLOCATABLE      :: IPIV_DGB(:)       ! Pivot vector for DGB fallback
-      INTEGER(LONG), ALLOCATABLE      :: IPIV_DGE(:)       ! Pivot vector for DGETRF/DGETRS fallback
+! --- solverbattle_bridge begin --- !
+      CHARACTER(1*BYTE)              :: BENCH_EXPORT = 'N'
+      CHARACTER(LEN=256)             :: BENCH_UL_FILE = ''
+      INTEGER(LONG)                  :: BENCH_UL_UNT = 0
+! --- solverbattle_bridge end --- !
 
 !***********************************************************************************************************************************
       LINKNO = 3
 
       EPS1 = EPSIL(1)
+
+#ifdef DMUMPS_Solver
+      MUMPS_COMM       = 0
+      MUMPS_INFOG1     = 0
+      MUMPS_MPI_IERR   = 0
+      MUMPS_ACTIVE     = .FALSE.
+      MUMPS_MPI_ACTIVE = .FALSE.
+#endif
 
 ! Set time initializing parameters
 
@@ -198,20 +187,6 @@
       DEB_PRT(1) = 34
       DEB_PRT(2) = 35
       IER_DECOMP = 0
-      TRANS_DGE = 'N'
-      USE_DGB_FALLBACK = .FALSE.
-      USE_DENSE_FALLBACK = .FALSE.
-      USE_SPARSE_FALLBACK = .FALSE.
-      FORCE_BANDED_ABORT = .FALSE.
-      FORCE_DEGRADED_SLU = .FALSE.
-      HAS_CONSTRAINT_RESCUE = .FALSE.
-      INPUT_FILE_PATH = INFILE
-      IF (INDEX(INPUT_FILE_PATH,'BANDED BAILOUT') > 0) THEN
-         FORCE_BANDED_ABORT = .TRUE.
-      ENDIF
-      IF (INDEX(INPUT_FILE_PATH,'SPARSE BAILOUT -1') > 0) THEN
-         FORCE_DEGRADED_SLU = .TRUE.
-      ENDIF
 
       DO J=1,NDOFL                                         ! Need a null col of loads when SuperLU is called to factor KLL
          DUM_COL(J) = ZERO                                 ! (only because it appears in the calling list)
@@ -237,169 +212,28 @@ sol_do:  DO
 
 Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
 
-         IF ((NMPC > 0) .OR. (NRIGEL > 0) .OR. (NTERM_RMG > 0)) THEN
-            HAS_CONSTRAINT_RESCUE = .TRUE.
-         ENDIF
-
-         SPD_READY_KLL = .TRUE.
-         SKIP_DPBTRF_COST = .FALSE.
-         NUM_NONPOS_KLL_DIAG = 0
-         NUM_ZERO_KLL_DIAG   = 0
-         KLL_COST_SDIA = 0
-         CALL BANDSIZ ( NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL_COST_SDIA )
-         KLL_BAND_MB_EST = REAL(DOUBLE,DOUBLE)*REAL(KLL_COST_SDIA+1,DOUBLE)*REAL(NDOFL,DOUBLE)/ONEPP6
-         IF (NDOFL > 0) THEN
-            KLL_BAND_RATIO = REAL(KLL_COST_SDIA+1,DOUBLE)/REAL(NDOFL,DOUBLE)
-         ELSE
-            KLL_BAND_RATIO = ZERO
-         ENDIF
-         IF ((KLL_BAND_MB_EST > MAX_DPBTRF_BAND_MB) .OR.                                                                     &
-             ((NDOFL >= MIN_DPBTRF_RATIO_GATE_NDOFL) .AND. (KLL_BAND_RATIO > MAX_DPBTRF_BAND_RATIO))) THEN
-            SKIP_DPBTRF_COST = .TRUE.
-            SPD_READY_KLL = .FALSE.
-         ENDIF
-
-         DO I=1,NDOFL
-            FOUND_DIAG = .FALSE.
-            DIAG_VAL   = ZERO
-            DO KTERM=I_KLL(I),I_KLL(I+1)-1
-               IF (J_KLL(KTERM) == I) THEN
-                  DIAG_VAL = KLL(KTERM)
-                  FOUND_DIAG = .TRUE.
-                  EXIT
-               ENDIF
-            ENDDO
-            IF (.NOT. FOUND_DIAG) THEN
-               NUM_NONPOS_KLL_DIAG = NUM_NONPOS_KLL_DIAG + 1
-               NUM_ZERO_KLL_DIAG   = NUM_ZERO_KLL_DIAG   + 1
-               SPD_READY_KLL = .FALSE.
-            ELSE
-               IF (DIAG_VAL <= EPS1) THEN
-                  NUM_NONPOS_KLL_DIAG = NUM_NONPOS_KLL_DIAG + 1
-                  SPD_READY_KLL = .FALSE.
-               ENDIF
-               IF (DIAG_VAL <= ZERO) THEN
-                  NUM_ZERO_KLL_DIAG = NUM_ZERO_KLL_DIAG + 1
-               ENDIF
-            ENDIF
-         ENDDO
-
          INFO = 0
-         IF (SKIP_DPBTRF_COST) THEN
-            WRITE(ERR,4892) KLL_COST_SDIA+1, NDOFL, KLL_BAND_MB_EST, KLL_BAND_RATIO, MAX_DPBTRF_BAND_MB, MAX_DPBTRF_BAND_RATIO
-            IF (SUPINFO == 'N') THEN
-               WRITE(F06,4892) KLL_COST_SDIA+1, NDOFL, KLL_BAND_MB_EST, KLL_BAND_RATIO, MAX_DPBTRF_BAND_MB, MAX_DPBTRF_BAND_RATIO
-            ENDIF
-            INFO = 2
-         ELSE IF (.NOT. SPD_READY_KLL) THEN
-            WRITE(ERR,4890) NUM_NONPOS_KLL_DIAG, NUM_ZERO_KLL_DIAG
-            IF (SUPINFO == 'N') THEN
-               WRITE(F06,4890) NUM_NONPOS_KLL_DIAG, NUM_ZERO_KLL_DIAG
-            ENDIF
-            INFO = 1
-         ELSE
-            INFO = -1
-            CALL SYM_MAT_DECOMP_LAPACK ( SUBR_NAME, 'KLL', L_SET, NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, 'Y', KLLRAT, 'Y', RCONDK,  &
-                                         DEB_PRT, EQUED, KLL_SDIA, K_INORM, RCOND, EQUIL_SCALE_FACS, INFO )
-            IF (INFO > 0) THEN
-               WRITE(ERR,4891) INFO
-               IF (SUPINFO == 'N') THEN
-                  WRITE(F06,4891) INFO
-               ENDIF
-               IF ((BAILOUT >= 0) .AND. FORCE_BANDED_ABORT .AND. (.NOT. HAS_CONSTRAINT_RESCUE)) THEN
-                  FATAL_ERR = FATAL_ERR + 1
-                  WRITE(ERR,99999) BAILOUT
-                  WRITE(F06,99999) BAILOUT
-                  CALL OUTA_HERE ( 'Y' )
-               ENDIF
-            ENDIF
-         ENDIF
-
-         IF (INFO > 0) THEN
-            MB_DUM1_FULL = REAL(DOUBLE,DOUBLE)*REAL(NDOFL,DOUBLE)*REAL(NDOFL,DOUBLE)/ONEPP6
-            IF (SKIP_DPBTRF_COST .AND. (SPARSE_FLAVOR(1:7) == 'SUPERLU')) THEN
-               WRITE(ERR,4898)
-               IF (SUPINFO == 'N') THEN
-                  WRITE(F06,4898)
-               ENDIF
-               SLU_INFO = 0
-               CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KLL', L_SET, NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, SLU_INFO )
-               IF ((SLU_INFO == 0) .OR. FORCE_DEGRADED_SLU) THEN
-                  USE_SPARSE_FALLBACK = .TRUE.
-                  INFO = 0
-               ENDIF
-            ELSE IF ((WINAMEM <= ZERO) .OR. (MB_DUM1_FULL <= WINAMEM)) THEN
-               WRITE(ERR,4896) MB_DUM1_FULL
-               IF (SUPINFO == 'N') THEN
-                  WRITE(F06,4896) MB_DUM1_FULL
-               ENDIF
-
-               IF (ALLOCATED(IPIV_DGE)) DEALLOCATE(IPIV_DGE)
-               CALL ALLOCATE_FULL_MAT ( 'DUM1', NDOFL, NDOFL, SUBR_NAME )
-               CALL SPARSE_CRS_TO_FULL ( 'KLL', NTERM_KLL, NDOFL, NDOFL, 'Y', I_KLL, J_KLL, KLL, DUM1 )
-               ALLOCATE(IPIV_DGE(NDOFL), STAT=ASTAT)
-               IF (ASTAT /= 0) THEN
-                  WRITE(ERR,48921) 'IPIV_DGE', NDOFL, 1, ASTAT
-                  WRITE(F06,48921) 'IPIV_DGE', NDOFL, 1, ASTAT
-                  FATAL_ERR = FATAL_ERR + 1
-                  CALL OUTA_HERE ( 'Y' )
-               ENDIF
-
-               INFO_DGE = 0
-               CALL DGETRF ( NDOFL, NDOFL, DUM1, NDOFL, IPIV_DGE, INFO_DGE )
-               IF (INFO_DGE == 0) THEN
-                  USE_DENSE_FALLBACK = .TRUE.
-                  INFO = 0
-               ELSE
-                  WRITE(ERR,4897) INFO_DGE
-                  WRITE(F06,4897) INFO_DGE
-                  IF (((BAILOUT < 0) .OR. HAS_CONSTRAINT_RESCUE .OR. (.NOT. FORCE_BANDED_ABORT)) .AND.                         &
-                      (SPARSE_FLAVOR(1:7) == 'SUPERLU')) THEN
-                     WRITE(ERR,4898)
-                     IF (SUPINFO == 'N') THEN
-                        WRITE(F06,4898)
-                     ENDIF
-                     SLU_INFO = 0
-                     CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KLL', L_SET, NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, SLU_INFO )
-                     IF ((SLU_INFO == 0) .OR. FORCE_DEGRADED_SLU) THEN
-                        USE_SPARSE_FALLBACK = .TRUE.
-                        INFO = 0
-                     ENDIF
-                  ELSE
-                     FATAL_ERR = FATAL_ERR + 1
-                     CALL OUTA_HERE ( 'Y' )
-                  ENDIF
-               ENDIF
-            ELSE
-               WRITE(ERR,4899) MB_DUM1_FULL, WINAMEM
-               IF (SUPINFO == 'N') THEN
-                  WRITE(F06,4899) MB_DUM1_FULL, WINAMEM
-               ENDIF
-               IF (((BAILOUT < 0) .OR. HAS_CONSTRAINT_RESCUE .OR. (.NOT. FORCE_BANDED_ABORT)) .AND.                            &
-                   (SPARSE_FLAVOR(1:7) == 'SUPERLU')) THEN
-                  WRITE(ERR,4898)
-                  IF (SUPINFO == 'N') THEN
-                     WRITE(F06,4898)
-                  ENDIF
-                  SLU_INFO = 0
-                  CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KLL', L_SET, NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, SLU_INFO )
-                  IF ((SLU_INFO == 0) .OR. FORCE_DEGRADED_SLU) THEN
-                     USE_SPARSE_FALLBACK = .TRUE.
-                     INFO = 0
-                  ENDIF
-               ELSE
-                  FATAL_ERR = FATAL_ERR + 1
-                  CALL OUTA_HERE ( 'Y' )
-               ENDIF
-            ENDIF
-         ENDIF
+         CALL SYM_MAT_DECOMP_LAPACK ( SUBR_NAME, 'KLL', L_SET, NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, 'Y', KLLRAT, 'Y', RCONDK,      &
+                                      DEB_PRT, EQUED, KLL_SDIA, K_INORM, RCOND, EQUIL_SCALE_FACS, INFO )
 
       ELSE IF (SOLLIB == 'SPARSE  ') THEN
 
+! --- MUMPS_COO add begin --- !
          IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
 
             SLU_INFO = 0
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KLL', L_SET, NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, SLU_INFO )
+
+         ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+
+#ifdef DMUMPS_Solver
+            CALL SYM_MAT_DECOMP_MUMPS ( INFO )
+#else
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+            WRITE(F06,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+            CALL OUTA_HERE ( 'Y' )
+#endif
 
          ELSE
 
@@ -409,6 +243,7 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
             CALL OUTA_HERE ( 'Y' )
 
          ENDIF
+! --- MUMPS_COO add end --- !
 
       ELSE
 
@@ -429,6 +264,14 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
 ! Open file for writing displs to.
 
       CALL FILE_OPEN ( L3A, LINK3A, OUNT, 'REPLACE', L3A_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N' )
+
+! --- solverbattle_bridge begin --- !
+      IF (DEBUG(211) > 0) THEN
+         BENCH_EXPORT = 'Y'
+         CALL LINK_MESSAGE('EXPORT KLL/PL BENCHMARK INPUTS                         ')
+         CALL EXPORT_LINK3_BENCHMARK_INPUTS
+      ENDIF
+! --- solverbattle_bridge end --- !
 
 ! Loop on subcases
 
@@ -463,37 +306,26 @@ Solve:DO ISUB = 1,NSUB
 
          IF      (SOLLIB == 'BANDED  ') THEN
 
-            IF (USE_SPARSE_FALLBACK) THEN
-               SLU_INFO = 0
-               CALL FBS_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, ISUB, DUM_COL, SLU_INFO )
-            ELSE IF (USE_DENSE_FALLBACK) THEN
-               INFO_DGE = 0
-               CALL DGETRS ( TRANS_DGE, NDOFL, 1, DUM1, NDOFL, IPIV_DGE, DUM_COL, NDOFL, INFO_DGE )
-               IF (INFO_DGE < 0) THEN
-                  WRITE(ERR,4993) SUBR_NAME, 'DGETRS'
-                  WRITE(F06,4993) SUBR_NAME, 'DGETRS'
-                  FATAL_ERR = FATAL_ERR + 1
-                  CALL OUTA_HERE ( 'Y' )
-               ENDIF
-            ELSE IF (USE_DGB_FALLBACK) THEN
-               INFO_DGB = 0
-               CALL DGBTRS ( 'N', NDOFL, KL_DGB, KU_DGB, 1, RFAC_DGB, LDRFAC_DGB, IPIV_DGB, DUM_COL, NDOFL, INFO_DGB, 'N' )
-               IF (INFO_DGB /= 0) THEN
-                  WRITE(ERR,4894) INFO_DGB, ISUB
-                  WRITE(F06,4894) INFO_DGB, ISUB
-                  FATAL_ERR = FATAL_ERR + 1
-                  CALL OUTA_HERE ( 'Y' )
-               ENDIF
-            ELSE
-               CALL FBS_LAPACK ( EQUED, NDOFL, KLL_SDIA, EQUIL_SCALE_FACS, DUM_COL )
-            ENDIF
+            CALL FBS_LAPACK ( EQUED, NDOFL, KLL_SDIA, EQUIL_SCALE_FACS, DUM_COL )
 
          ELSE IF (SOLLIB == 'SPARSE  ') THEN
 
+! --- MUMPS_COO add begin --- !
             IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
 
                SLU_INFO = 0
                CALL FBS_SUPRLU ( SUBR_NAME, 'KLL', NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, ISUB, DUM_COL, SLU_INFO )
+
+            ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+
+#ifdef DMUMPS_Solver
+               CALL FBS_MUMPS ( DUM_COL, INFO )
+#else
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+               WRITE(F06,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+               CALL OUTA_HERE ( 'Y' )
+#endif
 
             ELSE
 
@@ -503,6 +335,7 @@ Solve:DO ISUB = 1,NSUB
                CALL OUTA_HERE ( 'Y' )
 
             ENDIF
+! --- MUMPS_COO add end --- !
 
          ELSE
 
@@ -521,10 +354,6 @@ Solve:DO ISUB = 1,NSUB
             WRITE(F06,3022) ISUB
             CALL WRITE_VECTOR ( '      A-SET DISPL      ','DISPL', NDOFL, UL_COL )
             WRITE(F06,*)
-         ENDIF
-
-         IF (DEBUG(206) > 0) THEN
-            CALL WRITE_MATRIX_MARKET_VECTOR ( 'UL', NDOFL, UL_COL, ISUB )
          ENDIF
 
          IF (EPSERR == 'Y') THEN                           ! Calculate residual vector, R. Use RES to calculate EPSILON
@@ -560,13 +389,19 @@ Solve:DO ISUB = 1,NSUB
             WRITE(L3A) UL_COL(J)
          ENDDO
 
+! --- solverbattle_bridge begin --- !
+         IF (BENCH_EXPORT == 'Y') THEN
+            CALL WRITE_LINK3_BENCHMARK_UL_COL ( UL_COL )
+         ENDIF
+! --- solverbattle_bridge end --- !
+
          CALL DEALLOCATE_COL_VEC  ( 'UL_COL' )
          CALL DEALLOCATE_COL_VEC  ( 'PL_COL' )
 
 
       ENDDO Solve
 
-FreeS:IF ((SOLLIB == 'SPARSE  ') .OR. USE_SPARSE_FALLBACK) THEN      ! Last, free the storage allocated inside SuperLU
+FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the storage allocated inside SuperLU
 
          IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
 
@@ -586,6 +421,14 @@ FreeS:IF ((SOLLIB == 'SPARSE  ') .OR. USE_SPARSE_FALLBACK) THEN      ! Last, fre
 
       ENDIF FreeS
 
+#ifdef DMUMPS_Solver
+! --- MUMPS_COO add begin --- !
+      IF ((SOLLIB == 'SPARSE  ') .AND. (SPARSE_FLAVOR(1:5) == 'MUMPS')) THEN
+         CALL FREE_MUMPS_FACTORS
+      ENDIF
+! --- MUMPS_COO add end --- !
+#endif
+
 ! Dellocate arrays
 
       CALL LINK_MESSAGE('DEALLOCATE ARRAYS')
@@ -600,15 +443,18 @@ FreeS:IF ((SOLLIB == 'SPARSE  ') .OR. USE_SPARSE_FALLBACK) THEN      ! Last, fre
          ENDIF
       ENDIF
 
-      IF (ALLOCATED(RFAC_DGB)) DEALLOCATE(RFAC_DGB)
-      IF (ALLOCATED(IPIV_DGB)) DEALLOCATE(IPIV_DGB)
-      IF (ALLOCATED(IPIV_DGE)) DEALLOCATE(IPIV_DGE)
-      CALL DEALLOCATE_FULL_MAT ( 'DUM1' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate ABAND ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'ABAND' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate RES   ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'RES' )
 !xx   WRITE(SC1,12345,ADVANCE='NO') '       Deallocate UL_COL', CR13   ;   CALL DEALLOCATE_COL_VEC  ( 'UL_COL' )
 !xx   WRITE(SC1,12345,ADVANCE='NO') '       Deallocate PL_COL', CR13   ;   CALL DEALLOCATE_COL_VEC  ( 'PL_COL' )
 !xx   WRITE(SC1,12345,ADVANCE='NO') '       Deallocate PL    ', CR13   ;   CALL DEALLOCATE_SPARSE_MAT ( 'PL' )
+
+! --- solverbattle_bridge begin --- !
+      IF ((BENCH_EXPORT == 'Y') .AND. (BENCH_UL_UNT > 0)) THEN
+         CLOSE(BENCH_UL_UNT)
+         BENCH_UL_UNT = 0
+      ENDIF
+! --- solverbattle_bridge end --- !
 
       CALL FILE_CLOSE ( L3A, LINK3A, 'KEEP' )
 
@@ -643,6 +489,7 @@ FreeS:IF ((SOLLIB == 'SPARSE  ') .OR. USE_SPARSE_FALLBACK) THEN      ! Last, fre
 ! Write LINK3 end to screen
 
       WRITE(SC1,153) LINKNO
+
 !***********************************************************************************************************************************
   150 FORMAT(/,' >> LINK',I3,' BEGIN',/)
 
@@ -690,50 +537,332 @@ FreeS:IF ((SOLLIB == 'SPARSE  ') .OR. USE_SPARSE_FALLBACK) THEN      ! Last, fre
 
  3026 FORMAT(' *INFORMATION: CANNOT CALCULATE OMEGAI. DEN = 0',/)
 
- 4890 FORMAT(' *WARNING  4890: QUICK SPD PRE-CHECK FOR KLL FOUND ',I10,' DIAGONAL TERM(S) <= EPS1; OF THESE, ',I10,             &
-                    ' ARE <= 0.0.',/ ,14X,' KLL IS NOT SPD-READY, SO LINK3 WILL BYPASS DPBTRF AND TRY DENSE DGETRF/DGETRS.')
+ 9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+                    ,/,14X,A, ' = ',A,' NOT PROGRAMMED ',A)
 
- 4891 FORMAT(' *WARNING  4891: DPBTRF FACTORIZATION FAILED FOR KLL (LEADING MINOR ORDER = ',I10,').',                             &
-                    /,14X,' KLL IS NOT SPD IN PRACTICE, SO LINK3 WILL TRY DENSE DGETRF/DGETRS.')
+ 9992 FORMAT(' *ERROR  9992: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+                    ,/,14X,A,' = ',A,' WAS REQUESTED BUT THIS BUILD WAS NOT COMPILED WITH DMUMPS_Solver.')
 
- 4892 FORMAT(' *WARNING  4892: DPBTRF COST GATE FOR KLL BYPASSED BANDED CHOLESKY. BAND WIDTH = ',I10,', NDOFL = ',I10,           &
-                    /,14X,' COMPACT BAND MB = ',F10.3,', BAND/N RATIO = ',F10.6,                                                  &
-                    /,14X,' LIMITS: COMPACT BAND MB <= ',F10.3,', BAND/N RATIO <= ',F10.6,                                         &
-                    /,14X,' LINK3 WILL TRY THE SPARSE SUPERLU RESCUE PATH WHEN AVAILABLE.')
-
- 48921 FORMAT(' *ERROR    48921: ALLOCATE FAILED FOR ',A,' IN LINK3. REQUESTED SIZE = (',I10,',',I10,') STAT = ',I10)
-
- 4893 FORMAT(' *ERROR    4893: DGBTRF FALLBACK FAILED IN LINK3. INFO = ',I10)
-
- 4894 FORMAT(' *ERROR    4894: DGBTRS FALLBACK FAILED IN LINK3. INFO = ',I10,' FOR SUBCASE ',I10)
-
- 4895 FORMAT(' *ERROR    4895: ATTEMPT TO ALLOCATE ',A,' REQUIRES ',F10.3,' MB, EXCEEDING PARAM WINAMEM LIMIT OF ',F10.3,' MB')
-
- 4993 FORMAT(' *ERROR   4993: PROGRAMMING ERROR IN SUBROUTINE ',A,                                                                &
-                    /,14X,' LAPACK DENSE SOLVER SUBROUTINE ',A,' REPORTED AN ILLEGAL ARGUMENT.')
-
- 4896 FORMAT(' *WARNING  4896: TRYING DENSE DGETRF/DGETRS FALLBACK FOR KLL. ESTIMATED FULL MATRIX MB = ',F10.3)
-
- 4897 FORMAT(' *ERROR    4897: DGETRF DENSE FALLBACK FAILED IN LINK3. INFO = ',I10)
-
- 4898 FORMAT(' *WARNING  4898: LAPACK BANDED/DENSE FALLBACKS FAILED OR WERE UNSUITABLE.',                                        &
-                    /,14X,' TRYING SPARSE SUPERLU FALLBACK TO SALVAGE THE SUBCASE.')
-
-  4899 FORMAT(' *WARNING  4899: DENSE DGETRF/DGETRS FALLBACK SKIPPED. ESTIMATED FULL MATRIX MB = ',F10.3,                        &
-                    ' EXCEEDS WINAMEM = ',F10.3)
-
-  9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A,                                                                 &
-                    /,14X,A, ' = ',A,' NOT PROGRAMMED ',A)
-
-  9998 FORMAT(' *ERROR  9998: COMM ',I3,' INDICATES UNSUCCESSFUL LINK ',I2,' COMPLETION.'                                          &
-             ,/,14X,' FATAL ERROR - CANNOT START LINK ',I2)
-
-99999 FORMAT(/,' PROCESSING TERMINATED DUE TO ABOVE MESSAGES AND BULK DATA PARAMETER BAILOUT = ',I7)
+ 9998 FORMAT(' *ERROR  9998: COMM ',I3,' INDICATES UNSUCCESSFUL LINK ',I2,' COMPLETION.'                                           &
+                    ,/,14X,' FATAL ERROR - CANNOT START LINK ',I2)
 
 12345 FORMAT(A,10X,A)
 
 !***********************************************************************************************************************************
 
       CONTAINS
+
+! --- solverbattle_bridge begin --- !
+! **********************************************************************************************************************************
+      SUBROUTINE EXPORT_LINK3_BENCHMARK_INPUTS
+
+      CHARACTER(LEN=256)             :: BENCH_PREFIX
+      CHARACTER(LEN=256)             :: KLL_FILE
+      CHARACTER(LEN=256)             :: META_FILE
+      CHARACTER(LEN=256)             :: PL_FILE
+      CHARACTER(LEN=256)             :: UL_FILE
+      INTEGER(LONG)                  :: UNT
+
+      BENCH_PREFIX = GET_BENCHMARK_PREFIX()
+      KLL_FILE     = TRIM(BENCH_PREFIX) // '_kll.mtx'
+      PL_FILE      = TRIM(BENCH_PREFIX) // '_pl.mtx'
+      UL_FILE      = TRIM(BENCH_PREFIX) // '_ul.mtx'
+      META_FILE    = TRIM(BENCH_PREFIX) // '_benchmark_meta.txt'
+
+      CALL WRITE_MATRIX_MARKET_CRS ( KLL_FILE, NDOFL, NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, SYM_KLL )
+      CALL WRITE_MATRIX_MARKET_CRS ( PL_FILE , NDOFL, NSUB , NTERM_PL , I_PL , J_PL , PL  )
+      CALL OPEN_MATRIX_MARKET_ARRAY ( UL_FILE, NDOFL, NSUB, BENCH_UL_UNT )
+      BENCH_UL_FILE = UL_FILE
+
+      OPEN(NEWUNIT=UNT, FILE=META_FILE, STATUS='REPLACE', ACTION='WRITE')
+      WRITE(UNT,'(A)') '# MYSTRAN LINK3 static benchmark export'
+      WRITE(UNT,'(A)') 'input_file=' // TRIM(INFILE)
+      WRITE(UNT,'(A)') 'matrix_file=' // TRIM(KLL_FILE)
+      WRITE(UNT,'(A)') 'rhs_file=' // TRIM(PL_FILE)
+      WRITE(UNT,'(A)') 'solution_file=' // TRIM(UL_FILE)
+      WRITE(UNT,'(A)') 'matrix_set=KLL'
+      WRITE(UNT,'(A)') 'rhs_set=PL'
+      WRITE(UNT,'(A)') 'solution_set=UL'
+      WRITE(UNT,'(A,I0)') 'ndofl=', NDOFL
+      WRITE(UNT,'(A,I0)') 'nsub=', NSUB
+      WRITE(UNT,'(A,A)') 'matrix_sparse_storage_symmetry=', SYM_KLL
+      WRITE(UNT,'(A)') 'matrix_market_kll_export=expanded_full_general_when_sym_storage'
+      WRITE(UNT,'(A)') 'matrix_market_ul_export=array_dense_column_major'
+      WRITE(UNT,'(A)') 'matrix_market_rhs_columns_are_internal_subcase_numbers'
+      CLOSE(UNT)
+
+      WRITE(F06,'(/,A)') ' LINK3 benchmark export: Matrix Market files written for reduced static system.'
+      WRITE(F06,'(A)')   '   KLL : ' // TRIM(KLL_FILE)
+      WRITE(F06,'(A)')   '   PL  : ' // TRIM(PL_FILE)
+      WRITE(F06,'(A)')   '   UL  : ' // TRIM(UL_FILE)
+      WRITE(F06,'(A)')   '   META: ' // TRIM(META_FILE)
+      WRITE(F06,*)
+
+      END SUBROUTINE EXPORT_LINK3_BENCHMARK_INPUTS
+
+! **********************************************************************************************************************************
+      SUBROUTINE WRITE_MATRIX_MARKET_CRS ( FILNAM, NROWS, NCOLS, NTERM, I_MAT, J_MAT, MAT, SYM_STORAGE )
+
+      CHARACTER(LEN=*), INTENT(IN)   :: FILNAM
+      INTEGER(LONG), INTENT(IN)      :: NCOLS
+      INTEGER(LONG), INTENT(IN)      :: NROWS
+      INTEGER(LONG), INTENT(IN)      :: NTERM
+      INTEGER(LONG), INTENT(IN)      :: I_MAT(NROWS+1)
+      INTEGER(LONG), INTENT(IN)      :: J_MAT(NTERM)
+      CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: SYM_STORAGE
+      CHARACTER(1*BYTE)              :: SYM_STOR
+      INTEGER(LONG)                  :: NDIAG
+      INTEGER(LONG)                  :: NOUT
+      INTEGER(LONG)                  :: IROW
+      INTEGER(LONG)                  :: K
+      INTEGER(LONG)                  :: UNT
+      REAL(DOUBLE), INTENT(IN)       :: MAT(NTERM)
+
+      SYM_STOR = 'N'
+      IF (PRESENT(SYM_STORAGE)) SYM_STOR = SYM_STORAGE(1:1)
+
+      OPEN(NEWUNIT=UNT, FILE=FILNAM, STATUS='REPLACE', ACTION='WRITE')
+      WRITE(UNT,'(A)') '%%MatrixMarket matrix coordinate real general'
+      WRITE(UNT,'(A)') '% exported by MYSTRAN LINK3 benchmark bridge'
+      IF ((SYM_STOR == 'Y') .AND. (NROWS == NCOLS)) THEN
+         NDIAG = 0
+         DO IROW=1,NROWS
+            DO K=I_MAT(IROW),I_MAT(IROW+1)-1
+               IF (J_MAT(K) == IROW) NDIAG = NDIAG + 1
+            ENDDO
+         ENDDO
+         NOUT = 2*NTERM - NDIAG
+         WRITE(UNT,'(I0,1X,I0,1X,I0)') NROWS, NCOLS, NOUT
+         DO IROW=1,NROWS
+            DO K=I_MAT(IROW),I_MAT(IROW+1)-1
+               WRITE(UNT,'(I0,1X,I0,1X,ES25.16)') IROW, J_MAT(K), MAT(K)
+               IF (J_MAT(K) /= IROW) THEN
+                  WRITE(UNT,'(I0,1X,I0,1X,ES25.16)') J_MAT(K), IROW, MAT(K)
+               ENDIF
+            ENDDO
+         ENDDO
+      ELSE
+         WRITE(UNT,'(I0,1X,I0,1X,I0)') NROWS, NCOLS, NTERM
+         DO IROW=1,NROWS
+            DO K=I_MAT(IROW),I_MAT(IROW+1)-1
+               WRITE(UNT,'(I0,1X,I0,1X,ES25.16)') IROW, J_MAT(K), MAT(K)
+            ENDDO
+         ENDDO
+      ENDIF
+      CLOSE(UNT)
+
+      END SUBROUTINE WRITE_MATRIX_MARKET_CRS
+
+! **********************************************************************************************************************************
+      SUBROUTINE OPEN_MATRIX_MARKET_ARRAY ( FILNAM, NROWS, NCOLS, UNT )
+
+      CHARACTER(LEN=*), INTENT(IN)   :: FILNAM
+      INTEGER(LONG), INTENT(IN)      :: NROWS
+      INTEGER(LONG), INTENT(IN)      :: NCOLS
+      INTEGER(LONG), INTENT(OUT)     :: UNT
+
+      OPEN(NEWUNIT=UNT, FILE=FILNAM, STATUS='REPLACE', ACTION='WRITE')
+      WRITE(UNT,'(A)') '%%MatrixMarket matrix array real general'
+      WRITE(UNT,'(A)') '% exported by MYSTRAN LINK3 benchmark bridge'
+      WRITE(UNT,'(I0,1X,I0)') NROWS, NCOLS
+
+      END SUBROUTINE OPEN_MATRIX_MARKET_ARRAY
+
+! **********************************************************************************************************************************
+      SUBROUTINE WRITE_LINK3_BENCHMARK_UL_COL ( ULVEC )
+
+      REAL(DOUBLE), INTENT(IN)       :: ULVEC(NDOFL)
+      INTEGER(LONG)                  :: I
+
+      DO I=1,NDOFL
+         WRITE(BENCH_UL_UNT,'(ES25.16)') ULVEC(I)
+      ENDDO
+
+      END SUBROUTINE WRITE_LINK3_BENCHMARK_UL_COL
+! --- solverbattle_bridge end --- !
+
+#ifdef DMUMPS_Solver
+! --- MUMPS_COO add begin --- !
+! **********************************************************************************************************************************
+      SUBROUTINE SYM_MAT_DECOMP_MUMPS ( INFO_OUT )
+
+      INTEGER(LONG), INTENT(OUT)     :: INFO_OUT
+      INTEGER(LONG)                  :: K
+      INTEGER(LONG)                  :: IROW
+
+      CALL INIT_MUMPS_RUNTIME
+      CALL BUILD_COO_FROM_CRS
+
+      MUMPS_PAR%JOB = -1
+      MUMPS_PAR%PAR = 1
+      MUMPS_PAR%SYM = 0
+      IF (SYM_KLL == 'Y') MUMPS_PAR%SYM = 2
+      MUMPS_PAR%COMM = MUMPS_COMM
+      CALL DMUMPS(MUMPS_PAR)
+
+      MUMPS_PAR%ICNTL(1) = -1
+      MUMPS_PAR%ICNTL(2) = -1
+      MUMPS_PAR%ICNTL(3) = -1
+      MUMPS_PAR%ICNTL(4) = 0
+      MUMPS_PAR%N   = NDOFL
+      MUMPS_PAR%NZ  = SIZE(MUMPS_A)
+      MUMPS_PAR%IRN => MUMPS_IRN
+      MUMPS_PAR%JCN => MUMPS_JCN
+      MUMPS_PAR%A   => MUMPS_A
+      MUMPS_PAR%JOB = 4
+      CALL DMUMPS(MUMPS_PAR)
+      MUMPS_INFOG1 = MUMPS_PAR%INFOG(1)
+      INFO_OUT = MUMPS_INFOG1
+
+      IF (INFO_OUT < 0) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,A,A,I12,A,A,A)') ' *ERROR  9811: THE FACTORIZATION OF THE MATRIX ', 'KLL',                                &
+                                        ' BY MUMPS HAD ERROR WITH INFOG(1) = ', INFO_OUT, ' IN SUBR ', SUBR_NAME, '.'
+         WRITE(F06,'(A,A,A,I12,A,A,A)') ' *ERROR  9811: THE FACTORIZATION OF THE MATRIX ', 'KLL',                                &
+                                        ' BY MUMPS HAD ERROR WITH INFOG(1) = ', INFO_OUT, ' IN SUBR ', SUBR_NAME, '.'
+         CALL OUTA_HERE ( 'Y' )
+      ELSE
+         MUMPS_ACTIVE = .TRUE.
+         WRITE(F06,'(A,A,A,A)') ' MUMPS FACTORIZATION OF MATRIX ', 'KLL', ' SUCCEEDED IN SUBR ', SUBR_NAME
+      ENDIF
+
+      END SUBROUTINE SYM_MAT_DECOMP_MUMPS
+
+! **********************************************************************************************************************************
+      SUBROUTINE FBS_MUMPS ( RHS_COL, INFO_OUT )
+
+      REAL(DOUBLE), TARGET, INTENT(INOUT) :: RHS_COL(NDOFL)
+      INTEGER(LONG), INTENT(OUT)          :: INFO_OUT
+
+      IF (.NOT. MUMPS_ACTIVE) THEN
+         INFO_OUT = -999
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,A,A)') ' *ERROR  9812: MUMPS SOLVE WAS REQUESTED IN SUBR ', SUBR_NAME,                                    &
+                              ' BEFORE FACTORIZATION WAS AVAILABLE.'
+         WRITE(F06,'(A,A,A)') ' *ERROR  9812: MUMPS SOLVE WAS REQUESTED IN SUBR ', SUBR_NAME,                                    &
+                              ' BEFORE FACTORIZATION WAS AVAILABLE.'
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
+
+      MUMPS_PAR%NRHS = 1
+      MUMPS_PAR%LRHS = NDOFL
+      MUMPS_PAR%RHS  => RHS_COL
+      MUMPS_PAR%JOB  = 3
+      CALL DMUMPS(MUMPS_PAR)
+      INFO_OUT = MUMPS_PAR%INFOG(1)
+
+      IF (INFO_OUT < 0) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,I12,A,A,A)') ' *ERROR  9813: MUMPS SOLVE FAILED WITH INFOG(1) = ', INFO_OUT,                              &
+                                     ' IN SUBR ', SUBR_NAME, '.'
+         WRITE(F06,'(A,I12,A,A,A)') ' *ERROR  9813: MUMPS SOLVE FAILED WITH INFOG(1) = ', INFO_OUT,                              &
+                                     ' IN SUBR ', SUBR_NAME, '.'
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
+
+      END SUBROUTINE FBS_MUMPS
+
+! **********************************************************************************************************************************
+      SUBROUTINE FREE_MUMPS_FACTORS
+
+      IF (MUMPS_ACTIVE) THEN
+         MUMPS_PAR%JOB = -2
+         CALL DMUMPS(MUMPS_PAR)
+         MUMPS_ACTIVE = .FALSE.
+      ENDIF
+
+      IF (ALLOCATED(MUMPS_IRN)) DEALLOCATE(MUMPS_IRN)
+      IF (ALLOCATED(MUMPS_JCN)) DEALLOCATE(MUMPS_JCN)
+      IF (ALLOCATED(MUMPS_A  )) DEALLOCATE(MUMPS_A  )
+
+      IF (MUMPS_MPI_ACTIVE) THEN
+         CALL MPI_FINALIZE(MUMPS_MPI_IERR)
+         MUMPS_MPI_ACTIVE = .FALSE.
+      ENDIF
+
+      END SUBROUTINE FREE_MUMPS_FACTORS
+
+! **********************************************************************************************************************************
+      SUBROUTINE INIT_MUMPS_RUNTIME
+
+      CALL MPI_INIT(MUMPS_MPI_IERR)
+      IF (MUMPS_MPI_IERR /= 0) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,I12,A,A,A)') ' *ERROR  9814: MPI_INIT FAILED WITH IERR = ', MUMPS_MPI_IERR,                               &
+                                     ' IN SUBR ', SUBR_NAME, '.'
+         WRITE(F06,'(A,I12,A,A,A)') ' *ERROR  9814: MPI_INIT FAILED WITH IERR = ', MUMPS_MPI_IERR,                               &
+                                     ' IN SUBR ', SUBR_NAME, '.'
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
+      MUMPS_MPI_ACTIVE = .TRUE.
+      MUMPS_COMM = MPI_COMM_WORLD
+
+      END SUBROUTINE INIT_MUMPS_RUNTIME
+
+! **********************************************************************************************************************************
+      SUBROUTINE BUILD_COO_FROM_CRS
+
+      INTEGER(LONG)                  :: IDX
+      INTEGER(LONG)                  :: IROW
+      INTEGER(LONG)                  :: K
+
+      IF (ALLOCATED(MUMPS_IRN)) DEALLOCATE(MUMPS_IRN)
+      IF (ALLOCATED(MUMPS_JCN)) DEALLOCATE(MUMPS_JCN)
+      IF (ALLOCATED(MUMPS_A  )) DEALLOCATE(MUMPS_A  )
+
+      ALLOCATE(MUMPS_IRN(NTERM_KLL))
+      ALLOCATE(MUMPS_JCN(NTERM_KLL))
+      ALLOCATE(MUMPS_A  (NTERM_KLL))
+
+      IDX = 0
+      DO IROW=1,NDOFL
+         DO K=I_KLL(IROW),I_KLL(IROW+1)-1
+            IDX = IDX + 1
+            MUMPS_IRN(IDX) = IROW
+            MUMPS_JCN(IDX) = J_KLL(K)
+            MUMPS_A(IDX)   = KLL(K)
+         ENDDO
+      ENDDO
+
+      END SUBROUTINE BUILD_COO_FROM_CRS
+#endif
+! --- MUMPS_COO add end --- !
+
+! **********************************************************************************************************************************
+      FUNCTION GET_BENCHMARK_PREFIX() RESULT(PREFIX)
+
+      CHARACTER(LEN=256)             :: PREFIX
+      INTEGER(LONG)                  :: I
+      INTEGER(LONG)                  :: LAST_DOT
+      INTEGER(LONG)                  :: LAST_SEP
+      INTEGER(LONG)                  :: NAME_END
+
+      PREFIX   = 'mystran_link3'
+      LAST_SEP = 0
+      LAST_DOT = 0
+      NAME_END = LEN_TRIM(INFILE)
+
+      IF (NAME_END <= 0) RETURN
+
+      DO I=1,NAME_END
+         IF ((INFILE(I:I) == '\') .OR. (INFILE(I:I) == '/')) THEN
+            LAST_SEP = I
+            LAST_DOT = 0
+         ELSE IF (INFILE(I:I) == '.') THEN
+            LAST_DOT = I
+         ENDIF
+      ENDDO
+
+      IF ((LAST_DOT > LAST_SEP + 1) .AND. (LAST_DOT <= NAME_END)) THEN
+         PREFIX = ADJUSTL(INFILE(LAST_SEP+1:LAST_DOT-1))
+      ELSE
+         PREFIX = ADJUSTL(INFILE(LAST_SEP+1:NAME_END))
+      ENDIF
+
+      IF (LEN_TRIM(PREFIX) <= 0) PREFIX = 'mystran_link3'
+
+      END FUNCTION GET_BENCHMARK_PREFIX
+
+! **********************************************************************************************************************************
 
       END SUBROUTINE LINK3

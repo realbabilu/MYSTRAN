@@ -50,6 +50,7 @@
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
 ! --- chase_feast_add --- begin !
+      CHARACTER(  8*BYTE)      :: ARPKSOLV       = 'SOLLIB  '! ARPACK linear backend override: SOLLIB, SPARSE, or BANDED.
       CHARACTER(  8*BYTE)      :: LANCMETH       = '        '! Deprecated alias for EIGRL extract method selection.
 ! --- chase_feast_add --- end !
 ! ----------------------------------------------------------------------------------------------------------------------------------
@@ -445,12 +446,14 @@
 !                                                               and saved, files (LINK1R for MGG)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
+! --- MUMPS_COO add begin --- !
       CHARACTER(  8*BYTE)      :: SOLLIB         = 'SPARSE  '! If 'BANDED  ', use LAPACK and ARPACK for eqn soln and eigens.
 !                                                              If 'SPARSE  ', use value determined by parameter SPARSE_FLAVOR
 !                                                              defined in field 4 of the PARAM, SOLLIB entry
 
-      CHARACTER(  8*BYTE)      :: SPARSE_FLAVOR  = 'SUPERLU '! This denotes which SPARSE SOLLIB to use. Currently SuperLU is the
-!                                                              only option
+      CHARACTER(  8*BYTE)      :: SPARSE_FLAVOR  = 'SUPERLU '! This denotes which SPARSE SOLLIB to use. Supported options are
+!                                                              SUPERLU and (when compiled in) MUMPS.
+! --- MUMPS_COO add end --- !
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       INTEGER(LONG)            :: SORT_MAX       =     5     ! Max number of times to run sort algorithm before stopping with error.

@@ -38,7 +38,7 @@
       USE MACHINE_PARAMS, ONLY        :  MACH_PREC
       USE DOF_TABLES, ONLY            :  TSET_CHR_LEN
 
-      USE PARAMS, ONLY                :  ARP_TOL         , ART_KED         , ART_ROT_KED     , ART_TRAN_KED    ,                   &
+      USE PARAMS, ONLY                :  ARPKSOLV        , ARP_TOL         , ART_KED         , ART_ROT_KED     , ART_TRAN_KED    , &
                                          ART_MASS        , ART_ROT_MASS    , ART_TRAN_MASS   , AUTOSPC         , AUTOSPC_NSET    , &
                                          AUTOSPC_RAT     , AUTOSPC_INFO    , AUTOSPC_SPCF    , BAILOUT         , BANDEDOPT       , &
                                          CRS_CCS         , &
@@ -1366,6 +1366,36 @@
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
 ! --- chase_feast_add --- begin !
+! ARPKSOLV selects only the ARPACK shift-invert linear backend. It does not change the global SOLLIB policy.
+
+      ELSE IF (JCARD(2)(1:8) == 'ARPKSOLV') THEN
+         PARNAM = 'ARPKSOLV'
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      (CHRPARM(1:6) == 'SOLLIB') THEN
+               ARPKSOLV = 'SOLLIB  '
+            ELSE IF (CHRPARM(1:6) == 'SPARSE') THEN
+               ARPKSOLV = 'SPARSE  '
+            ELSE IF (CHRPARM(1:6) == 'BANDED') THEN
+               ARPKSOLV = 'BANDED  '
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'SOLLIB/SPARSE/BANDED',CHRPARM,ARPKSOLV
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'SOLLIB/SPARSE/BANDED',CHRPARM,ARPKSOLV
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
 ! LANCMETH is a deprecated alias for selecting the EIGRL extract backend when no EIGRL continuation is present
 
       ELSE IF (JCARD(2)(1:8) == 'LANCMETH') THEN
@@ -2617,6 +2647,7 @@
 
 ! SOLLIB sets the method for solving equations (BANDED, SPARSE)
 
+! --- MUMPS_COO add begin --- !
       ELSE IF (JCARD(2)(1:8) == 'SOLLIB  ') THEN
          PARNAM = 'SOLLIB'
          CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
@@ -2638,6 +2669,7 @@
                ENDIF
             ENDIF
          ENDIF
+! --- MUMPS_COO add end --- !
 
          IF (SOLLIB == 'SPARSE  ') THEN
             IF (JCARD(4)(1:) /= ' ') THEN
@@ -2647,15 +2679,17 @@
                   CALL LEFT_ADJ_BDFLD ( CHRPARM )
                   IF      (CHRPARM(1:7) == 'SUPERLU') THEN
                      SPARSE_FLAVOR = 'SUPERLU '
+                  ELSE IF (CHRPARM(1:5) == 'MUMPS') THEN
+                     SPARSE_FLAVOR = 'MUMPS   '
                   ELSE
                      WARN_ERR = WARN_ERR + 1
                      WRITE(ERR,101) CARD
-                     WRITE(ERR,1189) PARNAM,'Y OR N',CHRPARM,AUTOSPC_INFO
+                     WRITE(ERR,1189) PARNAM,'SUPERLU or MUMPS',CHRPARM,SPARSE_FLAVOR
                      IF (SUPWARN == 'N') THEN
                         IF (ECHO == 'NONE  ') THEN
                            WRITE(F06,101) CARD
                         ENDIF
-                        WRITE(F06,1189) PARNAM,'Y OR N',CHRPARM,AUTOSPC_INFO
+                        WRITE(F06,1189) PARNAM,'SUPERLU or MUMPS',CHRPARM,SPARSE_FLAVOR
                      ENDIF
                   ENDIF
                ENDIF

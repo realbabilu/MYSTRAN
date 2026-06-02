@@ -36,8 +36,9 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  ARP_TOL, BAILOUT, DARPACK, EIGESTL, EPSIL, MXITERL, SOLLIB, SPARSTOR, SUPINFO,            &
-                                         SUPWARN
+! --- MUMPS_COO add begin --- !
+      USE PARAMS, ONLY                :  ARPKSOLV, ARP_TOL, BAILOUT, DARPACK, EIGESTL, EPSIL, MXITERL, SOLLIB, SPARSE_FLAVOR,      &
+                                         SPARSTOR, SUPINFO, SUPWARN
       USE DOF_TABLES, ONLY            :  TDOFI
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
       USE MODEL_STUF, ONLY            :  EIG_FRQ1, EIG_FRQ2, EIG_LANCZOS_NEV_DELT, EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2,     &
@@ -47,6 +48,8 @@
                                          I_KMSM, J_KMSM, KMSM, I_KMSMn, J_KMSMn, KMSMn, I_KMSMs, J_KMSMs, KMSMs
 
       USE ARPACK_LANCZOS_EIG
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_FREE_FACTORS
+! --- MUMPS_COO add end --- !
 
       USE EIG_LANCZOS_ARPACK_USE_IFs
       USE LINK_MESSAGE_Interface
@@ -54,11 +57,6 @@
       IMPLICIT NONE
 
       LOGICAL                         :: RVEC              ! = .TRUE. or .FALSE. Specifies whether eigenvectors are to be calculated
-! --- arpack_surgery begin --- !
-      LOGICAL                         :: EST_NUM_EIGENS_VALID
-      LOGICAL                         :: EST_NUM_EIGENS_VALID1
-      LOGICAL                         :: EST_NUM_EIGENS_VALID2
-! --- arpack_surgery end --- !
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'EIG_LANCZOS_ARPACK'
@@ -80,6 +78,7 @@
 !                                                            When IPARAM(7) = 3, 4, or 5,  WHICH should be set to 'LM' only.
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: CALLED_SUBR = ' ' ! Name of a called subr (for output error purposes)
+      CHARACTER( 8*BYTE)              :: SOLLIB_SAVE       ! Saved global SOLLIB while ARPKSOLV locally overrides ARPACK backend
 
       INTEGER(LONG)                   :: COMPV             ! Component number (1-6) of a grid DOF
       INTEGER(LONG)                   :: GRIDV             ! Grid number
@@ -99,11 +98,8 @@
       INTEGER(LONG)                   :: NUM_NEG_TERMS2    ! Number of negative terms on the diagonal of RFAC for EIG_FRQ2
       INTEGER(LONG)                   :: NUM_EST_EIGENS    ! Number of estimated eigens in the freq interval (EIG_FRQ2 - EIG_FRQ1)
       INTEGER(LONG)                   :: NUM_KMSM_DIAG_0   ! Number of zero diagonal terms in KMSM
-      INTEGER(LONG)                   :: NVEC_SAFE         ! Safe converged-vector count bounded by allocated eigen arrays
 
-! --- arpack_surgery begin --- !
-      INTEGER(LONG)                   :: MIN_NCV, MAX_NCV, LNONZEROS, NDOFL_EFFECTIVE
-! --- arpack_surgery end --- !
+      INTEGER(LONG)                   :: MIN_NCV, MAX_NCV, LNONZEROS
 
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare zero to
 
@@ -112,31 +108,30 @@
 
 
 ! **********************************************************************************************************************************
+! --- BANDED_optimizisation -begin-- !
+      SOLLIB_SAVE = SOLLIB
+      IF      (ARPKSOLV == 'SPARSE  ') THEN
+         SOLLIB = 'SPARSE  '
+      ELSE IF (ARPKSOLV == 'BANDED  ') THEN
+         SOLLIB = 'BANDED  '
+      ENDIF
+! --- BANDED_optimizisation -end-- !
+
       EPS1 = EPSIL(1)
 
       NUM_EST_EIGENS = 0
       NUM_NEG_TERMS1 = 0
       NUM_NEG_TERMS2 = 0
-! --- arpack_surgery begin --- !
-      EST_NUM_EIGENS_VALID  = .FALSE.
-      EST_NUM_EIGENS_VALID1 = .TRUE.
-      EST_NUM_EIGENS_VALID2 = .FALSE.
-! --- arpack_surgery end --- !
 
 !xx   IF      (SOLLIB == 'BANDED  ') THEN
 
          IF (NDOFL < EIGESTL) THEN
             IF (EIG_FRQ2 > EPS1) THEN
                IF (EIG_FRQ1 > EPS1) THEN
-! --- arpack_surgery begin --- !
-                  CALL EST_NUM_EIGENS_BANDED ( EIG_FRQ1, NUM_NEG_TERMS1, EST_NUM_EIGENS_VALID1 )
-! --- arpack_surgery end --- !
+                  CALL EST_NUM_EIGENS_BANDED ( EIG_FRQ1, NUM_NEG_TERMS1 )
                ENDIF
-! --- arpack_surgery begin --- !
-               CALL EST_NUM_EIGENS_BANDED ( EIG_FRQ2, NUM_NEG_TERMS2, EST_NUM_EIGENS_VALID2 )
-               EST_NUM_EIGENS_VALID = EST_NUM_EIGENS_VALID1 .AND. EST_NUM_EIGENS_VALID2
-               IF (EST_NUM_EIGENS_VALID .AND. (NUM_NEG_TERMS2 > 0)) THEN
-! --- arpack_surgery end --- !
+               CALL EST_NUM_EIGENS_BANDED ( EIG_FRQ2, NUM_NEG_TERMS2 )
+               IF (NUM_NEG_TERMS2 > 0) THEN
                   NUM_EST_EIGENS = NUM_NEG_TERMS2 - NUM_NEG_TERMS1
                ELSE
                   ! ?
@@ -156,12 +151,6 @@
       IF (EIG_FRQ2 > EPS1) THEN
          WRITE(SC1,101) EIG_FRQ2, NUM_EST_EIGENS
          WRITE(F06,101) EIG_FRQ2, NUM_EST_EIGENS
-! --- arpack_surgery begin --- !
-         IF (.NOT. EST_NUM_EIGENS_VALID) THEN
-            WRITE(SC1,'(A)') '       Lanczos eigen-count estimate unavailable; using fallback NEV logic'
-            WRITE(F06,'(A)') '       Lanczos eigen-count estimate unavailable; using fallback NEV logic'
-         ENDIF
-! --- arpack_surgery end --- !
       ENDIF
 
 ! Calc KMSM = KLL - EIG_SIGMA*MLL (or + EIG_SIGMA*KLLD for BUCKLING) where EIG_SIGMA = shift freq
@@ -234,6 +223,7 @@
 
 ! --- BANDED_optimizisation -begin-- !
       CALL REPORT_SOLVER_DISPATCH_POLICY ( 'KMSM', SUBR_NAME )
+      CALL REPORT_ARPACK_LINEAR_BACKEND ( 'KMSM', SUBR_NAME, EIG_LAP_MAT_TYPE )
 ! --- BANDED_optimizisation -end-- !
       IF (SOL_NAME(1:8) == 'BUCKLING') THEN
          CALL LINK_MESSAGE('ALLOCATE ARPACK BAND MAT: RFAC = KLL + sigma*KLLD')
@@ -331,22 +321,12 @@
          LNONZEROS = NDOFL - NUM_MLL_DIAG_ZEROS
       ENDIF
 
-! --- arpack_surgery begin --- !
-      IF (DEBUG(185) == 0) THEN
-         NDOFL_EFFECTIVE = LNONZEROS
-      ELSE
-         NDOFL_EFFECTIVE = NDOFL
-      ENDIF
-! --- arpack_surgery end --- !
-
 
       IF (NUM_EST_EIGENS > 0) THEN
          NEV = NUM_EST_EIGENS + EIG_LANCZOS_NEV_DELT
       ELSE
          ! prevent the addition of DARPACK from crashing ARPACK
-! --- arpack_surgery begin --- !
-         IF ((EIG_N2 + DARPACK) > (NDOFL_EFFECTIVE - 4)) THEN
-! --- arpack_surgery end --- !
+         IF ((EIG_N2 + DARPACK) > (LNONZEROS - 4)) THEN
             WRITE(ERR,9775) NDOFL, DARPACK
             IF (SUPWARN == 'N') THEN
                WRITE(F06,9775) NDOFL, DARPACK
@@ -375,22 +355,11 @@
 !xx      IF (SUPWARN == 'N') THEN
 !xx         WRITE(F06,4901) EIG_N2, NDOFL-1-DARPACK, NDOFL-1-DARPACK
 !xx      ENDIF
-         NEV = MAX(1, NUM1 - 1)
+         NEV = NUM1 - 1
       ENDIF
 
       MIN_NCV = NEV + 2
-! --- arpack_surgery begin --- !
-      MAX_NCV = NDOFL_EFFECTIVE - 2
-! --- arpack_surgery end --- !
-
-! --- validation_fix7 begin --- !
-! Small mode-2 decks can have an infeasible effective NCV window when
-! LNONZEROS excludes released/zero-mass rotational DOF's. In that narrow
-! case, allow an NDOFL-based ceiling before declaring the request invalid.
-      IF (MIN_NCV > MAX_NCV) THEN
-         MAX_NCV = NDOFL - 2
-      ENDIF
-! --- validation_fix7 end --- !
+      MAX_NCV = LNONZEROS - 2
 
       ! sanity check on feasible NCV range
       IF (MIN_NCV > MAX_NCV) THEN
@@ -401,7 +370,6 @@
       END IF
 
       ! NCV determination step (try user factor first)
-      NCV = MIN_NCV
       DO I=EIG_NCVFACL,2,-1
          NCV = I*NEV
          IF (NCV >= MIN_NCV .AND. NCV <= MAX_NCV) THEN
@@ -487,18 +455,20 @@
                     NEV, ARP_TOL, RESID, NCV, VBAS, NDOFL, IPARAM, WORKD, WORKL, LWORKL, IWORK, INFO_ARPACK,                       &
                     INFO_LAPACK, 'Y', DEBUG(47) )
 
-      NVEC_SAFE  = MIN( IPARAM(5), NEV, SIZE(EIGEN_VEC,2), SIZE(EIGEN_VAL), SIZE(MODE_NUM) )
-      NVEC       = NVEC_SAFE                               ! With HOWMNY = 'A' we are calc'ing eigenvecs for all eigenvalues found
-      NUM_EIGENS = NVEC_SAFE
+! --- MUMPS_COO add begin --- !
+      IF ((SOLLIB(1:6) == 'SPARSE') .AND. (SPARSE_FLAVOR(1:5) == 'MUMPS')) THEN
+         CALL DMUMPS_FREE_FACTORS()
+      ENDIF
+! --- MUMPS_COO add end --- !
+
+      NVEC       = IPARAM(5)                               ! With HOWMNY = 'A' we are calc'ing eigenvecs for all eigenvalues found
+      NUM_EIGENS = IPARAM(5)
 
 !xx   WRITE(SC1, * ) '     DEALLOCATE SOME ARRAYS'
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate KMSMn ', CR13   ;   CALL DEALLOCATE_SPARSE_MAT ( 'KMSMn' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate IWORK ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'IWORK' )
-! --- validation_fix5 begin --- !
-! RFAC ownership is in LINK4 cleanup; avoid duplicate deallocation here.
-!      WRITE(SC1,12345,ADVANCE='NO') '       Deallocate RFAC  ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'RFAC' )
-! --- validation_fix5 end --- !
+      WRITE(SC1,12345,ADVANCE='NO') '       Deallocate RFAC  ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'RFAC' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate RESID ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'RESID' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate SELECT', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'SELECT' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate VBAS  ', CR13   ;   CALL DEALLOCATE_LAPACK_MAT ( 'VBAS' )
@@ -569,6 +539,7 @@
 
 
 
+      SOLLIB = SOLLIB_SAVE
       RETURN
 
 ! **********************************************************************************************************************************
@@ -628,9 +599,7 @@
 
 ! ##################################################################################################################################
 
-! --- arpack_surgery begin --- !
-      SUBROUTINE EST_NUM_EIGENS_BANDED ( FREQ, NUM_NEG_TERMS, COUNT_VALID )
-! --- arpack_surgery end --- !
+      SUBROUTINE EST_NUM_EIGENS_BANDED ( FREQ, NUM_NEG_TERMS )
 
       USE LAPACK_GIV_MGIV_EIG
       USE LAPACK_LIN_EQN_DGE
@@ -638,11 +607,7 @@
 
       IMPLICIT NONE
 
-! --- arpack_surgery begin --- !
-      LOGICAL                         :: COUNT_VALID       !
-      INTEGER(LONG)                   :: INFO_DPTTRF       !
-      INTEGER(LONG)                   :: INFO_DSBTRD       !
-! --- arpack_surgery end --- !
+      INTEGER(LONG)                   :: INFO              !
       INTEGER(LONG)                   :: NUM_NEG_TERMS     ! Number of negative terms on the diagonal of RFAC
 
       REAL(DOUBLE)                    :: DIAG(NDOFL)       !
@@ -654,9 +619,6 @@
 
 ! **********************************************************************************************************************************
       NUM_NEG_TERMS = 0
-! --- arpack_surgery begin --- !
-      COUNT_VALID = .FALSE.
-! --- arpack_surgery end --- !
       SIGMA = (TWO*PI*FREQ)**2
 
 ! Add KLL minus SIGMA*MLL used in Lanczos
@@ -681,6 +643,7 @@
 
 ! --- BANDED_optimizisation -begin-- !
       CALL REPORT_SOLVER_DISPATCH_POLICY ( 'KMSM', SUBR_NAME )
+      CALL REPORT_ARPACK_LINEAR_BACKEND ( 'KMSM', SUBR_NAME, EIG_LAP_MAT_TYPE )
 ! --- BANDED_optimizisation -end-- !
       CALL ALLOCATE_LAPACK_MAT ( 'RFAC', LDRFAC, NDOFL, SUBR_NAME )
 
@@ -694,45 +657,15 @@
 
 ! Reduce KMSM to tridiag form and do Cholesky L*D*L' decomp on it
 
-! --- arpack_surgery begin --- !
-      INFO_DSBTRD = 0
-      INFO_DPTTRF = 0
-
-      CALL DSBTRD ( 'N', 'U', NDOFL, KMSM_SDIA, RFAC, KMSM_SDIA+1, DIAG, OFF_DIAG, QMAT, 1, WORK, INFO_DSBTRD )
-      IF (INFO_DSBTRD /= 0) THEN
-         WARN_ERR = WARN_ERR + 1
-         WRITE(ERR,'(A,1ES14.6,A,I0)') ' WARNING: EST_NUM_EIGENS_BANDED skipped at FREQ=', FREQ,                  &
-                                       ' due to DSBTRD INFO=', INFO_DSBTRD
-         IF (SUPWARN == 'N') THEN
-            WRITE(F06,'(A,1ES14.6,A,I0)') ' WARNING: EST_NUM_EIGENS_BANDED skipped at FREQ=', FREQ,               &
-                                           ' due to DSBTRD INFO=', INFO_DSBTRD
-         ENDIF
-         GO TO 900
-      ENDIF
-
-      CALL DPTTRF_MYSTRAN ( NDOFL, DIAG, OFF_DIAG, INFO_DPTTRF )
-      IF (INFO_DPTTRF /= 0) THEN
-         WARN_ERR = WARN_ERR + 1
-         WRITE(ERR,'(A,1ES14.6,A,I0)') ' WARNING: EST_NUM_EIGENS_BANDED skipped at FREQ=', FREQ,                  &
-                                       ' due to DPTTRF_MYSTRAN INFO=', INFO_DPTTRF
-         IF (SUPWARN == 'N') THEN
-            WRITE(F06,'(A,1ES14.6,A,I0)') ' WARNING: EST_NUM_EIGENS_BANDED skipped at FREQ=', FREQ,               &
-                                           ' due to DPTTRF_MYSTRAN INFO=', INFO_DPTTRF
-         ENDIF
-         GO TO 900
-      ENDIF
-! --- arpack_surgery end --- !
+      CALL DSBTRD ( 'N', 'U', NDOFL, KMSM_SDIA, RFAC, KMSM_SDIA+1, DIAG, OFF_DIAG, QMAT, 1, WORK, INFO )
+      CALL DPTTRF_MYSTRAN ( NDOFL, DIAG, OFF_DIAG, INFO )
       NUM_NEG_TERMS = 0
       DO I=1,NDOFL
          IF (DIAG(I) < ZERO) THEN
             NUM_NEG_TERMS = NUM_NEG_TERMS + 1
          ENDIF
       ENDDO
-! --- arpack_surgery begin --- !
-      COUNT_VALID = .TRUE.
 
-  900 CONTINUE
-! --- arpack_surgery end --- !
       CALL DEALLOCATE_SPARSE_MAT ( 'KMSM' )
       CALL DEALLOCATE_LAPACK_MAT ( 'RFAC' )
 
@@ -750,9 +683,6 @@
       SUBROUTINE DEBUG_EIG_LANCZOS
 
       WRITE(F06,'(A,I8)')    ' IN EIG_LANCZOS_ARPACK: NUM_EST_EIGENS       = ', NUM_EST_EIGENS
-! --- arpack_surgery begin --- !
-      WRITE(F06,'(A,L8)')    '                      : EST_NUM_EIGENS_VALID = ', EST_NUM_EIGENS_VALID
-! --- arpack_surgery end --- !
       WRITE(F06,'(A,I8)')    '                      : EIG_LANCZOS_NEV_DELT = ', EIG_LANCZOS_NEV_DELT
       WRITE(F06,'(A,I8)')    '                      : EIG_N2               = ', EIG_N2
       WRITE(F06,'(A,I8)')    '                      : DARPACK              = ', DARPACK

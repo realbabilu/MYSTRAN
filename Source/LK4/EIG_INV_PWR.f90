@@ -42,6 +42,9 @@
       USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_KLLD, J_KLLD, KLLD, I_MLL, J_MLL, MLL,                               &
                                          I_KMSM, I2_KMSM, J_KMSM, KMSM, I_KMSMs, I2_KMSMs, J_KMSMs, KMSMs
       USE SPARSE_MATRICES, ONLY       :  SYM_KLL, SYM_KLLD, SYM_MLL
+! --- MUMPS_COO add begin --- !
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS, DMUMPS_SOLVE_VECTOR, DMUMPS_FREE_FACTORS
+! --- MUMPS_COO add end --- !
       USE LAPACK_LIN_EQN_DPB
       USE LAPACK_LIN_EQN_DGB
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -198,12 +201,30 @@
             INFO = 0
          ENDIF
 
+! --- MUMPS_COO add begin --- !
       ELSE IF (SOLLIB == 'SPARSE  ') THEN
 
          IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
 
             INFO = 0
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KMSM', 'L ', NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, INFO )
+
+         ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+
+            IF (.NOT. DMUMPS_COMPILED_IN()) THEN
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+               WRITE(F06,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+            INFO = 0
+            CALL DMUMPS_FACTOR_CRS ( NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, 'Y', INFO )
+            IF (INFO /= 0) THEN
+               WRITE(ERR,9811) INFO, SUBR_NAME
+               WRITE(F06,9811) INFO, SUBR_NAME
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
 
          ELSE
 
@@ -222,6 +243,7 @@
          CALL OUTA_HERE ( 'Y' )
 
       ENDIF
+! --- MUMPS_COO add end --- !
 
       IF (EQUED == 'Y') THEN                               ! If EQUED == 'Y' then error. We don't want KMSM equilibrated from the
          WRITE(ERR,4001) SUBR_NAME, EQUED                  ! call (above) to SYM_MAT_DECOMP_LAPACK
@@ -287,11 +309,22 @@ iters:DO
 
          ELSE IF (SOLLIB == 'SPARSE  ') THEN
 
+! --- MUMPS_COO add begin --- !
             IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
 
                INFO = 0
 
                CALL FBS_SUPRLU ( SUBR_NAME, 'KMSM', NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, ITER_NUM, MVEC, INFO )
+
+            ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+
+               CALL DMUMPS_SOLVE_VECTOR ( NDOFL, MVEC(:,1), INFO )
+               IF (INFO /= 0) THEN
+                  WRITE(ERR,9812) INFO, ITER_NUM, SUBR_NAME
+                  WRITE(F06,9812) INFO, ITER_NUM, SUBR_NAME
+                  FATAL_ERR = FATAL_ERR + 1
+                  CALL OUTA_HERE ( 'Y' )
+               ENDIF
 
             ELSE
 
@@ -301,6 +334,7 @@ iters:DO
                CALL OUTA_HERE ( 'Y' )
 
             ENDIF
+! --- MUMPS_COO add end --- !
 
          ELSE
 
@@ -399,6 +433,9 @@ iters:DO
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages
       WRITE(SC1,32345,ADVANCE='NO') '       Deallocate KMSM'
       CALL DEALLOCATE_SPARSE_MAT ( 'KMSM' )
+! --- MUMPS_COO add begin --- !
+      IF ((SOLLIB == 'SPARSE  ') .AND. (SPARSE_FLAVOR(1:5) == 'MUMPS')) CALL DMUMPS_FREE_FACTORS()
+! --- MUMPS_COO add end --- !
       IF (ALLOCATED(RFAC_DGB)) DEALLOCATE(RFAC_DGB)
       IF (ALLOCATED(IPIV_DGB)) DEALLOCATE(IPIV_DGB)
 
@@ -459,6 +496,13 @@ iters:DO
 
  9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,A, ' = ',A,' NOT PROGRAMMED ',A)
+
+ 9992 FORMAT(' *ERROR  9992: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+                    ,/,14X,A,' = ',A,' WAS REQUESTED BUT THIS BUILD WAS NOT COMPILED WITH DMUMPS_Solver.')
+
+ 9811 FORMAT(' *ERROR  9811: MUMPS FACTORIZATION FAILED WITH INFOG(1) = ',I12,' IN SUBR ',A)
+
+ 9812 FORMAT(' *ERROR  9812: MUMPS SOLVE FAILED WITH INFOG(1) = ',I12,' AT ITERATION ',I12,' IN SUBR ',A)
 
 12345 FORMAT(10X,I4,3X,1ES15.6,2X,1ES15.2,A)
 

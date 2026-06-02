@@ -48,7 +48,10 @@ c
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  EIG_MSGLVL, EIG_LAP_MAT_TYPE
       USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO
-      USE PARAMS, ONLY                :  SOLLIB
+! --- MUMPS_COO add begin --- !
+      USE PARAMS, ONLY                :  SOLLIB, SPARSE_FLAVOR
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_SOLVE_VECTOR
+! --- MUMPS_COO add end --- !
       USE SPARSE_MATRICES, ONLY       :  I_KLLDn, J_KLLDn, KLLDn,
      &                                   I_MLLn , J_MLLn , MLLn,
      &                                   I_KMSMn, J_KMSMn, KMSMn
@@ -283,12 +286,18 @@ c
      &         KLLDn_DIAG,MLLn_DIAG,KMSMn_DIAG,WORKD1,WORKD2,RFAC,IMID)
             call dcopy(n, workd(ipntr(2)), 1, workd(ipntr(1)), 1)
 
+! --- MUMPS_COO add begin --- !
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-               SLU_INFO = 0
-               call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
+               IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+                  SLU_INFO = 0
+                  call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
      &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
      &                        0, workd(ipntr(2)), SLU_INFO )
+               ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+                  call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
+     &                                      SLU_INFO )
+               ENDIF
 
             ELSE
 
@@ -313,6 +322,7 @@ c
                end if
 
             ENDIF
+! --- MUMPS_COO add end --- !
 
 c
          else if ( type .eq. 4 ) then
@@ -346,12 +356,18 @@ c
             IF (EIG_MSGLVL > 0) CALL ARP_DEB_PREFAC(1,N,IDO,IPNTR,
      &         KLLDn_DIAG,MLLn_DIAG,KMSMn_DIAG,WORKD1,WORKD2,RFAC,IMID)
 
+! --- MUMPS_COO add begin --- !
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-               SLU_INFO = 0
-               call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
+               IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+                  SLU_INFO = 0
+                  call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
      &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
      &                        0, workd(ipntr(2)), SLU_INFO )
+               ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+                  call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
+     &                                      SLU_INFO )
+               ENDIF
 
             ELSE
 
@@ -375,6 +391,7 @@ c
                end if
 
             ENDIF
+! --- MUMPS_COO add end --- !
 
 
          endif
@@ -412,12 +429,18 @@ c
      &         KLLDn_DIAG,MLLn_DIAG,KMSMn_DIAG,WORKD1,WORKD2,RFAC,IMID)
             call dcopy(n, workd(ipntr(2)), 1, workd(ipntr(1)), 1)
 
+! --- MUMPS_COO add begin --- !
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-               SLU_INFO = 0
-               call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
+               IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+                  SLU_INFO = 0
+                  call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
      &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
      &                        0, workd(ipntr(2)), SLU_INFO )
+               ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+                  call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
+     &                                      SLU_INFO )
+               ENDIF
 
             ELSE
 
@@ -442,6 +465,7 @@ c
                end if
 
             ENDIF
+! --- MUMPS_COO add end --- !
 c
          else if ( type .eq. 4 ) then
 c
@@ -455,12 +479,18 @@ c
 
             call dcopy(n, workd(ipntr(3)), 1, workd(ipntr(2)), 1)
 
+! --- MUMPS_COO add begin --- !
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
-               SLU_INFO = 0
-               call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
+               IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
+                  SLU_INFO = 0
+                  call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
      &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
      &                        0, workd(ipntr(2)), SLU_INFO )
+               ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+                  call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
+     &                                      SLU_INFO )
+               ENDIF
 
             ELSE
 
@@ -485,6 +515,7 @@ c
                end if
 
             ENDIF
+! --- MUMPS_COO add end --- !
 
 c
          end if
