@@ -34,20 +34,24 @@
       USE IOUNT1, ONLY                :  ERR, F06, L1M, L1M_MSG, L1MSTAT, LINK1M, SC1, WRT_ERR
       USE EIGEN_MATRICES_1 , ONLY     :  EIGEN_VAL, GEN_MASS, MODE_NUM
 
-      USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, &
-                                         EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ,    &
-                                         MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
+      USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL,                  &
+                                         EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID,              &
+                                         EIG_SIGMA, EIG_VECS, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT,                            &
+                                         EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, EIG_EXTRACT_SOURCE, EIG_FEAST_M0,                  &
+                                         EIG_FEAST_TOL_DIGITS, EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR,                           &
+                                         EIG_SUBSPACE_NSUB, EIG_SUBSPACE_MAX_ITER, EIG_DENSE_NEX, EIG_FEAST_SEARCH_SCALE,         &
+                                         EIG_SUBSPACE_TOL
 
       USE READ_L1M_USE_IFs
       USE LINK_MESSAGE_Interface
 
       IMPLICIT NONE
 
-      CHARACTER(24*BYTE)              :: ENAME(20)         ! Array of names of recirds read from file LINK1M
+      CHARACTER(24*BYTE)              :: ENAME(32)         ! Array of names of recirds read from file LINK1M
 
       INTEGER(LONG), INTENT(OUT)      :: IERROR            ! Error count
       INTEGER(LONG)                   :: I                 ! DO loop index
-      INTEGER(LONG)                   :: IOCHK(20)         ! IOSTAT error number when opening/reading a file
+      INTEGER(LONG)                   :: IOCHK(32)         ! IOSTAT error number when opening/reading a file
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to
       INTEGER(LONG)                   :: REC_NO            ! Indicator of record number when error encountered reading file
 
@@ -81,11 +85,22 @@
       READ(L1M,IOSTAT=IOCHK(14)) EIG_LAP_MAT_TYPE
       READ(L1M,IOSTAT=IOCHK(15)) EIG_MSGLVL
       READ(L1M,IOSTAT=IOCHK(16)) EIG_NCVFACL
-
-      READ(L1M,IOSTAT=IOCHK(17)) NUM_FAIL_CRIT
-      READ(L1M,IOSTAT=IOCHK(18)) MAXMIJ
-      READ(L1M,IOSTAT=IOCHK(19)) MIJ_ROW
-      READ(L1M,IOSTAT=IOCHK(20)) MIJ_COL
+      READ(L1M,IOSTAT=IOCHK(17)) EIG_EXTRACT_METHOD
+      READ(L1M,IOSTAT=IOCHK(18)) EIG_EXTRACT_MODE
+      READ(L1M,IOSTAT=IOCHK(19)) EIG_EXTRACT_SOURCE
+      READ(L1M,IOSTAT=IOCHK(20)) EIG_FEAST_M0
+      READ(L1M,IOSTAT=IOCHK(21)) EIG_FEAST_TOL_DIGITS
+      READ(L1M,IOSTAT=IOCHK(22)) EIG_FEAST_MAX_LOOP
+      READ(L1M,IOSTAT=IOCHK(23)) EIG_FEAST_N_CONTOUR
+      READ(L1M,IOSTAT=IOCHK(24)) EIG_FEAST_SEARCH_SCALE
+      READ(L1M,IOSTAT=IOCHK(25)) EIG_SUBSPACE_NSUB
+      READ(L1M,IOSTAT=IOCHK(26)) EIG_SUBSPACE_TOL
+      READ(L1M,IOSTAT=IOCHK(27)) EIG_SUBSPACE_MAX_ITER
+      READ(L1M,IOSTAT=IOCHK(28)) EIG_DENSE_NEX
+      READ(L1M,IOSTAT=IOCHK(29)) NUM_FAIL_CRIT
+      READ(L1M,IOSTAT=IOCHK(30)) MAXMIJ
+      READ(L1M,IOSTAT=IOCHK(31)) MIJ_ROW
+      READ(L1M,IOSTAT=IOCHK(32)) MIJ_COL
 
       ENAME( 1) = 'EIG_SID'
       ENAME( 2) = 'EIG_METH'
@@ -103,13 +118,25 @@
       ENAME(14) = 'EIG_LAP_MAT_TYPE'
       ENAME(15) = 'EIG_MSGLVL'
       ENAME(16) = 'EIG_NCVFACL'
-      ENAME(17) = 'NUM_FAIL_CRIT'
-      ENAME(18) = 'MAXMIJ'
-      ENAME(19) = 'MIJ_ROW'
-      ENAME(20) = 'MIJ_COL'
+      ENAME(17) = 'EIG_EXTRACT_METHOD'
+      ENAME(18) = 'EIG_EXTRACT_MODE'
+      ENAME(19) = 'EIG_EXTRACT_SOURCE'
+      ENAME(20) = 'EIG_FEAST_M0'
+      ENAME(21) = 'EIG_FEAST_TOL_DIGITS'
+      ENAME(22) = 'EIG_FEAST_MAX_LOOP'
+      ENAME(23) = 'EIG_FEAST_N_CONTOUR'
+      ENAME(24) = 'EIG_FEAST_SEARCH_SCALE'
+      ENAME(25) = 'EIG_SUBSPACE_NSUB'
+      ENAME(26) = 'EIG_SUBSPACE_TOL'
+      ENAME(27) = 'EIG_SUBSPACE_MAX_ITER'
+      ENAME(28) = 'EIG_DENSE_NEX'
+      ENAME(29) = 'NUM_FAIL_CRIT'
+      ENAME(30) = 'MAXMIJ'
+      ENAME(31) = 'MIJ_ROW'
+      ENAME(32) = 'MIJ_COL'
 
       REC_NO = 0
-      DO I=1,20
+      DO I=1,32
          REC_NO = REC_NO + 1
          IF (IOCHK(I) /= 0) THEN
             IERROR = IERROR + 1

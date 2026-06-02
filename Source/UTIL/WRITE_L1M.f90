@@ -35,9 +35,13 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE EIGEN_MATRICES_1 , ONLY     :  EIGEN_VAL, GEN_MASS, MODE_NUM
 
-      USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, &
-                                         EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ,    &
-                                         MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
+      USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL,                  &
+                                         EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID,              &
+                                         EIG_SIGMA, EIG_VECS, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT,                            &
+                                         EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, EIG_EXTRACT_SOURCE, EIG_FEAST_M0,                  &
+                                         EIG_FEAST_TOL_DIGITS, EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR,                           &
+                                         EIG_SUBSPACE_NSUB, EIG_SUBSPACE_MAX_ITER, EIG_DENSE_NEX, EIG_FEAST_SEARCH_SCALE,         &
+                                         EIG_SUBSPACE_TOL
 
       USE WRITE_L1M_USE_IFs
       USE LINK_MESSAGE_Interface
@@ -75,6 +79,18 @@
       WRITE(L1M) EIG_LAP_MAT_TYPE
       WRITE(L1M) EIG_MSGLVL
       WRITE(L1M) EIG_NCVFACL
+      WRITE(L1M) EIG_EXTRACT_METHOD
+      WRITE(L1M) EIG_EXTRACT_MODE
+      WRITE(L1M) EIG_EXTRACT_SOURCE
+      WRITE(L1M) EIG_FEAST_M0
+      WRITE(L1M) EIG_FEAST_TOL_DIGITS
+      WRITE(L1M) EIG_FEAST_MAX_LOOP
+      WRITE(L1M) EIG_FEAST_N_CONTOUR
+      WRITE(L1M) EIG_FEAST_SEARCH_SCALE
+      WRITE(L1M) EIG_SUBSPACE_NSUB
+      WRITE(L1M) EIG_SUBSPACE_TOL
+      WRITE(L1M) EIG_SUBSPACE_MAX_ITER
+      WRITE(L1M) EIG_DENSE_NEX
       WRITE(L1M) NUM_FAIL_CRIT
       WRITE(L1M) MAXMIJ
       WRITE(L1M) MIJ_ROW

@@ -1747,6 +1747,15 @@
 !                                                              DGB is the type used in the original ARPACK subr dsband
 !                                                              DPB uses less disk storage but may not work for free-free eigens
 
+      CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_METHOD  = 'ARPACK'
+                                                             ! Extract backend selected for EIGRL/LANCZOS family.
+
+      CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_MODE    = ' '
+                                                             ! Optional method-specific selector from EIGRL continuation.
+
+      CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_SOURCE  = 'DEFAULT'
+                                                             ! DEFAULT/EIGRL/PARAM source for extract-method selection.
+
       CHARACTER(1*BYTE)               :: EIG_VECS            = 'Y'
                                                              ! Indicator of whether to calc eigenvecs
 
@@ -1767,6 +1776,27 @@
 
       INTEGER(LONG)                   :: EIG_LANCZOS_NEV_DELT= 2
                                                              ! Number to add to est num eigens when search is on freq range
+
+      INTEGER(LONG)                   :: EIG_FEAST_M0        = 48
+                                                             ! FEAST search subspace size.
+
+      INTEGER(LONG)                   :: EIG_FEAST_TOL_DIGITS= 8
+                                                             ! FEAST convergence digits (fpm(3)).
+
+      INTEGER(LONG)                   :: EIG_FEAST_MAX_LOOP  = 60
+                                                             ! FEAST iteration limit (fpm(4)).
+
+      INTEGER(LONG)                   :: EIG_FEAST_N_CONTOUR = 8
+                                                             ! FEAST contour integration points.
+
+      INTEGER(LONG)                   :: EIG_SUBSPACE_NSUB   = 24
+                                                             ! Dense inverse-subspace working subspace dimension.
+
+      INTEGER(LONG)                   :: EIG_SUBSPACE_MAX_ITER = 40
+                                                             ! Dense inverse-subspace iteration limit.
+
+      INTEGER(LONG)                   :: EIG_DENSE_NEX       = 64
+                                                             ! Reserved dense oversampling/workspace knob.
 
       INTEGER(LONG)                   :: EIG_MODE            = 2
                                                              ! For Lanczos, the "mode" (see IPARAM(7) in ARPACK subr dsband)
@@ -1804,6 +1834,12 @@
 
       REAL(DOUBLE)                    :: EIG_SIGMA           = -ONE
                                                              ! For Lanczos, the shift frequency
+
+      REAL(DOUBLE)                    :: EIG_FEAST_SEARCH_SCALE = 1.10D0
+                                                             ! FEAST range expansion factor when upper frequency is requested.
+
+      REAL(DOUBLE)                    :: EIG_SUBSPACE_TOL    = 1.0D-06
+                                                             ! Dense inverse-subspace convergence tolerance.
 
       REAL(DOUBLE)                    :: MAXMIJ              = ZERO
                                                              ! Largest off-diag term in generalized mass matrix.
