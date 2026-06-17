@@ -89,6 +89,9 @@
       INTEGER(LONG)                   :: IERROR              ! Error count when reading records from a file.
 ! --- arpack_surgery begin --- !
       INTEGER(LONG)                   :: NVEC_USED           ! Safe vector count limited by allocated EIGEN_VEC columns.
+      INTEGER(LONG), PARAMETER        :: SMALL_MODEL_DENSE_MAX = 64
+      INTEGER(LONG)                   :: REQUESTED_MODES
+      LOGICAL                         :: USE_SMALL_MODEL_DENSE
 ! --- arpack_surgery end --- !
       INTEGER(LONG)                   :: OUNT(2)             ! File units to write messages to. Input to subr UNFORMATTED_OPEN.
       INTEGER(LONG), PARAMETER        :: P_LINKNO = 2        ! Prior LINK no's that should have run before this LINK can execute.
@@ -295,11 +298,29 @@
          ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'DENSE') THEN
             CALL EIG_LANCZOS_DENSE
          ELSE
-            ! Use adaptive version if frequency range specified and not BUCKLING/GEN CB MODEL
-            IF ((EIG_FRQ2 > EPS1) .AND. (SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL')) THEN
-               CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+            USE_SMALL_MODEL_DENSE = .FALSE.
+            REQUESTED_MODES       = 0
+            IF (SOL_NAME(1:5) == 'MODES') THEN
+               IF ((EIG_FRQ2 <= EPS1) .AND. (NDOFL <= SMALL_MODEL_DENSE_MAX)) THEN
+                  REQUESTED_MODES = EIG_N2
+                  IF (REQUESTED_MODES > 0) USE_SMALL_MODEL_DENSE = .TRUE.
+               ENDIF
+            ENDIF
+
+            IF (USE_SMALL_MODEL_DENSE) THEN
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,4971) REQUESTED_MODES, NDOFL
+               IF (SUPINFO == 'N') THEN
+                  WRITE(F06,4971) REQUESTED_MODES, NDOFL
+               ENDIF
+               CALL EIG_LANCZOS_DENSE
             ELSE
-               CALL EIG_LANCZOS_ARPACK
+               ! Use adaptive version if frequency range specified and not BUCKLING/GEN CB MODEL
+               IF ((EIG_FRQ2 > EPS1) .AND. (SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL')) THEN
+                  CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+               ELSE
+                  CALL EIG_LANCZOS_ARPACK
+               ENDIF
             ENDIF
          ENDIF
 
@@ -463,9 +484,12 @@
 
  9101 FORMAT(1X,A,' =  ','"',A,'"')
 
- 9102 FORMAT(1X,A,' =  ',I13)
+  9102 FORMAT(1X,A,' =  ',I13)
 
- 9103 FORMAT(1X,A,' =  ',1ES13.6)
+  9103 FORMAT(1X,A,' =  ',1ES13.6)
+
+ 4971 FORMAT(' *WARNING    : SMALL MODAL MODEL DETECTED (REQUESTED MODES =',I8,', NDOFL =',I8,').',                           &
+                    /,15X,'LINK4 WILL USE THE CONDENSED DENSE REFERENCE SOLVER INSTEAD OF ARPACK LANCZOS.')
 
  9998 FORMAT(' *ERROR  9998: COMM ',I3,' INDICATES UNSUCCESSFUL LINK ',I2,' COMPLETION.'                                           &
                     ,/,14X,' FATAL ERROR - CANNOT START LINK ',I2)
