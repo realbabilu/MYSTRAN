@@ -37,6 +37,7 @@
       USE SPARSE_MATRICES, ONLY       :  I_PO, J_PO, PO, I_KOO, J_KOO, KOO
       USE COL_VECS, ONLY              :  UO0_COL
       USE LAPACK_LIN_EQN_DPB
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_SOLVE_VECTOR
 
 ! Interface module not needed for subr DPBTRS. This is "CONTAIN'ed" in module LAPACK_LIN_EQN_DPB, which is "USE'd" above
 
@@ -114,6 +115,17 @@
                   INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'KOO', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, J, INOUT_COL, INFO )
 
+               ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+
+                  INFO = 0
+                  CALL DMUMPS_SOLVE_VECTOR ( NDOFO, INOUT_COL, INFO )
+                  IF (INFO /= 0) THEN
+                     FATAL_ERR = FATAL_ERR + 1
+                     WRITE(ERR,9812) INFO, J, SUBR_NAME
+                     WRITE(F06,9812) INFO, J, SUBR_NAME
+                     CALL OUTA_HERE ( 'Y' )
+                  ENDIF
+
                ELSE
 
                   FATAL_ERR = FATAL_ERR + 1
@@ -171,12 +183,14 @@
 ! **********************************************************************************************************************************
   201 FORMAT(59X,'COLUMN',I6)
 
- 2504 FORMAT(' *ERROR  2504: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+2504 FORMAT(' *ERROR  2504: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' THE NAME OF MATRIX THAT HAS BEEN DECOMPOSED INTO TRIANGULAR FACTORS SHOULD BE "KOO".'                 &
                     ,/,14X,' HOWEVER, IT IS NAMED "',A,'". CANNOT CONTINUE')
 
- 9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,A, ' = ',A,' NOT PROGRAMMED ',A)
+
+9812 FORMAT(' *ERROR  9812: MUMPS SOLVE FAILED WITH INFOG(1) = ',I12,' FOR COLUMN ',I12,' IN SUBR ',A)
 
 12345 FORMAT(3X,A,I8,' of ',I8,A)
 

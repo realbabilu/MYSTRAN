@@ -48,6 +48,7 @@
       USE SPARSE_MATRICES, ONLY       :  SYM_KAA
       USE SCRATCH_MATRICES
       USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_FREE_FACTORS
 
       USE REDUCE_F_AO_USE_IFs
 
@@ -163,6 +164,10 @@ FreeS:      IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free th
                   ELSE
                      WRITE(*,*) 'SUPERLU STORAGE NOT FREED. INFO FROM SUPERLU FREE STORAGE ROUTINE = ', SLU_INFO
                   ENDIF
+
+               ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+
+                  CALL DMUMPS_FREE_FACTORS()
 
                ENDIF
 

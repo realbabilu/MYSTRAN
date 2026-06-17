@@ -43,6 +43,8 @@
       INTEGER(LONG)                   :: IROW
       INTEGER(LONG)                   :: K
       INTEGER(LONG)                   :: IDX
+      INTEGER(LONG)                   :: NZ_KEEP
+      LOGICAL                         :: KEEP_LOWER_TRI
 
 #ifdef DMUMPS_Solver
       INFO_OUT = 0
@@ -51,13 +53,29 @@
       CALL DMUMPS_INIT_RUNTIME(INFO_OUT)
       IF (INFO_OUT /= 0) RETURN
 
-      ALLOCATE(DMUMPS_IRN(NTERM))
-      ALLOCATE(DMUMPS_JCN(NTERM))
-      ALLOCATE(DMUMPS_A(NTERM))
+      KEEP_LOWER_TRI = (SYM_FLAG(1:1) == 'Y')
+
+      IF (KEEP_LOWER_TRI) THEN
+         NZ_KEEP = 0
+         DO IROW=1,N
+            DO K=I_CRS(IROW),I_CRS(IROW+1)-1
+               IF (J_CRS(K) <= IROW) NZ_KEEP = NZ_KEEP + 1
+            ENDDO
+         ENDDO
+      ELSE
+         NZ_KEEP = NTERM
+      ENDIF
+
+      ALLOCATE(DMUMPS_IRN(NZ_KEEP))
+      ALLOCATE(DMUMPS_JCN(NZ_KEEP))
+      ALLOCATE(DMUMPS_A(NZ_KEEP))
 
       IDX = 0
       DO IROW=1,N
          DO K=I_CRS(IROW),I_CRS(IROW+1)-1
+            IF (KEEP_LOWER_TRI) THEN
+               IF (J_CRS(K) > IROW) CYCLE
+            ENDIF
             IDX = IDX + 1
             DMUMPS_IRN(IDX) = IROW
             DMUMPS_JCN(IDX) = J_CRS(K)
@@ -77,7 +95,7 @@
       DMUMPS_PAR%ICNTL(3) = -1
       DMUMPS_PAR%ICNTL(4) = 0
       DMUMPS_PAR%N   = N
-      DMUMPS_PAR%NZ  = NTERM
+      DMUMPS_PAR%NZ  = NZ_KEEP
       DMUMPS_PAR%IRN => DMUMPS_IRN
       DMUMPS_PAR%JCN => DMUMPS_JCN
       DMUMPS_PAR%A   => DMUMPS_A

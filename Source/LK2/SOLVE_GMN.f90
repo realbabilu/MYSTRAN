@@ -277,6 +277,7 @@
       USE FULL_MATRICES, ONLY         :  RMM_FULL
       USE LAPACK_LIN_EQN_DGE
       USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS, DMUMPS_SOLVE_VECTOR, DMUMPS_FREE_FACTORS
 
 ! Interface module not needed for subr's DGETRF and DGETRS. These are "CONTAIN'ed" in module LAPACK_LIN_EQN_DPB, which
 ! is "USE'd" above
@@ -296,6 +297,7 @@
       CHARACTER(FILE_NAM_MAXLEN*BYTE) :: SCRFIL            ! File name
       CHARACTER( 1*BYTE)              :: TRANS             ! 'Y' if
       LOGICAL                         :: RMM_SOLVED_WITH_SUPERLU
+      LOGICAL                         :: RMM_SOLVED_WITH_MUMPS
       LOGICAL                         :: RMM_FULL_ALLOCATED
       LOGICAL                         :: CCS1_ALLOCATED
 
@@ -327,6 +329,7 @@
       OUNT(1) = ERR
       OUNT(2) = F06
       RMM_SOLVED_WITH_SUPERLU = .FALSE.
+      RMM_SOLVED_WITH_MUMPS   = .FALSE.
       RMM_FULL_ALLOCATED      = .FALSE.
       CCS1_ALLOCATED          = .FALSE.
 
@@ -355,29 +358,46 @@
 
              CALL GET_GRID_AND_COMP ( 'M ', INFO, GRIDV, COMPV  )
 
+            WRITE(ERR,2501) CALLED_SUBR, SUBR_NAME, INFO
+            WRITE(F06,2501) CALLED_SUBR, SUBR_NAME, INFO
+            IF ((GRIDV > 0) .AND. (COMPV > 0)) THEN
+               WRITE(ERR,25012) GRIDV, COMPV
+               WRITE(F06,25012) GRIDV, COMPV
+            ENDIF
+
             IF (SPARSE_FLAVOR(1:7) == 'SUPERLU') THEN
-               WRITE(ERR,2501) CALLED_SUBR, SUBR_NAME, INFO
-               WRITE(F06,2501) CALLED_SUBR, SUBR_NAME, INFO
-               IF ((GRIDV > 0) .AND. (COMPV > 0)) THEN
-                  WRITE(ERR,25012) GRIDV, COMPV
-                  WRITE(F06,25012) GRIDV, COMPV
-               ENDIF
-               WRITE(ERR,25013)
-               WRITE(F06,25013)
+               WRITE(ERR,25013) 'SUPERLU'
+               WRITE(F06,25013) 'SUPERLU'
                SLU_INFO = 0
                CALL ALLOCATE_SCR_CCS_MAT ( 'CCS1', NDOFM, NTERM_RMM, SUBR_NAME )
                CCS1_ALLOCATED = .TRUE.
                CALL SPARSE_CRS_SPARSE_CCS ( NDOFM, NDOFM, NTERM_RMM, 'RMM', I_RMM, J_RMM, RMM, 'CCS1', J_CCS1, I_CCS1, CCS1, 'Y')
                CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'RMM', 'M ', NDOFM, NTERM_RMM, J_CCS1, I_CCS1, CCS1, SLU_INFO )
                RMM_SOLVED_WITH_SUPERLU = .TRUE.
-            ELSE
-               WRITE(ERR,2501) CALLED_SUBR, SUBR_NAME, INFO
-               WRITE(F06,2501) CALLED_SUBR, SUBR_NAME, INFO
-               FATAL_ERR = FATAL_ERR + 1
-               IF ((GRIDV > 0) .AND. (COMPV > 0)) THEN
-                  WRITE(ERR,25012) GRIDV, COMPV
-                  WRITE(F06,25012) GRIDV, COMPV
+
+            ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+               IF (.NOT. DMUMPS_COMPILED_IN()) THEN
+                  FATAL_ERR = FATAL_ERR + 1
+                  WRITE(ERR,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+                  WRITE(F06,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+                  CALL OUTA_HERE ( 'Y' )
                ENDIF
+               WRITE(ERR,25013) 'MUMPS'
+               WRITE(F06,25013) 'MUMPS'
+               CALL DMUMPS_FACTOR_CRS ( NDOFM, NTERM_RMM, I_RMM, J_RMM, RMM, 'N', INFO )
+               IF (INFO /= 0) THEN
+                  WRITE(ERR,9811) INFO, SUBR_NAME
+                  WRITE(F06,9811) INFO, SUBR_NAME
+                  FATAL_ERR = FATAL_ERR + 1
+                  CALL OUTA_HERE ( 'Y' )
+               ENDIF
+               WRITE(F06,9813) 'RMM', SUBR_NAME
+               RMM_SOLVED_WITH_MUMPS = .TRUE.
+
+            ELSE
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,9991) SUBR_NAME, 'SPARSE_FLAVOR'
+               WRITE(F06,9991) SUBR_NAME, 'SPARSE_FLAVOR'
                CALL OUTA_HERE ( 'Y' )
             ENDIF
 
@@ -393,6 +413,27 @@
             CALL SPARSE_CRS_SPARSE_CCS ( NDOFM, NDOFM, NTERM_RMM, 'RMM', I_RMM, J_RMM, RMM, 'CCS1', J_CCS1, I_CCS1, CCS1, 'Y')
             CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'RMM', 'M ', NDOFM, NTERM_RMM, J_CCS1, I_CCS1, CCS1, SLU_INFO )
             RMM_SOLVED_WITH_SUPERLU = .TRUE.
+
+         ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+
+            IF (.NOT. DMUMPS_COMPILED_IN()) THEN
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+               WRITE(F06,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+
+!           RMM is a partition of the rigid/MPC constraint matrix, not a structural stiffness matrix.
+!           Treat it as general sparse storage so MUMPS sees the full nonsymmetric pattern.
+            CALL DMUMPS_FACTOR_CRS ( NDOFM, NTERM_RMM, I_RMM, J_RMM, RMM, 'N', INFO )
+            IF (INFO /= 0) THEN
+               WRITE(ERR,9811) INFO, SUBR_NAME
+               WRITE(F06,9811) INFO, SUBR_NAME
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+            WRITE(F06,9813) 'RMM', SUBR_NAME
+            RMM_SOLVED_WITH_MUMPS = .TRUE.
 
          ELSE
 
@@ -461,6 +502,15 @@
                SLU_INFO = 0
                CALL FBS_SUPRLU ( SUBR_NAME, 'RMM', NDOFM, NTERM_RMM, J_CCS1, I_CCS1, CCS1, J, RMN_COL, SLU_INFO )
 
+            ELSE IF (RMM_SOLVED_WITH_MUMPS) THEN
+               CALL DMUMPS_SOLVE_VECTOR ( NDOFM, RMN_COL, INFO )
+               IF (INFO /= 0) THEN
+                  WRITE(ERR,9812) INFO, J, SUBR_NAME
+                  WRITE(F06,9812) INFO, J, SUBR_NAME
+                  FATAL_ERR = FATAL_ERR + 1
+                  CALL OUTA_HERE ( 'Y' )
+               ENDIF
+
             ELSE IF (SOLLIB == 'BANDED  ') THEN
                TRANS = 'N'
                NRHS = 1
@@ -481,6 +531,16 @@
 
                   SLU_INFO = 0
                   CALL FBS_SUPRLU ( SUBR_NAME, 'RMM', NDOFM, NTERM_RMM, J_CCS1, I_CCS1, CCS1, J, RMN_COL, SLU_INFO )
+
+               ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+
+                  CALL DMUMPS_SOLVE_VECTOR ( NDOFM, RMN_COL, INFO )
+                  IF (INFO /= 0) THEN
+                     WRITE(ERR,9812) INFO, J, SUBR_NAME
+                     WRITE(F06,9812) INFO, J, SUBR_NAME
+                     FATAL_ERR = FATAL_ERR + 1
+                     CALL OUTA_HERE ( 'Y' )
+                  ENDIF
 
                ELSE
 
@@ -521,6 +581,10 @@
       ENDIF
       IF (RMM_FULL_ALLOCATED) THEN
          CALL DEALLOCATE_FULL_MAT ( 'RMM_FULL' )
+      ENDIF
+
+      IF (RMM_SOLVED_WITH_MUMPS) THEN
+         CALL DMUMPS_FREE_FACTORS()
       ENDIF
 
  FreeS:IF (RMM_SOLVED_WITH_SUPERLU) THEN                    ! Last, free the storage allocated inside SuperLU
@@ -592,12 +656,21 @@
 25012 FORMAT('               THIS CORRESPONDS TO THE ROW & COL IN RMM FOR GRID POINT ',I8,' COMPONENT ',I3,'.'                     &
                     ,/,14X,' TO CORRECT THIS SITUATION, REMOVE THAT COMPONENT FROM REFC IN FIELD 5 OF THE OFFENDING RBE3(s)')
 
-25013 FORMAT(' *WARNING    : LAPACK RMM FACTORIZATION FAILED. MYSTRAN WILL FALL BACK TO SUPERLU FOR THE GMN CONSTRAINT SOLVE.')
+25013 FORMAT(' *WARNING    : LAPACK RMM FACTORIZATION FAILED. MYSTRAN WILL FALL BACK TO ',A,' FOR THE GMN CONSTRAINT SOLVE.')
 
  2092 FORMAT(4X,A44,20X,I2,':',I2,':',I2,'.',I3)
 
  9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,A, ' = ',A,' NOT PROGRAMMED ',A)
+
+ 9992 FORMAT(' *ERROR  9992: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+                    ,/,14X,A,' = ',A,' WAS REQUESTED BUT THIS BUILD WAS NOT COMPILED WITH DMUMPS_Solver.')
+
+ 9811 FORMAT(' *ERROR  9811: MUMPS FACTORIZATION FAILED WITH INFOG(1) = ',I12,' IN SUBR ',A)
+
+ 9812 FORMAT(' *ERROR  9812: MUMPS SOLVE FAILED WITH INFOG(1) = ',I12,' FOR COLUMN ',I12,' IN SUBR ',A)
+
+ 9813 FORMAT(' MUMPS FACTORIZATION OF MATRIX ',A,' SUCCEEDED IN SUBR ',A)
 
 12345 FORMAT(A,10X,A)
 

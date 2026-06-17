@@ -8,11 +8,9 @@
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  EIG_MSGLVL
       USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO
-! --- MUMPS_COO add begin --- !
       USE PARAMS, ONLY                :  SOLLIB, SPARSE_FLAVOR
       USE DMUMPS_STUF, ONLY           :  DMUMPS_FACTOR_CRS,
      &                                   DMUMPS_SOLVE_VECTOR
-! --- MUMPS_COO add end --- !
       USE ARPACK_UTIL
       USE LAPACK_BLAS_AUX
       USE LAPACK_LANCZOS_EIG
@@ -565,7 +563,8 @@ c     %---------------%
 c     | Local Scalars |
 c     %---------------%
 c
-      integer          ido, i, j, type, imid, itop, ibot, ierr
+      integer          ido, i, j, type, imid, itop, ibot, ierr,
+     &                 mass_rank, ncv_eff, seed_count
 c
 c     %------------%
 c     | Parameters |
@@ -668,7 +667,6 @@ c        | and Call LAPACK routine dpbtrf to factor rfac|
 c        %----------------------------------------------%
 c
 
-! --- MUMPS_COO add begin --- !
          IF(SOLLIB(1:6) == 'SPARSE') THEN
 
             if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
@@ -678,7 +676,7 @@ c
      &                                      J_KMSMn,  KMSMn,  SLU_INFO )
             else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
                call DMUMPS_FACTOR_CRS ( n, NTERM_KMSMn, I_KMSMn,
-     &                                  J_KMSMn, KMSMn, 'N', SLU_INFO )
+     &                                  J_KMSMn, KMSMn, 'N', ierr )
             endif
 
          ELSE
@@ -704,7 +702,6 @@ c
             end if
 
          ENDIF
-! --- MUMPS_COO add end --- !
 
 
 c
@@ -720,7 +717,6 @@ c        | Construct and factor (A - sigma*M). |
 c        %-------------------------------------%
 c
 
-! --- MUMPS_COO add begin --- !
          IF(SOLLIB(1:6) == 'SPARSE') THEN
 
             if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
@@ -730,7 +726,7 @@ c
      &                                      J_KMSMn,  KMSMn,  SLU_INFO )
             else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
                call DMUMPS_FACTOR_CRS ( n, NTERM_KMSMn, I_KMSMn,
-     &                                  J_KMSMn, KMSMn, 'N', SLU_INFO )
+     &                                  J_KMSMn, KMSMn, 'N', ierr )
             endif
 
          ELSE
@@ -756,7 +752,6 @@ c
             end if
 
          ENDIF
-! --- MUMPS_COO add end --- !
 c
       end if
 
@@ -794,6 +789,74 @@ c     %--------------------------------------------%
 c     |  M A I N   L O O P (reverse communication) |
 c     %--------------------------------------------%
 c
+      IF (EIG_MSGLVL > 0) THEN
+         IF (SOL_NAME(1:8) == 'BUCKLING') THEN
+            DO I=1,N
+               IF (I_KLLDn(I) == I_KLLDn(I+1)) THEN
+                  KLLDn_DIAG(I) = ZERO
+               ELSE
+                  KLLDn_DIAG(I) = KLLDn(I_KLLDn(I))
+               ENDIF
+               IF (I_KMSMn(I) == I_KMSMn(I+1)) THEN
+                  KMSMn_DIAG(I) = ZERO
+               ELSE
+                  KMSMn_DIAG(I) = KMSMn(I_KMSMn(I))
+               ENDIF
+            ENDDO
+         ELSE
+            DO I=1,N
+               IF (I_MLLn(I) == I_MLLn(I+1)) THEN
+                  MLLn_DIAG(I) = ZERO
+               ELSE
+                  MLLn_DIAG(I) = MLLn(I_MLLn(I))
+               ENDIF
+               IF (I_KMSMn(I) == I_KMSMn(I+1)) THEN
+                  KMSMn_DIAG(I) = ZERO
+               ELSE
+                  KMSMn_DIAG(I) = KMSMn(I_KMSMn(I))
+               ENDIF
+            ENDDO
+         ENDIF
+      ENDIF
+
+! --- arpack_surgery begin --- !
+! Restrict the custom mass-supported initial residual to small generalized
+! Lanczos requests. It helps the benchmark MODE-2 corner cases, but for
+! larger requests (for example released-DOF/MPC validation decks) it can
+! over-constrain the restart subspace and lead to partial or zero-vector
+! Arnoldi starts.
+      IF ((BMAT .EQ. 'G') .AND.
+     &    (SOL_NAME(1:8) .NE. 'BUCKLING') .AND.
+     &    (NEV <= 4)) THEN
+         mass_rank = 0
+         DO I=1,N
+            IF (MLLn_DIAG(I) .NE. ZERO) THEN
+               mass_rank = mass_rank + 1
+            ENDIF
+         ENDDO
+         IF (mass_rank > 0) THEN
+            DO I=1,N
+               RESID(I) = ZERO
+            ENDDO
+            seed_count = 0
+            DO I=1,N
+               IF (MLLn_DIAG(I) .NE. ZERO) THEN
+                  seed_count = seed_count + 1
+                  RESID(I) = ONE + DBLE(seed_count-1)
+     &                              / DBLE(MAX(1,mass_rank))
+               ENDIF
+            ENDDO
+            INFO = 1
+            IF (EIG_MSGLVL > 0) THEN
+               WRITE(F06,'(A,I8,A,I8)') ' *INFORMATION: ARPACK MASS '
+     &                    //'RANK = ', mass_rank, ', NCV = ', NCV
+               WRITE(F06,'(15X,A)') 'MASS-SUPPORTED INITIAL '
+     &                    //'RESIDUAL (BMAT=''G'').'
+            ENDIF
+         ENDIF
+      ENDIF
+! --- arpack_surgery end --- !
+
       iter_old          = 0
       dsaupd_loop_count = 0
       write(sc1, * )
@@ -862,17 +925,16 @@ c
             IF (EIG_MSGLVL > 0) CALL ARP_DEB(1,N,IDO,IPNTR)
             call dcopy(n, workd(ipntr(2)), 1, workd(ipntr(1)), 1)
 
-! --- MUMPS_COO add begin --- !
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
                if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
                   SLU_INFO = 0
                   call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
-     &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
-     &                        0, workd(ipntr(2)), SLU_INFO )
+     &                           NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
+     &                           0, workd(ipntr(2)), SLU_INFO )
                else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
                   call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
-     &                                      SLU_INFO )
+     &                                      ierr )
                endif
 
             ELSE
@@ -897,7 +959,6 @@ c
                end if
 
             ENDIf
-! --- MUMPS_COO add end --- !
 
 c
          else if ( type .eq. 4 ) then
@@ -930,17 +991,16 @@ c
             enddo
             IF (EIG_MSGLVL > 0) CALL ARP_DEB(1,N,IDO,IPNTR)
 
-! --- MUMPS_COO add begin --- !
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
                if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
                   SLU_INFO = 0
                   call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
-     &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
-     &                        0, workd(ipntr(2)), SLU_INFO )
+     &                           NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
+     &                           0, workd(ipntr(2)), SLU_INFO )
                else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
                   call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
-     &                                      SLU_INFO )
+     &                                      ierr )
                endif
 
             ELSE
@@ -964,7 +1024,6 @@ c
                end if
 
             ENDIF
-! --- MUMPS_COO add end --- !
 
 
          endif
@@ -1001,17 +1060,16 @@ c
             IF (EIG_MSGLVL > 0) CALL ARP_DEB(1,N,IDO,IPNTR)
             call dcopy(n, workd(ipntr(2)), 1, workd(ipntr(1)), 1)
 
-! --- MUMPS_COO add begin --- !
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
                if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
                   SLU_INFO = 0
                   call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
-     &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
-     &                        0, workd(ipntr(2)), SLU_INFO )
+     &                           NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
+     &                           0, workd(ipntr(2)), SLU_INFO )
                else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
                   call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
-     &                                      SLU_INFO )
+     &                                      ierr )
                endif
 
             ELSE
@@ -1036,7 +1094,6 @@ c
                end if
 
             ENDIF
-! --- MUMPS_COO add end --- !
 c
          else if ( type .eq. 4 ) then
 c
@@ -1050,17 +1107,16 @@ c
 
             call dcopy(n, workd(ipntr(3)), 1, workd(ipntr(2)), 1)
 
-! --- MUMPS_COO add begin --- !
             IF(SOLLIB(1:6) == 'SPARSE') THEN
 
                if (SPARSE_FLAVOR(1:7) .eq. 'SUPERLU') then
                   SLU_INFO = 0
                   call FBS_SUPRLU ( SUBR_NAME, 'KMSMn', n,
-     &                        NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
-     &                        0, workd(ipntr(2)), SLU_INFO )
+     &                           NTERM_KMSMn, I_KMSMn, J_KMSMn, KMSMn,
+     &                           0, workd(ipntr(2)), SLU_INFO )
                else if (SPARSE_FLAVOR(1:5) .eq. 'MUMPS') then
                   call DMUMPS_SOLVE_VECTOR ( n, workd(ipntr(2)),
-     &                                      SLU_INFO )
+     &                                      ierr )
                endif
 
             ELSE
@@ -1085,7 +1141,6 @@ c
                end if
 
             ENDIF
-! --- MUMPS_COO add end --- !
 
 c
          end if
@@ -1146,6 +1201,17 @@ c        %--------------------------------------%
 c        | Either we have convergence, or error |
 c        %--------------------------------------%
 c
+! --- arpack_surgery begin --- !
+         if ((info .eq. -9999) .and. (iparam(5) .ge. nev)) then
+            if (EIG_MSGLVL > 0) then
+               WRITE(F06,'(A,I8,A,I8)') ' *INFORMATION: '
+     &              //'ACCEPTING PARTIAL ARNOLDI BASIS. NCONV = ',
+     &              IPARAM(5), ', NEV = ', NEV
+            endif
+            info = 1
+         endif
+! --- arpack_surgery end --- !
+
          if ( info .lt. 0) then
 c
             call arpack_info_msg ('dsaupd',info,iparam,lworkl,nev,ncv)

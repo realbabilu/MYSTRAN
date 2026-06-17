@@ -42,6 +42,7 @@
       USE DEALLOCATE_RBGLOBAL_Interface
       USE OUTPUT4_PROC_Interface
       USE WRITE_USERIN_BD_CARDS_Interface
+      USE WRITE_MATRIX_MARKET_SPARSE_Interface
       USE WRITE_L1A_Interface
       USE CHK_ARRAY_ALLOC_STAT_Interface
       USE WRITE_ALLOC_MEM_TABLE_Interface

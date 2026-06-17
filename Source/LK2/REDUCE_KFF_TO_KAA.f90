@@ -43,6 +43,7 @@
       USE FULL_MATRICES, ONLY         :  KAA_FULL, KAO_FULL, GOA_FULL, DUM1, DUM2
       USE SPARSE_MATRICES, ONLY       :  I_KFF, J_KFF, KFF, I_KAA, J_KAA, KAA, I_KAO, J_KAO, KAO, I_GOA, J_GOA, GOA,               &
                                          I_KOO, J_KOO, KOO
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS
 
       USE SPARSE_MATRICES, ONLY       :  SYM_GOA, SYM_KFF, SYM_KAA, SYM_KAO, SYM_KOO
       USE SCRATCH_MATRICES
@@ -165,6 +166,24 @@
 
                INFO = 0
                CALL SYM_MAT_DECOMP_SUPRLU ( SUBR_NAME, 'KOO', 'O ', NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, INFO )
+
+            ELSE IF (SPARSE_FLAVOR(1:5) == 'MUMPS') THEN
+
+               IF (.NOT. DMUMPS_COMPILED_IN()) THEN
+                  FATAL_ERR = FATAL_ERR + 1
+                  WRITE(ERR,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+                  WRITE(F06,9992) SUBR_NAME, 'SPARSE_FLAVOR', 'MUMPS'
+                  CALL OUTA_HERE ( 'Y' )
+               ENDIF
+
+               INFO = 0
+               CALL DMUMPS_FACTOR_CRS ( NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, 'Y', INFO )
+               IF (INFO /= 0) THEN
+                  FATAL_ERR = FATAL_ERR + 1
+                  WRITE(ERR,9811) INFO, SUBR_NAME
+                  WRITE(F06,9811) INFO, SUBR_NAME
+                  CALL OUTA_HERE ( 'Y' )
+               ENDIF
 
             ELSE
 
@@ -357,11 +376,16 @@
   911 FORMAT(' *ERROR   911: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' PARAMETER MATSPARS MUST BE EITHER ','Y',' OR ','N',' BUT VALUE IS ',A)
 
-  932 FORMAT(' *ERROR   932: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+ 932 FORMAT(' *ERROR   932: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' PARAMETER SPARSTOR MUST BE EITHER "SYM" OR "NONSYM" BUT VALUE IS ',A)
 
- 9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,A, ' = ',A,' NOT PROGRAMMED ',A)
+
+9992 FORMAT(' *ERROR  9992: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+                    ,/,14X,A,' = ',A,' WAS REQUESTED BUT THIS BUILD WAS NOT COMPILED WITH DMUMPS_Solver.')
+
+9811 FORMAT(' *ERROR  9811: MUMPS FACTORIZATION FAILED WITH INFOG(1) = ',I12,' IN SUBR ',A)
 
 12345 FORMAT(A,10X,A)
 
