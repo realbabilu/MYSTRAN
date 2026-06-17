@@ -2,7 +2,7 @@ MYSTRAN
 =======
 
 MYSTRAN is an acronym for “My Structural Analysis” (https://www.mystran.com)
-
+This is a beta repository using added some features to test
 
 ---
 
@@ -22,6 +22,23 @@ MYSTRAN is an acronym for “My Structural Analysis” (https://www.mystran.com)
 
 See [BUILD.md](BUILD.md) for both Windows and Linux build (compiling) instructions.
 
+Since it added with several features, a minimum need OpenBlas library, use -DTPL_BLAS_LIBRARIES: to pointing where BLAS is, or it will automatically find openblas.
+create build folder and run it from there
+mkdir build
+cd build
+
+Minimum build : 
+cmake -G "MinGW Makefiles"  -DCMAKE_BUILD_TYPE=Release  -DCMAKE_C_COMPILER=gcc.exe  -DCMAKE_CXX_COMPILER=g++.exe  -DCMAKE_Fortran_COMPILER=gfortran.exe .. -DTPL_BLAS_LIBRARIES="..\libopenblas.dll.a" 
+
+Maximum build : download feast and mumps in each folder.
+cmake -G "MinGW Makefiles"  -DCMAKE_BUILD_TYPE=Release  -DCMAKE_C_COMPILER=gcc.exe  -DCMAKE_CXX_COMPILER=g++.exe  -DCMAKE_Fortran_COMPILER=gfortran.exe .. -DTPL_BLAS_LIBRARIES="..\libopenblas.dll.a"  -DMYSTRAN_USE_DMUMPS_SOLVER=ON -DMYSTRAN_USE_EXTERNAL_FEAST=ON
+
+Maximum build with already built FEAST and MUMPS-non MPI Libraries
+cmake -G "MinGW Makefiles"  -DCMAKE_BUILD_TYPE=Release  -DCMAKE_C_COMPILER=gcc.exe  -DCMAKE_CXX_COMPILER=g++.exe  -DCMAKE_Fortran_COMPILER=gfortran.exe .. -DTPL_BLAS_LIBRARIES="..\libopenblas.dll.a"  -DMYSTRAN_USE_DMUMPS_SOLVER=ON -DMYSTRAN_USE_EXTERNAL_FEAST=ON -DMYSTRAN_EXTERNAL_SUPERLU_LIB="../superlu/src/libsuperlu.a" -DMYSTRAN_EXTERNAL_SUPERLU_INCLUDE_DIR="../superlu/src" -DMYSTRAN_EXTERNAL_SUPERLU_CONFIG_DIR="../superlu/src" -DMYSTRAN_EXTERNAL_SUPERLU_DRIVER="../superlu/FORTRAN/c_fortran_dgssv.c" -DMYSTRAN_USE_EXTERNAL_FEAST=ON  -DMYSTRAN_FEAST_EXTRA_LIBS="C../feast/4.0/lib/x64/libfeast.a" -DMYSTRAN_USE_DMUMPS_SOLVER=ON -DMYSTRAN_DMUMPS_INCLUDE_DIR="../mumps/include"   -DMYSTRAN_DMUMPS_EXTRA_LIBS="../mumps/lib/libdmumps.a;../mumps/lib/libmpiseq.a;../mumps/lib/libmumps_common.a;../mumps/lib/libpord.a;../mumps/lib/libsmumps.a"
+
+Use mumps with no-mpi, but using multi-thread optimized like OPENBLAS
+
+For Windows intel OneAPI use MKL LP64 and -DMYSTRAN_DISABLE_NDEBUG=ON for Release version, and edit slu_cnames.h SuperLU to UPCASE only. 
 # Introduction
 
 MYSTRAN is a general purpose finite element analysis computer program for
