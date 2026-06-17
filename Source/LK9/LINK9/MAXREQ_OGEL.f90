@@ -33,8 +33,8 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, IBIT, LSUB, NDOFG, NELE, NGRID, METYPE, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
-      USE MODEL_STUF, ONLY            :  ELMTYP, ELOUT, ESORT2, ETYPE, GROUT, MEFFMASS_CALC, MPFACTOR_CALC, NELGP, NUM_PLIES,      &
-                                         PCOMP_PROPS, SCNUM, TYPE
+      USE MODEL_STUF, ONLY            :  EDAT, ELMTYP, ELOUT, EPNT, ESORT2, ETYPE, GROUT, MEFFMASS_CALC, MPFACTOR_CALC, NELGP,     &
+                                         NUM_PLIES, PBEAM_NSTATIONS, PCOMP_PROPS, SCNUM, TYPE
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC
       USE LINK9_STUFF, ONLY           :  MAXREQ
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -230,9 +230,14 @@
 !                                                            -----
          NUMBER_ROWS(K) = NELGP(L)
 
-      ELSE IF (K == 1) THEN                                ! K = 1 is elem engr force output requests. (only 1 row of output/elem)
+      ELSE IF (K == 1) THEN                                ! K = 1 is elem engr force output requests.
 !                                                            -----
          NUMBER_ROWS(K) = 1
+
+         IF (TYPE == 'BEAM    ') THEN
+            NUMBER_ROWS(K) = PBEAM_NSTATIONS(EDAT(EPNT(INT_ELEM_ID)+1))
+            IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 5
+         ENDIF
 
          IF (TYPE(1:5) == 'QUAD4') THEN
             IF (FORC_LOC == 'CENTER  ') THEN            !    PSHELL requires 2 rows of output/elem for FORC_LOC = 'CENTER'
@@ -251,7 +256,10 @@
             CALL GET_ELEM_NUM_PLIES ( INT_ELEM_ID )
          ENDIF
 
-         IF       (TYPE(1:3) == 'BAR  ') THEN
+         IF       (TYPE == 'BEAM    ') THEN
+               NUMBER_ROWS(K) = 2*PBEAM_NSTATIONS(EDAT(EPNT(INT_ELEM_ID)+1))
+               IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 10
+         ELSE IF  (TYPE(1:3) == 'BAR  ') THEN
                NUMBER_ROWS(K) = 2                          !    BAR stresses require 2 rows of output/elem
          ELSE IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4')) THEN
             IF (PCOMP_PROPS == 'Y') THEN
@@ -282,7 +290,10 @@
             CALL GET_ELEM_NUM_PLIES ( INT_ELEM_ID )
          ENDIF
 
-         IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'SHEAR')) THEN
+         IF (TYPE == 'BEAM    ') THEN
+            NUMBER_ROWS(K) = 2*PBEAM_NSTATIONS(EDAT(EPNT(INT_ELEM_ID)+1))
+            IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 10
+         ELSE IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'SHEAR')) THEN
             IF (PCOMP_PROPS == 'Y') THEN
                NUMBER_ROWS(K) = NUM_PLIES                  !    PCOMP requires NUM_PLIES rows of output/elem
             ELSE

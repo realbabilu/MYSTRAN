@@ -101,6 +101,42 @@
       INTEGER(LONG)            :: CBEAMAREA_PID(MCBEAMAREA_PID) = 0
       REAL(DOUBLE)             :: CBEAMAREA_VAL(MCBEAMAREA_PID) = ONE
 
+      REAL(DOUBLE)             :: BEAMAMO       =  ONE      ! Global multiplier on beam axial stiffness EA before CBAR/CBEAM
+      INTEGER(LONG), PARAMETER :: MBEAMAMO_PID  =   200     ! Max per-property beam axial overrides from PARAM,BEAMAMO,value,PID
+      INTEGER(LONG)            :: NBEAMAMO_PID  =     0     ! Number of active per-property beam axial overrides
+      INTEGER(LONG)            :: BEAMAMO_PID(MBEAMAMO_PID) = 0
+      REAL(DOUBLE)             :: BEAMAMO_VAL(MBEAMAMO_PID) = ONE
+
+      REAL(DOUBLE)             :: BEAMV1MO       =  ONE      ! Global multiplier on beam plane-1 stiffness before CBAR/CBEAM
+      INTEGER(LONG), PARAMETER :: MBEAMV1MO_PID  =   200     ! Max per-property beam plane-1 overrides from PARAM,BEAMV1MO,value,PID
+      INTEGER(LONG)            :: NBEAMV1MO_PID  =     0     ! Number of active per-property beam plane-1 overrides
+      INTEGER(LONG)            :: BEAMV1MO_PID(MBEAMV1MO_PID) = 0
+      REAL(DOUBLE)             :: BEAMV1MO_VAL(MBEAMV1MO_PID) = ONE
+
+      REAL(DOUBLE)             :: BEAMV2MO       =  ONE      ! Global multiplier on beam plane-2 stiffness before CBAR/CBEAM
+      INTEGER(LONG), PARAMETER :: MBEAMV2MO_PID  =   200     ! Max per-property beam plane-2 overrides from PARAM,BEAMV2MO,value,PID
+      INTEGER(LONG)            :: NBEAMV2MO_PID  =     0     ! Number of active per-property beam plane-2 overrides
+      INTEGER(LONG)            :: BEAMV2MO_PID(MBEAMV2MO_PID) = 0
+      REAL(DOUBLE)             :: BEAMV2MO_VAL(MBEAMV2MO_PID) = ONE
+
+      REAL(DOUBLE)             :: BEAMM1MO       =  ONE      ! Global multiplier on beam major-axis bending stiffness EI1 before CBAR/CBEAM
+      INTEGER(LONG), PARAMETER :: MBEAMM1MO_PID  =   200     ! Max per-property beam major-bending overrides from PARAM,BEAMM1MO,value,PID
+      INTEGER(LONG)            :: NBEAMM1MO_PID  =     0     ! Number of active per-property beam major-bending overrides
+      INTEGER(LONG)            :: BEAMM1MO_PID(MBEAMM1MO_PID) = 0
+      REAL(DOUBLE)             :: BEAMM1MO_VAL(MBEAMM1MO_PID) = ONE
+
+      REAL(DOUBLE)             :: BEAMM2MO       =  ONE      ! Global multiplier on beam minor-axis bending stiffness EI2 before CBAR/CBEAM
+      INTEGER(LONG), PARAMETER :: MBEAMM2MO_PID  =   200     ! Max per-property beam minor-bending overrides from PARAM,BEAMM2MO,value,PID
+      INTEGER(LONG)            :: NBEAMM2MO_PID  =     0     ! Number of active per-property beam minor-bending overrides
+      INTEGER(LONG)            :: BEAMM2MO_PID(MBEAMM2MO_PID) = 0
+      REAL(DOUBLE)             :: BEAMM2MO_VAL(MBEAMM2MO_PID) = ONE
+
+      REAL(DOUBLE)             :: BEAMTMO       =  ONE      ! Global multiplier on beam torsional stiffness GJ before CBAR/CBEAM
+      INTEGER(LONG), PARAMETER :: MBEAMTMO_PID  =   200     ! Max per-property beam torsion overrides from PARAM,BEAMTMO,value,PID
+      INTEGER(LONG)            :: NBEAMTMO_PID  =     0     ! Number of active per-property beam torsion overrides
+      INTEGER(LONG)            :: BEAMTMO_PID(MBEAMTMO_PID) = 0
+      REAL(DOUBLE)             :: BEAMTMO_VAL(MBEAMTMO_PID) = ONE
+
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: CHKGRDS        =    'Y'    ! If 'Y' call GET_ELEM_AGRID_BGRID to check all grids on elems exist
 

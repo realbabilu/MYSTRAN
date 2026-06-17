@@ -336,7 +336,7 @@ station_parse: DO WHILE (ITOK <= NTOK)
          GET_SECTION_NDIMS = 2
       ELSE IF (SEC(1:4) == 'BOX ') THEN
          GET_SECTION_NDIMS = 4
-      ELSE IF (SEC(1:5) == 'CROSS') THEN
+      ELSE IF (SEC(1:4) == 'H   ') THEN
          GET_SECTION_NDIMS = 4
       ELSE IF (SEC(1:4) == 'CHAN') THEN
          GET_SECTION_NDIMS = 4
@@ -344,8 +344,6 @@ station_parse: DO WHILE (ITOK <= NTOK)
          GET_SECTION_NDIMS = 4
       ELSE IF (SEC(1:4) == 'L   ') THEN
          GET_SECTION_NDIMS = 4
-      ELSE IF (SEC(1:4) == 'HEXA') THEN
-         GET_SECTION_NDIMS = 3
       ELSE IF (SEC(1:4) == 'I   ') THEN
          GET_SECTION_NDIMS = 6
       ENDIF
@@ -383,12 +381,6 @@ station_parse: DO WHILE (ITOK <= NTOK)
       RPBEAM(NPBEAM,43) = ZC
       CALL STORE_SECTION_PROPS ( 1, SEC_TYPE_IN, NDIM_IN, DIMS, NSM )
       CALL CHECK_BAR_MOIs ( 'PBEAML', ID, RPBEAM(NPBEAM,2), RPBEAM(NPBEAM,3), RPBEAM(NPBEAM,4), IERR_LOC )
-      IF (PROPERTY_ID == 1) THEN
-         WRITE(F06,'(A,I0,3A,1P,6E14.6)') '*PBEAML A DEBUG PID=', PROPERTY_ID, ' SEC=', TRIM(SEC_TYPE), ' A/I1/I2/J/K1/K2=',  &
-                                           RPBEAM(NPBEAM,1), RPBEAM(NPBEAM,2), RPBEAM(NPBEAM,3), RPBEAM(NPBEAM,5),               &
-                                           RPBEAM(NPBEAM,30), RPBEAM(NPBEAM,31)
-         WRITE(F06,'(A,2(1X,1ES14.6))') '*PBEAML A DIMS(1:2)=', DIMS(1), DIMS(2)
-      ENDIF
       IF (IERR_LOC /= 0) FATAL_ERR = FATAL_ERR + 1
 
       END SUBROUTINE LOAD_SECTION_A
@@ -425,12 +417,6 @@ station_parse: DO WHILE (ITOK <= NTOK)
       RPBEAM(NPBEAM,45) = ZC
       CALL STORE_SECTION_PROPS ( PBEAM_NSTATIONS(NPBEAM), SEC_TYPE_IN, NDIM_IN, DIMS, NSM )
       CALL CHECK_BAR_MOIs ( 'PBEAML', ID, RPBEAM(NPBEAM,17), RPBEAM(NPBEAM,18), RPBEAM(NPBEAM,19), IERR_LOC )
-      IF (PROPERTY_ID == 1) THEN
-         WRITE(F06,'(A,I0,A,1P,6E14.6)') '*PBEAML B DEBUG PID=', PROPERTY_ID, ' A/I1/I2/J/K1/K2=',                                 &
-                                         RPBEAM(NPBEAM,16), RPBEAM(NPBEAM,17), RPBEAM(NPBEAM,18), RPBEAM(NPBEAM,20),               &
-                                         RPBEAM(NPBEAM,30), RPBEAM(NPBEAM,31)
-         WRITE(F06,'(A,2(1X,1ES14.6))') '*PBEAML B DIMS(1:2)=', DIMS(1), DIMS(2)
-      ENDIF
       IF (IERR_LOC /= 0) FATAL_ERR = FATAL_ERR + 1
 
       END SUBROUTINE LOAD_SECTION_B
@@ -456,7 +442,177 @@ station_parse: DO WHILE (ITOK <= NTOK)
       PBEAM_RPROPS(NPBEAM,ISTA_IN,5) = JTOR
       PBEAM_RPROPS(NPBEAM,ISTA_IN,6) = NSM
 
+      CALL WRITE_PBEAML_CONVERTED_PBEAM_DEBUG ( 'S', PBEAM_XL(NPBEAM,ISTA_IN), SEC_TYPE_IN, NDIM_IN, DIMS, AREA, I1, I2, I12,   &
+                                                JTOR, NSM, K1, K2, YC, ZC, YS, ZS, IWARP, STRE )
+
       END SUBROUTINE STORE_SECTION_PROPS
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_PBEAML_CONVERTED_PBEAM_DEBUG ( WHICH, XL, SEC_TYPE_IN, NDIM_IN, DIMS, AREA, I1, I2, I12, JTOR, NSM, K1, K2, &
+                                                      YC, ZC, YS, ZS, IWARP, STRE )
+
+      CHARACTER(LEN=*), INTENT(IN) :: WHICH
+      CHARACTER(LEN=*), INTENT(IN) :: SEC_TYPE_IN
+      INTEGER(LONG), INTENT(IN)    :: NDIM_IN
+      REAL(DOUBLE), INTENT(IN)     :: XL, DIMS(10), AREA, I1, I2, I12, JTOR, NSM, K1, K2, YC, ZC, YS, ZS, IWARP, STRE(8)
+      INTEGER(LONG)                :: IDIM
+      CHARACTER(LEN=256)           :: LINE
+
+      WRITE(F06,'(A)') ' '
+      WRITE(F06,'(A)') '*** PBEAML CONVERTED PBEAM DEBUG *********************************************'
+      WRITE(F06,'(A,I0)') '  Property ID      : ', PROPERTY_ID
+      WRITE(F06,'(A,I0)') '  Material ID      : ', PBEAM(NPBEAM,2)
+      WRITE(F06,'(A,A)')  '  PBEAML section   : ', TRIM(SEC_TYPE_IN)
+      IF (WHICH == 'A') THEN
+         WRITE(F06,'(A)') '  Snapshot         : End A / station 1'
+      ELSE IF (WHICH == 'B') THEN
+         CALL WRITE_LABEL_VALUE ( '  Snapshot         : End B at x/L = ', XL )
+      ELSE
+         CALL WRITE_LABEL_VALUE ( '  Snapshot         : Intermediate station at x/L = ', XL )
+      ENDIF
+      WRITE(F06,'(A)') '  Input dimensions :'
+      DO IDIM=1,NDIM_IN
+         WRITE(LINE,'(A,I0,A,A)') '    DIM(', IDIM, ') = ', TRIM(FMT_REAL_SHORT(DIMS(IDIM)))
+         WRITE(F06,'(A)') TRIM(LINE)
+      ENDDO
+      WRITE(F06,'(A)') '  Converted PBEAM fields :'
+      CALL WRITE_LABEL_VALUE ( '    Area           = ', AREA )
+      CALL WRITE_LABEL_VALUE ( '    I1             = ', I1 )
+      CALL WRITE_LABEL_VALUE ( '    I2             = ', I2 )
+      CALL WRITE_LABEL_VALUE ( '    I12            = ', I12 )
+      CALL WRITE_LABEL_VALUE ( '    J              = ', JTOR )
+      CALL WRITE_LABEL_VALUE ( '    NSM            = ', NSM )
+      CALL WRITE_LABEL_VALUE ( '    K1 shear       = ', K1 )
+      CALL WRITE_LABEL_VALUE ( '    K2 shear       = ', K2 )
+      CALL WRITE_LABEL_VALUE ( '    CW             = ', IWARP )
+      CALL WRITE_LABEL_VALUE ( '    Neutral axis Y = ', YC )
+      CALL WRITE_LABEL_VALUE ( '    Neutral axis Z = ', ZC )
+      CALL WRITE_LABEL_VALUE ( '    Shear center Y = ', YS )
+      CALL WRITE_LABEL_VALUE ( '    Shear center Z = ', ZS )
+      WRITE(F06,'(A)') '  Stress recovery points :'
+      CALL WRITE_POINT_VALUE ( '    C = ', STRE(1), STRE(2) )
+      CALL WRITE_POINT_VALUE ( '    D = ', STRE(3), STRE(4) )
+      CALL WRITE_POINT_VALUE ( '    E = ', STRE(5), STRE(6) )
+      CALL WRITE_POINT_VALUE ( '    F = ', STRE(7), STRE(8) )
+      WRITE(F06,'(A)') '  NX-style converted PBEAM card image:'
+      WRITE(F06,'(A)') '     THE USER SUPPLIED PBEAML BULK DATA ENTRY IS REPRESENTED INTERNALLY AS:'
+      WRITE(LINE,'(A,I0,1X,I0)') '  PBEAM      ', PROPERTY_ID, PBEAM(NPBEAM,2)
+      CALL WRITE_VALUE_LIST_6 ( TRIM(LINE), AREA, I1, I2, I12, JTOR, NSM )
+      CALL WRITE_VALUE_LIST_8 ( '              ', STRE(1), STRE(2), STRE(3), STRE(4), STRE(5), STRE(6), STRE(7), STRE(8) )
+      CALL WRITE_VALUE_LIST_8 ( '              ', K1, K2, 0.0D0, 0.0D0, 0.0D0, 0.0D0, IWARP, IWARP )
+      CALL WRITE_VALUE_LIST_8 ( '              ', YS, ZS, YS, ZS, YC, ZC, YC, ZC )
+      WRITE(F06,'(A)') '***************************************************************************'
+
+      END SUBROUTINE WRITE_PBEAML_CONVERTED_PBEAM_DEBUG
+
+! ##################################################################################################################################
+
+      CHARACTER(LEN=24) FUNCTION FMT_REAL_SHORT ( VALUE )
+
+      REAL(DOUBLE), INTENT(IN) :: VALUE
+      CHARACTER(LEN=32)        :: BUFFER
+      CHARACTER(LEN=24)        :: MANT
+      CHARACTER(LEN=8)         :: EXPSTR
+      INTEGER(LONG)            :: EPOS, IEND
+
+      IF (DABS(VALUE) <= 1.0D-12) THEN
+         FMT_REAL_SHORT = '0.0'
+         RETURN
+      ENDIF
+
+      WRITE(BUFFER,'(ES16.8E2)') VALUE
+      BUFFER = ADJUSTL(BUFFER)
+      EPOS = INDEX(BUFFER,'E')
+      IF (EPOS <= 0) THEN
+         FMT_REAL_SHORT = TRIM(BUFFER)
+         RETURN
+      ENDIF
+
+      MANT = BUFFER(1:EPOS-1)
+      EXPSTR = BUFFER(EPOS:)
+      IEND = LEN_TRIM(MANT)
+
+      DO WHILE (IEND > 1)
+         IF (MANT(IEND:IEND) /= '0') EXIT
+         IEND = IEND - 1
+      ENDDO
+
+      IF (MANT(IEND:IEND) == '.') THEN
+         MANT(IEND+1:IEND+1) = '0'
+         IEND = IEND + 1
+      ENDIF
+      MANT = MANT(1:IEND)
+
+      IF ((TRIM(EXPSTR) == 'E+00') .OR. (TRIM(EXPSTR) == 'E-00')) THEN
+         FMT_REAL_SHORT = TRIM(MANT)
+      ELSE
+         FMT_REAL_SHORT = TRIM(MANT)//TRIM(EXPSTR)
+      ENDIF
+
+      END FUNCTION FMT_REAL_SHORT
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_LABEL_VALUE ( LABEL, VALUE )
+
+      CHARACTER(LEN=*), INTENT(IN) :: LABEL
+      REAL(DOUBLE), INTENT(IN)     :: VALUE
+
+      WRITE(F06,'(A,1X,A)') TRIM(LABEL), TRIM(FMT_REAL_SHORT(VALUE))
+
+      END SUBROUTINE WRITE_LABEL_VALUE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_POINT_VALUE ( LABEL, VALUE1, VALUE2 )
+
+      CHARACTER(LEN=*), INTENT(IN) :: LABEL
+      REAL(DOUBLE), INTENT(IN)     :: VALUE1, VALUE2
+      CHARACTER(LEN=128)           :: LINE
+
+      LINE = LABEL//'('//TRIM(FMT_REAL_SHORT(VALUE1))//', '//TRIM(FMT_REAL_SHORT(VALUE2))//')'
+      WRITE(F06,'(A)') TRIM(LINE)
+
+      END SUBROUTINE WRITE_POINT_VALUE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_VALUE_LIST_6 ( PREFIX, V1, V2, V3, V4, V5, V6 )
+
+      CHARACTER(LEN=*), INTENT(IN) :: PREFIX
+      REAL(DOUBLE), INTENT(IN)     :: V1, V2, V3, V4, V5, V6
+      CHARACTER(LEN=256)           :: LINE
+
+      LINE = PREFIX//' '//TRIM(FMT_REAL_SHORT(V1))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V2))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V3))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V4))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V5))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V6))
+      WRITE(F06,'(A)') TRIM(LINE)
+
+      END SUBROUTINE WRITE_VALUE_LIST_6
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_VALUE_LIST_8 ( PREFIX, V1, V2, V3, V4, V5, V6, V7, V8 )
+
+      CHARACTER(LEN=*), INTENT(IN) :: PREFIX
+      REAL(DOUBLE), INTENT(IN)     :: V1, V2, V3, V4, V5, V6, V7, V8
+      CHARACTER(LEN=256)           :: LINE
+
+      LINE = PREFIX//' '//TRIM(FMT_REAL_SHORT(V1))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V2))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V3))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V4))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V5))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V6))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V7))
+      LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(V8))
+      WRITE(F06,'(A)') TRIM(LINE)
+
+      END SUBROUTINE WRITE_VALUE_LIST_8
 
 ! ##################################################################################################################################
 
@@ -488,16 +644,14 @@ station_parse: DO WHILE (ITOK <= NTOK)
          CALL CALC_BAR_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, STRE )
       ELSE IF (SEC(1:4) == 'BOX ') THEN
          CALL CALC_BOX_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, STRE )
-      ELSE IF (SEC(1:5) == 'CROSS') THEN
-         CALL CALC_CROSS_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, IWARP, STRE )
+      ELSE IF (SEC(1:4) == 'H   ') THEN
+         CALL CALC_H_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, YS, ZS, IWARP, STRE )
       ELSE IF (SEC(1:4) == 'CHAN') THEN
          CALL CALC_CHAN_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, YS, ZS, STRE )
       ELSE IF (SEC(1:4) == 'T   ') THEN
          CALL CALC_T_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, STRE )
       ELSE IF (SEC(1:4) == 'L   ') THEN
          CALL CALC_L_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, STRE )
-      ELSE IF (SEC(1:4) == 'HEXA') THEN
-         CALL CALC_HEXA_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, STRE )
       ELSE
          FATAL_ERR = FATAL_ERR + 1
       ENDIF
@@ -511,16 +665,16 @@ station_parse: DO WHILE (ITOK <= NTOK)
       REAL(DOUBLE), INTENT(IN)  :: DIMS(10)
       REAL(DOUBLE), INTENT(OUT) :: AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, YS, ZS, IWARP, STRE(8)
 
-      REAL(DOUBLE) :: H, B1, B2, T1, T2, TW
+      REAL(DOUBLE) :: H, B1, B2, TW, T1, T2
       REAL(DOUBLE) :: A1, A2, A3
       REAL(DOUBLE) :: Z1, Z2, Z3, ZBAR, HWEB
 
       H  = DIMS(1)
       B1 = DIMS(2)
       B2 = DIMS(3)
-      T1 = DIMS(4)
-      T2 = DIMS(5)
-      TW = DIMS(6)
+      TW = DIMS(4)
+      T1 = DIMS(5)
+      T2 = DIMS(6)
 
       HWEB = H - T1 - T2
       IF (HWEB < ZERO) HWEB = ZERO
@@ -565,6 +719,28 @@ station_parse: DO WHILE (ITOK <= NTOK)
       STRE(8) = -0.5D0*H - ZBAR
 
       END SUBROUTINE CALC_I_SECTION
+
+! ##################################################################################################################################
+
+      SUBROUTINE CALC_H_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, YS, ZS, IWARP, STRE )
+      REAL(DOUBLE), INTENT(IN)  :: DIMS(10)
+      REAL(DOUBLE), INTENT(OUT) :: AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, YS, ZS, IWARP, STRE(8)
+
+! Temporary phase-1 support: treat H as an I-section rotated 90 degrees with equal flange thicknesses.
+! NX reverse-engineering for H is still thin, so keep this mapping conservative and explicit.
+      REAL(DOUBLE) :: IDIMS(10)
+
+      IDIMS = ZERO
+      IDIMS(1) = DIMS(1)
+      IDIMS(2) = DIMS(3)
+      IDIMS(3) = DIMS(3)
+      IDIMS(4) = DIMS(4)
+      IDIMS(5) = DIMS(2)
+      IDIMS(6) = DIMS(2)
+
+      CALL CALC_I_SECTION ( IDIMS, AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, YS, ZS, IWARP, STRE )
+
+      END SUBROUTINE CALC_H_SECTION
 
 ! ##################################################################################################################################
 
@@ -663,52 +839,39 @@ station_parse: DO WHILE (ITOK <= NTOK)
 
 ! ##################################################################################################################################
 
-      SUBROUTINE CALC_CROSS_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, IWARP, STRE )
-      REAL(DOUBLE), INTENT(IN)  :: DIMS(10)
-      REAL(DOUBLE), INTENT(OUT) :: AREA, I1, I2, I12, JTOR, K1, K2, IWARP, STRE(8)
-      REAL(DOUBLE), PARAMETER :: CROSS_CW_FACTOR = 0.5022726851851852D0
-      REAL(DOUBLE) :: AVERT, AHORZ, HV, WH, TV, TH, W0
-      HV = DIMS(3)
-      W0 = 0.5D0*DIMS(1)
-      WH = DIMS(1) + DIMS(2)
-      TV = DIMS(2)
-      TH = DIMS(4)
-      AVERT = HV*TV
-      AHORZ = WH*TH
-      AREA = AVERT + AHORZ - TV*TH
-      I1 = TV*HV**3/12.D0 + 2.D0*W0*TH**3/12.D0
-      I2 = HV*TV**3/12.D0 + 2.D0*(TH*W0**3/12.D0 + TH*W0*0.25D0*(TV + W0)**2)
-      I12 = ZERO
-      JTOR = 2.D0*CROSS_CW_FACTOR*(HV*TV**3 + WH*TH**3)/3.D0
-      IWARP = 0.5D0*JTOR
-      K1 = (5.D0/6.D0)*AVERT/AREA
-      K2 = (5.D0/6.D0)*AHORZ/AREA
-      STRE = (/ 0.5D0*HV, ZERO, ZERO, 0.5D0*TV + W0, -0.5D0*HV, ZERO, ZERO, -(0.5D0*TV + W0) /)
-      END SUBROUTINE CALC_CROSS_SECTION
-
-! ##################################################################################################################################
-
       SUBROUTINE CALC_CHAN_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, YS, ZS, STRE )
       REAL(DOUBLE), INTENT(IN)  :: DIMS(10)
       REAL(DOUBLE), INTENT(OUT) :: AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, YS, ZS, STRE(8)
-      REAL(DOUBLE) :: H, B, T1, T2, AWEB, AFLG, YWEB, YFLG, ZBAR, E
-      H = DIMS(1); B = DIMS(2); T1 = DIMS(3); T2 = DIMS(4)
-      AWEB = T2*H
-      AFLG = 2.D0*B*T1
+      REAL(DOUBLE) :: B, H, TW, TF, AWEB, AFLG, AWEB_EFF, AFLG_EFF, YWEB, YFLG, ZBAR, E
+      B  = DIMS(1)
+      H  = DIMS(2)
+      TW = DIMS(3)
+      TF = DIMS(4)
+      AWEB = TW*H
+      AFLG = 2.D0*B*TF
       AREA = AWEB + AFLG
       YWEB = H/2.D0
-      YFLG = H - T1/2.D0
+      YFLG = H - TF/2.D0
       ZBAR = ZERO
       IF (AREA > ZERO) ZBAR = (AWEB*YWEB + AFLG*YFLG)/AREA
       YC = ZERO
       ZC = ZBAR - H/2.D0
-      I1 = T2*H**3/12.D0 + AWEB*(YWEB - ZBAR)**2 + 2.D0*(B*T1**3/12.D0 + B*T1*(YFLG - ZBAR)**2)
-      I2 = H*T2**3/12.D0 + 2.D0*T1*B**3/12.D0
+      I1 = TW*H**3/12.D0 + AWEB*(YWEB - ZBAR)**2 + 2.D0*(B*TF**3/12.D0 + B*TF*(YFLG - ZBAR)**2)
+      I2 = H*TW**3/12.D0 + 2.D0*TF*B**3/12.D0
       I12 = ZERO
-      JTOR = (2.D0*B*T1**3 + H*T2**3)/3.D0
-      K1 = 0.5D0 ; K2 = 0.5D0
+      JTOR = (2.D0*B*TF**3 + H*TW**3)/3.D0
+      AWEB_EFF = TW*(H - 2.D0*TF)
+      IF (AWEB_EFF < ZERO) AWEB_EFF = ZERO
+      AFLG_EFF = ZERO
+      IF (B > ZERO) AFLG_EFF = AFLG*(1.D0 - TF/(H + B))
+      K1 = ZERO
+      K2 = ZERO
+      IF (AREA > ZERO) THEN
+         K1 = AWEB_EFF/AREA
+         K2 = AFLG_EFF/AREA
+      ENDIF
       E = ZERO
-      IF (I2 > ZERO) E = B**2*T1*H**2*T2/(4.D0*I2)
+      IF (I2 > ZERO) E = B**2*TF*H**2*TW/(4.D0*I2)
       YS = E
       ZS = ZERO
       STRE = (/ B, 0.5D0*H, ZERO, 0.5D0*H, ZERO, -0.5D0*H, B, -0.5D0*H /)
@@ -719,23 +882,31 @@ station_parse: DO WHILE (ITOK <= NTOK)
       SUBROUTINE CALC_T_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, STRE )
       REAL(DOUBLE), INTENT(IN)  :: DIMS(10)
       REAL(DOUBLE), INTENT(OUT) :: AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, STRE(8)
-      REAL(DOUBLE) :: H, B, T1, T2, AWEB, AFLG, YWEB, YFLG, ZBAR
-      H = DIMS(1); B = DIMS(2); T1 = DIMS(3); T2 = DIMS(4)
-      AWEB = T2*(H - T1)
-      AFLG = B*T1
+      REAL(DOUBLE) :: B, H, TF, TW, AWEB, AFLG, YWEB, YFLG, ZBAR
+      B  = DIMS(1)
+      H  = DIMS(2)
+      TF = DIMS(3)
+      TW = DIMS(4)
+      AWEB = TW*(H - TF)
+      AFLG = B*TF
       AREA = AWEB + AFLG
-      YWEB = 0.5D0*(H - T1)
-      YFLG = H - 0.5D0*T1
+      YWEB = 0.5D0*(H - TF)
+      YFLG = H - 0.5D0*TF
       ZBAR = ZERO
       IF (AREA > ZERO) ZBAR = (AWEB*YWEB + AFLG*YFLG)/AREA
       YC = ZERO
       ZC = ZBAR - H/2.D0
-      I1 = T2*(H - T1)**3/12.D0 + AWEB*(YWEB - ZBAR)**2 + B*T1**3/12.D0 + AFLG*(YFLG - ZBAR)**2
-      I2 = (H - T1)*T2**3/12.D0 + T1*B**3/12.D0
+      I1 = TW*(H - TF)**3/12.D0 + AWEB*(YWEB - ZBAR)**2 + B*TF**3/12.D0 + AFLG*(YFLG - ZBAR)**2
+      I2 = (H - TF)*TW**3/12.D0 + TF*B**3/12.D0
       I12 = ZERO
-      JTOR = (B*T1**3 + (H - T1)*T2**3)/3.D0
-      K1 = 0.5D0 ; K2 = 0.5D0
-      STRE = (/ 0.5D0*B, 0.5D0*H - ZBAR, -0.5D0*B, 0.5D0*H - ZBAR, ZERO, -0.5D0*H - ZBAR, ZERO, -0.5D0*H - ZBAR /)
+      JTOR = (B*TF**3 + (H - TF)*TW**3)/3.D0
+      K1 = ZERO
+      K2 = ZERO
+      IF (AREA > ZERO) THEN
+         K1 = AWEB/AREA
+         K2 = AFLG/AREA
+      ENDIF
+      STRE = (/ 0.5D0*TW, ZERO, 0.5D0*TW, 0.5D0*H, -B + 0.5D0*TW, ZERO, 0.5D0*TW, -0.5D0*H /)
       END SUBROUTINE CALC_T_SECTION
 
 ! ##################################################################################################################################
@@ -743,13 +914,16 @@ station_parse: DO WHILE (ITOK <= NTOK)
       SUBROUTINE CALC_L_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, STRE )
       REAL(DOUBLE), INTENT(IN)  :: DIMS(10)
       REAL(DOUBLE), INTENT(OUT) :: AREA, I1, I2, I12, JTOR, K1, K2, YC, ZC, STRE(8)
-      REAL(DOUBLE) :: H, B, T1, T2, A1, A2, Y1, Z1, Y2, Z2, YBAR, ZBAR
-      H = DIMS(1); B = DIMS(2); T1 = DIMS(3); T2 = DIMS(4)
-      A1 = H*T1
-      A2 = (B - T1)*T2
+      REAL(DOUBLE) :: B, H, TF, TW, A1, A2, Y1, Z1, Y2, Z2, YBAR, ZBAR
+      B  = DIMS(1)
+      H  = DIMS(2)
+      TF = DIMS(3)
+      TW = DIMS(4)
+      A1 = (H - TF)*TW
+      A2 = (B - TW)*TF
       AREA = A1 + A2
-      Y1 = H/2.D0 ; Z1 = T1/2.D0
-      Y2 = T2/2.D0 ; Z2 = T1 + 0.5D0*(B - T1)
+      Y1 = 0.5D0*(H - TF) ; Z1 = 0.5D0*TW
+      Y2 = 0.5D0*TF ; Z2 = TW + 0.5D0*(B - TW)
       YBAR = ZERO ; ZBAR = ZERO
       IF (AREA > ZERO) THEN
          YBAR = (A1*Y1 + A2*Y2)/AREA
@@ -757,32 +931,18 @@ station_parse: DO WHILE (ITOK <= NTOK)
       ENDIF
       YC = YBAR - H/2.D0
       ZC = ZBAR - B/2.D0
-      I1 = T1*H**3/12.D0 + A1*(Y1 - YBAR)**2 + (B - T1)*T2**3/12.D0 + A2*(Y2 - YBAR)**2
-      I2 = H*T1**3/12.D0 + A1*(Z1 - ZBAR)**2 + T2*(B - T1)**3/12.D0 + A2*(Z2 - ZBAR)**2
+      I1 = TW*(H - TF)**3/12.D0 + A1*(Y1 - YBAR)**2 + (B - TW)*TF**3/12.D0 + A2*(Y2 - YBAR)**2
+      I2 = (H - TF)*TW**3/12.D0 + A1*(Z1 - ZBAR)**2 + TF*(B - TW)**3/12.D0 + A2*(Z2 - ZBAR)**2
       I12 = A1*(Y1 - YBAR)*(Z1 - ZBAR) + A2*(Y2 - YBAR)*(Z2 - ZBAR)
-      JTOR = (H*T1**3 + (B - T1)*T2**3)/3.D0
-      K1 = 0.5D0 ; K2 = 0.5D0
-      STRE = (/ 0.5D0*B - ZBAR, 0.5D0*H - YBAR, -0.5D0*B - ZBAR, 0.5D0*H - YBAR,                           &
-                -0.5D0*B - ZBAR, -0.5D0*H - YBAR, 0.5D0*B - ZBAR, -0.5D0*H - YBAR /)
+      JTOR = ((H - TF)*TW**3 + (B - TW)*TF**3)/3.D0
+      K1 = ZERO
+      K2 = ZERO
+      IF (AREA > ZERO) THEN
+         K1 = A1/AREA
+         K2 = A2/AREA
+      ENDIF
+      STRE = (/ B - ZBAR, 0.5D0*TF, -ZBAR, H - YBAR, -ZBAR, -YBAR, B - ZBAR, -YBAR /)
       END SUBROUTINE CALC_L_SECTION
-
-! ##################################################################################################################################
-
-      SUBROUTINE CALC_HEXA_SECTION ( DIMS, AREA, I1, I2, I12, JTOR, K1, K2, STRE )
-      REAL(DOUBLE), INTENT(IN)  :: DIMS(10)
-      REAL(DOUBLE), INTENT(OUT) :: AREA, I1, I2, I12, JTOR, K1, K2, STRE(8)
-      REAL(DOUBLE) :: H, A, SQ3
-      H = DIMS(1)
-      A = H/2.D0
-      SQ3 = DSQRT(3.D0)
-      AREA = 2.D0*SQ3*A**2
-      I1 = 5.D0*SQ3*A**4/16.D0
-      I2 = I1
-      I12 = ZERO
-      JTOR = I1 + I2
-      K1 = 0.9D0 ; K2 = 0.9D0
-      STRE = (/ A, ZERO, 0.5D0*A, SQ3*A/2.D0, -A, ZERO, -0.5D0*A, -SQ3*A/2.D0 /)
-      END SUBROUTINE CALC_HEXA_SECTION
 
 ! ##################################################################################################################################
 

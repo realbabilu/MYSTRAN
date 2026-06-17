@@ -31,6 +31,8 @@
       USE ROD1_Interface
       USE BAR1_Interface
       USE BART_Interface
+! --- cbeam_tapered_add begin --- !
       USE BEAM_Interface
+! --- cbeam_tapered_add end --- !
 
       END MODULE BREL1_USE_IFs

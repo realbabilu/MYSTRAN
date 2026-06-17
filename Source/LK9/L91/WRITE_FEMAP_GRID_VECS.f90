@@ -41,14 +41,13 @@
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'WRITE_FEMAP_GRID_VECS'
       CHARACTER(LEN=*), INTENT(IN)    :: WHAT              ! Indicator if GRID_VEC is DISP, OLOA, SPCF or MPCF
-      CHARACTER(LEN= 3*BYTE)          :: TITLE1(4,2)       ! Titles for vectors written to NEU
+      CHARACTER(LEN= 5*BYTE)          :: TITLE1(4,2)       ! Titles for vectors written to NEU
       CHARACTER(LEN=20*BYTE)          :: TITLE2(2)         ! Titles for vectors written to NEU
 
       INTEGER(LONG), INTENT(IN)       :: FEMAP_SET_ID      ! FEMAP set ID to write out
       INTEGER(LONG)                   :: ACID_G            ! Actual coordinate system ID for a grid
       INTEGER(LONG)                   :: GRID_MAX          ! Grid ID where vector is max
       INTEGER(LONG)                   :: GRID_MIN          ! Grid ID where vector is min
-! !--- memory heap fix --- begin!
       INTEGER(LONG), ALLOCATABLE      :: GRID_NUMS(:)      ! Grid ID's in global order
       INTEGER(LONG)                   :: I                 ! DO loop index
       INTEGER(LONG)                   :: ICID              ! Internal coord sys no. corresponding to an actual coord sys no.
@@ -74,7 +73,6 @@
       REAL(DOUBLE), ALLOCATABLE       :: R1_VEC(:)         ! R1 rotation    component from GRID_VEC
       REAL(DOUBLE), ALLOCATABLE       :: R2_VEC(:)         ! R2 rotation    component from GRID_VEC
       REAL(DOUBLE), ALLOCATABLE       :: R3_VEC(:)         ! R3 rotation    component from GRID_VEC
-! !--- memory heap fix --- end!
       REAL(DOUBLE)                    :: T0G(3,3)           ! Matrix to transform offsets from global to basic  coords
       REAL(DOUBLE)                    :: VEC_ABS           ! Abs value in vector
       REAL(DOUBLE)                    :: VEC_MAX           ! Max value in vector
@@ -93,17 +91,27 @@
       TITLE1(4,2) = 'R3'
 
       IF      (WHAT == 'DISP') THEN
-         VEC_ID_OFFSET = 10000
-         TITLE2(1) = ' translation'
-         TITLE2(2) = ' rotation'
+! --- neu_upgrade begin --- !
+         VEC_ID_OFFSET = 0
+         TITLE1(1,1) = 'Total'
+         TITLE1(1,2) = 'Total'
+         TITLE2(1) = ' Translation'
+         TITLE2(2) = ' Rotation'
+! --- neu_upgrade end --- !
       ELSE IF (WHAT == 'OLOA') THEN
          VEC_ID_OFFSET = 20000
-         TITLE2(1) = ' applied force'
-         TITLE2(2) = ' applied moment'
+          TITLE1(1,1) = 'Total'
+          TITLE1(1,2) = 'Total'
+          TITLE2(1) = ' Applied Force'
+          TITLE2(2) = ' Applied Moment'
       ELSE IF (WHAT == 'SPCF') THEN
          VEC_ID_OFFSET = 30000
-         TITLE2(1) = ' SPC force'
-         TITLE2(2) = ' SPC moment'
+! --- neu_upgrade begin --- !
+          TITLE1(1,1) = 'Total'
+          TITLE1(1,2) = 'Total'
+         TITLE2(1) = ' Constraint Force'
+         TITLE2(2) = ' Constraint Moment'
+! --- neu_upgrade end --- !
       ELSE IF (WHAT == 'MPCF') THEN
          VEC_ID_OFFSET = 40000
          TITLE2(1) = ' MPC force'
@@ -115,8 +123,8 @@
          CALL OUTA_HERE ( 'Y' )
       ENDIF
 
-      ALLOCATE ( GRID_NUMS(NGRID), IARRAY(NGRID), TOTT_VEC(NGRID), TOTR_VEC(NGRID),                                          &
-                 T1_VEC(NGRID), T2_VEC(NGRID), T3_VEC(NGRID), R1_VEC(NGRID), R2_VEC(NGRID), R3_VEC(NGRID) )
+      ALLOCATE ( GRID_NUMS(NGRID), IARRAY(NGRID), TOTT_VEC(NGRID), TOTR_VEC(NGRID), T1_VEC(NGRID), T2_VEC(NGRID), T3_VEC(NGRID), &
+                 R1_VEC(NGRID), R2_VEC(NGRID), R3_VEC(NGRID) )
 
       IDOFG = 0
       DO I=1,NGRID
@@ -392,18 +400,16 @@
 
 
 
-! !--- memory heap fix --- begin!
-      IF (ALLOCATED(GRID_NUMS)) DEALLOCATE ( GRID_NUMS )
-      IF (ALLOCATED(IARRAY  )) DEALLOCATE ( IARRAY   )
-      IF (ALLOCATED(TOTT_VEC)) DEALLOCATE ( TOTT_VEC )
-      IF (ALLOCATED(TOTR_VEC)) DEALLOCATE ( TOTR_VEC )
-      IF (ALLOCATED(T1_VEC  )) DEALLOCATE ( T1_VEC   )
-      IF (ALLOCATED(T2_VEC  )) DEALLOCATE ( T2_VEC   )
-      IF (ALLOCATED(T3_VEC  )) DEALLOCATE ( T3_VEC   )
-      IF (ALLOCATED(R1_VEC  )) DEALLOCATE ( R1_VEC   )
-      IF (ALLOCATED(R2_VEC  )) DEALLOCATE ( R2_VEC   )
-      IF (ALLOCATED(R3_VEC  )) DEALLOCATE ( R3_VEC   )
-! !--- memory heap fix --- end!
+      IF (ALLOCATED(GRID_NUMS)) DEALLOCATE(GRID_NUMS)
+      IF (ALLOCATED(IARRAY   )) DEALLOCATE(IARRAY)
+      IF (ALLOCATED(TOTT_VEC )) DEALLOCATE(TOTT_VEC)
+      IF (ALLOCATED(TOTR_VEC )) DEALLOCATE(TOTR_VEC)
+      IF (ALLOCATED(T1_VEC   )) DEALLOCATE(T1_VEC)
+      IF (ALLOCATED(T2_VEC   )) DEALLOCATE(T2_VEC)
+      IF (ALLOCATED(T3_VEC   )) DEALLOCATE(T3_VEC)
+      IF (ALLOCATED(R1_VEC   )) DEALLOCATE(R1_VEC)
+      IF (ALLOCATED(R2_VEC   )) DEALLOCATE(R2_VEC)
+      IF (ALLOCATED(R3_VEC   )) DEALLOCATE(R3_VEC)
 
       RETURN
 

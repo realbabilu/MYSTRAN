@@ -32,7 +32,7 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE PARAMS, ONLY                :  EPSIL
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, BEAMTOR, FATAL_ERR, IERRFL, JCARD_LEN, JF, LPBEAM, NPBEAM, MPBEAM_STATIONS, WARN_ERR
-      USE CONSTANTS_1, ONLY           :  ZERO
+      USE CONSTANTS_1, ONLY           :  ONE, ZERO
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  PBEAM, PBEAM_NSTATIONS, PBEAM_XL, PBEAM_RPROPS, RPBEAM
       USE PARAMS, ONLY                :  SUPINFO
@@ -49,6 +49,7 @@
       CHARACTER(LEN(JCARD))           :: CHRINP             ! Character field read from CARD
       CHARACTER(LEN(CARD))            :: RAW_CONT           ! Raw continuation text for NX free-field station detection
       CHARACTER(LEN(JCARD))           :: ID                 ! Property ID for this PBEAM
+      CHARACTER(LEN(JCARD))           :: LAST_SO            ! Last SO token read from a station card
       CHARACTER(LEN(JCARD))           :: NAME               ! Char name for output error purposes
 
       INTEGER(LONG)                   :: ICONT       = 0    ! Indicator of whether a cont card exists. Output from subr NEXTC
@@ -57,6 +58,7 @@
       INTEGER(LONG)                   :: MATERIAL_ID = 0    ! Material ID (field 3 of this property card)
       INTEGER(LONG)                   :: PROPERTY_ID = 0    ! Property ID (field 2 of this property card)
 ! --- CBEAM_standard begin --- !
+      INTEGER(LONG)                   :: IPRINT_STATION = 0
       INTEGER(LONG)                   :: ISTATION     = 0    ! Count of stored NX-style continuation stations for this PBEAM
       INTEGER(LONG)                   :: SO_FIELD     = 0
       INTEGER(LONG)                   :: XL_FIELD     = 0
@@ -79,7 +81,9 @@
       REAL(DOUBLE)                    :: NSM         = ZERO ! Nonstructural mass at any location along beam
 ! --- CBEAM_standard begin --- !
       REAL(DOUBLE)                    :: STATION_XL  = ZERO ! Current station x/L value read from continuation chain
+      REAL(DOUBLE)                    :: CW_STA      = ZERO ! Debug-print warping coefficient at a stored station
       LOGICAL                         :: CONT_IS_STATION = .FALSE.
+      LOGICAL                         :: EXPECT_STRESS_CARD = .FALSE.
       LOGICAL                         :: STATION_WARNED  = .FALSE.
 ! --- CBEAM_standard end --- !
 
@@ -166,13 +170,14 @@
 
       NAME = JCARD(1)
       ID   = JCARD(2)
+      LAST_SO = ' '
       CALL I4FLD ( JCARD(2), JF(2), PROPERTY_ID )          ! Read property ID and enter into array PBEAM
       IF (IERRFL(2) == 'N') THEN
          DO J=1,NPBEAM-1
             IF (PROPERTY_ID == PBEAM(J,1)) THEN
                FATAL_ERR = FATAL_ERR + 1
-               WRITE(ERR,1145) JCARD(1),PROPERTY_ID
-               WRITE(F06,1145) JCARD(1),PROPERTY_ID
+               WRITE(ERR,'(A,A,A,I8)') ' *ERROR  1145: DUPLICATE ',TRIM(JCARD(1)),' ENTRY WITH ID = ',PROPERTY_ID
+               WRITE(F06,'(A,A,A,I8)') ' *ERROR  1145: DUPLICATE ',TRIM(JCARD(1)),' ENTRY WITH ID = ',PROPERTY_ID
                EXIT
              ENDIF
          ENDDO
@@ -183,8 +188,10 @@
       IF (IERRFL(3) == 'N') THEN
          IF (MATERIAL_ID <= 0) THEN
             FATAL_ERR = FATAL_ERR + 1
-            WRITE(ERR,1192) JF(3), JCARD(1), JCARD(2), ' > 0 ', MATERIAL_ID
-            WRITE(F06,1192) JF(3), JCARD(1), JCARD(2), ' > 0 ', MATERIAL_ID
+            WRITE(ERR,'(A,I3,A,A,A,A,A,I8)') ' *ERROR  1192: ID IN FIELD ',JF(3),' OF ',TRIM(JCARD(1)),TRIM(JCARD(2)),          &
+                                             ' MUST BE ',' > 0 ',' BUT IS = ',MATERIAL_ID
+            WRITE(F06,'(A,I3,A,A,A,A,A,I8)') ' *ERROR  1192: ID IN FIELD ',JF(3),' OF ',TRIM(JCARD(1)),TRIM(JCARD(2)),          &
+                                             ' MUST BE ',' > 0 ',' BUT IS = ',MATERIAL_ID
          ELSE
             PBEAM(NPBEAM,2) = MATERIAL_ID
          ENDIF
@@ -303,6 +310,9 @@ station_loop: DO
             IF (.NOT. CONT_IS_STATION) EXIT station_loop
 
             PBEAM(NPBEAM,3) = 1
+            LAST_SO = JCARD(SO_FIELD)
+            CALL LEFT_ADJ_BDFLD ( LAST_SO )
+            EXPECT_STRESS_CARD = (LAST_SO(1:2) /= 'NO')
 
             CALL R8FLD ( JCARD(XL_FIELD), JF(XL_FIELD), STATION_XL )
             IF (IERRFL(XL_FIELD) == 'N') THEN
@@ -312,8 +322,10 @@ station_loop: DO
                   PBEAM_NSTATIONS(NPBEAM) = ISTATION
                ELSE IF (.NOT. STATION_WARNED) THEN
                   WARN_ERR = WARN_ERR + 1
-                  WRITE(ERR,1197) NAME, ID, MPBEAM_STATIONS
-                  WRITE(F06,1197) NAME, ID, MPBEAM_STATIONS
+                  WRITE(ERR,'(A,A,A,A,A,I8,A)') ' *WARNING 1197: ',TRIM(NAME),' ID = ',TRIM(ID),' HAS MORE THAN ',               &
+                                                MPBEAM_STATIONS,' STORED STATIONS. EXTRA x/L VALUES WILL BE IGNORED'
+                  WRITE(F06,'(A,A,A,A,A,I8,A)') ' *WARNING 1197: ',TRIM(NAME),' ID = ',TRIM(ID),' HAS MORE THAN ',               &
+                                                MPBEAM_STATIONS,' STORED STATIONS. EXTRA x/L VALUES WILL BE IGNORED'
                   STATION_WARNED = .TRUE.
                ENDIF
                RPBEAM(NPBEAM,15) = STATION_XL
@@ -407,20 +419,26 @@ station_loop: DO
                CYCLE station_loop
             ENDIF
 
-            DO J = 22,29
-               CALL R8FLD ( JCARD(J-20), JF(J-20), RPBEAM(NPBEAM,J) )
-            ENDDO
-            CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
-            CALL CRDERR ( CARD )
+            IF (EXPECT_STRESS_CARD) THEN
+               DO J = 22,29
+                  CALL R8FLD ( JCARD(J-20), JF(J-20), RPBEAM(NPBEAM,J) )
+               ENDDO
+               CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
+               CALL CRDERR ( CARD )
 
-            IF (LARGE_FLD_INP == 'N') THEN
-               CALL NEXTC  ( CARD, ICONT, IERR )
+               IF (LARGE_FLD_INP == 'N') THEN
+                  CALL NEXTC  ( CARD, ICONT, IERR )
+               ELSE
+                  CALL NEXTC2 ( CARD, ICONT, IERR, CHILD )
+                  CARD = CHILD
+               ENDIF
+               IF (ICONT /= 1) EXIT station_loop
+               CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
             ELSE
-               CALL NEXTC2 ( CARD, ICONT, IERR, CHILD )
-               CARD = CHILD
+               DO J = 22,29
+                  RPBEAM(NPBEAM,J) = ZERO
+               ENDDO
             ENDIF
-            IF (ICONT /= 1) EXIT station_loop
-            CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
          ENDDO station_loop
 
       ELSE
@@ -448,11 +466,45 @@ station_loop: DO
 
       ENDIF
 
+! NX/MSC can stop the explicit station chain before x/L = 1.0 and still treat
+! the final defined properties as continuing to end B. The CBEAM station-aware
+! runtime expects the terminal station to be present explicitly, so append it
+! here when the last stored station is short of end B.
+      IF (PBEAM_NSTATIONS(NPBEAM) >= 1) THEN
+         IF (PBEAM_XL(NPBEAM,PBEAM_NSTATIONS(NPBEAM)) < 1.0D0 - EPSIL(1)) THEN
+            IF (PBEAM_NSTATIONS(NPBEAM) < MPBEAM_STATIONS) THEN
+               ISTATION = PBEAM_NSTATIONS(NPBEAM) + 1
+               PBEAM_NSTATIONS(NPBEAM) = ISTATION
+               PBEAM_XL(NPBEAM,ISTATION) = 1.0D0
+               DO J=1,6
+                  PBEAM_RPROPS(NPBEAM,ISTATION,J) = PBEAM_RPROPS(NPBEAM,ISTATION-1,J)
+               ENDDO
+            ELSE IF (.NOT. STATION_WARNED) THEN
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,'(A,A,A,A,A,I8,A)') ' *WARNING 1197: ',TRIM(NAME),' ID = ',TRIM(ID),' HAS MORE THAN ',               &
+                                             MPBEAM_STATIONS,' STORED STATIONS. END-B x/L = 1.0 COULD NOT BE APPENDED'
+               WRITE(F06,'(A,A,A,A,A,I8,A)') ' *WARNING 1197: ',TRIM(NAME),' ID = ',TRIM(ID),' HAS MORE THAN ',               &
+                                             MPBEAM_STATIONS,' STORED STATIONS. END-B x/L = 1.0 COULD NOT BE APPENDED'
+               STATION_WARNED = .TRUE.
+            ENDIF
+            RPBEAM(NPBEAM,15) = 1.0D0
+         ENDIF
+      ENDIF
+
 ! Read and check data on optional shear/neutral-axis tail cards, if present after the NX-style station chain.
+
+! If the optional shear-factor card is omitted, Nastran defaults the shear
+! factors to 1.0. Keep that behavior here so PBEAM-based shear-only models
+! do not silently lose their shear stiffness.
+
+      RPBEAM(NPBEAM,30) = 1.0D0
+      RPBEAM(NPBEAM,31) = 1.0D0
 
       IF (ICONT == 1) THEN
          DO J = 30,37
-            CALL R8FLD ( JCARD(J-28), JF(J-28), RPBEAM(NPBEAM,J) )
+            IF (JCARD(J-28)(1:) /= ' ') THEN
+               CALL R8FLD ( JCARD(J-28), JF(J-28), RPBEAM(NPBEAM,J) )
+            ENDIF
          ENDDO
          CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
          CALL CRDERR ( CARD )
@@ -466,26 +518,203 @@ station_loop: DO
          CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
          IF (ICONT == 1) THEN
             DO J = 38,45
-               CALL R8FLD ( JCARD(J-36), JF(J-36), RPBEAM(NPBEAM,J) )
+               IF (JCARD(J-36)(1:) /= ' ') THEN
+                  CALL R8FLD ( JCARD(J-36), JF(J-36), RPBEAM(NPBEAM,J) )
+               ENDIF
             ENDDO
             CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
             CALL CRDERR ( CARD )
          ENDIF
       ENDIF
 
+! Emit a compact converted-PBEAM debug trace so F06 shows the exact section
+! properties that CBEAM will inherit, using the same A/B plus station framing
+! we have been comparing against NX tube conversions.
+
+      WRITE(F06,'(A)') ' '
+      WRITE(F06,'(A)') '*** PBEAM PROPERTY DEBUG *******************************************************'
+      WRITE(F06,'(A,I0)') '  Property ID      : ', PROPERTY_ID
+      WRITE(F06,'(A,I0)') '  Material ID      : ', PBEAM(NPBEAM,2)
+      WRITE(F06,'(A)')    '  Section snapshot : End A / station 1'
+      CALL WRITE_LABEL_VALUE ( '    Area A         = ', RPBEAM(NPBEAM, 1) )
+      CALL WRITE_LABEL_VALUE ( '    I1   A         = ', RPBEAM(NPBEAM, 2) )
+      CALL WRITE_LABEL_VALUE ( '    I2   A         = ', RPBEAM(NPBEAM, 3) )
+      CALL WRITE_LABEL_VALUE ( '    I12  A         = ', RPBEAM(NPBEAM, 4) )
+      CALL WRITE_LABEL_VALUE ( '    J    A         = ', RPBEAM(NPBEAM, 5) )
+      CALL WRITE_LABEL_VALUE ( '    CW   A         = ', RPBEAM(NPBEAM,36) )
+      CALL WRITE_LABEL_VALUE ( '    K1   shear     = ', RPBEAM(NPBEAM,30) )
+      CALL WRITE_LABEL_VALUE ( '    K2   shear     = ', RPBEAM(NPBEAM,31) )
+      CALL WRITE_LABEL_VALUE ( '    NSM  A         = ', RPBEAM(NPBEAM, 6) )
+      WRITE(F06,'(A,I0)')      '  Stored stations  : ', PBEAM_NSTATIONS(NPBEAM)
+
+      IF (PBEAM_NSTATIONS(NPBEAM) > 1) THEN
+         DO IPRINT_STATION=2,PBEAM_NSTATIONS(NPBEAM)
+            STATION_XL = PBEAM_XL(NPBEAM,IPRINT_STATION)
+            IF (IPRINT_STATION == PBEAM_NSTATIONS(NPBEAM)) THEN
+               CW_STA = RPBEAM(NPBEAM,37)
+            ELSE
+               CW_STA = (1.0D0 - STATION_XL)*RPBEAM(NPBEAM,36) + STATION_XL*RPBEAM(NPBEAM,37)
+            ENDIF
+            WRITE(F06,'(A)') '  ------------------------------------------------------------------------'
+            WRITE(F06,'(A,I0)')      '  Station index    : ', IPRINT_STATION
+            CALL WRITE_LABEL_VALUE ( '    x/L            = ', STATION_XL )
+            CALL WRITE_LABEL_VALUE ( '    Area           = ', PBEAM_RPROPS(NPBEAM,IPRINT_STATION,1) )
+            CALL WRITE_LABEL_VALUE ( '    I1             = ', PBEAM_RPROPS(NPBEAM,IPRINT_STATION,2) )
+            CALL WRITE_LABEL_VALUE ( '    I2             = ', PBEAM_RPROPS(NPBEAM,IPRINT_STATION,3) )
+            CALL WRITE_LABEL_VALUE ( '    I12            = ', PBEAM_RPROPS(NPBEAM,IPRINT_STATION,4) )
+            CALL WRITE_LABEL_VALUE ( '    J              = ', PBEAM_RPROPS(NPBEAM,IPRINT_STATION,5) )
+            CALL WRITE_LABEL_VALUE ( '    CW             = ', CW_STA )
+            CALL WRITE_LABEL_VALUE ( '    K1 shear       = ', RPBEAM(NPBEAM,30) )
+            CALL WRITE_LABEL_VALUE ( '    K2 shear       = ', RPBEAM(NPBEAM,31) )
+            CALL WRITE_LABEL_VALUE ( '    NSM            = ', PBEAM_RPROPS(NPBEAM,IPRINT_STATION,6) )
+         ENDDO
+      ENDIF
+      WRITE(F06,'(A)') '  Stored RPBEAM slots :'
+      CALL WRITE_SLOT_LINE_6 ( '    1:A=',   1, '2:I1=',  2, '3:I2=',  3, '4:I12=',  4, '5:J=',   5, '6:NSM=',  6 )
+      CALL WRITE_SLOT_VECTOR ( '    7:14 stress A = ', 7, 14 )
+      CALL WRITE_SLOT_LINE_7 ( '    15:XL(B)=', 15, '16:A(B)=', 16, '17:I1(B)=', 17, '18:I2(B)=', 18, '19:I12(B)=', 19,       &
+                               '20:J(B)=', 20, '21:NSM(B)=', 21 )
+      CALL WRITE_SLOT_VECTOR ( '    22:29 stress B = ', 22, 29 )
+      CALL WRITE_SLOT_LINE_8 ( '    30:K1=', 30, '31:K2=', 31, '32:S1=', 32, '33:S2=', 33, '34:NSIA=', 34, '35:NSIB=', 35,    &
+                               '36:CWA=', 36, '37:CWB=', 37 )
+      CALL WRITE_SLOT_VECTOR ( '    38:45 offsets = ', 38, 45 )
+      WRITE(F06,'(A)') '***************************************************************************'
+
       RETURN
 
 ! **********************************************************************************************************************************
- 1136 FORMAT(' *ERROR  1136: REQUIRED CONTINUATION FOR ',A,' ID = ',A,' MISSING')
-
- 1145 FORMAT(' *ERROR  1145: DUPLICATE ',A,' ENTRY WITH ID = ',I8)
-
-1167 FORMAT(' *ERROR  1167: INCORRECT VALUE IN FIELD ',I2,' OF ',A,A,' = ',A,' MUST BE "YES", "YESA" OR "NO"')
-
-1197 FORMAT(' *WARNING 1197: ',A,' ID = ',A,' HAS MORE THAN ',I8,' STORED STATIONS. EXTRA x/L VALUES WILL BE IGNORED')
-
-1192 FORMAT(' *ERROR  1192: ID IN FIELD ',I3,' OF ',A,A,' MUST BE ',A,' BUT IS = ',I8)
+      CONTAINS
 
 ! **********************************************************************************************************************************
+
+      CHARACTER(LEN=24) FUNCTION FMT_REAL_SHORT ( VALUE )
+
+      REAL(DOUBLE), INTENT(IN) :: VALUE
+      CHARACTER(LEN=32)        :: BUFFER
+      CHARACTER(LEN=20)        :: MANT
+      CHARACTER(LEN=8)         :: EXPSTR
+      INTEGER(LONG)            :: IPOS
+      INTEGER(LONG)            :: LMANT
+
+      IF (DABS(VALUE) <= 1.0D-12) THEN
+         FMT_REAL_SHORT = '0.0'
+         RETURN
+      ENDIF
+
+      WRITE(BUFFER,'(ES16.8E2)') VALUE
+      BUFFER = ADJUSTL(BUFFER)
+      IPOS = INDEX(BUFFER,'E')
+      IF (IPOS <= 0) THEN
+         FMT_REAL_SHORT = TRIM(BUFFER)
+         RETURN
+      ENDIF
+
+      MANT = BUFFER(1:IPOS-1)
+      EXPSTR = BUFFER(IPOS:)
+      LMANT = LEN_TRIM(MANT)
+      DO WHILE (LMANT > 0)
+         IF (MANT(LMANT:LMANT) /= '0') EXIT
+         LMANT = LMANT - 1
+      ENDDO
+      IF (LMANT > 0) THEN
+         MANT = MANT(1:LMANT)
+      ELSE
+         MANT = '0'
+      ENDIF
+      LMANT = LEN_TRIM(MANT)
+      IF (MANT(LMANT:LMANT) == '.') MANT = TRIM(MANT)//'0'
+
+      IF ((TRIM(EXPSTR) == 'E+00') .OR. (TRIM(EXPSTR) == 'E-00')) THEN
+         FMT_REAL_SHORT = TRIM(MANT)
+      ELSE
+         FMT_REAL_SHORT = TRIM(MANT)//TRIM(EXPSTR)
+      ENDIF
+
+      END FUNCTION FMT_REAL_SHORT
+
+! **********************************************************************************************************************************
+
+      SUBROUTINE WRITE_LABEL_VALUE ( LABEL, VALUE )
+
+      CHARACTER(LEN=*), INTENT(IN) :: LABEL
+      REAL(DOUBLE), INTENT(IN)     :: VALUE
+
+      WRITE(F06,'(A,A)') LABEL, TRIM(FMT_REAL_SHORT(VALUE))
+
+      END SUBROUTINE WRITE_LABEL_VALUE
+
+! **********************************************************************************************************************************
+
+      SUBROUTINE WRITE_SLOT_VECTOR ( PREFIX, JSTART, JEND )
+
+      CHARACTER(LEN=*), INTENT(IN) :: PREFIX
+      INTEGER(LONG), INTENT(IN)    :: JSTART, JEND
+      CHARACTER(LEN=512)           :: LINE
+      INTEGER(LONG)                :: K
+
+      LINE = PREFIX
+      DO K=JSTART,JEND
+         LINE = TRIM(LINE)//' '//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,K)))
+      ENDDO
+      WRITE(F06,'(A)') TRIM(LINE)
+
+      END SUBROUTINE WRITE_SLOT_VECTOR
+
+! **********************************************************************************************************************************
+
+      SUBROUTINE WRITE_SLOT_LINE_6 ( L1, I1, L2, I2, L3, I3, L4, I4, L5, I5, L6, I6 )
+
+      CHARACTER(LEN=*), INTENT(IN) :: L1, L2, L3, L4, L5, L6
+      INTEGER(LONG), INTENT(IN)    :: I1, I2, I3, I4, I5, I6
+      CHARACTER(LEN=512)           :: LINE
+
+      LINE = TRIM(L1)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I1)))
+      LINE = TRIM(LINE)//', '//TRIM(L2)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I2)))
+      LINE = TRIM(LINE)//', '//TRIM(L3)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I3)))
+      LINE = TRIM(LINE)//', '//TRIM(L4)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I4)))
+      LINE = TRIM(LINE)//', '//TRIM(L5)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I5)))
+      LINE = TRIM(LINE)//', '//TRIM(L6)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I6)))
+      WRITE(F06,'(A)') TRIM(LINE)
+
+      END SUBROUTINE WRITE_SLOT_LINE_6
+
+! **********************************************************************************************************************************
+
+      SUBROUTINE WRITE_SLOT_LINE_7 ( L1, I1, L2, I2, L3, I3, L4, I4, L5, I5, L6, I6, L7, I7 )
+
+      CHARACTER(LEN=*), INTENT(IN) :: L1, L2, L3, L4, L5, L6, L7
+      INTEGER(LONG), INTENT(IN)    :: I1, I2, I3, I4, I5, I6, I7
+      CHARACTER(LEN=512)           :: LINE
+
+      LINE = TRIM(L1)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I1)))
+      LINE = TRIM(LINE)//', '//TRIM(L2)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I2)))
+      LINE = TRIM(LINE)//', '//TRIM(L3)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I3)))
+      LINE = TRIM(LINE)//', '//TRIM(L4)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I4)))
+      LINE = TRIM(LINE)//', '//TRIM(L5)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I5)))
+      LINE = TRIM(LINE)//', '//TRIM(L6)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I6)))
+      LINE = TRIM(LINE)//', '//TRIM(L7)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I7)))
+      WRITE(F06,'(A)') TRIM(LINE)
+
+      END SUBROUTINE WRITE_SLOT_LINE_7
+
+! **********************************************************************************************************************************
+
+      SUBROUTINE WRITE_SLOT_LINE_8 ( L1, I1, L2, I2, L3, I3, L4, I4, L5, I5, L6, I6, L7, I7, L8, I8 )
+
+      CHARACTER(LEN=*), INTENT(IN) :: L1, L2, L3, L4, L5, L6, L7, L8
+      INTEGER(LONG), INTENT(IN)    :: I1, I2, I3, I4, I5, I6, I7, I8
+      CHARACTER(LEN=512)           :: LINE
+
+      LINE = TRIM(L1)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I1)))
+      LINE = TRIM(LINE)//', '//TRIM(L2)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I2)))
+      LINE = TRIM(LINE)//', '//TRIM(L3)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I3)))
+      LINE = TRIM(LINE)//', '//TRIM(L4)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I4)))
+      LINE = TRIM(LINE)//', '//TRIM(L5)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I5)))
+      LINE = TRIM(LINE)//', '//TRIM(L6)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I6)))
+      LINE = TRIM(LINE)//', '//TRIM(L7)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I7)))
+      LINE = TRIM(LINE)//', '//TRIM(L8)//TRIM(FMT_REAL_SHORT(RPBEAM(NPBEAM,I8)))
+      WRITE(F06,'(A)') TRIM(LINE)
+
+      END SUBROUTINE WRITE_SLOT_LINE_8
 
       END SUBROUTINE BD_PBEAM

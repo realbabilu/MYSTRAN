@@ -27,8 +27,6 @@
       ! TODO: mak sure the TABLE_NAME_NEW is correct...
       !
       USE PENTIUM_II_KIND, ONLY        :  BYTE, LONG
-      USE IOUNT1, ONLY                 :  ERR
-
       CHARACTER(8*BYTE), INTENT(IN)    :: ETYPE          ! name of element type
       CHARACTER(8*BYTE), INTENT(INOUT) :: TABLE_NAME     ! name of the op2 table name
       CHARACTER(8*BYTE), INTENT(IN)    :: TABLE_NAME_BAR ! name of table for bars
@@ -37,28 +35,23 @@
       CHARACTER(8*BYTE)                :: TABLE_NAME_NEW ! name of the op2 table name
       LOGICAL                          :: RETURN_FLAG    ! return from the subroutine early
 
- 1    FORMAT("*DEBUG:      OUTPUT2_WRITE_STRESS: ", A)
- 2    FORMAT("*DEBUG:      OUTPUT2_WRITE_STRESS: ", A, "; TABLE_NAME= ", A,";ITABLE=", I8)
- 3    FORMAT("*DEBUG:      OUTPUT2_WRITE_STRESS: ", A, " ",A)
       RETURN_FLAG = .TRUE.
       IF      ((ETYPE == 'BAR     ') .OR. (ETYPE == 'BEAM    ')) THEN
         TABLE_NAME_NEW= TABLE_NAME_BAR !"OES1X   "
         RETURN_FLAG = .FALSE.
       ELSE IF ((ETYPE == 'ELAS1   ') .OR. (ETYPE == 'ELAS2   ') .OR. (ETYPE == 'ELAS3   ') .OR. (ETYPE == 'ELAS4   ') .OR.         &
                (ETYPE == 'BUSH    ') .OR. (ETYPE == 'ROD     ') .OR.                                                               &
-               (ETYPE == 'TRIA3   ') .OR. (ETYPE == 'QUAD4   ') .OR. (ETYPE == 'SHEAR   ') .OR.                                    &
-               (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'TETRA4  ') .OR.                                    &
-               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'TETRA10 ')) THEN
+               (ETYPE == 'TRIA3   ') .OR. (ETYPE == 'QUAD4   ') .OR. (ETYPE == 'QUADR   ') .OR. (ETYPE == 'QUAD8   ') .OR.        &
+               (ETYPE == 'SHEAR   ') .OR.                                                                                           &
+               (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'PYRA5   ') .OR. (ETYPE == 'TETRA4  ') .OR.        &
+               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRA14  ') .OR. (ETYPE == 'TETRA10 ')) THEN
         TABLE_NAME_NEW= TABLE_NAME_SHELL_SOLID !"OES1X1  "
-        WRITE(ERR,3) "OES1X1 found",ETYPE
         RETURN_FLAG = .FALSE.
       ELSE
-        WRITE(ERR,3) "ERROR STATE",ETYPE
         ! we're now in an error state
         ! also let's close the old table
         TABLE_NAME_NEW= "OES ERR "
         IF (ITABLE < -1) THEN
-          WRITE(ERR,2) "closing stress table", TABLE_NAME,ITABLE
           CALL END_OP2_TABLE(ITABLE)   ! close the previous
         ENDIF
 !        WRITE(ERR,2) "invalidated tableA",TABLE_NAME,ITABLE
@@ -73,18 +66,15 @@
         IF (TABLE_NAME /= TABLE_NAME_NEW) THEN
         ! first let's find out if we need to close off the previous table
           IF (ITABLE < -1) THEN
-            WRITE(ERR,2) "closing stress table",TABLE_NAME,ITABLE
             CALL END_OP2_TABLE(ITABLE)   ! close the previous
           ENDIF
           ! we're now at the beginning
           TABLE_NAME = TABLE_NAME_NEW
           ITABLE = -1
-          WRITE(ERR,2) "will create stress table",TABLE_NAME,ITABLE
         ENDIF
 
         ! if we started/restarted, we need to write the TABLE_NAME
         IF (ITABLE == -1) THEN
-          WRITE(ERR,2) "creating stress table",TABLE_NAME,ITABLE
           CALL WRITE_TABLE_HEADER(TABLE_NAME)
           ITABLE = -3
         ENDIF
@@ -163,6 +153,30 @@
       END SUBROUTINE WRITE_OES3_STATIC
 
 ! ##################################################################################################################################
+      SUBROUTINE WRITE_OES3_STATIC_AC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEM_TYPE, NUM_WIDE, STRESS_CODE, &
+                                      TITLE, LABEL, SUBTITLE, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      IMPLICIT NONE
+      INTEGER(LONG), INTENT(INOUT) :: ITABLE
+      INTEGER(LONG), INTENT(IN) :: ISUBCASE
+      INTEGER(LONG), INTENT(IN) :: DEVICE_CODE
+      INTEGER(LONG), INTENT(IN) :: ANALYSIS_CODE
+      INTEGER(LONG), INTENT(IN) :: ELEM_TYPE
+      INTEGER(LONG), INTENT(IN) :: NUM_WIDE
+      INTEGER(LONG), INTENT(IN) :: STRESS_CODE
+      CHARACTER(LEN=128), INTENT(IN) :: TITLE
+      CHARACTER(LEN=128), INTENT(IN) :: SUBTITLE
+      CHARACTER(LEN=128), INTENT(IN) :: LABEL
+      INTEGER(LONG), INTENT(IN)      :: FIELD5_INT_MODE
+      REAL(DOUBLE), INTENT(IN)       :: FIELD6_EIGENVALUE
+      INTEGER(LONG)                  :: FORMAT_CODE
+
+      FORMAT_CODE = 1
+      CALL WRITE_OES3(ITABLE, ANALYSIS_CODE, ISUBCASE, DEVICE_CODE, FORMAT_CODE, ELEM_TYPE, NUM_WIDE, STRESS_CODE, &
+                      TITLE, LABEL, SUBTITLE, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+      END SUBROUTINE WRITE_OES3_STATIC_AC
+
+! ##################################################################################################################################
       SUBROUTINE WRITE_OES3(ITABLE, ANALYSIS_CODE, ISUBCASE, DEVICE_CODE, FORMAT_CODE, ELEM_TYPE, NUM_WIDE, STRESS_CODE, &
                             TITLE, LABEL, SUBTITLE, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
 !      Parameters
@@ -201,8 +215,6 @@
       LABEL2 = LABEL(1:100)
 
       CALL WRITE_ITABLE(ITABLE)  ! write the -3, -5, ... subtable header
- 1    FORMAT("WRITE_OES3: ITABLE_START=",I8)
-      WRITE(ERR,1) ITABLE
 
       IF ((ANALYSIS_CODE == 1) .OR. (ANALYSIS_CODE == 10)) THEN
         ! statics
@@ -226,9 +238,7 @@
       THERMAL = 0
 
       APPROACH_CODE = ANALYSIS_CODE * 10 + DEVICE_CODE
-2     FORMAT(" APPROACH_CODE=",I4," TABLE_CODE=",I4," ELEM_TYPE=",I4," ISUBCASE=",I4)
       ! 584 bytes
-      WRITE(ERR,2) APPROACH_CODE, TABLE_CODE, ELEM_TYPE, ISUBCASE
       WRITE(OP2) APPROACH_CODE, TABLE_CODE, ELEM_TYPE, ISUBCASE, FIELD5_INT_MODE, &
             REAL(FIELD6_EIGENVALUE, 4), REAL(FIELD7, 4),                          &
             LOAD_SET, FORMAT_CODE, NUM_WIDE, &
@@ -240,8 +250,6 @@
             TITLE2, SUBTITLE2, LABEL2
 
       ITABLE = ITABLE - 1        ! flip it to -4, -6, ... so we don't have to do this later
- 3    FORMAT("WRITE_OES3: ITABLE_END=",I8)
-      WRITE(ERR,3) ITABLE
       CALL WRITE_ITABLE(ITABLE)
       ITABLE = ITABLE - 1
       END SUBROUTINE WRITE_OES3

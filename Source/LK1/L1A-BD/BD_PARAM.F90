@@ -43,7 +43,13 @@
                          AUTOSPC, AUTOSPC_NSET, AUTOSPC_RAT, AUTOSPC_INFO, AUTOSPC_SPCF, BAILOUT, BANDEDOPT,       &
                          CRS_CCS, CBMIN3, CBMIN4, CBMIN4T, CBEAMAREA, CBEAMAREA_PID, CBEAMAREA_VAL,              &
                          CBEAMSHR, CBEAMSHR_PID, CBEAMSHR_VAL, MCBEAMAREA_PID, MCBEAMSHR_PID, NCBEAMAREA_PID,     &
-                         NCBEAMSHR_PID, CHKGRDS, CUSERIN, CUSERIN_EID, CUSERIN_IN4,                                &
+                         NCBEAMSHR_PID, BEAMAMO, BEAMAMO_PID, BEAMAMO_VAL, MBEAMAMO_PID, NBEAMAMO_PID,           &
+                         BEAMV1MO, BEAMV1MO_PID, BEAMV1MO_VAL, MBEAMV1MO_PID, NBEAMV1MO_PID,                      &
+                         BEAMV2MO, BEAMV2MO_PID, BEAMV2MO_VAL, MBEAMV2MO_PID, NBEAMV2MO_PID,                      &
+                         BEAMM1MO, BEAMM1MO_PID, BEAMM1MO_VAL, MBEAMM1MO_PID, NBEAMM1MO_PID,                      &
+                         BEAMM2MO, BEAMM2MO_PID, BEAMM2MO_VAL, MBEAMM2MO_PID, NBEAMM2MO_PID,                      &
+                         BEAMTMO, BEAMTMO_PID, BEAMTMO_VAL, MBEAMTMO_PID, NBEAMTMO_PID,                            &
+                         CHKGRDS, CUSERIN, CUSERIN_EID, CUSERIN_IN4,                                &
                          CUSERIN_PID, CUSERIN_SPNT_ID, CUSERIN_XSET, CUSERIN_COMPTYP, DARPACK, DELBAN, EIGESTL,    &
                          EIGNORM2, ELFORCEN, EPSERR, EQCHK_REF_GRID, EQCHK_NORM, EQCHK_OUTPUT, EQCHK_TINY, EPSIL,  &
                          EMP0_PAUSE, ESP0_PAUSE, F06_COL_START, GRDPNT, GRDPNT_IN, GRIDSEQ, HEXAXIS, IORQ1M,        &
@@ -443,6 +449,7 @@
                         WRITE(F06,1147) PARNAM,CBEAMAREA,R8PARM
                      ENDIF
                      CBEAMAREA = R8PARM
+                     BEAMAMO   = R8PARM
                   ENDIF
                ELSE
                   CALL I4FLD ( JCARD(4), JF(4), I4PARM )
@@ -463,6 +470,8 @@
                         IF (ISLOT > 0) THEN
                            CBEAMAREA_PID(ISLOT) = IPID
                            CBEAMAREA_VAL(ISLOT) = R8PARM
+                           BEAMAMO_PID(ISLOT)    = IPID
+                           BEAMAMO_VAL(ISLOT)    = R8PARM
                            WRITE(ERR,'(A,A,A,I8,A,1ES14.6)') ' *INFORMATION: PARAMETER ',PARNAM,' FOR PID',IPID,' SET TO ',R8PARM
                            IF (SUPINFO == 'N') THEN
                               WRITE(F06,'(A,A,A,I8,A,1ES14.6)') ' *INFORMATION: PARAMETER ',PARNAM,' FOR PID',IPID,' SET TO ',R8PARM
@@ -515,6 +524,8 @@
                         WRITE(F06,1147) PARNAM,CBEAMSHR,R8PARM
                      ENDIF
                      CBEAMSHR = R8PARM
+                     BEAMV1MO = R8PARM
+                     BEAMV2MO = R8PARM
                   ENDIF
                ELSE
                   CALL I4FLD ( JCARD(4), JF(4), I4PARM )
@@ -535,6 +546,10 @@
                         IF (ISLOT > 0) THEN
                            CBEAMSHR_PID(ISLOT) = IPID
                            CBEAMSHR_VAL(ISLOT) = R8PARM
+                           BEAMV1MO_PID(ISLOT)  = IPID
+                           BEAMV1MO_VAL(ISLOT)  = R8PARM
+                           BEAMV2MO_PID(ISLOT)  = IPID
+                           BEAMV2MO_VAL(ISLOT)  = R8PARM
                            WRITE(ERR,'(A,A,A,I8,A,1ES14.6)') ' *INFORMATION: PARAMETER ',PARNAM,' FOR PID',IPID,' SET TO ',R8PARM
                            IF (SUPINFO == 'N') THEN
                               WRITE(F06,'(A,A,A,I8,A,1ES14.6)') ' *INFORMATION: PARAMETER ',PARNAM,' FOR PID',IPID,' SET TO ',R8PARM
@@ -573,7 +588,34 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,5,6,7,8,9 )! Field 4 optionally carries property ID override
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
- 
+
+      ! Beam stiffness modifiers use:
+      !   PARAM,BEAMAMO,REAL_MOD            -> global for all beam properties
+      !   PARAM,BEAMAMO,REAL_MOD,INTEGER_PID -> override one beam property
+      ELSE IF (JCARD(2)(1:8) == 'BEAMAMO') THEN
+         PARNAM = 'BEAMAMO'
+         CALL HANDLE_BEAM_REAL_PARAM ( PARNAM, BEAMAMO, BEAMAMO_PID, BEAMAMO_VAL, NBEAMAMO_PID, MBEAMAMO_PID )
+
+      ELSE IF (JCARD(2)(1:8) == 'BEAMV1MO') THEN
+         PARNAM = 'BEAMV1MO'
+         CALL HANDLE_BEAM_REAL_PARAM ( PARNAM, BEAMV1MO, BEAMV1MO_PID, BEAMV1MO_VAL, NBEAMV1MO_PID, MBEAMV1MO_PID )
+
+      ELSE IF (JCARD(2)(1:8) == 'BEAMV2MO') THEN
+         PARNAM = 'BEAMV2MO'
+         CALL HANDLE_BEAM_REAL_PARAM ( PARNAM, BEAMV2MO, BEAMV2MO_PID, BEAMV2MO_VAL, NBEAMV2MO_PID, MBEAMV2MO_PID )
+
+      ELSE IF (JCARD(2)(1:8) == 'BEAMM1MO') THEN
+         PARNAM = 'BEAMM1MO'
+         CALL HANDLE_BEAM_REAL_PARAM ( PARNAM, BEAMM1MO, BEAMM1MO_PID, BEAMM1MO_VAL, NBEAMM1MO_PID, MBEAMM1MO_PID )
+
+      ELSE IF (JCARD(2)(1:8) == 'BEAMM2MO') THEN
+         PARNAM = 'BEAMM2MO'
+         CALL HANDLE_BEAM_REAL_PARAM ( PARNAM, BEAMM2MO, BEAMM2MO_PID, BEAMM2MO_VAL, NBEAMM2MO_PID, MBEAMM2MO_PID )
+
+      ELSE IF (JCARD(2)(1:8) == 'BEAMTMO') THEN
+         PARNAM = 'BEAMTMO'
+         CALL HANDLE_BEAM_REAL_PARAM ( PARNAM, BEAMTMO, BEAMTMO_PID, BEAMTMO_VAL, NBEAMTMO_PID, MBEAMTMO_PID )
+
       ! CHKGRDS tells whether to call GET_ELEM_AGRID_BGRID to make sure
       ! all grids on elem connection entries are defined
       ELSE IF (JCARD(2)(1:8) == 'CHKGRDS ') THEN
@@ -1256,15 +1298,19 @@
                LANCMETH = 'FEAST '
             ELSE IF (CHRPARM == 'CHASE   ') THEN
                LANCMETH = 'CHASE '
+            ELSE IF (CHRPARM == 'DENSE   ') THEN
+               LANCMETH = 'DENSE '
+            ELSE IF (CHRPARM == 'MGIV    ') THEN
+               LANCMETH = 'MGIV  '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'ARPACK, FEAST or CHASE',CHRPARM,SOLLIB
+               WRITE(ERR,1189) PARNAM,'ARPACK, FEAST, CHASE, DENSE or MGIV',CHRPARM,SOLLIB
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'ARPACK, FEAST or CHASE',CHRPARM,SOLLIB
+                  WRITE(F06,1189) PARNAM,'ARPACK, FEAST, CHASE, DENSE or MGIV',CHRPARM,SOLLIB
                ENDIF
             ENDIF
          ENDIF
@@ -3192,6 +3238,92 @@ do_i:    DO I=1,JCARD_LEN
   101 FORMAT(A)
  1189 FORMAT(' *WARNING    : PARAMETER NAMED ',A,' MUST BE ',A,' BUT INPUT VALUE IS: ',A,'. DEFAULT VALUE = ',A,' WILL BE USED')
       END SUBROUTINE YES_NO_CHECK
+
+! ##################################################################################################################################
+      SUBROUTINE HANDLE_BEAM_REAL_PARAM ( PARNAM, GLOBAL_VAL, PID_LIST, VAL_LIST, NPID, MAX_PID )
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      IMPLICIT NONE
+
+      CHARACTER(15*BYTE), INTENT(IN)  :: PARNAM
+      REAL(DOUBLE), INTENT(INOUT)     :: GLOBAL_VAL
+      INTEGER(LONG), INTENT(INOUT)    :: PID_LIST(MAX_PID)
+      REAL(DOUBLE), INTENT(INOUT)     :: VAL_LIST(MAX_PID)
+      INTEGER(LONG), INTENT(INOUT)    :: NPID
+      INTEGER(LONG), INTENT(IN)       :: MAX_PID
+
+      INTEGER(LONG)                   :: IPID
+      INTEGER(LONG)                   :: ISLOT
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: I4PARM
+      REAL(DOUBLE)                    :: R8PARM
+
+      CALL R8FLD ( JCARD(3), JF(3), R8PARM )
+      IF (IERRFL(3) == 'N') THEN
+         IF (R8PARM >= ZERO) THEN
+            IF (JCARD(4) == ' ') THEN
+               IF (DABS(R8PARM - GLOBAL_VAL) > EPS1) THEN
+                  WRITE(ERR,'(A,A,A,1ES13.6,A,1ES13.6)') ' *INFORMATION: PARAMETER ',PARNAM,' CHANGED FROM ',GLOBAL_VAL,' TO ',R8PARM
+                  WRITE(F06,'(A,A,A,1ES13.6,A,1ES13.6)') ' *INFORMATION: PARAMETER ',PARNAM,' CHANGED FROM ',GLOBAL_VAL,' TO ',R8PARM
+                  GLOBAL_VAL = R8PARM
+               ENDIF
+            ELSE
+               CALL I4FLD ( JCARD(4), JF(4), I4PARM )
+               IF (IERRFL(4) == 'N') THEN
+                  IF (I4PARM > 0) THEN
+                     IPID = I4PARM
+                     ISLOT = 0
+                     DO I=1,NPID
+                        IF (PID_LIST(I) == IPID) THEN
+                           ISLOT = I
+                           EXIT
+                        ENDIF
+                     ENDDO
+                     IF ((ISLOT == 0) .AND. (NPID < MAX_PID)) THEN
+                        NPID = NPID + 1
+                        ISLOT = NPID
+                     ENDIF
+                     IF (ISLOT > 0) THEN
+                        PID_LIST(ISLOT) = IPID
+                        VAL_LIST(ISLOT) = R8PARM
+                        WRITE(ERR,'(A,A,A,I8,A,1ES14.6)') ' *INFORMATION: PARAMETER ',PARNAM,' FOR PID',IPID,' SET TO ',R8PARM
+                        WRITE(F06,'(A,A,A,I8,A,1ES14.6)') ' *INFORMATION: PARAMETER ',PARNAM,' FOR PID',IPID,' SET TO ',R8PARM
+                     ELSE
+                        WARN_ERR = WARN_ERR + 1
+                        WRITE(ERR,'(A,A,A)') ' *WARNING    : PARAM ',PARNAM,' exceeded max per-property overrides'
+                        IF (SUPWARN == 'N') WRITE(F06,'(A,A,A)') ' *WARNING    : PARAM ',PARNAM,' exceeded max per-property overrides'
+                     ENDIF
+                  ELSE
+                     WARN_ERR = WARN_ERR + 1
+                     WRITE(ERR,'(A)') CARD
+                     WRITE(ERR,'(A,A,A,I8,A,I8)') ' *WARNING    : ',TRIM(PARNAM)//' PID',' must be > ',I4PARM,' , found ',0
+                     IF (SUPWARN == 'N') THEN
+                        IF (ECHO == 'NONE  ') THEN
+                           WRITE(F06,'(A)') CARD
+                        ENDIF
+                        WRITE(F06,'(A,A,A,I8,A,I8)') ' *WARNING    : ',TRIM(PARNAM)//' PID',' must be > ',I4PARM,' , found ',0
+                     ENDIF
+                  ENDIF
+               ENDIF
+            ENDIF
+         ELSE
+            WARN_ERR = WARN_ERR + 1
+            WRITE(ERR,'(A)') CARD
+            WRITE(ERR,'(A,A,A,1ES14.6)') ' *WARNING    : PARAM ',PARNAM,' must be >= 0.D0, found ',R8PARM
+            IF (SUPWARN == 'N') THEN
+               IF (ECHO == 'NONE  ') THEN
+                  WRITE(F06,'(A)') CARD
+               ENDIF
+               WRITE(F06,'(A,A,A,1ES14.6)') ' *WARNING    : PARAM ',PARNAM,' must be >= 0.D0, found ',R8PARM
+            ENDIF
+         ENDIF
+      ENDIF
+
+      CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,0,0,0,0,0 )
+      CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,5,6,7,8,9 )
+      CALL CRDERR ( CARD )
+
+      END SUBROUTINE HANDLE_BEAM_REAL_PARAM
 
 ! ##################################################################################################################################
       SUBROUTINE LOAD_USETSTR_TABLE ( DOF_SET_NAME, PARNAM )

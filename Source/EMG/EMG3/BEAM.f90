@@ -56,6 +56,7 @@
       INTEGER(LONG)                   :: ISTA
       INTEGER(LONG)                   :: NSTA
       INTEGER(LONG)                   :: NUM_PFLAG_DOFS
+      LOGICAL                         :: HAS_NONUNIFORM_STATIONS
       LOGICAL                         :: USE_STATIONED_KE
 
       REAL(DOUBLE), INTENT(IN)        :: ALPHA
@@ -161,7 +162,18 @@
       JTOR_REF = JTOR
 
       NSTA = CBEAM_ACTIVE_NSTATIONS
-      USE_STATIONED_KE = (NSTA > 1)
+      HAS_NONUNIFORM_STATIONS = .FALSE.
+      IF (NSTA > 1) THEN
+         DO ISTA=2,NSTA
+            IF (DABS(CBEAM_ACTIVE_RPROPS(ISTA,1) - CBEAM_ACTIVE_RPROPS(1,1)) > EPS1) HAS_NONUNIFORM_STATIONS = .TRUE.
+            IF (DABS(CBEAM_ACTIVE_RPROPS(ISTA,2) - CBEAM_ACTIVE_RPROPS(1,2)) > EPS1) HAS_NONUNIFORM_STATIONS = .TRUE.
+            IF (DABS(CBEAM_ACTIVE_RPROPS(ISTA,3) - CBEAM_ACTIVE_RPROPS(1,3)) > EPS1) HAS_NONUNIFORM_STATIONS = .TRUE.
+            IF (DABS(CBEAM_ACTIVE_RPROPS(ISTA,4) - CBEAM_ACTIVE_RPROPS(1,4)) > EPS1) HAS_NONUNIFORM_STATIONS = .TRUE.
+            IF (DABS(CBEAM_ACTIVE_RPROPS(ISTA,5) - CBEAM_ACTIVE_RPROPS(1,5)) > EPS1) HAS_NONUNIFORM_STATIONS = .TRUE.
+            IF (DABS(CBEAM_ACTIVE_RPROPS(ISTA,6) - CBEAM_ACTIVE_RPROPS(1,6)) > EPS1) HAS_NONUNIFORM_STATIONS = .TRUE.
+         ENDDO
+      ENDIF
+      USE_STATIONED_KE = (NSTA > 1) .AND. HAS_NONUNIFORM_STATIONS
       IF (USE_STATIONED_KE) THEN
          CALL BUILD_TAPERED_BEAM_KE ( L, E, AREA_REF, I1_REF, I2_REF, I12_REF, JTOR_REF )
       ELSE
@@ -951,6 +963,172 @@
       REAL(DOUBLE), INTENT(OUT)     :: I12_AVG
       REAL(DOUBLE), INTENT(OUT)     :: JTOR_AVG
 
+      INTEGER(LONG), PARAMETER      :: MAX_SEG = 10
+      INTEGER(LONG), PARAMETER      :: MAX_NODE = MAX_SEG + 1
+      INTEGER(LONG), PARAMETER      :: MAX_DOF = 6*MAX_NODE
+
+      REAL(DOUBLE)                  :: AREA_GP, I1_GP, I2_GP, I12_GP, JTOR_GP, NSM_GP
+      REAL(DOUBLE)                  :: DXI_LOC, XI_A, XI_B, XI_SEG
+      REAL(DOUBLE)                  :: KCHAIN(MAX_DOF,MAX_DOF)
+      REAL(DOUBLE)                  :: KSEG(12,12)
+      REAL(DOUBLE)                  :: KEE(12,12)
+      REAL(DOUBLE)                  :: KEI(12,MAX_DOF-12)
+      REAL(DOUBLE)                  :: KIE(MAX_DOF-12,12)
+      REAL(DOUBLE)                  :: KII(MAX_DOF-12,MAX_DOF-12)
+      REAL(DOUBLE)                  :: YSOL(MAX_DOF-12,12)
+      REAL(DOUBLE)                  :: KSUB(MAX_DOF-12,MAX_DOF-12)
+      INTEGER(LONG)                 :: END_DOF(12)
+      INTEGER(LONG)                 :: INT_DOF(MAX_DOF-12)
+      INTEGER(LONG)                 :: IEND(12)
+      INTEGER(LONG)                 :: IINT(MAX_DOF-12)
+      INTEGER(LONG)                 :: I, J, IA, IB, IROW, ICOL, ISEG, NSEG, NNODE, NDOF, NINT
+      LOGICAL                       :: USED_CHAIN
+
+      USED_CHAIN = .FALSE.
+      NSEG = NSTA - 1
+      IF ((NSEG >= 1) .AND. (NSEG <= MAX_SEG)) THEN
+         NNODE = NSEG + 1
+         NDOF  = 6*NNODE
+         NINT  = NDOF - 12
+
+         DO I=1,NDOF
+            DO J=1,NDOF
+               KCHAIN(I,J) = ZERO
+            ENDDO
+         ENDDO
+
+         AREA_AVG = ZERO
+         I1_AVG   = ZERO
+         I2_AVG   = ZERO
+         I12_AVG  = ZERO
+         JTOR_AVG = ZERO
+
+         DO ISEG=1,NSEG
+            XI_A = CBEAM_ACTIVE_XL(ISEG)
+            XI_B = CBEAM_ACTIVE_XL(ISEG+1)
+            DXI_LOC = XI_B - XI_A
+            IF (DXI_LOC <= EPS1) CYCLE
+
+            XI_SEG = 0.5D0*(XI_A + XI_B)
+            CALL GET_STATION_PROPS ( XI_SEG, AREA_GP, I1_GP, I2_GP, I12_GP, JTOR_GP, NSM_GP )
+            CALL BUILD_PRISM_BEAM_SEG_KE ( DXI_LOC*L_IN, E_IN, AREA_GP, I1_GP, I2_GP, I12_GP, JTOR_GP, KSEG )
+
+            AREA_AVG = AREA_AVG + DXI_LOC*AREA_GP
+            I1_AVG   = I1_AVG   + DXI_LOC*I1_GP
+            I2_AVG   = I2_AVG   + DXI_LOC*I2_GP
+            I12_AVG  = I12_AVG  + DXI_LOC*I12_GP
+            JTOR_AVG = JTOR_AVG + DXI_LOC*JTOR_GP
+
+            IA = 6*(ISEG-1)
+            IB = 6*ISEG
+            DO IROW=1,12
+               DO ICOL=1,12
+                  IF (IROW <= 6) THEN
+                     I = IA + IROW
+                  ELSE
+                     I = IB + IROW - 6
+                  ENDIF
+                  IF (ICOL <= 6) THEN
+                     J = IA + ICOL
+                  ELSE
+                     J = IB + ICOL - 6
+                  ENDIF
+                  KCHAIN(I,J) = KCHAIN(I,J) + KSEG(IROW,ICOL)
+               ENDDO
+            ENDDO
+         ENDDO
+
+         IF (AREA_AVG <= EPS1) AREA_AVG = AREA
+         IF (I1_AVG   <= EPS1) I1_AVG   = I1
+         IF (I2_AVG   <= EPS1) I2_AVG   = I2
+         IF (JTOR_AVG <= EPS1) JTOR_AVG = JTOR
+
+         IF (NINT <= 0) THEN
+            DO IROW=1,12
+               DO ICOL=1,12
+                  KE(IROW,ICOL) = KCHAIN(IROW,ICOL)
+               ENDDO
+            ENDDO
+            USED_CHAIN = .TRUE.
+         ELSE
+            DO I=1,6
+               END_DOF(I)   = I
+               END_DOF(I+6) = NDOF - 6 + I
+            ENDDO
+
+            DO I=1,12
+               IEND(I) = END_DOF(I)
+            ENDDO
+            J = 0
+            DO I=1,NDOF
+               IF ((I <= 6) .OR. (I > NDOF-6)) CYCLE
+               J = J + 1
+               INT_DOF(J) = I
+               IINT(J) = I
+            ENDDO
+
+            DO IROW=1,12
+               DO ICOL=1,12
+                  KEE(IROW,ICOL) = KCHAIN(IEND(IROW),IEND(ICOL))
+               ENDDO
+            ENDDO
+            DO IROW=1,12
+               DO ICOL=1,NINT
+                  KEI(IROW,ICOL) = KCHAIN(IEND(IROW),IINT(ICOL))
+               ENDDO
+            ENDDO
+            DO IROW=1,NINT
+               DO ICOL=1,12
+                  KIE(IROW,ICOL) = KCHAIN(IINT(IROW),IEND(ICOL))
+               ENDDO
+            ENDDO
+            DO IROW=1,NINT
+               DO ICOL=1,NINT
+                  KII(IROW,ICOL) = KCHAIN(IINT(IROW),IINT(ICOL))
+                  KSUB(IROW,ICOL) = KII(IROW,ICOL)
+               ENDDO
+            ENDDO
+
+            CALL SOLVE_MULTI_RHS_GAUSS ( KSUB, NINT, KIE, 12, YSOL, USED_CHAIN )
+            IF (USED_CHAIN) THEN
+               DO IROW=1,12
+                  DO ICOL=1,12
+                     KE(IROW,ICOL) = KEE(IROW,ICOL)
+                     DO J=1,NINT
+                        KE(IROW,ICOL) = KE(IROW,ICOL) - KEI(IROW,J)*YSOL(J,ICOL)
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDIF
+         ENDIF
+      ENDIF
+
+      IF (USED_CHAIN) RETURN
+
+      AREA_AVG = ZERO
+      I1_AVG   = ZERO
+      I2_AVG   = ZERO
+      I12_AVG  = ZERO
+      JTOR_AVG = ZERO
+      CALL BUILD_TAPERED_BEAM_KE_DIRECT ( L_IN, E_IN, AREA_AVG, I1_AVG, I2_AVG, I12_AVG, JTOR_AVG )
+
+      IF (AREA_AVG <= EPS1) AREA_AVG = AREA
+      IF (I1_AVG   <= EPS1) I1_AVG   = I1
+      IF (I2_AVG   <= EPS1) I2_AVG   = I2
+      IF (JTOR_AVG <= EPS1) JTOR_AVG = JTOR
+
+      END SUBROUTINE BUILD_TAPERED_BEAM_KE
+
+      SUBROUTINE BUILD_TAPERED_BEAM_KE_DIRECT ( L_IN, E_IN, AREA_AVG, I1_AVG, I2_AVG, I12_AVG, JTOR_AVG )
+
+      REAL(DOUBLE), INTENT(IN)      :: L_IN
+      REAL(DOUBLE), INTENT(IN)      :: E_IN
+      REAL(DOUBLE), INTENT(OUT)     :: AREA_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: I1_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: I2_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: I12_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: JTOR_AVG
+
       REAL(DOUBLE)                  :: AREA_GP, I1_GP, I2_GP, I12_GP, JTOR_GP, NSM_GP
       REAL(DOUBLE)                  :: BAX(12), BTOR(12), BB1(12), BB2(12)
       REAL(DOUBLE)                  :: DXI_LOC, XI_A, XI_B, XI_SEG, WT_SEG
@@ -1026,12 +1204,154 @@
          ENDDO
       ENDDO
 
-      IF (AREA_AVG <= EPS1) AREA_AVG = AREA
-      IF (I1_AVG   <= EPS1) I1_AVG   = I1
-      IF (I2_AVG   <= EPS1) I2_AVG   = I2
-      IF (JTOR_AVG <= EPS1) JTOR_AVG = JTOR
+      END SUBROUTINE BUILD_TAPERED_BEAM_KE_DIRECT
 
-      END SUBROUTINE BUILD_TAPERED_BEAM_KE
+      SUBROUTINE BUILD_PRISM_BEAM_SEG_KE ( LSEG, ESEG, AREA_SEG, I1_SEG, I2_SEG, I12_SEG, JTOR_SEG, KSEG )
+
+      REAL(DOUBLE), INTENT(IN)      :: LSEG, ESEG, AREA_SEG, I1_SEG, I2_SEG, I12_SEG, JTOR_SEG
+      REAL(DOUBLE), INTENT(OUT)     :: KSEG(12,12)
+
+      REAL(DOUBLE)                  :: PHI1_SEG, PHI2_SEG, FAC1_SEG, FAC2_SEG, RG_SEG
+      INTEGER(LONG)                 :: IROW, ICOL
+
+      DO IROW=1,12
+         DO ICOL=1,12
+            KSEG(IROW,ICOL) = ZERO
+         ENDDO
+      ENDDO
+
+      IF (LSEG <= EPS1) RETURN
+
+      FAC1_SEG = ESEG*I1_SEG/(LSEG*LSEG*LSEG)
+      FAC2_SEG = ESEG*I2_SEG/(LSEG*LSEG*LSEG)
+      RG_SEG   = G*JTOR_SEG/LSEG
+
+      PHI1_SEG = ZERO
+      PHI2_SEG = ZERO
+      IF (.NOT. ((DABS(K1) <= EPS1) .AND. (DABS(K2) <= EPS1))) THEN
+         IF (DABS(K2*G*AREA_SEG*LSEG*LSEG) > EPS1) THEN
+            PHI1_SEG = TWELVE*ESEG*I1_SEG/(K2*G*AREA_SEG*LSEG*LSEG)
+         ENDIF
+         IF (DABS(K1*G*AREA_SEG*LSEG*LSEG) > EPS1) THEN
+            PHI2_SEG = TWELVE*ESEG*I2_SEG/(K1*G*AREA_SEG*LSEG*LSEG)
+         ENDIF
+      ENDIF
+
+      FAC1_SEG = FAC1_SEG/(ONE + PHI1_SEG)
+      FAC2_SEG = FAC2_SEG/(ONE + PHI2_SEG)
+
+      KSEG( 1, 1) = AREA_SEG*ESEG/LSEG
+      KSEG( 1, 7) =-KSEG(1,1)
+      KSEG( 7, 7) = KSEG(1,1)
+
+      KSEG( 4, 4) = RG_SEG
+      KSEG( 4,10) =-RG_SEG
+      KSEG(10,10) = RG_SEG
+
+      KSEG( 2, 2) =  TWELVE*FAC1_SEG
+      KSEG( 2, 6) =  SIX*LSEG*FAC1_SEG
+      KSEG( 2, 8) = -TWELVE*FAC1_SEG
+      KSEG( 2,12) =  SIX*LSEG*FAC1_SEG
+
+      KSEG( 6, 6) = (FOUR + PHI1_SEG)*ESEG*I1_SEG/(LSEG*(ONE + PHI1_SEG))
+      KSEG( 6, 8) = -SIX*LSEG*FAC1_SEG
+      KSEG( 6,12) = (TWO - PHI1_SEG)*ESEG*I1_SEG/(LSEG*(ONE + PHI1_SEG))
+
+      KSEG( 8, 8) =  TWELVE*FAC1_SEG
+      KSEG( 8,12) = -SIX*LSEG*FAC1_SEG
+
+      KSEG(12,12) = (FOUR + PHI1_SEG)*ESEG*I1_SEG/(LSEG*(ONE + PHI1_SEG))
+
+      KSEG( 3, 3) =  TWELVE*FAC2_SEG
+      KSEG( 3, 5) = -SIX*LSEG*FAC2_SEG
+      KSEG( 3, 9) = -TWELVE*FAC2_SEG
+      KSEG( 3,11) = -SIX*LSEG*FAC2_SEG
+
+      KSEG( 5, 5) = (FOUR + PHI2_SEG)*ESEG*I2_SEG/(LSEG*(ONE + PHI2_SEG))
+      KSEG( 5, 9) =  SIX*LSEG*FAC2_SEG
+      KSEG( 5,11) = (TWO - PHI2_SEG)*ESEG*I2_SEG/(LSEG*(ONE + PHI2_SEG))
+
+      KSEG( 9, 9) =  TWELVE*FAC2_SEG
+      KSEG( 9,11) =  SIX*LSEG*FAC2_SEG
+
+      KSEG(11,11) = (FOUR + PHI2_SEG)*ESEG*I2_SEG/(LSEG*(ONE + PHI2_SEG))
+
+      DO IROW=2,12
+         DO ICOL=1,IROW-1
+            KSEG(IROW,ICOL) = KSEG(ICOL,IROW)
+         ENDDO
+      ENDDO
+
+      END SUBROUTINE BUILD_PRISM_BEAM_SEG_KE
+
+      SUBROUTINE SOLVE_MULTI_RHS_GAUSS ( AIN, N, BIN, NRHS, XOUT, OK )
+
+      INTEGER(LONG), INTENT(IN)      :: N, NRHS
+      REAL(DOUBLE), INTENT(INOUT)    :: AIN(N,N)
+      REAL(DOUBLE), INTENT(IN)       :: BIN(N,NRHS)
+      REAL(DOUBLE), INTENT(OUT)      :: XOUT(N,NRHS)
+      LOGICAL, INTENT(OUT)           :: OK
+
+      REAL(DOUBLE)                   :: WORK(54,12)
+      REAL(DOUBLE)                   :: FACTOR, PIVMAX, TMP
+      INTEGER(LONG)                  :: I, J, K, IPIV
+
+      OK = .TRUE.
+      DO I=1,N
+         DO J=1,NRHS
+            WORK(I,J) = BIN(I,J)
+            XOUT(I,J) = ZERO
+         ENDDO
+      ENDDO
+
+      DO K=1,N
+         IPIV = K
+         PIVMAX = DABS(AIN(K,K))
+         DO I=K+1,N
+            IF (DABS(AIN(I,K)) > PIVMAX) THEN
+               PIVMAX = DABS(AIN(I,K))
+               IPIV = I
+            ENDIF
+         ENDDO
+         IF (PIVMAX <= EPS1) THEN
+            OK = .FALSE.
+            RETURN
+         ENDIF
+         IF (IPIV /= K) THEN
+            DO J=K,N
+               TMP = AIN(K,J)
+               AIN(K,J) = AIN(IPIV,J)
+               AIN(IPIV,J) = TMP
+            ENDDO
+            DO J=1,NRHS
+               TMP = WORK(K,J)
+               WORK(K,J) = WORK(IPIV,J)
+               WORK(IPIV,J) = TMP
+            ENDDO
+         ENDIF
+         DO I=K+1,N
+            FACTOR = AIN(I,K)/AIN(K,K)
+            AIN(I,K) = ZERO
+            DO J=K+1,N
+               AIN(I,J) = AIN(I,J) - FACTOR*AIN(K,J)
+            ENDDO
+            DO J=1,NRHS
+               WORK(I,J) = WORK(I,J) - FACTOR*WORK(K,J)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO J=1,NRHS
+         DO I=N,1,-1
+            TMP = WORK(I,J)
+            DO K=I+1,N
+               TMP = TMP - AIN(I,K)*XOUT(K,J)
+            ENDDO
+            XOUT(I,J) = TMP/AIN(I,I)
+         ENDDO
+      ENDDO
+
+      END SUBROUTINE SOLVE_MULTI_RHS_GAUSS
 
       SUBROUTINE GET_STATION_PROPS ( XI_IN, AREA_OUT, I1_OUT, I2_OUT, I12_OUT, JTOR_OUT, NSM_OUT )
 

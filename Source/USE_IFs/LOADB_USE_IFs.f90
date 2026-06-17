@@ -79,6 +79,7 @@
       USE BD_PBAR_Interface
       USE BD_PBARL_Interface
       USE BD_PBEAM_Interface
+      USE BD_PBEAML_Interface
       USE BD_PBUSH_Interface
       USE BD_PCOMP_Interface
       USE BD_PCOMP1_Interface

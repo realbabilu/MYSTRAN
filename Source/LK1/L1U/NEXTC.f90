@@ -129,8 +129,15 @@
          CARD = TCARD
          RETURN
       ELSE
-         ! can't find the continuation marker.  FATAL :)
          BACKSPACE(IN1)
+         IF (RAW_PARENT == 'YES') THEN
+            RETURN
+         ENDIF
+         IF (((JCARD0(1)(1:4) == 'CBAR') .OR. (JCARD0(1)(1:5) == 'CBEAM')) .AND.                                                    &
+             (INDEX('0123456789',OLDTAG(1:1)) > 0)) THEN
+            RETURN
+         ENDIF
+         ! can't find the continuation marker.  FATAL :)
          WRITE(F06,102) OLDTAG
          WRITE(ERR,102) OLDTAG
          WRITE(F06,103)

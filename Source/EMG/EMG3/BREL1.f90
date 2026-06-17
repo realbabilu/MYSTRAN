@@ -38,8 +38,14 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  HALF, TWO, ZERO
-      USE PARAMS, ONLY                :  CBEAMAREA, CBEAMAREA_PID, CBEAMAREA_VAL, CBEAMSHR, CBEAMSHR_PID, CBEAMSHR_VAL, EPSIL, NCBEAMAREA_PID, NCBEAMSHR_PID
+      USE CONSTANTS_1, ONLY           :  HALF, ONE, TWO, ZERO
+      USE PARAMS, ONLY                :  BEAMAMO, BEAMAMO_PID, BEAMAMO_VAL, BEAMM1MO, BEAMM1MO_PID, BEAMM1MO_VAL,          &
+                                         BEAMM2MO, BEAMM2MO_PID, BEAMM2MO_VAL, BEAMTMO, BEAMTMO_PID, BEAMTMO_VAL,          &
+                                         BEAMV1MO, BEAMV1MO_PID, BEAMV1MO_VAL, BEAMV2MO, BEAMV2MO_PID, BEAMV2MO_VAL,        &
+                                         CBEAMAREA, CBEAMAREA_PID, CBEAMAREA_VAL, CBEAMSHR, CBEAMSHR_PID,                    &
+                                         CBEAMSHR_VAL, EPSIL, MBEAMAMO_PID, MBEAMM1MO_PID, MBEAMM2MO_PID, MBEAMTMO_PID,    &
+                                         MBEAMV1MO_PID, MBEAMV2MO_PID, NCBEAMAREA_PID, NCBEAMSHR_PID, NBEAMAMO_PID,        &
+                                         NBEAMM1MO_PID, NBEAMM2MO_PID, NBEAMTMO_PID, NBEAMV1MO_PID, NBEAMV2MO_PID
       USE DEBUG_PARAMETERS
       USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_AREA_SCALE, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_RPROPS, CBEAM_ACTIVE_XL, EID, ELEM_LEN_AB, EMAT, INTL_PID, NUM_EMG_FATAL_ERRS, EPROP, &
                                          FCONV, ME, PBAR, PBEAM, ULT_STRE, ULT_STRN, TYPE, ZS
@@ -73,6 +79,12 @@
       REAL(DOUBLE)                    :: DXI
       REAL(DOUBLE)                    :: K1_EFF
       REAL(DOUBLE)                    :: K2_EFF
+      REAL(DOUBLE)                    :: AMOD
+      REAL(DOUBLE)                    :: V1MOD
+      REAL(DOUBLE)                    :: V2MOD
+      REAL(DOUBLE)                    :: M1MOD
+      REAL(DOUBLE)                    :: M2MOD
+      REAL(DOUBLE)                    :: TMOD
       REAL(DOUBLE)                    :: XI1
       REAL(DOUBLE)                    :: XI2
       INTEGER(LONG)                   :: ISTA
@@ -89,6 +101,12 @@
       AREA_EFF = ZERO
       K1_EFF = ZERO
       K2_EFF = ZERO
+      AMOD  = ONE
+      V1MOD = ONE
+      V2MOD = ONE
+      M1MOD = ONE
+      M2MOD = ONE
+      TMOD  = ONE
 ! --- warning_reduce-v2 end --- !
 
 ! Set element property and material constants
@@ -117,11 +135,20 @@
          ZS(7)    = EPROP(12)                              ! y coord of 4th point for stress recovery
          ZS(8)    = EPROP(13)                              ! z coord of 4th point for stress recovery
          PID_EXT  = PBAR(INTL_PID,1)
+         AMOD     = GET_BEAMAMO_FOR_PID(PID_EXT)
+         V1MOD    = GET_BEAMV1MO_FOR_PID(PID_EXT)
+         V2MOD    = GET_BEAMV2MO_FOR_PID(PID_EXT)
+         M1MOD    = GET_BEAMM1MO_FOR_PID(PID_EXT)
+         M2MOD    = GET_BEAMM2MO_FOR_PID(PID_EXT)
+         TMOD     = GET_BEAMTMO_FOR_PID(PID_EXT)
          K1       = EPROP(14)                              ! Plane 1 shear factor
          K2       = EPROP(15)                              ! Plane 2 shear factor
-         AREA_EFF = GET_CBEAMAREA_FOR_PID(PID_EXT)*AREA
-         K1_EFF   = GET_CBEAMSHR_FOR_PID(PID_EXT)*K1
-         K2_EFF   = GET_CBEAMSHR_FOR_PID(PID_EXT)*K2
+         AREA_EFF = AMOD*AREA
+         K1_EFF   = V1MOD*K1
+         K2_EFF   = V2MOD*K2
+         I1       = M1MOD*I1
+         I2       = M2MOD*I2
+         JTOR     = TMOD*JTOR
          I12      = EPROP(16)                              ! Product of inertia
          ZS(9)    = EPROP(17)                              ! Torsional stress recovery coefficient
          FCONV(1) = AREA
@@ -143,11 +170,20 @@
          ZS(7)    = EPROP(13)
          ZS(8)    = EPROP(14)
          PID_EXT  = PBEAM(INTL_PID,1)
+         AMOD     = GET_BEAMAMO_FOR_PID(PID_EXT)
+         V1MOD    = GET_BEAMV1MO_FOR_PID(PID_EXT)
+         V2MOD    = GET_BEAMV2MO_FOR_PID(PID_EXT)
+         M1MOD    = GET_BEAMM1MO_FOR_PID(PID_EXT)
+         M2MOD    = GET_BEAMM2MO_FOR_PID(PID_EXT)
+         TMOD     = GET_BEAMTMO_FOR_PID(PID_EXT)
          K1       = EPROP(30)
          K2       = EPROP(31)
-         AREA_EFF = GET_CBEAMAREA_FOR_PID(PID_EXT)*AREA
-         K1_EFF   = GET_CBEAMSHR_FOR_PID(PID_EXT)*K1
-         K2_EFF   = GET_CBEAMSHR_FOR_PID(PID_EXT)*K2
+         AREA_EFF = AMOD*AREA
+         K1_EFF   = V1MOD*K1
+         K2_EFF   = V2MOD*K2
+         I1       = M1MOD*I1
+         I2       = M2MOD*I2
+         JTOR     = TMOD*JTOR
          CBEAM_ACTIVE_AREA_SCALE = GET_CBEAMAREA_FOR_PID(PID_EXT)
          CW       = (EPROP(36) + EPROP(37))/TWO
          ZS(9)    = ZERO
@@ -282,5 +318,107 @@
       ENDDO
 
       END FUNCTION GET_CBEAMAREA_FOR_PID
+
+! **********************************************************************************************************************************
+
+      REAL(DOUBLE) FUNCTION GET_BEAMAMO_FOR_PID ( PID_IN )
+
+      INTEGER(LONG), INTENT(IN)       :: PID_IN
+      INTEGER(LONG)                   :: ILOC
+
+      GET_BEAMAMO_FOR_PID = BEAMAMO
+      DO ILOC=1,NBEAMAMO_PID
+         IF (BEAMAMO_PID(ILOC) == PID_IN) THEN
+            GET_BEAMAMO_FOR_PID = BEAMAMO_VAL(ILOC)
+            EXIT
+         ENDIF
+      ENDDO
+
+      END FUNCTION GET_BEAMAMO_FOR_PID
+
+! **********************************************************************************************************************************
+
+      REAL(DOUBLE) FUNCTION GET_BEAMV1MO_FOR_PID ( PID_IN )
+
+      INTEGER(LONG), INTENT(IN)       :: PID_IN
+      INTEGER(LONG)                   :: ILOC
+
+      GET_BEAMV1MO_FOR_PID = BEAMV1MO
+      DO ILOC=1,NBEAMV1MO_PID
+         IF (BEAMV1MO_PID(ILOC) == PID_IN) THEN
+            GET_BEAMV1MO_FOR_PID = BEAMV1MO_VAL(ILOC)
+            EXIT
+         ENDIF
+      ENDDO
+
+      END FUNCTION GET_BEAMV1MO_FOR_PID
+
+! **********************************************************************************************************************************
+
+      REAL(DOUBLE) FUNCTION GET_BEAMV2MO_FOR_PID ( PID_IN )
+
+      INTEGER(LONG), INTENT(IN)       :: PID_IN
+      INTEGER(LONG)                   :: ILOC
+
+      GET_BEAMV2MO_FOR_PID = BEAMV2MO
+      DO ILOC=1,NBEAMV2MO_PID
+         IF (BEAMV2MO_PID(ILOC) == PID_IN) THEN
+            GET_BEAMV2MO_FOR_PID = BEAMV2MO_VAL(ILOC)
+            EXIT
+         ENDIF
+      ENDDO
+
+      END FUNCTION GET_BEAMV2MO_FOR_PID
+
+! **********************************************************************************************************************************
+
+      REAL(DOUBLE) FUNCTION GET_BEAMM1MO_FOR_PID ( PID_IN )
+
+      INTEGER(LONG), INTENT(IN)       :: PID_IN
+      INTEGER(LONG)                   :: ILOC
+
+      GET_BEAMM1MO_FOR_PID = BEAMM1MO
+      DO ILOC=1,NBEAMM1MO_PID
+         IF (BEAMM1MO_PID(ILOC) == PID_IN) THEN
+            GET_BEAMM1MO_FOR_PID = BEAMM1MO_VAL(ILOC)
+            EXIT
+         ENDIF
+      ENDDO
+
+      END FUNCTION GET_BEAMM1MO_FOR_PID
+
+! **********************************************************************************************************************************
+
+      REAL(DOUBLE) FUNCTION GET_BEAMM2MO_FOR_PID ( PID_IN )
+
+      INTEGER(LONG), INTENT(IN)       :: PID_IN
+      INTEGER(LONG)                   :: ILOC
+
+      GET_BEAMM2MO_FOR_PID = BEAMM2MO
+      DO ILOC=1,NBEAMM2MO_PID
+         IF (BEAMM2MO_PID(ILOC) == PID_IN) THEN
+            GET_BEAMM2MO_FOR_PID = BEAMM2MO_VAL(ILOC)
+            EXIT
+         ENDIF
+      ENDDO
+
+      END FUNCTION GET_BEAMM2MO_FOR_PID
+
+! **********************************************************************************************************************************
+
+      REAL(DOUBLE) FUNCTION GET_BEAMTMO_FOR_PID ( PID_IN )
+
+      INTEGER(LONG), INTENT(IN)       :: PID_IN
+      INTEGER(LONG)                   :: ILOC
+
+      GET_BEAMTMO_FOR_PID = BEAMTMO
+      DO ILOC=1,NBEAMTMO_PID
+         IF (BEAMTMO_PID(ILOC) == PID_IN) THEN
+            GET_BEAMTMO_FOR_PID = BEAMTMO_VAL(ILOC)
+            EXIT
+         ENDIF
+      ENDDO
+
+      END FUNCTION GET_BEAMTMO_FOR_PID
 
       END SUBROUTINE BREL1
