@@ -4,7 +4,7 @@
 ! --- lapack_surgery begin --- !
 
       USE PENTIUM_II_KIND, ONLY              :  BYTE, LONG, DOUBLE
-      USE LAPACK_LANCZOS_EIG_HELPER, ONLY    :  DGEQR2_HELPER => DGEQR2,                                       &
+      USE LAPACK_LANCZOS_EIG_HELPER, ONLY    :  DGEQR2_HELPER => DGEQR2,
      &                                          DORM2R_HELPER => DORM2R
 
       CONTAINS
@@ -21,12 +21,12 @@
 ! ##################################################################################################################################
 
       SUBROUTINE DORM2R( SIDE, TRANS, M, N, K, A, LDA, TAU, C, LDC,
-     $                   WORK, INFO )
+     &                   WORK, INFO )
       CHARACTER          SIDE, TRANS
       INTEGER            INFO, K, LDA, LDC, M, N
       REAL(DOUBLE)       A( LDA, * ), C( LDC, * ), TAU( * ), WORK( * )
       CALL DORM2R_HELPER( SIDE, TRANS, M, N, K, A, LDA, TAU, C, LDC,
-     $                    WORK, INFO )
+     &                    WORK, INFO )
       RETURN
       END SUBROUTINE DORM2R
 

@@ -2,11 +2,10 @@
 
       MODULE LAPACK_STD_EIG_1
 ! --- lapack_surgery begin --- !
-
       USE PENTIUM_II_KIND, ONLY          :  BYTE, LONG, DOUBLE
-      USE LAPACK_STD_EIG_1_HELPER, ONLY  :  DSYEV_HELPER  => DSYEV,                                             &
-     &                                      DSYTRD_HELPER => DSYTRD,                                            &
-     &                                      DORGTR_HELPER => DORGTR
+      USE LAPACK_STD_EIG_1_HELPER, ONLY  :  DSYEV_HELPER  => DSYEV,
+     $                                      DSYTRD_HELPER => DSYTRD,
+     $                                      DORGTR_HELPER => DORGTR
 
       CONTAINS
 
