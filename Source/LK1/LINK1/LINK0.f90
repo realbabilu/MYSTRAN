@@ -1,3 +1,4 @@
+!--- cbeam add --- begin!
 ! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
@@ -117,7 +118,7 @@
       INTEGER(LONG) :: POST
       INTEGER(LONG)                   :: BGRID             ! Internal grid point number
 
-      REAL(DOUBLE)                    :: KGG_DIAG(NDOFG)   ! Diagonal of KGG (needed for equil check on RESTART)
+      REAL(DOUBLE), ALLOCATABLE       :: KGG_DIAG(:)       ! Diagonal of KGG (needed for equil check on RESTART)
       REAL(DOUBLE)                    :: KGG_MAX_DIAG      ! Max diag term from KGG (needed for equil check on RESTART)
       !LOGICAL                        :: WRITE_F06  ! flag
       !LOGICAL                        :: WRITE_OP2  ! flag
@@ -132,6 +133,8 @@
       DO I=0,MBUG-1
          WRT_BUG(I) = 0
       ENDDO
+
+      ALLOCATE ( KGG_DIAG(NDOFG) )
 
       RBG_GSET_ALLOCATED = 'N'
 
@@ -1176,6 +1179,10 @@ res20:IF (RESTART == 'N') THEN
 
 ! ##################################################################################################################################
 
+      IF (ALLOCATED(KGG_DIAG)) THEN
+         DEALLOCATE ( KGG_DIAG )
+      ENDIF
+
       CONTAINS
 
 ! ##################################################################################################################################
@@ -1457,3 +1464,5 @@ res20:IF (RESTART == 'N') THEN
       END SUBROUTINE WRITE_ELEM_SUMMARY
 
       END SUBROUTINE LINK0
+
+!---  cbeam add --- end!

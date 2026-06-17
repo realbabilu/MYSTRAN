@@ -50,7 +50,6 @@
       INTEGER(LONG)                   :: IERROR            ! Error count
       INTEGER(LONG)                   :: IGRID             ! Internal grid ID
       INTEGER(LONG)                   :: NSEQ_SAVE         ! Save of incoming SEQ count (for diagnostics)
-! !--- memory heap fix --- begin!
       INTEGER(LONG), ALLOCATABLE      :: TMP_GRID_ID(:)    ! Set to array GRID_ID for aid in sorting GRID_SEQ
       INTEGER(LONG), ALLOCATABLE      :: TMP_GRD_SEQ(:)    ! Set to array GRID_SEQ so we can sort it and get array INV_GRID_SEQ
 !                                                            without disturbing GRID_SEQ sequence
@@ -60,10 +59,8 @@
 !                                                            end, the sequence array that will be used is integer array GRID_SEQ
 
       INTRINSIC                       :: DBLE
-! !--- RCM BANDED ADD-ON --- begin!
       LOGICAL                         :: DO_RCM            ! Activate in-core RCM sequencing add-on
       LOGICAL                         :: RCM_OK            ! True if RCM graph build/order succeeded
-! !--- RCM BANDED ADD-ON --- end!
 
 
 
@@ -71,16 +68,13 @@
 ! Coming in to this subr, GRID_SEQ is in the order of the grids as read in the input data deck.
 
       ALLOCATE ( R_GSEQ(NGRID), TMP_GRID_ID(NGRID), TMP_GRD_SEQ(NGRID) )
-! !--- memory heap fix --- end!
       NSEQ_SAVE = NSEQ
-! !--- RCM BANDED ADD-ON --- begin!
       DO_RCM = .FALSE.
       RCM_OK = .FALSE.
 
       IF ((GRIDSEQ(1:3) == 'RCM') .OR. ((BANDEDOPT == 'Y') .AND. (SOLLIB == 'BANDED  ') .AND. (GRIDSEQ(1:6) /= 'BANDIT'))) THEN
          DO_RCM = .TRUE.
       ENDIF
-! !--- RCM BANDED ADD-ON --- end!
 
 ! Generate initial R_GSEQ based on the GRID_SEQ value. R_GSEQ(I) is  the (real) sequence number for Grid Point GRID_ID(I).
 ! If there are no SEQGP sequencing cards, then this will be the final grid point sequence order (as a real number).
@@ -90,7 +84,6 @@
 !       resequencing is necessary) and then proceed with that complete set of SEQGP cards. Need to do it this way because we have to
 !       get INV_GRID_SEQ (later) and to write the seq arrays to L1B.
 
-! !--- RCM BANDED ADD-ON --- begin!
       IF (DO_RCM) THEN
          CALL RCM_SEQ_PROC ( R_GSEQ, RCM_OK )
          IF (RCM_OK) THEN
@@ -106,13 +99,11 @@
             ENDIF
          ENDIF
       ENDIF
-! !--- RCM BANDED ADD-ON --- end!
 
-! !--- RCM BANDED ADD-ON --- begin!
       IF (.NOT. RCM_OK) THEN
-         IF       (GRIDSEQ(1:6) == 'BANDIT') THEN
+         IF       (GRIDSEQ(1:6) == 'BANDIT') THEN             ! Call subr AUTO_SEQ_PROC to generate SEQ1, SEQ2 from SEQGP card images
             CALL AUTO_SEQ_PROC
-            IF (NSEQ == NGRID) THEN
+            IF (NSEQ == NGRID) THEN                           ! Bandit did reseq grids. Set R_GSEQ to the SEQ2 from Bandit SEQGP cards
                DO I=1,NGRID
 !                 R_GSEQ(I) = DBLE(SEQ2(I))                   ! Shouldn't need this, SEQ2 is REAL(DOUBLE)
                   R_GSEQ(I) = SEQ2(I)
@@ -122,7 +113,7 @@
                IF (SUPINFO == 'N') THEN
                   WRITE(F06,101) NGRID,NSEQ,PROG_NAME
                ENDIF
-               GRIDSEQ = 'GRID    '
+               GRIDSEQ = 'GRID    '                           ! Need this to cover case where AUTO_SEQ_PROC returned without completing
             ENDIF
          ENDIF
 
@@ -130,13 +121,12 @@
             DO I=1,NGRID
                R_GSEQ(I) = DBLE(I)
             ENDDO
-         ELSE IF ((GRIDSEQ(1:5) == 'INPUT') .OR. (GRIDSEQ(1:3) == 'RCM'))  THEN ! RCM fallback currently maps to INPUT
+         ELSE IF ((GRIDSEQ(1:5) == 'INPUT') .OR. (GRIDSEQ(1:3) == 'RCM'))  THEN
             DO I=1,NGRID
               R_GSEQ(I) = DBLE(GRID_SEQ(I))
             ENDDO
          ENDIF
       ENDIF
-! !--- RCM BANDED ADD-ON --- end!
 
 ! Check to make sure that all grid points on SEQGP cards are defined
 
@@ -275,7 +265,7 @@
       ENDDO
 
 
-! !--- memory heap fix --- begin!
+
       IF (ALLOCATED(R_GSEQ)) THEN
          DEALLOCATE ( R_GSEQ )
       ENDIF
@@ -285,19 +275,19 @@
       IF (ALLOCATED(TMP_GRD_SEQ)) THEN
          DEALLOCATE ( TMP_GRD_SEQ )
       ENDIF
-! !--- memory heap fix --- end!
 
       RETURN
 
 ! **********************************************************************************************************************************
   101 FORMAT(' *INFORMATION: SUBR AUTO_SEQ_PROC DID NOT SEQUENCE ALL OF THE ',I8,' GRIDS. ONLY ',I8,' GRIDS WERE SEQUENCED.'       &
                   ,/,15X,A,' WILL DEFAULT TO A SEQUENCE THAT IS IN GRID NUMERICAL ORDER',/)
-! !--- RCM BANDED ADD-ON --- begin!
+! --- BANDED_optimizisation -begin-- !
   102 FORMAT(' *INFORMATION: IN-CORE RCM GRID SEQUENCING APPLIED TO ',I8,' GRIDS (IGNORED ',I8,' INPUT/AUTO SEQGP ENTRY(IES)).'    &
-                  ,/,15X,' PARAM GRIDSEQ=',A8,' BANDEDOPT=',A1,' SOLLIB=',A8)
+                  ,/,15X,' PARAM GRIDSEQ=',A8,' BANDEDOPT=',A1,' SOLLIB=',A8                                                    &
+                  ,/,15X,' RCM UPDATES GRID_SEQ/INV_GRID_SEQ BEFORE DOF NUMBERING, SO MASS AND STIFFNESS MATRICES SHARE ORDER.')
+! --- BANDED_optimizisation -end-- !
   103 FORMAT(' *WARNING    : IN-CORE RCM SEQUENCING REQUESTED BUT A VALID CONNECTIVITY GRAPH COULD NOT BE BUILT.'                  &
                   ,/,15X,' FALLING BACK TO EXISTING GRIDSEQ FLOW. PARAM GRIDSEQ=',A8,' BANDEDOPT=',A1,' SOLLIB=',A8)
-! !--- RCM BANDED ADD-ON --- end!
 
   111 FORMAT(56X,'GRID SEQUENCE DATA',//16X,'GRID ID                  I                   R_GSEQ(I)               GRID_SEQ(I)   ', &
                  '     INV_GRID_SEQ(I)',/,12X,'(Actual grid ID)    (Internal grid ID)     (Grid seq - real num)',                  &
@@ -325,7 +315,6 @@
 
 ! ##################################################################################################################################
 
-! !--- RCM BANDED ADD-ON --- begin!
       SUBROUTINE RCM_SEQ_PROC ( R_GSEQ, RCM_OK )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -569,7 +558,6 @@
       RETURN
 
       END SUBROUTINE RCM_SEQ_PROC
-! !--- RCM BANDED ADD-ON --- end!
 
 ! ##################################################################################################################################
 
