@@ -29,7 +29,7 @@ cd build
 
 Minimum build : 
 
-cmake -G "MinGW Makefiles"  -DCMAKE_BUILD_TYPE=Release  -DCMAKE_C_COMPILER=gcc.exe  -DCMAKE_CXX_COMPILER=g++.exe  -DCMAKE_Fortran_COMPILER=gfortran.exe .. -DTPL_BLAS_LIBRARIES="..\libopenblas.dll.a" 
+cmake -G "MinGW Makefiles"  -DCMAKE_BUILD_TYPE=Release  -DCMAKE_C_COMPILER=gcc.exe  -DCMAKE_CXX_COMPILER=g++.exe  -DCMAKE_Fortran_COMPILER=gfortran.exe .. -DTPL_BLAS_LIBRARIES="..\libopenblas.dll.a"  -DMYSTRAN_USE_EXTERNAL_FEAST=OFF  -DMYSTRAN_USE_DMUMPS_SOLVER=OFF
 
 Maximum build : download feast and mumps in each folder.
 
