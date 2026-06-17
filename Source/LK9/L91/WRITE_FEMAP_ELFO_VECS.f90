@@ -1,3 +1,4 @@
+!--- cbeam add --- begin!
 ! ##################################################################################################################################
 ! Begin MIT license text.                                                                                    
 ! _______________________________________________________________________________________________________
@@ -56,7 +57,6 @@
       INTEGER(LONG)                   :: ELEM_MIN               ! Grid ID where vector is min
 
                                                                 ! Col from FEMAP_EL_NUMS (elem ID's)
-! !--- memory heap fix --- begin!
       INTEGER(LONG), ALLOCATABLE      :: ELEM_NUMS(:)
 
       INTEGER(LONG)                   :: ELEM_NAME_LEN          ! Length of ELEM_TYP without trailing blanks
@@ -98,7 +98,6 @@
       ALLOCATE ( ELEM_NUMS(NUM_FEMAP_ROWS) )
       ALLOCATE ( ELEM_VECS(NUM_FEMAP_ROWS,12) )
       ALLOCATE ( ELEM_VEC(NUM_FEMAP_ROWS) )
-! !--- memory heap fix --- end!
 
       IF      (ELEM_TYP == 'ROD     ') THEN
          VEC_ID_OFFSET = 50100
@@ -124,6 +123,8 @@
          VEC_ID_OFFSET = 51100
       ELSE IF (ELEM_TYP == 'BUSH    ') THEN
          VEC_ID_OFFSET = 51200
+      ELSE IF (ELEM_TYP == 'BEAM    ') THEN
+         VEC_ID_OFFSET = 51300
       ELSE
          WARN_ERR = WARN_ERR + 1
          WRITE(ERR,943) TRIM(ELEM_TYP), 'ELEM FORCE', TRIM(SUBR_NAME)
@@ -134,7 +135,48 @@
 
 ! Process BAR and ROD elements
 
-      IF ((ELEM_TYP == 'BAR     ') .OR. (ELEM_TYP == 'ROD     ')) THEN
+      IF (ELEM_TYP == 'BEAM    ') THEN
+
+         TITLE_E( 1) = 'EndA Plane1 Moment'
+         TITLE_E( 2) = 'EndA Plane2 Moment'
+         TITLE_E( 3) = 'EndB Plane1 Moment'
+         TITLE_E( 4) = 'EndB Plane2 Moment'
+         TITLE_E( 5) = 'EndA Pl1 Shear Force'
+         TITLE_E( 6) = 'EndA Pl2 Shear Force'
+         TITLE_E( 7) = 'EndB Pl1 Shear Force'
+         TITLE_E( 8) = 'EndB Pl2 Shear Force'
+         TITLE_E( 9) = 'EndA Axial Force'
+         TITLE_E(10) = 'EndB Axial Force'
+         TITLE_E(11) = 'EndA Torque'
+         TITLE_E(12) = 'EndB Torque'
+
+         DO J=1,12
+            VEC_ID = VEC_ID_OFFSET + J
+            WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
+            WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
+            DO I=1,NUM_FEMAP_ROWS
+               ELEM_VEC(I)  = FEMAP_EL_VECS(I,J)
+               ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
+            ENDDO
+            CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
+            WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
+            DO I=1,20
+               ID(I) = 0
+            ENDDO
+            WRITE(NEU,1004) (ID(I),I= 1,10)
+            WRITE(NEU,1004) (ID(I),I=11,20)
+            WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
+            CALC_WARN  = '0'
+            COMP_DIR   = '3'
+            CENT_TOTAL = '1'
+            WRITE(NEU,1006) CALC_WARN, COMP_DIR, CENT_TOTAL
+            DO I=1,NUM_FEMAP_ROWS
+               WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
+            ENDDO
+            WRITE(NEU,1008)
+         ENDDO
+
+      ELSE IF ((ELEM_TYP == 'BAR     ') .OR. (ELEM_TYP == 'ROD     ')) THEN
 
          TITLE_E( 1) = 'EndA Plane1 Moment'
          TITLE_E( 2) = 'EndB Plane1 Moment'
@@ -405,7 +447,6 @@
  9002    FORMAT(1X,A,' END  ',F10.3)
       ENDIF
 
-! !--- memory heap fix --- begin!
       IF (ALLOCATED(ELEM_NUMS)) THEN
          DEALLOCATE ( ELEM_NUMS )
       ENDIF
@@ -415,7 +456,6 @@
       IF (ALLOCATED(ELEM_VEC)) THEN
          DEALLOCATE ( ELEM_VEC )
       ENDIF
-! !--- memory heap fix --- end!
 
       RETURN
 
@@ -441,3 +481,5 @@
 ! **********************************************************************************************************************************
  
       END SUBROUTINE WRITE_FEMAP_ELFO_VECS
+
+!---  cbeam add --- end!

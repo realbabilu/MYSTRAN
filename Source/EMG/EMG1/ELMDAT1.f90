@@ -40,7 +40,7 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  FATAL_ERR, MEDAT0_CUSERIN, MELGP, MEMATC, MEMATR, MEPROP, METYPE, MOFFSET, MRMATLC,       &
                                          MRPBAR, MRPBEAM, MRPBUSH, MRPELAS, MRPROD, MRPSHEAR, MRPUSER1, MPSOLID, BLNK_SUB_NAM,     &
-                                         NCORD, NGRID, SOL_NAME
+                                         MPBEAM_STATIONS, NCORD, NGRID, SOL_NAME
       USE SCONTR, ONLY                :  DEDAT_Q4_MATANG_KEY, DEDAT_Q4_THICK_KEY, DEDAT_Q4_POFFS_KEY,                              &
                                          DEDAT_T3_MATANG_KEY, DEDAT_T3_THICK_KEY, DEDAT_T3_POFFS_KEY,                              &
                                                               DEDAT_Q8_THICK_KEY, DEDAT_Q8_POFFS_KEY
@@ -49,12 +49,12 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONEPM4, ONE, TWO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE MODEL_STUF, ONLY            :  AGRID, BAROFF, BUSH_CID, BUSH_OCID, BUSH_VVEC, BUSH_VVEC_OR_CID, BUSHOFF, BGRID,          &
-                                         CAN_ELEM_TYPE_OFFSET, CORD, DOFPIN, EDAT, EID, ELAS_COMP, ELDOF, ELEM_LEN_12, ELGP,       &
-                                         ELMTYP, EMAT, EOFF, NUM_EMG_FATAL_ERRS, EPROP, EPNT, ETYPE, GRID, RGRID, GRID_ID,         &
-                                         INTL_MID, INTL_PID, ISOLID, MATANGLE, MATL, MTRL_TYPE, NUM_SEi, OFFDIS, OFFDIS_O, OFFSET, &
-                                         PBAR, PBEAM, PCOMP, PCOMP_PROPS, PLATEOFF, PLATETHICK, PROD, PSHEAR, PSHEL, PSOLID,       &
-                                         PUSER1, PUSERIN, RMATL, RPBAR, RPBEAM, RPBUSH, RPELAS, RPROD, RPSHEAR, RPSHEL, RPUSER1,   &
-                                         TYPE, VVEC, XEB, ZOFFS
+                                         CAN_ELEM_TYPE_OFFSET, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_RPROPS, CORD, DOFPIN, EDAT, EID,    &
+                                         ELAS_COMP, ELDOF, ELEM_LEN_12, ELGP, ELMTYP, EMAT, EOFF, NUM_EMG_FATAL_ERRS, EPROP, EPNT, &
+                                         ETYPE, GRID, RGRID, GRID_ID, INTL_MID, INTL_PID, ISOLID, MATANGLE, MATL, MTRL_TYPE,       &
+                                         NUM_SEi, OFFDIS, OFFDIS_O, OFFSET, PBAR, PBEAM, PBEAM_NSTATIONS, PBEAM_XL, PBEAM_RPROPS, PCOMP,          &
+                                         PCOMP_PROPS, PLATEOFF, PLATETHICK, PROD, PSHEAR, PSHEL, PSOLID, PUSER1, PUSERIN, RMATL,   &
+                                         RPBAR, RPBEAM, RPBUSH, RPELAS, RPROD, RPSHEAR, RPSHEL, RPUSER1, TYPE, VVEC, XEB, ZOFFS
 
       USE MODEL_STUF, ONLY            :  USERIN_ACT_GRIDS, USERIN_ACT_COMPS, USERIN_CID0, USERIN_IN4_INDEX,                        &
                                          USERIN_MAT_NAMES, USERIN_NUM_BDY_DOF, USERIN_NUM_ACT_GRDS, USERIN_NUM_SPOINTS,            &
@@ -76,6 +76,7 @@
 !                                                             row number in array EDAT where data begins for this element.
 
       INTEGER(LONG)                   :: IPNTR              ! Pointer into an array
+      INTEGER(LONG)                   :: ISTA               ! Loop index for active CBEAM station metadata
       INTEGER(LONG)                   :: VVEC_FLAG          ! Either actual grid ID for V vector or -IVVEC
 
       INTEGER(LONG)                   :: I,J                ! DO loop indices
@@ -116,6 +117,19 @@
       EID       = EDAT(EPNTK)
       INTL_PID  = EDAT(EPNTK+1)
 
+! --- cbeam_stations begin --- !
+      CBEAM_ACTIVE_NSTATIONS = 0
+      DO ISTA=1,MPBEAM_STATIONS
+         CBEAM_ACTIVE_XL(ISTA) = ZERO
+         CBEAM_ACTIVE_RPROPS(ISTA,1) = ZERO
+         CBEAM_ACTIVE_RPROPS(ISTA,2) = ZERO
+         CBEAM_ACTIVE_RPROPS(ISTA,3) = ZERO
+         CBEAM_ACTIVE_RPROPS(ISTA,4) = ZERO
+         CBEAM_ACTIVE_RPROPS(ISTA,5) = ZERO
+         CBEAM_ACTIVE_RPROPS(ISTA,6) = ZERO
+      ENDDO
+! --- cbeam_stations end --- !
+
 ! ELGP is the number of G.P.'s for this elem. Call GET_ELGP to find out how many grids there are for elem type TYPE
 
       CALL GET_ELGP ( INT_ELEM_ID )
@@ -126,7 +140,11 @@
       IF (TYPE(1:6) /= 'USERIN') THEN
          DO J=1,METYPE
             IF (ELMTYP(J) == TYPE) THEN
-               IF (NUM_SEi(J) > (ELGP + 1)) THEN
+! --- cbeam_stations begin --- !
+               IF ((TYPE == 'BEAM    ') .AND. (NUM_SEi(J) > 0)) THEN
+                  CONTINUE
+               ELSE IF (NUM_SEi(J) > (ELGP + 1)) THEN
+! --- cbeam_stations end --- !
                   WRITE(ERR,1957) SUBR_NAME, TYPE, NUM_SEi(J), ELGP
                   WRITE(F06,1957) SUBR_NAME, TYPE, NUM_SEi(J), ELGP
                   FATAL_ERR = FATAL_ERR + 1
@@ -140,7 +158,7 @@
 
       ! *** NOTE: CHECK CODE FOR 3D ELEMS IF THEY ARE TO HAVE OFFSET. GRID ORDER MAY GET CHANGED IN SUBR EDAT_FIXUP (SEE EMG)
       IF ((TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR. (TYPE == 'BUSH    ') .OR. (TYPE(1:5) == 'TRIA3'   ) .OR.             &
-          (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE(1:5) == 'QUAD8'   )) THEN
+          ((TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8'   )) THEN
          CAN_ELEM_TYPE_OFFSET = 'Y'
       ELSE
          CAN_ELEM_TYPE_OFFSET = 'N'
@@ -334,6 +352,51 @@
          DO I=1,MRPBEAM
             EPROP(I) = RPBEAM(INTL_PID,I)
          ENDDO
+         IF (DEBUG(233) > 0) THEN
+            WRITE(F06,'(A)') '*** CBEAM PROPERTY DEBUG *******************************************************'
+            WRITE(F06,'(A,I0)') '  Element ID       : ', EID
+            WRITE(F06,'(A,I0)') '  Property ID      : ', INTL_PID
+            WRITE(F06,'(A,1P,ES14.6)') '  Area            : ', EPROP(1)
+            WRITE(F06,'(A,1P,ES14.6)') '  I1              : ', EPROP(2)
+            WRITE(F06,'(A,1P,ES14.6)') '  I2              : ', EPROP(3)
+            WRITE(F06,'(A,1P,ES14.6)') '  I12             : ', EPROP(4)
+            WRITE(F06,'(A,1P,ES14.6)') '  J               : ', EPROP(5)
+            WRITE(F06,'(A,1P,ES14.6)') '  NSM             : ', EPROP(6)
+            WRITE(F06,'(A,1P,ES14.6)') '  K1              : ', EPROP(30)
+            WRITE(F06,'(A,1P,ES14.6)') '  K2              : ', EPROP(31)
+         ENDIF
+! --- cbeam_stations begin --- !
+         CBEAM_ACTIVE_NSTATIONS = PBEAM_NSTATIONS(INTL_PID)
+         IF (CBEAM_ACTIVE_NSTATIONS > MPBEAM_STATIONS) CBEAM_ACTIVE_NSTATIONS = MPBEAM_STATIONS
+         IF (CBEAM_ACTIVE_NSTATIONS <= 1) THEN
+            CBEAM_ACTIVE_NSTATIONS = 1
+            CBEAM_ACTIVE_XL(1) = ZERO
+            CBEAM_ACTIVE_RPROPS(1,1) = EPROP(1)
+            CBEAM_ACTIVE_RPROPS(1,2) = EPROP(2)
+            CBEAM_ACTIVE_RPROPS(1,3) = EPROP(3)
+            CBEAM_ACTIVE_RPROPS(1,4) = EPROP(4)
+            CBEAM_ACTIVE_RPROPS(1,5) = EPROP(5)
+            CBEAM_ACTIVE_RPROPS(1,6) = EPROP(6)
+         ELSE
+            DO ISTA=1,CBEAM_ACTIVE_NSTATIONS
+               CBEAM_ACTIVE_XL(ISTA) = PBEAM_XL(INTL_PID,ISTA)
+               CBEAM_ACTIVE_RPROPS(ISTA,1) = PBEAM_RPROPS(INTL_PID,ISTA,1)
+               CBEAM_ACTIVE_RPROPS(ISTA,2) = PBEAM_RPROPS(INTL_PID,ISTA,2)
+               CBEAM_ACTIVE_RPROPS(ISTA,3) = PBEAM_RPROPS(INTL_PID,ISTA,3)
+               CBEAM_ACTIVE_RPROPS(ISTA,4) = PBEAM_RPROPS(INTL_PID,ISTA,4)
+               CBEAM_ACTIVE_RPROPS(ISTA,5) = PBEAM_RPROPS(INTL_PID,ISTA,5)
+               CBEAM_ACTIVE_RPROPS(ISTA,6) = PBEAM_RPROPS(INTL_PID,ISTA,6)
+            ENDDO
+         ENDIF
+         IF (DEBUG(233) > 0) THEN
+            WRITE(F06,'(A,I0)') '  Stored stations  : ', PBEAM_NSTATIONS(INTL_PID)
+            WRITE(F06,'(A,I0)') '  Active stations  : ', CBEAM_ACTIVE_NSTATIONS
+            IF (CBEAM_ACTIVE_NSTATIONS > 0) THEN
+               WRITE(F06,'(A,11(1X,ES12.5))') '  Active x/L      :', (CBEAM_ACTIVE_XL(ISTA), ISTA=1,CBEAM_ACTIVE_NSTATIONS)
+            ENDIF
+            WRITE(F06,'(A)') '***************************************************************************'
+         ENDIF
+! --- cbeam_stations end --- !
 
       ELSE IF (TYPE == 'BUSH    ') THEN
          DO I=1,MRPBUSH
@@ -368,7 +431,7 @@
             EPROP(I) = RPSHEAR(INTL_PID,I)
          ENDDO
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
 
                                                            ! For elems that not composites do EPROP in subr SHELL_ABD_MATRICES)
          IF (PCOMP_PROPS == 'N') THEN                      ! Shell properties are in array PSHELL (except maybe membrane thickness)
@@ -440,7 +503,7 @@
             EPROP( 6) = RPSHEL(INTL_PID, 6)                ! ZS(2)
 
             THICK_AVG = ZERO                               ! DELTA locates where thickness key is in EDAT (rel to EID) for plates
-            IF (TYPE(1:5) == 'QUAD4') THEN
+            IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                DELTA = DEDAT_Q4_THICK_KEY
             ELSE IF (TYPE(1:5) == 'TRIA3') THEN
                DELTA = DEDAT_T3_THICK_KEY
@@ -630,7 +693,7 @@
          ENDIF
          NUMMAT = 1
 
-      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 
          INTL_MID(1) = PSOLID(INTL_PID,2)
          MTRL_TYPE(1) = MATL(INTL_MID(1),2)                ! Must be MAT1 or MAT9 for solids
@@ -666,7 +729,7 @@
          ENDIF
          NUMMAT = 1
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
                                                            ! For elems that are not composites do EMAT in subr SHELL_ABD_MATRICES)
          IF (PCOMP_PROPS == 'N') THEN
             INTL_MID(1) = PSHEL(INTL_PID,2)
@@ -763,7 +826,7 @@
 ! Set transverse shear alloawbles to same as in-plane shear allowables for non PCOMP shells. The transverse shear allowables go
 ! in rows 19 and 20 of EMAT
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))) THEN
          if (PCOMP_PROPS == 'N') THEN
             DO I=1,NUMMAT
                IF      (INTL_MID(I) == 1) THEN
@@ -927,7 +990,7 @@
                ZOFFS = ZERO
             ENDIF
 
-         ELSE IF (TYPE(1:5) == 'QUAD4') THEN
+         ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
 
             IROW = EDAT(EPNTK + DEDAT_Q4_POFFS_KEY)
             IF (IROW > 0) THEN                             ! Elem has offset. IROW > 0 is the row in PLATEOFF where ZOFFS is

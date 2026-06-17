@@ -33,15 +33,18 @@
       USE IOUNT1, ONLY                :  WRT_BUG, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ELOUT_STRN_BIT, FATAL_ERR, IBIT, INT_SC_NUM,                                &
                                          MAX_STRESS_POINTS, MBUG, MOGEL,                                                           &
-                                         NELE, NCBAR, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20, NCPENTA6,     &
+                                         NELE, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20,       &
+                                         NCPENTA6,                                                                                  &
                                          NCPENTA15,NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCROD, NCSHEAR, NCTRIA3, NCTRIA3K,      &
                                          SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, TWO, FOUR
-      USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS
+      USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
       USE PARAMS, ONLY                :  OTMSKIP, PRTNEU
-      USE MODEL_STUF, ONLY            :  AGRID, ANY_STRN_OUTPUT, EDAT, EPNT, ETYPE, EID, ELGP, ELMTYP, ELOUT,                      &
-                                         METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, PCOMP_PROPS, PLY_NUM, STRAIN, TYPE, SHELL_STR_ANGLE
+      USE MODEL_STUF, ONLY            :  AGRID, ANY_STRN_OUTPUT, CBEAM_ACTIVE_NSTATIONS, EDAT, EPNT, ETYPE, EID, ELGP, ELMTYP,     &
+                                         ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, PBEAM_NSTATIONS, PCOMP_PROPS, PLY_NUM, STRAIN, &
+                                         TYPE, SHELL_STR_ANGLE, ZS
+      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRN_OPT
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRN, TXT_STRN
@@ -70,6 +73,7 @@
 !xx   INTEGER(LONG)                   :: IROW_TXT          ! Row number in OTM text file
       INTEGER(LONG)                   :: NDUM              ! Dummy valye needed in call to CALC_ELEM_ENFR_FORCES
       INTEGER(LONG)                   :: NELREQ(METYPE)    ! Count of the no. of requests for ELFORCE(NODE or ENGR) or STRESS
+      INTEGER(LONG)                   :: NUM_PTS_ELEM      ! Num strain stations/points for current element
       INTEGER(LONG)                   :: NUM_OGEL_ROWS     ! No. elems processed prior to writing results to F06 file
       INTEGER(LONG)                   :: NUM_FROWS         ! No. elems processed for FEMAP
       INTEGER(LONG)                   :: NUM_OGEL          ! No. rows written to array OGEL prior to writing results to F06 file
@@ -88,6 +92,9 @@
       REAL(DOUBLE)                    :: STRAIN_OUT_PCT_ERR(MAX_STRESS_POINTS)
 
       REAL(DOUBLE)                    :: PCT_ERR_MAX       ! Max value from array STRAIN_OUT_PCT_ERR
+      REAL(DOUBLE)                    :: C1,C2,D1,D2,E1,E2,F1,F2
+      REAL(DOUBLE)                    :: EA0,EA1,EA2,EA3,EA4,EAMAX,EAMIN
+      REAL(DOUBLE)                    :: EB0,EB1,EB2,EB3,EB4,EBMAX,EBMIN
 
                                                            ! Array of values from array STRAIN for all stress points
       REAL(DOUBLE)                    :: STRAIN_RAW(9,MAX_STRESS_POINTS)
@@ -100,8 +107,9 @@
       CHARACTER(8*BYTE)               :: TABLE_NAME   ! name of the op2 table name
       INTEGER(LONG)                   :: ITABLE       ! the subtable
       LOGICAL                         :: WRITE_NEU
+      LOGICAL                         :: HAVE_SECTION_POINTS
 
-      INTRINSIC IAND
+      INTRINSIC DABS, DMAX1, DMIN1, IAND
       ITABLE = 0
       TABLE_NAME = "OES ERR "
 
@@ -124,26 +132,34 @@
       ENDDO
 
       DO I=1,METYPE                                        ! Only count requests for elem types that can have strain output
-         IF((ELMTYP(I)(1:5) == 'TRIA3') .OR. (ELMTYP(I)(1:5) == 'QUAD4') .OR. (ELMTYP(I)(1:5) == 'SHEAR') .OR.                     &
-            (ELMTYP(I)(1:4) == 'HEXA' ) .OR. (ELMTYP(I)(1:5) == 'PENTA') .OR. (ELMTYP(I)(1:5) == 'TETRA') .OR.                     &
-            (ELMTYP(I)(1:4) == 'BUSH' ) .OR. (ELMTYP(I)(1:5) == 'QUAD8')) THEN
+         IF((ELMTYP(I)(1:3) == 'BAR'  ) .OR. (ELMTYP(I)(1:4) == 'BEAM' ) .OR. (ELMTYP(I)(1:3) == 'ROD'  ) .OR.                    &
+            (ELMTYP(I)(1:4) == 'ELAS' ) .OR. (ELMTYP(I)(1:4) == 'BUSH' ) .OR. (ELMTYP(I)(1:5) == 'TRIA3') .OR.                    &
+            (ELMTYP(I)(1:5) == 'QUAD4') .OR. (ELMTYP(I)(1:5) == 'SHEAR') .OR. (ELMTYP(I)(1:4) == 'HEXA' ) .OR.                    &
+            (ELMTYP(I)(1:5) == 'PENTA') .OR. (ELMTYP(I)(1:5) == 'TETRA') .OR. (ELMTYP(I)(1:5) == 'QUAD8')) THEN
             DO J=1,NELE
                CALL IS_ELEM_PCOMP_PROPS ( J )
                IF (PCOMP_PROPS == 'N') THEN
                   IF (ETYPE(J) == ELMTYP(I)) THEN
-                  IF ((STRN_LOC == 'CORNER  ') .OR.                                                                                &
-                      (STRN_LOC == 'GAUSS   ') .OR.                                                                                &
-                      (ETYPE(J)(1:4) == 'HEXA') .OR.                                                                               &
-                      (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                              &
-                      (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                              &
-                      (ETYPE(J)(1:5) == 'QUAD8')) THEN
-                        NUM_PTS(I) = NUM_SEi(I)
+                     IF (ETYPE(J) == 'BEAM    ') THEN
+                        NUM_PTS_ELEM = PBEAM_NSTATIONS(EDAT(EPNT(J)+1))
+                        IF (NUM_PTS_ELEM <= 0) NUM_PTS_ELEM = 5
+                        IF (NUM_PTS_ELEM > NUM_PTS(I)) NUM_PTS(I) = NUM_PTS_ELEM
                      ELSE
-                        NUM_PTS(I) = 1
+                        IF ((STRN_LOC == 'CORNER  ') .OR.                                                                         &
+                            (STRN_LOC == 'GAUSS   ') .OR.                                                                         &
+                            (ETYPE(J)(1:4) == 'HEXA') .OR.                                                                        &
+                            (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                       &
+                            (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                       &
+                            (ETYPE(J)(1:5) == 'QUAD8')) THEN
+                           NUM_PTS_ELEM = NUM_SEi(I)
+                        ELSE
+                           NUM_PTS_ELEM = 1
+                        ENDIF
+                        NUM_PTS(I) = NUM_PTS_ELEM
                      ENDIF
                      ELOUT_STRN = IAND(ELOUT(J,INT_SC_NUM),IBIT(ELOUT_STRN_BIT))
                      IF (ELOUT_STRN > 0) THEN
-                        NELREQ(I) = NELREQ(I) + NUM_PTS(I)
+                        NELREQ(I) = NELREQ(I) + NUM_PTS_ELEM
                      ENDIF
                   ENDIF
                ENDIF
@@ -323,6 +339,88 @@ do_strain_pts:    DO M=1,NUM_PTS(I)
       ENDIF
 !===========================
       IF (WRITE_NEU .AND. (ANY_STRN_OUTPUT > 0)) THEN
+
+         NDUM = 0
+         NUM_FROWS= 0                                      ! Write out BEAM strains
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCBEAM, 12, SUBR_NAME )
+         DO J=1,NELE
+            CALL IS_ELEM_PCOMP_PROPS ( J )
+            IF (PCOMP_PROPS == 'N') THEN
+               EID   = EDAT(EPNT(J))
+               TYPE  = ETYPE(J)
+               IF (ETYPE(J)(1:4) == 'BEAM') THEN
+                  NUM_FROWS= NUM_FROWS+ 1
+                  DO K=1,12
+                     FEMAP_EL_VECS(NUM_FROWS,K) = ZERO
+                  ENDDO
+                  DO K=0,MBUG-1
+                     WRT_BUG(K) = 0
+                  ENDDO
+                  PLY_NUM = 1
+                  CALL EMG ( J   , OPT, 'N', SUBR_NAME, 'N' )
+                  FEMAP_EL_NUMS(NUM_FROWS,1) = EID
+                  IF (NUM_EMG_FATAL_ERRS > 0) THEN
+                     IERROR = IERROR + 1
+                     CYCLE
+                  ENDIF
+                  CALL ELMDIS
+                  HAVE_SECTION_POINTS = .FALSE.
+                  DO K=1,8
+                     IF (DABS(ZS(K)) > ZERO) THEN
+                        HAVE_SECTION_POINTS = .TRUE.
+                        EXIT
+                     ENDIF
+                  ENDDO
+                  IF (HAVE_SECTION_POINTS) THEN
+                     C1 = ZS(1); C2 = ZS(2)
+                     D1 = ZS(3); D2 = ZS(4)
+                     E1 = ZS(5); E2 = ZS(6)
+                     F1 = ZS(7); F2 = ZS(8)
+                  ELSE
+                     C1 = ZERO; C2 = ZERO
+                     D1 = ZERO; D2 = ZERO
+                     E1 = ZERO; E2 = ZERO
+                     F1 = ZERO; F2 = ZERO
+                  ENDIF
+                  CALL ELEM_STRE_STRN_ARRAYS ( 1 )
+                  EA0   = STRAIN(1)
+                  EA1   = EA0 - (C1*STRAIN(2) + C2*STRAIN(3))
+                  EA2   = EA0 - (D1*STRAIN(2) + D2*STRAIN(3))
+                  EA3   = EA0 - (E1*STRAIN(2) + E2*STRAIN(3))
+                  EA4   = EA0 - (F1*STRAIN(2) + F2*STRAIN(3))
+                  EAMAX = DMAX1(EA1,EA2,EA3,EA4)
+                  EAMIN = DMIN1(EA1,EA2,EA3,EA4)
+                  FEMAP_EL_VECS(NUM_FROWS, 1) = EA1
+                  FEMAP_EL_VECS(NUM_FROWS, 3) = EA2
+                  FEMAP_EL_VECS(NUM_FROWS, 5) = EA3
+                  FEMAP_EL_VECS(NUM_FROWS, 7) = EA4
+                  FEMAP_EL_VECS(NUM_FROWS, 9) = EAMAX
+                  FEMAP_EL_VECS(NUM_FROWS,11) = EAMIN
+                  IF (CBEAM_ACTIVE_NSTATIONS > 1) THEN
+                     CALL ELEM_STRE_STRN_ARRAYS ( CBEAM_ACTIVE_NSTATIONS )
+                  ELSE
+                     CALL ELEM_STRE_STRN_ARRAYS ( 1 )
+                  ENDIF
+                  EB0   = STRAIN(1)
+                  EB1   = EB0 - (C1*STRAIN(2) + C2*STRAIN(3))
+                  EB2   = EB0 - (D1*STRAIN(2) + D2*STRAIN(3))
+                  EB3   = EB0 - (E1*STRAIN(2) + E2*STRAIN(3))
+                  EB4   = EB0 - (F1*STRAIN(2) + F2*STRAIN(3))
+                  EBMAX = DMAX1(EB1,EB2,EB3,EB4)
+                  EBMIN = DMIN1(EB1,EB2,EB3,EB4)
+                  FEMAP_EL_VECS(NUM_FROWS, 2) = EB1
+                  FEMAP_EL_VECS(NUM_FROWS, 4) = EB2
+                  FEMAP_EL_VECS(NUM_FROWS, 6) = EB3
+                  FEMAP_EL_VECS(NUM_FROWS, 8) = EB4
+                  FEMAP_EL_VECS(NUM_FROWS,10) = EBMAX
+                  FEMAP_EL_VECS(NUM_FROWS,12) = EBMIN
+               ENDIF
+            ENDIF
+         ENDDO
+         IF (NUM_FROWS > 0) THEN
+            CALL WRITE_FEMAP_STRN_VECS ( 'BEAM    ', 'N', NUM_FROWS, FEMAP_SET_ID )
+         ENDIF
+         CALL DEALLOCATE_FEMAP_DATA
 
          NDUM = 0
          NUM_FROWS= 0                                      ! Write out BUSH strains

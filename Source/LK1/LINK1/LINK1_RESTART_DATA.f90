@@ -37,7 +37,7 @@
 
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, DATA_NAM_LEN, MCORD, MRCORD, MGRID, MRGRID, NBAROFF, NCORD,                 &
                                          NCONM2, NEDAT, NELE, NGRID, NMATANGLE, NMATL, NPBAR, NPBEAM, NPDAT, NPELAS,NPROD, NPSHEL, &
-                                         NPSOLID, NPUSER1, NSEQ, NSUB, NTCARD, NTDAT, NTSUB, NVVEC, MCONM2, MMATL, MPBAR, MPBEAM,  &
+                                         NPSOLID, NPUSER1, NSEQ, NSUB, NTCARD, NTDAT, NTSUB, NVVEC, MCONM2, MMATL, MPBAR, MPBEAM, MPBEAM_STATIONS,  &
                                          MPELAS, MPLOAD4_3D_DATA, MPROD, MPSHEL, MPSOLID, MPUSER1, MRCONM2, MRMATLC, MRPBAR,       &
                                          MRPBEAM, MRPELAS, MRPROD, MRPSHEL, MRPUSER1, NPLATEOFF, NPLOAD4_3D, NPUSERIN
 
@@ -50,7 +50,7 @@
       USE MODEL_STUF, ONLY            :  CONM2, RCONM2
       USE MODEL_STUF, ONLY            :  BAROFF, EDAT, EOFF, EPNT, ESORT1, ESORT2, ETYPE, PLATEOFF, VVEC
       USE MODEL_STUF, ONLY            :  GRID, RGRID, GRID_ID, GRID_SEQ, INV_GRID_SEQ
-      USE MODEL_STUF, ONLY            :  MATL, RMATL, PBAR, RPBAR, PBEAM, RPBEAM, PELAS, RPELAS, PPNT, PDATA,                      &
+      USE MODEL_STUF, ONLY            :  MATL, RMATL, PBAR, RPBAR, PBEAM, PBEAM_NSTATIONS, PBEAM_XL, PBEAM_RPROPS, RPBEAM, PELAS, RPELAS, PPNT, PDATA,                      &
                                          PLOAD4_3D_DATA, PTYPE, PROD, RPROD, PSHEL, PSOLID, RPSHEL, PUSER1, RPUSER1, MATANGLE
       USE MODEL_STUF, ONLY            :  GTEMP, TDATA, TPNT
       USE MODEL_STUF, ONLY            :  PLATETHICK, PBUSH, RPBUSH, PSHEAR, RPSHEAR, PCOMP, RPCOMP, PUSERIN, USERIN_MAT_NAMES
@@ -374,6 +374,26 @@
       DO I=1,NPBEAM
          DO J=1,MPBEAM
             READ(UNT,IOSTAT=IOCHK) PBEAM(I,J)                                  ; REC_NO = REC_NO + 1
+            CALL READ_CHK ( IOCHK, FILNAM, NAME_ShouldBe, REC_NO, OUNT )
+         ENDDO
+         READ(UNT,IOSTAT=IOCHK) PBEAM_NSTATIONS(I)                             ; REC_NO = REC_NO + 1
+         CALL READ_CHK ( IOCHK, FILNAM, NAME_ShouldBe, REC_NO, OUNT )
+         DO J=1,MPBEAM_STATIONS
+            READ(UNT,IOSTAT=IOCHK) PBEAM_XL(I,J)                               ; REC_NO = REC_NO + 1
+            CALL READ_CHK ( IOCHK, FILNAM, NAME_ShouldBe, REC_NO, OUNT )
+         ENDDO
+         DO J=1,MPBEAM_STATIONS
+            READ(UNT,IOSTAT=IOCHK) PBEAM_RPROPS(I,J,1)                         ; REC_NO = REC_NO + 1
+            CALL READ_CHK ( IOCHK, FILNAM, NAME_ShouldBe, REC_NO, OUNT )
+            READ(UNT,IOSTAT=IOCHK) PBEAM_RPROPS(I,J,2)                         ; REC_NO = REC_NO + 1
+            CALL READ_CHK ( IOCHK, FILNAM, NAME_ShouldBe, REC_NO, OUNT )
+            READ(UNT,IOSTAT=IOCHK) PBEAM_RPROPS(I,J,3)                         ; REC_NO = REC_NO + 1
+            CALL READ_CHK ( IOCHK, FILNAM, NAME_ShouldBe, REC_NO, OUNT )
+            READ(UNT,IOSTAT=IOCHK) PBEAM_RPROPS(I,J,4)                         ; REC_NO = REC_NO + 1
+            CALL READ_CHK ( IOCHK, FILNAM, NAME_ShouldBe, REC_NO, OUNT )
+            READ(UNT,IOSTAT=IOCHK) PBEAM_RPROPS(I,J,5)                         ; REC_NO = REC_NO + 1
+            CALL READ_CHK ( IOCHK, FILNAM, NAME_ShouldBe, REC_NO, OUNT )
+            READ(UNT,IOSTAT=IOCHK) PBEAM_RPROPS(I,J,6)                         ; REC_NO = REC_NO + 1
             CALL READ_CHK ( IOCHK, FILNAM, NAME_ShouldBe, REC_NO, OUNT )
          ENDDO
          DO J=1,MRPBEAM

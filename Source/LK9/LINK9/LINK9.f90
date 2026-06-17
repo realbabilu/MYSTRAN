@@ -940,7 +940,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          SC_STRN_OUTPUT = IAND(OELOUT(INT_SC_NUM),IBIT(ELOUT_STRN_BIT))
          IF((SC_ELFE_OUTPUT > 0) .OR. (SC_ELFN_OUTPUT > 0) .OR. (SC_STRE_OUTPUT > 0) .OR. (SC_STRN_OUTPUT > 0) .OR.                &
             ! (ANY_U_P_OUTPUT > 0) .OR.
-            (WRITE_NEU)) THEN
+            (WRITE_NEU .AND. (SOL_NAME(1:5) /= 'MODES'))) THEN
             CALL LINK_MESSAGE_I('PROCESS ELEM FORCE/STRESS REQUESTS,               "',JVEC)
             IF ((DEBUG(176) == 0) .AND. (JVEC == 1)) THEN
                WRITE(ERR,98980)

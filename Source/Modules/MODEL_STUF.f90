@@ -32,7 +32,7 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE CONSTANTS_1, ONLY           :  ONEPM4, ZERO, TEN, ONE
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_ENTRY_LEN, JCARD_LEN, MELDTS, MEMATR, MEMATC, MEPROP, METYPE,            &
-                                         MPSOLID, MEFE, MEFEI, MEFER, MEWE, MEWEI, MEWER, MAX_STRESS_POINTS
+                                         MPSOLID, MEFE, MEFEI, MEFER, MEWE, MEWEI, MEWER, MAX_STRESS_POINTS, MPBEAM_STATIONS
 
       IMPLICIT NONE
 
@@ -601,6 +601,9 @@
       INTEGER(LONG), ALLOCATABLE      :: MATL   (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PBAR   (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PBEAM  (:,:)         ! See description below
+! --- CBEAM_standard begin --- !
+      INTEGER(LONG), ALLOCATABLE      :: PBEAM_NSTATIONS(:)   ! Number of stored station x/L values for each PBEAM property
+! --- CBEAM_standard end --- !
       INTEGER(LONG), ALLOCATABLE      :: PBUSH  (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PCOMP  (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PELAS  (:,:)         ! See description below
@@ -614,6 +617,10 @@
       REAL(DOUBLE) , ALLOCATABLE      :: RMATL  (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPBAR  (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPBEAM (:,:)         ! See description below
+! --- CBEAM_standard begin --- !
+      REAL(DOUBLE) , ALLOCATABLE      :: PBEAM_XL(:,:)        ! Stored station x/L values for each PBEAM property
+      REAL(DOUBLE) , ALLOCATABLE      :: PBEAM_RPROPS(:,:,:)  ! Stored [A,I1,I2,I12,J,NSM] for each PBEAM station
+! --- CBEAM_standard end --- !
       REAL(DOUBLE) , ALLOCATABLE      :: RPBUSH (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPCOMP (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPELAS (:,:)         ! See description below
@@ -648,6 +655,9 @@
 !  PBEAM  = Array of integer data from PBEAM Bulk Data entries. Each row is for one PBEAM entry read in B.D. and contains:
 !             ( 1) Col  1: Property ID
 !             ( 2) Col  2: Material ID
+!
+!  PBEAM_NSTATIONS = Number of station x/L values stored for each PBEAM property. For NX-oriented beam work this includes:
+!                    station 1 = 0.0 at end A, followed by each continuation station found on the PBEAM entry.
 
 !  RPBEAM = Array of real data from PBEAM Bulk Data entries. Each row is for one PBEAM entry read in B.D. and contains:
 !             ( 1) Col  1: Cross sectional area, A       : end A          , (parent        entry, field 4)
@@ -694,6 +704,17 @@
 !             (42) Col 42: z coord of neutral axis for end A, N2(A)       , (optional  6th entry, field 7)
 !             (43) Col 43: y coord of neutral axis for end B, N1(B)       , (optional  6th entry, field 8)
 !             (44) Col 44: z coord of neutral axis for end B, N2(B)       , (optional  6th entry, field 9)
+!
+!  PBEAM_XL = Stored x/L station values for each PBEAM property. Phase-1 beam redevelopment stores the continuation chain explicitly
+!             so that CBEAM output can later be made station-aware independently of legacy CBAR end-only output.
+!
+!  PBEAM_RPROPS = Stored real section properties for each PBEAM station. The 3rd index stores:
+!             (1) A
+!             (2) I1
+!             (3) I2
+!             (4) I12
+!             (5) J
+!             (6) NSM
 
 !  PBUSH  = Array of integer data from PBUSH Bulk Data entries
 !             ( 1) Col  1: PID          Prop ID
@@ -1105,6 +1126,22 @@
 ! BEAM element specific data
 ! --------------------------
 
+! --- cbeam_stations begin --- !
+      INTEGER(LONG)                   :: CBEAM_ACTIVE_NSTATIONS = 0
+                                                             ! Number of active x/L stations copied into the current BEAM runtime state
+
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_XL(MPBEAM_STATIONS) = (/ (ZERO, I=1,MPBEAM_STATIONS) /)
+                                                             ! Active x/L station positions for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_RPROPS(MPBEAM_STATIONS,6) = ZERO
+                                                             ! Active [A,I1,I2,I12,J,NSM] station properties for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_AREA_SCALE = ONE
+                                                             ! Active stiffness-only area scale for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_FORCE_B1(3,6) = ZERO
+                                                             ! Beam section-force-to-stress map at the reference side
+      REAL(DOUBLE)                    :: CBEAM_FORCE_B2(3,6) = ZERO
+                                                             ! Beam section-force-to-stress map used in station interpolation
+! --- cbeam_stations end --- !
+
       CHARACTER( 9*BYTE)              :: BEAMOR_VVEC_TYPE    = '         '
                                                              ! Indicator of type of V vec on BEAMOR B.D. entry (grid or vector)
 
@@ -1203,7 +1240,10 @@
                                                                  'TRIA3K  ',      & !         20
                                                                  'TRIA3   ',      & !         21
                                                                  'USER1   ',      & !         22
-                                                                 'USERIN  '/)       !         23
+                                                                 'USERIN  ',      & !         23
+                                                                 'QUADR   ',      & !         24
+                                                                 'PYRA5   ',      & !         25
+                                                                 'PYRA14  '/)       !         26
 
                                                              ! Character name for output purposed in LINK9 WRTELi subr's
       CHARACTER(13*BYTE)              :: ELEM_ONAME(METYPE)  = (/'B A R        ', & !          1
@@ -1228,7 +1268,10 @@
                                                                  'T R I A 3 K  ', & !         20
                                                                  'T R I A 3    ', & !         21
                                                                  'U S E R 1    ', & !         22
-                                                                 'U S E R I N  '/)  !         23
+                                                                 'U S E R I N  ', & !         23
+                                                                 'C Q U A D R  ', & !         24
+                                                                 'C P Y R A M 5', & !         25
+                                                                 'C P Y R A M14'/)  !         26
 
                                                              ! Array of number of grid points for the various element types
       INTEGER(LONG)                   :: NELGP(METYPE)       =  (/ 2,             & ! BAR      1
@@ -1253,11 +1296,16 @@
                                                                    3,             & ! TRIA3K  20
                                                                    3,             & ! TRIA3   21
                                                                    4,             & ! USER1   22
-                                                                   0/)              ! USERIN  23
+                                                                   0,             & ! USERIN  23
+                                                                   4,             & ! QUADR   24
+                                                                   5,             & ! PYRA5   25
+                                                                  14/)              ! PYRA14  26
 
                                                              ! Array of number of stress recovery points for various elem types
       INTEGER(LONG)                   :: NUM_SEi(METYPE)     =  (/ 1,             & ! BAR      1
-                                                                   1,             & ! BEAM     2
+! --- cbeam_stations begin --- !
+                                                                  10,             & ! BEAM     2
+! --- cbeam_stations end --- !
                                                                    1,             & ! BUSH     3
                                                                    1,             & ! ELAS1    4
                                                                    1,             & ! ELAS2    5
@@ -1278,7 +1326,10 @@
                                                                    1,             & ! TRIA3K  20
                                                                    1,             & ! TRIA3   21
                                                                    1,             & ! USER1   22
-                                                                   0/)              ! USERIN  23
+                                                                   0,             & ! USERIN  23
+                                                                   5,             & ! QUADR   24
+                                                                   6,             & ! PYRA5   25
+                                                                  15/)              ! PYRA14  26
 
 ! **********************************************************************************************************************************
 ! Individual element data generated one element at a time (in subr EMG)
@@ -1312,6 +1363,9 @@
 
       CHARACTER(8*BYTE)               :: TE_IDENT            = 'N'
                                                              ! If 'Y' then TE element transformation matrix is an identity matrix
+
+      CHARACTER(1*BYTE)               :: SKIP_K6ROT          = 'N'
+                                                             ! Shell offset helper flag to suppress K6ROT tweaks in selected shell paths
 
       CHARACTER(8*BYTE)               :: TYPE                = '        '
                                                              ! The type of the specific elem being processed (value from ELMTYP)
@@ -1747,14 +1801,16 @@
 !                                                              DGB is the type used in the original ARPACK subr dsband
 !                                                              DPB uses less disk storage but may not work for free-free eigens
 
+! --- chase_feast_add --- begin !
       CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_METHOD  = 'ARPACK'
                                                              ! Extract backend selected for EIGRL/LANCZOS family.
 
       CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_MODE    = ' '
-                                                             ! Optional method-specific selector from EIGRL continuation.
+                                                             ! Optional method-specific mode selector from EIGRL continuation.
 
       CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_SOURCE  = 'DEFAULT'
                                                              ! DEFAULT/EIGRL/PARAM source for extract-method selection.
+! --- chase_feast_add --- end !
 
       CHARACTER(1*BYTE)               :: EIG_VECS            = 'Y'
                                                              ! Indicator of whether to calc eigenvecs
@@ -1777,27 +1833,6 @@
       INTEGER(LONG)                   :: EIG_LANCZOS_NEV_DELT= 2
                                                              ! Number to add to est num eigens when search is on freq range
 
-      INTEGER(LONG)                   :: EIG_FEAST_M0        = 48
-                                                             ! FEAST search subspace size.
-
-      INTEGER(LONG)                   :: EIG_FEAST_TOL_DIGITS= 8
-                                                             ! FEAST convergence digits (fpm(3)).
-
-      INTEGER(LONG)                   :: EIG_FEAST_MAX_LOOP  = 60
-                                                             ! FEAST iteration limit (fpm(4)).
-
-      INTEGER(LONG)                   :: EIG_FEAST_N_CONTOUR = 8
-                                                             ! FEAST contour integration points.
-
-      INTEGER(LONG)                   :: EIG_SUBSPACE_NSUB   = 24
-                                                             ! Dense inverse-subspace working subspace dimension.
-
-      INTEGER(LONG)                   :: EIG_SUBSPACE_MAX_ITER = 40
-                                                             ! Dense inverse-subspace iteration limit.
-
-      INTEGER(LONG)                   :: EIG_DENSE_NEX       = 64
-                                                             ! Reserved dense oversampling/workspace knob.
-
       INTEGER(LONG)                   :: EIG_MODE            = 2
                                                              ! For Lanczos, the "mode" (see IPARAM(7) in ARPACK subr dsband)
 
@@ -1810,6 +1845,36 @@
 !                                                              dim several arrays in the ARPACK version of the Lanczos eigenval
 !                                                              extraction method.(see subr DSBAND in module ARPACK_LANCZOS_1).
 !                                                              It must be > 1
+
+      INTEGER(LONG)                   :: EIG_CHASE_NEX       = 64
+                                                             ! CHASE oversampling dimension.
+
+      INTEGER(LONG)                   :: EIG_CHASE_MAX_ITER  = 80
+                                                             ! CHASE iteration limit.
+
+      INTEGER(LONG)                   :: EIG_CHASE_DEG       = 0
+                                                             ! CHASE Chebyshev degree override, 0 means library default.
+
+      INTEGER(LONG)                   :: EIG_FEAST_M0        = 48
+                                                             ! FEAST search subspace size.
+
+      INTEGER(LONG)                   :: EIG_FEAST_TOL_DIGITS= 8
+                                                             ! FEAST convergence digits (fpm(3)).
+
+      INTEGER(LONG)                   :: EIG_FEAST_MAX_LOOP  = 60
+                                                             ! FEAST iteration limit (fpm(4)).
+
+      INTEGER(LONG)                   :: EIG_FEAST_N_CONTOUR = 8
+                                                             ! FEAST contour integration points (fpm(8)).
+
+      INTEGER(LONG)                   :: EIG_SUBSPACE_NSUB   = 24
+                                                             ! Dense inverse-subspace working subspace dimension.
+
+      INTEGER(LONG)                   :: EIG_SUBSPACE_MAX_ITER = 40
+                                                             ! Dense inverse-subspace iteration limit.
+
+      INTEGER(LONG)                   :: EIG_DENSE_NEX       = 64
+                                                             ! Reserved dense oversampling/workspace knob for parity with other methods.
 
       INTEGER(LONG)                   :: MIJ_ROW             = 0
                                                              ! Row no. of largest off-diag gen. mass term.
@@ -1834,6 +1899,9 @@
 
       REAL(DOUBLE)                    :: EIG_SIGMA           = -ONE
                                                              ! For Lanczos, the shift frequency
+
+      REAL(DOUBLE)                    :: EIG_CHASE_TOL       = 1.0D-10
+                                                             ! CHASE convergence tolerance.
 
       REAL(DOUBLE)                    :: EIG_FEAST_SEARCH_SCALE = 1.10D0
                                                              ! FEAST range expansion factor when upper frequency is requested.

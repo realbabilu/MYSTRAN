@@ -38,11 +38,11 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  TWO
-      USE PARAMS, ONLY                :  EPSIL
+      USE CONSTANTS_1, ONLY           :  HALF, TWO, ZERO
+      USE PARAMS, ONLY                :  CBEAMAREA, CBEAMAREA_PID, CBEAMAREA_VAL, CBEAMSHR, CBEAMSHR_PID, CBEAMSHR_VAL, EPSIL, NCBEAMAREA_PID, NCBEAMSHR_PID
       USE DEBUG_PARAMETERS
-      USE MODEL_STUF, ONLY            :  EID, ELEM_LEN_AB, EMAT, NUM_EMG_FATAL_ERRS, EPROP, FCONV, ME, ULT_STRE, ULT_STRN, &
-                                         TYPE, ZS
+      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_AREA_SCALE, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_RPROPS, CBEAM_ACTIVE_XL, EID, ELEM_LEN_AB, EMAT, INTL_PID, NUM_EMG_FATAL_ERRS, EPROP, &
+                                         FCONV, ME, PBAR, PBEAM, ULT_STRE, ULT_STRN, TYPE, ZS
 
       USE BREL1_USE_IFs
 
@@ -52,10 +52,9 @@
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)            ! 'Y'/'N' flags for whether to calc certain elem matrices
       CHARACTER(LEN=*), INTENT(IN)    :: WRITE_WARN        ! If 'Y" write warning messages, otherwise do not
 
-
-
       REAL(DOUBLE)                    :: ALPHA             ! Coefficient of thermal expansion
       REAL(DOUBLE)                    :: AREA              ! Cross-sectional area
+      REAL(DOUBLE)                    :: AREA_EFF
       REAL(DOUBLE)                    :: E                 ! Youngs modulus
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare for real zero
       REAL(DOUBLE)                    :: G                 ! Shear modulus
@@ -66,15 +65,31 @@
       REAL(DOUBLE)                    :: JTOR              ! Torsional constant
       REAL(DOUBLE)                    :: K1                ! Shear constant for plane 1 (used in K1*AREA*G)
       REAL(DOUBLE)                    :: K2                ! Shear constant for plane 2 (used in K1*AREA*G)
+      REAL(DOUBLE)                    :: CW                ! Warping coefficient
       REAL(DOUBLE)                    :: M0                ! Intermediate variable in calculating element mass matrix, ME
       REAL(DOUBLE)                    :: NSM               ! Nonstructural mass
       REAL(DOUBLE)                    :: RHO               ! Material density
       REAL(DOUBLE)                    :: TREF              ! Element reference temperature
+      REAL(DOUBLE)                    :: DXI
+      REAL(DOUBLE)                    :: K1_EFF
+      REAL(DOUBLE)                    :: K2_EFF
+      REAL(DOUBLE)                    :: XI1
+      REAL(DOUBLE)                    :: XI2
+      INTEGER(LONG)                   :: ISTA
+      INTEGER(LONG)                   :: NSTA
+      INTEGER(LONG)                   :: PID_EXT
 
 
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
+! --- warning_reduce-v2 begin --- !
+      NSM  = ZERO
+      CW   = ZERO
+      AREA_EFF = ZERO
+      K1_EFF = ZERO
+      K2_EFF = ZERO
+! --- warning_reduce-v2 end --- !
 
 ! Set element property and material constants
 
@@ -101,14 +116,72 @@
          ZS(6)    = EPROP(11)                              ! z coord of 3rd point for stress recovery
          ZS(7)    = EPROP(12)                              ! y coord of 4th point for stress recovery
          ZS(8)    = EPROP(13)                              ! z coord of 4th point for stress recovery
+         PID_EXT  = PBAR(INTL_PID,1)
          K1       = EPROP(14)                              ! Plane 1 shear factor
          K2       = EPROP(15)                              ! Plane 2 shear factor
+         AREA_EFF = GET_CBEAMAREA_FOR_PID(PID_EXT)*AREA
+         K1_EFF   = GET_CBEAMSHR_FOR_PID(PID_EXT)*K1
+         K2_EFF   = GET_CBEAMSHR_FOR_PID(PID_EXT)*K2
          I12      = EPROP(16)                              ! Product of inertia
          ZS(9)    = EPROP(17)                              ! Torsional stress recovery coefficient
          FCONV(1) = AREA
 
       ELSE IF (TYPE == 'BEAM    ') THEN
-
+! --- cbeam_tapered_add begin --- !
+         AREA     = EPROP( 1)
+         I1       = EPROP( 2)
+         I2       = EPROP( 3)
+         I12      = EPROP( 4)
+         JTOR     = EPROP( 5)
+         NSM      = EPROP( 6)
+         ZS(1)    = EPROP( 7)
+         ZS(2)    = EPROP( 8)
+         ZS(3)    = EPROP( 9)
+         ZS(4)    = EPROP(10)
+         ZS(5)    = EPROP(11)
+         ZS(6)    = EPROP(12)
+         ZS(7)    = EPROP(13)
+         ZS(8)    = EPROP(14)
+         PID_EXT  = PBEAM(INTL_PID,1)
+         K1       = EPROP(30)
+         K2       = EPROP(31)
+         AREA_EFF = GET_CBEAMAREA_FOR_PID(PID_EXT)*AREA
+         K1_EFF   = GET_CBEAMSHR_FOR_PID(PID_EXT)*K1
+         K2_EFF   = GET_CBEAMSHR_FOR_PID(PID_EXT)*K2
+         CBEAM_ACTIVE_AREA_SCALE = GET_CBEAMAREA_FOR_PID(PID_EXT)
+         CW       = (EPROP(36) + EPROP(37))/TWO
+         ZS(9)    = ZERO
+         FCONV(1) = AREA
+         NSTA = CBEAM_ACTIVE_NSTATIONS
+         IF (NSTA > 1) THEN
+            AREA = ZERO
+            I1   = ZERO
+            I2   = ZERO
+            I12  = ZERO
+            JTOR = ZERO
+            NSM  = ZERO
+            DO ISTA=1,NSTA-1
+               XI1 = CBEAM_ACTIVE_XL(ISTA)
+               XI2 = CBEAM_ACTIVE_XL(ISTA+1)
+               DXI = XI2 - XI1
+               IF (DXI > EPS1) THEN
+                  AREA = AREA + HALF*DXI*(CBEAM_ACTIVE_RPROPS(ISTA,1) + CBEAM_ACTIVE_RPROPS(ISTA+1,1))
+                  I1   = I1   + HALF*DXI*(CBEAM_ACTIVE_RPROPS(ISTA,2) + CBEAM_ACTIVE_RPROPS(ISTA+1,2))
+                  I2   = I2   + HALF*DXI*(CBEAM_ACTIVE_RPROPS(ISTA,3) + CBEAM_ACTIVE_RPROPS(ISTA+1,3))
+                  I12  = I12  + HALF*DXI*(CBEAM_ACTIVE_RPROPS(ISTA,4) + CBEAM_ACTIVE_RPROPS(ISTA+1,4))
+                  JTOR = JTOR + HALF*DXI*(CBEAM_ACTIVE_RPROPS(ISTA,5) + CBEAM_ACTIVE_RPROPS(ISTA+1,5))
+                  NSM  = NSM  + HALF*DXI*(CBEAM_ACTIVE_RPROPS(ISTA,6) + CBEAM_ACTIVE_RPROPS(ISTA+1,6))
+               ENDIF
+            ENDDO
+            IF (AREA <= EPS1) AREA = EPROP(1)
+            IF (I1   <= EPS1) I1   = EPROP(2)
+            IF (I2   <= EPS1) I2   = EPROP(3)
+            IF (DABS(I12) <= EPS1) I12 = EPROP(4)
+            IF (JTOR <= EPS1) JTOR = EPROP(5)
+            AREA_EFF = CBEAM_ACTIVE_AREA_SCALE*AREA
+            FCONV(1) = AREA
+         ENDIF
+! --- cbeam_tapered_add end --- !
       ENDIF
 
 ! Need to set some values for materials here since subr for material properties not called for these 1D elements
@@ -149,14 +222,14 @@
 
             IF (DEBUG(249) == 0) THEN
 
-               CALL BAR1 ( OPT, ELEM_LEN_AB, AREA, I1, I2, JTOR, ZS(9), K1, K2, I12, E, G, ALPHA, TREF )
+               CALL BAR1 ( OPT, ELEM_LEN_AB, AREA_EFF, I1, I2, JTOR, ZS(9), K1_EFF, K2_EFF, I12, E, G, ALPHA, TREF )
 
             ELSE
                IF (DABS(I12) < EPS1) THEN
-                  CALL BART ( OPT, ELEM_LEN_AB, AREA, I1, I2, JTOR, ZS(9), K1, K2, I12, E, G, ALPHA, TREF )
+               CALL BART ( OPT, ELEM_LEN_AB, AREA_EFF, I1, I2, JTOR, ZS(9), K1_EFF, K2_EFF, I12, E, G, ALPHA, TREF )
                ELSE
-                  WRITE(ERR,1963) EID
-                  WRITE(F06,1963) EID
+                  WRITE(ERR,'(A,I8,A)') ' *ERROR  1962: TIMOSHENKO BAR ELEMENT ',EID,' CANNOT HAVE NONZERO I12. IT WILL BE SET TO I12 = 0.'
+                  WRITE(F06,'(A,I8,A)') ' *ERROR  1962: TIMOSHENKO BAR ELEMENT ',EID,' CANNOT HAVE NONZERO I12. IT WILL BE SET TO I12 = 0.'
                   RETURN
                ENDIF
 
@@ -164,19 +237,50 @@
 
          ELSE IF (TYPE == 'BEAM    ') THEN                 ! General beam
 
-            CALL BEAM
+! --- cbeam_tapered_add begin --- !
+            CALL BEAM ( OPT, ELEM_LEN_AB, AREA_EFF, I1, I2, JTOR, CW, ZS(9), K1_EFF, K2_EFF, I12, E, G, ALPHA, TREF )
+! --- cbeam_tapered_add end --- !
 
          ENDIF
 
       ENDIF
 
-! **********************************************************************************************************************************
- 1963 FORMAT(' *ERROR  1962: TIMOSHENKO BAR ELEMENT ',A,' CANNOT HAVE NONZERO I12. IT WILL BE SET TO I12 = 0.')
-
-
-
       RETURN
 
 ! **********************************************************************************************************************************
+
+      CONTAINS
+
+      REAL(DOUBLE) FUNCTION GET_CBEAMSHR_FOR_PID ( PID_IN )
+
+      INTEGER(LONG), INTENT(IN)       :: PID_IN
+      INTEGER(LONG)                   :: ILOC
+
+      GET_CBEAMSHR_FOR_PID = CBEAMSHR
+      DO ILOC=1,NCBEAMSHR_PID
+         IF (CBEAMSHR_PID(ILOC) == PID_IN) THEN
+            GET_CBEAMSHR_FOR_PID = CBEAMSHR_VAL(ILOC)
+            EXIT
+         ENDIF
+      ENDDO
+
+      END FUNCTION GET_CBEAMSHR_FOR_PID
+
+! **********************************************************************************************************************************
+
+      REAL(DOUBLE) FUNCTION GET_CBEAMAREA_FOR_PID ( PID_IN )
+
+      INTEGER(LONG), INTENT(IN)       :: PID_IN
+      INTEGER(LONG)                   :: ILOC
+
+      GET_CBEAMAREA_FOR_PID = CBEAMAREA
+      DO ILOC=1,NCBEAMAREA_PID
+         IF (CBEAMAREA_PID(ILOC) == PID_IN) THEN
+            GET_CBEAMAREA_FOR_PID = CBEAMAREA_VAL(ILOC)
+            EXIT
+         ENDIF
+      ENDDO
+
+      END FUNCTION GET_CBEAMAREA_FOR_PID
 
       END SUBROUTINE BREL1

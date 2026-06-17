@@ -38,7 +38,7 @@
                                          LPROD, LPSHEAR, LPSHEL, LPSOLID, LPUSER1, LPUSERIN, LRFORCE, LRIGEL, LSEQ, LSETLN, LSETS, &
                                          LSLOAD, LSNORM, LSPC, LSPC1, LSPCADDC, LSPCADDR, LSUB, LTDAT, LVVEC
       USE SCONTR, ONLY                :  MAX_ELEM_DEGREE, MAX_GAUSS_POINTS, MAX_STRESS_POINTS, MCMASS, MCONM2, MCORD, MDT, MELDOF, &
-                                         MELGP, MGRID, MMATL, MOFFSET, MPBAR, MPBEAM, MPBUSH, MPCOMP_PLIES, MPCOMP0, MPELAS,       &
+                                         MELGP, MGRID, MMATL, MOFFSET, MPBAR, MPBEAM, MPBEAM_STATIONS, MPBUSH, MPCOMP_PLIES, MPCOMP0, MPELAS,       &
                                          MPMASS, MPRESS, MPLOAD4_3D_DATA, MPROD, MPSHEAR, MPSHEL, MPSOLID, MPUSER1, MPUSERIN,      &
                                          MRCONM2, MRCORD,                                                                          &
                                          MRGRID, MRMATLC, MRPBAR, MRPBEAM, MRPBUSH, MRPCOMP_PLIES, MRPCOMP0, MRPELAS, MRPMASS,     &
@@ -62,7 +62,7 @@
       USE MODEL_STUF, ONLY            :  GRID, RGRID
       USE MODEL_STUF, ONLY            :  GRID_ID, GRID_SEQ, INV_GRID_SEQ, MPC_IND_GRIDS
       USE MODEL_STUF, ONLY            :  SNORM, RSNORM, GRID_SNORM
-      USE MODEL_STUF, ONLY            :  MATL, RMATL, PBAR, RPBAR, PBEAM, RPBEAM, PBUSH, RPBUSH, PCOMP, RPCOMP, PELAS, RPELAS,     &
+      USE MODEL_STUF, ONLY            :  MATL, RMATL, PBAR, RPBAR, PBEAM, PBEAM_NSTATIONS, PBEAM_XL, PBEAM_RPROPS, RPBEAM, PBUSH, RPBUSH, PCOMP, RPCOMP, PELAS, RPELAS,     &
                                          PROD, RPROD, PSHEAR, RPSHEAR, PSHEL, RPSHEL, PSOLID, PUSER1, RPUSER1, PUSERIN,            &
                                          USERIN_ACT_COMPS, USERIN_ACT_GRIDS, USERIN_MAT_NAMES
       USE MODEL_STUF, ONLY            :  MPC_SIDS, MPCSIDS, MPCADD_SIDS
@@ -1280,6 +1280,80 @@
                JERR = JERR + 1
             ENDIF
          ENDIF
+
+! --- CBEAM_standard begin --- !
+         NAME = 'PBEAM_NSTATIONS'
+         IF (ALLOCATED(PBEAM_NSTATIONS)) THEN
+            CONTINUE
+         ELSE
+            ALLOCATE (PBEAM_NSTATIONS(LPBEAM),STAT=IERR)
+            NROWS = LPBEAM
+            NCOLS = 1
+            MB_ALLOCATED = RLONG*REAL(LPBEAM)/ONEPP6
+            IF (IERR == 0) THEN
+               CALL ALLOCATED_MEMORY ( NAME, MB_ALLOCATED, 'ALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+               DO I=1,LPBEAM
+                  PBEAM_NSTATIONS(I) = 0
+               ENDDO
+            ELSE
+               WRITE(ERR,991) MB_ALLOCATED, NAME,SUBR_NAME, IERR
+               WRITE(F06,991) MB_ALLOCATED, NAME,SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         NAME = 'PBEAM_XL'
+         IF (ALLOCATED(PBEAM_XL)) THEN
+            CONTINUE
+         ELSE
+            ALLOCATE (PBEAM_XL(LPBEAM,MPBEAM_STATIONS),STAT=IERR)
+            NROWS = LPBEAM
+            NCOLS = MPBEAM_STATIONS
+            MB_ALLOCATED = RDOUBLE*REAL(LPBEAM)*REAL(MPBEAM_STATIONS)/ONEPP6
+            IF (IERR == 0) THEN
+               CALL ALLOCATED_MEMORY ( NAME, MB_ALLOCATED, 'ALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+               DO I=1,LPBEAM
+                  DO J=1,MPBEAM_STATIONS
+                     PBEAM_XL(I,J) = ZERO
+                  ENDDO
+               ENDDO
+            ELSE
+               WRITE(ERR,991) MB_ALLOCATED, NAME,SUBR_NAME, IERR
+               WRITE(F06,991) MB_ALLOCATED, NAME,SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         NAME = 'PBEAM_RPROPS'
+         IF (ALLOCATED(PBEAM_RPROPS)) THEN
+            CONTINUE
+         ELSE
+            ALLOCATE (PBEAM_RPROPS(LPBEAM,MPBEAM_STATIONS,6),STAT=IERR)
+            NROWS = LPBEAM
+            NCOLS = MPBEAM_STATIONS*6
+            MB_ALLOCATED = RDOUBLE*REAL(LPBEAM)*REAL(MPBEAM_STATIONS)*6.0/ONEPP6
+            IF (IERR == 0) THEN
+               CALL ALLOCATED_MEMORY ( NAME, MB_ALLOCATED, 'ALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+               DO I=1,LPBEAM
+                  DO J=1,MPBEAM_STATIONS
+                     PBEAM_RPROPS(I,J,1) = ZERO
+                     PBEAM_RPROPS(I,J,2) = ZERO
+                     PBEAM_RPROPS(I,J,3) = ZERO
+                     PBEAM_RPROPS(I,J,4) = ZERO
+                     PBEAM_RPROPS(I,J,5) = ZERO
+                     PBEAM_RPROPS(I,J,6) = ZERO
+                  ENDDO
+               ENDDO
+            ELSE
+               WRITE(ERR,991) MB_ALLOCATED, NAME,SUBR_NAME, IERR
+               WRITE(F06,991) MB_ALLOCATED, NAME,SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+! --- CBEAM_standard end --- !
 
          NAME = 'PBUSH'
          IF (ALLOCATED(PBUSH)) THEN

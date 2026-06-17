@@ -48,7 +48,7 @@
       USE MODEL_STUF, ONLY            :  GRID, RGRID
       USE MODEL_STUF, ONLY            :  GRID_ID, GRID_SEQ, INV_GRID_SEQ, MPC_IND_GRIDS
       USE MODEL_STUF, ONLY            :  SNORM, RSNORM, GRID_SNORM
-      USE MODEL_STUF, ONLY            :  MATL, RMATL, PBAR, RPBAR, PBEAM, RPBEAM, PBUSH, RPBUSH, PCOMP, RPCOMP, PELAS, RPELAS,     &
+      USE MODEL_STUF, ONLY            :  MATL, RMATL, PBAR, RPBAR, PBEAM, PBEAM_NSTATIONS, PBEAM_XL, PBEAM_RPROPS, RPBEAM, PBUSH, RPBUSH, PCOMP, RPCOMP, PELAS, RPELAS,     &
                                          PROD, RPROD, PSHEAR, RPSHEAR, PSHEL, RPSHEL, PSOLID, PUSER1, RPUSER1, PUSERIN,            &
                                          USERIN_ACT_COMPS, USERIN_ACT_GRIDS, USERIN_MAT_NAMES
       USE MODEL_STUF, ONLY            :  MPC_SIDS, MPCSIDS, MPCADD_SIDS
@@ -671,6 +671,42 @@
          NAME = 'RPBEAM'
          IF (ALLOCATED(RPBEAM)) THEN
             DEALLOCATE (RPBEAM,STAT=IERR)
+            IF (IERR == 0) THEN
+               CALL ALLOCATED_MEMORY ( NAME, ZERO, 'DEALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+            ELSE
+               WRITE(ERR,992) NAME, SUBR_NAME
+               WRITE(F06,992) NAME, SUBR_NAME
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         NAME = 'PBEAM_NSTATIONS'
+         IF (ALLOCATED(PBEAM_NSTATIONS)) THEN
+            DEALLOCATE (PBEAM_NSTATIONS,STAT=IERR)
+            IF (IERR == 0) THEN
+               CALL ALLOCATED_MEMORY ( NAME, ZERO, 'DEALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+            ELSE
+               WRITE(ERR,992) NAME, SUBR_NAME
+               WRITE(F06,992) NAME, SUBR_NAME
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         NAME = 'PBEAM_XL'
+         IF (ALLOCATED(PBEAM_XL)) THEN
+            DEALLOCATE (PBEAM_XL,STAT=IERR)
+            IF (IERR == 0) THEN
+               CALL ALLOCATED_MEMORY ( NAME, ZERO, 'DEALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+            ELSE
+               WRITE(ERR,992) NAME, SUBR_NAME
+               WRITE(F06,992) NAME, SUBR_NAME
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         NAME = 'PBEAM_RPROPS'
+         IF (ALLOCATED(PBEAM_RPROPS)) THEN
+            DEALLOCATE (PBEAM_RPROPS,STAT=IERR)
             IF (IERR == 0) THEN
                CALL ALLOCATED_MEMORY ( NAME, ZERO, 'DEALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
             ELSE
