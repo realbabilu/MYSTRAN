@@ -32,22 +32,40 @@ if(NOT MYSTRAN_FORTRAN_C_INT_IS_32BIT)
   message(FATAL_ERROR "OpenBLAS hijack requires 32-bit Fortran INTEGER/C int ABI.")
 endif()
 
-set(MYSTRAN_OPENBLAS_IMPORT_LIB
-  "C:/gcc/openblas32/lib/libopenblas.dll.a"
-  CACHE FILEPATH "OpenBLAS DLL import library for BLAS hijack mode"
-)
 
-if(EXISTS "${MYSTRAN_OPENBLAS_IMPORT_LIB}")
-  set(MYSTRAN_USE_OPENBLAS ON CACHE BOOL "Use OpenBLAS DLL import library" FORCE)
-  set(enable_internal_blaslib OFF CACHE BOOL "Disable SuperLU internal CBLAS" FORCE)
-  set(BLAS_FOUND TRUE)
-  set(TPL_BLAS_LIBRARIES "${MYSTRAN_OPENBLAS_IMPORT_LIB}" CACHE FILEPATH
-    "BLAS library used by MYSTRAN and SuperLU." FORCE)
-  message(STATUS "Using OpenBLAS hijack import library: ${TPL_BLAS_LIBRARIES}")
-else()
-  set(MYSTRAN_USE_OPENBLAS OFF CACHE BOOL "Use OpenBLAS DLL import library" FORCE)
-  message(STATUS "OpenBLAS import library not found; falling back to internal BLAS/f2c path.")
+
+
+###
+
+set(MYSTRAN_OPENBLAS_IMPORT_LIB "" CACHE FILEPATH
+    "OpenBLAS import library for BLAS hijack mode")
+
+if(NOT MYSTRAN_OPENBLAS_IMPORT_LIB AND TPL_BLAS_LIBRARIES)
+  set(MYSTRAN_OPENBLAS_IMPORT_LIB "${TPL_BLAS_LIBRARIES}")
 endif()
+
+if(NOT MYSTRAN_OPENBLAS_IMPORT_LIB)
+  find_library(MYSTRAN_OPENBLAS_IMPORT_LIB
+    NAMES openblas libopenblas libopenblas.dll.a openblas.dll.a
+  )
+endif()
+
+if(NOT MYSTRAN_OPENBLAS_IMPORT_LIB)
+  message(FATAL_ERROR
+    "Could not find OpenBLAS import library. "
+    "Set TPL_BLAS_LIBRARIES or MYSTRAN_OPENBLAS_IMPORT_LIB manually."
+  )
+endif()
+
+set(TPL_BLAS_LIBRARIES "${MYSTRAN_OPENBLAS_IMPORT_LIB}" CACHE FILEPATH
+    "BLAS library used by MYSTRAN" FORCE)
+set(MYSTRAN_USE_OPENBLAS ON CACHE BOOL "Use OpenBLAS DLL import library" FORCE)
+set(enable_internal_blaslib OFF CACHE BOOL "Disable internal BLAS/f2c path" FORCE)
+set(BLAS_FOUND TRUE)
+message(STATUS "Using OpenBLAS for BLAS calls (${TPL_BLAS_LIBRARIES})")
+
+
+
 # ! --- hijack mode for extern blas end--- !
 
 # basic compiler and output options
@@ -305,12 +323,7 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
 )
 
 # ! --- MUMPS_COO add begin --- !
-if(EXISTS "${PROJECT_SOURCE_DIR}/Source/Modules/DMUMPS_STUF.f90")
-  set_source_files_properties(
-    "${PROJECT_SOURCE_DIR}/Source/Modules/DMUMPS_STUF.f90"
-    PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"
-  )
-endif()
+
 if(EXISTS "${PROJECT_SOURCE_DIR}/Source/Modules/LAPACK/LAPACK_LIN_EQN_DPB.f")
   set_source_files_properties(
     "${PROJECT_SOURCE_DIR}/Source/Modules/LAPACK/LAPACK_LIN_EQN_DPB.f"
@@ -331,6 +344,20 @@ set(MYSTRAN_DMUMPS_INCLUDE_DIR "C:/gcc/mumps32_nonmpi/include" CACHE PATH
 set(MYSTRAN_DMUMPS_EXTRA_LIBS
   "C:/gcc/mumps32_nonmpi/libdmumps.a;C:/gcc/mumps32_nonmpi/libmumps_common.a;C:/gcc/mumps32_nonmpi/libpord.a;C:/gcc/mumps32_nonmpi/libmpiseq.a"
   CACHE STRING "Static libraries for sequential MUMPS sparse solver path.")
+
+foreach(MYSTRAN_CPP_F90
+    "${PROJECT_SOURCE_DIR}/Source/LK3/LINK3.f90"
+    "${PROJECT_SOURCE_DIR}/Source/LK4/EIGRL_EXTRACT_SOLVERS.F90"
+    "${PROJECT_SOURCE_DIR}/Source/Modules/DMUMPS_STUF.f90"
+)
+  if(EXISTS "${MYSTRAN_CPP_F90}")
+    set_source_files_properties(
+      "${MYSTRAN_CPP_F90}"
+      PROPERTIES Fortran_PREPROCESS ON COMPILE_OPTIONS "-cpp"
+    )
+  endif()
+endforeach()
+
 # ! --- MUMPS_COO add end --- !
 
 # ! --- FEAST V4.0 external hook --- begin !
