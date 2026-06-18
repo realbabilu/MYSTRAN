@@ -1,4 +1,4 @@
-! ##################################################################################################################################
+﻿! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -41,12 +41,13 @@
       USE CONSTANTS_1, ONLY           :  ZERO, TWO, FOUR
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
       USE PARAMS, ONLY                :  OTMSKIP, PRTNEU
-      USE MODEL_STUF, ONLY            :  AGRID, ANY_STRN_OUTPUT, CBEAM_ACTIVE_NSTATIONS, EDAT, EPNT, ETYPE, EID, ELGP, ELMTYP,     &
+      USE MODEL_STUF, ONLY            :  AGRID, ANY_STRN_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, ELGP, ELMTYP,     &
                                          ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, PBEAM_NSTATIONS, PCOMP_PROPS, PLY_NUM, STRAIN, &
                                          TYPE, SHELL_STR_ANGLE, ZS
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRN_OPT
-      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
+      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, POLY_FIT_ERR,                  &
+                                         POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRN, TXT_STRN
 
       USE PLANE_COORD_TRANS_21_Interface
@@ -74,6 +75,7 @@
       INTEGER(LONG)                   :: NDUM              ! Dummy valye needed in call to CALC_ELEM_ENFR_FORCES
       INTEGER(LONG)                   :: NELREQ(METYPE)    ! Count of the no. of requests for ELFORCE(NODE or ENGR) or STRESS
       INTEGER(LONG)                   :: NUM_PTS_ELEM      ! Num strain stations/points for current element
+      INTEGER(LONG)                   :: NUM_PTS_CUR       ! Actual number of strain points for the current element
       INTEGER(LONG)                   :: NUM_OGEL_ROWS     ! No. elems processed prior to writing results to F06 file
       INTEGER(LONG)                   :: NUM_FROWS         ! No. elems processed for FEMAP
       INTEGER(LONG)                   :: NUM_OGEL          ! No. rows written to array OGEL prior to writing results to F06 file
@@ -198,14 +200,27 @@ elems_7: DO J = 1,NELE
                   ENDIF
                   CALL ELMDIS
 
-                  DO M=1,NUM_PTS(I)
+! --- CBEAM_standard begin --- !
+                  NUM_PTS_CUR = NUM_PTS(I)
+                  IF (TYPE == 'BEAM    ') THEN
+                     NUM_PTS_CUR = CBEAM_ACTIVE_NSTATIONS
+                     IF (NUM_PTS_CUR <= 0) NUM_PTS_CUR = 1
+                  ENDIF
+! --- CBEAM_standard end --- !
+                  DO M=1,NUM_PTS_CUR
                      CALL ELEM_STRE_STRN_ARRAYS ( M )
                      DO K=1,9
                         STRAIN_RAW(K,M) = STRAIN(K)
                      ENDDO
                   ENDDO
 
-                  STRAIN_OUT(:,1) = STRAIN(:)              ! Set STRAIN_OUT for NUM_PTS(I) = 1
+! --- cbeam_stations begin --- !
+                  IF (TYPE == 'BEAM    ') THEN
+                     STRAIN_OUT(:,:) = STRAIN_RAW(:,:)
+                  ELSE
+                     STRAIN_OUT(:,1) = STRAIN(:)              ! Set STRAIN_OUT for NUM_PTS(I) = 1
+                  ENDIF
+! --- cbeam_stations end --- !
 
                   IF ((STRN_LOC == 'CORNER  ') .OR.                                                                                &
                       (STRN_LOC == 'GAUSS   ') .OR.                                                                                &
@@ -215,16 +230,16 @@ elems_7: DO J = 1,NELE
                       (TYPE(1:5) == 'QUAD8')) THEN
 
                      IF (TYPE(1:5) == 'QUAD4') THEN
-                        CALL POLYNOM_FIT_STRE_STRN ( STRAIN_RAW, 9, NUM_PTS(I), STRAIN_OUT, STRAIN_OUT_PCT_ERR,                    &
+                        CALL POLYNOM_FIT_STRE_STRN ( STRAIN_RAW, 9, NUM_PTS_CUR, STRAIN_OUT, STRAIN_OUT_PCT_ERR,                  &
                                                      STRAIN_OUT_ERR_INDEX, PCT_ERR_MAX )
 
                      ELSE IF (TYPE(1:5) == 'QUAD8') THEN
-                        CALL POLYNOM_FIT_STRE_STRN ( STRAIN_RAW, 9, NUM_PTS(I), STRAIN_OUT, STRAIN_OUT_PCT_ERR,                    &
+                        CALL POLYNOM_FIT_STRE_STRN ( STRAIN_RAW, 9, NUM_PTS_CUR, STRAIN_OUT, STRAIN_OUT_PCT_ERR,                  &
                                                      STRAIN_OUT_ERR_INDEX, PCT_ERR_MAX )
 
                                                            ! Transform strain from the cartesian local coordinate system to
                                                            ! the element coordinate system
-                        DO M=1,NUM_PTS(I)
+                        DO M=1,NUM_PTS_CUR
                            CALL PLANE_COORD_TRANS_21( SHELL_STR_ANGLE( M ), TEL, '')
                            CALL TRANSFORM_SHELL_STR( TEL, STRAIN_OUT(:,M), TWO)
                         ENDDO
@@ -244,7 +259,7 @@ elems_7: DO J = 1,NELE
 
                   ENDIF
 
-do_strain_pts:    DO M=1,NUM_PTS(I)
+do_strain_pts:    DO M=1,NUM_PTS_CUR
 
                      DO K=1,9
                         STRAIN(K) = STRAIN_OUT(K,M)
@@ -301,6 +316,13 @@ do_strain_pts:    DO M=1,NUM_PTS(I)
 
                      NUM_OGEL_ROWS = NUM_OGEL_ROWS + 1
                      EID_OUT_ARRAY(NUM_OGEL_ROWS,1) = EID
+! --- cbeam_stations begin --- !
+                     IF (TYPE == 'BEAM    ') THEN
+                        CBEAM_XL_OUT(NUM_OGEL_ROWS) = CBEAM_ACTIVE_XL(M)
+                     ELSE
+                        CBEAM_XL_OUT(NUM_OGEL_ROWS) = ZERO
+                     ENDIF
+! --- cbeam_stations end --- !
                      GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                      IF ((STRN_LOC == 'CORNER  ') .OR. (STRN_LOC == 'GAUSS   ')) THEN
                         IF (TYPE(1:5) == 'QUAD4') THEN
@@ -321,7 +343,7 @@ do_strain_pts:    DO M=1,NUM_PTS(I)
                         WRITE(ERR,100) "A",TYPE,TABLE_NAME,ITABLE
                         CALL SET_OST_TABLE_NAME(TYPE, TABLE_NAME, ITABLE)
                         WRITE(ERR,100) "B",TYPE,TABLE_NAME,ITABLE
-                        CALL WRITE_ELEM_STRAINS ( JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS(I), ITABLE )
+                        CALL WRITE_ELEM_STRAINS ( JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS_CUR, ITABLE )
                         EXIT
                      ENDIF
                   ENDIF
@@ -891,3 +913,4 @@ do_strain_pts:    DO M=1,NUM_PTS(I)
       END SUBROUTINE GET_STRAIN_ITEM_DATA
 
       END SUBROUTINE OFP3_STRN_NO_PCOMP
+
