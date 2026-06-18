@@ -1,4 +1,4 @@
-! ##################################################################################################################################
+﻿! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -38,7 +38,7 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  HALF, ONE, TWO, ZERO
+      USE CONSTANTS_1, ONLY           :  HALF, ONE, TWO, SIX, ZERO
       USE PARAMS, ONLY                :  BEAMAMO, BEAMAMO_PID, BEAMAMO_VAL, BEAMM1MO, BEAMM1MO_PID, BEAMM1MO_VAL,          &
                                          BEAMM2MO, BEAMM2MO_PID, BEAMM2MO_VAL, BEAMTMO, BEAMTMO_PID, BEAMTMO_VAL,          &
                                          BEAMV1MO, BEAMV1MO_PID, BEAMV1MO_VAL, BEAMV2MO, BEAMV2MO_PID, BEAMV2MO_VAL,        &
@@ -73,6 +73,12 @@
       REAL(DOUBLE)                    :: K2                ! Shear constant for plane 2 (used in K1*AREA*G)
       REAL(DOUBLE)                    :: CW                ! Warping coefficient
       REAL(DOUBLE)                    :: M0                ! Intermediate variable in calculating element mass matrix, ME
+      REAL(DOUBLE)                    :: M0A               ! End A translational lumped mass for nonprismatic beam gravity
+      REAL(DOUBLE)                    :: M0B               ! End B translational lumped mass for nonprismatic beam gravity
+      REAL(DOUBLE)                    :: MU1               ! Line mass at station A of a tapered beam segment
+      REAL(DOUBLE)                    :: MU2               ! Line mass at station B of a tapered beam segment
+      REAL(DOUBLE)                    :: MTOT              ! Total translational mass represented by a CBEAM
+      REAL(DOUBLE)                    :: MXI               ! First mass moment integral in x/L coordinates
       REAL(DOUBLE)                    :: NSM               ! Nonstructural mass
       REAL(DOUBLE)                    :: RHO               ! Material density
       REAL(DOUBLE)                    :: TREF              ! Element reference temperature
@@ -236,13 +242,42 @@
 ! Generate the mass matrix for this element (array was initialized in subr EMG).
 
       IF (OPT(1) == 'Y') THEN
-         M0 = (RHO*AREA + NSM)*(ELEM_LEN_AB)/TWO
-         ME(1,1) = M0
-         ME(2,2) = M0
-         ME(3,3) = M0
-         ME(7,7) = M0
-         ME(8,8) = M0
-         ME(9,9) = M0
+         M0A = ZERO
+         M0B = ZERO
+
+         IF ((TYPE == 'BEAM    ') .AND. (CBEAM_ACTIVE_NSTATIONS > 1)) THEN
+            MTOT = ZERO
+            MXI  = ZERO
+            DO ISTA=1,CBEAM_ACTIVE_NSTATIONS-1
+               XI1 = CBEAM_ACTIVE_XL(ISTA)
+               XI2 = CBEAM_ACTIVE_XL(ISTA+1)
+               DXI = XI2 - XI1
+               IF (DXI <= EPS1) CYCLE
+
+               MU1 = RHO*CBEAM_ACTIVE_AREA_SCALE*CBEAM_ACTIVE_RPROPS(ISTA  ,1) + CBEAM_ACTIVE_RPROPS(ISTA  ,6)
+               MU2 = RHO*CBEAM_ACTIVE_AREA_SCALE*CBEAM_ACTIVE_RPROPS(ISTA+1,1) + CBEAM_ACTIVE_RPROPS(ISTA+1,6)
+
+               MTOT = MTOT + ELEM_LEN_AB*DXI*(MU1 + MU2)/TWO
+               MXI  = MXI  + DXI*XI1*(MU1 + MU2)/TWO + DXI*DXI*(MU1 + TWO*MU2)/SIX
+            ENDDO
+
+            M0B = ELEM_LEN_AB*MXI
+            M0A = MTOT - M0B
+
+            IF (M0A < ZERO) M0A = ZERO
+            IF (M0B < ZERO) M0B = ZERO
+         ELSE
+            M0 = (RHO*AREA + NSM)*(ELEM_LEN_AB)/TWO
+            M0A = M0
+            M0B = M0
+         ENDIF
+
+         ME(1,1) = M0A
+         ME(2,2) = M0A
+         ME(3,3) = M0A
+         ME(7,7) = M0B
+         ME(8,8) = M0B
+         ME(9,9) = M0B
       ENDIF
 
 ! **********************************************************************************************************************************
@@ -422,3 +457,5 @@
       END FUNCTION GET_BEAMTMO_FOR_PID
 
       END SUBROUTINE BREL1
+
+
