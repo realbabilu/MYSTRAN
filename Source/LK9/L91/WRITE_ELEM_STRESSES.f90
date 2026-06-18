@@ -883,16 +883,16 @@
       ,/,1X,A,'   ID        SB1           SB2           SB3           SB4          Stress        SB-Max        SB-Min      M.S.-C')
 
  1104 FORMAT(                                                                                                                      &
-         1X,A,'Element   Station      SA1           SA2           SA3           SA4           Axial        SA-Max        SA-Min'  &
-         ,'      M.S.-T     Torsional'                                                                                             &
-      ,/,1X,A,'   ID        x/L        SB1           SB2           SB3           SB4          Stress        SB-Max        SB-Min' &
-         ,'      M.S.-C   Stress/Margin')
+         1X,A,'                       S T R E S S E S   I N   B E A M   E L E M E N T S        ( C B E A M )'                   &
+      ,/,1X,A,'GRID   ELEMENT-ID       SXC           SXD           SXE           SXF         S-MAX          S-MIN         M.S.-T'      &
+         ,'      M.S.-C'                                                                                                            &
+      ,/,10X,'x/L')
 
  1105 FORMAT(                                                                                                                      &
-         1X,A,'Element   Station      SA1           SA2           SA3           SA4          Axial         SA-Max        SA-Min'   &
-         ,'      M.S.-T'                                                                                                           &
-      ,/,1X,A,'   ID        x/L        SB1           SB2           SB3           SB4          Stress        SB-Max        SB-Min'  &
-         ,'      M.S.-C')
+         1X,A,'                       S T R E S S E S   I N   B E A M   E L E M E N T S        ( C B E A M )'                   &
+      ,/,1X,A,'GRID   ELEMENT-ID       SXC           SXD           SXE           SXF         S-MAX          S-MIN         M.S.-T'      &
+         ,'      M.S.-C'                                                                                                            &
+      ,/,10X,'x/L')
 
 ! ELAS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  1201 FORMAT(1X,A,'Element     Stress     Element     Stress     Element     Stress     Element     Stress     Element     Stress' &

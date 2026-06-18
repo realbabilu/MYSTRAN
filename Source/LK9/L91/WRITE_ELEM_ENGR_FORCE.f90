@@ -1,4 +1,4 @@
-! ##################################################################################################################################
+﻿! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -31,6 +31,7 @@
       ! enumerated below fin the IF(TYPE == ???)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, OP2
+      USE CONSTANTS_1, ONLY           :  ZERO
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, INT_SC_NUM, NDOFR, NUM_CB_DOFS, NVEC, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -57,6 +58,7 @@
       INTEGER(LONG)                   :: BDY_DOF_NUM       ! DOF number for BDY_GRID/BDY_COMP
       INTEGER(LONG)                   :: I,J,J1,K,L        ! DO loop indices or counters
       INTEGER(LONG)                   :: IBEG, IEND, IELEM, ISTA, NSTA_ELEM, NELEMENTS
+      INTEGER(LONG)                   :: GRID_ID
       INTEGER(LONG)                   :: NUM_TERMS         ! Number of terms to write out for shell elems
 
       LOGICAL                         :: WRITE_F06, WRITE_OP2   ! flag
@@ -264,7 +266,6 @@ headr:IF (IHDR == 'Y') THEN
                 WRITE(F06,1101) FILL(1: 0), FILL(1: 0)
 
              ELSE IF (TYPE(1:4) == 'BEAM') THEN
-                WRITE(F06,1111) FILL(1: 0), FILL(1: 0)
 
              ELSE IF (TYPE(1:4) == 'ELAS') THEN
                 WRITE(F06,1201) FILL(1: 0), FILL(1: 0)
@@ -438,12 +439,36 @@ headr:IF (IHDR == 'Y') THEN
 ! --- CBEAM_standard end --- !
 
          IF (WRITE_F06)  THEN
-            DO I=1,NUM
-               STA_XL = CBEAM_XL_OUT(I)
-               WRITE(F06,1112) FILL(1: 0), EID_OUT_ARRAY(I,1), STA_XL, (OGEL(I,J),J=1,8)
+            WRITE(F06,'(A,/,A,/,A)') '                                 F O R C E S   I N   B E A M   E L E M E N T S        ( C B E A M )', &
+                                      '         ELEMENT-ID        - BENDING MOMENTS -            - WEB  SHEARS -           AXIAL       TOTAL        WARPING', &
+                                      '    GRID   STAT X/L       PLANE 1       PLANE 2        PLANE 1       PLANE 2        FORCE       TORQUE       TORQUE'
+            I = 1
+            DO WHILE (I <= NUM)
+               IBEG = I
+               IELEM = EID_OUT_ARRAY(I,1)
+               DO WHILE (I <= NUM)
+                  IF (EID_OUT_ARRAY(I,1) /= IELEM) EXIT
+                  I = I + 1
+               ENDDO
+               IEND = I - 1
+               NSTA_ELEM = IEND - IBEG + 1
+
+               WRITE(F06,*)
+               WRITE(F06,1114) 0, IELEM
+               DO ISTA=1,NSTA_ELEM
+                  GRID_ID = 0
+                  IF (ISTA == 1) GRID_ID = GID_OUT_ARRAY(IBEG,2)
+                  IF (ISTA == NSTA_ELEM) GRID_ID = GID_OUT_ARRAY(IBEG,3)
+                  STA_XL = CBEAM_XL_OUT(IBEG + ISTA - 1)
+                  WRITE(F06,1115) FILL(1: 0), GRID_ID, STA_XL,                                                    &
+                                  OGEL(IBEG + ISTA - 1,1), OGEL(IBEG + ISTA - 1,2),                               &
+                                  OGEL(IBEG + ISTA - 1,5), OGEL(IBEG + ISTA - 1,6),                               &
+                                  OGEL(IBEG + ISTA - 1,7), OGEL(IBEG + ISTA - 1,8), ZERO
+               ENDDO
             ENDDO
-            WRITE(F06,1103) FILL(1: 0), FILL(1: 0), (MAX_ANS(J),J=1,8), FILL(1: 0), (MIN_ANS(J),J=1,8), FILL(1: 0),                 &
-                                                    (ABS_ANS(J),J=1,8), FILL(1: 0)
+            WRITE(F06,1116) FILL(1: 0), MAX_ANS(1), MAX_ANS(2), MAX_ANS(5), MAX_ANS(6), MAX_ANS(7), MAX_ANS(8), ZERO
+            WRITE(F06,1117) FILL(1: 0), MIN_ANS(1), MIN_ANS(2), MIN_ANS(5), MIN_ANS(6), MIN_ANS(7), MIN_ANS(8), ZERO
+            WRITE(F06,1118) FILL(1: 0), ABS_ANS(1), ABS_ANS(2), ABS_ANS(5), ABS_ANS(6), ABS_ANS(7), ABS_ANS(8), ZERO
          ENDIF
 
       ELSE IF (TYPE(1:4) == 'ELAS') THEN
@@ -698,12 +723,15 @@ headr:IF (IHDR == 'Y') THEN
  1102 FORMAT(16X,A,I8,8(1ES14.6))
 
 ! --- cbeam_stations begin --- !
- 1111 FORMAT(16X,A,' Element   Station                Bending Moments                           Shears                 Axial'        &
-          ,'         Torque'  &
-          ,/,16X,A,'    ID       x/L       Plane 1       Plane 2       Plane 1       Plane 2      Plane 1       Plane 2'         &
-          ,'        Force')
+ 1114 FORMAT(I1,8X,I8)
 
- 1112 FORMAT(16X,A,I8,2X,F7.4,8(1ES14.6))
+ 1115 FORMAT(1X,A,I8,2X,F7.3,1X,7(1ES14.6))
+
+ 1116 FORMAT(11X,A,'MAX* :  ',7(ES14.6))
+
+ 1117 FORMAT(11X,A,'MIN* :  ',7(ES14.6))
+
+ 1118 FORMAT(11X,A,'ABS* :  ',7(ES14.6))
 ! --- cbeam_stations end --- !
 
  1103 FORMAT(1X,A,'         ------------- ------------- ------------- ------------- ------------- ------------- -------------',    &
@@ -840,3 +868,4 @@ headr:IF (IHDR == 'Y') THEN
       END SUBROUTINE GET_MAX_MIN_ABS
 
       END SUBROUTINE WRITE_ELEM_ENGR_FORCE
+
