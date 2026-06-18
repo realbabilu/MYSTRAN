@@ -1,4 +1,4 @@
-! ##################################################################################################################################
+﻿! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -59,6 +59,10 @@
       INTEGER(LONG)                   :: MAXELOUT             ! Max of MAXELOUT_SC for all subcases
       INTEGER(LONG)                   :: NREQ_EL(METYPE,0:15) ! No. of requests in ELOUT for each bit of ELOUT for 1 subcase
       INTEGER(LONG)                   :: NREQ_GR(0:15)        ! No. of requests in GROUT for each bit of GROUT for 1 subcase
+      INTEGER(LONG)                   :: BEAM_FORCE_ROWS_SC   ! Conservative per-subcase count of beam engr-force rows
+      INTEGER(LONG)                   :: BEAM_STRESS_ROWS_SC  ! Conservative per-subcase count of beam stress rows
+      INTEGER(LONG)                   :: BEAM_STRAIN_ROWS_SC  ! Conservative per-subcase count of beam strain rows
+      INTEGER(LONG)                   :: BEAM_NSTA            ! Conservative beam station count used for LINK9 allocations
 
 
       INTRINSIC                       :: IAND, MAX
@@ -198,6 +202,27 @@
 
       IF (DEBUG(91) == 1) CALL MAXREQ_OGEL_DEB ( '25' )
 
+! Conservative beam-row pass: some simple 2-station PBEAM definitions are stored with
+! PBEAM_NSTATIONS=1 even though LINK9 beam force/stress/strain output writes both ends.
+      DO I=1,LSUB
+         BEAM_FORCE_ROWS_SC  = 0
+         BEAM_STRESS_ROWS_SC = 0
+         BEAM_STRAIN_ROWS_SC = 0
+         DO J=1,NELE
+            INT_ELEM_ID = ESORT2(J)
+            TYPE = ETYPE(INT_ELEM_ID)
+            IF (TYPE(1:4) /= 'BEAM') CYCLE
+            BEAM_NSTA = PBEAM_NSTATIONS(EDAT(EPNT(INT_ELEM_ID)+1))
+            IF (BEAM_NSTA <= 1) BEAM_NSTA = 2
+            IF (IAND(ELOUT(INT_ELEM_ID,I),IBIT(1)) > 0) BEAM_FORCE_ROWS_SC  = BEAM_FORCE_ROWS_SC  + BEAM_NSTA
+            IF (IAND(ELOUT(INT_ELEM_ID,I),IBIT(2)) > 0) BEAM_STRESS_ROWS_SC = BEAM_STRESS_ROWS_SC + 2*BEAM_NSTA
+            IF (IAND(ELOUT(INT_ELEM_ID,I),IBIT(3)) > 0) BEAM_STRAIN_ROWS_SC = BEAM_STRAIN_ROWS_SC + 2*BEAM_NSTA
+         ENDDO
+         MAXELOUT = MAX(MAXELOUT, BEAM_FORCE_ROWS_SC)
+         MAXELOUT = MAX(MAXELOUT, BEAM_STRESS_ROWS_SC)
+         MAXELOUT = MAX(MAXELOUT, BEAM_STRAIN_ROWS_SC)
+      ENDDO
+
       MAXREQ = MAX(MAXGROUT,MAXELOUT)
 
       IF (DEBUG(91) == 1) CALL MAXREQ_OGEL_DEB ( '31' )
@@ -234,7 +259,7 @@
 !                                                            -----
          NUMBER_ROWS(K) = 1
 
-         IF (TYPE == 'BEAM    ') THEN
+         IF (TYPE(1:4) == 'BEAM') THEN
             NUMBER_ROWS(K) = PBEAM_NSTATIONS(EDAT(EPNT(INT_ELEM_ID)+1))
             IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 5
          ENDIF
@@ -290,7 +315,7 @@
             CALL GET_ELEM_NUM_PLIES ( INT_ELEM_ID )
          ENDIF
 
-         IF (TYPE == 'BEAM    ') THEN
+         IF (TYPE(1:4) == 'BEAM') THEN
             NUMBER_ROWS(K) = 2*PBEAM_NSTATIONS(EDAT(EPNT(INT_ELEM_ID)+1))
             IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 10
          ELSE IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'SHEAR')) THEN
@@ -442,3 +467,6 @@
       END SUBROUTINE MAXREQ_OGEL_DEB
 
       END SUBROUTINE MAXREQ_OGEL
+
+
+
