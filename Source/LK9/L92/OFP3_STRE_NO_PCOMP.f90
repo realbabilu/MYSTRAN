@@ -258,7 +258,7 @@ elems_5: DO J = 1,NELE
                       (TYPE(1:5) == 'TETRA') .OR.                                                                                  &
                       (TYPE(1:5) == 'QUAD8')) THEN
 
-                     IF ((TYPE(1:5) == 'QUAD4')) THEN
+                     IF (TYPE(1:5) == 'QUAD4') THEN
                          CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS_CUR, STRESS_OUT, STRESS_OUT_PCT_ERR,                  &
                                                       STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
 
@@ -307,7 +307,7 @@ elems_5: DO J = 1,NELE
                                  IF (JVEC == 1) THEN
                                     IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ')) THEN
                                        IF (M == 1) THEN
-                                          IF ((TYPE(1:5) == 'QUAD4') ) THEN
+                                          IF (TYPE(1:5) == 'QUAD4') THEN
                                              WRITE(TXT_STRE(OT4_EROW),9190) OT4_EROW, OT4_DESCRIPTOR, TYPE, EID,                   &
                                                                            STRESS_ITEM(K+(L-1)*NUM_OTM_ENTRIES)
                                           ELSE
@@ -354,7 +354,7 @@ elems_5: DO J = 1,NELE
 ! --- cbeam_add end --- !
                      GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                      IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ')) THEN
-                        IF ((TYPE(1:5) == 'QUAD4')) THEN
+                        IF (TYPE(1:5) == 'QUAD4') THEN
                            POLY_FIT_ERR(NUM_OGEL_ROWS)       = STRESS_OUT_PCT_ERR(M)
                            POLY_FIT_ERR_INDEX(NUM_OGEL_ROWS) = STRESS_OUT_ERR_INDEX(M)
                         ENDIF

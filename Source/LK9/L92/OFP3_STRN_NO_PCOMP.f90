@@ -1,4 +1,4 @@
-! ##################################################################################################################################
+﻿! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -146,10 +146,7 @@
 
       DO I=1,METYPE  !metype
                                        ! Only count requests for elem types that can have strain output
-! --- cbeam_add begin --- !
-         IF((ELMTYP(I)(1:3) == 'BAR'  ) .OR. (ELMTYP(I)(1:4) == 'BEAM' ) .OR. (ELMTYP(I)(1:3) == 'ROD'  ) .OR.                    &
-! --- cbeam_add end --- !
-            (ELMTYP(I)(1:4) == 'ELAS' ) .OR. (ELMTYP(I)(1:4) == 'BUSH' ) .OR. (ELMTYP(I)(1:5) == 'TRIA3') .OR.                    &
+         IF((ELMTYP(I)(1:4) == 'BUSH' ) .OR. (ELMTYP(I)(1:5) == 'TRIA3') .OR.                                                     &
             (ELMTYP(I)(1:5) == 'QUAD4') .OR. (ELMTYP(I)(1:5) == 'SHEAR') .OR. (ELMTYP(I)(1:4) == 'HEXA' ) .OR.                    &
             (ELMTYP(I)(1:5) == 'PENTA') .OR. (ELMTYP(I)(1:5) == 'TETRA') .OR. (ELMTYP(I)(1:5) == 'QUAD8')) THEN
             DO J=1,NELE !nele
@@ -157,13 +154,6 @@
                IF (PCOMP_PROPS == 'N') THEN !pcomp_props
                   IF (ETYPE(J) == ELMTYP(I)) THEN !etype j
 
-! --- cbeam_add begin --- !
-                     IF (ETYPE(J) == 'BEAM    ') THEN
-                        NUM_PTS_ELEM = PBEAM_NSTATIONS(EDAT(EPNT(J)+1))
-                        IF (NUM_PTS_ELEM <= 0) NUM_PTS_ELEM = 5
-                        IF (NUM_PTS_ELEM > NUM_PTS(I)) NUM_PTS(I) = NUM_PTS_ELEM
-                     ELSE !not beam
-! --- cbeam_add end --- !
                         IF ((STRN_LOC == 'CORNER  ') .OR.                                                                         &
                             (STRN_LOC == 'GAUSS   ') .OR.                                                                         &
                             (ETYPE(J)(1:4) == 'HEXA') .OR.                                                                        &
@@ -176,7 +166,6 @@
                            NUM_PTS_ELEM = 1
                            NUM_PTS(I) = 1
                         ENDIF ! corner
-                     ENDIF ! beam or not
                      
                      ELOUT_STRN = IAND(ELOUT(J,INT_SC_NUM),IBIT(ELOUT_STRN_BIT))
                      IF (ELOUT_STRN > 0) THEN
@@ -215,15 +204,8 @@ elems_7: DO J = 1,NELE
                   ENDIF
                   CALL ELMDIS
 
-! --- cbeam_add begin --- !
-                  NUM_STR_POINTS =  NUM_PTS(I) 
-                  NUM_PTS_CUR = NUM_PTS(I)
-                  IF (TYPE == 'BEAM    ') THEN
-                     NUM_PTS_CUR = CBEAM_ACTIVE_NSTATIONS
-                     IF (NUM_PTS_CUR <= 0) NUM_PTS_CUR = 1
-                     NUM_STR_POINTS  = NUM_PTS_CUR
-                  ENDIF
-! --- cbeam_add end --- !
+                  NUM_STR_POINTS = NUM_PTS(I)
+                  NUM_PTS_CUR    = NUM_PTS(I)
                   DO M=1,NUM_STR_POINTS  
                      CALL ELEM_STRE_STRN_ARRAYS ( M )
                      DO K=1,9
@@ -231,13 +213,7 @@ elems_7: DO J = 1,NELE
                      ENDDO
                   ENDDO
 
-! --- cbeam_stations begin --- !
-                  IF (TYPE == 'BEAM    ') THEN
-                     STRAIN_OUT(:,:) = STRAIN_RAW(:,:)
-                  ELSE
-                     STRAIN_OUT(:,1) = STRAIN(:)              ! Set STRAIN_OUT for NUM_PTS(I) = 1
-                  ENDIF
-! --- cbeam_stations end --- !
+                  STRAIN_OUT(:,1) = STRAIN(:)              ! Set STRAIN_OUT for NUM_PTS(I) = 1
 
                   IF ((STRN_LOC == 'CORNER  ') .OR.                                                                                &
                       (STRN_LOC == 'GAUSS   ') .OR.                                                                                &
@@ -275,11 +251,7 @@ elems_7: DO J = 1,NELE
                      ENDIF
 
                   ENDIF
-                  IF (TYPE == 'BEAM    ') THEN
-			NUM_STR_POINTS = NUM_PTS_CUR
-		  ELSE
-			NUM_STR_POINTS = NUM_PTS(I)
-		  ENDIF
+                  NUM_STR_POINTS = NUM_PTS(I)
 
 do_strain_pts:    DO M=1,NUM_STR_POINTS 
 
@@ -338,13 +310,7 @@ do_strain_pts:    DO M=1,NUM_STR_POINTS
 
                      NUM_OGEL_ROWS = NUM_OGEL_ROWS + 1
                      EID_OUT_ARRAY(NUM_OGEL_ROWS,1) = EID
-! --- cbeam_add begin --- !
-                     IF (TYPE == 'BEAM    ') THEN
-                        CBEAM_XL_OUT(NUM_OGEL_ROWS) = CBEAM_ACTIVE_XL(M)
-                     ELSE
-                        CBEAM_XL_OUT(NUM_OGEL_ROWS) = ZERO
-                     ENDIF
-! --- cbeam_add end --- !
+                     CBEAM_XL_OUT(NUM_OGEL_ROWS) = ZERO
                      GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                      IF ((STRN_LOC == 'CORNER  ') .OR. (STRN_LOC == 'GAUSS   ')) THEN
                         IF (TYPE(1:5) == 'QUAD4') THEN
@@ -937,4 +903,5 @@ do_strain_pts:    DO M=1,NUM_STR_POINTS
       END SUBROUTINE GET_STRAIN_ITEM_DATA
 
       END SUBROUTINE OFP3_STRN_NO_PCOMP
+
 

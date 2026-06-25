@@ -205,8 +205,6 @@
       INTEGER(LONG)            :: NCORD2              =   0      ! Count of no. of CORD2C, 2R or 2S cards
       INTEGER(LONG)            :: NCPENTA6            =   0      ! Count of no. of CPENTA  elems with  6 nodes
       INTEGER(LONG)            :: NCPENTA15           =   0      ! Count of no. of CPENTA  elems with 15 nodes
-      INTEGER(LONG)            :: NCPYRA5             =   0      ! Count of no. of CPYRA   elems with  5 nodes
-      INTEGER(LONG)            :: NCPYRA14            =   0      ! Count of no. of CPYRA   elems with 14 nodes
       INTEGER(LONG)            :: NCQUAD4             =   0      ! Count of no. of CQUAD4  elems
       INTEGER(LONG)            :: NCQUAD4K            =   0      ! Count of no. of CQUAD4K elems
       INTEGER(LONG)            :: NCQUAD8             =   0      ! Count of no. of CQUAD8  elems
@@ -466,8 +464,6 @@
       INTEGER(LONG), PARAMETER :: MEDAT_CHEXA20       =  22      ! No. terms that go into EDAT array for CHEXA  elems with 20 nodes
       INTEGER(LONG), PARAMETER :: MEDAT_CPENTA6       =   8      ! No. terms that go into EDAT array for CPENTA elems with  6 nodes
       INTEGER(LONG), PARAMETER :: MEDAT_CPENTA15      =  17      ! No. terms that go into EDAT array for CPENTA elems with 15 nodes
-      INTEGER(LONG), PARAMETER :: MEDAT_CPYRA5        =   7      ! No. terms that go into EDAT array for CPYRA  elems with  5 nodes
-      INTEGER(LONG), PARAMETER :: MEDAT_CPYRA14       =  16      ! No. terms that go into EDAT array for CPYRA  elems with 14 nodes
       INTEGER(LONG), PARAMETER :: MEDAT_CQUAD         =  11      ! No. terms that go into EDAT array for CQUAD  elems
       INTEGER(LONG), PARAMETER :: MEDAT_CQUAD8        =  15      ! No. terms that go into EDAT array for CQUAD8 elems
       INTEGER(LONG), PARAMETER :: MEDAT_CROD          =   4      ! No. terms that go into EDAT array for CROD   elems

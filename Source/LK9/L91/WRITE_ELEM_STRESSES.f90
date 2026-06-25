@@ -297,7 +297,7 @@
                   WRITE(F06,401) FILL(1: 61), ONAME
                ENDIF
 
-            ELSE IF (((TYPE(1:5) == 'QUAD4') ) .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                   WRITE(F06,302) FILL(1: 20)
                ELSE
@@ -355,7 +355,7 @@
                   WRITE(F06,1302) FILL(1: 1), FILL(1: 1)
                ENDIF
 
-            ELSE IF (((TYPE(1:5) == 'QUAD4') ) .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
                IF (STRE_OPT == 'VONMISES') THEN
                   WRITE(F06,1401) FILL(1: 1), FILL(1: 1), FILL(1: 1)
                ELSE
@@ -562,12 +562,11 @@
 
          IF(WRITE_F06) WRITE(F06,1103) (FILL(1:1), EID_OUT_ARRAY(I,1), OGEL(I,1),I=1,NUM)
 
-      ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
          !       12345
          ! 39  : CTETRA
          ! 67  : CHEXA
          ! 68  : CPENTA
-         ! 255 : CPYRAM
          IF (TYPE(1:4) == "HEXA") THEN
              ELEMENT_TYPE = 67
              NNODES = 9
@@ -577,9 +576,6 @@
          ELSE IF (TYPE(1:5) == "PENTA") THEN
              ELEMENT_TYPE = 68
              NNODES = 7
-         ELSE IF (TYPE(1:4) == "PYRA") THEN
-             ELEMENT_TYPE = 255
-             NNODES = 6
          ENDIF
          NUM_WIDE = 4 + 21*NNODES
          NELEMENTS = NUM / NUM_PTS
@@ -604,7 +600,6 @@
 
           ! setting:
           !  - CTETRA: [element_device, cid, 'CEN/', 4]
-          !  - CPYRAM: [element_device, cid, 'CEN/', 5]
           !  - CPENTA: [element_device, cid, 'CEN/', 6]
           !  - CHEXA:  [element_device, cid, 'CEN/', 8]
 

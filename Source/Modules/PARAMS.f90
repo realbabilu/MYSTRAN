@@ -253,11 +253,9 @@
       CHARACTER(  1*BYTE)      :: KOORAT         =    'Y'    ! 'Y', 'N' to tell whether to calc ratio of max/min KOO diagonal terms
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-! --- dense_subspace_feast_add  begin --- !
       CHARACTER(  6*BYTE)      :: LANCMETH       = 'ARPACK'  ! Lanczos backend:
 !                                                              ARPACK (implemented)
 !                                                              FEAST / CHASE (accepted; currently fallback to ARPACK in LINK4)
-! --- dense_subspace_feast_add  end --- !
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: MATSPARS       =    'Y'    ! 'Y' for use of sparse SFF, SFS, SSS or 'N' for full matrix add/mult

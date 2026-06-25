@@ -436,7 +436,7 @@
             EPROP(I) = RPSHEAR(INTL_PID,I)
          ENDDO
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') ) .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
 
                                                            ! For elems that not composites do EPROP in subr SHELL_ABD_MATRICES)
          IF (PCOMP_PROPS == 'N') THEN                      ! Shell properties are in array PSHELL (except maybe membrane thickness)
@@ -508,7 +508,7 @@
             EPROP( 6) = RPSHEL(INTL_PID, 6)                ! ZS(2)
 
             THICK_AVG = ZERO                               ! DELTA locates where thickness key is in EDAT (rel to EID) for plates
-            IF ((TYPE(1:5) == 'QUAD4')) THEN
+            IF (TYPE(1:5) == 'QUAD4') THEN
                DELTA = DEDAT_Q4_THICK_KEY
             ELSE IF (TYPE(1:5) == 'TRIA3') THEN
                DELTA = DEDAT_T3_THICK_KEY
@@ -734,7 +734,7 @@
          ENDIF
          NUMMAT = 1
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') ) .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
                                                            ! For elems that are not composites do EMAT in subr SHELL_ABD_MATRICES)
          IF (PCOMP_PROPS == 'N') THEN
             INTL_MID(1) = PSHEL(INTL_PID,2)
@@ -831,7 +831,7 @@
 ! Set transverse shear alloawbles to same as in-plane shear allowables for non PCOMP shells. The transverse shear allowables go
 ! in rows 19 and 20 of EMAT
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') )) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
          if (PCOMP_PROPS == 'N') THEN
             DO I=1,NUMMAT
                IF      (INTL_MID(I) == 1) THEN
@@ -991,7 +991,7 @@
                ZOFFS = ZERO
             ENDIF
 
-         ELSE IF ((TYPE(1:5) == 'QUAD4') ) THEN
+         ELSE IF (TYPE(1:5) == 'QUAD4') THEN
 
             IROW = EDAT(EPNTK + DEDAT_Q4_POFFS_KEY)
             IF (IROW > 0) THEN                             ! Elem has offset. IROW > 0 is the row in PLATEOFF where ZOFFS is

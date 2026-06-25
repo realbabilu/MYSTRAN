@@ -1,4 +1,4 @@
-! ##################################################################################################################################
+﻿! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -279,7 +279,7 @@
                ENDIF
 
 ! --- CQUADR_DKMQ24 begin --- !
-            ELSE IF (((TYPE(1:5) == 'QUAD4') ) .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                   WRITE(F06,302) FILL(1: 20)
                ELSE
@@ -348,7 +348,7 @@
                ELSE
                   WRITE(F06,1302) FILL(1: 1), FILL(1: 1)
                ENDIF
-            ELSE IF (((TYPE(1:5) == 'QUAD4') ) .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
                IF (STRN_OPT == 'VONMISES') THEN
                   WRITE(F06,1401) FILL(1: 1), FILL(1: 1), FILL(1: 1)
                ELSE
@@ -545,7 +545,6 @@
          ! 39  : CTETRA
          ! 67  : CHEXA
          ! 68  : CPENTA
-         ! 255 : CPYRAM
          IF (TYPE(1:4) == "HEXA") THEN
              ELEMENT_TYPE = 67
              NNODES = 9
@@ -580,7 +579,6 @@
 
           ! setting:
           !  - CTETRA: [element_device, cid, 'CEN/', 4]
-          !  - CPYRAM: [element_device, cid, 'CEN/', 5]
           !  - CPENTA: [element_device, cid, 'CEN/', 6]
           !  - CHEXA:  [element_device, cid, 'CEN/', 8]
 
@@ -767,8 +765,8 @@
 
 
       ELSE IF (TYPE == 'ROD     ') THEN
-         CALL WRITE_ROD (ISUBCASE, NUM, FILL(1:1), FILL(1:16), ITABLE, TITLEI, STITLEI, LABELI, &
-                         FIELD5_INT_MODE, FIELD6_EIGENVALUE, WRITE_OP2 )
+         CALL WRITE_ROD (ISUBCASE, NUM, FILL(1:1), ITABLE, TITLEI, STITLEI, LABELI, &
+                         FIELD5_INT_MODE, FIELD6_EIGENVALUE, WRITE_F06, WRITE_OP2 )
 
       ELSE IF (TYPE(1:5) == 'SHEAR') THEN
          CALL WRITE_OST_CSHEAR (NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI, &
@@ -1209,3 +1207,4 @@
       END SUBROUTINE WRITE_OST_CTRIA3
 
 !==============================================================================
+
