@@ -141,8 +141,8 @@
       OPT(2) = 'Y'                                         ! OPT(2) is for calc of PTE
       OPT(3) = 'Y'                                         ! OPT(3) is for calc of SEi, STEi
       OPT(4) = 'Y'                                         ! OPT(4) is for calc of KE-linear
-      OPT(5) = 'Y'                                         ! OPT(5) is for calc of PPE 
-! --- cbeam_add begin --- ! >> change to 'Y' from 'N' PPE
+      OPT(5) = 'N'                                         ! OPT(5) is for calc of PPE 
+! --- cbeam_add begin --- ! enable PPE only for CBEAM distributed-load recovery
       OPT(6) = 'N'                                         ! OPT(6) is for calc of KE-diff stiff
 ! --- cbeam_add end --- !
       FORCE_ITEM(1) = 'M1a: Mom Plane1 EndA'
@@ -212,6 +212,11 @@ elems_2: DO J = 1,NELE
                   ELOUT_ELFE = IAND(ELOUT(J,INT_SC_NUM),IBIT(ELOUT_ELFE_BIT))
                   IF (ELOUT_ELFE > 0) THEN
                      PLY_NUM = 0                           ! 'N' in call to EMG means do not write to BUG file
+                     IF (TYPE == 'BEAM    ') THEN
+                        OPT(5) = 'Y'
+                     ELSE
+                        OPT(5) = 'N'
+                     ENDIF
                      CALL EMG ( J   , OPT, 'N', SUBR_NAME, 'N' )
                      IF (NUM_EMG_FATAL_ERRS > 0) THEN
                         IERROR = IERROR + 1
@@ -1175,6 +1180,5 @@ elems_2: DO J = 1,NELE
 ! **********************************************************************************************************************************
 
       END SUBROUTINE OFP3_ELFE_1D
-
 
 

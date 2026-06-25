@@ -135,10 +135,9 @@
       OPT(3) = 'Y'                                         ! OPT(3) is for calc of SEi, STEi
       OPT(4) = 'N'                                         ! OPT(4) is for calc of KE-linear
 ! --- cbeam_add begin --- !
-! CBEAM distributed-load stress recovery needs the same fixed-end load contribution
-! that the engineering-force path uses. Request PPE here so CALC_ELEM_NODE_FORCES
-! can reconstruct beam section forces from the full element load state.
-      OPT(5) = 'Y'                                         ! OPT(5) is for calc of PPE
+! Default to legacy behavior for non-beam elements. CBEAM output can enable PPE
+! per-element before the EMG call when fixed-end load recovery is actually needed.
+      OPT(5) = 'N'                                         ! OPT(5) is for calc of PPE
 ! --- cbeam_add end--- !
       OPT(6) = 'N'                                         ! OPT(6) is for calc of KE-diff stiff
 
@@ -208,6 +207,11 @@ elems_5: DO J = 1,NELE
                      WRT_BUG(K) = 0
                   ENDDO
                   PLY_NUM = 1                              ! 'N' in call to EMG means do not write to BUG file
+                  IF (TYPE == 'BEAM    ') THEN
+                     OPT(5) = 'Y'
+                  ELSE
+                     OPT(5) = 'N'
+                  ENDIF
                   CALL EMG ( J   , OPT, 'N', SUBR_NAME, 'N' )
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
@@ -1161,4 +1165,3 @@ elems_5: DO J = 1,NELE
 !====================================================================================================
 
       END SUBROUTINE OFP3_STRE_NO_PCOMP
-
