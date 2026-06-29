@@ -91,13 +91,11 @@
       TITLE1(4,2) = 'R3'
 
       IF      (WHAT == 'DISP') THEN
-! --- neu_upgrade begin --- !
          VEC_ID_OFFSET = 0
          TITLE1(1,1) = 'Total'
          TITLE1(1,2) = 'Total'
          TITLE2(1) = ' Translation'
          TITLE2(2) = ' Rotation'
-! --- neu_upgrade end --- !
       ELSE IF (WHAT == 'OLOA') THEN
          VEC_ID_OFFSET = 20000
           TITLE1(1,1) = 'Total'
@@ -106,12 +104,10 @@
           TITLE2(2) = ' Applied Moment'
       ELSE IF (WHAT == 'SPCF') THEN
          VEC_ID_OFFSET = 30000
-! --- neu_upgrade begin --- !
           TITLE1(1,1) = 'Total'
           TITLE1(1,2) = 'Total'
          TITLE2(1) = ' Constraint Force'
          TITLE2(2) = ' Constraint Moment'
-! --- neu_upgrade end --- !
       ELSE IF (WHAT == 'MPCF') THEN
          VEC_ID_OFFSET = 40000
          TITLE2(1) = ' MPC force'

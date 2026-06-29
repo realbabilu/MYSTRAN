@@ -145,45 +145,36 @@
       FIELD5_INT_MODE = 0
       FIELD6_EIGENVALUE = 0.0
       WRITE_F06 = (STRN_OUT(1:1) == 'Y')
-      INQUIRE ( UNIT=OP2, OPENED=WRITE_OP2 )
+      WRITE_OP2 = (STRN_OUT(2:2) == 'Y')
 
       IF (IHDR == 'Y') THEN
-         IF (WRITE_F06) WRITE(F06,*)
-         IF (WRITE_F06) WRITE(F06,*)
-
          ! -- F06 header: OUTPUT FOR SUBCASE, EIGENVECTOR or CRAIG-BAMPTON DOF
+         CALL WRITE_SUBCASE_EIGENVEC_HEADER(JSUB, WRITE_F06)
          ISUBCASE_INDEX = 0
          IF    (SOL_NAME(1:7) == 'STATICS') THEN
             ISUBCASE_INDEX = JSUB
             ANALYSIS_CODE = 1
             FIELD5_INT_MODE = 1  ! temp
             FIELD5_INT_MODE = SCNUM(JSUB)
-            IF (WRITE_F06) WRITE(F06,101) SCNUM(JSUB)
          ELSE IF (SOL_NAME(1:8) == 'NLSTATIC') THEN
             ISUBCASE_INDEX = 1  ! statics
             ANALYSIS_CODE = 10
             FIELD5_INT_MODE = SCNUM(JSUB)
-            IF (WRITE_F06) WRITE(F06,101) SCNUM(JSUB)
 
          ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
             ISUBCASE_INDEX = 1  ! statics
             ANALYSIS_CODE = 1
             FIELD5_INT_MODE = SCNUM(JSUB)
-            IF (WRITE_F06) WRITE(F06,101) SCNUM(JSUB)
 
          ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
             ISUBCASE_INDEX = 2  ! modes
             ANALYSIS_CODE = 7
             FIELD5_INT_MODE = JSUB
-            ! FIELD6_EIGENVALUE = ????
-            IF (WRITE_F06) WRITE(F06,102) JSUB
 
          ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
             ISUBCASE_INDEX = 1  ! modes
             ANALYSIS_CODE = 2
             FIELD5_INT_MODE = JSUB
-            ! FIELD6_EIGENVALUE = ????
-            IF (WRITE_F06) WRITE(F06,102) JSUB
 
          ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
             ISUBCASE_INDEX = 1  ! modes
@@ -209,27 +200,13 @@
          ENDIF
          ISUBCASE = SCNUM(ISUBCASE_INDEX)
 
-         ! -- F06 header for TITLE, SUBTITLE, LABEL (but only to F06)
          TITLEI = TITLE(INT_SC_NUM)
          STITLEI = STITLE(INT_SC_NUM)
          LABELI = LABEL(INT_SC_NUM)
 
          IF (WRITE_F06) THEN
-             IF (TITLE(INT_SC_NUM)(1:)  /= ' ') THEN
-                WRITE(F06,201) TITLE(INT_SC_NUM)
-             ENDIF
-
-             IF (STITLE(INT_SC_NUM)(1:) /= ' ') THEN
-                WRITE(F06,201) STITLE(INT_SC_NUM)
-             ENDIF
-
-             IF (LABEL(INT_SC_NUM)(1:)  /= ' ') THEN
-                WRITE(F06,201) LABEL(INT_SC_NUM)
-             ENDIF
-             WRITE(F06,*)
-
             ! -- F06 1st 2 header lines for strain output description
-            IF     ((TYPE(1:3) == 'BAR') .OR. (TYPE(1:4) == 'BEAM')) THEN
+            IF     ((TYPE(1:3) == 'BAR') .OR. (TYPE == 'BEAM    ')) THEN
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                   WRITE(F06,302) FILL(1: 20)
                ELSE
@@ -278,7 +255,6 @@
                   WRITE(F06,401) FILL(1: 61), ONAME
                ENDIF
 
-! --- CQUADR_DKMQ24 begin --- !
             ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                   WRITE(F06,302) FILL(1: 20)
@@ -387,7 +363,7 @@
       ! Write the element strain output
       !IF      (TYPE == 'BAR     ') THEN
          !CALL WRITE_BAR ( NUM, FILL(1:1), FILL(1:16) )
-      IF (TYPE(1:4) == 'BEAM') THEN
+      IF (TYPE == 'BEAM    ') THEN
 
          IF (WRITE_OP2) THEN
             NELEMENTS = 0
@@ -592,7 +568,7 @@
                         REAL(OGEL(I+J-1,12),4), REAL(OGEL(I+J-1,7),4),                                                    &
                         REAL(OGEL(I+J-1,2),4), REAL(OGEL(I+J-1,5),4), REAL(OGEL(I+J-1,10),4), 0., 0., 0.,              &
                         REAL(OGEL(I+J-1,3),4), REAL(OGEL(I+J-1,6),4), REAL(OGEL(I+J-1,11),4), 0., 0., 0.,              &
-                        J=1,NNODES), I=1,NUM,NUM_PTS)
+                        J=1,NNODES), I=1,NUM,NNODES)
          ENDIF  ! end of op2
 
          IF (STRN_OPT == 'VONMISES') THEN
@@ -601,15 +577,25 @@
             NCOLS = 8
          ENDIF
 
+         CLINE_BUF = ' '
+         CLINE_BUF(12:19) = 'CENTER  '
+         GLINE_BUF = ' '
+         GLINE_BUF(12:14) = 'GRD'
          K = 0
          DO I=1,NUM,NUM_PTS
             K = K + 1
-            ! Center
-            WRITE(F06,1303) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,NCOLS)
-            ! Corner
+            CALL FMT_I8_RJ ( EID_OUT_ARRAY(I,1), CLINE_BUF(2:9) )
+            DO J=1,NCOLS
+               CALL FMT_ES14_6 ( OGEL(K,J), CLINE_BUF(28 + (J-1)*14 : 27 + J*14) )
+            ENDDO
+            WRITE(F06,'(A)') CLINE_BUF(1 : 27 + NCOLS*14)
             DO L=1,NUM_PTS-1
                K = K + 1
-               WRITE(F06,1306) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,NCOLS)
+               CALL FMT_I8_RJ ( GID_OUT_ARRAY(I,L+1), GLINE_BUF(15:22) )
+               DO J=1,NCOLS
+                  CALL FMT_ES14_6 ( OGEL(K,J), GLINE_BUF(28 + (J-1)*14 : 27 + J*14) )
+               ENDDO
+               WRITE(F06,'(A)') GLINE_BUF(1 : 27 + NCOLS*14)
             ENDDO
          ENDDO
 
@@ -621,7 +607,7 @@
             WRITE(F06,1305) (MAX_ANS(J),J=1,8), (MIN_ANS(J),J=1,8), (ABS_ANS(J),J=1,8)
          ENDIF
 
-      ELSE IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
 
          IF (WRITE_OP2) THEN
            !CALL WRITE_OST_CQUAD4 ( NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI )
@@ -645,6 +631,8 @@
                WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
             ELSE
                ! CQUAD4-144
+  3             FORMAT(' *DEBUG:  WRITE_CQUAD4-144:  NUM=',I4, " NUM_PTS=", I4, " STRN_LOC=",A,"ITABLE=",I4)
+               WRITE(ERR,3) NUM,NUM_PTS,STRN_LOC,ITABLE
                ELEMENT_TYPE = 144
                NUM_WIDE = 87 ! 2 + 17 * (4+1)  ! 4 nodes + 1 centroid
 
@@ -660,7 +648,7 @@
                !  fd1, sx1, sy1, txy1, angle1, major1, minor1, vm1,
                !  fd2, sx2, sy2, txy2, angle2, major2, minor2, vm2,)*4 = n = 17*4
                CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
-                                      TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+                                      TITLEI, STITLE, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
                WRITE(OP2) NVALUES
                ! see the CQUAD4-33 stress/strain (the IF part of this IF-ELSE block)
                ! writing before trying to understand this...
@@ -678,10 +666,12 @@
             ENDIF
          ENDIF  ! write op2
 
-         !IF(WRITE_F06) THEN
+         IF(WRITE_F06) THEN
             K = 0
             DO I=1,NUM,NUM_PTS
+ 4             FORMAT(' *DEBUG:  WRITE_CQUAD4-144:  I=',I4, " K=", I4)
                K = K + 1
+               WRITE(ERR,4) I,K
                WRITE(F06,*)
                WRITE(F06,1403) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
 
@@ -690,6 +680,8 @@
 
                DO L=1,NUM_PTS-1
                   K = K + 1
+                  WRITE(ERR,4) I,K
+
                   WRITE(F06,*)
                   IF (DABS(POLY_FIT_ERR(I+L)) >= 0.01D0) THEN
                      WRITE(F06,1405) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10), POLY_FIT_ERR(I+L), POLY_FIT_ERR_INDEX(I+L)
@@ -703,7 +695,7 @@
                ENDDO
             ENDDO  ! num_pts
 
-            CALL GET_MAX_MIN_ABS_STR ( NUM, 10, 'Y', MAX_ANS, MIN_ANS, ABS_ANS )
+             CALL GET_MAX_MIN_ABS_STR ( NUM, 10, 'Y', MAX_ANS, MIN_ANS, ABS_ANS )
 
             ! Get max POLY_FIT_ERR
             MAX_ANS(11) = ZERO
@@ -753,19 +745,20 @@
                ENDIF
             ENDDO
 
-            IF (WRITE_NOTES == 'Y') THEN
-               WRITE(F06,1498)
-               DO I=1,MAX_NUM_STR
+             IF (WRITE_NOTES == 'Y') THEN
+                WRITE(F06,1498)
+                DO I=1,MAX_NUM_STR
                   IF (WRT_ERR_INDEX_NOTE(I) == 'Y') THEN
                      WRITE(F06,1499) ERR_INDEX_NOTE(I)
-                  ENDIF
-               ENDDO
-            ENDIF
+                   ENDIF
+                ENDDO
+             ENDIF
+         ENDIF
 
 
 
       ELSE IF (TYPE == 'ROD     ') THEN
-         CALL WRITE_ROD (ISUBCASE, NUM, FILL(1:1), ITABLE, TITLEI, STITLEI, LABELI, &
+         CALL WRITE_ROD (ISUBCASE, NUM, FILL(1:1), FILL(1:16), ITABLE, TITLEI, STITLEI, LABELI, &
                          FIELD5_INT_MODE, FIELD6_EIGENVALUE, WRITE_F06, WRITE_OP2 )
 
       ELSE IF (TYPE(1:5) == 'SHEAR') THEN
@@ -808,7 +801,6 @@
          WRITE(F06,9300) SUBR_NAME,TYPE
          FATAL_ERR = FATAL_ERR + 1
          CALL OUTA_HERE ( 'Y' )                            ! Coding error (elem type not valid) , so quit
-! --- CQUADR_DKMQ24 end --- !
       ENDIF
 
 
@@ -1101,69 +1093,60 @@
                                   WRITE_F06, WRITE_OP2)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06, OP2
-      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL
+      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, OGEL
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC
       USE GET_MAX_MIN_ABS_STR_Interface
       IMPLICIT NONE
       !
-      INTEGER(LONG), INTENT(IN)       :: NUM
-      INTEGER(LONG), INTENT(IN)       :: ISUBCASE
-      CHARACTER(LEN=128), INTENT(IN)  :: TITLE
-      CHARACTER(LEN=128), INTENT(IN)  :: SUBTITLE
-      CHARACTER(LEN=128), INTENT(IN)  :: LABEL
+      INTEGER(LONG), INTENT(IN)       :: NUM               ! the number of elements
+      INTEGER(LONG), INTENT(IN)       :: ISUBCASE          ! the current subcase
+      CHARACTER(LEN=128), INTENT(IN)  :: TITLE             ! the model TITLE
+      CHARACTER(LEN=128), INTENT(IN)  :: SUBTITLE          ! the subcase SUBTITLE
+      CHARACTER(LEN=128), INTENT(IN)  :: LABEL             ! the subcase LABEL
       LOGICAL, INTENT(IN)             :: WRITE_F06, WRITE_OP2
 
-      CHARACTER(119*BYTE)             :: FILL
+      CHARACTER(119*BYTE)             :: FILL              ! Padding for output format
 
-      INTEGER(LONG), INTENT(INOUT)    :: ITABLE
-      INTEGER(LONG)                   :: FIELD5_INT_MODE
-      REAL(DOUBLE)                    :: FIELD6_EIGENVALUE
+      INTEGER(LONG), INTENT(INOUT) :: ITABLE       ! the current subtable number
+      !LOGICAL                         :: FIELD_5_INT_FLAG       ! flag to trigger FIELD5_INT_MODE vs. FIELD5_FLOAT_TIME_FREQ
+      INTEGER(LONG)                   :: FIELD5_INT_MODE        ! int value for field 5
+      !REAL(DOUBLE)                    :: FIELD5_FLOAT_TIME_FREQ ! float value for field 5
+      REAL(DOUBLE)                    :: FIELD6_EIGENVALUE      ! float value for field 6
 
-      INTEGER(LONG)                   :: DEVICE_CODE
-      INTEGER(LONG)                   :: NUM_WIDE
-      INTEGER(LONG)                   :: NVALUES
-      INTEGER(LONG)                   :: NTOTAL
-      INTEGER(LONG)                   :: ELEMENT_TYPE
-      INTEGER(LONG)                   :: STRESS_CODE = 1
-      REAL(DOUBLE)                    :: ABS_ANS(11)
-      REAL(DOUBLE)                    :: MAX_ANS(11)
-      REAL(DOUBLE)                    :: MIN_ANS(11)
-      INTEGER(LONG)                   :: I, J, K, L, NELEMENTS, NUM_PTS_TRI
+      INTEGER(LONG)               :: DEVICE_CODE  ! PLOT, PRINT, PUNCH flag
+      INTEGER(LONG), PARAMETER    :: NUM_WIDE = 17     ! the number of "words" for an element
+      INTEGER(LONG)               :: NVALUES           ! the number of "words" for all the elments
+      INTEGER(LONG)               :: NTOTAL            ! the number of bytes for all NVALUES
+      INTEGER(LONG)               :: ELEMENT_TYPE = 74 ! the OP2 flag for the element
+      INTEGER(LONG)               :: STRESS_CODE = 1   ! the OP2 flag for the stress; preallocate
+      REAL(DOUBLE)                :: ABS_ANS(11)       ! Max ABS for output
+      REAL(DOUBLE)                :: MAX_ANS(11)       ! Max for output
+      REAL(DOUBLE)                :: MIN_ANS(11)       ! Min for output
+      INTEGER(LONG)               :: I, J, K           ! DO loop indices
 
-      DEVICE_CODE = 1
+      ! [eid, fiber_dist/curvature, oxx, oyy, txy, angle, omax, omin, ovm/max_shear,   ! upper
+      !       fiber_dist/curvature, oxx, oyy, txy, angle, omax, omin, ovm/max_shear,   ! lower
+      !]
+      NVALUES = NUM * NUM_WIDE
+      DEVICE_CODE = 1 ! plot
       K = 0
 
       IF (WRITE_OP2) THEN
-          IF (STRN_LOC == 'CENTER  ') THEN
-             NUM_WIDE = 17
-             ELEMENT_TYPE = 74
-             NVALUES = NUM * NUM_WIDE
-          ELSE
-             NUM_PTS_TRI = 1
-             NUM_WIDE = 70
-             ELEMENT_TYPE = 70
-             NELEMENTS = NUM
-             NVALUES = NELEMENTS * NUM_WIDE
-          ENDIF
+ 100      FORMAT("*DEBUG: WRITE_CTRIA3    ITABLE=",I8, "; NUM=",I8,"; NVALUES=",I8,"; NTOTAL=",I8)
+!101      FORMAT("*DEBUG: WRITE_CTRIA3    ITABLE=",I8," (should be -5, -7,...)")
+          NVALUES = NUM * NUM_WIDE
           NTOTAL = NVALUES * 4
+          WRITE(ERR,100) ITABLE,NUM,NVALUES,NTOTAL
 
+          !CALL GET_STRESS_CODE(STRESS_CODE, IS_VON_MISES, IS_STRAIN, IS_FIBER_DISTANCE)
           CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         1)
           CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
                                  TITLE, SUBTITLE, LABEL, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
           WRITE(OP2) NVALUES
 
-          IF (STRN_LOC == 'CENTER  ') THEN
-             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), &
-                        (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
-          ELSE
-             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, "CEN/", 3,                                                      &
-                         (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                                      &
-                         GID_OUT_ARRAY(I,2), (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                 &
-                         GID_OUT_ARRAY(I,3), (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                 &
-                         GID_OUT_ARRAY(I,4), (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                 &
-                         I=1,NELEMENTS)
-          ENDIF
+          ! op2 version of the upper & lower layers all in one call, but without the transverse shear
+          WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), &
+                     (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
       ENDIF
  1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
  1704 FORMAT(13X,'in elem',3X,4(1ES13.5),0PF9.3,5(1ES13.5))
@@ -1173,36 +1156,25 @@
              1X,'MIN* : ',28x,3(ES13.5),9X,5(ES13.5),//,                                                                           &
              1X,'ABS* : ',28x,3(ES13.5),9X,5(ES13.5),/,                                                                            &
              1X,'*for output set')
- 1706 FORMAT(1X,A,I8,4X,4(1ES13.5),0PF9.3,5(1ES13.5))
-
-      IF (STRN_LOC == 'CENTER  ') THEN
+      IF (WRITE_F06) THEN
          DO I=1,NUM
             K = K + 1
             WRITE(F06,*)
+            ! the J=1,10 loop is the upper layer & 2 transverse shear
             WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
             K = K + 1
+
+            ! the J=1,8 loop is the lower layer
             WRITE(F06,1704) (OGEL(K,J),J=1,8)
          ENDDO
-      ELSE
-         DO I=1,NUM
-            K = 2*I - 1
-            WRITE(F06,*)
-            WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
-            K = K + 1
-            WRITE(F06,1704) (OGEL(K,J),J=1,8)
-            DO L=1,3
-               WRITE(F06,*)
-               WRITE(F06,1706) FILL(1:0), GID_OUT_ARRAY(I,L+1),(OGEL(2*I-1,J),J=1,10)
-               WRITE(F06,1704) (OGEL(K,J),J=1,8)
-            ENDDO
-         ENDDO
-      ENDIF
 
-      CALL GET_MAX_MIN_ABS_STR ( NUM, 10, 'Y', MAX_ANS, MIN_ANS, ABS_ANS )
+         CALL GET_MAX_MIN_ABS_STR ( NUM, 10, 'Y', MAX_ANS, MIN_ANS, ABS_ANS )
 
-      WRITE(F06,1705) MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),MAX_ANS(10),                 &
-                      MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),MIN_ANS(10),                 &
-                      ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),ABS_ANS(10)
+         WRITE(F06,1705) MAX_ANS(2),MAX_ANS(3),MAX_ANS(4),MAX_ANS(6),MAX_ANS(7),MAX_ANS(8),MAX_ANS(9),MAX_ANS(10),                 &
+                         MIN_ANS(2),MIN_ANS(3),MIN_ANS(4),MIN_ANS(6),MIN_ANS(7),MIN_ANS(8),MIN_ANS(9),MIN_ANS(10),                 &
+                         ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),ABS_ANS(10)
+
+      ENDIF  ! f06
 
       END SUBROUTINE WRITE_OST_CTRIA3
 

@@ -52,11 +52,9 @@
 
 ! **********************************************************************************************************************************
 ! Calculate STRESS(4-6) for elements that have nonzero STRESS(4-6)
-!--- cbeam add --- begin!
       IF      ((TYPE(1:3) == 'BAR'  ) .OR. (TYPE == 'BEAM    ') .OR. (TYPE(1:4) == 'BUSH') .OR.                                  &
                (TYPE(1:4) == 'ELAS') .OR. (TYPE(1:3) == 'ROD'  )) THEN
          CALL ONE_D_STRESS_OUTPUTS ( SIZE_ALLOCATED, NUM1, NUM_FEMAP_ROWS, WRITE_OGEL, WRITE_FEMAP )
-!---  cbeam add --- end!
 
       ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR.                                 &
                (TYPE(1:5) == 'SHEAR') .OR. (TYPE(1:6) == 'USERIN')) THEN
@@ -88,4 +86,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE CALC_ELEM_STRESSES
-

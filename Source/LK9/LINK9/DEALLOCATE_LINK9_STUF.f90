@@ -35,9 +35,7 @@
       USE CONSTANTS_1, ONLY           :  ZERO
       USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, EID_OUT_ARRAY, FTNAME, MSPRNT, OGEL, POLY_FIT_ERR,              &
                                          POLY_FIT_ERR_INDEX
-! --- cbeam_add begin --- !
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT
-! --- cbeam_add end --- !
       USE DEALLOCATE_LINK9_STUF_USE_IFs
 
       IMPLICIT NONE
@@ -57,7 +55,6 @@
 
 ! **********************************************************************************************************************************
       JERR = 0
-! --- cbeam_add begin --- !
 ! Deallocate array CBEAM_XL_OUT
 
       IF (ALLOCATED(CBEAM_XL_OUT)) THEN
@@ -70,7 +67,6 @@
             JERR = JERR + 1
          ENDIF
       ENDIF
-! --- cbeam_add end --- !
 ! Deallocate array GID_OUT_ARRAY
 
       IF (ALLOCATED(GID_OUT_ARRAY)) THEN

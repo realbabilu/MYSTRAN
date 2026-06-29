@@ -1,4 +1,4 @@
-﻿! ##################################################################################################################################
+! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -48,13 +48,11 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRN_OPT
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRN, TXT_STRN
-! --- cbeam_add begin --- !
       USE SCONTR, ONLY                :  NCBEAM
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_VECS
       USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, PBEAM_NSTATIONS, ZS
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT
-! --- cbeam_add end ---
 
       USE PLANE_COORD_TRANS_21_Interface
       USE TRANSFORM_SHELL_STR_Interface
@@ -80,10 +78,8 @@
 !xx   INTEGER(LONG)                   :: IROW_TXT          ! Row number in OTM text file
       INTEGER(LONG)                   :: NDUM              ! Dummy valye needed in call to CALC_ELEM_ENFR_FORCES
       INTEGER(LONG)                   :: NELREQ(METYPE)    ! Count of the no. of requests for ELFORCE(NODE or ENGR) or STRESS
-! --- cbeam_add begin --- !
       INTEGER(LONG)                   :: NUM_PTS_ELEM      ! Num strain stations/points for current element
       INTEGER(LONG)                   :: NUM_PTS_CUR       ! Actual number of strain points for the current element
-! --- cbeam_add end --- !
       INTEGER(LONG)                   :: NUM_OGEL_ROWS     ! No. elems processed prior to writing results to F06 file
       INTEGER(LONG)                   :: NUM_FROWS         ! No. elems processed for FEMAP
       INTEGER(LONG)                   :: NUM_OGEL          ! No. rows written to array OGEL prior to writing results to F06 file
@@ -102,11 +98,9 @@
       REAL(DOUBLE)                    :: STRAIN_OUT_PCT_ERR(MAX_STRESS_POINTS+1) ! add+1 for cbeam
 
       REAL(DOUBLE)                    :: PCT_ERR_MAX       ! Max value from array STRAIN_OUT_PCT_ERR
-! --- cbeam_add begin --- !
       REAL(DOUBLE)                    :: C1,C2,D1,D2,E1,E2,F1,F2
       REAL(DOUBLE)                    :: EA0,EA1,EA2,EA3,EA4,EAMAX,EAMIN
       REAL(DOUBLE)                    :: EB0,EB1,EB2,EB3,EB4,EBMAX,EBMIN
-! --- cbeam_add end --- !
                                                            ! Array of values from array STRAIN for all stress points
       REAL(DOUBLE)                    :: STRAIN_RAW(9,MAX_STRESS_POINTS+1)
 
@@ -118,11 +112,9 @@
       CHARACTER(8*BYTE)               :: TABLE_NAME   ! name of the op2 table name
       INTEGER(LONG)                   :: ITABLE       ! the subtable
       LOGICAL                         :: WRITE_NEU
-! --- cbeam_add begin --- !
       LOGICAL                         :: HAVE_SECTION_POINTS
 
       INTRINSIC DABS, DMAX1, DMIN1, IAND
-! --- cbeam_add end --- !
       ITABLE = 0
       TABLE_NAME = "OES ERR "
 
@@ -351,7 +343,6 @@ do_strain_pts:    DO M=1,NUM_STR_POINTS
       IF (WRITE_NEU .AND. (ANY_STRN_OUTPUT > 0)) THEN
 
          NDUM = 0
-! --- cbeam_add begin --- !
          NUM_FROWS= 0                                      ! Write out BEAM strains
          CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCBEAM, 12, SUBR_NAME )
          DO J=1,NELE
@@ -434,7 +425,6 @@ do_strain_pts:    DO M=1,NUM_STR_POINTS
          CALL DEALLOCATE_FEMAP_DATA
 
          NDUM = 0
-! --- cbeam_add end --- !
          NUM_FROWS= 0                                      ! Write out BUSH strains
          CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCBUSH, 6, SUBR_NAME )
          DO J=1,NELE

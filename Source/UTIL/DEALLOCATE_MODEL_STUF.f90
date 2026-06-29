@@ -51,9 +51,7 @@
       USE MODEL_STUF, ONLY            :  MATL, RMATL, PBAR, RPBAR, PBEAM, RPBEAM, PBUSH, RPBUSH, PCOMP, RPCOMP, PELAS, RPELAS,     &
                                          PROD, RPROD, PSHEAR, RPSHEAR, PSHEL, RPSHEL, PSOLID, PUSER1, RPUSER1, PUSERIN,            &
                                          USERIN_ACT_COMPS, USERIN_ACT_GRIDS, USERIN_MAT_NAMES
-! --- cbeam_add begin --- !
       USE MODEL_STUF, ONLY            :  PBEAM_NSTATIONS, PBEAM_XL, PBEAM_RPROPS ! 
-! --- cbeam_add emd --- !
       USE MODEL_STUF, ONLY            :  MPC_SIDS, MPCSIDS, MPCADD_SIDS
       USE MODEL_STUF, ONLY            :  SPC_SIDS, SPC1_SIDS, SPCSIDS, SPCADD_SIDS
       USE MODEL_STUF, ONLY            :  ALL_SETS_ARRAY, ONE_SET_ARRAY, SETS_IDS, SC_ACCE, SC_DISP, SC_ELFN, SC_ELFE, SC_GPFO,     &
@@ -691,7 +689,6 @@
             ENDIF
          ENDIF
 
-! --- cbeam_add begin ---!
          NAME = 'PBEAM_NSTATIONS'
          IF (ALLOCATED(PBEAM_NSTATIONS)) THEN
             DEALLOCATE (PBEAM_NSTATIONS,STAT=IERR)
@@ -727,7 +724,6 @@
                JERR = JERR + 1
             ENDIF
          ENDIF
-! --- cbeam_add end ---!
          NAME = 'PBUSH'
          IF (ALLOCATED(PBUSH)) THEN
             DEALLOCATE (PBUSH,STAT=IERR)

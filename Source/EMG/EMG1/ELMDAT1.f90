@@ -55,14 +55,15 @@
                                          PBAR, PBEAM, PCOMP, PCOMP_PROPS, PLATEOFF, PLATETHICK, PROD, PSHEAR, PSHEL, PSOLID,       &
                                          PUSER1, PUSERIN, RMATL, RPBAR, RPBEAM, RPBUSH, RPELAS, RPROD, RPSHEAR, RPSHEL, RPUSER1,   &
                                          TYPE, VVEC, XEB, ZOFFS
+
       USE MODEL_STUF, ONLY            :  USERIN_ACT_GRIDS, USERIN_ACT_COMPS, USERIN_CID0, USERIN_IN4_INDEX,                        &
                                          USERIN_MAT_NAMES, USERIN_NUM_BDY_DOF, USERIN_NUM_ACT_GRDS, USERIN_NUM_SPOINTS,            &
                                          USERIN_MASS_MAT_NAME, USERIN_LOAD_MAT_NAME, USERIN_RBM0_MAT_NAME, USERIN_STIF_MAT_NAME
-! --- cbeam_add begin --- !
+
       USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_RPROPS, PBEAM_NSTATIONS, PBEAM_XL,  &
                                          PBEAM_RPROPS
       USE SCONTR, ONLY                :  MPBEAM_STATIONS
-! --- cbeam_add end --- !
+
       USE ELMDAT1_USE_IFs
 
       IMPLICIT NONE
@@ -79,9 +80,7 @@
 !                                                             row number in array EDAT where data begins for this element.
 
       INTEGER(LONG)                   :: IPNTR              ! Pointer into an array
-! --- cbeam_add begin --- !
       INTEGER(LONG)                   :: ISTA               ! Loop index for active CBEAM station metadata
-! --- cbeam_add end --- !
       INTEGER(LONG)                   :: VVEC_FLAG          ! Either actual grid ID for V vector or -IVVEC
 
       INTEGER(LONG)                   :: I,J                ! DO loop indices
@@ -122,7 +121,6 @@
       EID       = EDAT(EPNTK)
       INTL_PID  = EDAT(EPNTK+1)
 
-! --- cbeam_add begin --- !
       CBEAM_ACTIVE_NSTATIONS = 0
       DO ISTA=1,MPBEAM_STATIONS
          CBEAM_ACTIVE_XL(ISTA) = ZERO
@@ -133,7 +131,6 @@
          CBEAM_ACTIVE_RPROPS(ISTA,5) = ZERO
          CBEAM_ACTIVE_RPROPS(ISTA,6) = ZERO
       ENDDO
-! --- cbeam_add end --- !
 
 ! ELGP is the number of G.P.'s for this elem. Call GET_ELGP to find out how many grids there are for elem type TYPE
 
@@ -145,11 +142,9 @@
       IF (TYPE(1:6) /= 'USERIN') THEN
          DO J=1,METYPE
             IF (ELMTYP(J) == TYPE) THEN
-! --- cbeam_add begin --- !
                IF ((TYPE == 'BEAM    ') .AND. (NUM_SEi(J) > 0)) THEN
                   CONTINUE
                ELSE IF (NUM_SEi(J) > (ELGP + 1)) THEN
-! --- cbeam_add end --- !
                   WRITE(ERR,1957) SUBR_NAME, TYPE, NUM_SEi(J), ELGP
                   WRITE(F06,1957) SUBR_NAME, TYPE, NUM_SEi(J), ELGP
                   FATAL_ERR = FATAL_ERR + 1
@@ -163,7 +158,7 @@
 
       ! *** NOTE: CHECK CODE FOR 3D ELEMS IF THEY ARE TO HAVE OFFSET. GRID ORDER MAY GET CHANGED IN SUBR EDAT_FIXUP (SEE EMG)
       IF ((TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR. (TYPE == 'BUSH    ') .OR. (TYPE(1:5) == 'TRIA3'   ) .OR.             &
-          ((TYPE(1:5) == 'QUAD4'   ) ) .OR. (TYPE(1:5) == 'QUAD8'   )) THEN
+          (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE(1:5) == 'QUAD8'   )) THEN
          CAN_ELEM_TYPE_OFFSET = 'Y'
       ELSE
          CAN_ELEM_TYPE_OFFSET = 'N'
@@ -190,7 +185,6 @@
       ENDDO
 
 ! Obtain the coordinates of the G.P.'s for this element
-
 
       XEB = ZERO
 
@@ -231,10 +225,7 @@
       GET_VVEC         = 'Y'
       VVEC_DEFINED     = 'N'
       BUSH_VVEC_OR_CID = 'Y'
-
-      ! Initialize V vector
       VV = ZERO
-
       IF ((TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR. (TYPE == 'BUSH    ') .OR. (TYPE == 'USER1   ')) THEN
 
          VVEC_FLAG = 0
@@ -354,22 +345,7 @@
          DO I=1,MRPBEAM
             EPROP(I) = RPBEAM(INTL_PID,I)
          ENDDO
-! --- cbeam_add begin --- !
-!	 Debug Print what pbeam had
-         IF (DEBUG(233) > 0) THEN
-            WRITE(F06,'(A)') '*** CBEAM PROPERTY DEBUG *******************************************************'
-            WRITE(F06,'(A,I0)') '  Element ID       : ', EID
-            WRITE(F06,'(A,I0)') '  Property ID      : ', INTL_PID
-            WRITE(F06,'(A,1P,ES14.6)') '  Area            : ', EPROP(1)
-            WRITE(F06,'(A,1P,ES14.6)') '  I1              : ', EPROP(2)
-            WRITE(F06,'(A,1P,ES14.6)') '  I2              : ', EPROP(3)
-            WRITE(F06,'(A,1P,ES14.6)') '  I12             : ', EPROP(4)
-            WRITE(F06,'(A,1P,ES14.6)') '  J               : ', EPROP(5)
-            WRITE(F06,'(A,1P,ES14.6)') '  NSM             : ', EPROP(6)
-            WRITE(F06,'(A,1P,ES14.6)') '  K1              : ', EPROP(30)
-            WRITE(F06,'(A,1P,ES14.6)') '  K2              : ', EPROP(31)
-         ENDIF
-! --- cbeam_stations begin --- !
+
          CBEAM_ACTIVE_NSTATIONS = PBEAM_NSTATIONS(INTL_PID)
          IF (CBEAM_ACTIVE_NSTATIONS > MPBEAM_STATIONS) CBEAM_ACTIVE_NSTATIONS = MPBEAM_STATIONS
          IF (CBEAM_ACTIVE_NSTATIONS <= 1) THEN
@@ -392,16 +368,6 @@
                CBEAM_ACTIVE_RPROPS(ISTA,6) = PBEAM_RPROPS(INTL_PID,ISTA,6)
             ENDDO
          ENDIF
-         IF (DEBUG(233) > 0) THEN
-            WRITE(F06,'(A,I0)') '  Stored stations  : ', PBEAM_NSTATIONS(INTL_PID)
-            WRITE(F06,'(A,I0)') '  Active stations  : ', CBEAM_ACTIVE_NSTATIONS
-            IF (CBEAM_ACTIVE_NSTATIONS > 0) THEN
-               WRITE(F06,'(A,11(1X,ES12.5))') '  Active x/L      :', (CBEAM_ACTIVE_XL(ISTA), ISTA=1,CBEAM_ACTIVE_NSTATIONS)
-            ENDIF
-            WRITE(F06,'(A)') '***************************************************************************'
-         ENDIF
-! --- cbeam_stations end --- !
-! --- cbeam_add end --- !
 
       ELSE IF (TYPE == 'BUSH    ') THEN
          DO I=1,MRPBUSH
@@ -698,7 +664,7 @@
          ENDIF
          NUMMAT = 1
 
-      ELSE IF ((TYPE(1:4) == 'HEXA')  .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 
          INTL_MID(1) = PSOLID(INTL_PID,2)
          MTRL_TYPE(1) = MATL(INTL_MID(1),2)                ! Must be MAT1 or MAT9 for solids
@@ -910,7 +876,7 @@
       IF (CAN_ELEM_TYPE_OFFSET == 'Y') THEN
 
          OFFDIS = ZERO
-	
+
          IF      ((TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ')) THEN
 
             IROW = EDAT(EPNTK + 7)

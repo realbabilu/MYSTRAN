@@ -1,4 +1,4 @@
-﻿! ##################################################################################################################################
+! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -42,12 +42,10 @@
                                          PE_GA_GB, PEL, PLY_NUM, STRESS, TE, TE_GA_GB, TYPE, XEL
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, MAXREQ, OGEL
       USE OUTPUT4_MATRICES, ONLY      :  OTM_ELFE, TXT_ELFE
-!--- cbeam_add begin --- ! 
       USE SCONTR, ONLY                :  NCBEAM
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE MODEL_STUF, ONLY            :  AGRID, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, PBEAM_NSTATIONS, PRESS
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT,GID_OUT_ARRAY
-!--- cbeam_add end --- ! 
 
       USE OFP3_ELFE_1D_USE_IFs
 
@@ -75,7 +73,6 @@
       INTEGER(LONG)                   :: NUM_ELEM          ! No. elems processed prior to writing results to F06 file
       INTEGER(LONG)                   :: NUM_FROWS         ! No. elems processed for FEMAP
       INTEGER(LONG)                   :: NUM_OGEL          ! No. rows written to array OGEL prior to writing results to F06 file
-! --- cbeam_add begin --- !
       INTEGER(LONG)                   :: NREQ_ELEM         ! Actual number of engineering-force rows for current element
       INTEGER(LONG)                   :: NSTA             ! Active number of CBEAM stations for the current element
       INTEGER(LONG)                   :: ISTA             ! CBEAM station loop index
@@ -85,7 +82,6 @@
 !                                                            (this can be > NUM_ELEM since more than 1 row is written to OGEL
 !                                                            for ELFORCE(NODE) - elem nodal forces)
                                                            ! Indicator for output of elem data to BUG file
-! --- cbeam_add end --- !
 
       REAL(DOUBLE)                    :: DUM0(6,12)        ! Intermediate matrix in a calc
       REAL(DOUBLE)                    :: DUM1(6)           ! Intermediate matrix in a calc
@@ -97,7 +93,6 @@
       REAL(DOUBLE)                    :: DX,DY,DZ          ! Offset dist1
       REAL(DOUBLE)                    :: FORCES(12)        ! Forces at the grid points
       REAL(DOUBLE)                    :: LENGTH
-! --- cbeam_add begin --- !
       REAL(DOUBLE)                    :: DT
       REAL(DOUBLE)                    :: GRAD
       REAL(DOUBLE)                    :: M1_CORR
@@ -113,7 +108,6 @@
       REAL(DOUBLE)                    :: XI_SPAN
       REAL(DOUBLE)                    :: XI_STA
       REAL(DOUBLE)                    :: XI_TOL
-! --- cbeam_add end --- !
       ! OP2 parameters
       INTEGER(LONG)                   :: ITABLE            ! the op2 subtable number
       CHARACTER(8*BYTE)               :: TABLE_NAME        ! the op2 table name
@@ -125,7 +119,6 @@
       INTRINSIC IAND
 
 ! **********************************************************************************************************************************
-! --- op2_upgraded begin --- !
 !     Initialize
       TABLE_NAME = "OEF ERR "
       ITABLE = 0
@@ -142,9 +135,7 @@
       OPT(3) = 'Y'                                         ! OPT(3) is for calc of SEi, STEi
       OPT(4) = 'Y'                                         ! OPT(4) is for calc of KE-linear
       OPT(5) = 'N'                                         ! OPT(5) is for calc of PPE 
-! --- cbeam_add begin --- ! enable PPE only for CBEAM distributed-load recovery
       OPT(6) = 'N'                                         ! OPT(6) is for calc of KE-diff stiff
-! --- cbeam_add end --- !
       FORCE_ITEM(1) = 'M1a: Mom Plane1 EndA'
       FORCE_ITEM(2) = 'M1b: Mom Plane2 EndA'
       FORCE_ITEM(3) = 'M2a: Mom Plane1 EndB'
@@ -162,7 +153,6 @@
 
       DO I=1,METYPE
          DO J=1,NELE	
-! added CBEAM >> (ETYPE(J)(1:4) == 'BEAM') 
 
             IF ((ETYPE(J)(1:3) == 'BAR') .OR. (ETYPE(J)(1:4) == 'BEAM') .OR. (ETYPE(J)(1:4) == 'BUSH') .OR.                       &
                 (ETYPE(J)(1:4) == 'ELAS') .OR. (ETYPE(J)(1:3) == 'ROD'))THEN
@@ -170,14 +160,12 @@
                   ELOUT_ELFE = IAND(ELOUT(J,INT_SC_NUM),IBIT(ELOUT_ELFE_BIT))
                   IF (ELOUT_ELFE > 0) THEN
 
-! --- cbeam_add begin --- !
                      NREQ_ELEM = 1
                      IF (ETYPE(J)(1:4) == 'BEAM') THEN
                         NREQ_ELEM = PBEAM_NSTATIONS(EDAT(EPNT(J)+1))
                         IF (NREQ_ELEM <= 0) NREQ_ELEM = 5
                      ENDIF
                      NELREQ(I) = NELREQ(I) + NREQ_ELEM 
-! --- cbeam_end begin --- ! 
                    ENDIF
                ENDIF
             ENDIF
@@ -195,13 +183,10 @@ reqs2:DO I=1,METYPE
          IF (NELREQ(I) == 0) CYCLE reqs2
          NUM_ELEM  = 0
          NUM_OGEL = 0
-! --- cbeam_add begin --- !
          WRITE_NUM_PTS = 1
-! --- cbeam_add end --- !
 elems_2: DO J = 1,NELE
             EID   = EDAT(EPNT(J))
             TYPE  = ETYPE(J)
-! added CBEAM 
             IF ((ETYPE(J)(1:3) == 'BAR') .OR. (ETYPE(J)(1:4) == 'BEAM') .OR. (ETYPE(J)(1:4) == 'BUSH') .OR.                       &
                 (ETYPE(J)(1:4) == 'ELAS') .OR. (ETYPE(J)(1:3) == 'ROD'))THEN
 
@@ -225,16 +210,11 @@ elems_2: DO J = 1,NELE
                      CALL ELMDIS
 
                      CALL CALC_ELEM_NODE_FORCES            ! Use NODE to get engr forces (SE matrices don't have torque)
-! --- cbeam_add begin --- ! 
                      NSTA = 1
                      IF (ETYPE(J)(1:4) == 'BEAM') THEN
                         NSTA = CBEAM_ACTIVE_NSTATIONS
                         IF (NSTA <= 0) NSTA = 5
-                        IF (DEBUG(233) > 0) THEN
-                           WRITE(ERR,'("DBG_BEAM_PRE EID=",I8," NSTA=",I8," NUM_OGEL=",I8," NUM_ELEM=",I8)') EID, NSTA, NUM_OGEL, NUM_ELEM
-                        ENDIF
                      ENDIF
-! --- cbeam_add end --- !
 !                    ---------------------------------------------------------------------------------------------------------------
                      IF (ETYPE(J)(1:4) == 'ELAS') THEN     ! Set engr forces based on the node force values	
                         NUM_OGEL = NUM_OGEL + 1
@@ -370,8 +350,6 @@ elems_2: DO J = 1,NELE
                         OGEL(NUM_OGEL,6) = -PEL(3)                 ! V2  (plane 2 shear for BAR)
                         OGEL(NUM_OGEL,7) = -PEL(1)                 ! Fx  (axial force for BAR)
                         OGEL(NUM_OGEL,8) = -PEL(4)                 ! T   (torque for BAR)
-! --- cbeam_add begin --- !
-! --- cbeam_stations begin--- !
                      ELSE IF (ETYPE(J)(1:4) == 'BEAM') THEN
                         LENGTH = ELEM_LEN_AB
                         DO ISTA=1,NSTA
@@ -506,12 +484,7 @@ elems_2: DO J = 1,NELE
                            GID_OUT_ARRAY(NUM_OGEL,1) = 0
                            GID_OUT_ARRAY(NUM_OGEL,2) = AGRID(1)
                            GID_OUT_ARRAY(NUM_OGEL,3) = AGRID(2)
-                           IF ((DEBUG(233) > 0) .AND. ((EID == 14) .OR. (EID == 15))) THEN
-                              WRITE(F06,9233) EID, ISTA, XI_STA, PEL(2), PEL(3), M1_CORR, M2_CORR, V1_CORR, V2_CORR,                &
-                                               OGEL(NUM_OGEL,1), OGEL(NUM_OGEL,2), OGEL(NUM_OGEL,5), OGEL(NUM_OGEL,6)
-                           ENDIF
                         ENDDO
-! --- cbeam_add end --- !
                      ENDIF !end bar
 
                      IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
@@ -555,7 +528,6 @@ elems_2: DO J = 1,NELE
                               ENDIF
                            ENDDO
                         ENDIF
-! --- cbeam_add begin --- !
                         IF (ETYPE(J)(1:4) == 'BEAM') THEN
                            DO K=1,8
                               OT4_EROW = OT4_EROW + 1
@@ -565,7 +537,6 @@ elems_2: DO J = 1,NELE
                               ENDIF
                            ENDDO
                         ENDIF
-! --- cbeam_add end --- !
                      ENDIF
 
                      IF ((SOL_NAME(1:12) == 'GEN CB MODEL') .AND. (JVEC == 1) .AND. (OT4_EROW >= 1)) THEN
@@ -574,13 +545,9 @@ elems_2: DO J = 1,NELE
                            WRITE(TXT_ELFE(OT4_EROW), 9199)
                         ENDDO
                      ENDIF
-! --- cbeam_add begin --- !
                      IF (ETYPE(J)(1:4) == 'BEAM') THEN
                         NUM_ELEM = NUM_ELEM + NSTA
                         WRITE_NUM_PTS = NSTA
-                        IF (DEBUG(233) > 0) THEN
-                           WRITE(ERR,'("DBG_BEAM_POST EID=",I8," NSTA=",I8," NUM_OGEL=",I8," NUM_ELEM=",I8)') EID, NSTA, NUM_OGEL, NUM_ELEM
-                        ENDIF
                      ELSE
                         NUM_ELEM = NUM_ELEM + 1
                         EID_OUT_ARRAY(NUM_ELEM,1) = EID
@@ -627,14 +594,11 @@ elems_2: DO J = 1,NELE
       IF ((TABLE_NAME .NE. "OEF ERR ") .AND. (ITABLE < 0)) THEN
         CALL END_OP2_TABLE(ITABLE)
       ENDIF
-! --- op2_upgraded end --- !
 
       IF (WRITE_NEU .AND. (ANY_ELFE_OUTPUT > 0)) THEN
 
 ! beam
-! --- cbeam_add begin ---!  
          NUM_FROWS= 0
-! --- neu_upgrade begin --- !
          CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCBEAM, 14, SUBR_NAME )
          DO J=1,NELE
             EID   = EDAT(EPNT(J))
@@ -799,7 +763,6 @@ elems_2: DO J = 1,NELE
                FEMAP_EL_VECS(NUM_FROWS,13) = ZERO
                FEMAP_EL_VECS(NUM_FROWS,14) = ZERO
 
-! --- CBEAM_standard begin --- !
                OGEL_ENDA_ROW = 0
                OGEL_ENDB_ROW = 0
                XI_TOL        = 1.0D-10
@@ -825,15 +788,12 @@ elems_2: DO J = 1,NELE
                   FEMAP_EL_VECS(NUM_FROWS,10) = OGEL(OGEL_ENDB_ROW,7)
                   FEMAP_EL_VECS(NUM_FROWS,12) = OGEL(OGEL_ENDB_ROW,8)
                ENDIF
-! --- CBEAM_standard end --- !
             ENDIF
          ENDDO
          IF (NUM_FROWS > 0) THEN
             CALL WRITE_FEMAP_ELFO_VECS ( 'BEAM    ', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
-! --- neu_upgrade end --- !
-! --- cbeam_add begin ---! 
 
 ! bar    ---------------------------------------------------------------------------------------------------------------------------
          NUM_FROWS= 0
@@ -1174,8 +1134,6 @@ elems_2: DO J = 1,NELE
 
  9201 FORMAT(' *ERROR  9201: DUE TO ABOVE LISTED ERRORS, CANNOT CALCULATE ',A,' REQUESTS FOR ',A,' ELEMENT ID = ',I8)
 
- 9233 FORMAT(' DEBUG233 CBEAM ELFO EID=',I8,' ISTA=',I4,' XI=',1ES14.6,' PEL23=',2(1X,1ES14.6),                                   &
-             ' CORR(M1,M2,V1,V2)=',4(1X,1ES14.6),' OUT(M1,M2,V1,V2)=',4(1X,1ES14.6))
 
 ! **********************************************************************************************************************************
 

@@ -60,9 +60,6 @@
       CHARACTER(  1*BYTE)            :: IMB_BLANK(2:9)   = (/('N', I=2, 9)/) ! 'Y', 'N' indicates imbedded blanks in B.D. field
       CHARACTER(  1*BYTE)            :: PRINTENV         = 'N'               ! 'Y' if Software Passport env vars are to be printed
       CHARACTER(  1*BYTE)            :: RESTART          = 'N'               ! 'Y' if run is a restart
-! --- rsa_nastran begin --- !
-      CHARACTER(  1*BYTE)            :: RSA_NX_SEMODES   = 'N'               ! 'Y' if SOL SEMODES alias was requested
-! --- rsa_nastran end --- !
       CHARACTER( 16*BYTE)            :: SOL_NAME         = '                '! Name for the solution (e.g. 'STATICS')
       CHARACTER( 2*BYTE)             :: TSET_CHR_LEN     = '  '              ! Char len of entries in TSET
 
@@ -208,7 +205,6 @@
       INTEGER(LONG)            :: NCQUAD4             =   0      ! Count of no. of CQUAD4  elems
       INTEGER(LONG)            :: NCQUAD4K            =   0      ! Count of no. of CQUAD4K elems
       INTEGER(LONG)            :: NCQUAD8             =   0      ! Count of no. of CQUAD8  elems
-      INTEGER(LONG)            :: NCQUADR             =   0      ! Count of no. of CQUADR  elems
       INTEGER(LONG)            :: NCROD               =   0      ! Count of no. of CROD    elems
       INTEGER(LONG)            :: NCSHEAR             =   0      ! Count of no. of CSHEAR  elems
       INTEGER(LONG)            :: NCTETRA4            =   0      ! Count of no. of CTETRA  elems with  4 nodes
@@ -493,7 +489,6 @@
       INTEGER(LONG), PARAMETER :: MMATL               =   2      ! No. cols allowed in dimensioning array MATL
       INTEGER(LONG), PARAMETER :: MMSPRNT             =   3      ! No. cols allowed in dimensioning array MSPRNT
       INTEGER(LONG), PARAMETER :: MOGEL               =  12      ! No. cols allowed in dimensioning array OGEL
-! --- cbeam_add begin --- !
       INTEGER(LONG), PARAMETER :: MPDAT_PLOAD1        =  26      ! Beam/bar PLOAD1 data slots (6 comps x [P1,P2,X1,X2]) + 2 legacy dir flags
       INTEGER(LONG), PARAMETER :: MPDAT_PLOAD2        =   1      ! No. pressures on PLOAD2 Bulk Data card
       INTEGER(LONG), PARAMETER :: MPDAT_PLOAD4        =   4      ! No. pressuresa on PLOAD4 Bulk Data card
@@ -508,7 +503,6 @@
       INTEGER(LONG), PARAMETER :: MPELAS              =   1      ! No. cols allowed in dimensioning array PELAS
       INTEGER(LONG), PARAMETER :: MPMASS              =   1      ! No. cols allowed in dimensioning array PMASS
       INTEGER(LONG), PARAMETER :: MPRESS              =  26      ! No. rows allowed in dimensioning array PRESS
-! --- cbeam_add end --- !
       INTEGER(LONG), PARAMETER :: MPROD               =   2      ! No. cols allowed in dimensioning array PROD
       INTEGER(LONG), PARAMETER :: MPSHEAR             =   2      ! No. cols allowed in dimensioning array PSHEAR
       INTEGER(LONG), PARAMETER :: MPSHEL              =   6      ! No. cols allowed in dimensioning array PSHEL

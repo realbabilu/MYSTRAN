@@ -44,12 +44,7 @@
       USE PARAMS, ONLY                :  ARP_TOL         , ART_KED         , ART_ROT_KED     , ART_TRAN_KED    ,                   &
                                          ART_MASS        , ART_ROT_MASS    , ART_TRAN_MASS   , AUTOSPC         , AUTOSPC_NSET    , &
                                          AUTOSPC_RAT     , AUTOSPC_INFO    , AUTOSPC_SPCF    , BAILOUT         , CRS_CCS         , &
-!---  cbeam add --- begin!
-! add cbeam parameter stiffnes modifier
-                                         CBMIN3          , CBMIN4          , CBMIN4T         , CBEAMAREA       , CBEAMAREA_PID   , &
-                                         CBEAMAREA_VAL   , CBEAMSHR        , CBEAMSHR_PID    , CBEAMSHR_VAL    , &
-                                         MCBEAMAREA_PID  , MCBEAMSHR_PID   , NCBEAMAREA_PID  , NCBEAMSHR_PID   , CHKGRDS         , &
-!---  cbeam add --- end!
+                                         CBMIN3          , CBMIN4          , CBMIN4T         , CHKGRDS         ,                   &
                                          CUSERIN         , CUSERIN_EID     , CUSERIN_IN4     , CUSERIN_PID     , CUSERIN_SPNT_ID , &
                                          CUSERIN_XSET    , CUSERIN_COMPTYP , DARPACK         ,                                     &
                                          DELBAN          , EIGESTL         , EIGNORM2        , ELFORCEN        , EPSERR          , &
@@ -57,8 +52,7 @@
                                          EPSIL           , EMP0_PAUSE      , ESP0_PAUSE      , F06_COL_START   ,                   &
                                          GRDPNT          , GRIDSEQ         , HEXAXIS         ,                                     &
                                          IORQ1M          , IORQ1S          , IORQ1B          , IORQ2B          , IORQ2T          , &
-! add lancmeth for next eigen solver choice : DENSE, SUBSPACE, FEAST
-                                         ITMAX           , KLLRAT          , KOORAT          , LANCMETH        , MATSPARS        , &
+                                         ITMAX           , KLLRAT          , KOORAT          ,                   MATSPARS        , &
                                          MEMAFAC         , MIN4TRED        , MXALLOCA        , MAXRATIO        ,                   &
                                          MEFMCORD        , MEFMLOC         , MEFMGRID        ,                                     &
                                          MPFOUT          , MXITERI         , MXITERL         , OTMSKIP         , POST            , &
@@ -91,5 +85,3 @@
    END INTERFACE
 
    END MODULE BD_PARAM_Interface
-
-

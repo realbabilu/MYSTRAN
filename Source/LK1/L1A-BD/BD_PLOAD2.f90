@@ -49,10 +49,8 @@
       CHARACTER(LEN=*),INTENT(IN)     :: CARD               ! A Bulk Data card
       CHARACTER( 1*BYTE),INTENT(INOUT):: CC_LOAD_FND(LSUB,2)! 'Y' if B.D load/temp card w/ same set ID (SID) as C.C. LOAD = SID
       CHARACTER(LEN=JCARD_LEN)        :: JCARD(10)          ! The 10 fields of characters making up CARD
-! --- cbeam_add begin --- !
       CHARACTER(LEN=JCARD_LEN)        :: PLOAD1_SCALE       ! PLOAD1 scale keyword
       CHARACTER(LEN=JCARD_LEN)        :: PLOAD1_TYPE        ! PLOAD1 load type keyword
-! --- cbeam_add end --- !
       CHARACTER( 1*BYTE)              :: THRU               ! 'Y' if field 5 of parent card is "THRU"
       CHARACTER( 8*BYTE)              :: TOKEN              ! The 1st 8 characters from a JCARD
       CHARACTER( 8*BYTE)              :: TOKTYP             ! The type of token in a field of parent card. Output from subr TOKCHK
@@ -106,7 +104,6 @@
 ! which case field 5 will have "THRU".
 
 
-! --- cbeam_add begin --- !
       IF      ((JCARD(1)(1:7) == 'PLOAD1 ') .OR. (JCARD(1)(1:7) == 'PLOAD1*')) THEN
          CALL I4FLD ( JCARD(3), JF(3), PLOAD_ELID(1) )
          IF (IERRFL(3) == 'N') THEN
@@ -152,7 +149,6 @@
 
          CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
          CALL CRDERR ( CARD )
-! --- cbeam_add end --- !
       ELSE IF ((JCARD(1)(1:7) == 'PLOAD2 ') .OR. (JCARD(1)(1:7) == 'PLOAD2*')) THEN
 
          CALL R8FLD ( JCARD(3), JF(3), RPRESS )
@@ -223,12 +219,10 @@
 
  1152 FORMAT(' *ERROR  1152: ON ',A,A,' ELEM IDs MUST BE > 0')
 
-! --- cbeam_add begin --- !
  1199 FORMAT(' *ERROR      : ON ',A,A,' PLOAD1 TYPE "',A,'" IS NOT SUPPORTED. USE FYE/FZE/FXE/MXE/MYE/MZE',                 &
                     ' (legacy FY/FZ and Y/Z also accepted)')
 
  1200 FORMAT(' *ERROR      : ON ',A,A,' PLOAD1 SCALE "',A,'" IS NOT SUPPORTED. USE FR, LE, FRPR OR LEPR')
-! --- cbeam_add end --- !
 
  1163 FORMAT(' *ERROR  1163: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' TOO MANY ',A,' ENTRIES; LIMIT = ',I12)

@@ -117,53 +117,45 @@
       FIELD6_EIGENVALUE = 0.0
 
       WRITE_F06 = (FORC_OUT(1:1) == 'Y')
-      INQUIRE ( UNIT=OP2, OPENED=WRITE_OP2 )
+      WRITE_OP2 = (FORC_OUT(2:2) == 'Y')
 
 
 headr:IF (IHDR == 'Y') THEN
 
          !--- Subcase num, TITLE, SUBT, LABEL:
-         !IF(WRITE_F06) WRITE(F06,*)
-         !IF(WRITE_F06) WRITE(F06,*)
          CALL WRITE_SUBCASE_EIGENVEC_HEADER(JSUB, WRITE_F06)
          ISUBCASE_INDEX = 0
          IF    (SOL_NAME(1:7) == 'STATICS') THEN
             ISUBCASE_INDEX = JSUB ! statics
             ANALYSIS_CODE = 1
             FIELD5_INT_MODE = SCNUM(JSUB)
-            IF(WRITE_F06) WRITE(F06,101) SCNUM(JSUB)
          ELSE IF (SOL_NAME(1:8) == 'NLSTATIC') THEN
             ISUBCASE_INDEX = 1
             ANALYSIS_CODE = 10
             FIELD5_INT_MODE = SCNUM(JSUB)
-            IF(WRITE_F06) WRITE(F06,101) SCNUM(JSUB)
 
          ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
             ISUBCASE_INDEX = 1
             ANALYSIS_CODE = 1
             FIELD5_INT_MODE = SCNUM(JSUB)
-            IF(WRITE_F06) WRITE(F06,101) SCNUM(JSUB)
 
          ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
             ISUBCASE_INDEX = 2
             ANALYSIS_CODE = 7
             FIELD5_INT_MODE = JSUB
             FIELD6_EIGENVALUE = EIGEN_VAL(JSUB)
-            IF(WRITE_F06) WRITE(F06,102) JSUB
 
          ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
             ISUBCASE_INDEX = 1
             ANALYSIS_CODE = 2
             FIELD5_INT_MODE = JSUB
             FIELD6_EIGENVALUE = EIGEN_VAL(JSUB)
-            IF(WRITE_F06) WRITE(F06,102) JSUB
 
          ELSE IF (SOL_NAME(1:8) == 'MFREQ') THEN
             ISUBCASE_INDEX = INT_SC_NUM
             ANALYSIS_CODE = 5
             FIELD5_INT_MODE = JSUB
             FIELD6_EIGENVALUE = EIGEN_VAL(JSUB)
-            IF(WRITE_F06) WRITE(F06,102) JSUB
 
          ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
             ! Write info on what CB DOF the output is for
@@ -194,20 +186,6 @@ headr:IF (IHDR == 'Y') THEN
          LABELI = LABEL(INT_SC_NUM)
 
          IF(WRITE_F06) THEN
-             IF (TITLE(INT_SC_NUM)(1:)  /= ' ') THEN
-                WRITE(F06,201) TITLE(INT_SC_NUM)
-             ENDIF
-
-             IF (STITLE(INT_SC_NUM)(1:) /= ' ') THEN
-                WRITE(F06,201) STITLE(INT_SC_NUM)
-             ENDIF
-
-             IF (LABEL(INT_SC_NUM)(1:)  /= ' ') THEN
-                WRITE(F06,201) LABEL(INT_SC_NUM)
-             ENDIF
-
-             WRITE(F06,*)
-
              !--- 1st 2 lines of element specific headers - general info on what type of output:
              IF      (TYPE(1:3) == 'BAR') THEN
                 IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
@@ -217,7 +195,7 @@ headr:IF (IHDR == 'Y') THEN
                 ENDIF
                 WRITE(F06,401) FILL(1:45), ONAME
 
-             ELSE IF (TYPE(1:4) == 'BEAM') THEN
+             ELSE IF (TYPE == 'BEAM    ') THEN
                 IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                    WRITE(F06,302) FILL(1:33)
                 ELSE
@@ -269,8 +247,6 @@ headr:IF (IHDR == 'Y') THEN
              !--- Header lines describing columns of output for an element type:
              IF      (TYPE(1:3) == 'BAR'  ) THEN
                 WRITE(F06,1101) FILL(1: 0), FILL(1: 0)
-
-             ELSE IF (TYPE(1:4) == 'BEAM') THEN
 
              ELSE IF (TYPE(1:4) == 'ELAS') THEN
                 WRITE(F06,1201) FILL(1: 0), FILL(1: 0)
@@ -324,7 +300,6 @@ headr:IF (IHDR == 'Y') THEN
 
          CALL GET_MAX_MIN_ABS ( 1, 8 )
 
-! --- CBEAM_standard begin --- !
          IF (WRITE_OP2)  THEN
             NELEMENTS = 0
             I = 1
@@ -365,7 +340,6 @@ headr:IF (IHDR == 'Y') THEN
                NSTA_ELEM = IEND - IBEG + 1
                IF (NSTA_ELEM > 11) NSTA_ELEM = 11
 
-! --- CBEAM_standard begin --- !
                ! Populate station grid ids for OP2 CBEAM records.
                ! Use the end grids at x/L=0 and x/L=1 and leave interior
                ! stations as zero, which matches classic beam-station
@@ -373,7 +347,6 @@ headr:IF (IHDR == 'Y') THEN
                BEAM_GRID(IELEM,:) = 0
                BEAM_GRID(IELEM,1)  = GID_OUT_ARRAY(IBEG,2)
                BEAM_GRID(IELEM,11) = GID_OUT_ARRAY(IBEG,3)
-! --- CBEAM_standard end --- !
 
                DO ISTA=1,NSTA_ELEM
                   XI_RAW (ISTA) = CBEAM_XL_OUT(IBEG + ISTA - 1)
@@ -441,7 +414,6 @@ headr:IF (IHDR == 'Y') THEN
                          IELEM=1,NELEMENTS)
             DEALLOCATE ( BEAM_EID, BEAM_GRID, BEAM_XI, BEAM_BM1, BEAM_BM2, BEAM_V1, BEAM_V2, BEAM_AX, BEAM_TRQ, BEAM_WTRQ )
          ENDIF
-! --- CBEAM_standard end --- !
 
          IF (WRITE_F06)  THEN
             WRITE(F06,'(A,/,A,/,A)') '                          F O R C E S   I N   B E A M   E L E M E N T S        ( C B E A M )', &
@@ -597,17 +569,18 @@ headr:IF (IHDR == 'Y') THEN
           WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(I,J),4),J=1,8), I=1,NUM)
         ENDIF
 
-        IF (WRITE_F06)  THEN
+        IF (WRITE_F06)  THEN  ! f06
           K = 0
           DO I=1,NUM,NUM_PTS
              K = K + 1
+                                                           ! Center forces
              IF(TYPE == 'QUAD8   ') THEN
                WRITE(F06,1524) FILL(1: 0), EID_OUT_ARRAY(I,1), 'CENTER  ', (OGEL(K,J),J=1,8)
              ELSE
                WRITE(F06,1524) FILL(1: 0), EID_OUT_ARRAY(I,1), '        ', (OGEL(K,J),J=1,8)
              ENDIF
 
-             DO L=2,NUM_PTS
+             DO L=2,NUM_PTS                                ! Corner forces
                K = K + 1
                WRITE(F06,1525) FILL(1: 0), GID_OUT_ARRAY(I,L),(OGEL(K,J),J=1,8)
              ENDDO

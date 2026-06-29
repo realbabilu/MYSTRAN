@@ -43,9 +43,7 @@
                                          MRCONM2, MRCORD,                                                                          &
                                          MRGRID, MRMATLC, MRPBAR, MRPBEAM, MRPBUSH, MRPCOMP_PLIES, MRPCOMP0, MRPELAS, MRPMASS,     &
                                          MRPROD, MRPSHEAR, MRPSHEL, MRPUSER1, MRSNORM, MSNORM, MGRID_SNORM, MUSERIN_MAT_NAMES  
-! --- cbeam_add begin --- !
       USE SCONTR, ONLY                :  MPBEAM_STATIONS
-! --- cbeam_add end--- !                                         
       USE SCONTR, ONLY                :  NDOFG, NGRID, NMPC, NPCOMP, NPLOAD4_3D, NRBAR, NRBE1, NRBE2, NSPC, NTSUB, NUM_MPCSIDS,    &
                                          NUM_SPCSIDS
       USE TIMDAT, ONLY                :  TSEC
@@ -68,9 +66,7 @@
       USE MODEL_STUF, ONLY            :  MATL, RMATL, PBAR, RPBAR, PBEAM, RPBEAM, PBUSH, RPBUSH, PCOMP, RPCOMP, PELAS, RPELAS,     &
                                          PROD, RPROD, PSHEAR, RPSHEAR, PSHEL, RPSHEL, PSOLID, PUSER1, RPUSER1, PUSERIN,            &
                                          USERIN_ACT_COMPS, USERIN_ACT_GRIDS, USERIN_MAT_NAMES
-! --- cbeam_add begin --- !
       USE MODEL_STUF, ONLY            :  PBEAM_NSTATIONS, PBEAM_XL, PBEAM_RPROPS
-! --- cbeam_add end --- !                                                                                 
       USE MODEL_STUF, ONLY            :  MPC_SIDS, MPCSIDS, MPCADD_SIDS
       USE MODEL_STUF, ONLY            :  SPC_SIDS, SPC1_SIDS, SPCSIDS, SPCADD_SIDS
       USE MODEL_STUF, ONLY            :  ALL_SETS_ARRAY, ONE_SET_ARRAY, SETS_IDS, SC_ACCE, SC_DISP, SC_ELFN, SC_ELFE, SC_GPFO,     &
@@ -1374,7 +1370,6 @@
             ENDIF
          ENDIF
 
-! --- CBEAM_add begin --- !
          NAME = 'PBEAM_NSTATIONS'
          IF (ALLOCATED(PBEAM_NSTATIONS)) THEN
             CONTINUE
@@ -1446,7 +1441,6 @@
                JERR = JERR + 1
             ENDIF
          ENDIF
-! --- CBEAM_add end --- !
 
          NAME = 'PBUSH'
          IF (ALLOCATED(PBUSH)) THEN

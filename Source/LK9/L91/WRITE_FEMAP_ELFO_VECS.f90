@@ -51,17 +51,17 @@
 
       INTEGER(LONG), INTENT(IN)       :: NUM_FEMAP_ROWS         ! Number of rows of FEMAP data to write
       INTEGER(LONG), INTENT(IN)       :: FEMAP_SET_ID           ! FEMAP set ID to write out
-      INTEGER(LONG)                   :: ELEM_MAX               ! Grid ID where vector is max
-      INTEGER(LONG)                   :: ELEM_MIN               ! Grid ID where vector is min
+      INTEGER(LONG)                   :: ELEM_MAX = 0           ! Grid ID where vector is max
+      INTEGER(LONG)                   :: ELEM_MIN = 0           ! Grid ID where vector is min
 
                                                                 ! Col from FEMAP_EL_NUMS (elem ID's)
       INTEGER(LONG), ALLOCATABLE      :: ELEM_NUMS(:)
 
-      INTEGER(LONG)                   :: ELEM_NAME_LEN          ! Length of ELEM_TYP without trailing blanks
-      INTEGER(LONG)                   :: I,J                    ! DO loop indices
-      INTEGER(LONG)                   :: ID(20)                 ! Vector ID's for FEMAP output
-      INTEGER(LONG)                   :: VEC_ID_OFFSET          ! Offset in determining output vector ID
-      INTEGER(LONG)                   :: VEC_ID                 ! Vector ID for FEMAP output
+      INTEGER(LONG)                   :: ELEM_NAME_LEN = 0      ! Length of ELEM_TYP without trailing blanks
+      INTEGER(LONG)                   :: I = 0, J = 0           ! DO loop indices
+      INTEGER(LONG)                   :: ID(20) = 0             ! Vector ID's for FEMAP output
+      INTEGER(LONG)                   :: VEC_ID_OFFSET = 0      ! Offset in determining output vector ID
+      INTEGER(LONG)                   :: VEC_ID        = 0      ! Vector ID for FEMAP output
 
                                                                 ! Columns from FEMAP_EL_VECS
       REAL(DOUBLE), ALLOCATABLE       :: ELEM_VECS(:,:)
@@ -69,9 +69,9 @@
                                                                 ! One column from FEMAP_EL_VECS
       REAL(DOUBLE), ALLOCATABLE       :: ELEM_VEC(:)
 
-      REAL(DOUBLE)                    :: VEC_ABS                ! Abs value in vector
-      REAL(DOUBLE)                    :: VEC_MAX                ! Max value in vector
-      REAL(DOUBLE)                    :: VEC_MIN                ! Min value in vector
+      REAL(DOUBLE)                    :: VEC_ABS = 0.0D0        ! Abs value in vector
+      REAL(DOUBLE)                    :: VEC_MAX = 0.0D0        ! Max value in vector
+      REAL(DOUBLE)                    :: VEC_MIN = 0.0D0        ! Min value in vector
  
 
 ! **********************************************************************************************************************************
@@ -114,10 +114,8 @@
          VEC_ID_OFFSET = 51100
       ELSE IF (ELEM_TYP == 'BUSH    ') THEN
          VEC_ID_OFFSET = 51200
-!--- cbeam add begin --- !
       ELSE IF (ELEM_TYP == 'BEAM    ') THEN
          VEC_ID_OFFSET = 51300
-!--- cbeam add end --- !
       ELSE
          WARN_ERR = WARN_ERR + 1
          WRITE(ERR,943) TRIM(ELEM_TYP), 'ELEM FORCE', TRIM(SUBR_NAME)
@@ -127,7 +125,6 @@
       ENDIF
 
 ! Process BAR and ROD elements
-!--- cbeam add begin --- !
       IF (ELEM_TYP == 'BEAM    ') THEN
 
          TITLE_E( 1) = 'EndA Plane1 Moment'
@@ -168,7 +165,6 @@
             ENDDO
             WRITE(NEU,1008)
          ENDDO
-!--- cbeam add end --- !
       ELSE IF ((ELEM_TYP == 'BAR     ') .OR. (ELEM_TYP == 'ROD     ')) THEN
 
          TITLE_E( 1) = 'EndA Plane1 Moment'
@@ -468,4 +464,3 @@
 ! **********************************************************************************************************************************
  
       END SUBROUTINE WRITE_FEMAP_ELFO_VECS
-

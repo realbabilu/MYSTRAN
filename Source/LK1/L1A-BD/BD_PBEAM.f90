@@ -57,13 +57,11 @@
       INTEGER(LONG)                   :: J                  ! DO loop index
       INTEGER(LONG)                   :: MATERIAL_ID = 0    ! Material ID (field 3 of this property card)
       INTEGER(LONG)                   :: PROPERTY_ID = 0    ! Property ID (field 2 of this property card)
-! --- CBEAM_standard begin --- !
       INTEGER(LONG)                   :: IPRINT_STATION = 0
       INTEGER(LONG)                   :: ISTATION     = 0    ! Count of stored NX-style continuation stations for this PBEAM
       INTEGER(LONG)                   :: SO_FIELD     = 0
       INTEGER(LONG)                   :: XL_FIELD     = 0
       INTEGER(LONG)                   :: PROP_FIELD0  = 0
-! --- CBEAM_standard end --- !
 
 
       REAL(DOUBLE)                    :: AREA_A      = ZERO ! Cross sectional area at end A
@@ -79,13 +77,11 @@
       REAL(DOUBLE)                    :: I12         = ZERO ! Product of inertia at any location along beam
       REAL(DOUBLE)                    :: JTOR        = ZERO ! Torsional constantr at any location along beam
       REAL(DOUBLE)                    :: NSM         = ZERO ! Nonstructural mass at any location along beam
-! --- CBEAM_standard begin --- !
       REAL(DOUBLE)                    :: STATION_XL  = ZERO ! Current station x/L value read from continuation chain
       REAL(DOUBLE)                    :: CW_STA      = ZERO ! Debug-print warping coefficient at a stored station
       LOGICAL                         :: CONT_IS_STATION = .FALSE.
       LOGICAL                         :: EXPECT_STRESS_CARD = .FALSE.
       LOGICAL                         :: STATION_WARNED  = .FALSE.
-! --- CBEAM_standard end --- !
 
 
 

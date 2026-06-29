@@ -53,7 +53,6 @@
  
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME   = 'LOADB'
       CHARACTER(LEN=BD_ENTRY_LEN)     :: CARD1              ! BD card (a small field card or the 1st half of a large field card)
-      CHARACTER(LEN=BD_ENTRY_LEN)     :: CARD1_RAW          ! Original raw text of CARD1 before FFIELD changes it
       CHARACTER(LEN=BD_ENTRY_LEN)     :: CARD2              ! 2nd half of a large field card
       CHARACTER(LEN=BD_ENTRY_LEN)     :: CARD               ! 16 col field card (either CARD1 if small field or CARD1 + CARD2 if
 !                                                             a large field card. This is output from subr FFIELD
@@ -149,7 +148,6 @@
 bdf:  DO
 
          CALL READ_BDF_LINE(IN1, IOCHK, CARD1)
-         CARD1_RAW(1:) = CARD1(1:)
 
          ! Must have this since CARD goes to BD_xxxx, not CARD1.
          ! This will get reset if CARD1 is a large field format
@@ -305,13 +303,14 @@ bdf:  DO
          ELSE IF (CARD(1:5) == 'CONM2'   )  THEN
             CALL BD_CONM2   ( CARD, LARGE_FLD_INP )
   
-         ELSE IF ((CARD(1:6) == 'CORD1C'  ) .OR. (CARD(1:6) == 'CORD1R'  ) .OR. (CARD(1:6) == 'CORD1S'  ) .OR.                     &
-                  (CARD(1:6) == 'CORD2C'  ) .OR. (CARD(1:6) == 'CORD2R'  ) .OR. (CARD(1:6) == 'CORD2S'  )) THEN
-            IF ((LARGE_FLD_INP == 'N') .AND. ((INDEX(CARD1_RAW,',') > 0) .OR. (INDEX(CARD1_RAW,ACHAR(9)) > 0))) THEN
-               CALL BD_CORD ( CARD1_RAW, LARGE_FLD_INP )
-            ELSE
-               CALL BD_CORD ( CARD, LARGE_FLD_INP )
-            ENDIF
+         ELSE IF ((CARD(1:6) == 'CORD1C'  ) .OR. (CARD(1:6) == 'CORD1R'  ) .OR. (CARD(1:6) == 'CORD1S'  )) THEN
+            CALL BD_CORD ( CARD, LARGE_FLD_INP )
+
+         ELSE IF ((CARD(1:6) == 'CORD2C'  ) .OR. (CARD(1:6) == 'CORD2R'  ) .OR. (CARD(1:6) == 'CORD2S'  )) THEN
+            WRITE(ERR,9201) CARD(1:6)
+            WRITE(F06,9201) CARD(1:6)
+            FATAL_ERR = FATAL_ERR + 1
+            CALL OUTA_HERE ( 'Y' )
   
          ELSE IF (CARD(1:6) == 'CPENTA'  ) THEN
             CALL BD_CPENTA  ( CARD, LARGE_FLD_INP, ELEM_NUM_GRDS )
@@ -472,10 +471,8 @@ bdf:  DO
             CALL BD_PBARL    ( CARD, LARGE_FLD_INP, SEC_TYPE )
             IPBARL = IPBARL + 1
             PBARL_SEC_TYPES(IPBARL) = SEC_TYPE
- ! --- cbeam_add begin --- !
          ELSE IF (CARD(1:6) == 'PBEAML'  )  THEN
             CALL BD_PBEAML  ( CARD, LARGE_FLD_INP )
- ! --- cbeam_add end --- !
          ELSE IF (CARD(1:5) == 'PBEAM'   )  THEN
             CALL BD_PBEAM   ( CARD, LARGE_FLD_INP )
  
@@ -567,9 +564,11 @@ bdf:  DO
 
          ELSE IF((CARD(1:4) == 'SPC '    ) .OR. (CARD(1:4) == 'SPC*'    )) THEN
             CALL BD_SPC     ( CARD, CC_SPC_FND )
-! new diplacement deck
          ELSE IF (CARD(1:4) == 'SPCD'    )  THEN
-            CALL BD_SPCD    ( CARD, CC_LOAD_FND ) 
+            WRITE(ERR,9202) CARD(1:4)
+            WRITE(F06,9202) CARD(1:4)
+            FATAL_ERR = FATAL_ERR + 1
+            CALL OUTA_HERE ( 'Y' )
 
          ELSE IF (CARD(1:4) == 'SPC1'    )  THEN
             CALL BD_SPC1    ( CARD, LARGE_FLD_INP, CC_SPC_FND )
@@ -649,6 +648,8 @@ bdf:  DO
             ENDIF
          ENDIF
       ENDIF
+ 9201 FORMAT(' *ERROR  9201: BULK DATA ENTRY ',A,' IS NOT SUPPORTED IN THIS CBEAM-ONLY BRANCH. PLEASE ADD THIS FEATURE IN A SEPARATE PR.')
+ 9202 FORMAT(' *ERROR  9202: BULK DATA ENTRY ',A,' IS NOT SUPPORTED IN THIS CBEAM-ONLY BRANCH. PLEASE ADD THIS FEATURE IN A SEPARATE PR.')
  9991 FORMAT( /,' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'&
             ,'+++++++++++++++++++',/                                                                                               &
             ,' +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'&

@@ -1,4 +1,3 @@
-!--- cbeam add --- begin!
 ! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
@@ -54,23 +53,23 @@
 
       INTEGER(LONG), INTENT(IN)       :: NUM_FEMAP_ROWS         ! Number of rows of FEMAP data to write
       INTEGER(LONG), INTENT(IN)       :: FEMAP_SET_ID           ! FEMAP set ID to write out
-      INTEGER(LONG)                   :: ELEM_MAX               ! Elem ID where vector is max
-      INTEGER(LONG)                   :: ELEM_MIN               ! Elem ID where vector is min
-      INTEGER(LONG)                   :: ELEM_NAME_LEN          ! Length of ELEM_TYP without trailing blanks
+      INTEGER(LONG)                   :: ELEM_MAX      = 0      ! Elem ID where vector is max
+      INTEGER(LONG)                   :: ELEM_MIN      = 0      ! Elem ID where vector is min
+      INTEGER(LONG)                   :: ELEM_NAME_LEN = 0      ! Length of ELEM_TYP without trailing blanks
 
                                                                 ! Col from FEMAP_EL_NUMS (elem ID's)
       INTEGER(LONG), ALLOCATABLE      :: ELEM_NUMS(:)
 
-      INTEGER(LONG)                   :: I,J                    ! DO loop indices
-      INTEGER(LONG)                   :: ID(20)                 ! Vector ID's for FEMAP output
-      INTEGER(LONG)                   :: VEC_ID_OFFSET          ! Offset in determining output vector ID
-      INTEGER(LONG)                   :: VEC_ID                 ! Vector ID for FEMAP output
+      INTEGER(LONG)                   :: I = 0, J = 0           ! DO loop indices
+      INTEGER(LONG)                   :: ID(20) = 0             ! Vector ID's for FEMAP output
+      INTEGER(LONG)                   :: VEC_ID_OFFSET = 0      ! Offset in determining output vector ID
+      INTEGER(LONG)                   :: VEC_ID        = 0      ! Vector ID for FEMAP output
 
 
       REAL(DOUBLE), ALLOCATABLE       :: ELEM_VEC(:)                 ! One column from FEMAP_EL_VECS
-      REAL(DOUBLE)                    :: VEC_ABS                ! Abs value in vector
-      REAL(DOUBLE)                    :: VEC_MAX                ! Max value in vector
-      REAL(DOUBLE)                    :: VEC_MIN                ! Min value in vector
+      REAL(DOUBLE)                    :: VEC_ABS = 0.0D0        ! Abs value in vector
+      REAL(DOUBLE)                    :: VEC_MAX = 0.0D0        ! Max value in vector
+      REAL(DOUBLE)                    :: VEC_MIN = 0.0D0        ! Min value in vector
 
 
 ! **********************************************************************************************************************************
@@ -110,10 +109,8 @@
          VEC_ID_OFFSET = 71300
       ELSE IF (ELEM_TYP == 'SHEAR   ') THEN
          VEC_ID_OFFSET = 71400
-!---  cbeam add begin --- !
       ELSE IF (ELEM_TYP == 'BEAM    ') THEN
          VEC_ID_OFFSET = 71500
-!---  cbeam add end --- !
       ELSE
          WARN_ERR = WARN_ERR + 1
          WRITE(ERR,943) TRIM(ELEM_TYP), 'STRAIN', TRIM(SUBR_NAME)
@@ -123,7 +120,6 @@
       ENDIF
 
 ! Process elements
-!---  cbeam add begin --- !
       IF (ELEM_TYP == 'BEAM    ') THEN
 
          TITLE_E( 1) = 'EndA Pt1 Comb Strain';   CALC_WARN( 1) = '0';   COMP_DIR( 1) = '3';   CENT_TOTAL( 1) = '1'
@@ -161,7 +157,6 @@
             ENDDO
             WRITE(NEU,1008)
          ENDDO
-!---  cbeam add end --- !	
       ELSE IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4')) THEN
 
          IF (IS_PCOMP == 'N') THEN
@@ -348,5 +343,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE WRITE_FEMAP_STRN_VECS
-
-

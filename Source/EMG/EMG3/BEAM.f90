@@ -1,4 +1,3 @@
-!--- cbeam_add begin ---!
 ! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
@@ -42,7 +41,7 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  EPSIL, ART_KED, ART_ROT_KED, ART_TRAN_KED
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_AREA_SCALE, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_RPROPS, CBEAM_FORCE_B1, CBEAM_FORCE_B2, DOFPIN, DT, EID,&
+      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_RPROPS, CBEAM_FORCE_B1, CBEAM_FORCE_B2, DOFPIN, DT, EID,&
                                          ELDOF, KE, KED, PEL, PPE, PRESS, PTE, SE1, SE2, STE1, STE2, TE, UEL, ZS
       USE MODEL_STUF, ONLY            :  NUM_EMG_FATAL_ERRS
       USE BEAM_USE_IFs
@@ -149,12 +148,8 @@
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
 
-      DO I=1,12
-         DO J=1,12
-            KE(I,J)  = ZERO
-            KED(I,J) = ZERO
-         ENDDO
-      ENDDO
+      KE  = ZERO
+      KED = ZERO
       AREA_REF = AREA
       I1_REF   = I1
       I2_REF   = I2
@@ -180,8 +175,6 @@
          FAC1 = E*I1/(L*L*L)
          FAC2 = E*I2/(L*L*L)
          RG   = G*JTOR/L
-
-         IF (DEBUG(203) > 0) CALL DEBUG_BEAM ( 1 )
 
          PHI1 = ZERO
          PHI2 = ZERO
@@ -209,8 +202,6 @@
             DELTA2  = I1/DEN
             DELTA12 = I12/DEN
          ENDIF
-
-         IF (DEBUG(203) > 0) CALL DEBUG_BEAM ( 2 )
 
 ! **********************************************************************************************************************************
 ! Stiffness matrix
@@ -316,11 +307,7 @@
 
       IF (NTSUB > 0) THEN
 
-         DO I=1,6
-            DO J=1,5
-               ABAR(I,J) = ZERO
-            ENDDO
-         ENDDO
+         ABAR = ZERO
 
          ABAR(1,1) =  ONE
          ABAR(2,2) =  DELTA1*I1*L/SIX
@@ -662,19 +649,13 @@
 
          ENDDO
 
-! --- CBEAM_standard begin --- !
-! --- CBEAM_standard end --- !
       ENDIF
 
 ! **********************************************************************************************************************************
 ! Stress recovery matrices
 
-      DO I=1,3
-         DO J=1,6
-            B1(I,J) = ZERO
-            B2(I,J) = ZERO
-         ENDDO
-      ENDDO
+      B1 = ZERO
+      B2 = ZERO
 
       IF (DABS(AREA_REF) > EPS1) THEN
          B1(1,1) = -ONE/AREA_REF
@@ -739,12 +720,8 @@
 ! --- cbeam_stations end --- !
 
       IF (NTSUB > 0) THEN
-         DO I=1,3
-            DO J=1,5
-               BT1(I,J) = ZERO
-               BT2(I,J) = ZERO
-            ENDDO
-         ENDDO
+         BT1 = ZERO
+         BT2 = ZERO
 
          CALL MATMULT_FFF ( S11, ABAR, 3, 6, 5, BT1 )
          CALL MATMULT_FFF ( S21, ABAR, 3, 6, 5, BT2 )
@@ -774,14 +751,12 @@
 
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
 
-! --- bug_cbeam_fix1 begin --- !
 ! For the second buckling pass, derive local element end forces directly from
 ! the local stiffness times the local element displacement vector. This avoids
 ! the broader helper path that was unstable for the validated CBEAM buckling
 ! family while preserving the existing geometric stiffness assembly.
          CALL ELMDIS
          PEL(1:ELDOF) = MATMUL(KE(1:ELDOF,1:ELDOF), UEL(1:ELDOF))
-! --- bug_cbeam_fix1 end --- !
 
          M1A = -PEL(6)
          M2A =  PEL(5)
@@ -868,52 +843,6 @@
       CONTAINS
 
 ! ##################################################################################################################################
-
-      SUBROUTINE DEBUG_BEAM ( WHAT )
-
-      USE PENTIUM_II_KIND
-
-      IMPLICIT NONE
-
-      INTEGER(LONG), INTENT(IN)       :: WHAT
-
-      IF (WHAT == 1) THEN
-         WRITE(F06,*)
-         WRITE(F06,1997)
-         WRITE(F06,'(A,I8)') 'In subr BEAM with BEAM element ',EID
-         WRITE(F06,*) '--------------------------------------'
-         WRITE(F06,1998) 'L       = ',L
-         WRITE(F06,1998) 'AREA    = ',AREA
-         WRITE(F06,1998) 'I1      = ',I1
-         WRITE(F06,1998) 'I2      = ',I2
-         WRITE(F06,1998) 'I12     = ',I12
-         WRITE(F06,1998) 'JTOR    = ',JTOR
-         WRITE(F06,1998) 'CW      = ',CW
-         WRITE(F06,1998) 'K1      = ',K1
-         WRITE(F06,1998) 'K2      = ',K2
-         WRITE(F06,1998) 'E       = ',E
-         WRITE(F06,1998) 'G       = ',G
-         WRITE(F06,1998) 'SCOEFF  = ',SCOEFF
-         WRITE(F06,1998) 'ALPHA   = ',ALPHA
-         WRITE(F06,1998) 'TREF    = ',TREF
-      ELSE IF (WHAT == 2) THEN
-         WRITE(F06,1999) 'plane1 (UY,RZ) uses I1/K2; phi1 = ',PHI1
-         WRITE(F06,1999) 'plane2 (UZ,RY) uses I2/K1; phi2 = ',PHI2
-         WRITE(F06,1998) 'FAC1    = ',FAC1
-         WRITE(F06,1998) 'FAC2    = ',FAC2
-         WRITE(F06,1998) 'DEN     = ',DEN
-         WRITE(F06,1998) 'DELTA1  = ',DELTA1
-         WRITE(F06,1998) 'DELTA2  = ',DELTA2
-         WRITE(F06,1998) 'DELTA12 = ',DELTA12
-         WRITE(F06,*)
-         WRITE(F06,1997)
-         WRITE(F06,*)
-      ENDIF
-
- 1997 FORMAT('************************************************************')
- 1998 FORMAT(A, 1ES14.6)
- 1999 FORMAT(A, 1ES14.6)
-      END SUBROUTINE DEBUG_BEAM
 
       SUBROUTINE DECODE_PLOAD1_SPAN ( X1_IO, X2_IO, ELEN )
 
@@ -1149,10 +1078,8 @@
       I12_AVG  = ZERO
       JTOR_AVG = ZERO
 
-      DO IROW=1,12
-         BAX(IROW)  = ZERO
-         BTOR(IROW) = ZERO
-      ENDDO
+      BAX  = ZERO
+      BTOR = ZERO
       BAX(1)   = -ONE/L_IN
       BAX(7)   =  ONE/L_IN
       BTOR(4)  = -ONE/L_IN
@@ -1181,10 +1108,8 @@
             N3PP = ( SIX - TWELVE*XI_SEG)/(L_IN*L_IN)
             N4PP = (-TWO + SIX*XI_SEG)/L_IN
 
-            DO IROW=1,12
-               BB1(IROW) = ZERO
-               BB2(IROW) = ZERO
-            ENDDO
+            BB1 = ZERO
+            BB2 = ZERO
             BB1(2)  = N1PP
             BB1(6)  = N2PP
             BB1(8)  = N3PP
@@ -1363,7 +1288,7 @@
       REAL(DOUBLE)                  :: DXI_LOC, FRAC
       INTEGER(LONG)                 :: IST
 
-      AREA_OUT = CBEAM_ACTIVE_AREA_SCALE*CBEAM_ACTIVE_RPROPS(1,1)
+      AREA_OUT = CBEAM_ACTIVE_RPROPS(1,1)
       I1_OUT   = CBEAM_ACTIVE_RPROPS(1,2)
       I2_OUT   = CBEAM_ACTIVE_RPROPS(1,3)
       I12_OUT  = CBEAM_ACTIVE_RPROPS(1,4)
@@ -1379,7 +1304,6 @@
             IF (DXI_LOC <= EPS1) RETURN
             FRAC = (XI_IN - CBEAM_ACTIVE_XL(IST))/DXI_LOC
             AREA_OUT = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,1) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,1)
-            AREA_OUT = CBEAM_ACTIVE_AREA_SCALE*AREA_OUT
             I1_OUT   = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,2) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,2)
             I2_OUT   = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,3) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,3)
             I12_OUT  = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,4) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,4)
@@ -1389,7 +1313,7 @@
          ENDIF
       ENDDO
 
-      AREA_OUT = CBEAM_ACTIVE_AREA_SCALE*CBEAM_ACTIVE_RPROPS(NSTA,1)
+      AREA_OUT = CBEAM_ACTIVE_RPROPS(NSTA,1)
       I1_OUT   = CBEAM_ACTIVE_RPROPS(NSTA,2)
       I2_OUT   = CBEAM_ACTIVE_RPROPS(NSTA,3)
       I12_OUT  = CBEAM_ACTIVE_RPROPS(NSTA,4)
@@ -1399,9 +1323,6 @@
       END SUBROUTINE GET_STATION_PROPS
 
       END SUBROUTINE BEAM
-
-!--- cbeam_add end ---!
-
 
 
 

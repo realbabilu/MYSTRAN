@@ -601,9 +601,7 @@
       INTEGER(LONG), ALLOCATABLE      :: MATL   (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PBAR   (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PBEAM  (:,:)         ! See description below
-! --- CBEAM_standard begin --- !
       INTEGER(LONG), ALLOCATABLE      :: PBEAM_NSTATIONS(:)   ! Number of stored station x/L values for each PBEAM property
-! --- CBEAM_standard end --- !
       INTEGER(LONG), ALLOCATABLE      :: PBUSH  (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PCOMP  (:,:)         ! See description below
       INTEGER(LONG), ALLOCATABLE      :: PELAS  (:,:)         ! See description below
@@ -617,10 +615,8 @@
       REAL(DOUBLE) , ALLOCATABLE      :: RMATL  (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPBAR  (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPBEAM (:,:)         ! See description below
-! --- CBEAM_standard begin --- !
       REAL(DOUBLE) , ALLOCATABLE      :: PBEAM_XL(:,:)        ! Stored station x/L values for each PBEAM property
       REAL(DOUBLE) , ALLOCATABLE      :: PBEAM_RPROPS(:,:,:)  ! Stored [A,I1,I2,I12,J,NSM] for each PBEAM station
-! --- CBEAM_standard end --- !
       REAL(DOUBLE) , ALLOCATABLE      :: RPBUSH (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPCOMP (:,:)         ! See description below
       REAL(DOUBLE) , ALLOCATABLE      :: RPELAS (:,:)         ! See description below
@@ -1126,7 +1122,6 @@
 ! BEAM element specific data
 ! --------------------------
 
-! --- cbeam_stations begin --- !
       INTEGER(LONG)                   :: CBEAM_ACTIVE_NSTATIONS = 0
                                                              ! Number of active x/L stations copied into the current BEAM runtime state
 
@@ -1140,7 +1135,6 @@
                                                              ! Beam section-force-to-stress map at the reference side
       REAL(DOUBLE)                    :: CBEAM_FORCE_B2(3,6) = ZERO
                                                              ! Beam section-force-to-stress map used in station interpolation
-! --- cbeam_stations end --- !
 
       CHARACTER( 9*BYTE)              :: BEAMOR_VVEC_TYPE    = '         '
                                                              ! Indicator of type of V vec on BEAMOR B.D. entry (grid or vector)
@@ -1294,9 +1288,7 @@
 
                                                              ! Array of number of stress recovery points for various elem types
       INTEGER(LONG)                   :: NUM_SEi(METYPE)     =  (/ 1,             & ! BAR      1
-! --- cbeam_stations begin --- !
                                                                   10,             & ! BEAM     2
-! --- cbeam_stations end --- !
                                                                    1,             & ! BUSH     3
                                                                    1,             & ! ELAS1    4
                                                                    1,             & ! ELAS2    5

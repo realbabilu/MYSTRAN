@@ -1,4 +1,3 @@
-!--- cbeam add --- begin!
 ! ##################################################################################################################################
 ! Begin MIT license text.                                                                                    
 ! _______________________________________________________________________________________________________
@@ -285,7 +284,10 @@
             IF (CARD(41:48) /= '        ') LCORD = LCORD + 1
   
          ELSE IF((CARD(1:6) == 'CORD2C'  ) .OR. (CARD(1:6) == 'CORD2R'  ) .OR. (CARD(1:6) == 'CORD2S'  )) THEN
-            LCORD = LCORD + 1
+            WRITE(ERR,9201) CARD(1:6)
+            WRITE(F06,9201) CARD(1:6)
+            FATAL_ERR = FATAL_ERR + 1
+            CALL OUTA_HERE ( 'Y' )
   
          ELSE IF (CARD(1:6) == 'CPENTA'  ) THEN
             LELE  = LELE + 1
@@ -386,10 +388,8 @@
          ELSE IF (CARD(1:5) == 'PBARL'   )  THEN
             LPBAR  = LPBAR  + 1
             NPBARL = NPBARL + 1
- ! --- cbeam_add begin --- !
          ELSE IF (CARD(1:6) == 'PBEAML'  )  THEN
             LPBEAM = LPBEAM + 1
- ! --- cbeam_add end --- !
          ELSE IF (CARD(1:5) == 'PBEAM'   )  THEN
             LPBEAM = LPBEAM + 1
  
@@ -412,7 +412,6 @@
 
          ELSE IF (CARD(1:5) == 'PELAS'   )  THEN
             LPELAS = LPELAS + 1
- ! --- cbeam_add begin --- !
          ELSE IF ((CARD(1:6) == 'PLOAD1'  ) .OR. (CARD(1:6) == 'PLOAD2'  ))  THEN
             IF (CARD(1:6) == 'PLOAD1') THEN
                LPDAT  = LPDAT  + MPDAT_PLOAD1               ! Beam/bar PLOAD1 data slots
@@ -420,7 +419,6 @@
                LPDAT  = LPDAT  + MPDAT_PLOAD2
             ENDIF
             LPLOAD = LPLOAD + 1
- ! --- cbeam_add end --- !
 
          ELSE IF (CARD(1:6) == 'PLOAD4'  )  THEN
             LPDAT  = LPDAT  + MPDAT_PLOAD4
@@ -489,10 +487,11 @@
  
          ELSE IF((CARD(1:4) == 'SPC '    ) .OR. (CARD(1:4) == 'SPC*'    )) THEN
             LSPC = LSPC + 1
- ! --- cbeam_add begin --- !
          ELSE IF (CARD(1:4) == 'SPCD'    )  THEN
-            LSPC = LSPC + 1
- ! --- cbeam_add end --- !
+            WRITE(ERR,9202) CARD(1:4)
+            WRITE(F06,9202) CARD(1:4)
+            FATAL_ERR = FATAL_ERR + 1
+            CALL OUTA_HERE ( 'Y' )
          ELSE IF (CARD(1:4) == 'SPC1'    )  THEN
             LSPC1 = LSPC1 + 1
 
@@ -535,6 +534,10 @@
  1010 FORMAT(' *ERROR  1010: ERROR READING FOLLOWING ',A,' ENTRY. ENTRY IGNORED')
 
  1011 FORMAT(' *ERROR  1011: NO ',A10,' ENTRY FOUND BEFORE END OF FILE OR END OF RECORD IN INPUT FILE')
+
+ 9201 FORMAT(' *ERROR  9201: BULK DATA ENTRY ',A,' IS NOT SUPPORTED IN THIS CBEAM-ONLY BRANCH. PLEASE ADD THIS FEATURE IN A SEPARATE PR.')
+
+ 9202 FORMAT(' *ERROR  9202: BULK DATA ENTRY ',A,' IS NOT SUPPORTED IN THIS CBEAM-ONLY BRANCH. PLEASE ADD THIS FEATURE IN A SEPARATE PR.')
 
 ! **********************************************************************************************************************************
  

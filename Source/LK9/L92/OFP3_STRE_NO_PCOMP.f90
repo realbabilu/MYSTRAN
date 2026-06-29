@@ -45,14 +45,12 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRE, TXT_STRE
-! --- cbeam_add begin --- !
       USE SCONTR, ONLY                :  NGRID, NCBEAM
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_VECS
       USE CONSTANTS_1, ONLY           :  HALF, THREE
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT
       USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, OGROUT, PBEAM_NSTATIONS, ZS, GRID_ID
-! --- cbeam_add end --- !
 
       USE PLANE_COORD_TRANS_21_Interface
       USE TRANSFORM_SHELL_STR_Interface
@@ -86,11 +84,9 @@
 
       INTEGER(LONG)                   :: NUM_OTM_ENTRIES   ! Number of entries in OGEL for a particular element type
       INTEGER(LONG)                   :: NUM_PTS(METYPE)   ! Num diff stress points for one element (3rd dim in arrays SEi, STEi)
-! --- cbeam_add begin --- !
       INTEGER(LONG)                   :: NUM_PTS_CUR       ! Actual number of stress points for the current element
       INTEGER(LONG)                   :: NUM_PTS_ELEM      ! Actual number of stress points for the current element in request counting
       INTEGER(LONG)                   :: NUM_STS_POINTS    ! Actual number of stress points 
-! --- cbeam_add end --- !
                                                            ! Stress index (1 through 9) where poly fit err is max
       INTEGER(LONG)                   :: STRESS_OUT_ERR_INDEX(MAX_STRESS_POINTS+1) !add+1
 
@@ -100,11 +96,9 @@
       REAL(DOUBLE)                    :: STRESS_OUT_PCT_ERR(MAX_STRESS_POINTS+1) !add+1
 
       REAL(DOUBLE)                    :: PCT_ERR_MAX       ! Max value from array STRESS_OUT_PCT_ERR
-! --- cbeam_add begin --- !
       REAL(DOUBLE)                    :: C1,C2,D1,D2,E1,E2,F1,F2
       REAL(DOUBLE)                    :: EA0,EA1,EA2,EA3,EA4,EAMAX,EAMIN
       REAL(DOUBLE)                    :: EB0,EB1,EB2,EB3,EB4,EBMAX,EBMIN
-! --- cbeam_add end --- !
                                                            ! Array of values from array STRESS for all stress points + 1
       REAL(DOUBLE)                    :: STRESS_RAW(9,MAX_STRESS_POINTS+1)
 
@@ -116,11 +110,9 @@
       CHARACTER(8*BYTE)               :: TABLE_NAME   ! name of the op2 table name
       INTEGER(LONG)                   :: ITABLE       ! the subtable
       LOGICAL                         :: WRITE_NEU
-! --- cbeam_add begin --- !
       LOGICAL                         :: HAVE_SECTION_POINTS
 
       INTRINSIC DABS, DMAX1, DMIN1, IAND
-! --- cbeam_add end --- !
 
       ITABLE = 0
       TABLE_NAME = "OES ERR "
@@ -134,11 +126,9 @@
       OPT(2) = 'N'                                         ! OPT(2) is for calc of PTE
       OPT(3) = 'Y'                                         ! OPT(3) is for calc of SEi, STEi
       OPT(4) = 'N'                                         ! OPT(4) is for calc of KE-linear
-! --- cbeam_add begin --- !
 ! Default to legacy behavior for non-beam elements. CBEAM output can enable PPE
 ! per-element before the EMG call when fixed-end load recovery is actually needed.
       OPT(5) = 'N'                                         ! OPT(5) is for calc of PPE
-! --- cbeam_add end--- !
       OPT(6) = 'N'                                         ! OPT(6) is for calc of KE-diff stiff
 
 
@@ -153,13 +143,11 @@
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
                IF (ETYPE(J) == ELMTYP(I)) THEN
-! --- cbeam_add begin --- !
 ! --- cbeam_stations begin --- !
                   IF (ETYPE(J) == 'BEAM    ') THEN
                      NUM_PTS_ELEM = PBEAM_NSTATIONS(EDAT(EPNT(J)+1))
                      IF (NUM_PTS_ELEM <= 0) NUM_PTS_ELEM = 5
                      IF (NUM_PTS_ELEM > NUM_PTS(I)) NUM_PTS(I) = NUM_PTS_ELEM
-! --- cbeam_add end --- !
                   ELSE
                      IF ((STRE_LOC == 'CORNER  ') .OR.                                                                            &
                          (STRE_LOC == 'GAUSS   ') .OR.                                                                            &
@@ -222,30 +210,22 @@ elems_5: DO J = 1,NELE
                      CALL CALC_ELEM_NODE_FORCES
                   ENDIF
 
-! --- CBEAM_add begin --- !
                    NUM_STS_POINTS = NUM_PTS(I)
                    NUM_PTS_CUR = NUM_PTS(I)
                    IF (TYPE == 'BEAM    ') THEN
                       NUM_PTS_CUR = CBEAM_ACTIVE_NSTATIONS
                       IF (NUM_PTS_CUR <= 0) NUM_PTS_CUR = 1
-                      IF ((DEBUG(233) > 0) .AND. ((EID == 14) .OR. (EID == 15))) THEN
-                         WRITE(ERR,9233) EID, NUM_PTS(I), CBEAM_ACTIVE_NSTATIONS, NUM_PTS_CUR,                                     &
-                                          (CBEAM_ACTIVE_XL(K), K=1,NUM_PTS_CUR)
-                      ENDIF
                       NUM_STS_POINTS = NUM_PTS_CUR
 	           ELSE 
                       NUM_STS_POINTS = NUM_PTS(I)
                    ENDIF
-! --- CBEAM_add end --- !
                    DO M=1,NUM_STS_POINTS
                       CALL ELEM_STRE_STRN_ARRAYS ( M )
                       STRESS_RAW(:,M) = STRESS(:)
                    ENDDO
 
-! --- cbeam_add begin --- !
                   IF (TYPE == 'BEAM    ') THEN
                      STRESS_OUT(:,:) = STRESS_RAW(:,:)
-! --- cbeam_add end --- !
                   ELSE
                      STRESS_OUT(:,1) = STRESS(:)         ! Set STRESS_OUT for NUM_PTS(I) = 1
                   ENDIF
@@ -345,13 +325,11 @@ elems_5: DO J = 1,NELE
 
                      NUM_OGEL_ROWS = NUM_OGEL_ROWS + 1
                      EID_OUT_ARRAY(NUM_OGEL_ROWS,1) = EID
-! --- cbeam_add begin --- !
                      IF (TYPE == 'BEAM    ') THEN
                         CBEAM_XL_OUT(NUM_OGEL_ROWS) = CBEAM_ACTIVE_XL(M)
                      ELSE
                         CBEAM_XL_OUT(NUM_OGEL_ROWS) = ZERO
                      ENDIF
-! --- cbeam_add end --- !
                      GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                      IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ')) THEN
                         IF (TYPE(1:5) == 'QUAD4') THEN
@@ -416,7 +394,6 @@ elems_5: DO J = 1,NELE
                      CYCLE
                   ENDIF
                   CALL ELMDIS
-! --- CBEAM_add begin --- !
 ! Beam stress recovery in FEMAP/NEU needs the same element nodal force reconstruction
 ! used by the standard F06 path; otherwise the beam stress vectors stay effectively zero.
                   CALL CALC_ELEM_NODE_FORCES
@@ -1064,7 +1041,6 @@ elems_5: DO J = 1,NELE
 
  9201 FORMAT(' *ERROR  9201: DUE TO ABOVE LISTED ERRORS, CANNOT CALCULATE ',A,' REQUESTS FOR ',A,' ELEMENT ID = ',I8)
 
- 9233 FORMAT(' *CBEAM STRE DEBUG: EID=',I8,' NUM_PTS(I)=',I8,' ACTIVE=',I8,' CUR=',I8,' XL=',21(1X,ES12.5))
 
  1001 FORMAT(2(I8,','),'       1,')
  1002 FORMAT(A)

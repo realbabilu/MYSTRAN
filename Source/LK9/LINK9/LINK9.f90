@@ -55,9 +55,7 @@
                                          NROWS_OTM_ELFE, NROWS_OTM_ELFN, NROWS_OTM_STRE, NROWS_OTM_STRN,                           &
                                          NROWS_TXT_ACCE, NROWS_TXT_DISP, NROWS_TXT_MPCF, NROWS_TXT_SPCF,                           &
                                          NROWS_TXT_ELFE, NROWS_TXT_ELFN, NROWS_TXT_STRE, NROWS_TXT_STRN, RESTART, SOL_NAME, WARN_ERR	
-! --- cbeam_add begin --- !
       USE SCONTR, ONLY                :  INT_EIG_NUM, NUM_BUCKLING_SUBS,MODE_SUBCASE
-! --- cbeam_add end --- !
 
       USE SCONTR, ONLY                :  GROUT_ACCE_BIT, GROUT_DISP_BIT, GROUT_OLOA_BIT, GROUT_SPCF_BIT, GROUT_MPCF_BIT,           &
                                          GROUT_GPFO_BIT, ELOUT_ELFN_BIT, ELOUT_ELFE_BIT, ELOUT_STRE_BIT, ELOUT_STRN_BIT,           &
@@ -600,10 +598,6 @@
          NUM_SOLNS = NSUB
 
       ELSE IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-! --- cbeam_add begin --- !
-         !IF (LK9_PROC_NUM == 1) THEN	! original cbeam_add 
-         !   NUM_SOLNS = 1              ! original cbeam_add
-! --- cbeam_add end  --- !
          IF (LOAD_ISTEP == 1) THEN
             NUM_SOLNS = NSUB - NUM_BUCKLING_SUBS  ! all static preload subcases
 
@@ -679,10 +673,8 @@ j_do: DO JVEC=1,NUM_SOLNS
             FEMAP_SET_ID = SCNUM(JVEC)
 
          ELSE IF (SOL_NAME(1: 8) == 'BUCKLING') THEN
-! --- cbeam_add begin --- !
 !            INT_SC_NUM   = LK9_PROC_NUM
 !            FEMAP_SET_ID = LK9_PROC_NUM
-! --- cbeam_add end --- !
             IF (LOAD_ISTEP == 2) THEN
                ! Each eigenvector is attributed to its owning buckling subcase via MODE_SUBCASE (same as MODES)
                INT_SC_NUM = 1
