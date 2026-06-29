@@ -26,13 +26,16 @@
 
       SUBROUTINE BD_CORD ( CARD, LARGE_FLD_INP )
 
-! Processes CORD1C, CORD1R, and CORD1S Bulk Data Cards
+! Processes CORD1C, CORD1R, CORD1S and CORD2C, CORD2R, CORD2S Bulk Data Cards
+!  1) Sets coord type  (0 {2R},1 {2C},2 {2S}) and enters it into array CORD
+!  2) Reads coord system ID and reference ID  and enters it into array CORD
+!  3) Reads coord data into array RCORD
 
-      USE PENTIUM_II_KIND, ONLY       :  LONG
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
-      USE SCONTR, ONLY                :  FATAL_ERR, IERRFL, JCARD_LEN, JF, LCORD, NCORD, NCORD1, BLNK_SUB_NAM
+      USE SCONTR, ONLY                :  FATAL_ERR, IERRFL, JCARD_LEN, JF, LCORD, NCORD, NCORD1, NCORD2, BLNK_SUB_NAM
       USE TIMDAT, ONLY                :  TSEC
-      USE MODEL_STUF, ONLY            :  CORD
+      USE MODEL_STUF, ONLY            :  CORD, RCORD
 
       USE BD_CORD_USE_IFs
 
@@ -41,25 +44,52 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'BD_CORD'
       CHARACTER(LEN=*), INTENT(INOUT) :: CARD              ! A Bulk Data card
       CHARACTER(LEN=*), INTENT(IN)    :: LARGE_FLD_INP     ! If 'Y', CARD is large field format
+      CHARACTER(LEN(CARD))            :: CHILD             ! "Child" card read in subr NEXTC, called herein
       CHARACTER(LEN=JCARD_LEN)        :: JCARD(10)         ! The 10 fields of characters making up CARD
       CHARACTER(LEN(JCARD))           :: CORD_CID          ! Field 2 of CORD card (coord sys ID)
       CHARACTER(LEN(JCARD))           :: CORD_NAME         ! Name of coors sys
 
+      INTEGER(LONG)                   :: J                 ! DO loop index
       INTEGER(LONG)                   :: I4INP     = 0     ! A value read from input file that should be an integer value
+      INTEGER(LONG)                   :: ICONT     = 0     ! Indicator of whether a cont card exists. Output from subr NEXTC
+      INTEGER(LONG)                   :: IERR      = 0     ! Error indicator returned from subr NEXTC called herein
+
+
+
 
 ! **********************************************************************************************************************************
-! CORD1 Bulk Data Card routine
+! CORD1R Bulk Data Card routine
 
 !   FIELD   ITEM           ARRAY ELEMENT
 !   -----   ------------   -------------
-!    1      Cord Type       CORD(ncord,1) 11 is CORD1R, 12 is CORD1C, 13 is CORD1S
+!    1      Cord Type       CORD(ncord,1) 11 is CORD1R, 21 is CORD2R, 22 is CORD2C, 23 is CORD2S
 !    2      CID             CORD(ncord,2)
 !    3      GA              Temporarily put into CORD(ncord,3)
-!    4      GB              Temporarily put into CORD(ncord,4)
-!    5      GC              Temporarily put into CORD(ncord,5)
+!    3      GB              Temporarily put into CORD(ncord,4)
+!    3      GC              Temporarily put into CORD(ncord,5)
 !    3      RID             CORD(ncord,3) ref sys for grid A (will be entered later when GRID array is sorted and we can find GA
 !    4      RID             CORD(ncord,4) ref sys for grid B (will be entered later when GRID array is sorted and we can find GB
 !    5      RID             CORD(ncord,5) ref sys for grid C (will be entered later when GRID array is sorted and we can find GC
+
+
+! CORD2C, CORD2R, CORD2S Bulk Data Card routine
+
+!   FIELD   ITEM           ARRAY ELEMENT
+!   -----   ------------   -------------
+! on first card:
+!    1      Cord Type       CORD(ncord,1) =02 {2R},12 {2C},22 {2S}
+!    2      CID             CORD(ncord,2)
+!    3      RID             CORD(ncord,3)
+!    4      A1             RCORD(ncord,1)
+!    5      A2             RCORD(ncord,2)
+!    6      A3             RCORD(ncord,3)
+!    7      B1             RCORD(ncord,4)
+!    8      B2             RCORD(ncord,5)
+!    9      B3             RCORD(ncord,6)
+! on required second card:
+!    2      C1             RCORD(ncord,7)
+!    3      C2             RCORD(ncord,8)
+!    4      C3             RCORD(ncord,9)
 
 ! Make JCARD from CARD
 
@@ -197,13 +227,94 @@
 
          ENDIF
 
+! ---------------------------------------------------------------------------------------------------------------------------------
+      ELSE IF (CORD_NAME(1:5) == 'CORD2') THEN
+
+         NCORD2 = NCORD2 + 1
+         NCORD  = NCORD  + 1
+
+         CORD_CID = JCARD(2)
+
+         IF      (JCARD(1)(1:6) == 'CORD2R') THEN
+            CORD(NCORD,1) = 21
+         ELSE IF (JCARD(1)(1:6) == 'CORD2C') THEN
+            CORD(NCORD,1) = 22
+         ELSE IF (JCARD(1)(1:6) == 'CORD2S') THEN
+            CORD(NCORD,1) = 23
+         ENDIF
+
+         CALL I4FLD ( JCARD(2), JF(2), I4INP )             ! Read CID and make sure it is > 0 (cannot define 0, or basic, system)
+         IF (IERRFL(2) == 'N') THEN
+            IF (I4INP < 0) THEN                            ! --- CID cannot be negative
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,1169) JF(2), CORD_NAME, JCARD(2), JCARD(2)
+               WRITE(F06,1169) JF(2), CORD_NAME, JCARD(2), JCARD(2)
+            ELSE IF (I4INP == 0) THEN                      ! --- CID cannot be 0 (can't define basic)
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,1170) JF(2), CORD_NAME, JCARD(2), JCARD(2)
+               WRITE(F06,1170) JF(2), CORD_NAME, JCARD(2), JCARD(2)
+            ELSE                                           ! --- CID is OK
+               CORD(NCORD,2) = I4INP
+            ENDIF
+         ENDIF
+
+         CALL I4FLD ( JCARD(3), JF(3), I4INP )             ! Read RID and make sure it is >= 0
+         IF (IERRFL(3) == 'N') THEN
+            IF (I4INP >= 0) THEN
+               CORD(NCORD,3) = I4INP
+            ELSE                                           ! --- RID cannot be negative
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,1169) JF(3), CORD_NAME, JCARD(3), JCARD(3)
+               WRITE(F06,1169) JF(3), CORD_NAME, JCARD(3), JCARD(3)
+            ENDIF
+         ENDIF
+
+         DO J = 1,6                                        ! Read real data on parent card
+            CALL R8FLD ( JCARD(J+3), JF(J+3), RCORD(NCORD,J) )
+         ENDDO
+
+         CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+         IF (LARGE_FLD_INP == 'N') THEN
+            CALL NEXTC  ( CARD, ICONT, IERR )              ! Read 2nd card
+         ELSE
+            CALL NEXTC2 ( CARD, ICONT, IERR, CHILD )
+            CARD = CHILD
+         ENDIF
+         CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
+         IF (ICONT == 1) THEN
+            CALL R8FLD ( JCARD(2), JF(2), RCORD(NCORD,7) )
+            CALL R8FLD ( JCARD(3), JF(3), RCORD(NCORD,8) )
+            CALL R8FLD ( JCARD(4), JF(4), RCORD(NCORD,9) )
+
+            CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,0,0,0,0,0 )
+            CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,5,6,7,8,9 )
+            CALL CRDERR ( CARD )
+
+         ELSE
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,1136) CORD_NAME, CORD_CID
+            WRITE(F06,1136) CORD_NAME, CORD_CID
+         ENDIF
+
+! ----------------------------------------------------------------------------------------------------------------------------------
       ENDIF
+
+
 
       RETURN
 
 ! **********************************************************************************************************************************
+ 1136 FORMAT(' *ERROR  1136: REQUIRED CONTINUATION FOR ',A,' ID = ',A,' MISSING')
+
+ 1163 FORMAT(' *ERROR  1163: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+                    ,/,14X,' TOO MANY ',A,' ENTRIES; LIMIT = ',I12)
+
  1169 FORMAT(' *ERROR  1169: FIELD ',I3,' ON ',A,' ID ',A,' CANNOT BE NEGATIVE. VALUE IS = ',A)
 
  1170 FORMAT(' *ERROR  1170: FIELD ',I3,' ON ',A,' ID ',A,' CANNOT BE 0 (CANNOT DEFINE BASIC SYSTEM). VALUE IS = ',A)
+
+! **********************************************************************************************************************************
 
       END SUBROUTINE BD_CORD

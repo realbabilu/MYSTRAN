@@ -30,7 +30,7 @@
 ! for stresses for Craig-Bampton models)
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_BUG, ERR, F06, NEU
+      USE IOUNT1, ONLY                :  WRT_BUG, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ELOUT_STRE_BIT, FATAL_ERR, IBIT, INT_SC_NUM,                                &
                                          MAX_STRESS_POINTS, MBUG, MOGEL,                                                           &
                                          NELE, NCBAR, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20, NCPENTA6,     &
@@ -45,12 +45,10 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRE, TXT_STRE
-      USE SCONTR, ONLY                :  NGRID, NCBEAM
-      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
+      USE SCONTR, ONLY                :  NCBEAM
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_VECS
-      USE CONSTANTS_1, ONLY           :  HALF, THREE
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT
-      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, OGROUT, PBEAM_NSTATIONS, ZS, GRID_ID
+      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, PBEAM_NSTATIONS, ZS
 
       USE PLANE_COORD_TRANS_21_Interface
       USE TRANSFORM_SHELL_STR_Interface
@@ -86,23 +84,21 @@
       INTEGER(LONG)                   :: NUM_PTS(METYPE)   ! Num diff stress points for one element (3rd dim in arrays SEi, STEi)
       INTEGER(LONG)                   :: NUM_PTS_CUR       ! Actual number of stress points for the current element
       INTEGER(LONG)                   :: NUM_PTS_ELEM      ! Actual number of stress points for the current element in request counting
-      INTEGER(LONG)                   :: NUM_STS_POINTS    ! Actual number of stress points 
+      INTEGER(LONG)                   :: NUM_STS_POINTS    ! Actual number of stress points
                                                            ! Stress index (1 through 9) where poly fit err is max
-      INTEGER(LONG)                   :: STRESS_OUT_ERR_INDEX(MAX_STRESS_POINTS+1) !add+1
-
-
+      INTEGER(LONG)                   :: STRESS_OUT_ERR_INDEX(MAX_STRESS_POINTS+1)
 
                                                            ! Array of %errs from subr POLYNOM_FIT_STRE_STRN (only NUM_PTS vals used)
-      REAL(DOUBLE)                    :: STRESS_OUT_PCT_ERR(MAX_STRESS_POINTS+1) !add+1
+      REAL(DOUBLE)                    :: STRESS_OUT_PCT_ERR(MAX_STRESS_POINTS+1)
 
       REAL(DOUBLE)                    :: PCT_ERR_MAX       ! Max value from array STRESS_OUT_PCT_ERR
       REAL(DOUBLE)                    :: C1,C2,D1,D2,E1,E2,F1,F2
       REAL(DOUBLE)                    :: EA0,EA1,EA2,EA3,EA4,EAMAX,EAMIN
       REAL(DOUBLE)                    :: EB0,EB1,EB2,EB3,EB4,EBMAX,EBMIN
-                                                           ! Array of values from array STRESS for all stress points + 1
+                                                           ! Array of values from array STRESS for all stress points
       REAL(DOUBLE)                    :: STRESS_RAW(9,MAX_STRESS_POINTS+1)
 
-                                                           ! Array of output stress values after surface fit + 1
+                                                           ! Array of output stress values after surface fit
       REAL(DOUBLE)                    :: STRESS_OUT(9,MAX_STRESS_POINTS+1)
       REAL(DOUBLE)                    :: TEL(3,3)          ! Transformation matrix from cartesian local (L) to element (E) coordinates.
 
@@ -126,8 +122,6 @@
       OPT(2) = 'N'                                         ! OPT(2) is for calc of PTE
       OPT(3) = 'Y'                                         ! OPT(3) is for calc of SEi, STEi
       OPT(4) = 'N'                                         ! OPT(4) is for calc of KE-linear
-! Default to legacy behavior for non-beam elements. CBEAM output can enable PPE
-! per-element before the EMG call when fixed-end load recovery is actually needed.
       OPT(5) = 'N'                                         ! OPT(5) is for calc of PPE
       OPT(6) = 'N'                                         ! OPT(6) is for calc of KE-diff stiff
 
@@ -143,7 +137,6 @@
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
                IF (ETYPE(J) == ELMTYP(I)) THEN
-! --- cbeam_stations begin --- !
                   IF (ETYPE(J) == 'BEAM    ') THEN
                      NUM_PTS_ELEM = PBEAM_NSTATIONS(EDAT(EPNT(J)+1))
                      IF (NUM_PTS_ELEM <= 0) NUM_PTS_ELEM = 5
@@ -165,7 +158,7 @@
 
                   ELOUT_STRE = IAND(ELOUT(J,INT_SC_NUM),IBIT(ELOUT_STRE_BIT))
                   IF (ELOUT_STRE > 0) THEN
-                     NELREQ(I) = NELREQ(I) + NUM_PTS(I) ! NUM_PTS_ELEM
+                     NELREQ(I) = NELREQ(I) + NUM_PTS(I)
                   ENDIF
                ENDIF
             ENDIF
@@ -175,7 +168,6 @@
       OGEL = ZERO
 
 
-! 101  FORMAT("*DEBUG:      ",A,"; ELEMENT_TYPE_INT=",I8,"; TABLE_NAME=",A)
 !xx   IROW_MAT = 0
 !xx   IROW_TXT = 0
       OT4_DESCRIPTOR = 'Element stress'
@@ -210,19 +202,19 @@ elems_5: DO J = 1,NELE
                      CALL CALC_ELEM_NODE_FORCES
                   ENDIF
 
-                   NUM_STS_POINTS = NUM_PTS(I)
-                   NUM_PTS_CUR = NUM_PTS(I)
-                   IF (TYPE == 'BEAM    ') THEN
-                      NUM_PTS_CUR = CBEAM_ACTIVE_NSTATIONS
-                      IF (NUM_PTS_CUR <= 0) NUM_PTS_CUR = 1
-                      NUM_STS_POINTS = NUM_PTS_CUR
-	           ELSE 
-                      NUM_STS_POINTS = NUM_PTS(I)
-                   ENDIF
-                   DO M=1,NUM_STS_POINTS
-                      CALL ELEM_STRE_STRN_ARRAYS ( M )
-                      STRESS_RAW(:,M) = STRESS(:)
-                   ENDDO
+                  NUM_STS_POINTS = NUM_PTS(I)
+                  NUM_PTS_CUR    = NUM_PTS(I)
+                  IF (TYPE == 'BEAM    ') THEN
+                     NUM_PTS_CUR = CBEAM_ACTIVE_NSTATIONS
+                     IF (NUM_PTS_CUR <= 0) NUM_PTS_CUR = 1
+                     NUM_STS_POINTS = NUM_PTS_CUR
+                  ELSE
+                     NUM_STS_POINTS = NUM_PTS(I)
+                  ENDIF
+                  DO M=1,NUM_STS_POINTS
+                     CALL ELEM_STRE_STRN_ARRAYS ( M )
+                     STRESS_RAW(:,M) = STRESS(:)
+                  ENDDO
 
                   IF (TYPE == 'BEAM    ') THEN
                      STRESS_OUT(:,:) = STRESS_RAW(:,:)
@@ -346,10 +338,7 @@ elems_5: DO J = 1,NELE
                   IF (ETYPE(J)(1:5) /='USER1') THEN
                      IF (NUM_OGEL_ROWS == NELREQ(I)) THEN
                         CALL CHK_OGEL_ZEROS ( NUM_OGEL )
- 100                    FORMAT("*DEBUG:      ",A,"; ELEMENT_TYPE=",A,"; TABLE_NAME=",A,"; ITABLE=",I8)
-                        WRITE(ERR,100) "A",TYPE,TABLE_NAME,ITABLE
                         CALL SET_OES_TABLE_NAME(TYPE, TABLE_NAME, ITABLE)
-                        WRITE(ERR,100) "B",TYPE,TABLE_NAME,ITABLE
                         CALL WRITE_ELEM_STRESSES ( JVEC, NUM_OGEL_ROWS, IHDR, NUM_STS_POINTS, ITABLE )
                         EXIT
                      ENDIF
@@ -370,7 +359,6 @@ elems_5: DO J = 1,NELE
       IF (WRITE_NEU .AND. (ANY_STRE_OUTPUT > 0)) THEN
 
          NDUM = 0
-! --- neu_upgrade begin --- !
          NUM_FROWS= 0                                      ! Write out BEAM stresses
          CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCBEAM, 14, SUBR_NAME )
          DO J=1,NELE
@@ -394,8 +382,6 @@ elems_5: DO J = 1,NELE
                      CYCLE
                   ENDIF
                   CALL ELMDIS
-! Beam stress recovery in FEMAP/NEU needs the same element nodal force reconstruction
-! used by the standard F06 path; otherwise the beam stress vectors stay effectively zero.
                   CALL CALC_ELEM_NODE_FORCES
                   HAVE_SECTION_POINTS = .FALSE.
                   DO K=1,8
@@ -447,7 +433,6 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_VECS(NUM_FROWS, 8) = EB4
                   FEMAP_EL_VECS(NUM_FROWS,10) = EBMAX
                   FEMAP_EL_VECS(NUM_FROWS,12) = EBMIN
-! --- CBEAM_begin end --- !
                ENDIF
             ENDIF
          ENDDO
@@ -455,8 +440,6 @@ elems_5: DO J = 1,NELE
             CALL WRITE_FEMAP_STRE_VECS ( 'BEAM    ', 'N', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
-! --- neu_upgrade end --- !
-
          NDUM = 0
          NUM_FROWS= 0                                      ! Write out BUSH stresses
          CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCBUSH, 6, SUBR_NAME )

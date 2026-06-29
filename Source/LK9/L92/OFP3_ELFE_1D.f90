@@ -594,7 +594,6 @@ elems_2: DO J = 1,NELE
       IF ((TABLE_NAME .NE. "OEF ERR ") .AND. (ITABLE < 0)) THEN
         CALL END_OP2_TABLE(ITABLE)
       ENDIF
-
       IF (WRITE_NEU .AND. (ANY_ELFE_OUTPUT > 0)) THEN
 
 ! beam
@@ -794,7 +793,6 @@ elems_2: DO J = 1,NELE
             CALL WRITE_FEMAP_ELFO_VECS ( 'BEAM    ', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
-
 ! bar    ---------------------------------------------------------------------------------------------------------------------------
          NUM_FROWS= 0
          CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCBAR, 8, SUBR_NAME )

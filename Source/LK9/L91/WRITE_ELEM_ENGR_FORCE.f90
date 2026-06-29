@@ -31,18 +31,14 @@
       ! enumerated below fin the IF(TYPE == ???)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, OP2
-      USE CONSTANTS_1, ONLY           :  ZERO
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, INT_SC_NUM, NDOFR, NUM_CB_DOFS, NVEC, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL
+      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL
       USE MODEL_STUF, ONLY            :  ELEM_ONAME, LABEL, SCNUM, STITLE, TITLE, TYPE
-      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  FORC_LOC, FORC_OUT
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  FORC_OUT
       USE WRITE_ELEM_ENGR_FORCE_USE_IFs
-
-
 
       IMPLICIT NONE
 
@@ -59,8 +55,6 @@
       INTEGER(LONG)                   :: BDY_GRID          ! Grid for a boundary DOF in CB analyses
       INTEGER(LONG)                   :: BDY_DOF_NUM       ! DOF number for BDY_GRID/BDY_COMP
       INTEGER(LONG)                   :: I,J,J1,K,L        ! DO loop indices or counters
-      INTEGER(LONG)                   :: IBEG, IEND, IELEM, ISTA, NSTA_ELEM, NELEMENTS
-      INTEGER(LONG)                   :: GRID_ID
       INTEGER(LONG)                   :: NUM_TERMS         ! Number of terms to write out for shell elems
 
       LOGICAL                         :: WRITE_F06, WRITE_OP2   ! flag
@@ -68,13 +62,6 @@
       REAL(DOUBLE)                    :: ABS_ANS(8)       ! Max ABS for all element output
       REAL(DOUBLE)                    :: MAX_ANS(8)       ! Max for all element output
       REAL(DOUBLE)                    :: MIN_ANS(8)       ! Min for all element output
-      REAL(DOUBLE)                    :: STA_XL
-      REAL(DOUBLE)                    :: TINT, XI_STD, XI0, XI1
-      REAL(DOUBLE)                    :: XI_RAW(11), BM1_RAW(11), BM2_RAW(11), V1_RAW(11), V2_RAW(11), AX_RAW(11), TRQ_RAW(11)
-      REAL(DOUBLE), ALLOCATABLE       :: BEAM_XI(:,:), BEAM_BM1(:,:), BEAM_BM2(:,:), BEAM_V1(:,:), BEAM_V2(:,:), BEAM_AX(:,:),   &
-                                         BEAM_TRQ(:,:), BEAM_WTRQ(:,:)
-      INTEGER(LONG), ALLOCATABLE      :: BEAM_EID(:), BEAM_GRID(:,:)
-            
 
       ! op2 info
       CHARACTER( 8*BYTE)              :: TABLE_NAME             ! the name of the op2 table
@@ -95,7 +82,7 @@
       INTEGER(LONG)                   :: NVALUES      ! the number of "words" for all the elments
       INTEGER(LONG)                   :: NTOTAL       ! the number of bytes for all NVALUES
       INTEGER(LONG)                   :: ISUBCASE     ! the subcase ID
-      
+      INTEGER(LONG)                   :: NELEMENTS
       ! initialize
       ANALYSIS_CODE = -1
 
@@ -143,19 +130,11 @@ headr:IF (IHDR == 'Y') THEN
             ISUBCASE_INDEX = 2
             ANALYSIS_CODE = 7
             FIELD5_INT_MODE = JSUB
-            FIELD6_EIGENVALUE = EIGEN_VAL(JSUB)
 
          ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
             ISUBCASE_INDEX = 1
             ANALYSIS_CODE = 2
             FIELD5_INT_MODE = JSUB
-            FIELD6_EIGENVALUE = EIGEN_VAL(JSUB)
-
-         ELSE IF (SOL_NAME(1:8) == 'MFREQ') THEN
-            ISUBCASE_INDEX = INT_SC_NUM
-            ANALYSIS_CODE = 5
-            FIELD5_INT_MODE = JSUB
-            FIELD6_EIGENVALUE = EIGEN_VAL(JSUB)
 
          ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
             ! Write info on what CB DOF the output is for
@@ -186,16 +165,9 @@ headr:IF (IHDR == 'Y') THEN
          LABELI = LABEL(INT_SC_NUM)
 
          IF(WRITE_F06) THEN
+
              !--- 1st 2 lines of element specific headers - general info on what type of output:
              IF      (TYPE(1:3) == 'BAR') THEN
-                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-                   WRITE(F06,302) FILL(1:33)
-                ELSE
-                   WRITE(F06,301) FILL(1:39)
-                ENDIF
-                WRITE(F06,401) FILL(1:45), ONAME
-
-             ELSE IF (TYPE == 'BEAM    ') THEN
                 IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                    WRITE(F06,302) FILL(1:33)
                 ELSE
@@ -295,158 +267,6 @@ headr:IF (IHDR == 'Y') THEN
 !        IF (FORC_OUT(3:3) == 'Y')  CALL WRITE_GRD_PCH_OUTPUTS(JVEC, NUM, WHAT)  ! pch/punch
 !        IF (FORC_OUT(4:4) == 'Y')  CALL WRITE_GRD_NEU_OUTPUTS(JVEC, NUM, WHAT)  ! NEU
 !        IF (FORC_OUT(5:5) == 'Y')  CALL WRITE_GRD_CSV_OUTPUTS(JVEC, NUM, WHAT)  ! CSV
-
-      ELSE IF (TYPE == 'BEAM    ') THEN
-
-         CALL GET_MAX_MIN_ABS ( 1, 8 )
-
-         IF (WRITE_OP2)  THEN
-            NELEMENTS = 0
-            I = 1
-            DO WHILE (I <= NUM)
-               NELEMENTS = NELEMENTS + 1
-               J = EID_OUT_ARRAY(I,1)
-               DO WHILE (I <= NUM)
-                  IF (EID_OUT_ARRAY(I,1) /= J) EXIT
-                  I = I + 1
-               ENDDO
-            ENDDO
-
-            ALLOCATE ( BEAM_EID(NELEMENTS), BEAM_GRID(NELEMENTS,11), BEAM_XI(NELEMENTS,11), BEAM_BM1(NELEMENTS,11),              &
-                       BEAM_BM2(NELEMENTS,11), BEAM_V1(NELEMENTS,11), BEAM_V2(NELEMENTS,11), BEAM_AX(NELEMENTS,11),               &
-                       BEAM_TRQ(NELEMENTS,11), BEAM_WTRQ(NELEMENTS,11) )
-
-            BEAM_GRID(:,:) = 0
-            BEAM_XI(:,:)   = 0.0D0
-            BEAM_BM1(:,:)  = 0.0D0
-            BEAM_BM2(:,:)  = 0.0D0
-            BEAM_V1(:,:)   = 0.0D0
-            BEAM_V2(:,:)   = 0.0D0
-            BEAM_AX(:,:)   = 0.0D0
-            BEAM_TRQ(:,:)  = 0.0D0
-            BEAM_WTRQ(:,:) = 0.0D0
-
-            I = 1
-            IELEM = 0
-            DO WHILE (I <= NUM)
-               IELEM = IELEM + 1
-               BEAM_EID(IELEM) = EID_OUT_ARRAY(I,1)
-               IBEG = I
-               DO WHILE (I <= NUM)
-                  IF (EID_OUT_ARRAY(I,1) /= BEAM_EID(IELEM)) EXIT
-                  I = I + 1
-               ENDDO
-               IEND = I - 1
-               NSTA_ELEM = IEND - IBEG + 1
-               IF (NSTA_ELEM > 11) NSTA_ELEM = 11
-
-               ! Populate station grid ids for OP2 CBEAM records.
-               ! Use the end grids at x/L=0 and x/L=1 and leave interior
-               ! stations as zero, which matches classic beam-station
-               ! conventions better than an all-zero grid list.
-               BEAM_GRID(IELEM,:) = 0
-               BEAM_GRID(IELEM,1)  = GID_OUT_ARRAY(IBEG,2)
-               BEAM_GRID(IELEM,11) = GID_OUT_ARRAY(IBEG,3)
-
-               DO ISTA=1,NSTA_ELEM
-                  XI_RAW (ISTA) = CBEAM_XL_OUT(IBEG + ISTA - 1)
-                  BM1_RAW(ISTA) = OGEL(IBEG + ISTA - 1,1)
-                  BM2_RAW(ISTA) = OGEL(IBEG + ISTA - 1,2)
-                  V1_RAW (ISTA) = OGEL(IBEG + ISTA - 1,5)
-                  V2_RAW (ISTA) = OGEL(IBEG + ISTA - 1,6)
-                  AX_RAW (ISTA) = OGEL(IBEG + ISTA - 1,7)
-                  TRQ_RAW(ISTA) = OGEL(IBEG + ISTA - 1,8)
-               ENDDO
-
-               DO ISTA=1,11
-                  XI_STD = DBLE(ISTA - 1)/10.0D0
-                  BEAM_XI(IELEM,ISTA) = XI_STD
-                  IF (NSTA_ELEM <= 1) THEN
-                     BEAM_BM1(IELEM,ISTA) = BM1_RAW(1)
-                     BEAM_BM2(IELEM,ISTA) = BM2_RAW(1)
-                     BEAM_V1 (IELEM,ISTA) = V1_RAW(1)
-                     BEAM_V2 (IELEM,ISTA) = V2_RAW(1)
-                     BEAM_AX (IELEM,ISTA) = AX_RAW(1)
-                     BEAM_TRQ(IELEM,ISTA) = TRQ_RAW(1)
-                  ELSE IF (XI_STD <= XI_RAW(1)) THEN
-                     BEAM_BM1(IELEM,ISTA) = BM1_RAW(1)
-                     BEAM_BM2(IELEM,ISTA) = BM2_RAW(1)
-                     BEAM_V1 (IELEM,ISTA) = V1_RAW(1)
-                     BEAM_V2 (IELEM,ISTA) = V2_RAW(1)
-                     BEAM_AX (IELEM,ISTA) = AX_RAW(1)
-                     BEAM_TRQ(IELEM,ISTA) = TRQ_RAW(1)
-                  ELSE IF (XI_STD >= XI_RAW(NSTA_ELEM)) THEN
-                     BEAM_BM1(IELEM,ISTA) = BM1_RAW(NSTA_ELEM)
-                     BEAM_BM2(IELEM,ISTA) = BM2_RAW(NSTA_ELEM)
-                     BEAM_V1 (IELEM,ISTA) = V1_RAW(NSTA_ELEM)
-                     BEAM_V2 (IELEM,ISTA) = V2_RAW(NSTA_ELEM)
-                     BEAM_AX (IELEM,ISTA) = AX_RAW(NSTA_ELEM)
-                     BEAM_TRQ(IELEM,ISTA) = TRQ_RAW(NSTA_ELEM)
-                  ELSE
-                     DO K=1,NSTA_ELEM-1
-                        XI0 = XI_RAW(K)
-                        XI1 = XI_RAW(K+1)
-                        IF ((XI_STD >= XI0) .AND. (XI_STD <= XI1)) THEN
-                           TINT = (XI_STD - XI0)/(XI1 - XI0)
-                           BEAM_BM1(IELEM,ISTA) = (1.0D0 - TINT)*BM1_RAW(K) + TINT*BM1_RAW(K+1)
-                           BEAM_BM2(IELEM,ISTA) = (1.0D0 - TINT)*BM2_RAW(K) + TINT*BM2_RAW(K+1)
-                           BEAM_V1 (IELEM,ISTA) = (1.0D0 - TINT)*V1_RAW (K) + TINT*V1_RAW (K+1)
-                           BEAM_V2 (IELEM,ISTA) = (1.0D0 - TINT)*V2_RAW (K) + TINT*V2_RAW (K+1)
-                           BEAM_AX (IELEM,ISTA) = (1.0D0 - TINT)*AX_RAW (K) + TINT*AX_RAW (K+1)
-                           BEAM_TRQ(IELEM,ISTA) = (1.0D0 - TINT)*TRQ_RAW(K) + TINT*TRQ_RAW(K+1)
-                           EXIT
-                        ENDIF
-                     ENDDO
-                  ENDIF
-               ENDDO
-            ENDDO
-
-            ELEMENT_TYPE = 2
-            NUM_WIDE = 100
-            NVALUES = NELEMENTS*NUM_WIDE
-            CALL WRITE_OEF3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, &
-                                   TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
-            WRITE(OP2) NVALUES
-            WRITE(OP2) (BEAM_EID(IELEM)*10+DEVICE_CODE,                                                                             &
-                         (BEAM_GRID(IELEM,ISTA), REAL(BEAM_XI(IELEM,ISTA),4), REAL(BEAM_BM1(IELEM,ISTA),4),                        &
-                          REAL(BEAM_BM2(IELEM,ISTA),4), REAL(BEAM_V1(IELEM,ISTA),4), REAL(BEAM_V2(IELEM,ISTA),4),                 &
-                          REAL(BEAM_AX(IELEM,ISTA),4), REAL(BEAM_TRQ(IELEM,ISTA),4), REAL(BEAM_WTRQ(IELEM,ISTA),4), ISTA=1,11),  &
-                         IELEM=1,NELEMENTS)
-            DEALLOCATE ( BEAM_EID, BEAM_GRID, BEAM_XI, BEAM_BM1, BEAM_BM2, BEAM_V1, BEAM_V2, BEAM_AX, BEAM_TRQ, BEAM_WTRQ )
-         ENDIF
-
-         IF (WRITE_F06)  THEN
-            WRITE(F06,'(A,/,A,/,A)') '                          F O R C E S   I N   B E A M   E L E M E N T S        ( C B E A M )', &
-                                      '         ELEMENT-ID        - BENDING MOMENTS -            - WEB  SHEARS -           AXIAL       TOTAL        WARPING', &
-                                      '    GRID   STAT X/L       PLANE 1       PLANE 2        PLANE 1       PLANE 2        FORCE       TORQUE       TORQUE'
-            I = 1
-            DO WHILE (I <= NUM)
-               IBEG = I
-               IELEM = EID_OUT_ARRAY(I,1)
-               DO WHILE (I <= NUM)
-                  IF (EID_OUT_ARRAY(I,1) /= IELEM) EXIT
-                  I = I + 1
-               ENDDO
-               IEND = I - 1
-               NSTA_ELEM = IEND - IBEG + 1
-
-               WRITE(F06,*)
-               WRITE(F06,1114) 0, IELEM
-               DO ISTA=1,NSTA_ELEM
-                  GRID_ID = 0
-                  IF (ISTA == 1) GRID_ID = GID_OUT_ARRAY(IBEG,2)
-                  IF (ISTA == NSTA_ELEM) GRID_ID = GID_OUT_ARRAY(IBEG,3)
-                  STA_XL = CBEAM_XL_OUT(IBEG + ISTA - 1)
-                  WRITE(F06,1115) FILL(1: 0), GRID_ID, STA_XL,                                                    &
-                                  OGEL(IBEG + ISTA - 1,1), OGEL(IBEG + ISTA - 1,2),                               &
-                                  OGEL(IBEG + ISTA - 1,5), OGEL(IBEG + ISTA - 1,6),                               &
-                                  OGEL(IBEG + ISTA - 1,7), OGEL(IBEG + ISTA - 1,8), ZERO
-               ENDDO
-            ENDDO
-            WRITE(F06,1116) FILL(1: 0), MAX_ANS(1), MAX_ANS(2), MAX_ANS(5), MAX_ANS(6), MAX_ANS(7), MAX_ANS(8), ZERO
-            WRITE(F06,1117) FILL(1: 0), MIN_ANS(1), MIN_ANS(2), MIN_ANS(5), MIN_ANS(6), MIN_ANS(7), MIN_ANS(8), ZERO
-            WRITE(F06,1118) FILL(1: 0), ABS_ANS(1), ABS_ANS(2), ABS_ANS(5), ABS_ANS(6), ABS_ANS(7), ABS_ANS(8), ZERO
-         ENDIF
 
       ELSE IF (TYPE(1:4) == 'ELAS') THEN
            ! Engr force for ELAS was put into OGEL(I,1)
@@ -559,8 +379,13 @@ headr:IF (IHDR == 'Y') THEN
           IF (TYPE == 'TRIA3   ') THEN
               ELEMENT_TYPE = 74
           ELSE IF (TYPE == 'QUAD4   ') THEN
-              ELEMENT_TYPE = 33
+              ELEMENT_TYPE = 33  ! todo: verify no ELEMENT_TYPE=144
+          !ELSE
+          !   error
           ENDIF
+          ! -MEMBRANE FORCES-   -BENDING MOMENTS- -TRANSVERSE SHEAR FORCES -
+          !     FX FY FXY           MX MY MXY            QX QY         DO I=1,NUM
+          ! [fx, fy, fxy,  mx,  my,  mxy, qx, qy]
           NUM_WIDE = 9
           NVALUES = NUM * NUM_WIDE
           CALL WRITE_OEF3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, &
@@ -590,6 +415,7 @@ headr:IF (IHDR == 'Y') THEN
                                                   (ABS_ANS(J),J=1,8), FILL(1: 0)
         ENDIF
         NUM_TERMS = 8
+
       ELSE IF (TYPE(1:4) == 'BUSH') THEN
          ! Engr force for BUSH was put into OGEL(I,1-6)
          IF (WRITE_OP2)  THEN  ! op2/plot
@@ -639,18 +465,6 @@ headr:IF (IHDR == 'Y') THEN
           ,/,16X,A,'    ID       Plane 1       Plane 2       Plane 1       Plane 2      Plane 1       Plane 2        Force')
 
  1102 FORMAT(16X,A,I8,8(1ES14.6))
-
-! --- cbeam_stations begin --- !
- 1114 FORMAT(I1,8X,I8)
-
- 1115 FORMAT(1X,A,I8,2X,F7.3,1X,7(1ES14.6))
-
- 1116 FORMAT(11X,A,'MAX* :  ',7(ES14.6))
-
- 1117 FORMAT(11X,A,'MIN* :  ',7(ES14.6))
-
- 1118 FORMAT(11X,A,'ABS* :  ',7(ES14.6))
-! --- cbeam_stations end --- !
 
  1103 FORMAT(1X,A,'         ------------- ------------- ------------- ------------- ------------- ------------- -------------',    &
                         ' -------------',/,                                                                                        &
@@ -786,4 +600,3 @@ headr:IF (IHDR == 'Y') THEN
       END SUBROUTINE GET_MAX_MIN_ABS
 
       END SUBROUTINE WRITE_ELEM_ENGR_FORCE
-

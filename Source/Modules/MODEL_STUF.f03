@@ -1908,44 +1908,6 @@
 ! buffers live as allocatable components inside EIG_PARAMS(ISUB).
       INTEGER(LONG)     , ALLOCATABLE :: NUM_EIGENS_SUB(:)   ! No. of eigenvalues extracted per modes-subcase
                                                              
-! --- feast_add --- begin !
-      CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_METHOD  = 'ARPACK'
-                                                             ! Extract backend selected for EIGRL/LANCZOS family.
-
-      CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_MODE    = ' '
-                                                             ! Optional method-specific mode selector from EIGRL continuation.
-
-      CHARACTER(LEN=JCARD_LEN)        :: EIG_EXTRACT_SOURCE  = 'DEFAULT'
-                                                             ! DEFAULT/EIGRL/PARAM source for extract-method selection.
-
-      INTEGER(LONG)                   :: EIG_FEAST_M0        = 48
-                                                             ! FEAST search subspace size.
-
-      INTEGER(LONG)                   :: EIG_FEAST_TOL_DIGITS= 8
-                                                             ! FEAST convergence digits (fpm(3)).
-
-      INTEGER(LONG)                   :: EIG_FEAST_MAX_LOOP  = 60
-                                                             ! FEAST iteration limit (fpm(4)).
-
-      INTEGER(LONG)                   :: EIG_FEAST_N_CONTOUR = 8
-                                                             ! FEAST contour integration points (fpm(8)).
-
-      INTEGER(LONG)                   :: EIG_SUBSPACE_NSUB   = 24
-                                                             ! Dense inverse-subspace working subspace dimension.
-
-      INTEGER(LONG)                   :: EIG_SUBSPACE_MAX_ITER = 40
-                                                             ! Dense inverse-subspace iteration limit.
-
-      INTEGER(LONG)                   :: EIG_DENSE_NEX       = 64
-                                                             ! Reserved dense oversampling/workspace knob for parity with other methods.
-                                                             
-      REAL(DOUBLE)                    :: EIG_FEAST_SEARCH_SCALE = 1.10D0
-                                                             ! FEAST range expansion factor when upper frequency is requested.
-
-      REAL(DOUBLE)                    :: EIG_SUBSPACE_TOL    = 1.0D-06
-                                                             ! Dense inverse-subspace convergence tolerance.
-                                                             
-! --- feast_add --- end !
 
 ! **********************************************************************************************************************************
 ! Rigid element ID's

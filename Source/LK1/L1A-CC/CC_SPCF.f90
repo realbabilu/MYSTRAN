@@ -74,14 +74,10 @@
       ! concatenate the strings
       SPCF_OUT = TRIM(FOUND_PRINT) // TRIM(FOUND_PLOT) // TRIM(FOUND_PUNCH) // TRIM(FOUND_NEU) // TRIM(FOUND_CSV)
 
-! --- op2_upgraded begin --- !
-      ! For bare "SPCF = ALL" requests, default to PRINT+PLOT so classic
-      ! OP2 SPC force output (OQGV1) is emitted without requiring explicit
-      ! "(PLOT)" qualifiers on the Case Control entry.
+      ! default to print
       IF (SPCF_OUT(1:5) == 'NNNNN') THEN
-        SPCF_OUT = 'YYNNN'
+        SPCF_OUT = 'YNNNN'
       ENDIF
-! --- op2_upgraded end --- !
 
 
       ! Set CASE CONTROL output request variable to SETID

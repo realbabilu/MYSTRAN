@@ -689,7 +689,6 @@
       CALL MATMULT_FFF ( B2, KAA, 3, 6, 6, S21 )
       CALL MATMULT_FFF ( B2, KAB, 3, 6, 6, S22 )
 
-! --- cbeam_stations begin --- !
       NSTA = CBEAM_ACTIVE_NSTATIONS
       IF (NSTA <= 0) NSTA = 1
 
@@ -717,8 +716,6 @@
             SE2(2,J,ISTA) = SE1(3,J,ISTA)
          ENDDO
       ENDDO
-! --- cbeam_stations end --- !
-
       IF (NTSUB > 0) THEN
          BT1 = ZERO
          BT2 = ZERO
@@ -728,7 +725,6 @@
 
          CALL MATMULT_FFF ( BT1, TPRIME, 3, 5, NTSUB, DUM1 )
          CALL MATMULT_FFF ( BT2, TPRIME, 3, 5, NTSUB, DUM2 )
-! --- cbeam_stations begin --- !
          DO ISTA=1,NSTA
             XI_STA = CBEAM_ACTIVE_XL(ISTA)
             IF (NSTA == 1) XI_STA = ZERO
@@ -743,7 +739,6 @@
                STE2(2,J,ISTA) = STE1(3,J,ISTA)
             ENDDO
          ENDDO
-! --- cbeam_stations end --- !
       ENDIF
 
 ! **********************************************************************************************************************************

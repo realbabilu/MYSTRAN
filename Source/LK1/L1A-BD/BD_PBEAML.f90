@@ -208,7 +208,6 @@ collect_tokens: DO
       NSM_B  = NSM_A
       STATION_COUNT = 1
 
-! --- cbeam_pbeaml_constant begin --- !
 ! Support the standard constant-section PBEAML form where the only continuation
 ! fields are the section dimensions (and optional NSM) with no SO/XL station
 ! data. In that case the section is uniform from end A to end B.
@@ -219,7 +218,6 @@ collect_tokens: DO
          CALL LOAD_SECTION_B ( SEC_TYPE, NDIM_SEC, DIMS_B, NSM_B )
          RETURN
       ENDIF
-! --- cbeam_pbeaml_constant end --- !
 
 station_parse: DO WHILE (ITOK <= NTOK)
          SOFLAG = TOKENS(ITOK)

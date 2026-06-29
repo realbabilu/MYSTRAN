@@ -45,7 +45,6 @@
       INTEGER(LONG)                   :: ELEMENT_ID
       INTEGER(LONG)                   :: GRID_ID
 
-! --- cbeam_stations begin --- !
       IF (.NOT. WRITE_F06) THEN
          RETURN
       ENDIF
@@ -83,8 +82,6 @@
             ENDDO
          ENDIF
       ENDDO
-! --- cbeam_stations end --- !
-
       RETURN
 
  9001 FORMAT(I1,8X,I8)

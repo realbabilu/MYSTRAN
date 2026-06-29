@@ -48,10 +48,9 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRN_OPT
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRN, TXT_STRN
-      USE SCONTR, ONLY                :  NCBEAM
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_VECS
-      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, PBEAM_NSTATIONS, ZS
-      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
+      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_NSTATIONS, ZS
+      USE SCONTR, ONLY                :  NCBEAM
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT
 
       USE PLANE_COORD_TRANS_21_Interface
@@ -78,7 +77,6 @@
 !xx   INTEGER(LONG)                   :: IROW_TXT          ! Row number in OTM text file
       INTEGER(LONG)                   :: NDUM              ! Dummy valye needed in call to CALC_ELEM_ENFR_FORCES
       INTEGER(LONG)                   :: NELREQ(METYPE)    ! Count of the no. of requests for ELFORCE(NODE or ENGR) or STRESS
-      INTEGER(LONG)                   :: NUM_PTS_ELEM      ! Num strain stations/points for current element
       INTEGER(LONG)                   :: NUM_PTS_CUR       ! Actual number of strain points for the current element
       INTEGER(LONG)                   :: NUM_OGEL_ROWS     ! No. elems processed prior to writing results to F06 file
       INTEGER(LONG)                   :: NUM_FROWS         ! No. elems processed for FEMAP
@@ -90,12 +88,12 @@
       INTEGER(LONG)                   :: NUM_PTS(METYPE)   ! Num diff strain points for one element (3rd dim in arrays SEi, STEi)
 
                                                            ! Strain index (1 through 9) where poly fit err is max
-      INTEGER(LONG)                   :: STRAIN_OUT_ERR_INDEX(MAX_STRESS_POINTS+1) ! add+1 for cbeam
-      INTEGER(LONG)                   :: NUM_STR_POINTS      
+      INTEGER(LONG)                   :: STRAIN_OUT_ERR_INDEX(MAX_STRESS_POINTS+1)
+      INTEGER(LONG)                   :: NUM_STR_POINTS
 
 
                                                            ! Array of %errs from subr POLYNOM_FIT_STRE_STRN (only NUM_PTS vals used)
-      REAL(DOUBLE)                    :: STRAIN_OUT_PCT_ERR(MAX_STRESS_POINTS+1) ! add+1 for cbeam
+      REAL(DOUBLE)                    :: STRAIN_OUT_PCT_ERR(MAX_STRESS_POINTS+1)
 
       REAL(DOUBLE)                    :: PCT_ERR_MAX       ! Max value from array STRAIN_OUT_PCT_ERR
       REAL(DOUBLE)                    :: C1,C2,D1,D2,E1,E2,F1,F2
@@ -136,15 +134,14 @@
          NELREQ(I) = 0
       ENDDO
 
-      DO I=1,METYPE  !metype
-                                       ! Only count requests for elem types that can have strain output
+      DO I=1,METYPE                                        ! Only count requests for elem types that can have strain output
          IF((ELMTYP(I)(1:4) == 'BUSH' ) .OR. (ELMTYP(I)(1:5) == 'TRIA3') .OR.                                                     &
             (ELMTYP(I)(1:5) == 'QUAD4') .OR. (ELMTYP(I)(1:5) == 'SHEAR') .OR. (ELMTYP(I)(1:4) == 'HEXA' ) .OR.                    &
             (ELMTYP(I)(1:5) == 'PENTA') .OR. (ELMTYP(I)(1:5) == 'TETRA') .OR. (ELMTYP(I)(1:5) == 'QUAD8')) THEN
-            DO J=1,NELE !nele
+            DO J=1,NELE
                CALL IS_ELEM_PCOMP_PROPS ( J )
-               IF (PCOMP_PROPS == 'N') THEN !pcomp_props
-                  IF (ETYPE(J) == ELMTYP(I)) THEN !etype j
+               IF (PCOMP_PROPS == 'N') THEN
+                  IF (ETYPE(J) == ELMTYP(I)) THEN
 
                         IF ((STRN_LOC == 'CORNER  ') .OR.                                                                         &
                             (STRN_LOC == 'GAUSS   ') .OR.                                                                         &
@@ -152,22 +149,20 @@
                             (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                       &
                             (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                       &
                             (ETYPE(J)(1:5) == 'QUAD8')) THEN
-                            NUM_PTS(I) = NUM_SEi(I)! 
-                            NUM_PTS_ELEM = NUM_SEi(I) 
-                        ELSE ! bush maybe 
-                           NUM_PTS_ELEM = 1
+                            NUM_PTS(I) = NUM_SEi(I)
+                        ELSE
                            NUM_PTS(I) = 1
-                        ENDIF ! corner
-                     
+                        ENDIF
+
                      ELOUT_STRN = IAND(ELOUT(J,INT_SC_NUM),IBIT(ELOUT_STRN_BIT))
                      IF (ELOUT_STRN > 0) THEN
-                        NELREQ(I) = NELREQ(I) + NUM_PTS(I) ! NELREQ(I) = NELREQ(I) + NUM_PTS_ELEM  !Checkagain
+                        NELREQ(I) = NELREQ(I) + NUM_PTS(I)
                      ENDIF
-                  ENDIF ! tyoe j
-               ENDIF ! pcomp
-            ENDDO ! nele
-         ENDIF !bar or something
-      ENDDO ! metype
+                  ENDIF
+               ENDIF
+            ENDDO
+         ENDIF
+      ENDDO
 
       OGEL = ZERO
 
@@ -198,7 +193,7 @@ elems_7: DO J = 1,NELE
 
                   NUM_STR_POINTS = NUM_PTS(I)
                   NUM_PTS_CUR    = NUM_PTS(I)
-                  DO M=1,NUM_STR_POINTS  
+                  DO M=1,NUM_STR_POINTS
                      CALL ELEM_STRE_STRN_ARRAYS ( M )
                      DO K=1,9
                         STRAIN_RAW(K,M) = STRAIN(K)
@@ -319,10 +314,7 @@ do_strain_pts:    DO M=1,NUM_STR_POINTS
                   IF (ETYPE(J)(1:5) /='USER1') THEN
                      IF (NUM_OGEL_ROWS == NELREQ(I)) THEN
                         CALL CHK_OGEL_ZEROS ( NUM_OGEL )
- 100                    FORMAT("*DEBUG:      ",A,"; ELEMENT_TYPE=",A,"; TABLE_NAME=",A,"; ITABLE=",I8)
-                        WRITE(ERR,100) "A",TYPE,TABLE_NAME,ITABLE
                         CALL SET_OST_TABLE_NAME(TYPE, TABLE_NAME, ITABLE)
-                        WRITE(ERR,100) "B",TYPE,TABLE_NAME,ITABLE
                         CALL WRITE_ELEM_STRAINS ( JVEC, NUM_OGEL_ROWS, IHDR, NUM_STR_POINTS, ITABLE )
                         EXIT
                      ENDIF

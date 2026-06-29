@@ -257,7 +257,7 @@
       ELSE IF (K == 1) THEN                                ! K = 1 is elem engr force output requests. (only 1 row of output/elem)
 !                                                            -----
          NUMBER_ROWS(K) = 1
-         IF (TYPE(1:4) == 'BEAM') THEN
+         IF (TYPE == 'BEAM    ') THEN
             NUMBER_ROWS(K) = PBEAM_NSTATIONS(EDAT(EPNT(INT_ELEM_ID)+1))
             IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 5
          ENDIF
@@ -325,7 +325,7 @@
             ENDIF
          ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
             NUMBER_ROWS(K) = NUM_SEi(LETYPE)
-         ELSE IF (TYPE(1:4) == 'BEAM') THEN
+         ELSE IF (TYPE == 'BEAM    ') THEN
             NUMBER_ROWS(K) = 2*PBEAM_NSTATIONS(EDAT(EPNT(INT_ELEM_ID)+1))
             IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 10
          ENDIF
