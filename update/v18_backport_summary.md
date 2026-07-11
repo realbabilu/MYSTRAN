@@ -1,115 +1,170 @@
-# MYSTRAN 18a Backport Summary
+# MYSTRAN 18a Source Backport Summary
 
 Branch:
 
 - `v18.00.a`
 
-Latest local backport commit prepared in this workspace:
+Main source commits prepared in this workspace:
 
 - `ad5c292` `Backport v18 solver, output, and validation fixes`
+- `14dfeb1` `Add v18 backport update notes`
 
-## Main Work Areas
+This note is intended to mirror the 2026 release progression for this branch, but only for source and build changes that belong in this repository.
 
-### 1. Build and dependency selection
+It is intentionally limited to:
 
-- Reworked `CMakeLists.txt` so external dependency paths can be passed in from the command line instead of hardcoding `C:/gcc/...`.
-- Improved logic around:
-  - `USE_MUMPS`
-  - `USE_FEAST`
-  - `EXTERNAL_MUMPS`
-  - `EXTERNAL_FEAST`
-  - external or internal SuperLU
-- Kept BLAS/OpenBLAS usage aligned so MYSTRAN and dependent libraries point to the same BLAS import library.
-- Added `BUILD.bat` to make the intended Windows MinGW rebuild flow easier to repeat.
+- `CMakeLists.txt`
+- `BUILD.bat`
+- Fortran source changes under `Source/`
 
-### 2. Solver dispatch and sparse-library behavior
+It intentionally does not summarize:
 
-- Fixed or improved routing so decks requesting alternate solver libraries do not silently fall back to the wrong sparse path.
-- Added reporting and support code for solver dispatch policy.
-- Updated sparse and modal flow code touching:
-  - MUMPS
-  - FEAST
-  - SuperLU
-  - ARPACK/Lanczos handling
+- external validation workspace notes
+- temporary compare artifacts
+- KMSM-specific discussion not yet carried as a dedicated patch in this branch
 
-### 3. Subcase and statsub support
+## April 2026
 
-- Backported subcase-related fixes so multi-subcase behavior is closer to later MYSTRAN work and to the validation reference set.
-- Added or updated support files for:
-  - `CC_STATSUB`
-  - reading prior subcase displacement data
-  - rebuilding reduced stiffness data from prior state where needed
+This stage corresponds to the earlier `mystran18-cbeam-chase-feast` direction.
 
-### 4. RFORCE and load-processing fixes
+Main source themes:
 
-- Updated RFORCE parsing and processing paths.
-- Adjusted load and case-control handling in the LK1 flow so requested solver or recovery behavior is honored more consistently.
+- initial CBEAM-oriented source backports
+- initial FEAST-related source hooks
+- initial `CHASE`-related eigen extraction support
+- early output and element-side source changes needed to support the expanded beam and modal paths
 
-### 5. K6ROT and stabilization work
+Relevant source areas:
 
-- Added `CALC_K6ROT.f90` and related interfaces/use-files.
-- Integrated K6ROT-related fixes into shell and element workflows where needed.
-- Improved several shell/problem cases that were previously sensitive to stabilization details.
+- `Source/LK1/L1A-BD/BD_PARAM.F90`
+- `Source/LK1/L1A-BD/BD_EIGRL.f90`
+- `Source/LK4`
+- `Source/LK9`
 
-### 6. Stress, strain, force, and shell output backports
+Current note for this branch:
 
-- Backported writer-side improvements so shell stress/strain/force output is closer to MYSTRAN 19 and closer to MSC/Nastran expectations.
-- Added separate principal stress/strain helper routines:
-  - `PRINCIPAL_STRAIN_2D.f90`
-  - `PRINCIPAL_STRESS_2D.f90`
-- Updated major output paths including:
-  - `WRITE_ELEM_STRESSES.f90`
-  - `WRITE_ELEM_STRAINS.f90`
-  - `WRITE_ELEM_ENGR_FORCE.f90`
-  - `OFP3_ELFE_1D.f90`
-  - `OFP3_STRE_NO_PCOMP.f90`
-  - shell output helpers in `LK9/L92`
+- `CHASE` is not part of the retained June/July direction
+- if it appears in parser or parameter handling text, it should not be treated as a featured July capability
 
-### 7. Element and matrix/data-structure support
+## June 2026
 
-- Updated several EMG, LK1, LK2, LK4, LK5, and LK9 routines used by:
-  - shell recovery
-  - element offsets
-  - eigen setup
-  - reduced matrix recovery
-  - output descriptor plumbing
-- Expanded supporting interfaces and `USE_IFs` so the backported routines are wired correctly in 18a.
+This stage corresponds to the `mystran-18.00a-cbeam-mumps-feast` direction.
 
-## Validation and reference work done alongside the code
+Main source themes:
 
-The code backport was paired with a large amount of validation and reference cleanup in `D:\18a\MYSTRAN_Validation-main`.
+- CBEAM-related source and print/output stability fixes
+- MUMPS sparse-solver integration in the source and build system
+- FEAST integration in the source and build system
+- removal of `CHASE` from the active release direction
 
-Major supporting work included:
+Main build-system changes:
 
-- comparing MYSTRAN 18a against:
-  - MYSTRAN dev
-  - MYSTRAN 19
-  - MSC/Nastran
-  - NX/Nastran in selected cases
-- repairing reference decks that had:
-  - missing OP2 output
-  - duplicate/load-ID conflicts
-  - bailout/autospc requirements
-  - parser-path mismatches
-- improving the OP2-vs-F06 validation workflow
-- separating true parser gaps from reference-deck stabilization issues
+- `CMakeLists.txt` updated so external dependency paths can be passed from the command line
+- `USE_MUMPS` and `EXTERNAL_MUMPS` logic added or expanded
+- `USE_FEAST` and `EXTERNAL_FEAST` logic added or expanded
+- external/internal SuperLU selection improved
+- BLAS/OpenBLAS linkage kept aligned across MYSTRAN and third-party solver paths
+- `BUILD.bat` added for the intended MinGW rebuild flow
 
-Two useful generated validation maps are:
+Main source areas touched:
 
-- `D:\18a\MYSTRAN_Validation-main\reference_msc_bailout_map.csv`
-- `D:\18a\MYSTRAN_Validation-main\reference_msc_needs_bailout.csv`
+- `Source/LK1/L1A-BD/BD_PARAM.F90`
+- `Source/LK1/L1A-BD/BD_EIGR.f90`
+- `Source/LK1/L1A-BD/BD_EIGRL.f90`
+- `Source/LK1/L1D/RFORCE_PROC.f90`
+- `Source/LK4/EIG_LANCZOS_ARPACK.f90`
+- `Source/LK4/EIG_SUMMARY.f90`
+- `Source/LK4/LINK4.f90`
+- `Source/Modules/PARAMS.f90`
+- `Source/Modules/SCONTR.f90`
+- `Source/UTIL/REPORT_SOLVER_DISPATCH_POLICY.f90`
 
-These identify which MSC reference decks explicitly need `BAILOUT` or related stabilization handling and help keep that separate from actual MYSTRAN defects.
+Source intent at this stage:
 
-## Scope note
+- allow `MUMPS` to be selected explicitly as sparse flavor
+- allow `FEAST` to be selected explicitly for eigen extraction
+- keep source behavior consistent with the build-time availability of the external libraries
 
-This backport is not a single isolated bugfix. It is a combined 18a maintenance pass covering:
+## July 2026
+
+This stage corresponds to the current `mystran18a` branch state prepared in this workspace.
+
+Main source themes:
+
+- continued solver-dispatch cleanup
+- subcase and statsub source backports
+- RFORCE and load-processing fixes
+- K6ROT-related source additions and stabilization fixes
+- shell stress, shell strain, and element force writer backports
+- principal stress and principal strain helper backports
+
+Main new source files added:
+
+- `Source/EMG/EMG4/CALC_K6ROT.f90`
+- `Source/Interfaces/BUILD_KGGD_FROM_UG_Interface.f90`
+- `Source/Interfaces/CALC_K6ROT_Interface.f90`
+- `Source/Interfaces/CC_STATSUB_Interface.f90`
+- `Source/Interfaces/PRINCIPAL_STRAIN_2D_Interface.f90`
+- `Source/Interfaces/PRINCIPAL_STRESS_2D_Interface.f90`
+- `Source/Interfaces/READ_L5A_UG_FOR_SUBCASE_Interface.f90`
+- `Source/Interfaces/REBUILD_KLLD_FROM_KGGD_Interface.f90`
+- `Source/LK1/L1A-CC/CC_STATSUB.f90`
+- `Source/LK1/LINK1/BUILD_KGGD_FROM_UG.f90`
+- `Source/LK2/REBUILD_KLLD_FROM_KGGD.f90`
+- `Source/LK9/L91/PRINCIPAL_STRAIN_2D.f90`
+- `Source/LK9/L91/PRINCIPAL_STRESS_2D.f90`
+- `Source/USE_IFs/BUILD_KGGD_FROM_UG_USE_IFs.f90`
+- `Source/USE_IFs/CC_STATSUB_USE_IFs.f90`
+- `Source/USE_IFs/READ_L5A_UG_FOR_SUBCASE_USE_IFs.f90`
+- `Source/USE_IFs/REBUILD_KLLD_FROM_KGGD_USE_IFs.f90`
+- `Source/UTIL/READ_L5A_UG_FOR_SUBCASE.f90`
+
+Main source areas heavily updated:
+
+- `CMakeLists.txt`
+- `Source/EMG`
+- `Source/Interfaces`
+- `Source/LK1`
+- `Source/LK2`
+- `Source/LK4`
+- `Source/LK5`
+- `Source/LK9`
+- `Source/Modules`
+- `Source/USE_IFs`
+- `Source/UTIL`
+
+Main retained July source changes:
+
+- solver dispatch logic for sparse and eigen backends
+- explicit support for `MUMPS` and `FEAST` source-side behavior
+- subcase/state reconstruction support for multiple subcase workflows
+- RFORCE corrections in the source path
+- K6ROT helper introduction and wiring
+- writer-side shell stress/strain/force updates
+- principal 2D stress/strain output updates
+
+Main writer/output files updated:
+
+- `Source/LK9/L91/WRITE_ELEM_STRESSES.f90`
+- `Source/LK9/L91/WRITE_ELEM_STRAINS.f90`
+- `Source/LK9/L91/WRITE_ELEM_ENGR_FORCE.f90`
+- `Source/LK9/L91/PRINCIPAL_2D.f90`
+- `Source/LK9/L91/PRINCIPAL_STRAIN_2D.f90`
+- `Source/LK9/L91/PRINCIPAL_STRESS_2D.f90`
+- `Source/LK9/L92/OFP3_ELFE_1D.f90`
+- `Source/LK9/L92/OFP3_STRE_NO_PCOMP.f90`
+- `Source/LK9/L92/SHELL_STRAIN_OUTPUTS.f90`
+- `Source/LK9/L92/SHELL_STRESS_OUTPUTS.f90`
+
+## Scope Note
+
+This backport is not one isolated fix. It is a rolling 2026 maintenance line for `v18.00.a` covering:
 
 - build configuration
 - external solver integration
-- modal/subcase behavior
+- modal and eigen extraction behavior
+- subcase and statsub behavior
 - RFORCE and load handling
-- shell output formatting and recovery
-- stabilization and K6ROT-related behavior
-- validation and parser support around MSC/NX reference outputs
+- K6ROT and stabilization-related source changes
+- shell and element output writer updates
 
