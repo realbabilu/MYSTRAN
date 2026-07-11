@@ -30,10 +30,10 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1M
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LSUB
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LSUB, NSUB
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
-      USE MODEL_STUF, ONLY            :  CC_EIGR_SID
+      USE MODEL_STUF, ONLY            :  CC_EIGR_SID, CC_EIGR_SID_SUB, CC_EIGR_SID_DECK, EIG_PARAMS
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_CRIT_DEF, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL,     &
                                          EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA,    &
                                          EIG_VECS, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
@@ -53,7 +53,11 @@
 
       INTEGER(LONG)                   :: ICONT     = 0     ! Indicator of whether a cont card exists. Output from subr NEXTC
       INTEGER(LONG)                   :: IERR      = 0     ! Error indicator returned from subr NEXTC called herein
+      INTEGER(LONG)                   :: I_SUB             ! DO loop index over subcases
       INTEGER(LONG)                   :: JERR      = 0     ! A local error count
+      LOGICAL                         :: MATCHES_SCALAR
+      LOGICAL                         :: MATCHES_PER_SUB
+      LOGICAL                         :: SUB_WANTS_THIS
 
 
 
@@ -88,7 +92,9 @@
       CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
 
       JERR = 0
-      USE_THIS_EIG = 'N'
+      USE_THIS_EIG    = 'N'
+      MATCHES_SCALAR  = .FALSE.
+      MATCHES_PER_SUB = .FALSE.
       CALL I4FLD ( JCARD(2), JF(2), EIG_SID )              ! Read set ID and check if it is one requested in Case Control
       IF (IERRFL(2) == 'N') THEN
          IF (EIG_SID == CC_EIGR_SID) THEN
@@ -99,10 +105,28 @@
                WRITE(F06,1117) JCARD(1),JCARD(2)
             ELSE
                EIGFND = 'Y'
-               USE_THIS_EIG = 'Y'
+               MATCHES_SCALAR = .TRUE.
+               USE_THIS_EIG   = 'Y'
             ENDIF
-         ELSE
-            RETURN
+         ENDIF
+         IF (.NOT. MATCHES_SCALAR) THEN
+            IF (ALLOCATED(CC_EIGR_SID_SUB)) THEN
+               DO I_SUB = 1, NSUB
+                  IF (CC_EIGR_SID_SUB(I_SUB) == EIG_SID) THEN
+                     MATCHES_PER_SUB = .TRUE.
+                     EXIT
+                  ENDIF
+                  IF ((CC_EIGR_SID_SUB(I_SUB) == 0) .AND. (EIG_SID == CC_EIGR_SID_DECK) .AND. (CC_EIGR_SID_DECK /= 0)) THEN
+                     MATCHES_PER_SUB = .TRUE.
+                     EXIT
+                  ENDIF
+               ENDDO
+            ENDIF
+            IF (MATCHES_PER_SUB) THEN
+               USE_THIS_EIG = 'Y'
+            ELSE
+               RETURN
+            ENDIF
          ENDIF
       ELSE
          JERR = JERR + 1
@@ -226,7 +250,37 @@
          MIJ_ROW          = 0
          MIJ_COL          = 0
 
-         CALL WRITE_L1M
+         IF (ALLOCATED(EIG_PARAMS) .AND. ALLOCATED(CC_EIGR_SID_SUB)) THEN
+            DO I_SUB = 1, NSUB
+               SUB_WANTS_THIS = .FALSE.
+               IF (CC_EIGR_SID_SUB(I_SUB) == EIG_SID) SUB_WANTS_THIS = .TRUE.
+               IF ((CC_EIGR_SID_SUB(I_SUB) == 0) .AND. (EIG_SID == CC_EIGR_SID_DECK) .AND. (CC_EIGR_SID_DECK /= 0)) THEN
+                  SUB_WANTS_THIS = .TRUE.
+               ENDIF
+               IF (SUB_WANTS_THIS) THEN
+                  EIG_PARAMS(I_SUB)%METHOD           = EIG_METH
+                  EIG_PARAMS(I_SUB)%NORM             = EIG_NORM
+                  EIG_PARAMS(I_SUB)%LAP_MAT_TYPE     = EIG_LAP_MAT_TYPE
+                  EIG_PARAMS(I_SUB)%VECS             = EIG_VECS
+                  EIG_PARAMS(I_SUB)%SID              = EIG_SID
+                  EIG_PARAMS(I_SUB)%N1               = EIG_N1
+                  EIG_PARAMS(I_SUB)%N2               = EIG_N2
+                  EIG_PARAMS(I_SUB)%COMP             = EIG_COMP
+                  EIG_PARAMS(I_SUB)%GRID             = EIG_GRID
+                  EIG_PARAMS(I_SUB)%MODE             = EIG_MODE
+                  EIG_PARAMS(I_SUB)%MSGLVL           = EIG_MSGLVL
+                  EIG_PARAMS(I_SUB)%NCVFACL          = EIG_NCVFACL
+                  EIG_PARAMS(I_SUB)%CRIT             = EIG_CRIT
+                  EIG_PARAMS(I_SUB)%FRQ1             = EIG_FRQ1
+                  EIG_PARAMS(I_SUB)%FRQ2             = EIG_FRQ2
+                  EIG_PARAMS(I_SUB)%SIGMA            = EIG_SIGMA
+               ENDIF
+            ENDDO
+         ENDIF
+
+         IF (MATCHES_SCALAR) THEN
+            CALL WRITE_L1M
+         ENDIF
 
       ENDIF
 

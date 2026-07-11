@@ -2796,51 +2796,59 @@
          PARNAM = 'SKIPMGG '
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, SKIPMGG)
 
-! SOLLIB sets the method for solving equations (BANDED, SPARSE)
+! SOLLIB sets the method for solving equations (BANDED, SPARSE, or sparse-flavor shorthands)
 
-      ELSE IF (JCARD(2)(1:8) == 'SOLLIB  ') THEN
-         PARNAM = 'SOLLIB'
-         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
-         IF (IERRFL(3) == 'N') THEN
-            CALL LEFT_ADJ_BDFLD ( CHRPARM )
-            IF (CHRPARM == 'BANDED  ') THEN
-               SOLLIB = 'BANDED  '
-            ELSE IF (CHRPARM == 'SPARSE  ') THEN
-               SOLLIB = 'SPARSE  '
-            ELSE
-               WARN_ERR = WARN_ERR + 1
-               WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'BANDED or SPARSE',CHRPARM,SOLLIB
-               IF (SUPWARN == 'N') THEN
-                  IF (ECHO == 'NONE  ') THEN
-                     WRITE(F06,101) CARD
-                  ENDIF
-                  WRITE(F06,1189) PARNAM,'BANDED or SPARSE',CHRPARM,SOLLIB
-               ENDIF
-            ENDIF
-         ENDIF
+       ELSE IF (JCARD(2)(1:8) == 'SOLLIB  ') THEN
+          PARNAM = 'SOLLIB'
+          CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+          IF (IERRFL(3) == 'N') THEN
+             CALL LEFT_ADJ_BDFLD ( CHRPARM )
+             IF (CHRPARM == 'BANDED  ') THEN
+                SOLLIB = 'BANDED  '
+             ELSE IF (CHRPARM == 'SPARSE  ') THEN
+                SOLLIB = 'SPARSE  '
+             ELSE IF (CHRPARM(1:7) == 'SUPERLU') THEN
+                SOLLIB = 'SPARSE  '
+                SPARSE_FLAVOR = 'SUPERLU '
+             ELSE IF (CHRPARM(1:5) == 'MUMPS') THEN
+                SOLLIB = 'SPARSE  '
+                SPARSE_FLAVOR = 'MUMPS   '
+              ELSE
+                 WARN_ERR = WARN_ERR + 1
+                 WRITE(ERR,101) CARD
+                WRITE(ERR,1189) PARNAM,'BANDED, SPARSE, SUPERLU or MUMPS',CHRPARM,SOLLIB
+                 IF (SUPWARN == 'N') THEN
+                    IF (ECHO == 'NONE  ') THEN
+                       WRITE(F06,101) CARD
+                    ENDIF
+                   WRITE(F06,1189) PARNAM,'BANDED, SPARSE, SUPERLU or MUMPS',CHRPARM,SOLLIB
+                 ENDIF
+              ENDIF
+          ENDIF
 
-         IF (SOLLIB == 'SPARSE  ') THEN
-            IF (JCARD(4)(1:) /= ' ') THEN
-               PARNAM = 'SPARSE_FLAVOR'
-               CALL CHAR_FLD ( JCARD(4), JF(4), CHRPARM )
-               IF (IERRFL(4) == 'N') THEN
-                  CALL LEFT_ADJ_BDFLD ( CHRPARM )
-                  IF      (CHRPARM(1:7) == 'SUPERLU') THEN
-                     SPARSE_FLAVOR = 'SUPERLU '
-                  ELSE
-                     WARN_ERR = WARN_ERR + 1
-                     WRITE(ERR,101) CARD
-                     WRITE(ERR,1189) PARNAM,'Y OR N',CHRPARM,AUTOSPC_INFO
-                     IF (SUPWARN == 'N') THEN
-                        IF (ECHO == 'NONE  ') THEN
-                           WRITE(F06,101) CARD
-                        ENDIF
-                        WRITE(F06,1189) PARNAM,'Y OR N',CHRPARM,AUTOSPC_INFO
-                     ENDIF
-                  ENDIF
-               ENDIF
-            ENDIF
+          IF (SOLLIB == 'SPARSE  ') THEN
+             IF (JCARD(4)(1:) /= ' ') THEN
+                PARNAM = 'SPARSE_FLAVOR'
+                CALL CHAR_FLD ( JCARD(4), JF(4), CHRPARM )
+                IF (IERRFL(4) == 'N') THEN
+                   CALL LEFT_ADJ_BDFLD ( CHRPARM )
+                   IF      (CHRPARM(1:7) == 'SUPERLU') THEN
+                      SPARSE_FLAVOR = 'SUPERLU '
+                   ELSE IF (CHRPARM(1:5) == 'MUMPS') THEN
+                      SPARSE_FLAVOR = 'MUMPS   '
+                   ELSE
+                      WARN_ERR = WARN_ERR + 1
+                      WRITE(ERR,101) CARD
+                      WRITE(ERR,1189) PARNAM,'SUPERLU or MUMPS',CHRPARM,SPARSE_FLAVOR
+                      IF (SUPWARN == 'N') THEN
+                         IF (ECHO == 'NONE  ') THEN
+                            WRITE(F06,101) CARD
+                         ENDIF
+                         WRITE(F06,1189) PARNAM,'SUPERLU or MUMPS',CHRPARM,SPARSE_FLAVOR
+                      ENDIF
+                   ENDIF
+                ENDIF
+             ENDIF
          ENDIF
 
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3

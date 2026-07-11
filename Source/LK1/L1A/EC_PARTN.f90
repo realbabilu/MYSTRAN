@@ -57,6 +57,7 @@
       CHARACTER(LEN=EC_ENTRY_LEN)     :: DATA_80(3)        ! Temp slot for holding data until lead/trail blanks stripped
       CHARACTER(16*BYTE)              :: DATA_16(3)        ! Matrix name read from OUTPUT4 entry
       CHARACTER( 1*BYTE)              :: FOUND             ! 'Y' if we found something we were looking for
+      CHARACTER(16*BYTE)              :: PARTN_MAT_NAME    ! Canonical matrix name matched to prior OUTPUT4 request
 
       INTEGER(LONG), INTENT(OUT)      :: IERR              ! Error indicator. If CHAR not found, IERR set to 1
       INTEGER(LONG)                   :: DATA_BEG          ! Column where data begins (after OUTPUT4)
@@ -166,11 +167,13 @@ nerr: IF (IERR == 0) THEN
             ENDIF
          ENDDO
 
+         PARTN_MAT_NAME = DATA_16(1)
          FOUND = 'N'
          DO I=1,NUM_OU4_REQUESTS                           ! Set names of the matrix to be partitioned, the partitions and the vecs
-            IF (DATA_16(1) == ACT_OU4_MYSTRAN_NAMES(I)) THEN
+            IF (SAME_NAME_IGNORE_CASE(DATA_16(1), ACT_OU4_MYSTRAN_NAMES(I))) THEN
                FOUND = 'Y'
-               OU4_PART_MAT_NAMES(I,1) = DATA_16(1)
+               PARTN_MAT_NAME = ACT_OU4_MYSTRAN_NAMES(I)
+               OU4_PART_MAT_NAMES(I,1) = PARTN_MAT_NAME
                OU4_PART_VEC_NAMES(I,1) = DATA_16(2)
                OU4_PART_VEC_NAMES(I,2) = DATA_16(3)
             ENDIF
@@ -245,5 +248,52 @@ nerr: IF (IERR == 0) THEN
 99901 FORMAT(' I =',I3,2X,A,2X,'"',A,'"')
 
 ! **********************************************************************************************************************************
+
+      CONTAINS
+
+! ##################################################################################################################################
+
+      LOGICAL FUNCTION SAME_NAME_IGNORE_CASE ( NAME_A, NAME_B )
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(IN)    :: NAME_A, NAME_B
+
+      CHARACTER(LEN=LEN(NAME_A))      :: NAME_A_UPPER
+      CHARACTER(LEN=LEN(NAME_B))      :: NAME_B_UPPER
+
+! **********************************************************************************************************************************
+      NAME_A_UPPER = NAME_A
+      NAME_B_UPPER = NAME_B
+      CALL TO_UPPER_NAME ( NAME_A_UPPER )
+      CALL TO_UPPER_NAME ( NAME_B_UPPER )
+      SAME_NAME_IGNORE_CASE = (NAME_A_UPPER == NAME_B_UPPER)
+
+! **********************************************************************************************************************************
+
+      END FUNCTION SAME_NAME_IGNORE_CASE
+
+! ##################################################################################################################################
+
+      SUBROUTINE TO_UPPER_NAME ( STR )
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(INOUT) :: STR
+
+      INTEGER(LONG)                   :: II
+      INTEGER(LONG)                   :: ICHAR
+
+! **********************************************************************************************************************************
+      DO II=1,LEN(STR)
+         ICHAR = IACHAR(STR(II:II))
+         IF ((ICHAR >= IACHAR('a')) .AND. (ICHAR <= IACHAR('z'))) THEN
+            STR(II:II) = ACHAR(ICHAR - 32)
+         ENDIF
+      ENDDO
+
+! **********************************************************************************************************************************
+
+      END SUBROUTINE TO_UPPER_NAME
 
       END SUBROUTINE EC_PARTN

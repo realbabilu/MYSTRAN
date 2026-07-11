@@ -40,7 +40,7 @@
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE MODEL_STUF, ONLY            :  ELEM_ONAME, ELMTYP, LABEL, SCNUM, STITLE, TITLE, TYPE
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRN_OPT, STRN_OUT
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRN_OPT, STRN_OUT, STRN_CUR
 
       USE WRITE_ELEM_STRAINS_USE_IFs
 
@@ -67,6 +67,7 @@
       INTEGER(LONG)                   :: BDY_DOF_NUM       ! DOF number for BDY_GRID/BDY_COMP
       INTEGER(LONG)                   :: I,J,L             ! DO loop indices
       INTEGER(LONG)                   :: IBEG, IEND, IELEM, ISTA, NROW_ELEM, NSTA_ELEM
+      INTEGER(LONG)                   :: IS_FIBER_DISTANCE
       INTEGER(LONG)                   :: K                 ! Counter
       INTEGER(LONG)                   :: NCOLS             ! Num of cols to write out
 
@@ -74,9 +75,18 @@
       REAL(DOUBLE)                    :: ABS_ANS(11)       ! Max ABS for all element output
       REAL(DOUBLE)                    :: MAX_ANS(11)       ! Max for all element output
       REAL(DOUBLE)                    :: MIN_ANS(11)       ! Min for all element output
+      REAL(DOUBLE)                    :: ANGLE
+      REAL(DOUBLE)                    :: MEAN
+      REAL(DOUBLE)                    :: SMAJ
+      REAL(DOUBLE)                    :: SMIN
+      REAL(DOUBLE)                    :: SXYMAX
       REAL(DOUBLE)                    :: TINT, XI_STD, XI0, XI1
+      REAL(DOUBLE)                    :: ROW_CURV(10)
+      REAL(DOUBLE)                    :: ROW_MEM(10)
+      REAL(DOUBLE)                    :: VONMISES
       REAL(DOUBLE)                    :: XI_RAW(11), SXC_RAW(11), SXD_RAW(11), SXE_RAW(11), SXF_RAW(11), SMAX_RAW(11),            &
                                          SMIN_RAW(11), MST_RAW(11), MSC_RAW(11)
+      REAL(DOUBLE)                    :: Z1, Z2, Z_DEN
       REAL(DOUBLE), ALLOCATABLE       :: BEAM_XI(:,:), BEAM_SXC(:,:), BEAM_SXD(:,:), BEAM_SXE(:,:), BEAM_SXF(:,:),               &
                                          BEAM_SMAX(:,:), BEAM_SMIN(:,:), BEAM_MST(:,:), BEAM_MSC(:,:)
       INTEGER(LONG), ALLOCATABLE      :: BEAM_EID(:), BEAM_GRID(:,:)
@@ -108,6 +118,10 @@
       INTEGER(LONG)                   :: ISUBCASE_INDEX   ! the index into SCNUM
       INTEGER(LONG)                   :: CID          ! coordinate system
       CHARACTER(4*BYTE)               :: CEN_WORD     ! the word "CEN/" (we need to cast the length)
+      CHARACTER( 6*BYTE)              :: FIBER_HDR_1
+      CHARACTER( 9*BYTE)              :: FIBER_HDR_2
+      CHARACTER( 6*BYTE)              :: OPT_HDR_1
+      CHARACTER( 9*BYTE)              :: OPT_HDR_2
 
 
 
@@ -141,6 +155,11 @@
       FIELD6_EIGENVALUE = 0.0
       WRITE_F06 = (STRN_OUT(1:1) == 'Y')
       INQUIRE ( UNIT=OP2, OPENED=WRITE_OP2 )
+      IF (STRN_CUR == 'FIBER') THEN
+         IS_FIBER_DISTANCE = 1
+      ELSE
+         IS_FIBER_DISTANCE = 0
+      ENDIF
 
       IF (IHDR == 'Y') THEN
          IF (WRITE_F06) WRITE(F06,*)
@@ -210,6 +229,22 @@
          LABELI = LABEL(INT_SC_NUM)
 
          IF (WRITE_F06) THEN
+            IF (STRN_CUR == 'FIBER') THEN
+               FIBER_HDR_1 = 'Fiber'
+               FIBER_HDR_2 = 'Distance'
+            ELSE
+               FIBER_HDR_1 = 'Strain'
+               FIBER_HDR_2 = 'Curvature'
+            ENDIF
+
+            IF (STRN_OPT == 'VONMISES') THEN
+               OPT_HDR_1 = ''
+               OPT_HDR_2 = 'von Mises'
+            ELSE
+               OPT_HDR_1 = 'Max'
+               OPT_HDR_2 = 'Shear-XY'
+            ENDIF
+
              IF (TITLE(INT_SC_NUM)(1:)  /= ' ') THEN
                 WRITE(F06,201) TITLE(INT_SC_NUM)
              ENDIF
@@ -344,11 +379,7 @@
                   WRITE(F06,1302) FILL(1: 1), FILL(1: 1)
                ENDIF
             ELSE IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
-               IF (STRN_OPT == 'VONMISES') THEN
-                  WRITE(F06,1401) FILL(1: 1), FILL(1: 1), FILL(1: 1)
-               ELSE
-                  WRITE(F06,1402) FILL(1: 1), FILL(1: 1)
-               ENDIF
+               WRITE(F06,1400) FIBER_HDR_1, ' Strains', ' Strains', OPT_HDR_1, FIBER_HDR_2, OPT_HDR_2
 
             ELSE IF  (TYPE == 'ROD     ') THEN
                WRITE(F06,1501) FILL(1: 1), FILL(1: 1)
@@ -356,11 +387,7 @@
             ELSE IF (TYPE(1:5) == 'SHEAR') THEN
                WRITE(F06,1601) FILL(1: 1), FILL(1: 1)
             ELSE IF (TYPE(1:5) == 'TRIA3') THEN
-               IF (STRN_OPT == 'VONMISES') THEN
-                  WRITE(F06,1701) FILL(1: 1), FILL(1: 1), FILL(1: 1)
-               ELSE
-                  WRITE(F06,1702) FILL(1: 1), FILL(1: 1)
-               ENDIF
+               WRITE(F06,1700) FIBER_HDR_1, ' Strains', ' Strains', OPT_HDR_1, FIBER_HDR_2, OPT_HDR_2
 
             ELSE IF  (TYPE == 'BUSH    ') THEN
                WRITE(F06,1801) FILL(1:  1), FILL(1:  1)
@@ -380,9 +407,17 @@
       ENDIF
 
       ! Write the element strain output
-      !IF      (TYPE == 'BAR     ') THEN
-         !CALL WRITE_BAR ( NUM, FILL(1:1), FILL(1:16) )
-      IF (TYPE(1:4) == 'BEAM') THEN
+      IF      (TYPE == 'BAR     ') THEN
+
+         IF (WRITE_F06) THEN
+            DO I=1,NUM
+               WRITE(F06,*)
+               WRITE(F06,1111) EID_OUT_ARRAY(I,1), (OGEL(2*I-1,J),J=1,7)
+               WRITE(F06,1112)                    (OGEL(2*I  ,J),J=1,7)
+            ENDDO
+         ENDIF
+
+      ELSE IF (TYPE(1:4) == 'BEAM') THEN
 
          IF (WRITE_OP2) THEN
             NELEMENTS = 0
@@ -626,9 +661,8 @@
          IF (WRITE_OP2) THEN
            !CALL WRITE_OST_CQUAD4 ( NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI )
 
-           !CALL GET_STRESS_CODE(STRESS_CODE, IS_VON_MISES, IS_STRAIN, IS_FIBER_DISTANCE)
-           CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         1)
             IF ((STRN_LOC == 'CENTER  ') .AND. (TYPE(1:5) /= 'QUAD8')) THEN
+               CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         0)
                ! CQUAD4-33
                !(eid_device,
                ! fd1, sx1, sy1, txy1, angle1, major1, minor1, vm1,
@@ -642,8 +676,37 @@
                ! just a copy of the CTRIA3 code
                ! op2 version of the upper & lower layers all in one call, but without the transverse shear
                WRITE(OP2) NVALUES
-               WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
+               DO I=1,NUM
+                  Z1 = OGEL(2*I-1,1)
+                  Z2 = OGEL(2*I  ,1)
+                  Z_DEN = Z1 - Z2
+                  ROW_MEM(1) = 0.0D0
+                  ROW_CURV(1) = -1.0D0
+                  IF (DABS(Z_DEN) > 1.0D-12) THEN
+                     DO J=2,4
+                        ROW_MEM(J)  = (Z1*OGEL(2*I  ,J) - Z2*OGEL(2*I-1,J)) / Z_DEN
+                        ROW_CURV(J) = (OGEL(2*I,J) - OGEL(2*I-1,J)) / Z_DEN
+                     ENDDO
+                  ELSE
+                     DO J=2,4
+                        ROW_MEM(J)  = 0.5D0*(OGEL(2*I-1,J) + OGEL(2*I,J))
+                        ROW_CURV(J) = OGEL(2*I,J) - OGEL(2*I-1,J)
+                     ENDDO
+                  ENDIF
+                  CALL PRINCIPAL_2D(ROW_MEM(2), ROW_MEM(3), ROW_MEM(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
+                  ROW_MEM(5) = ANGLE
+                  ROW_MEM(6) = SMAJ
+                  ROW_MEM(7) = SMIN
+                  ROW_MEM(8) = VONMISES
+                  CALL PRINCIPAL_2D(ROW_CURV(2), ROW_CURV(3), ROW_CURV(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
+                  ROW_CURV(5) = ANGLE
+                  ROW_CURV(6) = SMAJ
+                  ROW_CURV(7) = SMIN
+                  ROW_CURV(8) = VONMISES
+                  WRITE(OP2) EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8)
+               ENDDO
             ELSE
+               CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         1)
                ! CQUAD4-144
                ELEMENT_TYPE = 144
                NUM_WIDE = 87 ! 2 + 17 * (4+1)  ! 4 nodes + 1 centroid
@@ -659,9 +722,9 @@
                ! (grid,
                !  fd1, sx1, sy1, txy1, angle1, major1, minor1, vm1,
                !  fd2, sx2, sy2, txy2, angle2, major2, minor2, vm2,)*4 = n = 17*4
-               CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
+              CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
                                       TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
-               WRITE(OP2) NVALUES
+              WRITE(OP2) NVALUES
                ! see the CQUAD4-33 stress/strain (the IF part of this IF-ELSE block)
                ! writing before trying to understand this...
                !
@@ -678,13 +741,12 @@
             ENDIF
          ENDIF  ! write op2
 
-         !IF(WRITE_F06) THEN
+         IF (WRITE_F06) THEN
             K = 0
             DO I=1,NUM,NUM_PTS
                K = K + 1
                WRITE(F06,*)
                WRITE(F06,1403) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
-
                K = K + 1
                WRITE(F06,1404) FILL(1: 0), (OGEL(K,J),J=1,8)
 
@@ -697,7 +759,6 @@
                   ELSE
                      WRITE(F06,1406) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10), POLY_FIT_ERR(I+L)
                   ENDIF
-
                   K = K + 1
                   WRITE(F06,1407) FILL(1: 0), (OGEL(K,J),J=1,8)
                ENDDO
@@ -761,11 +822,12 @@
                   ENDIF
                ENDDO
             ENDIF
+         ENDIF
 
 
 
       ELSE IF (TYPE == 'ROD     ') THEN
-         CALL WRITE_ROD (ISUBCASE, NUM, FILL(1:1), FILL(1:16), ITABLE, TITLEI, STITLEI, LABELI, &
+         CALL WRITE_ROD (ISUBCASE, NUM, FILL(1:1), ITABLE, TITLEI, STITLEI, LABELI, &
                          FIELD5_INT_MODE, FIELD6_EIGENVALUE, WRITE_OP2 )
 
       ELSE IF (TYPE(1:5) == 'SHEAR') THEN
@@ -850,6 +912,9 @@
          1X,A,'Element      SA1           SA2           SA3           SA4          Axial         SA-Max        SA-Min      M.S.-T' &
       ,/,1X,A,'   ID        SB1           SB2           SB3           SB4          Strain        SB-Max        SB-Min      M.S.-C')
 
+ 1111 FORMAT(1X,I8,7(1ES14.6))
+ 1112 FORMAT(1X,8X,7(1ES14.6))
+
  1104 FORMAT(                                                                                                                      &
          1X,A,'                        S T R A I N S   I N   B E A M   E L E M E N T S        ( C B E A M )'                  &
       ,/,1X,A,'GRID   ELEMENT-ID       SXC           SXD           SXE           SXF           S-MAX        S-MIN         M.S.-T'      &
@@ -908,15 +973,11 @@
  1306 FORMAT(1X,A,10X,'GRD',I8,5X,8(1ES14.6))
 
 ! QUAD4 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
- 1401 FORMAT(1X,A,'Elem  Location         Fibre      Strains In Element Coord System       Principal Strains (Zero Shear)',        &
-  '                 Transverse   Transverse   % Poly',/,1X,A,                                                                      &
-  ' ID                   Distance   Normal-X     Normal-Y     Shear-XY     Angle      Major        Minor      von Mises',          &
-  '    Shear-XZ     Shear-YZ    Fit Err',A)
-
- 1402 FORMAT(1X,A,'Elem  Location         Fibre      Strains In Element Coord System       Principal Strains (Zero Shear)',        &
-  '       Max     Transverse   Transverse   % Poly',/,1X,A,                                                                        &
-  ' ID                     Distance    Normal-X     Normal-Y     Shear-XY     Angle     Major        Minor      Shear-XY',         &
-  '     Shear-XZ     Shear-YZ   Fit Err',A)
+ 1400 FORMAT(                                                                                                                      &
+ '    Elem  Location       ',A6,'      ', A8, ' In Element Coord System     Principal ', A8, ' (Zero Shear)',                    &
+ '      ',A6,'    Transverse   Transverse   % Poly',/,                                                                            &
+ '     ID                 ', A9,  '   Normal-X     Normal-Y     Shear-XY     Angle     Major        Minor  ',                    &
+ '    ', A9,  '    Shear-XZ     Shear-YZ    Fit Err')
 
  1403 FORMAT(1X,A,I8,2X,'CENTER  ',3X,1ES11.3,3(1ES13.5),0PF8.2,5(1ES13.5))
 
@@ -952,15 +1013,11 @@
 
 
 ! TRIA3 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
- 1701 FORMAT(1X,A,'Element    Location      Fibre        Strains In Element Coord System       Principal Strains (Zero Shear)',    &
-                '                 Transverse   Transverse'                                                                         &
-          ,/,1X,A,'   ID                   Distance     Normal-X     Normal-Y      Shear-XY     Angle     Major        Minor'      &
-          ,'      von Mises    Shear-XZ     Shear-YZ',A)
-
- 1702 FORMAT(1X,A,'Element    Location      Fibre        Strains In Element Coord System       Principal Strains (Zero Shear)',    &
-  '      Max        Transverse   Transverse'                                                                                       &
-          ,/,1X,A,'   ID                   Distance     Normal-X     Normal-Y      Shear-XY     Angle     Major        Minor',     &
-          '      Shear-XY    Shear-XZ     Shear-YZ',A)
+ 1700 FORMAT(                                                                                                                      &
+ '  Element    Location      ',A6,'       ', A8, ' In Element Coord System      Principal ', A8, ' (Zero Shear)',                &
+ '      ',A6,'    Transverse   Transverse',/,                                                                                     &
+ '     ID                   ', A9,  '    Normal-X     Normal-Y     Shear-XY      Angle     Major        Minor  ',                &
+ '    ', A9,  '    Shear-XZ     Shear-YZ')
 
  1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
 
@@ -1105,6 +1162,7 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC
       USE GET_MAX_MIN_ABS_STR_Interface
+      USE PRINCIPAL_2D_Interface
       IMPLICIT NONE
       !
       INTEGER(LONG), INTENT(IN)       :: NUM
@@ -1127,8 +1185,17 @@
       INTEGER(LONG)                   :: ELEMENT_TYPE
       INTEGER(LONG)                   :: STRESS_CODE = 1
       REAL(DOUBLE)                    :: ABS_ANS(11)
+      REAL(DOUBLE)                    :: ANGLE
       REAL(DOUBLE)                    :: MAX_ANS(11)
+      REAL(DOUBLE)                    :: MEAN
       REAL(DOUBLE)                    :: MIN_ANS(11)
+      REAL(DOUBLE)                    :: ROW_CURV(10)
+      REAL(DOUBLE)                    :: ROW_MEM(10)
+      REAL(DOUBLE)                    :: SMAJ
+      REAL(DOUBLE)                    :: SMIN
+      REAL(DOUBLE)                    :: SXYMAX
+      REAL(DOUBLE)                    :: VONMISES
+      REAL(DOUBLE)                    :: Z1, Z2, Z_DEN
       INTEGER(LONG)                   :: I, J, K, L, NELEMENTS, NUM_PTS_TRI
 
       DEVICE_CODE = 1
@@ -1148,21 +1215,75 @@
           ENDIF
           NTOTAL = NVALUES * 4
 
-          CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         1)
+          CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         0)
           CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
                                  TITLE, SUBTITLE, LABEL, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
           WRITE(OP2) NVALUES
 
           IF (STRN_LOC == 'CENTER  ') THEN
-             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), &
-                        (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
+             DO I=1,NUM
+                Z1 = OGEL(2*I-1,1)
+                Z2 = OGEL(2*I  ,1)
+                Z_DEN = Z1 - Z2
+                ROW_MEM(1) = 0.0D0
+                ROW_CURV(1) = -1.0D0
+                IF (DABS(Z_DEN) > 1.0D-12) THEN
+                   DO J=2,4
+                      ROW_MEM(J)  = (Z1*OGEL(2*I  ,J) - Z2*OGEL(2*I-1,J)) / Z_DEN
+                      ROW_CURV(J) = (OGEL(2*I,J) - OGEL(2*I-1,J)) / Z_DEN
+                   ENDDO
+                ELSE
+                   DO J=2,4
+                      ROW_MEM(J)  = 0.5D0*(OGEL(2*I-1,J) + OGEL(2*I,J))
+                      ROW_CURV(J) = OGEL(2*I,J) - OGEL(2*I-1,J)
+                   ENDDO
+                ENDIF
+                CALL PRINCIPAL_2D(ROW_MEM(2), ROW_MEM(3), ROW_MEM(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
+                ROW_MEM(5) = ANGLE
+                ROW_MEM(6) = SMAJ
+                ROW_MEM(7) = SMIN
+                ROW_MEM(8) = VONMISES
+                CALL PRINCIPAL_2D(ROW_CURV(2), ROW_CURV(3), ROW_CURV(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
+                ROW_CURV(5) = ANGLE
+                ROW_CURV(6) = SMAJ
+                ROW_CURV(7) = SMIN
+                ROW_CURV(8) = VONMISES
+                WRITE(OP2) EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8)
+             ENDDO
           ELSE
-             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, "CEN/", 3,                                                      &
-                         (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                                      &
-                         GID_OUT_ARRAY(I,2), (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                 &
-                         GID_OUT_ARRAY(I,3), (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                 &
-                         GID_OUT_ARRAY(I,4), (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                 &
-                         I=1,NELEMENTS)
+             DO I=1,NELEMENTS
+                Z1 = OGEL(2*I-1,1)
+                Z2 = OGEL(2*I  ,1)
+                Z_DEN = Z1 - Z2
+                ROW_MEM(1) = 0.0D0
+                ROW_CURV(1) = -1.0D0
+                IF (DABS(Z_DEN) > 1.0D-12) THEN
+                   DO J=2,4
+                      ROW_MEM(J)  = (Z1*OGEL(2*I  ,J) - Z2*OGEL(2*I-1,J)) / Z_DEN
+                      ROW_CURV(J) = (OGEL(2*I,J) - OGEL(2*I-1,J)) / Z_DEN
+                   ENDDO
+                ELSE
+                   DO J=2,4
+                      ROW_MEM(J)  = 0.5D0*(OGEL(2*I-1,J) + OGEL(2*I,J))
+                      ROW_CURV(J) = OGEL(2*I,J) - OGEL(2*I-1,J)
+                   ENDDO
+                ENDIF
+                CALL PRINCIPAL_2D(ROW_MEM(2), ROW_MEM(3), ROW_MEM(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
+                ROW_MEM(5) = ANGLE
+                ROW_MEM(6) = SMAJ
+                ROW_MEM(7) = SMIN
+                ROW_MEM(8) = VONMISES
+                CALL PRINCIPAL_2D(ROW_CURV(2), ROW_CURV(3), ROW_CURV(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
+                ROW_CURV(5) = ANGLE
+                ROW_CURV(6) = SMAJ
+                ROW_CURV(7) = SMIN
+                ROW_CURV(8) = VONMISES
+                WRITE(OP2) EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, "CEN/", 3,                               &
+                            (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8),                 &
+                            GID_OUT_ARRAY(I,2), (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8), &
+                            GID_OUT_ARRAY(I,3), (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8), &
+                            GID_OUT_ARRAY(I,4), (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8)
+             ENDDO
           ENDIF
       ENDIF
  1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
@@ -1188,12 +1309,11 @@
             K = 2*I - 1
             WRITE(F06,*)
             WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
-            K = K + 1
-            WRITE(F06,1704) (OGEL(K,J),J=1,8)
+            WRITE(F06,1704) (OGEL(K+1,J),J=1,8)
             DO L=1,3
                WRITE(F06,*)
-               WRITE(F06,1706) FILL(1:0), GID_OUT_ARRAY(I,L+1),(OGEL(2*I-1,J),J=1,10)
-               WRITE(F06,1704) (OGEL(K,J),J=1,8)
+               WRITE(F06,1706) FILL(1:0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10)
+               WRITE(F06,1704) (OGEL(K+1,J),J=1,8)
             ENDDO
          ENDDO
       ENDIF

@@ -30,10 +30,10 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
-      USE SCONTR, ONLY                :  WARN_ERR, BLNK_SUB_NAM
+      USE SCONTR, ONLY                :  WARN_ERR, BLNK_SUB_NAM, NSUB
       USE TIMDAT, ONLY                :  TSEC
       USE PARAMS, ONLY                :  SUPWARN
-      USE MODEL_STUF, ONLY            :  CC_EIGR_SID
+      USE MODEL_STUF, ONLY            :  CC_EIGR_SID, CC_EIGR_SID_SUB, CC_EIGR_SID_DECK, IS_MODES_SUBCASE
 
       USE CC_METH_USE_IFs
 
@@ -56,23 +56,44 @@
 
 ! Set CASE CONTROL variable to SETID
 
-      IF (CC_EIGR_SID == 0) THEN
-         CC_EIGR_SID = SETID
-      ELSE
-         CC_EIGR_SID = SETID
-         WARN_ERR = WARN_ERR+1
-         WRITE(ERR,8866)
-         IF (SUPWARN == 'N') THEN
-            WRITE(F06,8866)
+      IF (NSUB == 0) THEN
+
+         IF ((CC_EIGR_SID_DECK /= 0) .AND. (CC_EIGR_SID_DECK /= SETID)) THEN
+            WARN_ERR = WARN_ERR + 1
+            WRITE(ERR,8867) CC_EIGR_SID_DECK, SETID
+            IF (SUPWARN == 'N') THEN
+               WRITE(F06,8867) CC_EIGR_SID_DECK, SETID
+            ENDIF
          ENDIF
+         CC_EIGR_SID_DECK = SETID
+
+      ELSE
+
+         IF (ALLOCATED(CC_EIGR_SID_SUB)) THEN
+            IF ((CC_EIGR_SID_SUB(NSUB) /= 0) .AND. (CC_EIGR_SID_SUB(NSUB) /= SETID)) THEN
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,8868) NSUB, CC_EIGR_SID_SUB(NSUB), SETID
+               IF (SUPWARN == 'N') THEN
+                  WRITE(F06,8868) NSUB, CC_EIGR_SID_SUB(NSUB), SETID
+               ENDIF
+            ENDIF
+            CC_EIGR_SID_SUB(NSUB) = SETID
+            IS_MODES_SUBCASE(NSUB) = 'Y'
+         ENDIF
+
       ENDIF
+
+      CC_EIGR_SID = SETID
 
 
 
       RETURN
 
 ! **********************************************************************************************************************************
- 8866 FORMAT(' *WARNING    : MORE THAN ONE METHOD ENTRY IN CASE CONTROL. LAST ONE READ WILL BE USED')
+ 8867 FORMAT(' *WARNING    : MORE THAN ONE DECK-LEVEL METHOD ENTRY IN CASE CONTROL. PREVIOUS SET ID = ',I8,', NEW SET ID = ',I8,    &
+             '. NEW VALUE WILL BE USED AS THE DECK DEFAULT.')
+ 8868 FORMAT(' *WARNING    : MORE THAN ONE METHOD ENTRY IN SUBCASE ',I8,'. PREVIOUS SET ID = ',I8,', NEW SET ID = ',I8,             &
+             '. NEW VALUE WILL BE USED.')
 
 ! **********************************************************************************************************************************
 

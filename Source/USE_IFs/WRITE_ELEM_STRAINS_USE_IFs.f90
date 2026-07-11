@@ -31,6 +31,8 @@
       USE GET_ELEM_ONAME_Interface
       USE GET_GRID_AND_COMP_Interface
       USE GET_MAX_MIN_ABS_STR_Interface
+      USE WRITE_ROD_Interface
       USE OUTA_HERE_Interface
+      USE PRINCIPAL_2D_Interface
 
       END MODULE WRITE_ELEM_STRAINS_USE_IFs

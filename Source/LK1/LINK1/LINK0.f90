@@ -621,7 +621,8 @@ res14:IF (RESTART == 'N') THEN
       CALL SUBCASE_PROC
       CALL DEALLOCATE_MODEL_STUF ( 'GROUT, ELOUT' )
       CALL DEALLOCATE_MODEL_STUF ( 'SETS ARRAYS' )
-      CALL DEALLOCATE_MODEL_STUF ( 'TITLES' )
+      ! Keep per-subcase title/subtitle/label arrays alive for later links
+      ! that still write subcase-scoped summaries and result headers.
       CALL DEALLOCATE_MODEL_STUF ( 'SC_xxxx' )
       CALL FILE_CLOSE ( L1D, LINK1D, 'KEEP' )
                                                            ! If we will be writing data to the F2i disk files open them now
@@ -707,7 +708,7 @@ res15:IF (RESTART == 'Y') THEN
          IF (PRTDOF > 0) THEN
             CALL WRITE_TDOF ( 'After all AUTOSPC' )
          ENDIF
-         CALL DEALLOCATE_MODEL_STUF ( 'SCNUM' )
+         ! Keep SCNUM available for later links that emit subcase-scoped modal/buckling output.
          CALL DEALLOCATE_MODEL_STUF ( 'SUBLOD' )
          CALL DEALLOCATE_MODEL_STUF ( 'ETYPE, EDAT, EPNT' )
          CALL DEALLOCATE_MODEL_STUF ( 'VVEC, OFFSETS, PLATE stuff' )

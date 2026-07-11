@@ -24,26 +24,27 @@
 
 ! End MIT license text.
 
-      SUBROUTINE EIG_SUMMARY
+      SUBROUTINE EIG_SUMMARY ( ISUB )
 
 ! Prints eigenvalue analysis summary table
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, NDOFL, NUM_EIGENS, NVEC, NUM_KLLD_DIAG_ZEROS, NUM_MLL_DIAG_ZEROS, SOL_NAME, &
-                                         WARN_ERR
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, NDOFL, NSUB, NUM_EIGENS, NVEC, NUM_KLLD_DIAG_ZEROS, NUM_MLL_DIAG_ZEROS,      &
+                                         SOL_NAME, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  ART_MASS, ART_ROT_MASS, ART_TRAN_MASS, DARPACK, SOLLIB, SUPINFO, SUPWARN
       USE CONSTANTS_1, ONLY           :  ZERO, TWO, PI
       USE EIGEN_MATRICES_1, ONLY      :  GEN_MASS, MODE_NUM, EIGEN_VAL
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_GRID, EIG_LAP_MAT_TYPE, EIG_METH, EIG_MODE, EIG_N2, EIG_NORM,     &
-                                         EIG_SIGMA, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
+                                         EIG_SIGMA, LABEL, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT, SCNUM, STITLE, TITLE
 
       USE EIG_SUMMARY_USE_IFs
 
       IMPLICIT NONE
 
+      INTEGER(LONG), INTENT(IN)       :: ISUB              ! Internal subcase index (for header and buckling load factor label)
       LOGICAL                         :: FILE_OPND         ! .TRUE. if a file is opened
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'EIG_SUMMARY'
@@ -54,6 +55,7 @@
       INTEGER(LONG)                   :: MAX_LANCZOS_EIGENS! Max number of eigenvalues that can be found by Lanczos method
       INTEGER(LONG)                   :: NUM_NEG_EIGENS    ! Number of eigenvalues that are negative
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to. Input to subr UNFORMATTED_OPEN
+      INTEGER(LONG)                   :: SCNUM_OUT         ! External subcase number if available, else fallback to ISUB
 
 
       REAL(DOUBLE)                    :: CYCLES1           ! Circular frequency of a mode
@@ -65,6 +67,28 @@
 ! **********************************************************************************************************************************
       OUNT(1) = ERR
       OUNT(2) = F06
+      SCNUM_OUT = ISUB
+
+      IF (ALLOCATED(SCNUM)) THEN
+         IF ((ISUB >= 1) .AND. (ISUB <= SIZE(SCNUM))) SCNUM_OUT = SCNUM(ISUB)
+      ENDIF
+      WRITE(F06,9001) SCNUM_OUT
+      IF (ALLOCATED(TITLE)) THEN
+         IF ((ISUB >= 1) .AND. (ISUB <= SIZE(TITLE))) THEN
+            IF (TITLE(ISUB)(1:) /= ' ') WRITE(F06,9011) TITLE(ISUB)
+         ENDIF
+      ENDIF
+      IF (ALLOCATED(STITLE)) THEN
+         IF ((ISUB >= 1) .AND. (ISUB <= SIZE(STITLE))) THEN
+            IF (STITLE(ISUB)(1:) /= ' ') WRITE(F06,9011) STITLE(ISUB)
+         ENDIF
+      ENDIF
+      IF (ALLOCATED(LABEL)) THEN
+         IF ((ISUB >= 1) .AND. (ISUB <= SIZE(LABEL))) THEN
+            IF (LABEL(ISUB)(1:) /= ' ') WRITE(F06,9011) LABEL(ISUB)
+         ENDIF
+      ENDIF
+      WRITE(F06,*)
 
 
       IF (EIG_METH == 'LANCZOS') THEN
@@ -120,9 +144,27 @@
          WRITE(F06,92010)
 
       ENDIF
+      WRITE(F06,9001) SCNUM_OUT
+      IF (ALLOCATED(TITLE)) THEN
+         IF ((ISUB >= 1) .AND. (ISUB <= SIZE(TITLE))) THEN
+            IF (TITLE(ISUB)(1:) /= ' ') WRITE(F06,9011) TITLE(ISUB)
+         ENDIF
+      ENDIF
+      IF (ALLOCATED(STITLE)) THEN
+         IF ((ISUB >= 1) .AND. (ISUB <= SIZE(STITLE))) THEN
+            IF (STITLE(ISUB)(1:) /= ' ') WRITE(F06,9011) STITLE(ISUB)
+         ENDIF
+      ENDIF
+      IF (ALLOCATED(LABEL)) THEN
+         IF ((ISUB >= 1) .AND. (ISUB <= SIZE(LABEL))) THEN
+            IF (LABEL(ISUB)(1:) /= ' ') WRITE(F06,9011) LABEL(ISUB)
+         ENDIF
+      ENDIF
+      WRITE(F06,*)
+      WRITE(F06,*)
 
       IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-         WRITE(F06,94101)
+         WRITE(F06,94101) SCNUM_OUT
          WRITE(F06,94102)
       ELSE
          WRITE(F06,94201)
@@ -204,14 +246,14 @@
       ENDIF
       WRITE(F06,*)
       WRITE(F06,*)
-
-
-
-
       RETURN
 
 ! **********************************************************************************************************************************
 99001 FORMAT(A1)
+
+ 9001 FORMAT(' OUTPUT FOR SUBCASE ',I8)
+
+ 9011 FORMAT(1X,A)
 
 90001 FORMAT(/,27X,'E I G E N V A L U E   A N A L Y S I S   S U M M A R Y',3X,'(',A8,' Mode',I2,1X,A,', Shift eigen = ',1ES9.2,')',&
              /,70X,A,/)
@@ -243,7 +285,7 @@
 92010 FORMAT(4X,'NO EIGENVECTORS WERE REQUESTED TO BE OUTPUT, SO NO GENERALIZED MASS OR GENERALIZED STIFFNESS HAS BEEN CALCULATED',&
              /)
 
-94101 FORMAT(44X,'R E A L   E I G E N V A L U E S',/,43X,'(subcase 1 buckling load factors)',/)
+94101 FORMAT(44X,'R E A L   E I G E N V A L U E S',/,38X,'(subcase',I8,' buckling load factors)',/)
 
 94102 FORMAT(40X,' MODE  EXTRACTION      EIGENVALUE',/,40X,'NUMBER   ORDER',/)
 

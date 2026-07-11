@@ -37,8 +37,13 @@
                                          RESTART, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE PARAMS, ONLY                :  SUPINFO, SUPWARN
-      USE MODEL_STUF, ONLY            :  CC_EIGR_SID, MEFFMASS_CALC, MPCSET, MPCSETS, MPFACTOR_CALC, SCNUM, SPCSET, SPCSETS, SUBLOD
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC
+      USE MODEL_STUF, ONLY            :  CC_EIGR_SID, CC_EIGR_SID_SUB, CC_EIGR_SID_DECK, CC_STATSUB_DECK, CC_STATSUB_SUB,          &
+                                         IS_BUCKLING_SUBCASE, IS_MODES_SUBCASE, MEFFMASS_CALC, MPCSET, MPCSETS, MPFACTOR_CALC,     &
+                                         SCNUM, SPCSET, SPCSETS, SUBLOD, SC_STRE, SC_STRN, SC_ELFE, SC_ELFN, EIG_PARAMS,           &
+                                         EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_LANCZOS_NEV_DELT, EIG_METH,         &
+                                         EIG_MSGLVL, EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID,   &
+                                         EIG_SIGMA, EIG_VECS
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC
 
       IMPLICIT NONE
 
@@ -51,4 +56,3 @@
    END INTERFACE
 
    END MODULE LOADC_Interface
-

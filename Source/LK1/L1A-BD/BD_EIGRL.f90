@@ -30,14 +30,14 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1M
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LSUB, SOL_NAME
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LSUB, NSUB, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONEPM4
       USE PARAMS, ONLY                :  LANCMETH
-      USE MODEL_STUF, ONLY            :  CC_EIGR_SID, EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID,                            &
-                                         EIG_LANCZOS_NEV_DELT, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, EIG_MODE,                   &
-                                         EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA, EIG_VECS, MAXMIJ,             &
-                                         MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT, EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE,                    &
+      USE MODEL_STUF, ONLY            :  CC_EIGR_SID, CC_EIGR_SID_SUB, CC_EIGR_SID_DECK, EIG_PARAMS, EIG_COMP, EIG_CRIT,          &
+                                         EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_LANCZOS_NEV_DELT, EIG_METH, EIG_MSGLVL,                 &
+                                         EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA,   &
+                                         EIG_VECS, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT, EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, &
                                          EIG_EXTRACT_SOURCE, EIG_FEAST_M0, EIG_FEAST_TOL_DIGITS, EIG_FEAST_MAX_LOOP,               &
                                          EIG_FEAST_N_CONTOUR, EIG_SUBSPACE_NSUB, EIG_SUBSPACE_MAX_ITER, EIG_DENSE_NEX,             &
                                          EIG_FEAST_SEARCH_SCALE, EIG_SUBSPACE_TOL
@@ -58,10 +58,14 @@
 ! --- feast_subspace_dense --- end !
 
       INTEGER(LONG)                   :: I4INP             ! An integer*4 value read
+      INTEGER(LONG)                   :: I_SUB             ! DO loop index over subcases
       INTEGER(LONG)                   :: ICONT     = 0     ! Indicator of whether a cont card exists. Output from subr NEXTC
       INTEGER(LONG)                   :: IERR      = 0     ! Error indicator returned from subr NEXTC called herein
       INTEGER(LONG)                   :: JERR      = 0     ! A local error count
       REAL(DOUBLE)                    :: R8INP             ! Generic real read from continuation
+      LOGICAL                         :: MATCHES_SCALAR
+      LOGICAL                         :: MATCHES_PER_SUB
+      LOGICAL                         :: SUB_WANTS_THIS
 
 
 
@@ -96,7 +100,9 @@
       JCARD_MAIN = JCARD
 
       JERR = 0
-      USE_THIS_EIG = 'N'
+      USE_THIS_EIG    = 'N'
+      MATCHES_SCALAR  = .FALSE.
+      MATCHES_PER_SUB = .FALSE.
 
 ! --- feast_subspace_dense --- begin !
       CALL SET_EXTRACT_DEFAULTS
@@ -112,10 +118,28 @@
                WRITE(F06,1117) JCARD(1),JCARD(2)
             ELSE
                EIGFND = 'Y'
-               USE_THIS_EIG = 'Y'
+               MATCHES_SCALAR = .TRUE.
+               USE_THIS_EIG   = 'Y'
             ENDIF
-         ELSE
-            RETURN
+         ENDIF
+         IF (.NOT. MATCHES_SCALAR) THEN
+            IF (ALLOCATED(CC_EIGR_SID_SUB)) THEN
+               DO I_SUB = 1, NSUB
+                  IF (CC_EIGR_SID_SUB(I_SUB) == EIG_SID) THEN
+                     MATCHES_PER_SUB = .TRUE.
+                     EXIT
+                  ENDIF
+                  IF ((CC_EIGR_SID_SUB(I_SUB) == 0) .AND. (EIG_SID == CC_EIGR_SID_DECK) .AND. (CC_EIGR_SID_DECK /= 0)) THEN
+                     MATCHES_PER_SUB = .TRUE.
+                     EXIT
+                  ENDIF
+               ENDDO
+            ENDIF
+            IF (MATCHES_PER_SUB) THEN
+               USE_THIS_EIG = 'Y'
+            ELSE
+               RETURN
+            ENDIF
          ENDIF
       ELSE
          JERR = JERR + 1
@@ -224,20 +248,47 @@
          MIJ_ROW       = 0
          MIJ_COL       = 0
 
-         ! ensure a proper size for SCNUM
-         IF (EIG_N2 > LSUB) THEN
-            LSUB          = EIG_N2
-         ELSE
-            ! since we have adaptive lanczos now, we set this to be
-            ! INITIAL_NEV*(2**MAX_DOUBLINGS), both being 10 and unlikely to be
-            ! changed unless someone *really* wants more than 10k modes AND
-            ! doesn't want to specify nmodes manually.
-            IF (SOL_NAME /= 'BUCKLING') THEN
-               LSUB = 10240
-            END IF
-         END IF
+         IF (ALLOCATED(EIG_PARAMS) .AND. ALLOCATED(CC_EIGR_SID_SUB)) THEN
+            DO I_SUB = 1, NSUB
+               SUB_WANTS_THIS = .FALSE.
+               IF (CC_EIGR_SID_SUB(I_SUB) == EIG_SID) SUB_WANTS_THIS = .TRUE.
+               IF ((CC_EIGR_SID_SUB(I_SUB) == 0) .AND. (EIG_SID == CC_EIGR_SID_DECK) .AND. (CC_EIGR_SID_DECK /= 0)) THEN
+                  SUB_WANTS_THIS = .TRUE.
+               ENDIF
+               IF (SUB_WANTS_THIS) THEN
+                  EIG_PARAMS(I_SUB)%METHOD            = EIG_METH
+                  EIG_PARAMS(I_SUB)%NORM              = EIG_NORM
+                  EIG_PARAMS(I_SUB)%LAP_MAT_TYPE      = EIG_LAP_MAT_TYPE
+                  EIG_PARAMS(I_SUB)%VECS              = EIG_VECS
+                  EIG_PARAMS(I_SUB)%SID               = EIG_SID
+                  EIG_PARAMS(I_SUB)%N1                = EIG_N1
+                  EIG_PARAMS(I_SUB)%N2                = EIG_N2
+                  EIG_PARAMS(I_SUB)%COMP              = EIG_COMP
+                  EIG_PARAMS(I_SUB)%GRID              = EIG_GRID
+                  EIG_PARAMS(I_SUB)%LANCZOS_NEV_DELT  = EIG_LANCZOS_NEV_DELT
+                  EIG_PARAMS(I_SUB)%MODE              = EIG_MODE
+                  EIG_PARAMS(I_SUB)%MSGLVL            = EIG_MSGLVL
+                  EIG_PARAMS(I_SUB)%NCVFACL           = EIG_NCVFACL
+                  EIG_PARAMS(I_SUB)%CRIT              = EIG_CRIT
+                  EIG_PARAMS(I_SUB)%FRQ1              = EIG_FRQ1
+                  EIG_PARAMS(I_SUB)%FRQ2              = EIG_FRQ2
+                  EIG_PARAMS(I_SUB)%SIGMA             = EIG_SIGMA
+               ENDIF
+            ENDDO
+         ENDIF
 
-         CALL WRITE_L1M
+         IF (MATCHES_SCALAR) THEN
+            ! ensure a proper size for SCNUM
+            IF (EIG_N2 > LSUB) THEN
+               LSUB          = EIG_N2
+            ELSE
+               IF (SOL_NAME /= 'BUCKLING') THEN
+                  LSUB = 10240
+               END IF
+            END IF
+
+            CALL WRITE_L1M
+         ENDIF
 
       ENDIF
 

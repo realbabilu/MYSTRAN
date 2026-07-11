@@ -1,0 +1,12 @@
+      MODULE BUILD_KGGD_FROM_UG_USE_IFs
+
+      USE ALLOCATE_MODEL_STUF_Interface
+      USE DEALLOCATE_MODEL_STUF_Interface
+      USE DEALLOCATE_SPARSE_MAT_Interface
+      USE DEALLOCATE_STF_ARRAYS_Interface
+      USE ESP0_Interface
+      USE ALLOCATE_STF_ARRAYS_Interface
+      USE ESP_Interface
+      USE SPARSE_KGGD_Interface
+
+      END MODULE BUILD_KGGD_FROM_UG_USE_IFs

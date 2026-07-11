@@ -105,7 +105,7 @@
       INTEGER(LONG)                   :: NVEC_SAFE         ! Safe converged-vector count bounded by allocated eigen arrays
 
 ! --- arpack_surgery begin --- !
-      INTEGER(LONG)                   :: MIN_NCV, MAX_NCV, LNONZEROS, NDOFL_EFFECTIVE
+      INTEGER(LONG)                   :: MIN_NCV, MAX_NCV, LNONZEROS, NDOFL_EFFECTIVE, NEV_EXTRA
 ! --- arpack_surgery end --- !
 
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare zero to
@@ -343,20 +343,28 @@
 ! --- arpack_surgery end --- !
 
 
+      NEV_EXTRA = DARPACK
+
       IF (NUM_EST_EIGENS > 0) THEN
          NEV = NUM_EST_EIGENS + EIG_LANCZOS_NEV_DELT
       ELSE
+         IF (EIG_N2 <= 2) THEN
+            NEV_EXTRA = MAX(NEV_EXTRA, 4)
+         ENDIF
+         IF ((EIG_N2 <= 2) .AND. (EIG_LANCZOS_NEV_DELT > NEV_EXTRA)) THEN
+            NEV_EXTRA = EIG_LANCZOS_NEV_DELT
+         ENDIF
          ! prevent the addition of DARPACK from crashing ARPACK
 ! --- arpack_surgery begin --- !
-         IF ((EIG_N2 + DARPACK) > (NDOFL_EFFECTIVE - 4)) THEN
+         IF ((EIG_N2 + NEV_EXTRA) > (NDOFL_EFFECTIVE - 4)) THEN
 ! --- arpack_surgery end --- !
             WRITE(ERR,9775) NDOFL, DARPACK
             IF (SUPWARN == 'N') THEN
                WRITE(F06,9775) NDOFL, DARPACK
             ENDIF
-            DARPACK = 0
+            NEV_EXTRA = 0
          END IF
-         NEV = EIG_N2 + DARPACK
+         NEV = EIG_N2 + NEV_EXTRA
       ENDIF
       IF (DEBUG(185) == 0) THEN                            ! If 0, only find finite eigens within the range requested
          IF (SOL_NAME(1:8) == 'BUCKLING') THEN
@@ -422,6 +430,12 @@
          END DO
       END IF
 
+! Small requests such as NEV=2 can converge poorly with the minimum Krylov
+! subspace (e.g. NCV=4). Give ARPACK a slightly wider window when available.
+      IF (NEV <= 2) THEN
+         NCV = MAX(NCV, MIN(MAX_NCV, NEV + 4))
+      ENDIF
+
       ! no valid NCV.
       IF (NCV > MAX_NCV .OR. NCV < MIN_NCV) THEN
          WRITE(ERR,9777) NDOFL, NEV
@@ -480,8 +494,9 @@
       CALL ALLOCATE_LAPACK_MAT ( 'WORKD' , 3*NDOFL, 1, SUBR_NAME )
       CALL ALLOCATE_LAPACK_MAT ( 'WORKL' , LWORKL , 1, SUBR_NAME )
 
-      ! Supply a deterministic nonzero starting vector. The ARPACK random
-      ! start intermittently returns INFO=-9 on very small beam models.
+      ! Use a deterministic nonzero starting vector so repeated Lanczos
+      ! solves over multiple METHOD requests do not depend on ARPACK's
+      ! internal random start-vector choice.
       DO I=1,NDOFL
          RESID(I) = ONE + REAL(I,DOUBLE)/REAL(MAX(1,NDOFL),DOUBLE)
       ENDDO
@@ -581,7 +596,14 @@
 
 ! With HOWMNY = 'A' we are calculating eigenvecs for all eigenvalues found
 
-      NVEC = NUM_EIGENS - DARPACK                          ! Get rid of the higher DARPACK modes in LANCZOS
+      IF (NUM_EST_EIGENS > 0) THEN
+         NVEC = NUM_EIGENS
+      ELSE
+         ! Keep at most the user-requested modes, but do not discard
+         ! converged modes just because the over-requested DARPACK margin
+         ! was larger than the actual number returned by ARPACK.
+         NVEC = MIN(EIG_N2, NUM_EIGENS)
+      ENDIF
       NUM_EIGENS = NVEC
 
 

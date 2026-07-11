@@ -157,28 +157,20 @@
             WRITE(ERR,9106) STRESS(1), STRESS(2), STRESS(3), STRESS(4), STRESS(5), STRESS(6)
          ENDIF
 
-! --- cbeam_stations begin --- !
       ELSE IF ((TYPE(1:3) == 'BAR') .OR. (TYPE(1:4) == 'BUSH') .OR. (TYPE(1:4) == 'ELAS') .OR.                                     &
-          (TYPE(1:3) == 'ROD') .OR. (TYPE(1:5) == 'USER1')) THEN
-! --- cbeam_stations end --- !
+                (TYPE(1:3) == 'ROD') .OR. (TYPE(1:5) == 'USER1')) THEN
 
          DO I=1,3
             STRESS(I) = ZERO
             DO J=1,ELDOF
                STRESS(I) = STRESS(I) + SE1(I,J,STR_PT_NUM)*UEL(J)
-               if (dabs(uel(j)) > 1.e-15) then
-               endif
             ENDDO
             IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
                STRESS(I) = STRESS(I) - STE1(I,JTSUB,STR_PT_NUM)
             ENDIF
          ENDDO
 
-! --- cbeam_stations begin --- !
-         ! CBEAM recovers STRESS(1:6) in the dedicated branch above.
-         ! Do not overwrite STRESS(4:6) here with the generic SE2 path.
          IF ((TYPE(1:3) == 'BAR') .OR. (TYPE(1:4) == 'BUSH')) THEN
-! --- cbeam_stations end --- !
             K = 0
             DO I=4,6
                STRESS(I) = ZERO
@@ -191,7 +183,6 @@
                ENDDO
             ENDDO
          ENDIF
-
 
       ENDIF
 

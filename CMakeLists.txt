@@ -61,6 +61,8 @@ set(TPL_BLAS_LIBRARIES "${MYSTRAN_OPENBLAS_IMPORT_LIB}" CACHE FILEPATH
     "BLAS library used by MYSTRAN" FORCE)
 set(MYSTRAN_USE_OPENBLAS ON CACHE BOOL "Use OpenBLAS DLL import library" FORCE)
 set(enable_internal_blaslib OFF CACHE BOOL "Disable internal BLAS/f2c path" FORCE)
+set(TPL_ENABLE_INTERNAL_BLASLIB OFF CACHE BOOL "Disable internal BLAS in third-party builds" FORCE)
+set(BLA_VENDOR OpenBLAS CACHE STRING "Preferred BLAS vendor when autodetection is needed" FORCE)
 set(BLAS_FOUND TRUE)
 message(STATUS "Using OpenBLAS for BLAS calls (${TPL_BLAS_LIBRARIES})")
 
@@ -72,6 +74,11 @@ message(STATUS "Using OpenBLAS for BLAS calls (${TPL_BLAS_LIBRARIES})")
 set(CMAKE_SOURCE_DIR "${PROJECT_SOURCE_DIR}/Source")
 set(BLAS_SOURCE_DIR "${PROJECT_SOURCE_DIR}/BLAS")
 set(PROJECT_BINARY_DIR "${PROJECT_SOURCE_DIR}/Binaries")
+set(MYSTRAN_RUNTIME_OUTPUT_DIR "" CACHE PATH
+    "Optional override for the MYSTRAN runtime output directory")
+if(MYSTRAN_RUNTIME_OUTPUT_DIR)
+  set(PROJECT_BINARY_DIR "${MYSTRAN_RUNTIME_OUTPUT_DIR}")
+endif()
 set(CMAKE_FLAGS "-c -fbacktrace")
 
 # set(CMAKE_BUILD_TYPE Debug)
@@ -134,6 +141,17 @@ endif()
 set(SUPERLU_DIR "${PROJECT_SOURCE_DIR}/superlu")
 set(SUPERLU_MT_DIR "${PROJECT_SOURCE_DIR}/superlu_mt")
 set(SUPERLU_PATCHES_DIR "${PROJECT_SOURCE_DIR}/superlu_mt_patches")
+option(EXTERNAL_SUPERLU "Use a prebuilt regular SuperLU package instead of the in-tree submodule" OFF)
+set(SUPERLU_INCLUDE_DIR "" CACHE PATH
+  "Directory containing SuperLU headers for external regular SuperLU.")
+set(SUPERLU_LIBRARY "" CACHE FILEPATH
+  "Static library for external regular SuperLU.")
+set(SUPERLU_FORTRAN_LIBRARY "" CACHE FILEPATH
+  "Fortran bridge library for external regular SuperLU.")
+if(SUPERLU_INCLUDE_DIR AND SUPERLU_LIBRARY AND SUPERLU_FORTRAN_LIBRARY)
+  set(EXTERNAL_SUPERLU ON CACHE BOOL
+    "Use a prebuilt regular SuperLU package instead of the in-tree submodule" FORCE)
+endif()
 
 set(enable_examples OFF FORCE)
 set(enable_tests OFF FORCE)
@@ -195,18 +213,41 @@ if(USE_SUPERLU_MT)
   add_subdirectory(${SUPERLU_MT_DIR})
   set(SLU_DRIVER "${SUPERLU_MT_DIR}/SRC/c_fortran_pdgssv.c")
 else()
-  message(STATUS "Will link against regular SuperLU.")
+  if(EXTERNAL_SUPERLU)
+    message(STATUS "Will link against external regular SuperLU.")
 
-  if(NOT EXISTS "${SUPERLU_DIR}/CMakeLists.txt")
-    message(
-      FATAL_ERROR
-      "The SuperLU submodule was not downloaded. You have to do it manually!"
-    )
+    if(NOT EXISTS "${SUPERLU_INCLUDE_DIR}/slu_ddefs.h")
+      message(FATAL_ERROR
+        "EXTERNAL_SUPERLU=ON but SuperLU headers were not found in "
+        "${SUPERLU_INCLUDE_DIR}")
+    endif()
+    if(NOT EXISTS "${SUPERLU_LIBRARY}")
+      message(FATAL_ERROR
+        "EXTERNAL_SUPERLU=ON but libsuperlu.a was not found at "
+        "${SUPERLU_LIBRARY}")
+    endif()
+    if(NOT EXISTS "${SUPERLU_FORTRAN_LIBRARY}")
+      message(FATAL_ERROR
+        "EXTERNAL_SUPERLU=ON but libsuperlu_fortran.a was not found at "
+        "${SUPERLU_FORTRAN_LIBRARY}")
+    endif()
+
+    include_directories("${SUPERLU_INCLUDE_DIR}")
+    set(SLU_DRIVER)
+  else()
+    message(STATUS "Will link against regular SuperLU.")
+
+    if(NOT EXISTS "${SUPERLU_DIR}/CMakeLists.txt")
+      message(
+        FATAL_ERROR
+        "The SuperLU submodule was not downloaded. You have to do it manually!"
+      )
+    endif()
+
+    include_directories("${SUPERLU_DIR}/SRC")
+    add_subdirectory(${SUPERLU_DIR})
+    set(SLU_DRIVER "${SUPERLU_DIR}/FORTRAN/c_fortran_dgssv.c")
   endif()
-
-  include_directories("${SUPERLU_DIR}/SRC")
-  add_subdirectory(${SUPERLU_DIR})
-  set(SLU_DRIVER "${SUPERLU_DIR}/FORTRAN/c_fortran_dgssv.c")
 endif()
 
 if(NOT MYSTRAN_USE_OPENBLAS)
@@ -338,17 +379,39 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Source/Modules/LAPACK/LAPACK_LANCZOS_EIG.f")
   )
 endif()
 
-option(MYSTRAN_USE_DMUMPS_SOLVER "Enable sequential non-MPI MUMPS sparse solver path" OFF)
-set(MYSTRAN_DMUMPS_INCLUDE_DIR "C:/gcc/mumps32_nonmpi/include" CACHE PATH
+option(USE_MUMPS "Enable sequential non-MPI MUMPS sparse solver path" OFF)
+option(EXTERNAL_MUMPS "Use externally provided MUMPS libraries instead of the repo mumps/ folder" OFF)
+set(MUMPS_ROOT "${PROJECT_SOURCE_DIR}/mumps" CACHE PATH
+  "Root directory for a local MUMPS package when EXTERNAL_MUMPS=OFF.")
+set(MUMPS_INCLUDE_DIR "" CACHE PATH
   "Directory containing dmumps_struc.h and mpif.h for sequential MUMPS.")
-set(MYSTRAN_DMUMPS_EXTRA_LIBS
-  "C:/gcc/mumps32_nonmpi/libdmumps.a;C:/gcc/mumps32_nonmpi/libmumps_common.a;C:/gcc/mumps32_nonmpi/libpord.a;C:/gcc/mumps32_nonmpi/libmpiseq.a"
+set(MUMPS_LIBRARIES
+  ""
   CACHE STRING "Static libraries for sequential MUMPS sparse solver path.")
+if(MUMPS_INCLUDE_DIR AND MUMPS_LIBRARIES)
+  set(USE_MUMPS ON CACHE BOOL
+    "Enable sequential non-MPI MUMPS sparse solver path" FORCE)
+  set(EXTERNAL_MUMPS ON CACHE BOOL
+    "Use externally provided MUMPS libraries instead of the repo mumps/ folder" FORCE)
+endif()
+if(USE_MUMPS AND NOT EXTERNAL_MUMPS)
+  if(NOT MUMPS_INCLUDE_DIR AND EXISTS "${MUMPS_ROOT}/include")
+    set(MUMPS_INCLUDE_DIR "${MUMPS_ROOT}/include" CACHE PATH
+      "Directory containing dmumps_struc.h and mpif.h for sequential MUMPS." FORCE)
+  endif()
+  if(NOT MUMPS_LIBRARIES)
+    set(_mystran_mumps_local_libs
+      "${MUMPS_ROOT}/libdmumps.a;${MUMPS_ROOT}/libmumps_common.a;${MUMPS_ROOT}/libpord.a;${MUMPS_ROOT}/libmpiseq.a")
+    set(MUMPS_LIBRARIES "${_mystran_mumps_local_libs}" CACHE STRING
+      "Static libraries for sequential MUMPS sparse solver path." FORCE)
+  endif()
+endif()
 
 foreach(MYSTRAN_CPP_F90
     "${PROJECT_SOURCE_DIR}/Source/LK3/LINK3.f90"
     "${PROJECT_SOURCE_DIR}/Source/LK4/EIGRL_EXTRACT_SOLVERS.F90"
     "${PROJECT_SOURCE_DIR}/Source/Modules/DMUMPS_STUF.f90"
+    "${PROJECT_SOURCE_DIR}/Source/UTIL/REPORT_SOLVER_DISPATCH_POLICY.f90"
 )
   if(EXISTS "${MYSTRAN_CPP_F90}")
     set_source_files_properties(
@@ -361,26 +424,52 @@ endforeach()
 # ! --- MUMPS_COO add end --- !
 
 # ! --- FEAST V4.0 external hook --- begin !
-option(MYSTRAN_USE_EXTERNAL_FEAST "Enable native FEAST backend when FEAST v4.0 is provided locally" OFF)
-set(MYSTRAN_FEAST_ROOT "${PROJECT_SOURCE_DIR}/feast" CACHE PATH
+option(USE_FEAST "Enable native FEAST backend when FEAST is provided locally" OFF)
+option(EXTERNAL_FEAST "Use an externally provided FEAST package instead of the repo feast/ folder" OFF)
+set(FEAST_ROOT "${PROJECT_SOURCE_DIR}/feast" CACHE PATH
   "Root directory where the user unpacked FEAST v4.0 (expects src/ and lib/<arch>/).")
-set(MYSTRAN_FEAST_ARCH "x64" CACHE STRING
+set(FEAST_ARCH "x64" CACHE STRING
   "FEAST library architecture subdirectory under lib/.")
-set(MYSTRAN_FEAST_F90 "gfortran" CACHE STRING
+set(FEAST_F90 "gfortran" CACHE STRING
   "Fortran compiler name passed to FEAST's own makefile.")
-set(MYSTRAN_FEAST_BUILD_FLAGS "MKL=no F90FLAGS=-O3 -fopenmp -ffree-line-length-none -ffixed-line-length-none -cpp -fallow-argument-mismatch" CACHE STRING
+set(FEAST_BUILD_FLAGS "MKL=no F90FLAGS=-O3 -fopenmp -ffree-line-length-none -ffixed-line-length-none -cpp -fallow-argument-mismatch" CACHE STRING
   "Additional flags passed to FEAST's own makefile when building libfeast.a.")
-
-set(MYSTRAN_FEAST_REAL_ROOT "${MYSTRAN_FEAST_ROOT}")
-if(EXISTS "${MYSTRAN_FEAST_ROOT}/FEAST/4.0/src")
-  set(MYSTRAN_FEAST_REAL_ROOT "${MYSTRAN_FEAST_ROOT}/FEAST/4.0")
-elseif(EXISTS "${MYSTRAN_FEAST_ROOT}/4.0/src")
-  set(MYSTRAN_FEAST_REAL_ROOT "${MYSTRAN_FEAST_ROOT}/4.0")
+if(FEAST_INCLUDE_DIR AND FEAST_LIBRARY)
+  set(USE_FEAST ON CACHE BOOL
+    "Enable native FEAST backend when FEAST is provided locally" FORCE)
+  set(EXTERNAL_FEAST ON CACHE BOOL
+    "Use an externally provided FEAST package instead of the repo feast/ folder" FORCE)
 endif()
 
-set(MYSTRAN_FEAST_LIB "${MYSTRAN_FEAST_REAL_ROOT}/lib/${MYSTRAN_FEAST_ARCH}/libfeast.a" CACHE FILEPATH
+set(FEAST_REAL_ROOT "${FEAST_ROOT}")
+if(EXISTS "${FEAST_ROOT}/FEAST/4.0/src")
+  set(FEAST_REAL_ROOT "${FEAST_ROOT}/FEAST/4.0")
+elseif(EXISTS "${FEAST_ROOT}/4.0/src")
+  set(FEAST_REAL_ROOT "${FEAST_ROOT}/4.0")
+endif()
+
+set(FEAST_INCLUDE_DIR "${FEAST_INCLUDE_DIR}" CACHE PATH
+  "Directory containing FEAST headers.")
+if(USE_FEAST AND NOT EXTERNAL_FEAST AND NOT FEAST_INCLUDE_DIR AND FEAST_REAL_ROOT)
+  set(FEAST_INCLUDE_DIR "${FEAST_REAL_ROOT}/include" CACHE PATH
+    "Directory containing FEAST headers." FORCE)
+endif()
+if(USE_FEAST AND NOT EXTERNAL_FEAST AND FEAST_ROOT AND EXISTS "${FEAST_ROOT}/feast.h")
+  set(FEAST_INCLUDE_DIR "${FEAST_ROOT}" CACHE PATH
+    "Directory containing FEAST headers." FORCE)
+endif()
+
+set(FEAST_LIBRARY "${FEAST_LIBRARY}" CACHE FILEPATH
   "Expected FEAST static library path after FEAST v4.0 is built.")
-set(MYSTRAN_FEAST_LIB_FALLBACK "${MYSTRAN_FEAST_REAL_ROOT}/src/libfeast.a")
+if(USE_FEAST AND NOT EXTERNAL_FEAST AND NOT FEAST_LIBRARY AND FEAST_REAL_ROOT)
+  set(FEAST_LIBRARY "${FEAST_REAL_ROOT}/lib/${FEAST_ARCH}/libfeast.a" CACHE FILEPATH
+    "Expected FEAST static library path after FEAST v4.0 is built." FORCE)
+endif()
+if(USE_FEAST AND NOT EXTERNAL_FEAST AND FEAST_ROOT AND EXISTS "${FEAST_ROOT}/libfeast.a")
+  set(FEAST_LIBRARY "${FEAST_ROOT}/libfeast.a" CACHE FILEPATH
+    "Expected FEAST static library path after FEAST v4.0 is built." FORCE)
+endif()
+set(FEAST_LIBRARY_FALLBACK "${FEAST_REAL_ROOT}/src/libfeast.a")
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/Source/LK4/EIGRL_EXTRACT_SOLVERS.F90")
   set_source_files_properties(
@@ -468,40 +557,47 @@ add_executable(
 )
 
 # ! --- FEAST V4.0 external hook --- begin !
-if(MYSTRAN_USE_EXTERNAL_FEAST)
-  if(NOT EXISTS "${MYSTRAN_FEAST_REAL_ROOT}/src")
+if(USE_FEAST)
+  if(NOT EXISTS "${FEAST_INCLUDE_DIR}/feast.h")
     message(FATAL_ERROR
-      "MYSTRAN_USE_EXTERNAL_FEAST=ON but FEAST src/ was not found at "
-      "${MYSTRAN_FEAST_ROOT}. Download FEAST v4.0, unpack it under a local "
-      "'feast' folder, then point MYSTRAN_FEAST_ROOT there.")
+      "USE_FEAST=ON but feast.h was not found in "
+      "${FEAST_INCLUDE_DIR}. Set FEAST_INCLUDE_DIR/FEAST_LIBRARY explicitly or populate "
+      "${FEAST_ROOT}.")
   endif()
 
-  if(NOT MYSTRAN_MAKE_PROGRAM)
+  set(MYSTRAN_FEAST_EFFECTIVE_LIB "${FEAST_LIBRARY}")
+  if(NOT EXISTS "${MYSTRAN_FEAST_EFFECTIVE_LIB}" AND EXISTS "${FEAST_LIBRARY_FALLBACK}")
+    set(MYSTRAN_FEAST_EFFECTIVE_LIB "${FEAST_LIBRARY_FALLBACK}")
+  endif()
+
+  if(NOT EXISTS "${MYSTRAN_FEAST_EFFECTIVE_LIB}" AND NOT EXISTS "${FEAST_REAL_ROOT}/src")
     message(FATAL_ERROR
-      "MYSTRAN_USE_EXTERNAL_FEAST=ON but no make program was found. "
+      "USE_FEAST=ON but no FEAST library was found at "
+      "${FEAST_LIBRARY} and no buildable src/ tree was found under "
+      "${FEAST_ROOT}.")
+  endif()
+
+  if(NOT EXISTS "${MYSTRAN_FEAST_EFFECTIVE_LIB}" AND NOT MYSTRAN_MAKE_PROGRAM)
+    message(FATAL_ERROR
+      "USE_FEAST=ON but no make program was found. "
       "Install make/mingw32-make so CMake can build FEAST v4.0 from feast/src.")
-  endif()
-
-  set(MYSTRAN_FEAST_EFFECTIVE_LIB "${MYSTRAN_FEAST_LIB}")
-  if(NOT EXISTS "${MYSTRAN_FEAST_EFFECTIVE_LIB}" AND EXISTS "${MYSTRAN_FEAST_LIB_FALLBACK}")
-    set(MYSTRAN_FEAST_EFFECTIVE_LIB "${MYSTRAN_FEAST_LIB_FALLBACK}")
   endif()
 
   if(EXISTS "${MYSTRAN_FEAST_EFFECTIVE_LIB}")
     add_custom_target(mystran_feast_build)
   else()
     add_custom_command(
-      OUTPUT "${MYSTRAN_FEAST_LIB}"
-      COMMAND ${CMAKE_COMMAND} -E env PWD=${MYSTRAN_FEAST_REAL_ROOT}/src
-              ${MYSTRAN_MAKE_PROGRAM} ARCH=${MYSTRAN_FEAST_ARCH} F90=${MYSTRAN_FEAST_F90} ${MYSTRAN_FEAST_BUILD_FLAGS} feast
-      COMMAND ${CMAKE_COMMAND} -E make_directory "${MYSTRAN_FEAST_REAL_ROOT}/lib/${MYSTRAN_FEAST_ARCH}"
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${MYSTRAN_FEAST_LIB_FALLBACK}" "${MYSTRAN_FEAST_LIB}"
-      WORKING_DIRECTORY "${MYSTRAN_FEAST_REAL_ROOT}/src"
-      COMMENT "Building FEAST v4.0 static library at ${MYSTRAN_FEAST_LIB}"
+      OUTPUT "${FEAST_LIBRARY}"
+      COMMAND ${CMAKE_COMMAND} -E env PWD=${FEAST_REAL_ROOT}/src
+              ${MYSTRAN_MAKE_PROGRAM} ARCH=${FEAST_ARCH} F90=${FEAST_F90} ${FEAST_BUILD_FLAGS} feast
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${FEAST_REAL_ROOT}/lib/${FEAST_ARCH}"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${FEAST_LIBRARY_FALLBACK}" "${FEAST_LIBRARY}"
+      WORKING_DIRECTORY "${FEAST_REAL_ROOT}/src"
+      COMMENT "Building FEAST v4.0 static library at ${FEAST_LIBRARY}"
       VERBATIM
     )
-    add_custom_target(mystran_feast_build DEPENDS "${MYSTRAN_FEAST_LIB}")
-    set(MYSTRAN_FEAST_EFFECTIVE_LIB "${MYSTRAN_FEAST_LIB}")
+    add_custom_target(mystran_feast_build DEPENDS "${FEAST_LIBRARY}")
+    set(MYSTRAN_FEAST_EFFECTIVE_LIB "${FEAST_LIBRARY}")
   endif()
 
   add_library(mystran_feast STATIC IMPORTED GLOBAL)
@@ -509,32 +605,33 @@ if(MYSTRAN_USE_EXTERNAL_FEAST)
   add_dependencies(mystran_feast mystran_feast_build)
 
   target_compile_definitions(mystran PRIVATE MYSTRAN_HAVE_EXTERNAL_FEAST)
-  target_include_directories(mystran PRIVATE "${MYSTRAN_FEAST_REAL_ROOT}/include")
+  target_include_directories(mystran PRIVATE "${FEAST_INCLUDE_DIR}")
   target_link_libraries(mystran mystran_feast)
 endif()
 # ! --- FEAST V4.0 external hook --- end !
 
 # ! --- MUMPS_COO add begin --- !
-if(MYSTRAN_USE_DMUMPS_SOLVER)
+if(USE_MUMPS)
   target_compile_definitions(mystran PRIVATE DMUMPS_Solver)
-  if(NOT EXISTS "${MYSTRAN_DMUMPS_INCLUDE_DIR}/dmumps_struc.h"
-     OR NOT EXISTS "${MYSTRAN_DMUMPS_INCLUDE_DIR}/mpif.h")
+  if(NOT EXISTS "${MUMPS_INCLUDE_DIR}/dmumps_struc.h"
+     OR NOT EXISTS "${MUMPS_INCLUDE_DIR}/mpif.h")
     message(FATAL_ERROR
-      "MYSTRAN_USE_DMUMPS_SOLVER=ON but dmumps_struc.h or mpif.h was not found in "
-      "${MYSTRAN_DMUMPS_INCLUDE_DIR}")
+      "USE_MUMPS=ON but dmumps_struc.h or mpif.h was not found in "
+      "${MUMPS_INCLUDE_DIR}. Set MUMPS_INCLUDE_DIR/MUMPS_LIBRARIES explicitly or populate "
+      "${MUMPS_ROOT}.")
   endif()
-  target_include_directories(mystran PRIVATE "${MYSTRAN_DMUMPS_INCLUDE_DIR}")
+  target_include_directories(mystran PRIVATE "${MUMPS_INCLUDE_DIR}")
 
-  if(NOT MYSTRAN_DMUMPS_EXTRA_LIBS)
+  if(NOT MUMPS_LIBRARIES)
     message(FATAL_ERROR
-      "MYSTRAN_USE_DMUMPS_SOLVER=ON requires MYSTRAN_DMUMPS_EXTRA_LIBS.")
+      "USE_MUMPS=ON requires MUMPS_LIBRARIES.")
   endif()
-  foreach(MYSTRAN_DMUMPS_LIB IN LISTS MYSTRAN_DMUMPS_EXTRA_LIBS)
+  foreach(MYSTRAN_DMUMPS_LIB IN LISTS MUMPS_LIBRARIES)
     if(NOT EXISTS "${MYSTRAN_DMUMPS_LIB}")
       message(FATAL_ERROR "Required static MUMPS library was not found: ${MYSTRAN_DMUMPS_LIB}")
     endif()
   endforeach()
-  target_link_libraries(mystran ${MYSTRAN_DMUMPS_EXTRA_LIBS})
+  target_link_libraries(mystran ${MUMPS_LIBRARIES})
 
   if(WIN32)
     target_link_libraries(mystran pthread)
@@ -561,7 +658,17 @@ if(USE_SUPERLU_MT)
 
   target_compile_definitions(mystran PRIVATE USE_SUPERLU_MT)
 else()
-  if(MYSTRAN_USE_OPENBLAS)
+  if(EXTERNAL_SUPERLU)
+    add_library(mystran_superlu STATIC IMPORTED GLOBAL)
+    set_target_properties(mystran_superlu PROPERTIES IMPORTED_LOCATION "${SUPERLU_LIBRARY}")
+    add_library(mystran_superlu_fortran STATIC IMPORTED GLOBAL)
+    set_target_properties(mystran_superlu_fortran PROPERTIES IMPORTED_LOCATION "${SUPERLU_FORTRAN_LIBRARY}")
+    if(MYSTRAN_USE_OPENBLAS)
+      target_link_libraries(mystran mystran_superlu_fortran mystran_superlu ${TPL_BLAS_LIBRARIES})
+    else()
+      target_link_libraries(mystran mystran_superlu_fortran mystran_superlu f2c)
+    endif()
+  elseif(MYSTRAN_USE_OPENBLAS)
     target_link_libraries(mystran superlu ${TPL_BLAS_LIBRARIES})
   else()
     target_link_libraries(mystran superlu f2c)
@@ -632,4 +739,3 @@ message(STATUS "You can now compile MYSTRAN with `cmake --build .`")
 if(NOT NCPU EQUAL 0)
   message(STATUS "Compile faster by passing the -j${NCPU} flag.")
 endif()
-

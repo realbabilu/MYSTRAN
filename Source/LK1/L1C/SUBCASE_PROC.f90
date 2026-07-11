@@ -137,6 +137,26 @@
 ! **********************************************************************************************************************************
       JERR = 0
 
+! Start from a clean slate before setting per-subcase request bits.
+      DO I=1,NSUB
+         OGROUT(I) = 0
+         OELOUT(I) = 0
+      ENDDO
+
+      DO I=1,NSUB
+         DO J=1,NGRID
+            GROUT(J,I) = 0
+         ENDDO
+         DO J=1,NELE
+            ELOUT(J,I) = 0
+         ENDDO
+      ENDDO
+
+      OELDT = 0
+      DO I=1,NELE
+         ELDT(I) = 0
+      ENDDO
+
 ! **********************************************************************************************************************************
 ! 1st: Process grid output requests to generate OGROUT(i), GROUT(j,i)
 

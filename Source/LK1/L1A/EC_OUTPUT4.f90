@@ -385,14 +385,20 @@ nerr: IF (IERR == 0) THEN
       CHARACTER(LEN=*), INTENT(INOUT) :: INPUT_NAME
       CHARACTER(LEN=*), INTENT(OUT)   :: MYSTRAN_NAME
       CHARACTER(LEN=*), INTENT(OUT)   :: OUTPUT_NAME
+      CHARACTER(LEN=LEN(INPUT_NAME))  :: INPUT_UPPER
+      CHARACTER(LEN=16)               :: ALLOW_UPPER
 
       INTEGER(LONG)                   :: JJ                ! DO loop index
 
 ! **********************************************************************************************************************************
       OUTPUT_NAME  = INPUT_NAME
       MYSTRAN_NAME = INPUT_NAME
+      INPUT_UPPER  = INPUT_NAME
+      CALL TO_UPPER_NAME ( INPUT_UPPER )
       DO JJ=1,NUM_OU4_VALID_NAMES
-         IF (INPUT_NAME == ALLOW_OU4_OUTPUT_NAMES(JJ)) THEN
+         ALLOW_UPPER = ALLOW_OU4_OUTPUT_NAMES(JJ)
+         CALL TO_UPPER_NAME ( ALLOW_UPPER )
+         IF (INPUT_UPPER == ALLOW_UPPER) THEN
             OUTPUT_NAME  = ALLOW_OU4_OUTPUT_NAMES(JJ)
             MYSTRAN_NAME = ALLOW_OU4_MYSTRAN_NAMES(JJ)
          ENDIF
@@ -412,6 +418,8 @@ nerr: IF (IERR == 0) THEN
 
       CHARACTER(LEN=*), INTENT(IN)    :: MYSTRAN_NAME
       CHARACTER( 1*BYTE)              :: FOUND             ! 'Y'/'N' if something was found
+      CHARACTER(LEN=LEN(MYSTRAN_NAME)):: MYSTRAN_UPPER
+      CHARACTER(LEN=16)               :: ALLOW_MYSTRAN_UPPER, ALLOW_OUTPUT_UPPER
 
       INTEGER(LONG), INTENT(OUT)      :: INDEX             ! Row in array ALLOW_OU4_MYSTRAN_NAMES where name was found
       INTEGER(LONG)                   :: JJ                ! DO loop index
@@ -420,9 +428,15 @@ nerr: IF (IERR == 0) THEN
 ! Check requested OUTPUT4 names to make sure they are in the list of valid names
 
       VALID_OU4_NAME = 'Y'
+      MYSTRAN_UPPER  = MYSTRAN_NAME
+      CALL TO_UPPER_NAME ( MYSTRAN_UPPER )
       DO JJ=1,NUM_OU4_VALID_NAMES
          FOUND = 'N'
-         IF ((MYSTRAN_NAME == ALLOW_OU4_MYSTRAN_NAMES(JJ)) .OR. (MYSTRAN_NAME == ALLOW_OU4_OUTPUT_NAMES(JJ))) THEN
+         ALLOW_MYSTRAN_UPPER = ALLOW_OU4_MYSTRAN_NAMES(JJ)
+         ALLOW_OUTPUT_UPPER  = ALLOW_OU4_OUTPUT_NAMES(JJ)
+         CALL TO_UPPER_NAME ( ALLOW_MYSTRAN_UPPER )
+         CALL TO_UPPER_NAME ( ALLOW_OUTPUT_UPPER  )
+         IF ((MYSTRAN_UPPER == ALLOW_MYSTRAN_UPPER) .OR. (MYSTRAN_UPPER == ALLOW_OUTPUT_UPPER)) THEN
             FOUND = 'Y'
             INDEX = JJ
             EXIT
@@ -452,5 +466,28 @@ nerr: IF (IERR == 0) THEN
 ! **********************************************************************************************************************************
 
       END SUBROUTINE CHECK_MATRIX_NAME
+
+! ##################################################################################################################################
+
+      SUBROUTINE TO_UPPER_NAME ( STR )
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(INOUT) :: STR
+
+      INTEGER(LONG)                   :: II
+      INTEGER(LONG)                   :: ICHAR
+
+! **********************************************************************************************************************************
+      DO II=1,LEN(STR)
+         ICHAR = IACHAR(STR(II:II))
+         IF ((ICHAR >= IACHAR('a')) .AND. (ICHAR <= IACHAR('z'))) THEN
+            STR(II:II) = ACHAR(ICHAR - 32)
+         ENDIF
+      ENDDO
+
+! **********************************************************************************************************************************
+
+      END SUBROUTINE TO_UPPER_NAME
 
       END SUBROUTINE EC_OUTPUT4

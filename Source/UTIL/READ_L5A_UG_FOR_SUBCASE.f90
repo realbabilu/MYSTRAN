@@ -1,0 +1,85 @@
+      SUBROUTINE READ_L5A_UG_FOR_SUBCASE ( ISUB, IERROR )
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      USE IOUNT1, ONLY                :  ERR, F06, L5A, LINK5A, L5A_MSG
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NDOFG
+      USE COL_VECS, ONLY              :  UG_COL
+
+      USE READ_L5A_UG_FOR_SUBCASE_USE_IFs
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'READ_L5A_UG_FOR_SUBCASE'
+
+      INTEGER(LONG), INTENT(IN)       :: ISUB
+      INTEGER(LONG), INTENT(INOUT)    :: IERROR
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: IOCHK
+      INTEGER(LONG)                   :: REC_NO
+      INTEGER(LONG)                   :: SKIP
+      INTEGER(LONG)                   :: OUNT(2)
+
+      OUNT(1) = ERR
+      OUNT(2) = F06
+
+      IF (ISUB < 1) THEN
+         WRITE(ERR,9101) SUBR_NAME, ISUB
+         WRITE(F06,9101) SUBR_NAME, ISUB
+         FATAL_ERR = FATAL_ERR + 1
+         IERROR = IERROR + 1
+         RETURN
+      ENDIF
+
+      IF (.NOT. ALLOCATED(UG_COL)) THEN
+         WRITE(ERR,9102) SUBR_NAME
+         WRITE(F06,9102) SUBR_NAME
+         FATAL_ERR = FATAL_ERR + 1
+         IERROR = IERROR + 1
+         RETURN
+      ENDIF
+
+      IF (SIZE(UG_COL) < NDOFG) THEN
+         WRITE(ERR,9103) SUBR_NAME, SIZE(UG_COL), NDOFG
+         WRITE(F06,9103) SUBR_NAME, SIZE(UG_COL), NDOFG
+         FATAL_ERR = FATAL_ERR + 1
+         IERROR = IERROR + 1
+         RETURN
+      ENDIF
+
+      CALL FILE_CLOSE ( L5A, LINK5A, 'KEEP' )
+      CALL FILE_OPEN  ( L5A, LINK5A, OUNT, 'OLD', L5A_MSG, 'READ_STIME', 'UNFORMATTED', 'READ', 'REWIND', 'Y', 'N' )
+
+      SKIP = (ISUB - 1) * NDOFG
+      REC_NO = 0
+      DO I = 1, SKIP
+         REC_NO = REC_NO + 1
+         READ(L5A,IOSTAT=IOCHK)
+         IF (IOCHK /= 0) THEN
+            CALL READERR ( IOCHK, LINK5A, L5A_MSG, REC_NO, OUNT )
+            IERROR = IERROR + 1
+            CALL FILE_CLOSE ( L5A, LINK5A, 'KEEP' )
+            RETURN
+         ENDIF
+      ENDDO
+
+      DO I = 1, NDOFG
+         REC_NO = REC_NO + 1
+         READ(L5A,IOSTAT=IOCHK) UG_COL(I)
+         IF (IOCHK /= 0) THEN
+            CALL READERR ( IOCHK, LINK5A, L5A_MSG, REC_NO, OUNT )
+            IERROR = IERROR + 1
+            CALL FILE_CLOSE ( L5A, LINK5A, 'KEEP' )
+            RETURN
+         ENDIF
+      ENDDO
+
+      CALL FILE_CLOSE ( L5A, LINK5A, 'KEEP' )
+
+      RETURN
+
+ 9101 FORMAT(' *ERROR  9101: PROGRAMMING ERROR IN ',A,': ISUB MUST BE >= 1 BUT IS ',I8)
+ 9102 FORMAT(' *ERROR  9102: PROGRAMMING ERROR IN ',A,': UG_COL IS NOT ALLOCATED')
+ 9103 FORMAT(' *ERROR  9103: PROGRAMMING ERROR IN ',A,': SIZE(UG_COL)=',I8,' IS LESS THAN NDOFG=',I8)
+
+      END SUBROUTINE READ_L5A_UG_FOR_SUBCASE

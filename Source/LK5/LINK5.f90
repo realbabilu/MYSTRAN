@@ -38,7 +38,7 @@
       USE IOUNT1, ONLY                :  ERRSTAT, L1HSTAT, L2ESTAT, L2FSTAT, L3ASTAT
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, COMM, FATAL_ERR, LINKNO, MBUG, NDOFA, NDOFF, NDOFG, NDOFL, NDOFM,           &
                                          NDOFN, NDOFO, NDOFR, NDOFS, NDOFSE, NGRID, NSUB, NTERM_GMN, NTERM_GOA, NTERM_PO,          &
-                                         NUM_CB_DOFS, NUM_EIGENS, NVEC, SOL_NAME, WARN_ERR
+                                         NUM_CB_DOFS, NUM_EIGENS, NVEC, SOL_NAME, WARN_ERR, MODE_SUBCASE
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE PARAMS, ONLY                :  EIGNORM2, SUPINFO, SUPWARN
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
@@ -50,10 +50,12 @@
       USE COL_VECS, ONLY              :  UG_COL, YSe, UO0_COL, UL_COL
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE DOF_TABLES, ONLY            :  TDOF, TDOFI
-      USE MODEL_STUF, ONLY            :  GRID, GRID_ID, INV_GRID_SEQ, EIG_COMP, EIG_GRID, EIG_NORM, MAXMIJ, MIJ_COL, MIJ_ROW
+      USE MODEL_STUF, ONLY            :  GRID, GRID_ID, INV_GRID_SEQ, EIG_COMP, EIG_GRID, EIG_NORM, MAXMIJ, MIJ_COL, MIJ_ROW,   &
+                                         EIG_PARAMS, IS_MODES_SUBCASE, IS_BUCKLING_SUBCASE
 
       USE LINK5_USE_IFs
       USE LINK_MESSAGE_Interface
+      USE READ_L5A_UG_FOR_SUBCASE_Interface
 
       IMPLICIT NONE
 
@@ -76,6 +78,7 @@
       INTEGER(LONG)                   :: G_SET_COL         ! Col number in TDOF, TDOFI where G-set DOF's exist
       INTEGER(LONG)                   :: I,J,K,L           ! DO loop indices
       INTEGER(LONG)                   :: IERROR            ! Error count
+      INTEGER(LONG)                   :: I_ESUB            ! Internal subcase index for subcase-aware eigen summaries
       INTEGER(LONG)                   :: IGRID             ! Internal grid numbER for EIG_GRID
       INTEGER(LONG)                   :: IOCHK             ! IOSTAT error number when opening/reading a file
       INTEGER(LONG)                   :: NUM_COMPS         ! 6 if GRID_NUM is an physical grid, 1 if an SPOINT
@@ -321,7 +324,7 @@
          NUM_SOLNS = NVEC
       ELSE IF (SOL_NAME(1:8) == 'BUCKLING') THEN
          IF (LOAD_ISTEP == 1) THEN
-            NUM_SOLNS = 1
+            NUM_SOLNS = NSUB
          ELSE IF (LOAD_ISTEP == 2) THEN
             NUM_SOLNS = NVEC
          ENDIF
@@ -444,6 +447,30 @@ j_do: DO J = 1,NUM_SOLNS
             WRITE(F06,9995) LINKNO,IERROR
             CALL OUTA_HERE ( 'Y' )
          ENDIF
+         IF (SOL_NAME(1:5) == 'MODES') THEN
+            IF (ALLOCATED(MODE_SUBCASE)) THEN
+               IF (J <= SIZE(MODE_SUBCASE)) THEN
+                  IF ((MODE_SUBCASE(J) >= 1) .AND. ALLOCATED(EIG_PARAMS)) THEN
+                     IF (EIG_PARAMS(MODE_SUBCASE(J))%SID /= 0) THEN
+                        EIG_NORM = EIG_PARAMS(MODE_SUBCASE(J))%NORM
+                        EIG_GRID = EIG_PARAMS(MODE_SUBCASE(J))%GRID
+                        EIG_COMP = EIG_PARAMS(MODE_SUBCASE(J))%COMP
+                        IF (EIG_NORM == 'POINT   ') THEN
+                           EIG_NORM_GSET_DOF = 0
+                           CALL TDOF_COL_NUM ( 'G ',  G_SET_COL )
+                           DO I=1,NDOFG
+                              IF (TDOF(I,1) == EIG_GRID) THEN
+                                 EIG_NORM_GSET_DOF = TDOF(I,G_SET_COL) + EIG_COMP - 1
+                                 EXIT
+                              ENDIF
+                           ENDDO
+                        ENDIF
+                     ENDIF
+                  ENDIF
+               ENDIF
+            ENDIF
+         ENDIF
+
                                                            ! Build UA from UL and UR
          CALL ALLOCATE_COL_VEC ( 'UA_COL', NDOFA, SUBR_NAME )
          CALL ALLOCATE_COL_VEC ( 'UR_COL', NDOFR, SUBR_NAME )
@@ -577,6 +604,34 @@ j_do: DO J = 1,NUM_SOLNS
 
       ENDDO j_do                                           ! End of loop on NUM_SOLNS
 
+      IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
+         BUCKLING_PRELOAD_RELOAD : BLOCK
+            INTEGER(LONG) :: I_BUCK, ISUB_PRELOAD, IERR_RELOAD
+            ISUB_PRELOAD = 0
+            IF (ALLOCATED(IS_BUCKLING_SUBCASE) .AND. ALLOCATED(EIG_PARAMS)) THEN
+               DO I_BUCK = 1, NSUB
+                  IF (IS_BUCKLING_SUBCASE(I_BUCK) == 'Y') THEN
+                     IF (EIG_PARAMS(I_BUCK)%STATSUB_REF > 0) THEN
+                        ISUB_PRELOAD = EIG_PARAMS(I_BUCK)%STATSUB_REF
+                        EXIT
+                     ENDIF
+                  ENDIF
+               ENDDO
+            ENDIF
+            IF (ISUB_PRELOAD > 0) THEN
+               CALL DEALLOCATE_COL_VEC ( 'UG_COL' )
+               CALL ALLOCATE_COL_VEC ( 'UG_COL', NDOFG, SUBR_NAME )
+               IERR_RELOAD = 0
+               CALL READ_L5A_UG_FOR_SUBCASE ( ISUB_PRELOAD, IERR_RELOAD )
+               IF (IERR_RELOAD /= 0) THEN
+                  WRITE(ERR,9995) LINKNO, IERR_RELOAD
+                  WRITE(F06,9995) LINKNO, IERR_RELOAD
+                  CALL OUTA_HERE ( 'Y' )
+               ENDIF
+            ENDIF
+         END BLOCK BUCKLING_PRELOAD_RELOAD
+      ENDIF
+
 ! If CB soln, expand PHIXA to G-set size and write to file unit L5B
 
      IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
@@ -638,7 +693,35 @@ j_do: DO J = 1,NUM_SOLNS
                ENDIF
             ENDIF
 
-            CALL EIG_SUMMARY
+            IF (SOL_NAME(1:5) == 'MODES') THEN
+               IF (ALLOCATED(EIG_PARAMS) .AND. ALLOCATED(IS_MODES_SUBCASE)) THEN
+                  DO I_ESUB = 1, NSUB
+                     IF (IS_MODES_SUBCASE(I_ESUB) == 'Y') THEN
+                        IF ((EIG_PARAMS(I_ESUB)%NORM == 'POINT   ') .OR.                           &
+                            (EIG_PARAMS(I_ESUB)%NORM == 'MAX     ')) THEN
+                           CALL EIG_SUMMARY(I_ESUB)
+                        ENDIF
+                     ENDIF
+                  ENDDO
+               ELSE
+                  CALL EIG_SUMMARY(1)
+               ENDIF
+            ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
+               IF (ALLOCATED(EIG_PARAMS) .AND. ALLOCATED(IS_BUCKLING_SUBCASE)) THEN
+                  DO I_ESUB = 1, NSUB
+                     IF (IS_BUCKLING_SUBCASE(I_ESUB) == 'Y') THEN
+                        IF ((EIG_PARAMS(I_ESUB)%NORM == 'POINT   ') .OR.                           &
+                            (EIG_PARAMS(I_ESUB)%NORM == 'MAX     ')) THEN
+                           CALL EIG_SUMMARY(I_ESUB)
+                        ENDIF
+                     ENDIF
+                  ENDDO
+               ELSE
+                  CALL EIG_SUMMARY(1)
+               ENDIF
+            ELSE
+               CALL EIG_SUMMARY(1)
+            ENDIF
          ENDIF
       ENDIF
 

@@ -1912,6 +1912,51 @@
       REAL(DOUBLE)                    :: MAXMIJ              = ZERO
                                                              ! Largest off-diag term in generalized mass matrix.
 ! **********************************************************************************************************************************
+! Per-subcase eigenvalue extraction parameters (SOL 103 multi-METHOD support).
+!
+! The legacy EIG_* scalars above remain the active view consumed by the eigensolvers. When more than one subcase resolves a
+! METHOD request, LINK4 copies the parameters for the current subcase from EIG_PARAMS(ISUB) into the scalars before each solve.
+
+      TYPE EIG_PARAMS_TYPE
+         CHARACTER(LEN=JCARD_LEN)     :: METHOD              = ' '
+         CHARACTER(LEN=JCARD_LEN)     :: NORM                = 'MASS'
+         CHARACTER(LEN=JCARD_LEN)     :: LAP_MAT_TYPE        = 'DPB'
+         CHARACTER(1*BYTE)            :: VECS                = 'Y'
+         INTEGER(LONG)                :: SID                 = 0
+         INTEGER(LONG)                :: N1                  = 0
+         INTEGER(LONG)                :: N2                  = 0
+         INTEGER(LONG)                :: COMP                = 0
+         INTEGER(LONG)                :: GRID                = 0
+         INTEGER(LONG)                :: LANCZOS_NEV_DELT    = 2
+         INTEGER(LONG)                :: MODE                = 2
+         INTEGER(LONG)                :: MSGLVL              = 0
+         INTEGER(LONG)                :: NCVFACL             = 3
+         REAL(DOUBLE)                 :: CRIT                = ZERO
+         REAL(DOUBLE)                 :: FRQ1                = ZERO
+         REAL(DOUBLE)                 :: FRQ2                = ZERO
+         REAL(DOUBLE)                 :: SIGMA               = -ONE
+         INTEGER(LONG)                :: NUM_EIGENS          = 0
+         INTEGER(LONG)                :: NVEC                = 0
+         INTEGER(LONG)                :: NUM_FAIL_CRIT       = 0
+         INTEGER(LONG)                :: MIJ_ROW             = 0
+         INTEGER(LONG)                :: MIJ_COL             = 0
+         REAL(DOUBLE)                 :: MAXMIJ              = ZERO
+         REAL(DOUBLE)   , ALLOCATABLE :: EIGEN_VAL(:)
+         INTEGER(LONG)  , ALLOCATABLE :: MODE_NUM(:)
+         REAL(DOUBLE)   , ALLOCATABLE :: GEN_MASS(:)
+         REAL(DOUBLE)   , ALLOCATABLE :: EIGEN_VEC(:,:)
+         INTEGER(LONG)                :: STATSUB_REF         = 0
+      END TYPE EIG_PARAMS_TYPE
+
+      TYPE(EIG_PARAMS_TYPE), ALLOCATABLE :: EIG_PARAMS(:)
+      INTEGER(LONG)        , ALLOCATABLE :: CC_EIGR_SID_SUB(:)
+      INTEGER(LONG)                      :: CC_EIGR_SID_DECK = 0
+      CHARACTER(1*BYTE) , ALLOCATABLE    :: IS_MODES_SUBCASE(:)
+      INTEGER(LONG)     , ALLOCATABLE    :: CC_STATSUB_SUB(:)
+      INTEGER(LONG)                      :: CC_STATSUB_DECK  = 0
+      CHARACTER(1*BYTE) , ALLOCATABLE    :: IS_BUCKLING_SUBCASE(:)
+      INTEGER(LONG)     , ALLOCATABLE    :: NUM_EIGENS_SUB(:)
+! **********************************************************************************************************************************
 ! Rigid element ID's
 
       INTEGER(LONG), ALLOCATABLE      :: RIGID_ELEM_IDS(:)   ! Rigid element ID's

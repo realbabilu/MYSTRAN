@@ -24,7 +24,7 @@
 
 ! End MIT license text.
 
-      SUBROUTINE PRINCIPAL_2D ( SX, SY, SXY, ANGLE, SMAJOR, SMINOR, SXYMAX, MEAN, VONMISES )
+      SUBROUTINE PRINCIPAL_2D ( SX, SY, SXY, IS_STRAIN, ANGLE, SMAJOR, SMINOR, SXYMAX, MEAN, VONMISES )
 
 ! Calculates principal stresses or strains for 2-D shell elems:
 
@@ -36,7 +36,7 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO, QUARTER, HALF, TWO, ONEPM6, CONV_RAD_DEG
+      USE CONSTANTS_1, ONLY           :  ZERO, QUARTER, HALF, TWO, ONE, THREE, FOUR, NINE, ONEPM6, CONV_RAD_DEG
 
       USE PRINCIPAL_2D_USE_IFs
 
@@ -49,6 +49,7 @@
       REAL(DOUBLE), INTENT(IN)        :: SX                 ! Normal x stress or strain
       REAL(DOUBLE), INTENT(IN)        :: SY                 ! Normal y stress or strain
       REAL(DOUBLE), INTENT(IN)        :: SXY                ! Shear stress or strain
+      LOGICAL      , INTENT(IN)        :: IS_STRAIN          ! .TRUE. for engineering strain input, .FALSE. for stress input
       REAL(DOUBLE), INTENT(OUT)       :: ANGLE              ! Angle of principal stresses or strain
       REAL(DOUBLE), INTENT(OUT)       :: MEAN               ! Mean stresses or strain
       REAL(DOUBLE), INTENT(OUT)       :: SMAJOR             ! Major principal stress or strain
@@ -73,23 +74,43 @@
 ! Calc outputs
 
       DENR     = SX - SY
-      NUMR     = TWO*SXY
+      SAVG     = HALF*(SX + SY)
 
-! Calculate angle for principal axes.
+      IF (IS_STRAIN) THEN
+         NUMR   = SXY
 
-      ANGLE = (HALF*DATAN2(NUMR,DENR))*CONV_RAD_DEG
+! Calculate angle for principal strain axes using engineering shear strain gamma_xy.
 
-! Calculate the principal stresses and max shear
+         ANGLE  = (HALF*DATAN2(NUMR,DENR))*CONV_RAD_DEG
 
-      SXYMAX = DSQRT(QUARTER*DENR*DENR + SXY*SXY)
-      SAVG   = HALF*(SX + SY)
-      SMAJOR = SAVG + SXYMAX
-      SMINOR = SAVG - SXYMAX
+! Calculate the principal strains and max engineering shear strain.
 
-! Calculate mean andvon Mises stress for 2D stress state
+         SXYMAX = DSQRT(DENR*DENR + SXY*SXY)
+         SMAJOR = SAVG + HALF*SXYMAX
+         SMINOR = SAVG - HALF*SXYMAX
 
-      MEAN     = HALF*(SMAJOR + SMINOR)
-      VONMISES = DSQRT( SMAJOR*SMAJOR - SMAJOR*SMINOR + SMINOR*SMINOR)
+! Calculate mean strain and equivalent von Mises strain for plane stress/strain style shell output.
+
+         MEAN     = SAVG
+         VONMISES = DSQRT((FOUR/NINE)*(SX*SX + SY*SY - SX*SY) + (ONE/THREE)*SXY*SXY)
+      ELSE
+         NUMR   = TWO*SXY
+
+! Calculate angle for principal stress axes.
+
+         ANGLE  = (HALF*DATAN2(NUMR,DENR))*CONV_RAD_DEG
+
+! Calculate the principal stresses and max shear stress.
+
+         SXYMAX = DSQRT(QUARTER*DENR*DENR + SXY*SXY)
+         SMAJOR = SAVG + SXYMAX
+         SMINOR = SAVG - SXYMAX
+
+! Calculate mean stress and von Mises stress for 2D stress state.
+
+         MEAN     = SAVG
+         VONMISES = DSQRT( SMAJOR*SMAJOR - SMAJOR*SMINOR + SMINOR*SMINOR)
+      ENDIF
 
 
 

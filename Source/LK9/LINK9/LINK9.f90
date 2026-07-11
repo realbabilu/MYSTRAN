@@ -50,7 +50,7 @@
                                          NDOFF, NDOFG, NDOFL, NDOFM, NDOFN, ndofo, NDOFR, NDOFS, NDOFSA, NGRID, NSUB, NVEC,        &
                                          NTERM_IF_LTM, NTERM_GMN, NTERM_HMN, NTERM_KFS, NTERM_KFSD, NTERM_LMN, NTERM_MFS,          &
                                          NTERM_MGG, NTERM_MLL,NTERM_PG, NTERM_PM, NTERM_PS, NTERM_QSYS,                            &
-                                         NUM_CB_DOFS, NUM_EIGENS,                                                                  &
+                                         NUM_CB_DOFS, NUM_EIGENS, MODE_SUBCASE,                                                   &
                                          NROWS_OTM_ACCE, NROWS_OTM_DISP, NROWS_OTM_MPCF, NROWS_OTM_SPCF,                           &
                                          NROWS_OTM_ELFE, NROWS_OTM_ELFN, NROWS_OTM_STRE, NROWS_OTM_STRN,                           &
                                          NROWS_TXT_ACCE, NROWS_TXT_DISP, NROWS_TXT_MPCF, NROWS_TXT_SPCF,                           &
@@ -83,8 +83,8 @@
 
       USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_MPCF_OUTPUT, ANY_SPCF_OUTPUT, ANY_OLOA_OUTPUT,      &
                                          ANY_GPFO_OUTPUT, ANY_ELFE_OUTPUT, ANY_ELFN_OUTPUT, ANY_STRE_OUTPUT, ANY_STRN_OUTPUT,      &
-                                         OELDT, OELOUT, OGROUT, GRID, GROUT, MEFFMASS_CALC, MPFACTOR_CALC, SCNUM, SUBLOD, TITLE,   &
-                                         STITLE, LABEL
+                                         IS_BUCKLING_SUBCASE, NUM_EIGENS_SUB, OELDT, OELOUT, OGROUT, GRID, GROUT, MEFFMASS_CALC,   &
+                                         MPFACTOR_CALC, SCNUM, SUBLOD, TITLE, STITLE, LABEL
       USE LINK9_STUFF, ONLY           :  MAXREQ
 
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -137,6 +137,7 @@
       INTEGER(LONG), PARAMETER        :: NUM2      = 2     ! Used in subr's that partition matrices
       INTEGER(LONG)                   :: NUM_COLS          ! Number of cols to get when subr GET_SPARSE_CRS_COL is called
       INTEGER(LONG)                   :: NUM_SOLNS         ! No. of solutions to process (e.g. NSUB for STATICS)
+      INTEGER(LONG)                   :: NUM_STATIC_SUBS   ! Number of preload/static subcases for buckling step 1 output
       INTEGER(LONG)                   :: NUM_OU4_NOT_PART  ! Number of OU4 mats requested for partitioning that were not done
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to. Input to subr UNFORMATTED_OPEN
       INTEGER(LONG)                   :: OT4_EROW  = 0     ! Row number in OT4 elem related files. Accumulated in OFP1,2 for OTM's
@@ -597,7 +598,16 @@
       ELSE IF (SOL_NAME(1:8) == 'BUCKLING') THEN
 
          IF (LK9_PROC_NUM == 1) THEN
-            NUM_SOLNS = 1
+            NUM_STATIC_SUBS = 0
+            IF (ALLOCATED(IS_BUCKLING_SUBCASE)) THEN
+               DO I=1,NSUB
+                  IF (IS_BUCKLING_SUBCASE(I) /= 'Y') NUM_STATIC_SUBS = NUM_STATIC_SUBS + 1
+               ENDDO
+            ELSE
+               NUM_STATIC_SUBS = 1
+            ENDIF
+            IF (NUM_STATIC_SUBS <= 0) NUM_STATIC_SUBS = 1
+            NUM_SOLNS = NUM_STATIC_SUBS
 
          ELSE
             NUM_SOLNS = NVEC
@@ -671,11 +681,30 @@ j_do: DO JVEC=1,NUM_SOLNS
             FEMAP_SET_ID = SCNUM(JVEC)
 
          ELSE IF (SOL_NAME(1: 8) == 'BUCKLING') THEN
-            INT_SC_NUM   = LK9_PROC_NUM
-            FEMAP_SET_ID = LK9_PROC_NUM
+            IF (LOAD_ISTEP == 2) THEN
+               INT_SC_NUM = 1
+               IF (ALLOCATED(NUM_EIGENS_SUB) .AND. ALLOCATED(IS_BUCKLING_SUBCASE)) THEN
+                  K = 0
+                  DO I=1,NSUB
+                     IF (IS_BUCKLING_SUBCASE(I) /= 'Y') CYCLE
+                     K = K + NUM_EIGENS_SUB(I)
+                     INT_SC_NUM = I
+                     IF (JVEC <= K) EXIT
+                  ENDDO
+               ELSE IF (ALLOCATED(MODE_SUBCASE)) THEN
+                  IF (JVEC <= SIZE(MODE_SUBCASE)) INT_SC_NUM = MODE_SUBCASE(JVEC)
+               ENDIF
+               FEMAP_SET_ID = JVEC
+            ELSE
+               INT_SC_NUM   = JVEC
+               FEMAP_SET_ID = SCNUM(JVEC)
+            ENDIF
 
          ELSE IF (SOL_NAME(1: 5) == 'MODES') THEN
             INT_SC_NUM   = 1
+            IF (ALLOCATED(MODE_SUBCASE)) THEN
+               IF (JVEC <= SIZE(MODE_SUBCASE)) INT_SC_NUM = MODE_SUBCASE(JVEC)
+            ENDIF
             FEMAP_SET_ID = JVEC
 
          ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
@@ -703,9 +732,11 @@ j_do: DO JVEC=1,NUM_SOLNS
          ENDIF
 
 
-         IF ((SOL_NAME(1:8) == 'BUCKLING') .OR. (SOL_NAME(1:8) == 'DIFFEREN')) THEN
+         IF (SOL_NAME(1:8) == 'DIFFEREN') THEN
             JTSUB = 1
             INT_SC_NUM = 1
+         ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
+            JTSUB = 1
          ELSE
             IF (SUBLOD(INT_SC_NUM,2) > 0) THEN                ! JTSUB must only be used in the subrs called if this SUBLOD > 0
                JTSUB = JTSUB + 1

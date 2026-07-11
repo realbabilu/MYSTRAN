@@ -577,95 +577,36 @@ headr:IF (IHDR == 'Y') THEN
          ENDIF
          NUM_TERMS = 6
 
-      ELSE IF ((TYPE == 'TRIA3   ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE == 'QUAD8   ')) THEN
+      ELSE IF ((TYPE == 'TRIA3   ') .OR. (TYPE == 'QUAD4   ') .OR. (TYPE == 'QUAD8   ')) THEN
         IF (WRITE_OP2)  THEN
-          IF ((FORC_LOC == 'CENTER  ') .AND. (TYPE /= 'QUAD8   ')) THEN
-             IF (TYPE == 'TRIA3   ') THEN
-                 ELEMENT_TYPE = 74
-             ELSE
-                 ELEMENT_TYPE = 33
-             ENDIF
-             NUM_WIDE = 9
-             NVALUES = NUM * NUM_WIDE
-             CALL WRITE_OEF3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, &
-                                    TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
-             WRITE(OP2) NVALUES
-             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(I,J),4),J=1,8), I=1,NUM)
-          ELSE
-             IF (TYPE == 'TRIA3   ') THEN
-                ELEMENT_TYPE = 70
-                NUM_WIDE = 38
-                NELEMENTS = NUM
-                NVALUES = NUM_WIDE * NELEMENTS
-                CALL WRITE_OEF3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, &
-                                       TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
-                WRITE(OP2) NVALUES
-                WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, "CEN/",                                                    &
-                            0, (REAL(OGEL(I,J),4),J=1,8),                                                                  &
-                            GID_OUT_ARRAY(I,2), (REAL(OGEL(I,J),4),J=1,8),                                                 &
-                            GID_OUT_ARRAY(I,3), (REAL(OGEL(I,J),4),J=1,8),                                                 &
-                            GID_OUT_ARRAY(I,4), (REAL(OGEL(I,J),4),J=1,8),                                                 &
-                            I=1,NELEMENTS)
-             ELSE
-                NELEMENTS = NUM / NUM_PTS
-                IF (TYPE == 'QUAD8   ') THEN
-                   ELEMENT_TYPE = 64
-                ELSE IF (TYPE == 'QUADR   ') THEN
-                   ELEMENT_TYPE = 82
-                ELSE
-                   ELEMENT_TYPE = 144
-                ENDIF
-                NUM_WIDE = 47
-                NVALUES = NUM_WIDE * NELEMENTS
-                CALL WRITE_OEF3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, &
-                                       TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
-                WRITE(OP2) NVALUES
-                IF (TYPE == 'QUAD8   ') THEN
-                   WRITE(OP2) (EID_OUT_ARRAY(5*I+1,1)*10+DEVICE_CODE, "CEN/",                                           &
-                               0,                     (REAL(OGEL(5*I+1,J),4),J=1,8),                                      &
-                               GID_OUT_ARRAY(5*I+1,2),(REAL(OGEL(5*I+2,J),4),J=1,8),                                      &
-                               GID_OUT_ARRAY(5*I+1,3),(REAL(OGEL(5*I+3,J),4),J=1,8),                                      &
-                               GID_OUT_ARRAY(5*I+1,4),(REAL(OGEL(5*I+4,J),4),J=1,8),                                      &
-                               GID_OUT_ARRAY(5*I+1,5),(REAL(OGEL(5*I+5,J),4),J=1,8),                                      &
-                               I=0,NELEMENTS-1)
-                ELSE
-                   WRITE(OP2) (EID_OUT_ARRAY(4*I+1,1)*10+DEVICE_CODE, "CEN/",                                           &
-                               0, (REAL((OGEL(4*I+1,J)+OGEL(4*I+2,J)+OGEL(4*I+3,J)+OGEL(4*I+4,J))/4.0D0,4),J=1,8),     &
-                               GID_OUT_ARRAY(4*I+1,2), (REAL(OGEL(4*I+1,J),4),J=1,8),                                     &
-                               GID_OUT_ARRAY(4*I+1,3), (REAL(OGEL(4*I+2,J),4),J=1,8),                                     &
-                               GID_OUT_ARRAY(4*I+1,4), (REAL(OGEL(4*I+3,J),4),J=1,8),                                     &
-                               GID_OUT_ARRAY(4*I+1,5), (REAL(OGEL(4*I+4,J),4),J=1,8),                                     &
-                               I=0,NELEMENTS-1)
-                ENDIF
-             ENDIF
+          IF (TYPE == 'TRIA3   ') THEN
+              ELEMENT_TYPE = 74
+          ELSE IF (TYPE == 'QUAD4   ') THEN
+              ELEMENT_TYPE = 33  ! todo: verify no ELEMENT_TYPE=144
           ENDIF
+          NUM_WIDE = 9
+          NVALUES = NUM * NUM_WIDE
+          CALL WRITE_OEF3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, &
+                                 TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+          WRITE(OP2) NVALUES
+          WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(I,J),4),J=1,8), I=1,NUM)
         ENDIF
 
         IF (WRITE_F06)  THEN  ! f06
           K = 0
-          IF (TYPE == 'TRIA3   ') THEN
-             DO I=1,NUM
-                WRITE(F06,1524) FILL(1: 0), EID_OUT_ARRAY(I,1), '        ', (OGEL(I,J),J=1,8)
-                DO L=2,4
-                   WRITE(F06,1525) FILL(1: 0), GID_OUT_ARRAY(I,L),(OGEL(I,J),J=1,8)
-                ENDDO
-             ENDDO
-          ELSE
-             DO I=1,NUM,NUM_PTS
-                K = K + 1
-                                                           ! Center forces
-                IF(TYPE == 'QUAD8   ') THEN
-                  WRITE(F06,1524) FILL(1: 0), EID_OUT_ARRAY(I,1), 'CENTER  ', (OGEL(K,J),J=1,8)
-                ELSE
-                  WRITE(F06,1524) FILL(1: 0), EID_OUT_ARRAY(I,1), '        ', (OGEL(K,J),J=1,8)
-                ENDIF
+          DO I=1,NUM,NUM_PTS
+             K = K + 1
+             IF(TYPE == 'QUAD8   ') THEN
+               WRITE(F06,1524) FILL(1: 0), EID_OUT_ARRAY(I,1), 'CENTER  ', (OGEL(K,J),J=1,8)
+             ELSE
+               WRITE(F06,1524) FILL(1: 0), EID_OUT_ARRAY(I,1), '        ', (OGEL(K,J),J=1,8)
+             ENDIF
 
-                DO L=2,NUM_PTS                                ! Corner forces
-                  K = K + 1
-                  WRITE(F06,1525) FILL(1: 0), GID_OUT_ARRAY(I,L),(OGEL(K,J),J=1,8)
-                ENDDO
+             DO L=2,NUM_PTS
+               K = K + 1
+               WRITE(F06,1525) FILL(1: 0), GID_OUT_ARRAY(I,L),(OGEL(K,J),J=1,8)
              ENDDO
-          ENDIF
+          ENDDO
           CALL GET_MAX_MIN_ABS ( 1, 8 )
           WRITE(F06,1523) FILL(1: 0), FILL(1: 0), (MAX_ANS(J),J=1,8), FILL(1: 0), (MIN_ANS(J),J=1,8), FILL(1: 0),  &
                                                   (ABS_ANS(J),J=1,8), FILL(1: 0)

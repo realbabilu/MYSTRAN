@@ -300,6 +300,10 @@
       INTEGER(LONG)            :: NSPOINT             =   0      ! Count of no. of SPOINT's
       INTEGER(LONG)            :: NUM_SPCSIDS         =   0      ! The number of SPC set ID's called for in an execution
       INTEGER(LONG)            :: NSUB                =   0      ! Count of no. of subcases
+      INTEGER(LONG)            :: NUM_MODES_SUBS      =   0      ! Count of subcases that have a resolved METHOD
+      INTEGER(LONG)            :: NUM_BUCKLING_SUBS   =   0      ! Count of buckling subcases (SOL 105 support)
+      INTEGER(LONG)            :: TOTAL_MODES         =   0      ! Total eigenvectors across all modes subcases
+      INTEGER(LONG), ALLOCATABLE :: MODE_SUBCASE(:)           ! Map global mode index to owning internal subcase number
       INTEGER(LONG)            :: NTCARD              =   0      ! Count of no. of TEMP/TEMPRB/TEMPP1 cards written to filename.L1K
       INTEGER(LONG)            :: NTDAT               =   0      ! Count of no. of rows that go into array TDATA
       INTEGER(LONG)            :: NTERM_ALL           =   0      ! Count of no. of terms in ALL             matrix

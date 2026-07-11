@@ -250,6 +250,8 @@ j_do3:      DO J=1,NUM_NONZERO_IN_ROW
 
       RETURN
 
+  9200 FORMAT(' *ERROR  9200: CANNOT ALLOCATE LOCAL ROW-WORK ARRAYS IN SUBROUTINE ',A)
+
 ! **********************************************************************************************************************************
   101 FORMAT(' *INFORMATION: MAX NUMBER OF NONZERO TERMS IN A ROW OF THE G-SET STIFFNESS MATRIX     = ',I12,/)
 
@@ -260,8 +262,6 @@ j_do3:      DO J=1,NUM_NONZERO_IN_ROW
  1625 FORMAT(' *ERROR  1625: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' 1ST COL OF ARRAY STF3 INDICATES THERE IS MORE DATA IN ARRAY STF3 FOR ROW ',I12,' OF THE KGGD STIFF'   &
                     ,/,14X,' MATRIX ALTHOUGH THE DOF COUNT IS AT THE END OF THE ROW')
-
-  9200 FORMAT(' *ERROR  9200: CANNOT ALLOCATE LOCAL ROW-WORK ARRAYS IN SUBROUTINE ',A)
 
 ! **********************************************************************************************************************************
 

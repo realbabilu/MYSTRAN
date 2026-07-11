@@ -33,13 +33,28 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE
       USE IOUNT1, ONLY                :  ERR, F06
       USE PARAMS, ONLY                :  SOLLIB, SPARSE_FLAVOR, SUPINFO
+      USE MODEL_STUF, ONLY            :  EIG_EXTRACT_METHOD
 
       IMPLICIT NONE
 
       CHARACTER(LEN=*), INTENT(IN)    :: CALLING_SUBR
       CHARACTER(LEN=*), INTENT(IN)    :: MATRIX_NAME
+      CHARACTER(  8*BYTE)             :: COMPILED_MUMPS
+      CHARACTER(  8*BYTE)             :: COMPILED_FEAST
 
 ! **********************************************************************************************************************************
+
+#ifdef DMUMPS_Solver
+      COMPILED_MUMPS = 'YES     '
+#else
+      COMPILED_MUMPS = 'NO      '
+#endif
+
+#ifdef MYSTRAN_HAVE_EXTERNAL_FEAST
+      COMPILED_FEAST = 'YES     '
+#else
+      COMPILED_FEAST = 'NO      '
+#endif
 
       IF (SOLLIB == 'BANDED  ') THEN
          WRITE(ERR,9001) MATRIX_NAME, CALLING_SUBR
@@ -52,6 +67,9 @@
          IF (SUPINFO == 'N') WRITE(F06,9003) MATRIX_NAME, CALLING_SUBR, SOLLIB
       ENDIF
 
+      WRITE(ERR,9010) COMPILED_MUMPS, COMPILED_FEAST, SPARSE_FLAVOR, EIG_EXTRACT_METHOD
+      IF (SUPINFO == 'N') WRITE(F06,9010) COMPILED_MUMPS, COMPILED_FEAST, SPARSE_FLAVOR, EIG_EXTRACT_METHOD
+
       RETURN
 
 ! **********************************************************************************************************************************
@@ -62,6 +80,9 @@
                     /,14X,' SOLLIB=SPARSE WILL USE SPARSE_FLAVOR=',A8,'.')
 
  9003 FORMAT(' *WARNING    : SOLVER DISPATCH POLICY FOR MATRIX ',A,' IN ',A,' HAS UNKNOWN SOLLIB=',A8)
+
+ 9010 FORMAT(' *INFORMATION: COMPILED SOLVER BACKENDS: MUMPS=',A8,' FEAST=',A8,                                                 &
+                    /,14X,' ACTIVE SPARSE_FLAVOR=',A8,' EIG_EXTRACT_METHOD=',A8,'.')
 
 ! **********************************************************************************************************************************
 

@@ -79,6 +79,7 @@
       REAL(DOUBLE)                    :: K33_LAMBDA_MAX     ! Max value from  K33_ROT K33_LAMBDAS(i)
       REAL(DOUBLE)                    :: K33_VECS(3,3)      ! Eigenvectors of K33_ROT
       REAL(DOUBLE)                    :: K33_VEC_MAX        ! Max value from one eigenvector (column) of K33_VECS
+      REAL(DOUBLE)                    :: K33_VEC_TOL        ! Tie tolerance for selecting the dominant comp from an eigenvector
 
       INTRINSIC                       :: DABS
 
@@ -139,9 +140,10 @@ eigs_ok:    IF (INFO == 0) THEN                            ! K33_EIGENS returned
                DO J=1,3                                    ! For the J-th eigenvalue (1 to 3) get any comp that needs to be SPC'd
                   IF(DABS(FAC*K33_LAMBDAS(J))<=AUTOSPC_RAT) THEN
                      K33_VEC_MAX = ZERO
+                     K33_VEC_TOL = 100.0D0*EPS1
                      I2 = 0
-                     DO I=1,3                              ! Scan the J-th eigenvector for comp with largest absolute value
-                        IF (DABS(K33_VECS(I,J)) > K33_VEC_MAX) THEN
+                     DO I=1,3                              ! Keep the first component when the dominant entries are tied numerically
+                        IF (DABS(K33_VECS(I,J)) > K33_VEC_MAX + K33_VEC_TOL) THEN
                            K33_VEC_MAX = DABS(K33_VECS(I,J))
                            I2 = I + 3*(K - 1)              ! After this loop, I2 will be the comp number (1-6) where the eigenvector
                         ENDIF                              ! is the max absolute value

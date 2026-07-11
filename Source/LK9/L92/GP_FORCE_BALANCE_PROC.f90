@@ -30,20 +30,18 @@
       ! The effects of all forces on grids are included so totals
       ! should be zero
 
-      USE PENTIUM_II_KIND, ONLY       :  BYTE, SHORT, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  ERR, F06, OP2, SC1, WRT_ERR
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      USE IOUNT1, ONLY                :  ERR, F06, OP2, SC1
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, GROUT_GPFO_BIT, IBIT, INT_SC_NUM, JTSUB, NDOFG, NDOFM, MELDOF, NDOFO, NDOFR,&
                                          NELE, NGRID, NUM_CB_DOFS, NVEC, SOL_NAME
-      USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE_HUNDRED
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE MODEL_STUF, ONLY            :  AGRID, EID, ELGP, ESORT1, ETYPE, NUM_EMG_FATAL_ERRS, GRID, GRID_ELEM_CONN_ARRAY, GRID_ID, &
+      USE MODEL_STUF, ONLY            :  AGRID, EID, ELGP, ESORT1, ETYPE, GRID, GRID_ELEM_CONN_ARRAY, GRID_ID, &
                                          GROUT, LABEL, PLY_NUM, PEG, PTE, SCNUM, STITLE, SUBLOD, TITLE, TYPE
-      USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY
       USE COL_VECS, ONLY              :  FG_COL, PG_COL, QGm_COL, QGs_COL, QGr_COL, UG_COL
-      USE PARAMS, ONLY                :  EPSIL
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  GPFO_OUT
+      USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
 
       USE GP_FORCE_BALANCE_PROC_USE_IFs
 
@@ -75,9 +73,6 @@
       INTEGER(LONG)                   :: NUM_CONN_ELEMS    ! The number of elements that are connected to a specific grid
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
       INTEGER(LONG)                   :: TDOF_ROW          ! Row no. in array TDOF to find GDOF DOF number
-
-
-      INTEGER(SHORT), DIMENSION(1)    :: Udd = (/0220/)    ! 0220 is the 4 digit ASCII code for a capital U double-dot
 
       REAL(DOUBLE)                    :: DUM_KE(MELDOF,MELDOF)
       REAL(DOUBLE)                    :: FG1(6)            ! The 6 vals from FG_COL (grid inertia forces) for 1 grid point
@@ -112,25 +107,19 @@
       INTEGER(LONG)                   :: ELEMENT_TYPE           ! the OP2 flag for the element
       LOGICAL                         :: FIELD_5_INT_FLAG       ! flag to trigger FIELD5_INT_MODE vs.
       INTEGER(LONG)                   :: FIELD5_INT_MODE        ! int value for field 5
-      !REAL(DOUBLE)                    :: FIELD5_FLOAT_TIME_FREQ ! float value for field 5
       REAL(DOUBLE)                    :: FIELD6_EIGENVALUE      ! float value for field 6
       CHARACTER(LEN=128)              :: TITLEI                 ! the model TITLE
       CHARACTER(LEN=128)              :: SUBTITLEI              ! the subcase SUBTITLE
       CHARACTER(LEN=128)              :: LABELI                 ! the subcase LABEL
       INTEGER(LONG)                   :: ITABLE                 ! the table counter
 
-      INTEGER, ALLOCATABLE            :: GPFORCE_NID_EID(:,:)    ! currently unused
-      CHARACTER*8, ALLOCATABLE        :: GPFORCE_ETYPE(:)        ! currently unused
-      REAL, ALLOCATABLE               :: GPFORCE_FXYZ_MXYZ(:,:)  ! currently unused
+      INTEGER, ALLOCATABLE            :: GPFORCE_NID_EID(:,:)
+      CHARACTER*8, ALLOCATABLE        :: GPFORCE_ETYPE(:)
+      REAL(DOUBLE), ALLOCATABLE       :: GPFORCE_FXYZ_MXYZ(:,:)
 
 
 
 ! **********************************************************************************************************************************
-
-      ! GPFORCE is unsupported for buckling decks
-      IF (SOL_NAME(1:8) == "BUCKLING") THEN
-         RETURN
-      ENDIF
 
       ! Print some summary info for max abs value of GP force balance for each solution vector
       IS_GPFORCE_SUMMARY_INFO = (DEBUG(192) > 0)
@@ -141,13 +130,6 @@
       WRITE_F06 = (GPFO_OUT(1:1) == 'Y')
       INQUIRE ( UNIT=OP2, OPENED=WRITE_OP2 )
 
-      !WRITE(ERR,*) 'GPFORCE WRITE_F06',WRITE_F06
-      !WRITE(ERR,*) 'GPFORCE WRITE_OP2',WRITE_OP2
-      !FLUSH(ERR)
-      !WRITE_PCH = (ACCE_OUT(3:3) == 'Y')
-      !WRITE_OP2 = .TRUE.
-      !WRITE_F06 = .TRUE.
-
       ! OP2: Write output headers if this is not the first use of this subr.
       ANALYSIS_CODE = -1
       FIELD_5_INT_FLAG = .TRUE.
@@ -155,9 +137,6 @@
       FIELD6_EIGENVALUE = 0.0
 
       INODE_GPFORCE = 1
-
-      !WRITE(ERR,*) "Running GPFORCE"
-      !FLUSH(ERR)
 
       ! Initialize
       DO I=1,6
@@ -192,6 +171,18 @@
             FIELD5_INT_MODE = SCNUM(JVEC)
             IF (WRITE_F06)  WRITE(F06,9101) SCNUM(JVEC)
 
+         ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
+            ISUBCASE_INDEX = JVEC
+            ANALYSIS_CODE = 1
+            FIELD5_INT_MODE = SCNUM(JVEC)
+            IF (WRITE_F06)  WRITE(F06,9101) SCNUM(JVEC)
+
+         ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
+            ISUBCASE_INDEX = 1
+            ANALYSIS_CODE = 2
+            FIELD5_INT_MODE = JVEC
+            IF (WRITE_F06)  WRITE(F06,9102) JVEC
+
          ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
             ISUBCASE_INDEX = 1  ! modes
             ANALYSIS_CODE = 2
@@ -222,11 +213,6 @@
          ENDIF
 
          ISUBCASE = SCNUM(ISUBCASE_INDEX)
-         !WRITE(ERR,*) "JVEC=",JVEC
-         !WRITE(ERR,*) "ISUBCASE_INDEX=",ISUBCASE_INDEX
-         !WRITE(ERR,*) "SCNUM(1)=",SCNUM(1)
-         !WRITE(ERR,*) "ISUBCASE=",ISUBCASE
-         !FLUSH(ERR)
 
          ! -- F06 header for TITLE, SUBTITLE, LABEL (but only to F06)
          TITLEI = TITLE(INT_SC_NUM)
@@ -235,7 +221,7 @@
 
          IF (WRITE_F06) THEN
             IF (TITLEI(1:)  /= ' ') THEN
-               WRITE(F06,9799) TITLE
+               WRITE(F06,9799) TITLEI
             ENDIF
 
             IF (SUBTITLEI(1:) /= ' ') THEN
@@ -376,13 +362,16 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
           IF (IERR == 0) THEN
               DO I=1,NROWS
                   DO J=1,NCOLS
-                      GPFORCE_FXYZ_MXYZ(I,J) = 0
+                      GPFORCE_FXYZ_MXYZ(I,J) = ZERO
                   ENDDO
               ENDDO
           ELSE
               WRITE(6,*) 'GPFORCE_FXYZ_MXYZ ALLOCATED error'
           ENDIF
-
+      ELSE
+          ALLOCATE (GPFORCE_NID_EID(0,0))
+          ALLOCATE (GPFORCE_ETYPE(0))
+          ALLOCATE (GPFORCE_FXYZ_MXYZ(0,0))
       ENDIF  ! write_op2 allocation
       !------------------------------------------------------------------------
       CALL COUNTER_INIT('Process grid ', NGRID)
@@ -463,16 +452,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
             IS_APP = IS_ABS_POSITIVE(PG1)
             IS_SPC = IS_ABS_POSITIVE(QGs1)
             IS_MPC = IS_ABS_POSITIVE(QGm1)
-            !IS_APP = .TRUE.
-            !IS_SPC = .TRUE.
-            !IS_MPC = .TRUE.
-            !WRITE(ERR,*) "start - loads WRITE_OP2",WRITE_OP2
-            !write(ERR,*) "  INODE_GPFORCE =", INODE_GPFORCE
-            !write(ERR,*) "  IS_APP =", IS_APP
-            !write(ERR,*) "  IS_SPC =", IS_SPC
-            !write(ERR,*) "  IS_MPC =", IS_MPC
-            !FLUSH(ERR)
-
             IF(WRITE_OP2) THEN
                 IF(IS_APP) THEN
                     GPFORCE_NID_EID(INODE_GPFORCE,1) = GRID_NUM
@@ -528,9 +507,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
                 IF(IS_SPC) INODE_GPFORCE = INODE_GPFORCE + 1
                 IF(IS_MPC) INODE_GPFORCE = INODE_GPFORCE + 1
             ENDIF
-            !WRITE(ERR,*) "end - loads WRITE_OP2",WRITE_OP2
-            !FLUSH(ERR)
-
             IF (WRITE_F06) THEN
                IF (IS_APP) WRITE(F06,9203) (PG1(J),J=1,6)  ! applied load
                IF (IS_THERMAL) THEN
@@ -582,8 +558,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
                         TOTALS(L) = TOTALS(L) - PEG1(L)
                      ENDDO
 
-                     !WRITE(ERR,*) "INODE_GPFORCE=",INODE_GPFORCE
-                     !FLUSH(ERR)
                      IF(WRITE_OP2) THEN
                        GPFORCE_NID_EID(INODE_GPFORCE,1) = GRID_NUM
                        GPFORCE_NID_EID(INODE_GPFORCE,2) = EID
@@ -637,9 +611,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
             ENDIF
 
          ENDIF
-         !FLUSH(F06)
-         !FLUSH(ERR)
-
          ! For each of the 6 components (J=1,6 for components T1, T2, T3, R1, R2, R3),
          ! calc % of grid force imbalance as a % of the largest
          ! force item in that component
@@ -658,12 +629,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
           CALL CALCULATE_GPFB_IMBALANCE(CHAR_PCT, MAX_ABS, MAX_ABS_PCT, MAX_ABS_GRID, MAX_ABS_ALL_GRDS)
       ENDIF
 
-      !----------------
-      !WRITE(ERR,*) "  GPFORCE DEALLOCATE: NROWS", NROWS
-      !WRITE(ERR,*) "  IERR=", IERR
-      !WRITE(ERR,*) "  INODE_GPFORCE=", INODE_GPFORCE
-      !WRITE(ERR,*) "  NNODE_GPFORCE=", NNODE_GPFORCE
-      !FLUSH(ERR)
       ! DEALLOCATE: GPFORCE_NID_EID, GPFORCE_ETYPE, GPFORCE_FXYZ_MXYZ
       !ref mystran SUB DEALLOCATE_DOF_TABLES
       !KTSTACK(5500,3)
@@ -672,28 +637,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
           ! write the data to the op2
           !(nid_device, eid, elem_name, f1, f2, f3, m1, m2, m3) = out
           !nid = nid_device // 10
-          !DO I=1,INODE_GPFORCE-1
-          !    WRITE(F06,*) GPFORCE_NID_EID(I,1)*10+DEVICE_CODE, &
-          !            GPFORCE_NID_EID(I,2), &
-          !            GPFORCE_ETYPE(I), &
-          !            GPFORCE_FXYZ_MXYZ(I,1), &
-          !            GPFORCE_FXYZ_MXYZ(I,2), &
-          !            GPFORCE_FXYZ_MXYZ(I,3), &
-          !            GPFORCE_FXYZ_MXYZ(I,4), &
-          !            GPFORCE_FXYZ_MXYZ(I,5), &
-          !            GPFORCE_FXYZ_MXYZ(I,6)
-          !    WRITE(ERR,*) GPFORCE_NID_EID(I,1)*10+DEVICE_CODE, &
-          !            GPFORCE_NID_EID(I,2), &
-          !            GPFORCE_ETYPE(I), &
-          !            GPFORCE_FXYZ_MXYZ(I,1), &
-          !            GPFORCE_FXYZ_MXYZ(I,2), &
-          !            GPFORCE_FXYZ_MXYZ(I,3), &
-          !            GPFORCE_FXYZ_MXYZ(I,4), &
-          !            GPFORCE_FXYZ_MXYZ(I,5), &
-          !            GPFORCE_FXYZ_MXYZ(I,6)
-          !ENDDO
-
-          !WRITE(ERR,*) "OP2-ISUBCASE=",ISUBCASE
           CALL OUTPUT2_WRITE_OGF(ISUBCASE, INODE_GPFORCE-1, &
                                  TITLEI, SUBTITLEI, LABELI, &
                                  ANALYSIS_CODE, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
@@ -713,11 +656,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
 
           !---------------------
           ! deallocate the arrays
-          !WRITE(ERR,*) 'GPFORCE_NID_EID is allocated'
-          !WRITE(ERR,*) 'GPFORCE_NID_EID(1,:)=',GPFORCE_NID_EID(1,1),GPFORCE_NID_EID(1,2),GPFORCE_ETYPE(1)
-          !WRITE(ERR,*) 'GPFORCE_FXYZ(1,:)=',GPFORCE_FXYZ_MXYZ(1,1),GPFORCE_FXYZ_MXYZ(1,2),GPFORCE_FXYZ_MXYZ(1,3)
-          !WRITE(ERR,*) 'GPFORCE_MXYZ(1,:)=',GPFORCE_FXYZ_MXYZ(1,4),GPFORCE_FXYZ_MXYZ(1,5),GPFORCE_FXYZ_MXYZ(1,6)
-          !FLUSH(ERR)
           DEALLOCATE(GPFORCE_NID_EID,STAT=IERR)
           IF (IERR /= 0) THEN
               WRITE(ERR,*) 'GPFORCE_NID_EID DEALLOCATE error'
@@ -769,7 +707,7 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
 
  9206 FORMAT(1X,   'MPC FORCE              ',6(1ES14.6))
 
- 9207 FORMAT(1X,   'INERTIA FORCE (-Mgg*Üg)',6(1ES14.6))
+ 9207 FORMAT(1X,   'INERTIA FORCE          ',6(1ES14.6))
 
  9208 FORMAT(1X,   'SUBSTRUCTURE I/F FORCE ',6(1ES14.6))
 
@@ -782,7 +720,7 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
 
  9310 FORMAT(1X,   'TOTALS                :',6(1ES14.6),13X,/,                                                                     &
              1X,   '(may not be zero since there were OMIT''d DOF''s which can mean that the correct inertia forces at the G-set', &
-                   ' are not -Mgg*Üg)',//)
+                   ' are not -Mgg*a*g)',//)
 
  9799 FORMAT(1X,A)
 
@@ -852,7 +790,7 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
       ! For each of the 6 components (J=1,6 for components T1, T2, T3, R1, R2, R3)
       !  - calc % of grid force imbalance as a % of the largest
       !    force item in that component
-      USE PENTIUM_II_KIND, ONLY       :  BYTE, SHORT, LONG, DOUBLE
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  F06
       USE CONSTANTS_1, ONLY           :  ZERO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG

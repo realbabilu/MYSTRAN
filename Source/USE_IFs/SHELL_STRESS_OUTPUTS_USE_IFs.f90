@@ -28,7 +28,7 @@
 ! USE Interface statements for all subroutines called by SUBROUTINE SHELL_STRESS_OUTPUTS
 
       USE OURTIM_Interface
-      USE PRINCIPAL_2D_Interface
+      USE PRINCIPAL_STRESS_2D_Interface
       USE OUTA_HERE_Interface
       USE GET_COMP_SHELL_ALLOWS_Interface
       USE POLY_FAILURE_INDEX_Interface

@@ -29,11 +29,16 @@
       ! LOADC reads in the CASE CONTROL DECK
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  BUGOUT, ERR, F06, IN1, WRT_ERR
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_ENTRY_LEN, ENFORCED, FATAL_ERR, WARN_ERR, NSUB, NTSUB, PROG_NAME,        &
-                                         RESTART, SOL_NAME
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_ENTRY_LEN, ENFORCED, FATAL_ERR, WARN_ERR, NSUB, NTSUB, NUM_BUCKLING_SUBS,&
+                                         PROG_NAME, RESTART, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE PARAMS, ONLY                :  SUPINFO, SUPWARN
-      USE MODEL_STUF, ONLY            :  CC_EIGR_SID, MEFFMASS_CALC, MPCSET, MPCSETS, MPFACTOR_CALC, SCNUM, SPCSET, SPCSETS, SUBLOD
+      USE MODEL_STUF, ONLY            :  CC_EIGR_SID, CC_EIGR_SID_SUB, CC_EIGR_SID_DECK, CC_STATSUB_DECK, CC_STATSUB_SUB,         &
+                                         IS_BUCKLING_SUBCASE, MEFFMASS_CALC, MPCSET, MPCSETS, MPFACTOR_CALC, SCNUM, SPCSET,        &
+                                         SPCSETS, SUBLOD, SC_STRE, SC_STRN, SC_ELFE, SC_ELFN, EIG_PARAMS, IS_MODES_SUBCASE
+      USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_LANCZOS_NEV_DELT, EIG_METH,        &
+                                         EIG_MSGLVL, EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SIGMA,&
+                                         EIG_VECS
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC
 
       USE LOADC_USE_IFs
@@ -47,6 +52,7 @@
       CHARACTER(LEN=CC_ENTRY_LEN)     :: CARD1             ! CARD shifted to begin in col 1
       CHARACTER(12*BYTE)              :: DECK_NAME   = 'CASE CONTROL'
       CHARACTER(10*BYTE), PARAMETER   :: END_CARD    = 'BEGIN BULK'
+      CHARACTER(LEN=CC_ENTRY_LEN)     :: QUAD4_LOC
 
       INTEGER(LONG)                   :: CHAR_COL          ! Column number on CARD where character CHAR is found
       INTEGER(LONG)                   :: I,J               ! DO loop indices
@@ -184,6 +190,9 @@ inner:         DO
          ELSE IF (CARD1(1:4) == 'SPCF'    ) THEN
             CALL CC_SPCF   ( CARD1 )
 
+         ELSE IF (INDEX(CARD1,'STATSUB') == 1) THEN
+            CALL CC_STATSUB ( CARD1 )
+
          ELSE IF((CARD1(1:4) == 'STRA'    ) .OR.  (CARD1(1:4) == 'STRN'    ) .OR.  (CARD1(1:8) == 'ELSTRAIN')) THEN
             CALL CC_STRN   ( CARD1 )
 
@@ -224,6 +233,19 @@ inner:         DO
 
       ENDDO outer
 
+      IF       (SC_STRE(1) /= 0) THEN
+         QUAD4_LOC = STRE_LOC
+      ELSE IF  (SC_STRN(1) /= 0) THEN
+         QUAD4_LOC = STRN_LOC
+      ELSE IF  (SC_ELFE(1) /= 0 .OR. SC_ELFN(1) /= 0) THEN
+         QUAD4_LOC = FORC_LOC
+      ELSE
+         QUAD4_LOC = 'CENTER'
+      ENDIF
+      STRE_LOC = QUAD4_LOC
+      STRN_LOC = QUAD4_LOC
+      FORC_LOC = QUAD4_LOC
+
       IF (STRN_LOC /= 'CENTER  ') THEN
          WRITE(ERR,1016) STRN_LOC, 'STRAIN'
          IF (SUPINFO == 'N') THEN
@@ -248,6 +270,50 @@ inner:         DO
          SCNUM(1) = 1
       ENDIF
 
+      IF (ALLOCATED(CC_EIGR_SID_SUB)) THEN
+         DO I=1,NSUB
+            IF ((CC_EIGR_SID_SUB(I) == 0) .AND. (CC_EIGR_SID_DECK /= 0)) THEN
+               CC_EIGR_SID_SUB(I)  = CC_EIGR_SID_DECK
+               IS_MODES_SUBCASE(I) = 'Y'
+            ENDIF
+         ENDDO
+
+         IF (CC_EIGR_SID_DECK /= 0) THEN
+            CC_EIGR_SID = CC_EIGR_SID_DECK
+         ELSE
+            DO I=1,NSUB
+               IF (CC_EIGR_SID_SUB(I) /= 0) THEN
+                  CC_EIGR_SID = CC_EIGR_SID_SUB(I)
+                  EXIT
+               ENDIF
+            ENDDO
+         ENDIF
+
+         IF (ALLOCATED(EIG_PARAMS)) THEN
+            DO I=1,NSUB
+               IF ((CC_EIGR_SID_SUB(I) /= 0) .AND. (EIG_PARAMS(I)%SID == 0)) THEN
+                  EIG_PARAMS(I)%METHOD           = EIG_METH
+                  EIG_PARAMS(I)%NORM             = EIG_NORM
+                  EIG_PARAMS(I)%LAP_MAT_TYPE     = EIG_LAP_MAT_TYPE
+                  EIG_PARAMS(I)%VECS             = EIG_VECS
+                  EIG_PARAMS(I)%SID              = CC_EIGR_SID_SUB(I)
+                  EIG_PARAMS(I)%N1               = EIG_N1
+                  EIG_PARAMS(I)%N2               = EIG_N2
+                  EIG_PARAMS(I)%COMP             = EIG_COMP
+                  EIG_PARAMS(I)%GRID             = EIG_GRID
+                  EIG_PARAMS(I)%LANCZOS_NEV_DELT = EIG_LANCZOS_NEV_DELT
+                  EIG_PARAMS(I)%MODE             = EIG_MODE
+                  EIG_PARAMS(I)%MSGLVL           = EIG_MSGLVL
+                  EIG_PARAMS(I)%NCVFACL          = EIG_NCVFACL
+                  EIG_PARAMS(I)%CRIT             = EIG_CRIT
+                  EIG_PARAMS(I)%FRQ1             = EIG_FRQ1
+                  EIG_PARAMS(I)%FRQ2             = EIG_FRQ2
+                  EIG_PARAMS(I)%SIGMA            = EIG_SIGMA
+               ENDIF
+            ENDDO
+         ENDIF
+      ENDIF
+
       ! If SOL is modes or CB or buckilng, then a METH card should have been found in Case Control
       IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN_CB_MODEL') .OR. (SOL_NAME(1:8) == 'BUCKLING')) THEN
          IF (CC_EIGR_SID == 0) THEN
@@ -257,53 +323,89 @@ inner:         DO
          ENDIF
       ENDIF
 
-     ! If SOL is buckling there should be 2 subcases; the first with a load
-     ! and the second with a METH (METH checked above)
-     ! If any load, SPC or MPC is found in the 2nd subcase, make sure it is
-     ! the same as in subcase 1
+     ! For SOL 105 buckling, resolve STATSUB(PRELOAD) references for each buckling subcase.
       IF (SOL_NAME == 'BUCKLING') THEN
-         IF (NSUB /= 2) THEN                               ! Check for 2 subcases
-            WRITE(ERR,1101)
-            WRITE(F06,1101)
-            FATAL_ERR = FATAL_ERR + 1
-            IF (NSUB < 2) THEN
-               ! further code will crash if we continue with just one subcase
-               CALL OUTA_HERE ( 'Y' )
-            END IF
-         ENDIF
-         ! Check that subcase 1 has a mechanical or thermal load
-         IF ((SUBLOD(1,1) == 0) .AND. (SUBLOD(1,2) == 0)) THEN
-            WRITE(ERR,1101)
-            WRITE(F06,1101)
-            FATAL_ERR = FATAL_ERR + 1
-         ENDIF
-
-         ! Check the 2 subcases for identical loading (if S/C 2 has any stated)
-         DO I = 1,2
-            IF (SUBLOD(2,I) /= 0) THEN
-               IF (SUBLOD(2,I) /= SUBLOD(1,I)) THEN
-                  WRITE(ERR,1102)
-                  WRITE(F06,1102)
-                  FATAL_ERR = FATAL_ERR + 1
+         NUM_BUCKLING_SUBS = 0
+         IF (ALLOCATED(IS_BUCKLING_SUBCASE) .AND. ALLOCATED(IS_MODES_SUBCASE)) THEN
+            DO I = 1, NSUB
+               IF (IS_MODES_SUBCASE(I) == 'Y') THEN
+                  IS_BUCKLING_SUBCASE(I) = 'Y'
+                  NUM_BUCKLING_SUBS = NUM_BUCKLING_SUBS + 1
                ENDIF
-            ENDIF
-         ENDDO
-
-         IF (SPCSETS(2) /= 0) THEN                          ! Check the 2 subcases for identical SPC (if S/C 2 has any stated)
-            IF (SPCSETS(2) /= SPCSETS(1)) THEN
-               WRITE(ERR,1102)
-               WRITE(F06,1102)
-               FATAL_ERR = FATAL_ERR + 1
-            ENDIF
+            ENDDO
          ENDIF
 
-         IF (MPCSETS(2) /= 0) THEN                          ! Check the 2 subcases for identical MPC (if S/C 2 has any stated)
-            IF (MPCSETS(2) /= MPCSETS(1)) THEN
-               WRITE(ERR,1102)
-               WRITE(F06,1102)
+         IF (NUM_BUCKLING_SUBS == 0) THEN
+            WRITE(ERR,1101)
+            WRITE(F06,1101)
+            FATAL_ERR = FATAL_ERR + 1
+            CALL OUTA_HERE ( 'Y' )
+         ENDIF
+
+         BLOCK
+            LOGICAL :: HAS_STATIC_LOAD
+            INTEGER(LONG) :: STATSUB_REQ, RESOLVED_IDX, K
+
+            HAS_STATIC_LOAD = .FALSE.
+            DO I = 1, NSUB
+               IF ((IS_BUCKLING_SUBCASE(I) == 'N') .AND. ((SUBLOD(I,1) /= 0) .OR. (SUBLOD(I,2) /= 0))) THEN
+                  HAS_STATIC_LOAD = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (.NOT. HAS_STATIC_LOAD) THEN
+               WRITE(ERR,1101)
+               WRITE(F06,1101)
                FATAL_ERR = FATAL_ERR + 1
             ENDIF
-         ENDIF
+
+            DO I = 1, NSUB
+               IF (IS_BUCKLING_SUBCASE(I) /= 'Y') CYCLE
+               STATSUB_REQ = 0
+               IF (ALLOCATED(CC_STATSUB_SUB)) STATSUB_REQ = CC_STATSUB_SUB(I)
+               IF (STATSUB_REQ == 0) STATSUB_REQ = CC_STATSUB_DECK
+
+               RESOLVED_IDX = 0
+               IF (STATSUB_REQ == 0) THEN
+                  DO K = 1, NSUB
+                     IF ((IS_BUCKLING_SUBCASE(K) == 'N') .AND. ((SUBLOD(K,1) /= 0) .OR. (SUBLOD(K,2) /= 0))) THEN
+                        RESOLVED_IDX = K
+                        EXIT
+                     ENDIF
+                  ENDDO
+                  IF (RESOLVED_IDX == 0) THEN
+                     WRITE(ERR,1103) I
+                     WRITE(F06,1103) I
+                     FATAL_ERR = FATAL_ERR + 1
+                  ENDIF
+               ELSE
+                  DO K = 1, NSUB
+                     IF (SCNUM(K) == STATSUB_REQ) THEN
+                        RESOLVED_IDX = K
+                        EXIT
+                     ENDIF
+                  ENDDO
+                  IF (RESOLVED_IDX == 0) THEN
+                     WRITE(ERR,1104) STATSUB_REQ, I
+                     WRITE(F06,1104) STATSUB_REQ, I
+                     FATAL_ERR = FATAL_ERR + 1
+                  ELSE IF (IS_BUCKLING_SUBCASE(RESOLVED_IDX) == 'Y') THEN
+                     WRITE(ERR,1105) STATSUB_REQ, I
+                     WRITE(F06,1105) STATSUB_REQ, I
+                     FATAL_ERR = FATAL_ERR + 1
+                     RESOLVED_IDX = 0
+                  ELSE IF ((SUBLOD(RESOLVED_IDX,1) == 0) .AND. (SUBLOD(RESOLVED_IDX,2) == 0)) THEN
+                     WRITE(ERR,1106) STATSUB_REQ, I
+                     WRITE(F06,1106) STATSUB_REQ, I
+                     FATAL_ERR = FATAL_ERR + 1
+                  ENDIF
+               ENDIF
+
+               IF (ALLOCATED(EIG_PARAMS) .AND. (RESOLVED_IDX > 0)) THEN
+                  EIG_PARAMS(I)%STATSUB_REF = RESOLVED_IDX
+               ENDIF
+            ENDDO
+         END BLOCK
 
       ENDIF
 
@@ -362,14 +464,26 @@ inner:         DO
 
  1015 FORMAT(' *WARNING    : GRID POINT FORCE BALANCE ONLY ALLOWED IN ',A,' SOLUTION. ABOVE ENTRY IGNORED')
 
- 1016 FORMAT(' *INFORMATION: ALL SUBCASES WILL USE "',A,'" AS THE LOCATION OF ',A,' OUTPUTS FOR PSHELL QUAD4 ELEMENTS'             &
-                    ,/,14X,' SINCE THIS WAS THE FIRST REQUEST, OTHER THAN DEFAULT "CENTER  ", DETECTED')
+ 1016 FORMAT(' *INFORMATION: ALL SUBCASES WILL USE "',A,'" AS THE LOCATION OF ',A,' OUTPUTS FOR PSHELL QUAD4 ELEMENTS')
 
  1028 FORMAT(' *ERROR  1028: THERE MUST BE 2 SUBCASES FOR LINEAR BUCKLING ANALYSES BUT NSUB = ',I8)
 
- 1101 FORMAT(' *ERROR  1101: FOR BUCKLING ANALYSES THERE MUST BE 2 SUBCASES WITH A LOAD (AND/OR TEMP) DEFINED IN SUBCASE 1')
+ 1101 FORMAT(' *ERROR  1101: FOR BUCKLING ANALYSES THERE MUST BE AT LEAST ONE SUBCASE WITH A METHOD (BUCKLING EIGENPROBLEM)',     &
+                           ' AND AT LEAST ONE OTHER SUBCASE THAT CARRIES A LOAD (AND/OR TEMP) TO ACT AS THE STATSUB PRELOAD.')
 
  1102 FORMAT(' *ERROR  1102: FOR BUCKLING ANALYSES ANY LOAD, SPS OR MPC IN 2nd SUBCASE MUST BE THE SAME AS THOSE IN 1st SUBCASE')
+
+ 1103 FORMAT(' *ERROR  1103: BUCKLING SUBCASE (INTERNAL #',I8,') HAS NO STATSUB AND NO STATIC SUBCASE WITH A LOAD WAS FOUND',     &
+                           ' TO ACT AS THE LEGACY DEFAULT PRELOAD.')
+
+ 1104 FORMAT(' *ERROR  1104: STATSUB(PRELOAD)=',I8,' ON BUCKLING SUBCASE (INTERNAL #',I8,') REFERENCES A SUBCASE THAT DOES NOT',  &
+                           ' EXIST IN THIS CASE CONTROL DECK.')
+
+ 1105 FORMAT(' *ERROR  1105: STATSUB(PRELOAD)=',I8,' ON BUCKLING SUBCASE (INTERNAL #',I8,') REFERENCES ANOTHER BUCKLING SUBCASE.',&
+                           ' STATSUB MUST POINT TO A LINEAR-STATIC SUBCASE.')
+
+ 1106 FORMAT(' *ERROR  1106: STATSUB(PRELOAD)=',I8,' ON BUCKLING SUBCASE (INTERNAL #',I8,') REFERENCES A SUBCASE THAT CARRIES',   &
+                           ' NEITHER LOAD NOR TEMP.')
 
  1199 FORMAT(' *WARNING    : BE CAREFUL WITH LINES THAT BEGIN WITH A $ SIGN IN COL 1 FOLLOWED BY AN UPPER CASE LETTER IN EXEC OR', &
                            ' CASE CONTROL.'                                                                                        &

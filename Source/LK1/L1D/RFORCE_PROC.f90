@@ -28,7 +28,7 @@
 
 ! RFORCE load processor. Forces on grids for an RFORCE are:
 
-!           Fi = Mi*[W x (W x (Ri - Ra)) + A x (Ri - Ra)]
+!           Fi = -Mi*[W x (W x (Ri - Ra)) - A x (Ri - Ra)]
 
 ! where x means a vector cross product and:
 
@@ -46,8 +46,8 @@
 !               SETID         = Load set ID
 !               ACID_L        = Local coord sys ID that RFORCE load is given in
 !               RFORCE_GRID   = ID of grid that rotational (components 4, 5, 6) RFORCE velocity/accels are about
-!               SCALEF_AV     = Scale factor for angular velocity
-!               SCALEF_AA     = Scale factor for angular accel
+!               SCALEF_AV     = Scale factor for angular velocity in revolutions per unit time
+!               SCALEF_AA     = Scale factor for angular accel in revolutions per unit time squared
 !               VEC(1-3)      = 3 components of the vector for the velocity and/or accel
 
 ! The process in creating array SYS_LOAD from this information is as follows:
@@ -104,7 +104,7 @@
       USE IOUNT1, ONLY                :  ERR, F06, FILE_NAM_MAXLEN, L1U, LINK1U, L1U_MSG, SC1, SCR, WRT_ERR
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, LLOADC, NCORD, NRFORCE, NGRID, NLOAD, NSUB, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO, ONE
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, PI
       USE PARAMS, ONLY                :  SUPWARN
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE MODEL_STUF, ONLY            :  CORD, GRID, GRID_ID, LOAD_FACS, LOAD_SIDS, RCORD, RGRID, SYS_LOAD, SUBLOD
@@ -154,8 +154,8 @@
       REAL(DOUBLE)                    :: ACCEL_I_T2(3)     ! 3 transl components of accel due to RFORCE at a grid in global coords
       REAL(DOUBLE)                    :: ACCEL_I_R1(3)     ! 3 rotat  components of accel due to RFORCE at a grid in basic  coords
       REAL(DOUBLE)                    :: ACCEL_I_R2(3)     ! 3 rotat  components of accel due to RFORCE at a grid in global coords
-      REAL(DOUBLE)                    :: ANG_ACC(3)        ! Angular acceleration (SCALEF_AA*VEC(I))
-      REAL(DOUBLE)                    :: ANG_VEL(3)        ! Angular velocity     (SCALEF_AV*VEC(I))
+      REAL(DOUBLE)                    :: ANG_ACC(3)        ! Angular acceleration in radians per unit time squared
+      REAL(DOUBLE)                    :: ANG_VEL(3)        ! Angular velocity in radians per unit time
       REAL(DOUBLE)                    :: DRI(3)            ! Components of the vector formed by RI - RA
       REAL(DOUBLE)                    :: FORCE_I(6)        ! 6 forces at a grid due to the RFORCE loading
       REAL(DOUBLE)                    :: GRID_MGG(6,6)     ! 6 X 6 mass matrix for one grid point
@@ -209,22 +209,6 @@ i_do1:DO I=1,NRFORCE
             CYCLE i_do1
          ENDIF
 
-         DO J=1,3
-            RA(J) = ZERO
-         ENDDO
-         IF (RFORCE_GRD > 0) THEN
-            CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, RFORCE_GRD, RFORCE_GRD_ROW_NUM )
-            IF (RFORCE_GRD_ROW_NUM == -1) THEN
-               WRITE(ERR,1822) 'GRID ', RFORCE_GRD, NAME, SETID
-               WRITE(F06,1822) 'GRID ', RFORCE_GRD, NAME, SETID
-               GID_ERR = GID_ERR + 1
-               FATAL_ERR = FATAL_ERR + 1
-            ELSE
-               RA(1) = RGRID(RFORCE_GRD_ROW_NUM,1)
-               RA(2) = RGRID(RFORCE_GRD_ROW_NUM,2)
-               RA(3) = RGRID(RFORCE_GRD_ROW_NUM,3)
-            ENDIF
-         ENDIF
                                                            ! The local system that RFORCE is defined in is ACID_L.
          DO J=1,3
             VEC_LOCAL(J) = VEC(J)
@@ -337,14 +321,31 @@ j_do_22: DO J = 1,NRFORCE                                  ! Process RFORCE card
                CALL OUTA_HERE ( 'Y' )                      ! Coding error, so quit
             ENDIF
 
+                                                           ! Find the location of the axis from the grid point ID.
+            RA = ZERO
+            IF (RFORCE_GRD > 0) THEN
+               CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, RFORCE_GRD, RFORCE_GRD_ROW_NUM )
+               IF (RFORCE_GRD_ROW_NUM == -1) THEN
+                  WRITE(ERR,1822) 'GRID ', RFORCE_GRD, NAME, SETID
+                  WRITE(F06,1822) 'GRID ', RFORCE_GRD, NAME, SETID
+                  GID_ERR = GID_ERR + 1
+                  FATAL_ERR = FATAL_ERR + 1
+                  CYCLE j_do_22
+               ELSE
+                  RA(1) = RGRID(RFORCE_GRD_ROW_NUM,1)
+                  RA(2) = RGRID(RFORCE_GRD_ROW_NUM,2)
+                  RA(3) = RGRID(RFORCE_GRD_ROW_NUM,3)
+               ENDIF
+            ENDIF
+
             FOUND = 'N'                                    ! (2-b- ii). Scan through LSID to find set that matches SETID read.
 k_do221:    DO K = 1,NSID                                  ! There is a match; we made sure all requested loads were in B.D. deck
                IF (SETID == LSID(K)) THEN                  ! We start with K = 1 to cover the case of no LOAD B.D cards
                   SCALE = RSID(K)
                   FOUND = 'Y'
                   DO L=1,3
-                     ANG_ACC(L) = SCALE*SCALEF_AA*VEC(L)   ! Ang accel and vel of model due to RFORCE angular vel, accel entries
-                     ANG_VEL(L) = SCALE*SCALEF_AV*VEC(L)
+                     ANG_ACC(L) = 2*PI*SCALE*SCALEF_AA*VEC(L)
+                     ANG_VEL(L) = 2*PI*SCALE*SCALEF_AV*VEC(L)
                   ENDDO
                   EXIT k_do221
                ENDIF
@@ -439,7 +440,14 @@ l_do_2214:     DO L = 1,6
             ENDDO
 
          ENDDO j_do_22
-         REWIND (SCR(1))                                       ! Need to read all of the RFORCE records again for the next S/C
+
+         IF (GID_ERR > 0) THEN
+            WRITE(ERR,1599) SUBR_NAME,GID_ERR
+            WRITE(F06,1599) SUBR_NAME,GID_ERR
+            CALL OUTA_HERE ( 'Y' )
+         ENDIF
+
+         REWIND (SCR(1))                                   ! Need to read all of the RFORCE records again for the next S/C
 
       ENDDO i_do2
 
@@ -494,8 +502,6 @@ l_do_2214:     DO L = 1,6
 
       IMPLICIT NONE
 
-      INTEGER(LONG)                   :: II                ! DO loop index
-
       REAL(DOUBLE)                    :: DUM1(3)           ! Intermediate vector in cross product
       REAL(DOUBLE)                    :: DUM2(3)           ! Intermediate vector in cross product
       REAL(DOUBLE)                    :: DUM3(3)           ! Intermediate vector in cross product
@@ -505,12 +511,8 @@ l_do_2214:     DO L = 1,6
       CALL CROSS ( ANG_VEL, DRI , DUM1 )
       CALL CROSS ( ANG_VEL, DUM1, DUM2 )
       CALL CROSS ( ANG_ACC, DRI , DUM3 )
-      DO II = 1,3
-         ACCEL_I_T1(II) = DUM2(II) + DUM3(II)
-      ENDDO
-      DO II = 1,3
-         ACCEL_I_R1(II) = DUM3(II)
-      ENDDO
+      ACCEL_I_T1 = DUM2 - DUM3
+      ACCEL_I_R1 = -ANG_ACC
 
 
 

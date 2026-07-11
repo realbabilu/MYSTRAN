@@ -48,7 +48,8 @@
 
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, COMM, ELDT_F21_P_T_BIT, ELDT_F22_ME_BIT, ELDT_F23_KE_BIT, ELDT_F24_SE_BIT,  &
                                          FATAL_ERR, IBIT, LINKNO, LTERM_KGG, LTERM_KGGD, LTERM_MGGE, NDOFM, NFORCE,                &
-                                         NGRAV, NMPC, NPLOAD, NRFORCE, NRIGEL, NSLOAD, NTERM_RMG, NTSUB, RESTART, SOL_NAME
+                                         NGRAV, NMPC, NPLOAD, NRFORCE, NRIGEL, NSLOAD, NTERM_RMG, NTSUB, NUM_BUCKLING_SUBS,        &
+                                         RESTART, SOL_NAME
 
       USE DOF_TABLES, ONLY            :  TDOFI
 
@@ -358,7 +359,8 @@ res19:IF (RESTART == 'N') THEN
          CALL ESP
 
          IF ((SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:8) /= 'NLSTATIC') .AND. (SOL_NAME(1:8) /= 'DIFFEREN')) THEN
-            CALL DEALLOCATE_MODEL_STUF ( 'SCNUM' )
+            ! Keep SCNUM alive for later links that still emit subcase-scoped output
+            ! (e.g. modal summaries and multi-subcase reporting in LINK4/LINK9).
             CALL DEALLOCATE_MODEL_STUF ( 'ELDT' )
             CALL DEALLOCATE_MODEL_STUF ( 'TPNT, TDATA' )
             CALL DEALLOCATE_MODEL_STUF ( 'PPNT, PDATA, PTYPE' )
@@ -385,9 +387,10 @@ res19:IF (RESTART == 'N') THEN
 ! Convert system stiff matrix from linked list format to sparse format (SPARSE_KGG calls grid singularity check subr)
 
          IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
-            CALL LINK_MESSAGE('SPARSE KGGD PROCESSOR                       ')
-            CALL SPARSE_KGGD
-            CALL DEALLOCATE_MODEL_STUF ( 'MPC_IND_GRIDS' )
+            CALL BUILD_KGGD_FROM_UG
+            IF (.NOT. ((SOL_NAME(1:8) == 'BUCKLING') .AND. (NUM_BUCKLING_SUBS > 1))) THEN
+               CALL DEALLOCATE_MODEL_STUF ( 'MPC_IND_GRIDS' )
+            ENDIF
             CALL DEALLOCATE_STF_ARRAYS ( 'STFKEY' )
             CALL DEALLOCATE_STF_ARRAYS ( 'STF3' )
          ELSE
@@ -431,9 +434,11 @@ res19:IF (RESTART == 'N') THEN
 
 ! Deallocate
 
-      CALL DEALLOCATE_MODEL_STUF ( 'SINGLE ELEMENT ARRAYS' )
-      IF ((SOL_NAME(1:8) /= 'NLSTATIC') .AND. (SOL_NAME(1:8) /= 'DIFFEREN')) THEN
-         CALL DEALLOCATE_MODEL_STUF ( 'SUBLOD' )
+      IF (.NOT. ((SOL_NAME(1:8) == 'BUCKLING') .AND. (NUM_BUCKLING_SUBS > 1) .AND. (LOAD_ISTEP == 2))) THEN
+         CALL DEALLOCATE_MODEL_STUF ( 'SINGLE ELEMENT ARRAYS' )
+         IF ((SOL_NAME(1:8) /= 'NLSTATIC') .AND. (SOL_NAME(1:8) /= 'DIFFEREN')) THEN
+            CALL DEALLOCATE_MODEL_STUF ( 'SUBLOD' )
+         ENDIF
       ENDIF
 
 ! Check allocation status of allocatable arrays, if requested

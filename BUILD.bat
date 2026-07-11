@@ -1,0 +1,4 @@
+rmdir build /s /q
+mkdir build
+cd build
+cmake -G "MinGW Makefiles" .. -DMYSTRAN_OPENBLAS_IMPORT_LIB=C:/gcc/openblas/libopenblas.dll.a  -DTPL_BLAS_LIBRARIES=C:/gcc/openblas/libopenblas.dll.a  -DSUPERLU_INCLUDE_DIR=C:/gcc/superlu7  -DSUPERLU_LIBRARY=C:/gcc/superlu7/libsuperlu.a  -DSUPERLU_FORTRAN_LIBRARY=C:/gcc/superlu7/libsuperlu_fortran.a  -DMUMPS_INCLUDE_DIR=C:/gcc/libmumps/include  -DMUMPS_LIBRARIES="C:/gcc/libmumps/libdmumps.a;C:/gcc/libmumps/libmumps_common.a;C:/gcc/libmumps/libpord.a;C:/gcc/libmumps/libmpiseq.a"  -DFEAST_INCLUDE_DIR=C:/gcc/feast32   -DFEAST_LIBRARY=C:/gcc/feast32/libfeast.a -DCMAKE_C_COMPILER="c:\gcc\bin\gcc.exe" -DCMAKE_CXX_COMPILER="c:\gcc\bin\c++.exe" -DCMAKE_Fortran_COMPILER="c:\gcc\bin\gfortran.exe" -DCMAKE_MAKE_PROGRAM="c:\gcc\bin\make.exe" -DUSE_MUMPS=on -DUSE_FEAST=on -DEXTERNAL_MUMPS=on -DEXTERNAL_FEAST=on

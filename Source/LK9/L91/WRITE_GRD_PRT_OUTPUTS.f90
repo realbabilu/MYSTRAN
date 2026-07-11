@@ -31,7 +31,7 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, PCH
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, INT_SC_NUM, MELGP, MOGEL, NDOFR, NVEC, NUM_CB_DOFS,              &
-                                         SOL_NAME
+                                         SOL_NAME, MODE_SUBCASE
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -65,6 +65,7 @@
       INTEGER(LONG)                   :: BDY_DOF_NUM       ! DOF number for BDY_GRID/BDY_COMP
       INTEGER(LONG)                   :: I,J               ! DO loop indices
       INTEGER(LONG)                   :: LINES_WRITTEN     ! Number of lines written for the grids
+      INTEGER(LONG)                   :: MODE_INDEX_OUT    ! Mode/eigenvector number to print in headers
 
 
       REAL(DOUBLE)                    :: ABS_ANS(6)        ! Max Abs for all grids output for each of the 6 disp components
@@ -96,6 +97,7 @@
 
          WRITE(F06,*)
          WRITE(F06,*)
+         MODE_INDEX_OUT = JVEC
          IF    ((SOL_NAME(1:7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'NLSTATIC')) THEN
 
             WRITE(F06,9011) SCNUM(JVEC)
@@ -106,11 +108,27 @@
 
          ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
 
-            WRITE(F06,9012) JVEC
+            MODE_INDEX_OUT = 0
+            IF (ALLOCATED(MODE_SUBCASE)) THEN
+               DO I=1,MIN(JVEC,SIZE(MODE_SUBCASE))
+                  IF (MODE_SUBCASE(I) == INT_SC_NUM) MODE_INDEX_OUT = MODE_INDEX_OUT + 1
+               ENDDO
+            ENDIF
+            IF (MODE_INDEX_OUT <= 0) MODE_INDEX_OUT = JVEC
+            WRITE(F06,9011) SCNUM(INT_SC_NUM)
+            WRITE(F06,9012) MODE_INDEX_OUT
 
          ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
 
-            WRITE(F06,9012) JVEC
+            MODE_INDEX_OUT = 0
+            IF (ALLOCATED(MODE_SUBCASE)) THEN
+               DO I=1,MIN(JVEC,SIZE(MODE_SUBCASE))
+                  IF (MODE_SUBCASE(I) == INT_SC_NUM) MODE_INDEX_OUT = MODE_INDEX_OUT + 1
+               ENDDO
+            ENDIF
+            IF (MODE_INDEX_OUT <= 0) MODE_INDEX_OUT = JVEC
+            WRITE(F06,9011) SCNUM(INT_SC_NUM)
+            WRITE(F06,9012) MODE_INDEX_OUT
 
          ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN   ! Write info on what CB DOF the output is for
 

@@ -28,14 +28,14 @@
 
    INTERFACE
 
-      SUBROUTINE PRINCIPAL_2D ( SX, SY, SXY, ANGLE, SMAJOR, SMINOR, SXYMAX, MEAN, VONMISES )
+      SUBROUTINE PRINCIPAL_2D ( SX, SY, SXY, IS_STRAIN, ANGLE, SMAJOR, SMINOR, SXYMAX, MEAN, VONMISES )
 
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO, QUARTER, HALF, TWO, ONEPM6, FORTY5, CONV_RAD_DEG
+      USE CONSTANTS_1, ONLY           :  ZERO, QUARTER, HALF, TWO, ONE, THREE, FOUR, NINE, ONEPM6, FORTY5, CONV_RAD_DEG
 
       IMPLICIT NONE
 
@@ -44,6 +44,7 @@
       REAL(DOUBLE), INTENT(IN)        :: SX                 ! Normal x stress or strain
       REAL(DOUBLE), INTENT(IN)        :: SY                 ! Normal y stress or strain
       REAL(DOUBLE), INTENT(IN)        :: SXY                ! Shear stress or strain
+      LOGICAL      , INTENT(IN)       :: IS_STRAIN          ! .TRUE. for engineering strain input, .FALSE. for stress input
       REAL(DOUBLE), INTENT(OUT)       :: ANGLE              ! Angle of principal stresses or strain
       REAL(DOUBLE), INTENT(OUT)       :: MEAN               ! Mean stresses or strain
       REAL(DOUBLE), INTENT(OUT)       :: SMAJOR             ! Major principal stress or strain
@@ -57,4 +58,3 @@
    END INTERFACE
 
    END MODULE PRINCIPAL_2D_Interface
-

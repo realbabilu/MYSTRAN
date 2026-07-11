@@ -72,11 +72,20 @@
 
 
       REAL(DOUBLE)                    :: ABS_ANS(11)       ! Max ABS for all element output
+      REAL(DOUBLE)                    :: ANGLE
       REAL(DOUBLE)                    :: MAX_ANS(11)       ! Max for all element output
+      REAL(DOUBLE)                    :: MEAN
       REAL(DOUBLE)                    :: MIN_ANS(11)       ! Min for all element output
+      REAL(DOUBLE)                    :: ROW_CURV(10)
+      REAL(DOUBLE)                    :: ROW_MEM(10)
+      REAL(DOUBLE)                    :: SMAJ
+      REAL(DOUBLE)                    :: SMIN
+      REAL(DOUBLE)                    :: SXYMAX
       REAL(DOUBLE)                    :: TINT, XI_STD, XI0, XI1
+      REAL(DOUBLE)                    :: VONMISES
       REAL(DOUBLE)                    :: XI_RAW(11), SXC_RAW(11), SXD_RAW(11), SXE_RAW(11), SXF_RAW(11), SMAX_RAW(11),            &
                                          SMIN_RAW(11), MST_RAW(11), MSC_RAW(11)
+      REAL(DOUBLE)                    :: Z1, Z2, Z_DEN
       REAL(DOUBLE), ALLOCATABLE       :: BEAM_XI(:,:), BEAM_SXC(:,:), BEAM_SXD(:,:), BEAM_SXE(:,:), BEAM_SXF(:,:),               &
                                          BEAM_SMAX(:,:), BEAM_SMIN(:,:), BEAM_MST(:,:), BEAM_MSC(:,:)
       INTEGER(LONG), ALLOCATABLE      :: BEAM_EID(:), BEAM_GRID(:,:)
@@ -549,7 +558,7 @@
              DEVICE_CODE = 1   ! PLOT
 
              !CALL GET_STRESS_CODE(STRESS_CODE, IS_VON_MISES, IS_STRAIN, IS_FIBER_DISTANCE)
-             CALL GET_STRESS_CODE( STRESS_CODE, 1,            0,         0)
+             CALL GET_STRESS_CODE( STRESS_CODE, 1,            0,         1)
              CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
                                     TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
 
@@ -651,11 +660,9 @@
       ELSE IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
          !CALL WRITE_OES_CQUAD4 ( NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI )
 
-         !CALL GET_STRESS_CODE(STRESS_CODE, IS_VON_MISES, IS_STRAIN, IS_FIBER_DISTANCE)
-         CALL GET_STRESS_CODE( STRESS_CODE, 1,            0,         1)
-
          IF (WRITE_OP2) THEN
            IF ((STRE_LOC == 'CENTER  ') .AND. (TYPE(1:5) /= 'QUAD8')) THEN
+              CALL GET_STRESS_CODE( STRESS_CODE, 1,            0,         0)
               ! CQUAD4-33
                !(eid_device,
               ! fd1, sx1, sy1, txy1, angle1, major1, minor1, vm1,
@@ -671,6 +678,7 @@
               WRITE(OP2) NVALUES
               WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
            ELSE
+              CALL GET_STRESS_CODE( STRESS_CODE, 1,            0,         1)
               ! CQUAD4-144
                ELEMENT_TYPE = 144
               NUM_WIDE = 87 ! 2 + 17 * (4+1)  ! 4 nodes + 1 centroid
@@ -928,14 +936,14 @@
  1306 FORMAT(1X,A,10X,'GRD',I8,5X,8(1ES14.6))
 
 ! QUAD4 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
- 1401 FORMAT(1X,A,'  Elem  Location       Fibre       Stresses In Element Coord System     Principal Stresses (Zero Shear)',       &
+ 1401 FORMAT(1X,A,'  Elem  Location       Stress      Stresses In Element Coord System     Principal Stresses (Zero Shear)',       &
   '               Transverse   Transverse   % Poly',/,1X,A,                                                                        &
-  '   ID                 Distance    Normal-X     Normal-Y     Shear-XY     Angle     Major        Minor      von Mises',          &
+  '   ID                Distance     Normal-X     Normal-Y     Shear-XY     Angle     Major        Minor      von Mises',          &
   '    Shear-XZ     Shear-YZ    Fit Err',/,1X,A,119X,'(max through thickness)')
 
- 1402 FORMAT(1X,A,'Elem  Location         Fibre       Stresses In Element Coord System     Principal Stresses (Zero Shear)',       &
+ 1402 FORMAT(1X,A,'Elem  Location         Stress      Stresses In Element Coord System     Principal Stresses (Zero Shear)',       &
   '       Max     Transverse   Transverse   % Poly',/,1X,A,                                                                        &
-  ' ID                   Distance    Normal-X     Normal-Y     Shear-XY     Angle     Major        Minor      Shear-XY',           &
+  ' ID                  Distance     Normal-X     Normal-Y     Shear-XY     Angle     Major        Minor      Shear-XY',           &
   '     Shear-XZ     Shear-YZ    Fit Err',/,1X,A,119X,'(max through thickness)')
 
  1403 FORMAT(1X,A,I8,2X,'CENTER  ',3X,1ES11.3,3(1ES13.5),0PF8.2,5(1ES13.5))
@@ -972,15 +980,15 @@
 
 
 ! TRIA3 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
- 1701 FORMAT(1X,A,'Element    Location      Fibre        Stresses In Element Coord System       Principal Stresses (Zero Shear)',  &
+ 1701 FORMAT(1X,A,'Element    Location      Stress       Stresses In Element Coord System       Principal Stresses (Zero Shear)',  &
                 '               Transverse   Transverse'                                                                           &
-          ,/,1X,A,'   ID                   Distance     Normal-X     Normal-Y      Shear-XY     Angle     Major        Minor'      &
+          ,/,1X,A,'   ID                  Distance      Normal-X     Normal-Y      Shear-XY     Angle     Major        Minor'      &
           ,'      von Mises     Shear-XZ     Shear-YZ'                                                                             &
           ,/,1X,A,123X,'(max through thickness)')
 
- 1702 FORMAT(1X,A,'Element    Location      Fibre        Stresses In Element Coord System       Principal Stresses (Zero Shear)',  &
+ 1702 FORMAT(1X,A,'Element    Location      Stress       Stresses In Element Coord System       Principal Stresses (Zero Shear)',  &
   '      Max      Transverse   Transverse'                                                                                         &
-          ,/,1X,A,'   ID                   Distance     Normal-X     Normal-Y      Shear-XY     Angle     Major        Minor',     &
+          ,/,1X,A,'   ID                  Distance      Normal-X     Normal-Y      Shear-XY     Angle     Major        Minor',     &
           '      Shear-XY     Shear-XZ     Shear-YZ',/,1X,123X,'(max through thickness)')
 
  1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
@@ -1149,8 +1157,17 @@
       INTEGER(LONG)               :: ELEMENT_TYPE      ! the OP2 flag for the element
       INTEGER(LONG)               :: STRESS_CODE = 1   ! the OP2 flag for the stress; preallocate
       REAL(DOUBLE)                :: ABS_ANS(11)       ! Max ABS for output
+      REAL(DOUBLE)                :: ANGLE
       REAL(DOUBLE)                :: MAX_ANS(11)       ! Max for output
+      REAL(DOUBLE)                :: MEAN
       REAL(DOUBLE)                :: MIN_ANS(11)       ! Min for output
+      REAL(DOUBLE)                :: ROW_CURV(10)
+      REAL(DOUBLE)                :: ROW_MEM(10)
+      REAL(DOUBLE)                :: SMAJ
+      REAL(DOUBLE)                :: SMIN
+      REAL(DOUBLE)                :: SXYMAX
+      REAL(DOUBLE)                :: VONMISES
+      REAL(DOUBLE)                :: Z1, Z2, Z_DEN
       INTEGER(LONG)               :: I, J, K, L, NELEMENTS, NUM_PTS_TRI           ! DO loop indices
 
       ! [eid, fiber_dist/curvature, oxx, oyy, txy, angle, omax, omin, ovm/max_shear,   ! upper
@@ -1187,8 +1204,7 @@
 !              '      Shear-XY     Shear-XZ     Shear-YZ',/,1X,123X,'(max through thickness)')
 
           IF (STRE_LOC == 'CENTER  ') THEN
-             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), &
-                        (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
+             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
           ELSE
              WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, "CEN/", 3,                                                      &
                          (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8),                                      &
@@ -1224,12 +1240,11 @@
             K = 2*I - 1
             WRITE(F06,*)
             WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
-            K = K + 1
-            WRITE(F06,1704) (OGEL(K,J),J=1,8)
+            WRITE(F06,1704) (OGEL(K+1,J),J=1,8)
             DO L=1,3
                WRITE(F06,*)
-               WRITE(F06,1706) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(2*I-1,J),J=1,10)
-               WRITE(F06,1704) (OGEL(K,J),J=1,8)
+               WRITE(F06,1706) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10)
+               WRITE(F06,1704) (OGEL(K+1,J),J=1,8)
             ENDDO
          ENDDO
       ENDIF
