@@ -8,6 +8,7 @@ Main source commits prepared in this workspace:
 
 - `ad5c292` `Backport v18 solver, output, and validation fixes`
 - `14dfeb1` `Add v18 backport update notes`
+- `7460d0c` `Backport validation, output, and solver updates to v18.00.a`
 
 This note is intended to mirror the 2026 release progression for this branch, but only for source and build changes that belong in this repository.
 
@@ -95,6 +96,7 @@ Main source themes:
 - subcase and statsub source backports
 - RFORCE and load-processing fixes
 - K6ROT-related source additions and stabilization fixes
+- `MEFFMASS/MPFACTOR` Case Control compatibility bridge plus backend corrections
 - shell stress, shell strain, and element force writer backports
 - principal stress and principal strain helper backports
 - `NEU` writer architecture cleanup for more consistent and faster text output
@@ -143,6 +145,35 @@ Intent and scope:
 - keep `NEU` text semantics stable while reducing repeated formatted-write overhead
 - defer the more complex mixed-format shell layouts such as `1ES13.5` and `F8.2` until a later isolated pass
 - `Source/UTIL/READ_L5A_UG_FOR_SUBCASE.f90`
+
+`MEFFMASS/MPFACTOR` compatibility and backend direction in the current workspace:
+
+- added `Source/LK1/L1A-CC/CC_MPF_MEFM.f90` and `Source/Interfaces/CC_MPF_MEFM_Interface.f90`
+- legacy forms such as `MEFFMASS = ALL` still work
+- Nastran-style forms such as `MEFFMASS(ALL)=YES` and `MPFACTOR(ALL)=YES` are now accepted
+- the current bridge explicitly maps these parenthesized descriptors:
+  - `ALL`
+  - `SUMMARY`
+  - `PARTFAC`
+  - `MEFFM`
+  - `MEFFW`
+  - `FRACSUM`
+  - `GRID=`
+- unsupported extended descriptors still fall back to current MYSTRAN behavior with transition warnings
+- `Source/LK9/L92/OFP2.f90` now calculates `SOL MODES` participation factors and effective modal mass from
+  `MGG * rigid-body displacement` at the active reference point instead of relying on the older SPC-force-style path
+- `Source/LK9/L91/WRITE_MEFFMASS.f90` and `Source/LK9/L91/WRITE_MPFACTOR.f90` now honor per-subcase
+  `MEFMLOC_SUB` / `MEFMGRID_SUB` requests during output grouping for normal modal runs
+- this fixes the earlier case where free-free normal modes could print zero or reference-point-insensitive
+  participation outputs
+
+Current boundary of the `MEFFMASS/MPFACTOR` work:
+
+- normal modal (`SOL MODES`) output now respects subcase reference-point changes in the backend and writer path
+- Craig-Bampton (`GEN CB MODEL`) still uses the older global `TR6_MEFM` transform path in
+  `Source/LK6/CALC_CB_MEFM_MPF.f90`
+- because of that, the existing `LOADC` warning about conflicting per-subcase `MEFFMASS/MPFACTOR` reference settings
+  remains valid for the Craig-Bampton branch and should not be removed yet
 
 Main source areas heavily updated:
 
