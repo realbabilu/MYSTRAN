@@ -62,7 +62,7 @@
 
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  DISP_OUT, ACCE_OUT, OLOA_OUT, SPCF_OUT, MPCF_OUT, FORC_OUT, GPFO_OUT, STRE_OUT, STRN_OUT
       USE TIMDAT, ONLY                :  STIME
-      USE CONSTANTS_1, ONLY           :  ZERO, ONE
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
       USE PARAMS, ONLY                :  EPSIL, MPFOUT, SUPINFO, SUPWARN, WTMASS, PRTF06, PRTOP2, PRTNEU, OUTMODE
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE FEMAP_NEU_WRITE_HELPERS, ONLY : NEU_WRITE_TEXT, NEU_WRITE_BLOCK_END, NEU_WRITE_SET_ID, NEU_WRITE_ANALYSIS_IDS,       &
@@ -167,6 +167,7 @@
 
 
       REAL(DOUBLE)                    :: EPS1              ! Small number to compare against zero
+      REAL(DOUBLE)                    :: FEMAP_SET_VALUE = ZERO ! Scalar value stored in FEMAP block 450 for current set
       REAL(DOUBLE)                    :: UGV               ! A G-set vector read from file L5A
       REAL(DOUBLE)                    :: PHIXGV            ! A G-set vector read from file L5B
       INTEGER(LONG)                   :: ITABLE            !
@@ -737,13 +738,13 @@ j_do: DO JVEC=1,NUM_SOLNS
 
          IF (WRITE_NEU_GEOM) THEN
             FEMAP_BLK = '   450'
-            CALL CONCATENATE_TITLES
+            CALL PREPARE_FEMAP_SET_HEADER
             CALL NEU_WRITE_BLOCK_END
             CALL NEU_WRITE_TEXT(FEMAP_BLK)
             CALL NEU_WRITE_SET_ID(FEMAP_SET_ID)
             CALL NEU_WRITE_TEXT(TRIM(TSL))
             CALL NEU_WRITE_ANALYSIS_IDS(FEMAP_FROM_PROG, FEMAP_ANAL_TYPE)
-            CALL NEU_WRITE_ZERO_REAL
+            CALL NEU_WRITE_TRIPLE_REAL(FEMAP_SET_VALUE, FEMAP_SET_VALUE, FEMAP_SET_VALUE)
             CALL NEU_WRITE_ZERO_INT
             CALL NEU_WRITE_BLOCK_END
 
@@ -1552,6 +1553,57 @@ j_do: DO JVEC=1,NUM_SOLNS
       TSL(P5+1:  ) = ','
 
       END SUBROUTINE CONCATENATE_TITLES
+
+! ##################################################################################################################################
+
+      SUBROUTINE PREPARE_FEMAP_SET_HEADER
+
+! Builds the current FEMAP block-450 set title and the associated scalar value.
+! For normal modes and buckling-eigen sets, prefer a title/value closer to the
+! reference FEMAP v9 exports. For all other cases, fall back to the legacy title
+! concatenation and zero scalar payload.
+
+      USE PENTIUM_II_KIND
+
+      IMPLICIT NONE
+
+      INTEGER(LONG)                        :: MODE_OUT
+
+! **********************************************************************************************************************************
+      FEMAP_SET_VALUE = ZERO
+      CALL CONCATENATE_TITLES
+
+      IF (SOL_NAME(1:5) == 'MODES') THEN
+         MODE_OUT = JVEC
+         IF (ALLOCATED(MODE_NUM)) THEN
+            IF (JVEC <= SIZE(MODE_NUM)) MODE_OUT = MODE_NUM(JVEC)
+         ENDIF
+
+         IF (ALLOCATED(EIGEN_VAL)) THEN
+            IF (JVEC <= SIZE(EIGEN_VAL)) THEN
+               FEMAP_SET_VALUE = DSQRT(DABS(EIGEN_VAL(JVEC)))/(TWO*PI)
+            ENDIF
+         ENDIF
+
+         WRITE(TSL,'("Mode ",I0,", ",ES14.6," Hz,")') MODE_OUT, FEMAP_SET_VALUE
+
+      ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
+         MODE_OUT = JVEC
+         IF (ALLOCATED(MODE_NUM)) THEN
+            IF (JVEC <= SIZE(MODE_NUM)) MODE_OUT = MODE_NUM(JVEC)
+         ENDIF
+
+         IF (ALLOCATED(EIGEN_VAL)) THEN
+            IF (JVEC <= SIZE(EIGEN_VAL)) FEMAP_SET_VALUE = EIGEN_VAL(JVEC)
+         ENDIF
+
+         WRITE(TSL,'("Eigenvalue ",I0," ",ES14.6,",")') MODE_OUT, FEMAP_SET_VALUE
+
+      ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
+         WRITE(TSL,'("Subcase ",I0,",")') SCNUM(JVEC)
+      ENDIF
+
+      END SUBROUTINE PREPARE_FEMAP_SET_HEADER
 
 ! ##################################################################################################################################
 

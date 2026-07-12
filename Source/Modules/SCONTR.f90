@@ -576,7 +576,7 @@
       INTEGER(LONG), PARAMETER :: ELDT_F25_U_P_BIT    =  14      ! Bit pos in OELDT, ELDT for elem displ/load file requests
 
 
-      REAL(DOUBLE) , PARAMETER :: FEMAP_VERSION       = 8.2      ! FEMAP   Version number
+      REAL(DOUBLE) , PARAMETER :: FEMAP_VERSION       = 9.0      ! FEMAP neutral header version number
       REAL(SINGLE)             :: KMAT_DEN            = ZERO     ! Stiffness matrix density from BANDIT
       REAL(DOUBLE)             :: TOT_MB_MEM_ALLOC    = ZERO     ! The total amount of memory, in MB, allocated at any time
 

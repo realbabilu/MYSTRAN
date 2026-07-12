@@ -136,6 +136,10 @@ Fast-writer direction in the current workspace:
 - `WRITE_ELEM_STRESSES.f90` and `WRITE_ELEM_STRAINS.f90` now use the same fast `I8 + 6 x E14.6` path for the simple `BUSH` and `USERIN` rows
 - shell stress/strain `F06` rows now also have dedicated C-backed line builders for the mixed-format layouts:
   `1403/1404/1405/1406/1407` and `1703/1704/1706`
+- `WRITE_PLY_STRESSES.f90` and `WRITE_PLY_STRAINS.f90` now route the per-ply data rows through buffer builders backed by
+  the fast formatter layer instead of repeated `WRITE(F06,1405:1408)` row formatting
+- the fast formatter layer now also covers the mixed-width numeric fields needed by layered shell output:
+  `ES14.5`, `ES10.2`, and `F9.3`
 - the shell helpers keep the legacy field widths (`ES11.3`, `ES13.5`, `F8.2`, `E9.1`) rather than coercing them to `E14.6`
 
 Intent and scope:
@@ -224,6 +228,8 @@ Main `NEU` architecture changes:
   - `Source/LK9/L91/WRITE_FEMAP_STRN_VECS.f90`
 - removed the old pattern where each writer repeated its own block of `NEU` record formatting logic
 - kept `F06` behavior separate; this cleanup is specifically for FEMAP-neutral text output
+- `Source/LK9/LINK9/LINK9.f90` now gives `MODES` and buckling-eigen FEMAP set headers a more informative block-450
+  title/scalar payload instead of the previous zero-only placeholder
 
 Intent of the `NEU` writer cleanup:
 
@@ -237,6 +243,8 @@ Current boundary of this work:
 - this is a phase-1 neutral cleanup only
 - it covers geometry snapshot plus the main grid, element force, stress, and strain vector writers
 - it does not yet claim full import-grade FEMAP geometry export beyond the current snapshot approach
+- block `450` is now closer to FEMAP v9 reference exports for modal and buckling-eigen sets, but it still does not
+  reproduce the full `From:/Date:/<NULL>/title-trailer` metadata used by FEMAP text exports
 
 ## Scope Note
 

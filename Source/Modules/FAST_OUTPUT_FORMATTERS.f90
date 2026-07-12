@@ -35,8 +35,11 @@
       PUBLIC :: FAST_FMT_F06_E14_6
       PUBLIC :: FAST_FMT_E17_6
       PUBLIC :: FAST_FMT_ES13_5
+      PUBLIC :: FAST_FMT_ES14_5
       PUBLIC :: FAST_FMT_ES11_3
+      PUBLIC :: FAST_FMT_ES10_2
       PUBLIC :: FAST_FMT_F8_2
+      PUBLIC :: FAST_FMT_F9_3
       PUBLIC :: FAST_FMT_E9_1
       PUBLIC :: FAST_FMT_I8_RJ
       PUBLIC :: FAST_BUILD_GRID_F06_LINE
@@ -47,6 +50,8 @@
       PUBLIC :: FAST_BUILD_TRIA_1703_LINE
       PUBLIC :: FAST_BUILD_TRIA_1704_LINE
       PUBLIC :: FAST_BUILD_TRIA_1706_LINE
+      PUBLIC :: FAST_BUILD_PLY_FIRST_LINE
+      PUBLIC :: FAST_BUILD_PLY_CONT_LINE
 
       INTERFACE
          SUBROUTINE C_MYSTRAN_FMT_E14_6_F06 ( VALUE, TEXT ) BIND(C, NAME='mystran_fmt_e14_6_f06')
@@ -67,17 +72,35 @@
             CHARACTER(C_CHAR)           :: TEXT(*)
          END SUBROUTINE C_MYSTRAN_FMT_ES13_5
 
+         SUBROUTINE C_MYSTRAN_FMT_ES14_5 ( VALUE, TEXT ) BIND(C, NAME='mystran_fmt_es14_5')
+            IMPORT :: C_CHAR, C_DOUBLE
+            REAL(C_DOUBLE), VALUE       :: VALUE
+            CHARACTER(C_CHAR)           :: TEXT(*)
+         END SUBROUTINE C_MYSTRAN_FMT_ES14_5
+
          SUBROUTINE C_MYSTRAN_FMT_ES11_3 ( VALUE, TEXT ) BIND(C, NAME='mystran_fmt_es11_3')
             IMPORT :: C_CHAR, C_DOUBLE
             REAL(C_DOUBLE), VALUE       :: VALUE
             CHARACTER(C_CHAR)           :: TEXT(*)
          END SUBROUTINE C_MYSTRAN_FMT_ES11_3
 
+         SUBROUTINE C_MYSTRAN_FMT_ES10_2 ( VALUE, TEXT ) BIND(C, NAME='mystran_fmt_es10_2')
+            IMPORT :: C_CHAR, C_DOUBLE
+            REAL(C_DOUBLE), VALUE       :: VALUE
+            CHARACTER(C_CHAR)           :: TEXT(*)
+         END SUBROUTINE C_MYSTRAN_FMT_ES10_2
+
          SUBROUTINE C_MYSTRAN_FMT_F8_2 ( VALUE, TEXT ) BIND(C, NAME='mystran_fmt_f8_2')
             IMPORT :: C_CHAR, C_DOUBLE
             REAL(C_DOUBLE), VALUE       :: VALUE
             CHARACTER(C_CHAR)           :: TEXT(*)
          END SUBROUTINE C_MYSTRAN_FMT_F8_2
+
+         SUBROUTINE C_MYSTRAN_FMT_F9_3 ( VALUE, TEXT ) BIND(C, NAME='mystran_fmt_f9_3')
+            IMPORT :: C_CHAR, C_DOUBLE
+            REAL(C_DOUBLE), VALUE       :: VALUE
+            CHARACTER(C_CHAR)           :: TEXT(*)
+         END SUBROUTINE C_MYSTRAN_FMT_F9_3
 
          SUBROUTINE C_MYSTRAN_FMT_E9_1 ( VALUE, TEXT ) BIND(C, NAME='mystran_fmt_e9_1')
             IMPORT :: C_CHAR, C_DOUBLE
@@ -193,6 +216,20 @@
 
 ! ##################################################################################################################################
 
+      SUBROUTINE FAST_FMT_ES14_5 ( VALUE, TEXT )
+
+      REAL(DOUBLE), INTENT(IN)         :: VALUE
+      CHARACTER(14*BYTE), INTENT(OUT)  :: TEXT
+
+      CHARACTER(C_CHAR)                :: C_TEXT(14)
+
+      CALL C_MYSTRAN_FMT_ES14_5(REAL(VALUE,C_DOUBLE), C_TEXT)
+      CALL COPY_C_TEXT(C_TEXT, TEXT, 14_LONG)
+
+      END SUBROUTINE FAST_FMT_ES14_5
+
+! ##################################################################################################################################
+
       SUBROUTINE FAST_FMT_ES11_3 ( VALUE, TEXT )
 
       REAL(DOUBLE), INTENT(IN)         :: VALUE
@@ -206,6 +243,20 @@
 
 ! ##################################################################################################################################
 
+      SUBROUTINE FAST_FMT_ES10_2 ( VALUE, TEXT )
+
+      REAL(DOUBLE), INTENT(IN)         :: VALUE
+      CHARACTER(10*BYTE), INTENT(OUT)  :: TEXT
+
+      CHARACTER(C_CHAR)                :: C_TEXT(10)
+
+      CALL C_MYSTRAN_FMT_ES10_2(REAL(VALUE,C_DOUBLE), C_TEXT)
+      CALL COPY_C_TEXT(C_TEXT, TEXT, 10_LONG)
+
+      END SUBROUTINE FAST_FMT_ES10_2
+
+! ##################################################################################################################################
+
       SUBROUTINE FAST_FMT_F8_2 ( VALUE, TEXT )
 
       REAL(DOUBLE), INTENT(IN)         :: VALUE
@@ -216,6 +267,20 @@
       CALL COPY_C_TEXT(C_TEXT, TEXT, 8_LONG)
 
       END SUBROUTINE FAST_FMT_F8_2
+
+! ##################################################################################################################################
+
+      SUBROUTINE FAST_FMT_F9_3 ( VALUE, TEXT )
+
+      REAL(DOUBLE), INTENT(IN)         :: VALUE
+      CHARACTER(9*BYTE), INTENT(OUT)   :: TEXT
+
+      CHARACTER(C_CHAR)                :: C_TEXT(9)
+
+      CALL C_MYSTRAN_FMT_F9_3(REAL(VALUE,C_DOUBLE), C_TEXT)
+      CALL COPY_C_TEXT(C_TEXT, TEXT, 9_LONG)
+
+      END SUBROUTINE FAST_FMT_F9_3
 
 ! ##################################################################################################################################
 
@@ -376,6 +441,102 @@
       CALL COPY_C_TEXT(C_TEXT, TEXT, 139_LONG)
 
       END SUBROUTINE FAST_BUILD_TRIA_1706_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE FAST_BUILD_PLY_FIRST_LINE ( EID, PLY_NUM, VALUES, NVALS, FTNAME, TEXT )
+
+      INTEGER(LONG), INTENT(IN)        :: EID, PLY_NUM, NVALS
+      REAL(DOUBLE), INTENT(IN)         :: VALUES(NVALS)
+      CHARACTER(LEN=*), INTENT(IN)     :: FTNAME
+      CHARACTER(LEN=*), INTENT(OUT)    :: TEXT
+
+      CHARACTER(8*BYTE)                :: EID_TEXT
+      CHARACTER(8*BYTE)                :: PLY_TEXT
+      CHARACTER(13*BYTE)               :: ES13_TEXT
+      CHARACTER(14*BYTE)               :: ES14_TEXT
+      CHARACTER(9*BYTE)                :: F9_TEXT
+      CHARACTER(10*BYTE)               :: ES10_TEXT
+      INTEGER(LONG)                    :: POS
+
+      TEXT = ' '
+      CALL FAST_FMT_I8_RJ(EID, EID_TEXT)
+      CALL FAST_FMT_I8_RJ(PLY_NUM, PLY_TEXT)
+
+      TEXT(2:9)   = EID_TEXT
+      TEXT(12:17) = PLY_TEXT(3:8)
+
+      POS = 18
+      CALL FAST_FMT_ES13_5(VALUES(1), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      CALL FAST_FMT_ES13_5(VALUES(2), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      CALL FAST_FMT_ES13_5(VALUES(3), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      TEXT(POS:POS+1) = '  '; POS = POS + 2
+      CALL FAST_FMT_ES14_5(VALUES(4), ES14_TEXT); TEXT(POS:POS+13) = ES14_TEXT; POS = POS + 14
+      CALL FAST_FMT_ES14_5(VALUES(5), ES14_TEXT); TEXT(POS:POS+13) = ES14_TEXT; POS = POS + 14
+      CALL FAST_FMT_F9_3 (VALUES(6), F9_TEXT ); TEXT(POS:POS+8 ) = F9_TEXT ; POS = POS + 9
+      CALL FAST_FMT_ES13_5(VALUES(7), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      CALL FAST_FMT_ES13_5(VALUES(8), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      CALL FAST_FMT_ES13_5(VALUES(9), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+
+      IF (NVALS >= 10) THEN
+         CALL FAST_FMT_ES10_2(VALUES(10), ES10_TEXT)
+         TEXT(POS:POS+9) = ES10_TEXT
+         POS = POS + 10
+      ENDIF
+
+      IF (LEN_TRIM(FTNAME) > 0) THEN
+         TEXT(POS:POS+1) = '  '
+         POS = POS + 2
+         TEXT(POS:POS+LEN_TRIM(FTNAME)-1) = FTNAME(1:LEN_TRIM(FTNAME))
+      ENDIF
+
+      END SUBROUTINE FAST_BUILD_PLY_FIRST_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE FAST_BUILD_PLY_CONT_LINE ( PLY_NUM, VALUES, NVALS, FTNAME, TEXT )
+
+      INTEGER(LONG), INTENT(IN)        :: PLY_NUM, NVALS
+      REAL(DOUBLE), INTENT(IN)         :: VALUES(NVALS)
+      CHARACTER(LEN=*), INTENT(IN)     :: FTNAME
+      CHARACTER(LEN=*), INTENT(OUT)    :: TEXT
+
+      CHARACTER(8*BYTE)                :: PLY_TEXT
+      CHARACTER(13*BYTE)               :: ES13_TEXT
+      CHARACTER(14*BYTE)               :: ES14_TEXT
+      CHARACTER(9*BYTE)                :: F9_TEXT
+      CHARACTER(10*BYTE)               :: ES10_TEXT
+      INTEGER(LONG)                    :: POS
+
+      TEXT = ' '
+      CALL FAST_FMT_I8_RJ(PLY_NUM, PLY_TEXT)
+      TEXT(18:23) = PLY_TEXT(3:8)
+
+      POS = 24
+      CALL FAST_FMT_ES13_5(VALUES(1), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      CALL FAST_FMT_ES13_5(VALUES(2), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      CALL FAST_FMT_ES13_5(VALUES(3), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      TEXT(POS:POS+1) = '  '; POS = POS + 2
+      CALL FAST_FMT_ES14_5(VALUES(4), ES14_TEXT); TEXT(POS:POS+13) = ES14_TEXT; POS = POS + 14
+      CALL FAST_FMT_ES14_5(VALUES(5), ES14_TEXT); TEXT(POS:POS+13) = ES14_TEXT; POS = POS + 14
+      CALL FAST_FMT_F9_3 (VALUES(6), F9_TEXT ); TEXT(POS:POS+8 ) = F9_TEXT ; POS = POS + 9
+      CALL FAST_FMT_ES13_5(VALUES(7), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      CALL FAST_FMT_ES13_5(VALUES(8), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+      CALL FAST_FMT_ES13_5(VALUES(9), ES13_TEXT); TEXT(POS:POS+12) = ES13_TEXT; POS = POS + 13
+
+      IF (NVALS >= 10) THEN
+         CALL FAST_FMT_ES10_2(VALUES(10), ES10_TEXT)
+         TEXT(POS:POS+9) = ES10_TEXT
+         POS = POS + 10
+      ENDIF
+
+      IF (LEN_TRIM(FTNAME) > 0) THEN
+         TEXT(POS:POS+1) = '  '
+         POS = POS + 2
+         TEXT(POS:POS+LEN_TRIM(FTNAME)-1) = FTNAME(1:LEN_TRIM(FTNAME))
+      ENDIF
+
+      END SUBROUTINE FAST_BUILD_PLY_CONT_LINE
 
 ! ##################################################################################################################################
 

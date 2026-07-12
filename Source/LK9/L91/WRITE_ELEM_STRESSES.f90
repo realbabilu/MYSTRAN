@@ -578,7 +578,11 @@
              WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, REAL(OGEL(I,1), 4), I=1,NUM)
          ENDIF   ! end of op2
 
-         IF(WRITE_F06) WRITE(F06,1103) (FILL(1:1), EID_OUT_ARRAY(I,1), OGEL(I,1),I=1,NUM)
+         IF (WRITE_F06) THEN
+            DO I=1,NUM,5
+               CALL WRITE_STRESS_ELAS_GROUP_LINE ( I, MIN(I+4,NUM) )
+            ENDDO
+         ENDIF
 
       ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
          !       12345
@@ -1137,9 +1141,9 @@
 
       DO I=1,NUM,2
          IF (I+1 <= NUM) THEN
-            WRITE(F06,1603) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(I,J),J=1,3), EID_OUT_ARRAY(I+1,1),(OGEL(I+1,J),J=1,3)
+            CALL WRITE_STRESS_CSHEAR_PAIR_LINE ( EID_OUT_ARRAY(I,1), OGEL(I,1:3), EID_OUT_ARRAY(I+1,1), OGEL(I+1,1:3), .TRUE. )
          ELSE
-            WRITE(F06,1603) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(I,J),J=1,3)
+            CALL WRITE_STRESS_CSHEAR_PAIR_LINE ( EID_OUT_ARRAY(I,1), OGEL(I,1:3), 0_LONG, OGEL(I,1:3), .FALSE. )
          ENDIF
       ENDDO
 
@@ -1373,6 +1377,86 @@
       WRITE(F06,'(A)') LINE_BUF(1:POS-1)
 
       END SUBROUTINE WRITE_STRESS_SOLID_GRID_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_STRESS_CSHEAR_PAIR_LINE ( EID1, VALUES1, EID2, VALUES2, HAS_SECOND )
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      USE IOUNT1, ONLY                :  F06
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_I8_RJ
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), INTENT(IN)       :: EID1, EID2
+      REAL(DOUBLE), INTENT(IN)        :: VALUES1(3), VALUES2(3)
+      LOGICAL, INTENT(IN)             :: HAS_SECOND
+
+      CHARACTER(128*BYTE)             :: LINE_BUF
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT
+      INTEGER(LONG)                   :: IVAL, POS
+
+      LINE_BUF = ' '
+      POS = 2
+      CALL FAST_FMT_I8_RJ ( EID1, ID_TEXT )
+      LINE_BUF(POS:POS+7) = ID_TEXT
+      POS = POS + 8
+      DO IVAL=1,3
+         CALL FAST_FMT_F06_E14_6 ( VALUES1(IVAL), VAL_TEXT )
+         LINE_BUF(POS:POS+13) = VAL_TEXT
+         POS = POS + 14
+      ENDDO
+
+      IF (HAS_SECOND) THEN
+         LINE_BUF(POS:POS+13) = '              '
+         POS = POS + 14
+         CALL FAST_FMT_I8_RJ ( EID2, ID_TEXT )
+         LINE_BUF(POS:POS+7) = ID_TEXT
+         POS = POS + 8
+         DO IVAL=1,3
+            CALL FAST_FMT_F06_E14_6 ( VALUES2(IVAL), VAL_TEXT )
+            LINE_BUF(POS:POS+13) = VAL_TEXT
+            POS = POS + 14
+         ENDDO
+      ENDIF
+
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_STRESS_CSHEAR_PAIR_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_STRESS_ELAS_GROUP_LINE ( IBEG, IEND )
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      USE IOUNT1, ONLY                :  F06
+      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, OGEL
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_I8_RJ
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), INTENT(IN)       :: IBEG, IEND
+
+      CHARACTER(160*BYTE)             :: LINE_BUF
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT
+      INTEGER(LONG)                   :: IROW, POS
+
+      LINE_BUF = ' '
+      POS = 1
+      DO IROW=IBEG,IEND
+         CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(IROW,1), ID_TEXT )
+         CALL FAST_FMT_F06_E14_6 ( OGEL(IROW,1), VAL_TEXT )
+         LINE_BUF(POS:POS)       = ' '
+         LINE_BUF(POS+1:POS+8)   = ID_TEXT
+         LINE_BUF(POS+9:POS+22)  = VAL_TEXT
+         POS = POS + 23
+      ENDDO
+
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_STRESS_ELAS_GROUP_LINE
 
 !==============================================================================
       SUBROUTINE GET_SPRING_OP2_ELEMENT_TYPE(ELEMENT_TYPE)

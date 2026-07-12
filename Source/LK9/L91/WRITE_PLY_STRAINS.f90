@@ -40,6 +40,7 @@
       USE MODEL_STUF, ONLY            :  ANY_FAILURE_THEORY, ELEM_ONAME, LABEL, PCOMP, SCNUM, STITLE, TITLE
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_OPT
       USE MACHINE_PARAMS, ONLY        :  MACH_LARGE_NUM
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_BUILD_PLY_FIRST_LINE, FAST_BUILD_PLY_CONT_LINE
 
       USE WRITE_PLY_STRAINS_USE_IFs
 
@@ -48,6 +49,7 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'WRITE_PLY_STRAINS'
       CHARACTER(LEN=*), INTENT(IN)    :: IHDR              ! Indicator of whether to write an output header
       CHARACTER(128*BYTE)             :: FILL              ! Padding for output format
+      CHARACTER(192*BYTE)             :: LINE_BUF
       CHARACTER(LEN=LEN(ELEM_ONAME))  :: ONAME             ! Element name to write out in F06 file
 
       INTEGER(LONG), INTENT(IN)       :: JSUB              ! Solution vector number
@@ -254,24 +256,28 @@
             WRITE(F06,*)
             IF (ANY_FAILURE_THEORY == 'Y') THEN
                IF (FTNAME(I) /= 'None') THEN
-                  WRITE(F06,1405) FILL(1: 0), EID_OUT_ARRAY(I,1), EID_OUT_ARRAY(I,2), (OGEL(I,J),J=1,10), FTNAME(I)
+                  CALL FAST_BUILD_PLY_FIRST_LINE ( EID_OUT_ARRAY(I,1), EID_OUT_ARRAY(I,2), OGEL(I,1:10), 10_LONG,              &
+                                                   FTNAME(I), LINE_BUF )
                ELSE
-                  WRITE(F06,1406) FILL(1: 0), EID_OUT_ARRAY(I,1), EID_OUT_ARRAY(I,2), (OGEL(I,J),J=1,9), FTNAME(I)
+                  CALL FAST_BUILD_PLY_FIRST_LINE ( EID_OUT_ARRAY(I,1), EID_OUT_ARRAY(I,2), OGEL(I,1:9), 9_LONG, FTNAME(I),     &
+                                                   LINE_BUF )
                ENDIF
             ELSE
-               WRITE(F06,1406) FILL(1: 0), EID_OUT_ARRAY(I,1), EID_OUT_ARRAY(I,2), (OGEL(I,J),J=1,9)
+               CALL FAST_BUILD_PLY_FIRST_LINE ( EID_OUT_ARRAY(I,1), EID_OUT_ARRAY(I,2), OGEL(I,1:9), 9_LONG, '', LINE_BUF )
             ENDIF
          ELSE
             IF (ANY_FAILURE_THEORY == 'Y') THEN
                IF (FTNAME(I) /= 'None') THEN
-                  WRITE(F06,1407) FILL(1: 0), EID_OUT_ARRAY(I,2), (OGEL(I,J),J=1,10)
+                  CALL FAST_BUILD_PLY_CONT_LINE ( EID_OUT_ARRAY(I,2), OGEL(I,1:10), 10_LONG, '', LINE_BUF )
                ELSE
-                  WRITE(F06,1408) FILL(1: 0), EID_OUT_ARRAY(I,2), (OGEL(I,J),J=1,9)
+                  CALL FAST_BUILD_PLY_CONT_LINE ( EID_OUT_ARRAY(I,2), OGEL(I,1:9), 9_LONG, '', LINE_BUF )
                ENDIF
             ELSE
-               WRITE(F06,1408) FILL(1: 0), EID_OUT_ARRAY(I,2), (OGEL(I,J),J=1,9)
+               CALL FAST_BUILD_PLY_CONT_LINE ( EID_OUT_ARRAY(I,2), OGEL(I,1:9), 9_LONG, '', LINE_BUF )
             ENDIF
          ENDIF
+
+         WRITE(F06,'(A)') TRIM(LINE_BUF)
 
       ENDDO
 

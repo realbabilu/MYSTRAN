@@ -24,10 +24,11 @@
 
       SUBROUTINE WRITE_CBEAM_STRESS (NUM, WRITE_F06)
 
-      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_F9_3, FAST_FMT_I8_RJ
 
       USE WRITE_CBEAM_STRESS_USE_IFs
 
@@ -63,7 +64,7 @@
 
          IF (NSTA >= 1) THEN
             WRITE(F06,*)
-            WRITE(F06,9001) 0, ELEMENT_ID
+            WRITE(F06,'(I1,8X,I8)') 0, ELEMENT_ID
             DO ISTA = 1, NSTA
                IF (ISTA == 1) THEN
                    GRID_ID = GID_OUT_ARRAY(IBEG,2)
@@ -78,9 +79,9 @@
                ! values and the second paired row carries the compressive margin.
                K = 2*(IBEG + ISTA - 2) + 1
 
-               WRITE(F06,9002) GRID_ID, CBEAM_XL_OUT(IBEG + ISTA - 1),                                         &
-                               OGEL(K,1), OGEL(K,2), OGEL(K,3), OGEL(K,4),                                       &
-                               OGEL(K,6), OGEL(K,7), OGEL(K,8), OGEL(K + 1,8)
+               CALL WRITE_CBEAM_STATION_LINE ( GRID_ID, CBEAM_XL_OUT(IBEG + ISTA - 1),                         &
+                                               OGEL(K,1), OGEL(K,2), OGEL(K,3), OGEL(K,4),                     &
+                                               OGEL(K,6), OGEL(K,7), OGEL(K,8), OGEL(K + 1,8) )
             ENDDO
          ENDIF
       ENDDO
@@ -88,7 +89,38 @@
 
       RETURN
 
- 9001 FORMAT(I1,8X,I8)
- 9002 FORMAT(1X,I8,2X,F7.3,1X,8(1ES14.6))
+      CONTAINS
+
+      SUBROUTINE WRITE_CBEAM_STATION_LINE ( GRID_ID, XL, V1, V2, V3, V4, V5, V6, V7, V8 )
+
+      INTEGER(LONG), INTENT(IN)       :: GRID_ID
+      REAL(DOUBLE), INTENT(IN)        :: XL, V1, V2, V3, V4, V5, V6, V7, V8
+
+      CHARACTER(128*BYTE)             :: LINE_BUF
+      CHARACTER(8*BYTE)               :: I8_TEXT
+      CHARACTER(9*BYTE)               :: F9_TEXT
+      CHARACTER(14*BYTE)              :: E14_TEXT
+      INTEGER(LONG)                   :: POS
+
+      LINE_BUF = ' '
+      CALL FAST_FMT_I8_RJ ( GRID_ID, I8_TEXT )
+      LINE_BUF(2:9) = I8_TEXT
+      LINE_BUF(12:20) = ' '
+      CALL FAST_FMT_F9_3 ( XL, F9_TEXT )
+      LINE_BUF(12:20) = F9_TEXT
+
+      POS = 21
+      CALL FAST_FMT_F06_E14_6 ( V1, E14_TEXT ); LINE_BUF(POS:POS+13) = E14_TEXT; POS = POS + 14
+      CALL FAST_FMT_F06_E14_6 ( V2, E14_TEXT ); LINE_BUF(POS:POS+13) = E14_TEXT; POS = POS + 14
+      CALL FAST_FMT_F06_E14_6 ( V3, E14_TEXT ); LINE_BUF(POS:POS+13) = E14_TEXT; POS = POS + 14
+      CALL FAST_FMT_F06_E14_6 ( V4, E14_TEXT ); LINE_BUF(POS:POS+13) = E14_TEXT; POS = POS + 14
+      CALL FAST_FMT_F06_E14_6 ( V5, E14_TEXT ); LINE_BUF(POS:POS+13) = E14_TEXT; POS = POS + 14
+      CALL FAST_FMT_F06_E14_6 ( V6, E14_TEXT ); LINE_BUF(POS:POS+13) = E14_TEXT; POS = POS + 14
+      CALL FAST_FMT_F06_E14_6 ( V7, E14_TEXT ); LINE_BUF(POS:POS+13) = E14_TEXT; POS = POS + 14
+      CALL FAST_FMT_F06_E14_6 ( V8, E14_TEXT ); LINE_BUF(POS:POS+13) = E14_TEXT; POS = POS + 14
+
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_CBEAM_STATION_LINE
 
       END SUBROUTINE WRITE_CBEAM_STRESS

@@ -464,10 +464,9 @@ headr:IF (IHDR == 'Y') THEN
                   IF (ISTA == 1) GRID_ID = GID_OUT_ARRAY(IBEG,2)
                   IF (ISTA == NSTA_ELEM) GRID_ID = GID_OUT_ARRAY(IBEG,3)
                   STA_XL = CBEAM_XL_OUT(IBEG + ISTA - 1)
-                  WRITE(F06,1115) FILL(1: 0), GRID_ID, STA_XL,                                                    &
-                                  OGEL(IBEG + ISTA - 1,1), OGEL(IBEG + ISTA - 1,2),                               &
-                                  OGEL(IBEG + ISTA - 1,5), OGEL(IBEG + ISTA - 1,6),                               &
-                                  OGEL(IBEG + ISTA - 1,7), OGEL(IBEG + ISTA - 1,8), ZERO
+                  CALL WRITE_CBEAM_STATION_LINE ( GRID_ID, STA_XL, OGEL(IBEG + ISTA - 1,1), OGEL(IBEG + ISTA - 1,2),           &
+                                                   OGEL(IBEG + ISTA - 1,5), OGEL(IBEG + ISTA - 1,6),                            &
+                                                   OGEL(IBEG + ISTA - 1,7), OGEL(IBEG + ISTA - 1,8), ZERO )
                ENDDO
             ENDDO
             WRITE(F06,1116) FILL(1: 0), MAX_ANS(1), MAX_ANS(2), MAX_ANS(5), MAX_ANS(6), MAX_ANS(7), MAX_ANS(8), ZERO
@@ -495,10 +494,10 @@ headr:IF (IHDR == 'Y') THEN
            J1 = 1
            DO I=1,NUM,5
               IF (J1+4 <= NUM) THEN
-                 WRITE(F06,1202) FILL(1: 0), (EID_OUT_ARRAY(J,1), OGEL(J,1), J=J1,J1+4)
+                 CALL WRITE_ELAS_GROUP_LINE ( J1, J1+4 )
                  J1 = J1 + 5
               ELSE
-                 WRITE(F06,1202) FILL(1: 0), (EID_OUT_ARRAY(J,1), OGEL(J,1), J=J1,NUM)
+                 CALL WRITE_ELAS_GROUP_LINE ( J1, NUM )
               ENDIF
            ENDDO
            CALL GET_MAX_MIN_ABS ( 1, 1 )
@@ -524,10 +523,10 @@ headr:IF (IHDR == 'Y') THEN
            J1 = 1
            DO I=1,NUM,3
               IF (J1+2 <= NUM) THEN
-                 WRITE(F06,1302) FILL(1: 0), (EID_OUT_ARRAY(J,1), OGEL(J,7), OGEL(J,8), J=J1,J1+2)
+                 CALL WRITE_ROD_GROUP_LINE ( J1, J1+2 )
                  J1 = J1 + 3
               ELSE
-                 WRITE(F06,1302) FILL(1: 0), (EID_OUT_ARRAY(J,1), OGEL(J,7), OGEL(J,8), J=J1,NUM)
+                 CALL WRITE_ROD_GROUP_LINE ( J1, NUM )
               ENDIF
            ENDDO
            CALL GET_MAX_MIN_ABS ( 7, 8 )
@@ -559,10 +558,10 @@ headr:IF (IHDR == 'Y') THEN
            J1 = 1
            DO I=1,NUM,2
               IF      (J1+1 <= NUM) THEN
-                 WRITE(F06,1402) FILL(1: 0), (EID_OUT_ARRAY(J,1), OGEL(J,1), OGEL(J,2), OGEL(J,3), J=J1,J1+1)
+                 CALL WRITE_SHEAR_GROUP_LINE ( J1, J1+1 )
                  J1 = J1 + 2
               ELSE
-                 WRITE(F06,1402) FILL(1: 0), (EID_OUT_ARRAY(J,1), OGEL(J,1), OGEL(J,2), OGEL(J,3), J=J1,NUM)
+                 CALL WRITE_SHEAR_GROUP_LINE ( J1, NUM )
               ENDIF
            ENDDO
            CALL GET_MAX_MIN_ABS ( 1, 3 )
@@ -928,6 +927,120 @@ headr:IF (IHDR == 'Y') THEN
       WRITE(F06,'(A)') LINE_BUF(1:POS-1)
 
       END SUBROUTINE WRITE_I8_PLUS_R14_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_ELAS_GROUP_LINE ( IBEG, IEND )
+
+      INTEGER(LONG), INTENT(IN)       :: IBEG, IEND
+
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT
+      INTEGER(LONG)                   :: IROW, POS
+
+      LINE_BUF = ' '
+      POS = 17
+      DO IROW=IBEG,IEND
+         CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(IROW,1), ID_TEXT )
+         CALL FAST_FMT_F06_E14_6 ( OGEL(IROW,1), VAL_TEXT )
+         LINE_BUF(POS:POS+7)   = ID_TEXT
+         LINE_BUF(POS+8:POS+21)= VAL_TEXT
+         POS = POS + 22
+      ENDDO
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_ELAS_GROUP_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_ROD_GROUP_LINE ( IBEG, IEND )
+
+      INTEGER(LONG), INTENT(IN)       :: IBEG, IEND
+
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT_1, VAL_TEXT_2
+      INTEGER(LONG)                   :: IROW, POS
+
+      LINE_BUF = ' '
+      POS = 17
+      DO IROW=IBEG,IEND
+         CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(IROW,1), ID_TEXT )
+         CALL FAST_FMT_F06_E14_6 ( OGEL(IROW,7), VAL_TEXT_1 )
+         CALL FAST_FMT_F06_E14_6 ( OGEL(IROW,8), VAL_TEXT_2 )
+         LINE_BUF(POS:POS+7)    = ID_TEXT
+         LINE_BUF(POS+8:POS+21) = VAL_TEXT_1
+         LINE_BUF(POS+22:POS+35)= VAL_TEXT_2
+         POS = POS + 36
+      ENDDO
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_ROD_GROUP_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_SHEAR_GROUP_LINE ( IBEG, IEND )
+
+      INTEGER(LONG), INTENT(IN)       :: IBEG, IEND
+
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT
+      INTEGER(LONG)                   :: IROW, JCOL, POS
+
+      LINE_BUF = ' '
+      POS = 2
+      DO IROW=IBEG,IEND
+         CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(IROW,1), ID_TEXT )
+         LINE_BUF(POS:POS+7) = ID_TEXT
+         POS = POS + 8
+         DO JCOL=1,3
+            CALL FAST_FMT_F06_E14_6 ( OGEL(IROW,JCOL), VAL_TEXT )
+            LINE_BUF(POS:POS+13) = VAL_TEXT
+            POS = POS + 14
+         ENDDO
+         LINE_BUF(POS:POS) = ' '
+         POS = POS + 1
+      ENDDO
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_SHEAR_GROUP_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_CBEAM_STATION_LINE ( GRID_ID, STA_XL, BM1, BM2, V1, V2, AXIAL, TORQUE, WTORQ )
+
+      INTEGER(LONG), INTENT(IN)       :: GRID_ID
+      REAL(DOUBLE), INTENT(IN)        :: STA_XL, BM1, BM2, V1, V2, AXIAL, TORQUE, WTORQ
+
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(7*BYTE)               :: STA_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT
+      REAL(DOUBLE)                    :: VALUES(7)
+      INTEGER(LONG)                   :: IVAL, POS
+
+      VALUES(1) = BM1
+      VALUES(2) = BM2
+      VALUES(3) = V1
+      VALUES(4) = V2
+      VALUES(5) = AXIAL
+      VALUES(6) = TORQUE
+      VALUES(7) = WTORQ
+
+      LINE_BUF = ' '
+      CALL FAST_FMT_I8_RJ ( GRID_ID, ID_TEXT )
+      WRITE(STA_TEXT,'(F7.3)') STA_XL
+
+      LINE_BUF(2:9)   = ID_TEXT
+      LINE_BUF(12:18) = STA_TEXT
+      LINE_BUF(19:19) = ' '
+      POS = 20
+      DO IVAL=1,7
+         CALL FAST_FMT_F06_E14_6 ( VALUES(IVAL), VAL_TEXT )
+         LINE_BUF(POS:POS+13) = VAL_TEXT
+         POS = POS + 14
+      ENDDO
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_CBEAM_STATION_LINE
 
       END SUBROUTINE WRITE_ELEM_ENGR_FORCE
 

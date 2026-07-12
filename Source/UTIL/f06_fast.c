@@ -235,6 +235,62 @@ static char *fmt_f8_2(char *dst, double v) {
     return dst;
 }
 
+static char *fmt_f_width_prec(char *dst, double v, int width, int precision) {
+    int neg;
+    int pad;
+    int scale10;
+    uint64_t scaled;
+    uint64_t intpart;
+    unsigned int frac;
+    char ibuf[32];
+    int ilen;
+
+    if (isnan(v) || isinf(v)) {
+        int n = snprintf(dst, (size_t)width + 8u, "%*.*f", width, precision, v);
+        return dst + n;
+    }
+
+    neg = (v < 0.0);
+    if (neg) {
+        v = -v;
+    }
+
+    scale10 = pow10i(precision);
+    if (scale10 <= 0) {
+        int n = snprintf(dst, (size_t)width + 8u, "%*.*f", width, precision, neg ? -v : v);
+        return dst + n;
+    }
+
+    scaled = (uint64_t)(v * (double)scale10 + 0.5);
+    intpart = scaled / (uint64_t)scale10;
+    frac = (unsigned int)(scaled % (uint64_t)scale10);
+
+    ilen = 0;
+    do {
+        ibuf[ilen++] = (char)('0' + (int)(intpart % 10u));
+        intpart /= 10u;
+    } while (intpart != 0u && ilen < (int)sizeof(ibuf));
+
+    pad = width - (ilen + 1 + precision + (neg ? 1 : 0));
+    if (pad < 0) {
+        int n = snprintf(dst, (size_t)width + 8u, "%*.*f", width, precision, neg ? -v : v);
+        return dst + n;
+    }
+
+    while (pad-- > 0) {
+        *dst++ = ' ';
+    }
+    if (neg) {
+        *dst++ = '-';
+    }
+    while (ilen-- > 0) {
+        *dst++ = ibuf[ilen];
+    }
+    *dst++ = '.';
+    dst = write_ndigits(dst, frac, precision);
+    return dst;
+}
+
 void mystran_fmt_e14_6_f06(double v, char out[14]) {
     (void)fmt_e_width_prec(out, v, 14, 6, 1);
 }
@@ -247,12 +303,24 @@ void mystran_fmt_es13_5(double v, char out[13]) {
     (void)fmt_e_width_prec(out, v, 13, 5, 0);
 }
 
+void mystran_fmt_es14_5(double v, char out[14]) {
+    (void)fmt_e_width_prec(out, v, 14, 5, 0);
+}
+
 void mystran_fmt_es11_3(double v, char out[11]) {
     (void)fmt_e_width_prec(out, v, 11, 3, 0);
 }
 
+void mystran_fmt_es10_2(double v, char out[10]) {
+    (void)fmt_e_width_prec(out, v, 10, 2, 0);
+}
+
 void mystran_fmt_f8_2(double v, char out[8]) {
     (void)fmt_f8_2(out, v);
+}
+
+void mystran_fmt_f9_3(double v, char out[9]) {
+    (void)fmt_f_width_prec(out, v, 9, 3);
 }
 
 void mystran_fmt_e9_1(double v, char out[9]) {
