@@ -62,7 +62,7 @@
                          QUAD4TYP, RCONDK, RELINK3, SEQPRT, SEQQUIT, SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, SOLLIB,   &
                          SPARSE_FLAVOR, SPARSTOR, SPC1QUIT, SORT_MAX, SPC1SID, STR_CID, SUPINFO, SUPWARN, NOCOUNTS,&
                          THRESHK, THRESHK_LAP, TINY, TSTM_DEF, USR_JCT, USR_LTERM_KGG, USR_LTERM_MGG, WINAMEM,      &
-                         WTMASS, K6ROT, PRTALL, PRTANS, PRTF06, PRTNEU, PRTOP2
+                         WTMASS, K6ROT, PRTALL, PRTANS, PRTF06, PRTNEU, PRTOP2, OUTMODE
  
       USE BD_PARAM_USE_IFs
 
@@ -1017,6 +1017,33 @@
       ELSE IF ((PARAM_NAME(1:8) == 'PRTOP2  ') .OR. (PARAM_NAME(1:8) == 'OP2     ')) THEN
          PARNAM = 'PRTOP2  '
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, PRTOP2)
+
+      ! OUTMODE controls whether legacy broad writer behavior is preserved or smart routing is used
+      ELSE IF (PARAM_NAME(1:8) == 'OUTMODE ') THEN
+         PARNAM = 'OUTMODE '
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF (CHRPARM(1:6) == 'LEGACY') THEN
+               OUTMODE = 'LEGACY  '
+            ELSE IF (CHRPARM(1:5) == 'SMART') THEN
+               OUTMODE = 'SMART   '
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'LEGACY OR SMART',CHRPARM,OUTMODE
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'LEGACY OR SMART',CHRPARM,OUTMODE
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
 
       ! GRDPNT causes the grid point weight generator to be run to calculate mass of the model relative to G.P defined by PARAM GRDPNT.
       ELSE IF (JCARD(2)(1:8) == 'GRDPNT  ') THEN

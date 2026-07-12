@@ -37,7 +37,7 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_OPT, STRN_CUR
       USE LINK9_STUFF, ONLY           :  FTNAME, OGEL
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  PRTNEU
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRN
       USE PRINCIPAL_STRAIN_2D_Interface
       USE OUTA_HERE_Interface
       USE GET_COMP_SHELL_ALLOWS_Interface
@@ -75,7 +75,7 @@
       INTRINSIC DMAX1,DMIN1
 
 
-      WRITE_NEU = (PRTNEU == 'Y')
+      WRITE_NEU = WRITE_NEU_STRN
 
 ! **********************************************************************************************************************************
 ! Calculates strain output for shell elements (TRIA3, QUAD4, SHEAR) and puts results into array OGEL for later output to F06 file

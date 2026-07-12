@@ -29,7 +29,7 @@
 
       USE OURTIM_Interface
       USE BCHECK_2D_Interface
-      USE MATMULT_FFF_T_Interface
-      USE MATMULT_FFF_Interface
+      USE MATMULX_FFF_T_Interface
+      USE MATMULX_FFF_Interface
 
       END MODULE TMEM1_USE_IFs

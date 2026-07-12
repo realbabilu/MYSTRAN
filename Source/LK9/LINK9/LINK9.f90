@@ -63,8 +63,12 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  DISP_OUT, ACCE_OUT, OLOA_OUT, SPCF_OUT, MPCF_OUT, FORC_OUT, GPFO_OUT, STRE_OUT, STRN_OUT
       USE TIMDAT, ONLY                :  STIME
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  EPSIL, MPFOUT, SUPINFO, SUPWARN, WTMASS, PRTF06, PRTOP2, PRTNEU
+      USE PARAMS, ONLY                :  EPSIL, MPFOUT, SUPINFO, SUPWARN, WTMASS, PRTF06, PRTOP2, PRTNEU, OUTMODE
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
+      USE FEMAP_NEU_WRITE_HELPERS, ONLY : NEU_WRITE_TEXT, NEU_WRITE_BLOCK_END, NEU_WRITE_SET_ID, NEU_WRITE_ANALYSIS_IDS,       &
+                                           NEU_WRITE_ZERO_REAL, NEU_WRITE_ZERO_INT, NEU_WRITE_SET_VEC_HEADER, NEU_WRITE_TITLES, &
+                                           NEU_WRITE_TRIPLE_REAL, NEU_WRITE_TEN_IDS, NEU_WRITE_GRID_RANGE, NEU_WRITE_GRID_VALUE, &
+                                           NEU_WRITE_VECTOR_END
       USE COL_VECS, ONLY              :  FG_COL, UG_COL, PG_COL, PM_COL, PS_COL, QSYS_COL, QGm_COL, QGr_COL, QGs_COL, QR_COL,      &
                                          PHIXG_COL, PHIXN_COL
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MODE_NUM
@@ -83,9 +87,10 @@
 
       USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_MPCF_OUTPUT, ANY_SPCF_OUTPUT, ANY_OLOA_OUTPUT,      &
                                          ANY_GPFO_OUTPUT, ANY_ELFE_OUTPUT, ANY_ELFN_OUTPUT, ANY_STRE_OUTPUT, ANY_STRN_OUTPUT,      &
-                                         IS_BUCKLING_SUBCASE, NUM_EIGENS_SUB, OELDT, OELOUT, OGROUT, GRID, GROUT, MEFFMASS_CALC,   &
-                                         MPFACTOR_CALC, SCNUM, SUBLOD, TITLE, STITLE, LABEL
-      USE LINK9_STUFF, ONLY           :  MAXREQ
+                                         IS_BUCKLING_SUBCASE, NUM_EIGENS_SUB, OELDT, OELOUT, OGROUT, GRID, GRID_ID, GROUT,         &
+                                         INV_GRID_SEQ, MEFFMASS_CALC, MPFACTOR_CALC, RGRID, SCNUM, SUBLOD, TITLE, STITLE, LABEL
+      USE LINK9_STUFF, ONLY           :  MAXREQ, SMART_OUTPUT_MODE, WRITE_NEU_GEOM, WRITE_NEU_DISP, WRITE_NEU_OLOA,               &
+                                         WRITE_NEU_SPCF, WRITE_NEU_MPCF, WRITE_NEU_ELFO, WRITE_NEU_STRE, WRITE_NEU_STRN
 
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
@@ -105,6 +110,7 @@
       CHARACTER( 8*BYTE)              :: CLOSE_STAT        ! What to do with file when it is closed
       CHARACTER(14*BYTE)              :: CTIME             ! A char variable to which STIME will be written (for use in NEU file)
       CHARACTER( 6*BYTE)              :: FEMAP_BLK='xxxxxx'! 3 digit number indicating the FEMAP data block
+      CHARACTER(1024*BYTE)            :: NEU_LINE          ! Buffered NEU line assembly
       CHARACTER( 1*BYTE)              :: NULL_ROW          ! 'Y'/'N' depending on whether a col in IF_LTM is null
       CHARACTER( 1*BYTE)              :: ZERO_GEN_STIFF    ! Indicator of whether there are zero gen stiffs (can't calc MEFFMASS)
 
@@ -164,6 +170,8 @@
       REAL(DOUBLE)                    :: UGV               ! A G-set vector read from file L5A
       REAL(DOUBLE)                    :: PHIXGV            ! A G-set vector read from file L5B
       INTEGER(LONG)                   :: ITABLE            !
+      INTEGER(LONG)                   :: FEMAP_FROM_PROG = 0
+      INTEGER(LONG)                   :: FEMAP_ANAL_TYPE = 0
       LOGICAL                         :: NEW_RESULT        ! Is this a new result
 
       INTRINSIC                       :: IAND
@@ -187,6 +195,15 @@
       EPS1 = EPSIL(1)
 
       WRITE_NEU = (PRTNEU == 'Y')
+      SMART_OUTPUT_MODE = (OUTMODE(1:5) == 'SMART')
+      WRITE_NEU_GEOM = WRITE_NEU
+      WRITE_NEU_DISP = WRITE_NEU .AND. (ANY_DISP_OUTPUT > 0)
+      WRITE_NEU_OLOA = WRITE_NEU .AND. (ANY_OLOA_OUTPUT > 0)
+      WRITE_NEU_SPCF = WRITE_NEU .AND. (ANY_SPCF_OUTPUT > 0)
+      WRITE_NEU_MPCF = WRITE_NEU .AND. (ANY_MPCF_OUTPUT > 0)
+      WRITE_NEU_ELFO = WRITE_NEU .AND. (ANY_ELFE_OUTPUT > 0)
+      WRITE_NEU_STRE = WRITE_NEU .AND. (ANY_STRE_OUTPUT > 0)
+      WRITE_NEU_STRN = WRITE_NEU .AND. (ANY_STRN_OUTPUT > 0)
       ! setup PRTF06, PRTNEU, PRTOP2
       !IF (DEBUG(200) > 0) THEN
       !   PRTNEU = 'Y'
@@ -194,7 +211,7 @@
       !IF (PRTNEU == 'Y') THEN
       !   DEBUG(200) = 1
       !ENDIF
-      IF (PRTF06 == 'Y') THEN
+      IF ((PRTF06 == 'Y') .AND. (.NOT.SMART_OUTPUT_MODE)) THEN
          DISP_OUT(1:1) = 'Y'  ! f06
          ACCE_OUT(2:2) = 'Y'
          OLOA_OUT(1:1) = 'Y'
@@ -316,7 +333,7 @@
 
       IF ((SOL_NAME(1:7)=='STATICS') .OR. (SOL_NAME(1:8)=='NLSTATIC') .OR. ((SOL_NAME(1:8)=='BUCKLING') .AND. (LOAD_ISTEP==1))) THEN
 
-         IF ((ANY_OLOA_OUTPUT > 0) .OR. (ANY_MPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. (WRITE_NEU)) THEN
+         IF ((ANY_OLOA_OUTPUT > 0) .OR. (ANY_MPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. WRITE_NEU_OLOA .OR. WRITE_NEU_MPCF) THEN
 
             IF (NTERM_PG > 0) THEN
 
@@ -326,7 +343,7 @@
                CLOSE_IT   = 'N'
                CALL READ_MATRIX_1 ( LINK1E, L1E, 'N', CLOSE_IT, 'KEEP', L1E_MSG, 'PG', NTERM_PG, 'Y', NDOFG,                       &
                                     I_PG, J_PG, PG)
-               IF ((ANY_MPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. (WRITE_NEU)) THEN
+               IF ((ANY_MPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. WRITE_NEU_MPCF) THEN
                   IF (NTERM_PM  > 0) THEN                  ! Partition PM from PG if there are any loads on the M-set
                      CALL PARTITION_VEC (NDOFG,'G ','N ','M ',PART_G_NM)
                      DO I=1,NSUB
@@ -348,15 +365,16 @@
       ENDIF
 
       ! Read files with KSF, MSF, QSYS (used to calc SPC constraint forces, QS), but only if they will be needed.
-      ! For any SOL_NAME they will be needed if any SPC constraint force output is requested or GP force balance or if WRITE_NEU.
+      ! For any SOL_NAME they will be needed if any SPC constraint force output is requested or GP force balance or if neutral SPC
+      ! vectors are requested.
       ! For non CB they will be needed also if MEFFMASS, MPFACTOR are to be calculated (done via SPC force total method)
       READ_SPCARRAYS = 'N'
       IF (SOL_NAME == 'GEN CB MODEL') THEN
-         IF ((ANY_SPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. (NDOFSA > 0) .OR. (WRITE_NEU)) THEN
+         IF ((ANY_SPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. (NDOFSA > 0) .OR. WRITE_NEU_SPCF) THEN
             READ_SPCARRAYS = 'Y'
          ENDIF
       ELSE
-         IF ((ANY_SPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. (NDOFSA > 0) .OR. (WRITE_NEU) .OR.                          &
+         IF ((ANY_SPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. (NDOFSA > 0) .OR. WRITE_NEU_SPCF .OR.                       &
              (MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y')) THEN
             READ_SPCARRAYS = 'Y'
          ENDIF
@@ -439,7 +457,7 @@
       ENDIF
 
       ! Read MPC constraint matrices
-      IF ((ANY_MPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. (WRITE_NEU)) THEN
+      IF ((ANY_MPCF_OUTPUT > 0) .OR. (ANY_GPFO_OUTPUT > 0) .OR. WRITE_NEU_MPCF) THEN
 
          IF (NDOFM > 0) THEN
 
@@ -569,15 +587,19 @@
 !      CALL WRITE_OP2_GEOM()
 
       ! Open FEMAP neutral file for writing, if WRITE_NEU, and write FEMAP data block 100
-      IF (WRITE_NEU) THEN
+      IF (WRITE_NEU_GEOM) THEN
          WRITE(CTIME,9000) STIME
          CALL FILE_OPEN ( NEU, NEUFIL, OUNT, 'REPLACE', NEU_MSG, 'WRITE_STIME', 'FORMATTED', 'WRITE', 'REWIND', 'Y', 'N' )
+         CALL GET_FEMAP_ANAL_TYPE
          FEMAP_BLK = '   100'
-         WRITE(NEU,9001)
-         WRITE(NEU,9011) FEMAP_BLK
-         WRITE(NEU,9012) STIME, F06FIL
-         WRITE(NEU,9013) FEMAP_VERSION
-         WRITE(NEU,9001)
+         CALL NEU_WRITE_BLOCK_END
+         CALL NEU_WRITE_TEXT(FEMAP_BLK)
+         WRITE(NEU_LINE,9012) STIME, F06FIL
+         CALL NEU_WRITE_TEXT(TRIM(NEU_LINE))
+         WRITE(NEU_LINE,9013) FEMAP_VERSION
+         CALL NEU_WRITE_TEXT(TRIM(NEU_LINE))
+         CALL NEU_WRITE_BLOCK_END
+         CALL WRITE_FEMAP_GEOM_GRID_SNAPSHOT
       ENDIF
 
       CALL ALLOCATE_COL_VEC ( 'PG_COL', NDOFG, SUBR_NAME )
@@ -713,22 +735,21 @@ j_do: DO JVEC=1,NUM_SOLNS
 
          ENDIF
 
-         IF (WRITE_NEU) THEN
+         IF (WRITE_NEU_GEOM) THEN
             FEMAP_BLK = '   450'
             CALL CONCATENATE_TITLES
-            WRITE(NEU,9001)                                ! Write data block 450 to FEMAP NEU file
-            WRITE(NEU,9011) FEMAP_BLK
-            WRITE(NEU,9022) FEMAP_SET_ID
-!           WRITE(NEU,9023) TITLE(JVEC), STITLE(JVEC), LABEL(JVEC)
-            WRITE(NEU,9023) TSL
-            WRITE(NEU,9024)
-            WRITE(NEU,9025)
-            WRITE(NEU,9026)
-            WRITE(NEU,9001)
+            CALL NEU_WRITE_BLOCK_END
+            CALL NEU_WRITE_TEXT(FEMAP_BLK)
+            CALL NEU_WRITE_SET_ID(FEMAP_SET_ID)
+            CALL NEU_WRITE_TEXT(TRIM(TSL))
+            CALL NEU_WRITE_ANALYSIS_IDS(FEMAP_FROM_PROG, FEMAP_ANAL_TYPE)
+            CALL NEU_WRITE_ZERO_REAL
+            CALL NEU_WRITE_ZERO_INT
+            CALL NEU_WRITE_BLOCK_END
 
             FEMAP_BLK = '   451'                           ! Write header for FEMAP data block 451 (for output vectors)
-            WRITE(NEU,9001)
-            WRITE(NEU,9011) FEMAP_BLK
+            CALL NEU_WRITE_BLOCK_END
+            CALL NEU_WRITE_TEXT(FEMAP_BLK)
          ENDIF
 
 
@@ -803,7 +824,7 @@ j_do: DO JVEC=1,NUM_SOLNS
 
         NEW_RESULT = .TRUE.
         ITABLE = -1
-         IF ((SC_ACCE_OUTPUT > 0) .OR. (WRITE_NEU)) THEN
+         IF (SC_ACCE_OUTPUT > 0) THEN
             IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                CALL LINK_MESSAGE_I('PROCESS ACCEL OUTPUT REQUESTS,                    "',JVEC)
                CALL OFP1 ( JVEC, 'ACCE', SC_ACCE_OUTPUT, FEMAP_SET_ID, ITG, OT4_GROW, ITABLE, NEW_RESULT )
@@ -818,7 +839,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          ENDIF
 
          ! Process displacement output requests
-         IF ((SC_DISP_OUTPUT > 0) .OR. (WRITE_NEU)) THEN
+         IF ((SC_DISP_OUTPUT > 0) .OR. WRITE_NEU_DISP) THEN
             CALL LINK_MESSAGE_I('PROCESS DISPL OUTPUT REQUESTS,                    "',JVEC)
             CALL OFP1 ( JVEC, 'DISP', SC_DISP_OUTPUT, FEMAP_SET_ID, ITG, OT4_GROW, ITABLE, NEW_RESULT )
 !           NEW_RESULT = .FALSE.
@@ -829,7 +850,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          NEW_RESULT = .TRUE.
          ITABLE = -1
          IF (PROC_PG_OUTPUT == 'Y') THEN
-            IF ((SC_OLOA_OUTPUT > 0) .OR. (SC_GPFO_OUTPUT > 0) .OR. (WRITE_NEU)) THEN
+            IF ((SC_OLOA_OUTPUT > 0) .OR. (SC_GPFO_OUTPUT > 0) .OR. WRITE_NEU_OLOA) THEN
                IF  ((SOL_NAME(1:7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'BUCKLING') .OR. (SOL_NAME(1:8) == 'NLSTATIC')) THEN
                   CALL LINK_MESSAGE_I('PROCESS APPLIED LOAD OUTPUT REQS,                 "',JVEC)
                   CALL GET_SPARSE_CRS_COL ('PG_COL    ',JVEC      , NTERM_PG, NDOFG, NSUB, I_PG, J_PG, PG, ONE, PG_COL, NULL_COL)
@@ -856,7 +877,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          ENDIF
 
          IF ((NDOFS > 0) .OR. (SC_SPCF_OUTPUT > 0) .OR. (SC_GPFO_OUTPUT > 0) .OR.                                                  &
-             (MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y') .OR. (WRITE_NEU)) THEN
+             (MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y') .OR. WRITE_NEU_SPCF) THEN
 
             CALL ALLOCATE_COL_VEC ( 'PS_COL', NDOFS, SUBR_NAME )
             DO K=1,NDOFS
@@ -884,7 +905,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          NEW_RESULT = .TRUE.
          IF (NDOFM > 0) THEN
 
-            IF ((SC_MPCF_OUTPUT > 0) .OR. (SC_GPFO_OUTPUT > 0) .OR. (WRITE_NEU)) THEN
+            IF ((SC_MPCF_OUTPUT > 0) .OR. (SC_GPFO_OUTPUT > 0) .OR. WRITE_NEU_MPCF) THEN
 
                CALL ALLOCATE_COL_VEC ( 'PM_COL', NDOFM, SUBR_NAME )
                DO K=1,NDOFM
@@ -971,7 +992,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          SC_STRN_OUTPUT = IAND(OELOUT(INT_SC_NUM),IBIT(ELOUT_STRN_BIT))
          IF((SC_ELFE_OUTPUT > 0) .OR. (SC_ELFN_OUTPUT > 0) .OR. (SC_STRE_OUTPUT > 0) .OR. (SC_STRN_OUTPUT > 0) .OR.                &
             ! (ANY_U_P_OUTPUT > 0) .OR.
-            (WRITE_NEU .AND. (SOL_NAME(1:5) /= 'MODES'))) THEN
+            ((WRITE_NEU_ELFO .OR. WRITE_NEU_STRE .OR. WRITE_NEU_STRN) .AND. (SOL_NAME(1:5) /= 'MODES'))) THEN
             CALL LINK_MESSAGE_I('PROCESS ELEM FORCE/STRESS REQUESTS,               "',JVEC)
             IF ((DEBUG(176) == 0) .AND. (JVEC == 1)) THEN
                WRITE(ERR,98980)
@@ -1024,16 +1045,16 @@ j_do: DO JVEC=1,NUM_SOLNS
                                                            ! For BUCKLING we want to keep UG_COL from the linear statics portion of
          CALL DEALLOCATE_COL_VEC ( 'PHIXG_COL' )
 
-         IF (WRITE_NEU) THEN
-            WRITE(NEU,9001)                                ! End of FEMAP block 451 indicator
+         IF (WRITE_NEU_GEOM) THEN
+            CALL NEU_WRITE_BLOCK_END                       ! End of FEMAP block 451 indicator
          ENDIF
 
       ENDDO j_do
 
       !IF (POST /= 0) THEN
       !ENDIF
-      IF (WRITE_NEU) THEN
-         WRITE(NEU,9001)                                   ! End of FEMAP block 451 indicator
+      IF (WRITE_NEU_GEOM) THEN
+         CALL NEU_WRITE_BLOCK_END                          ! End of FEMAP block 451 indicator
          CALL FILE_CLOSE ( NEU, NEUFIL, 'KEEP' )
       ENDIF
 
@@ -1379,7 +1400,7 @@ j_do: DO JVEC=1,NUM_SOLNS
 
  9023 FORMAT(A,1X,A,1X,A,',')
 
- 9024 FORMAT('0,1,')
+ 9024 FORMAT(I8,',',I8,',')
 
  9025 FORMAT('0.,')
 
@@ -1531,6 +1552,214 @@ j_do: DO JVEC=1,NUM_SOLNS
       TSL(P5+1:  ) = ','
 
       END SUBROUTINE CONCATENATE_TITLES
+
+! ##################################################################################################################################
+
+      SUBROUTINE GET_FEMAP_ANAL_TYPE
+
+      IMPLICIT NONE
+
+! **********************************************************************************************************************************
+      FEMAP_FROM_PROG = 0
+      FEMAP_ANAL_TYPE = 0
+
+      IF (SOL_NAME(1:7) == 'STATICS') THEN
+         FEMAP_ANAL_TYPE = 1
+      ELSE IF (SOL_NAME(1:8) == 'NLSTATIC') THEN
+         FEMAP_ANAL_TYPE = 10
+      ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
+         FEMAP_ANAL_TYPE = 2
+      ELSE IF (SOL_NAME(1:8) == 'MFREQ') THEN
+         FEMAP_ANAL_TYPE = 5
+      ELSE IF (SOL_NAME(1:8) == 'BUCKLING') THEN
+         FEMAP_ANAL_TYPE = 7
+      ELSE IF (SOL_NAME(1:8) == 'DFREQ') THEN
+         FEMAP_ANAL_TYPE = 4
+      ELSE
+         FEMAP_ANAL_TYPE = 0
+      ENDIF
+
+      END SUBROUTINE GET_FEMAP_ANAL_TYPE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_FEMAP_GEOM_GRID_SNAPSHOT
+
+! Phase-1 geometry snapshot written as FEMAP-neutral output-set/vector blocks.
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=3*CC_ENTRY_LEN+5)    :: GEOM_TSL
+      INTEGER(LONG), PARAMETER           :: GEOM_SET_ID = 90000001
+
+! **********************************************************************************************************************************
+      GEOM_TSL = 'MYSTRAN INPUT GEOMETRY SNAPSHOT. GRID BASIC XYZ, CP, CD, SPC. ,'
+
+      FEMAP_BLK = '   450'
+      CALL NEU_WRITE_BLOCK_END
+      CALL NEU_WRITE_TEXT(FEMAP_BLK)
+      CALL NEU_WRITE_SET_ID(GEOM_SET_ID)
+      CALL NEU_WRITE_TEXT(TRIM(GEOM_TSL))
+      CALL NEU_WRITE_ANALYSIS_IDS(FEMAP_FROM_PROG, FEMAP_ANAL_TYPE)
+      CALL NEU_WRITE_ZERO_REAL
+      CALL NEU_WRITE_ZERO_INT
+      CALL NEU_WRITE_BLOCK_END
+
+      FEMAP_BLK = '   451'
+      CALL NEU_WRITE_BLOCK_END
+      CALL NEU_WRITE_TEXT(FEMAP_BLK)
+
+      CALL WRITE_ONE_GEOM_GRID_VEC     ( GEOM_SET_ID, 91001, 'X basic coordinate', 1 )
+      CALL WRITE_ONE_GEOM_GRID_VEC     ( GEOM_SET_ID, 91002, 'Y basic coordinate', 2 )
+      CALL WRITE_ONE_GEOM_GRID_VEC     ( GEOM_SET_ID, 91003, 'Z basic coordinate', 3 )
+      CALL WRITE_ONE_GEOM_GRID_INT_VEC ( GEOM_SET_ID, 91004, 'Input coordinate system (CP)', 2 )
+      CALL WRITE_ONE_GEOM_GRID_INT_VEC ( GEOM_SET_ID, 91005, 'Output coordinate system (CD)', 3 )
+      CALL WRITE_ONE_GEOM_GRID_INT_VEC ( GEOM_SET_ID, 91006, 'Permanent SPC code', 4 )
+
+      CALL NEU_WRITE_BLOCK_END
+
+      END SUBROUTINE WRITE_FEMAP_GEOM_GRID_SNAPSHOT
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_ONE_GEOM_GRID_VEC ( GEOM_SET_ID, VEC_ID, VEC_TITLE, ICOMP )
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(IN)       :: VEC_TITLE
+      INTEGER(LONG), INTENT(IN)          :: GEOM_SET_ID
+      INTEGER(LONG), INTENT(IN)          :: ICOMP
+      INTEGER(LONG), INTENT(IN)          :: VEC_ID
+
+      INTEGER(LONG)                      :: GRID_MAX
+      INTEGER(LONG)                      :: GRID_MIN
+      INTEGER(LONG)                      :: I
+      INTEGER(LONG)                      :: ID(20)
+      INTEGER(LONG)                      :: IGRID
+      REAL(DOUBLE)                       :: VEC_ABS
+      REAL(DOUBLE)                       :: VEC_MAX
+      REAL(DOUBLE)                       :: VEC_MIN
+      REAL(DOUBLE)                       :: VVAL
+
+! **********************************************************************************************************************************
+      VEC_MIN  = ZERO
+      VEC_MAX  = ZERO
+      VEC_ABS  = ZERO
+      GRID_MIN = 0
+      GRID_MAX = 0
+
+      IF (NGRID > 0) THEN
+         IGRID    = INV_GRID_SEQ(1)
+         VEC_MIN  = RGRID(IGRID,ICOMP)
+         VEC_MAX  = RGRID(IGRID,ICOMP)
+         VEC_ABS  = DABS(RGRID(IGRID,ICOMP))
+         GRID_MIN = GRID_ID(IGRID)
+         GRID_MAX = GRID_ID(IGRID)
+      ENDIF
+
+      DO I=1,NGRID
+         IGRID = INV_GRID_SEQ(I)
+         VVAL  = RGRID(IGRID,ICOMP)
+         IF (VVAL < VEC_MIN) THEN
+            VEC_MIN = VVAL
+            GRID_MIN = GRID_ID(IGRID)
+         ENDIF
+         IF (VVAL > VEC_MAX) THEN
+            VEC_MAX = VVAL
+            GRID_MAX = GRID_ID(IGRID)
+         ENDIF
+         IF (DABS(VVAL) > VEC_ABS) VEC_ABS = DABS(VVAL)
+      ENDDO
+
+      DO I=1,20
+         ID(I) = 0
+      ENDDO
+      ID(1) = VEC_ID
+
+      CALL NEU_WRITE_SET_VEC_HEADER(GEOM_SET_ID, VEC_ID)
+      CALL NEU_WRITE_TITLES(VEC_TITLE, '')
+      CALL NEU_WRITE_TRIPLE_REAL(VEC_MIN, VEC_MAX, VEC_ABS)
+      CALL NEU_WRITE_TEN_IDS(ID(1:10))
+      CALL NEU_WRITE_TEN_IDS(ID(11:20))
+      CALL NEU_WRITE_GRID_RANGE(GRID_MIN, GRID_MAX)
+      DO I=1,NGRID
+         IGRID = INV_GRID_SEQ(I)
+         CALL NEU_WRITE_GRID_VALUE(GRID_ID(IGRID), RGRID(IGRID,ICOMP))
+      ENDDO
+      CALL NEU_WRITE_VECTOR_END
+
+      END SUBROUTINE WRITE_ONE_GEOM_GRID_VEC
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_ONE_GEOM_GRID_INT_VEC ( GEOM_SET_ID, VEC_ID, VEC_TITLE, ICOL )
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(IN)       :: VEC_TITLE
+      INTEGER(LONG), INTENT(IN)          :: GEOM_SET_ID
+      INTEGER(LONG), INTENT(IN)          :: ICOL
+      INTEGER(LONG), INTENT(IN)          :: VEC_ID
+
+      INTEGER(LONG)                      :: GRID_MAX
+      INTEGER(LONG)                      :: GRID_MIN
+      INTEGER(LONG)                      :: I
+      INTEGER(LONG)                      :: ID(20)
+      INTEGER(LONG)                      :: IGRID
+      INTEGER(LONG)                      :: IVAL
+      REAL(DOUBLE)                       :: VEC_ABS
+      REAL(DOUBLE)                       :: VEC_MAX
+      REAL(DOUBLE)                       :: VEC_MIN
+
+! **********************************************************************************************************************************
+      VEC_MIN  = ZERO
+      VEC_MAX  = ZERO
+      VEC_ABS  = ZERO
+      GRID_MIN = 0
+      GRID_MAX = 0
+
+      IF (NGRID > 0) THEN
+         IGRID    = INV_GRID_SEQ(1)
+         IVAL     = GRID(IGRID,ICOL)
+         VEC_MIN  = DBLE(IVAL)
+         VEC_MAX  = DBLE(IVAL)
+         VEC_ABS  = DABS(DBLE(IVAL))
+         GRID_MIN = GRID_ID(IGRID)
+         GRID_MAX = GRID_ID(IGRID)
+      ENDIF
+
+      DO I=1,NGRID
+         IGRID = INV_GRID_SEQ(I)
+         IVAL  = GRID(IGRID,ICOL)
+         IF (DBLE(IVAL) < VEC_MIN) THEN
+            VEC_MIN = DBLE(IVAL)
+            GRID_MIN = GRID_ID(IGRID)
+         ENDIF
+         IF (DBLE(IVAL) > VEC_MAX) THEN
+            VEC_MAX = DBLE(IVAL)
+            GRID_MAX = GRID_ID(IGRID)
+         ENDIF
+         IF (DABS(DBLE(IVAL)) > VEC_ABS) VEC_ABS = DABS(DBLE(IVAL))
+      ENDDO
+
+      DO I=1,20
+         ID(I) = 0
+      ENDDO
+      ID(1) = VEC_ID
+
+      CALL NEU_WRITE_SET_VEC_HEADER(GEOM_SET_ID, VEC_ID)
+      CALL NEU_WRITE_TITLES(VEC_TITLE, '')
+      CALL NEU_WRITE_TRIPLE_REAL(VEC_MIN, VEC_MAX, VEC_ABS)
+      CALL NEU_WRITE_TEN_IDS(ID(1:10))
+      CALL NEU_WRITE_TEN_IDS(ID(11:20))
+      CALL NEU_WRITE_GRID_RANGE(GRID_MIN, GRID_MAX)
+      DO I=1,NGRID
+         IGRID = INV_GRID_SEQ(I)
+         CALL NEU_WRITE_GRID_VALUE(GRID_ID(IGRID), DBLE(GRID(IGRID,ICOL)))
+      ENDDO
+      CALL NEU_WRITE_VECTOR_END
+
+      END SUBROUTINE WRITE_ONE_GEOM_GRID_INT_VEC
 
 ! ##################################################################################################################################
 

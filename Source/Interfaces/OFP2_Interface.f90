@@ -36,24 +36,26 @@
 
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, GROUT_SPCF_BIT, GROUT_MPCF_BIT, GROUT_GPFO_BIT, IBIT, INT_SC_NUM,&
                                          MELGP, MOGEL, NGRID, NDOFF, NDOFG, NDOFM, NDOFN, NDOFS, NDOFSA, NTERM_GMN,                &
-                                         NTERM_HMN, NTERM_KFS, NTERM_KFSD, NTERM_LMN, NTERM_MFS, NTERM_QS, SOL_NAME
+                                         NTERM_HMN, NTERM_KFS, NTERM_KFSD, NTERM_LMN, NTERM_MFS, NTERM_MGG, NTERM_QS, SOL_NAME
 
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START, TDOFI
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MEFFMASS, MPFACTOR_N6
-      USE MODEL_STUF, ONLY            :  ANY_SPCF_OUTPUT, ANY_MPCF_OUTPUT, GRID, GRID_ID, GROUT, MEFFMASS_CALC, MPFACTOR_CALC
-      USE PARAMS, ONLY                :  AUTOSPC_SPCF, EPSIL, MEFMCORD, OTMSKIP, POST
+      USE MODEL_STUF, ONLY            :  ANY_SPCF_OUTPUT, ANY_MPCF_OUTPUT, GRID, GRID_ID, GROUT, MEFFMASS_CALC, MPFACTOR_CALC,  &
+                                         MEFMLOC_SUB, MEFMGRID_SUB, MODEL_XCG, MODEL_YCG, MODEL_ZCG, RGRID
+      USE PARAMS, ONLY                :  AUTOSPC_SPCF, EPSIL, GRDPNT, MEFMCORD, MEFMGRID, MEFMLOC, OTMSKIP, POST
 
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE SPARSE_MATRICES, ONLY       :  I_GMN  , J_GMN  , GMN    , I_GMNt  , J_GMNt , GMNt   , I_HMN, J_HMN, HMN,                 &
                                          I_KSF  , J_KSF  , KSF    , I_KSFD  , J_KSFD , KSFD   ,                                    &
-                                         I_LMN  , J_LMN  , LMN    , I_MSF   , J_MSF  , MSF    ,                                    &
-                                         SYM_GMN, SYM_HMN, SYM_KFS, SYM_KFSD, SYM_MFS, SYM_LMN
+                                         I_LMN  , J_LMN  , LMN    , I_MSF   , J_MSF  , MSF    , I_MGG, J_MGG, MGG,                &
+                                         SYM_GMN, SYM_HMN, SYM_KFS, SYM_KFSD, SYM_MFS, SYM_LMN, SYM_MGG
 
       USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, MAXREQ, OGEL
       USE COL_VECS, ONLY              :  UF_COL, UG_COL, UN_COL, PHIXG_COL, PHIXN_COL, PM_COL, PS_COL,                             &
                                          QGm_COL, QGs_COL, QM_COL, QN_COL, QS_COL, QSYS_COL
+      USE RIGID_BODY_DISP_MATS, ONLY  :  RBGLOBAL_GSET
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE OUTPUT4_MATRICES, ONLY      :  OTM_MPCF, OTM_SPCF, TXT_MPCF, TXT_SPCF
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  MPCF_OUT, SPCF_OUT
@@ -79,4 +81,3 @@
    END INTERFACE
 
    END MODULE OFP2_Interface
-

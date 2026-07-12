@@ -38,7 +38,7 @@
       USE MODEL_STUF, ONLY            :  STRAIN, TYPE, ZS
       USE LINK9_STUFF, ONLY           :  MSPRNT, OGEL
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  PRTNEU
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRN
 
       USE ONE_D_STRAIN_OUTPUTS_USE_IFs
 
@@ -71,7 +71,7 @@
       INTRINSIC DABS, DMAX1,DMIN1
 
 
-      WRITE_NEU = (PRTNEU == 'Y')
+      WRITE_NEU = WRITE_NEU_STRN
       MS1  = ZERO
       MS2  = ZERO
       MS3  = ZERO

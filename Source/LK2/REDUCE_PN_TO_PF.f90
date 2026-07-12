@@ -260,7 +260,7 @@
             ENDDO
             CALL ALLOCATE_FULL_MAT ( 'KFSe_FULL', NDOFF, NDOFSE, SUBR_NAME )
             CALL ALLOCATE_FULL_MAT ( 'PFYS_FULL', NDOFF, NSUB, SUBR_NAME )
-            CALL MATMULT_FFF (KFSe_FULL, DUM1, NDOFF, NDOFSE, NSUB, PFYS_FULL )
+            CALL MATMULX_FFF (KFSe_FULL, DUM1, NDOFF, NDOFSE, NSUB, PFYS_FULL )
             CALL DEALLOCATE_FULL_MAT ( 'DUM1' )
 
             IF (NTERM_PF > 0) THEN                         ! Step (3a), NTERM_PF > 0 so reduced PF = PF(bar) - PFYS
@@ -338,4 +338,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE REDUCE_PN_TO_PF
-

@@ -34,10 +34,10 @@
                                          MELGP, MOGEL, NGRID, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
-      USE PARAMS, ONLY                :  OTMSKIP, PRTNEU
+      USE PARAMS, ONLY                :  OTMSKIP
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_OLOA_OUTPUT, GROUT, GRID, GRID_ID
-      USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, MAXREQ, OGEL
+      USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, MAXREQ, OGEL, WRITE_NEU_DISP, WRITE_NEU_OLOA
       USE COL_VECS, ONLY              :  UG_COL, UG0_COL, PG_COL, PHIXG_COL, PHIXN_COL
       USE OUTPUT4_MATRICES, ONLY      :  OTM_ACCE, OTM_DISP, TXT_ACCE, TXT_DISP
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  ACCE_OUT, DISP_OUT, OLOA_OUT
@@ -81,15 +81,9 @@
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
 
       INTEGER(LONG)                   :: TDOF_ROW          ! Row no. in array TDOF to find GDOF DOF number
-      LOGICAL                         :: WRITE_NEU
-
       INTRINSIC IAND
       WRITE(ERR,9000) "OFP1 - disp, accel and applied force output"
  9000 FORMAT(' *DEBUG:    RUNNING=', A)
-
-      WRITE_NEU = (PRTNEU == 'Y')
-
-
 
 ! **********************************************************************************************************************************
       DO I=1,MAXREQ
@@ -278,7 +272,7 @@
             ENDIF
          ENDDO
 
-         IF (WRITE_NEU .AND. (ANY_DISP_OUTPUT > 0)) THEN
+         IF (WRITE_NEU_DISP .AND. (ANY_DISP_OUTPUT > 0)) THEN
             CALL WRITE_FEMAP_GRID_VECS ( UG_COL, FEMAP_SET_ID, 'DISP' )
          ENDIF
 
@@ -353,7 +347,7 @@
             ENDIF
          ENDDO
 
-         IF (WRITE_NEU .AND. (ANY_OLOA_OUTPUT > 0)) THEN  ! No need to transform PG_COL to basic for FEMAP (handles it as-is)
+         IF (WRITE_NEU_OLOA .AND. (ANY_OLOA_OUTPUT > 0)) THEN  ! No need to transform PG_COL to basic for FEMAP (handles it as-is)
             CALL WRITE_FEMAP_GRID_VECS ( PG_COL, FEMAP_SET_ID, 'OLOA' )
          ENDIF
 

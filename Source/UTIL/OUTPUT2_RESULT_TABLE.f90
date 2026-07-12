@@ -16,8 +16,6 @@
       MONTH = DATE_TIME(2)
       DAY   = DATE_TIME(3)
 
-      WRITE(ERR,9110) TABLE_NAME
-
 !      table0 = [
 !        4, 2, 4,
 !        8, table_name.encode('ascii'), 8,
@@ -59,13 +57,12 @@
 
       !ITABLE = -3
       !CALL WRITE_ITABLE(ITABLE)
-9110 FORMAT(" *DEBUG:       WRITE WRITE_TABLE_HEADER; TABLE_NAME=", A)
       END SUBROUTINE WRITE_TABLE_HEADER
 
 ! ##################################################################################################################################
       SUBROUTINE WRITE_ITABLE(ITABLE)
       USE PENTIUM_II_KIND, ONLY  :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY           :  ERR, OP2
+      USE IOUNT1, ONLY           :  OP2
       IMPLICIT NONE
       INTEGER(LONG), INTENT(IN) :: ITABLE   ! The subtable id
 !      INTEGER(LONG), INTENT(IN) :: NTOTAL   ! the width of the block
@@ -73,10 +70,4 @@
       WRITE(OP2) ITABLE
       WRITE(OP2) 1
       WRITE(OP2) 0
-!     WRITE(ERR,*) " *INFORMATION: "
-!      WRITE(ERR,9114) " *DEBUG:       WRITE ITABLE; ITABLE=", ITABLE
-      WRITE(ERR,9114) ITABLE
-
-9114 FORMAT(" *DEBUG:       WRITE ITABLE; ITABLE=", I8)
       END SUBROUTINE WRITE_ITABLE
-

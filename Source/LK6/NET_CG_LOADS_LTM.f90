@@ -79,15 +79,11 @@
                                                            ! 1st, multiply MRRcbn*TR6_CG to get DUM1
       CALL MATMULT_SFF('MRRcbn', NDOFR, NDOFR, NTERM_MRRcbn, SYM_MRRcbn, I_MRRcbn, J_MRRcbn, MRRcbn, 'TR6_CG', NDOFR, 6, TR6_CG,   &
                         'N','DUM1', ONE, DUM1)
-      CALL MATMULT_FFF_T ( TR6_CG, DUM1, NDOFR, 6, 6, MCG )
+      CALL MATMULX_FFF_T ( TR6_CG, DUM1, NDOFR, 6, 6, MCG )
 
 ! Calc and print WCG
 
-      DO I=1,6
-         DO J=1,6
-            WCG(I,J)  = MCG(I,J)/WTMASS
-         ENDDO
-      ENDDO
+      WCG = MCG/WTMASS
 
       WRITE(F06,101)
       WRITE(F06,103)
@@ -107,15 +103,11 @@
 
       CALL MATMULT_SFF('MRRcbn', NDOFR, NDOFR, NTERM_MRRcbn, SYM_MRRcbn, I_MRRcbn, J_MRRcbn, MRRcbn, 'TR6_0', NDOFR, 6, TR6_0,    &
                         'N','DUM1', ONE, DUM1)
-      CALL MATMULT_FFF_T ( TR6_0, DUM1, NDOFR, 6, 6, RBM0 )
+      CALL MATMULX_FFF_T ( TR6_0, DUM1, NDOFR, 6, 6, RBM0 )
 
 ! Calc and print WBASIC
 
-      DO I=1,6
-         DO J=1,6
-            WBASIC(I,J)  = RBM0(I,J)/WTMASS
-         ENDDO
-      ENDDO
+      WBASIC = RBM0/WTMASS
 
       WRITE(F06,102)
       WRITE(F06,103)
@@ -131,11 +123,7 @@
 
 ! Invert MCG (to MCGI). Note INFO is returned from INVERT_FF_MAT but any necessary action was taken there
 
-      DO I=1,6                                             ! 1st set MCGI = MCG since INVERT will write over the input matrix
-         DO J=1,6
-            MCGI(I,J) = MCG(I,J)
-         ENDDO
-      ENDDO
+      MCGI = MCG                                           ! 1st set MCGI = MCG since INVERT will write over the input matrix
 
       CALL INVERT_FF_MAT ( SUBR_NAME, 'MCG', MCGI, 6, INFO )
 
@@ -144,19 +132,11 @@
 ! If user wants cg LTM calculated such that translational terms are in G's, scale the upper 3 rows of the LTM (but do it on DUM2
 ! since it is easier here)
 
-      DO I=1,6
-         DO J=1,NDOFR
-            TR6_CGt(I,J) = TR6_CG(J,I)
-         ENDDO
-      ENDDO
+      TR6_CGt = TRANSPOSE(TR6_CG)
 
-      CALL MATMULT_FFF ( MCGI, TR6_CGt, 6, 6, NDOFR, DUM2 )
+      CALL MATMULX_FFF ( MCGI, TR6_CGt, 6, 6, NDOFR, DUM2 )
 !     IF (SC_CGLTM == 'Y') THEN
-         DO I=1,3
-            DO J=1,NDOFR
-               DUM2(I,J) = WTMASS*DUM2(I,J)
-            ENDDO
-         ENDDO
+         DUM2(1:3,1:NDOFR) = WTMASS*DUM2(1:3,1:NDOFR)
 !     ENDIF
 
       CALL CNT_NONZ_IN_FULL_MAT ( 'MCGI*TR6_CGt', DUM2, 6, NDOFR, 'N', NTERM_CRS1, SMALL )

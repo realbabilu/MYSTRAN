@@ -86,9 +86,11 @@
       ! concatenate the strings
       FORC_OUT = TRIM(FOUND_PRINT) // TRIM(FOUND_PLOT) // TRIM(FOUND_PUNCH) // TRIM(FOUND_NEU) // TRIM(FOUND_CSV)
 
-      ! default to print
+      ! For bare "ELFO = ALL" requests, default to PRINT+PLOT so classic
+      ! OP2 element-force tables are emitted without requiring explicit
+      ! "(PLOT)" qualifiers on the Case Control entry.
       IF (FORC_OUT(1:5) == 'NNNNN') THEN
-        FORC_OUT = 'YNNNN'
+        FORC_OUT = 'YYNNN'
       ENDIF
 
 

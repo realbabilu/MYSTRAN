@@ -37,7 +37,7 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_OPT
       USE LINK9_STUFF, ONLY           :  OGEL
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  PRTNEU
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRN
 
       USE SOLID_STRAIN_OUTPUTS_USE_IFs
 
@@ -63,7 +63,7 @@
       INTRINSIC DMAX1,DMIN1
 
 
-      WRITE_NEU = (PRTNEU == 'Y')
+      WRITE_NEU = WRITE_NEU_STRN
 
 ! **********************************************************************************************************************************
 ! Calc engineering strains from array STRAIN and put into array OGEL

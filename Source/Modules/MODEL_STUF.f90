@@ -411,6 +411,20 @@
       CHARACTER( 1*BYTE), ALLOCATABLE :: ONE_SET_ARRAY(:)    ! Array containing one SET (after "=" sign) from ALL_SETS_ARRAY
       CHARACTER( 1*BYTE)              :: MEFFMASS_CALC = 'N' ! If 'Y', calc modal effective masses
       CHARACTER( 1*BYTE)              :: MPFACTOR_CALC = 'N' ! If 'Y', calc modal participation factors
+      CHARACTER( 1*BYTE)              :: MEFFMASS_REQ_SUMMARY = 'N' ! If 'Y', write effective-mass summary block
+      CHARACTER( 1*BYTE)              :: MEFFMASS_REQ_MEFFM   = 'N' ! If 'Y', write per-mode effective masses
+      CHARACTER( 1*BYTE)              :: MEFFMASS_REQ_MEFFW   = 'N' ! If 'Y', write per-mode effective weights
+      CHARACTER( 1*BYTE)              :: MEFFMASS_REQ_FRACSUM = 'N' ! If 'Y', write effective-mass fraction summary
+      CHARACTER( 1*BYTE)              :: MPFACTOR_REQ_PARTFAC = 'N' ! If 'Y', write modal participation factors
+      CHARACTER( 1*BYTE), ALLOCATABLE :: MEFFMASS_CALC_SUB(:)       ! Per-subcase effective-mass calculation requests
+      CHARACTER( 1*BYTE), ALLOCATABLE :: MPFACTOR_CALC_SUB(:)       ! Per-subcase participation-factor calculation requests
+      CHARACTER( 1*BYTE), ALLOCATABLE :: MEFFMASS_REQ_SUMMARY_SUB(:)! Per-subcase effective-mass summary requests
+      CHARACTER( 1*BYTE), ALLOCATABLE :: MEFFMASS_REQ_MEFFM_SUB(:)  ! Per-subcase effective-mass table requests
+      CHARACTER( 1*BYTE), ALLOCATABLE :: MEFFMASS_REQ_MEFFW_SUB(:)  ! Per-subcase effective-weight table requests
+      CHARACTER( 1*BYTE), ALLOCATABLE :: MEFFMASS_REQ_FRACSUM_SUB(:)! Per-subcase effective-mass fraction requests
+      CHARACTER( 1*BYTE), ALLOCATABLE :: MPFACTOR_REQ_PARTFAC_SUB(:)! Per-subcase participation-factor table requests
+      CHARACTER( 6*BYTE), ALLOCATABLE :: MEFMLOC_SUB(:)             ! Per-subcase reference-point mode for modal mass outputs
+      INTEGER(LONG),     ALLOCATABLE  :: MEFMGRID_SUB(:)            ! Per-subcase reference grid for modal mass outputs
 
       INTEGER(LONG)                   :: CCELDT(0:MELDTS-1) = (/(0,I=0,MELDTS-1)/)
                                                              ! See description below

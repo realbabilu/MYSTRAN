@@ -6,3 +6,4 @@ Files:
 
 - `v18_backport_summary.md`
   Summary of the MYSTRAN 18a source-level changes in `CMakeLists.txt` and the Fortran source tree under `Source/`.
+  This now also includes a short note on the July 2026 `NEU` writer architecture cleanup.

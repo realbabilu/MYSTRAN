@@ -32,10 +32,13 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_ENTRY_LEN, ENFORCED, FATAL_ERR, WARN_ERR, NSUB, NTSUB, NUM_BUCKLING_SUBS,&
                                          PROG_NAME, RESTART, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
-      USE PARAMS, ONLY                :  SUPINFO, SUPWARN
+      USE PARAMS, ONLY                :  SUPINFO, SUPWARN, MEFMLOC, MEFMGRID
       USE MODEL_STUF, ONLY            :  CC_EIGR_SID, CC_EIGR_SID_SUB, CC_EIGR_SID_DECK, CC_STATSUB_DECK, CC_STATSUB_SUB,         &
                                          IS_BUCKLING_SUBCASE, MEFFMASS_CALC, MPCSET, MPCSETS, MPFACTOR_CALC, SCNUM, SPCSET,        &
-                                         SPCSETS, SUBLOD, SC_STRE, SC_STRN, SC_ELFE, SC_ELFN, EIG_PARAMS, IS_MODES_SUBCASE
+                                         SPCSETS, SUBLOD, SC_STRE, SC_STRN, SC_ELFE, SC_ELFN, EIG_PARAMS, IS_MODES_SUBCASE,       &
+                                         MEFFMASS_CALC_SUB, MPFACTOR_CALC_SUB, MEFFMASS_REQ_SUMMARY_SUB,                           &
+                                         MEFFMASS_REQ_MEFFM_SUB, MEFFMASS_REQ_MEFFW_SUB, MEFFMASS_REQ_FRACSUM_SUB,                 &
+                                         MPFACTOR_REQ_PARTFAC_SUB, MEFMLOC_SUB, MEFMGRID_SUB
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_LANCZOS_NEV_DELT, EIG_METH,        &
                                          EIG_MSGLVL, EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SIGMA,&
                                          EIG_VECS
@@ -58,6 +61,10 @@
       INTEGER(LONG)                   :: I,J               ! DO loop indices
       INTEGER(LONG)                   :: IERR              ! Error indicator. If CHAR not found, IERR set to 1
       INTEGER(LONG)                   :: IOCHK             ! IOSTAT error number when reading a Case Control card from unit IN1
+      INTEGER(LONG)                   :: FIRST_MEFM_SUB
+      INTEGER(LONG)                   :: RESOLVED_MEFMGRID
+      CHARACTER(6*BYTE)               :: RESOLVED_MEFMLOC
+      LOGICAL                         :: MEFM_CONFLICT
 
 
 
@@ -137,7 +144,7 @@ outer:DO
 
          ELSE IF (CARD1(1:8) == 'MEFFMASS') THEN
             IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
-               MEFFMASS_CALC = 'Y'
+               CALL CC_MPF_MEFM ( CARD1, 'MEFFMASS', MEFFMASS_CALC )
             ENDIF
 
          ELSE IF (CARD1(1:4) == 'METH'    ) THEN
@@ -151,7 +158,7 @@ outer:DO
 
          ELSE IF (CARD1(1:8) == 'MPFACTOR') THEN
             IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
-               MPFACTOR_CALC = 'Y'
+               CALL CC_MPF_MEFM ( CARD1, 'MPFACTOR', MPFACTOR_CALC )
             ENDIF
 
          ELSE IF (CARD1(1:6) == 'NLPARM'  ) THEN
@@ -311,6 +318,36 @@ inner:         DO
                   EIG_PARAMS(I)%SIGMA            = EIG_SIGMA
                ENDIF
             ENDDO
+         ENDIF
+      ENDIF
+
+      FIRST_MEFM_SUB = 0
+      MEFM_CONFLICT = .FALSE.
+      RESOLVED_MEFMLOC = MEFMLOC
+      RESOLVED_MEFMGRID = MEFMGRID
+      IF (ALLOCATED(MEFMLOC_SUB) .AND. ALLOCATED(MEFMGRID_SUB)) THEN
+         DO I=1,NSUB
+            IF ((MEFFMASS_CALC_SUB(I) /= 'Y') .AND. (MPFACTOR_CALC_SUB(I) /= 'Y')) CYCLE
+            IF (FIRST_MEFM_SUB == 0) THEN
+               FIRST_MEFM_SUB = I
+               RESOLVED_MEFMLOC = MEFMLOC_SUB(I)
+               RESOLVED_MEFMGRID = MEFMGRID_SUB(I)
+            ELSE
+               IF ((MEFMLOC_SUB(I) /= RESOLVED_MEFMLOC) .OR. (MEFMGRID_SUB(I) /= RESOLVED_MEFMGRID)) THEN
+                  MEFM_CONFLICT = .TRUE.
+               ENDIF
+            ENDIF
+         ENDDO
+         IF (FIRST_MEFM_SUB > 0) THEN
+            MEFMLOC = RESOLVED_MEFMLOC
+            MEFMGRID = RESOLVED_MEFMGRID
+         ENDIF
+      ENDIF
+      IF (MEFM_CONFLICT .AND. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
+         WARN_ERR = WARN_ERR + 1
+         WRITE(ERR,1888) SCNUM(FIRST_MEFM_SUB)
+         IF (SUPWARN == 'N') THEN
+            WRITE(F06,1888) SCNUM(FIRST_MEFM_SUB)
          ENDIF
       ENDIF
 
@@ -497,6 +534,10 @@ inner:         DO
  1830 FORMAT(' *ERROR  1830: ONLY ONE ',A,' SET ID IS ALLOWED PER RUN. HOWEVER, IN CASE CONTROL THERE WERE THE FOLLOWING SET',     &
                            ' ID''s FOUND: '                                                                                        &
                            ,/,14X,32767(I8,', '))
+
+ 1888 FORMAT(' *WARNING    : MULTIPLE SUBCASES REQUESTED DIFFERENT MEFFMASS/MPFACTOR GRID REFERENCE SETTINGS. MYSTRAN 18a STILL',  &
+                           ' CALCULATES A SINGLE GLOBAL REFERENCE POINT, SO THE SETTINGS FROM SUBCASE ',I8,' WILL BE USED FOR ALL',&
+                           ' MODAL EFFECTIVE MASS/PARTICIPATION OUTPUTS IN THIS RUN.')
 
  9993 FORMAT(' *WARNING    : PRIOR ENTRY NOT PROCESSED BY ',A)
 

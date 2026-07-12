@@ -269,8 +269,8 @@
                CALL JAC2D ( SSI, SSJ, XSD, YSD, 'Y', JAC, JACI, DETJ )
                CALL MATMULT_FFF ( JACI, DPSHG, 2, 2, 4, DPSHX )
                CALL BBMIN4 ( DPSHX, I, J, 'bending strains', 'Y', BB )
-               CALL MATMULT_FFF ( SHELL_D, BB, 3, 3, 8, DUM1 )
-               CALL MATMULT_FFF_T ( BB, DUM1, 3, 8, 8, DUM2 )
+               CALL MATMULX_FFF ( SHELL_D, BB, 3, 3, 8, DUM1 )
+               CALL MATMULX_FFF_T ( BB, DUM1, 3, 8, 8, DUM2 )
                INTFAC = DETJ*HHH(I)*HHH(J)
                DO K=1,8
                   DO L=K,8
@@ -316,8 +316,8 @@
                   CALL MATMULT_FFF ( JACI, DNXSHG, 2, 2, 4, DNXSHX )
                   CALL MATMULT_FFF ( JACI, DNYSHG, 2, 2, 4, DNYSHX )
                   CALL BSMIN4 ( PSH, DPSHX, DNXSHX, DNYSHX, I, J, 'transverse shear strains', 'Y', BS )
-                  CALL MATMULT_FFF ( SHELL_T, BS, 2, 2, 12, DUM3 )
-                  CALL MATMULT_FFF_T ( BS, DUM3, 2, 12, 12, DUM4 )
+                  CALL MATMULX_FFF ( SHELL_T, BS, 2, 2, 12, DUM3 )
+                  CALL MATMULX_FFF_T ( BS, DUM3, 2, 12, 12, DUM4 )
                   INTFAC = DETJ*HHH(I)*HHH(J)
                   DO K=1,12
                      DO L=K,12
@@ -369,8 +369,8 @@
                   SSI = SSS(I)
                   SSJ = SSS(J)
                   CALL JAC2D ( SSI, SSJ, XSD, YSD, 'N', JAC, JACI, DETJ )
-                  CALL MATMULT_FFF ( SHELL_T, BS, 2, 2, 12, DUM3 )
-                  CALL MATMULT_FFF_T ( BS, DUM3, 2, 12, 12, DUM4 )
+                  CALL MATMULX_FFF ( SHELL_T, BS, 2, 2, 12, DUM3 )
+                  CALL MATMULX_FFF_T ( BS, DUM3, 2, 12, 12, DUM4 )
                   INTFAC = DETJ*HHH(I)*HHH(J)
                   DO K=1,12
                      DO L=K,12

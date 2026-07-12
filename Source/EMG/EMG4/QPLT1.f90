@@ -259,8 +259,8 @@
                CALL JAC2D ( SSI, SSJ, XSD, YSD, 'Y', JAC, JACI, DETJ )
                CALL MATMULT_FFF ( JACI, DPSHG, 2, 2, 8, DPSHX )
                CALL BBDKQ ( DPSHX, XSD, YSD, SLN, I, J, 'bending strains', 'Y', BB )
-               CALL MATMULT_FFF ( SHELL_D, BB, 3, 3, 12, DUM1 )
-               CALL MATMULT_FFF_T ( BB, DUM1, 3, 12, 12, DUM2 )
+               CALL MATMULX_FFF ( SHELL_D, BB, 3, 3, 12, DUM1 )
+               CALL MATMULX_FFF_T ( BB, DUM1, 3, 12, 12, DUM2 )
                INTFAC = DETJ*HHH(I)*HHH(J)
                DO K=1,12
                   DO L=K,12

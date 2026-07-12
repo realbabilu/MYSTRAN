@@ -65,8 +65,9 @@
       REAL(DOUBLE)                    :: MEFW_MAT_66(6,6)        ! Modal eff wgt for 1 mode transformed to CG via TR6_CG
       REAL(DOUBLE)                    :: MEFW_DIAG_NR(NVEC,NDOFR)! Matrix whose i-th row is the diagonal from MEFW for mode i
       REAL(DOUBLE)                    :: MPFt(NDOFR,NVEC)        ! Transpose of MPF
-      REAL(DOUBLE)                    :: MPFi(1,NDOFR)           ! i-th row of MPF
       REAL(DOUBLE)                    :: MPFit(NDOFR,1)          ! MPFi'
+
+      EXTERNAL                        :: DGER
 
 
 
@@ -86,34 +87,24 @@
 
       IF (MPFOUT == '6') THEN
          CALL ALLOCATE_EIGEN1_MAT ( 'MPFACTOR_N6', NVEC, 6, SUBR_NAME )
-         CALL MATMULT_FFF ( MPFACTOR_NR, TR6_MEFM, NVEC, NDOFR, 6, MPFACTOR_N6 )
+         CALL MATMULX_FFF ( MPFACTOR_NR, TR6_MEFM, NVEC, NDOFR, 6, MPFACTOR_N6 )
       ENDIF
 
 ! Calculate modal effective mass from MPF's
 
       DO I=1,NVEC
                                                            ! MPF is an NVEC x NDOFR matrix of modal participation factors
-         DO J=1,NDOFR
-            MPFit(J,1) = MPFACTOR_NR(I,J)                  ! MPFit is a col vec equal to the I-th row of MPF (MPF's for mode i)
-         ENDDO
-
-         DO J=1,NDOFR
-            MPFi(1,J)  = MPFACTOR_NR(I,J)                  ! MPFi is a row vec of the MPF's for mode i (MPFit = MPFi')
-         ENDDO
+         MPFit(:,1) = MPFACTOR_NR(I,:)                     ! MPFit is a col vec equal to the I-th row of MPF (MPF's for mode i)
                                                            ! MEFW_MAT_RR = MPFi'xMPFi ( a square matrix of NDOFR x NDOFR)
-         CALL MATMULT_FFF ( MPFit, MPFi, NDOFR, 1, NDOFR, MEFW_MAT_RR )
-         DO J=1,NDOFR
-            DO K=1,NDOFR                                   ! Scale MEFW_MAT_RR by GEN_MASS
-               MEFW_MAT_RR(J,K) = GEN_MASS(I)*MEFW_MAT_RR(J,K)
-            ENDDO
-         ENDDO
+         MEFW_MAT_RR = ZERO
+         CALL DGER ( NDOFR, NDOFR, GEN_MASS(I), MPFit(1,1), 1, MPFit(1,1), 1, MEFW_MAT_RR, NDOFR )
 
          DO J=1,NDOFR                                      ! MEFW_DIAG_NR are diagonals from MEFW_MAT_RR (NDOFR x NDOFR)
             MEFW_DIAG_NR(I,J) = MEFW_MAT_RR(J,J)
          ENDDO
                                                            ! Reduce NDOFR x NDOFR MEFW_MAT_RR to 6 x 6 MEFW_MAT_66
-         CALL MATMULT_FFF   ( MEFW_MAT_RR, TR6_MEFM, NDOFR, NDOFR, 6, DUM1 )
-         CALL MATMULT_FFF_T ( TR6_MEFM, DUM1, NDOFR, 6, 6, MEFW_MAT_66 )
+         CALL MATMULX_FFF   ( MEFW_MAT_RR, TR6_MEFM, NDOFR, NDOFR, 6, DUM1 )
+         CALL MATMULX_FFF_T ( TR6_MEFM, DUM1, NDOFR, 6, 6, MEFW_MAT_66 )
 
          DO J=1,6                                          ! Get diags from MEFW_MAT_66 and put into the ith row of MEFFMASS
             MEFFMASS(I,J) = MEFW_MAT_66(J,J)

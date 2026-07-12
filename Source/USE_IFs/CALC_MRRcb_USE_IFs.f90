@@ -43,8 +43,8 @@
       USE OUTA_HERE_Interface
       USE DEALLOCATE_SPARSE_MAT_Interface
       USE SPARSE_CRS_TO_FULL_Interface
-      USE MATMULT_FFF_Interface
-      USE MATMULT_FFF_T_Interface
+      USE MATMULX_FFF_Interface
+      USE MATMULX_FFF_T_Interface
       USE SPARSE_MAT_DIAG_ZEROS_Interface
 
       END MODULE CALC_MRRcb_USE_IFs

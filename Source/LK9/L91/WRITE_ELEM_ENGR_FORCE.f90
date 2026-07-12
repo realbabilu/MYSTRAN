@@ -40,6 +40,7 @@
       USE MODEL_STUF, ONLY            :  ELEM_ONAME, LABEL, SCNUM, STITLE, TITLE, TYPE
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  FORC_LOC, FORC_OUT
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_I8_RJ
       USE WRITE_ELEM_ENGR_FORCE_USE_IFs
 
       IMPLICIT NONE
@@ -47,6 +48,7 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'WRITE_ELEM_ENGR_FORCE'
       CHARACTER(LEN=*), INTENT(IN)    :: IHDR              ! Indicator of whether to write an output header
       CHARACTER(128*BYTE)             :: FILL              ! Padding for output format
+      CHARACTER(160*BYTE)             :: LINE_BUF
       CHARACTER(LEN=LEN(ELEM_ONAME))  :: ONAME             ! Element name to write out in F06 file
 
       INTEGER(LONG), INTENT(IN)       :: JSUB              ! Solution vector number
@@ -58,6 +60,7 @@
       INTEGER(LONG)                   :: BDY_DOF_NUM       ! DOF number for BDY_GRID/BDY_COMP
       INTEGER(LONG)                   :: I,J,J1,K,L        ! DO loop indices or counters
       INTEGER(LONG)                   :: IBEG, IEND, IELEM, ISTA, NSTA_ELEM, NELEMENTS
+      INTEGER(LONG)                   :: IPOINT
       INTEGER(LONG)                   :: GRID_ID
       INTEGER(LONG)                   :: NUM_TERMS         ! Number of terms to write out for shell elems
 
@@ -66,6 +69,7 @@
       REAL(DOUBLE)                    :: ABS_ANS(8)       ! Max ABS for all element output
       REAL(DOUBLE)                    :: MAX_ANS(8)       ! Max for all element output
       REAL(DOUBLE)                    :: MIN_ANS(8)       ! Min for all element output
+      REAL(DOUBLE)                    :: SHELL_VALUES_8(8)! Local contiguous copy to avoid strided slice temporaries
       REAL(DOUBLE)                    :: STA_XL
       REAL(DOUBLE)                    :: TINT, XI_STD, XI0, XI1
       REAL(DOUBLE)                    :: XI_RAW(11), BM1_RAW(11), BM2_RAW(11), V1_RAW(11), V2_RAW(11), AX_RAW(11), TRQ_RAW(11)
@@ -305,7 +309,7 @@ headr:IF (IHDR == 'Y') THEN
 
          IF (WRITE_F06)  THEN  ! f06/print
            DO I=1,NUM
-              WRITE(F06,1102) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(I,J),J=1,8)
+              CALL WRITE_I8_PLUS_R14_LINE ( 16, EID_OUT_ARRAY(I,1), OGEL(I,1:8), 8 )
            ENDDO
            !CALL GET_MAX_MIN_ABS ( 1, 8 )
            WRITE(F06,1103) FILL(1: 0), FILL(1: 0), (MAX_ANS(J),J=1,8), FILL(1: 0), (MIN_ANS(J),J=1,8), FILL(1: 0),                 &
@@ -569,7 +573,7 @@ headr:IF (IHDR == 'Y') THEN
       ELSE IF ((TYPE == 'TRIA3K  ') .OR. (TYPE == 'QUAD4K  ')) THEN
          IF (WRITE_F06) THEN
              DO I=1,NUM
-                WRITE(F06,1512) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(I,J),J=1,6)
+                CALL WRITE_I8_PLUS_R14_LINE ( 16, EID_OUT_ARRAY(I,1), OGEL(I,1:6), 6 )
              ENDDO
              CALL GET_MAX_MIN_ABS ( 1, 8 )
              WRITE(F06,1513) FILL(1: 0), FILL(1: 0), (MAX_ANS(J),J=1,6), FILL(1: 0), (MIN_ANS(J),J=1,6), FILL(1: 0),  &
@@ -577,13 +581,9 @@ headr:IF (IHDR == 'Y') THEN
          ENDIF
          NUM_TERMS = 6
 
-      ELSE IF ((TYPE == 'TRIA3   ') .OR. (TYPE == 'QUAD4   ') .OR. (TYPE == 'QUAD8   ')) THEN
+      ELSE IF (TYPE == 'TRIA3   ') THEN
         IF (WRITE_OP2)  THEN
-          IF (TYPE == 'TRIA3   ') THEN
-              ELEMENT_TYPE = 74
-          ELSE IF (TYPE == 'QUAD4   ') THEN
-              ELEMENT_TYPE = 33  ! todo: verify no ELEMENT_TYPE=144
-          ENDIF
+          ELEMENT_TYPE = 74
           NUM_WIDE = 9
           NVALUES = NUM * NUM_WIDE
           CALL WRITE_OEF3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, &
@@ -596,15 +596,112 @@ headr:IF (IHDR == 'Y') THEN
           K = 0
           DO I=1,NUM,NUM_PTS
              K = K + 1
-             IF(TYPE == 'QUAD8   ') THEN
-               WRITE(F06,1524) FILL(1: 0), EID_OUT_ARRAY(I,1), 'CENTER  ', (OGEL(K,J),J=1,8)
+             SHELL_VALUES_8(1:8) = OGEL(K,1:8)
+             LINE_BUF = ' '
+             CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(I,1), LINE_BUF(2:9) )
+             IF (TYPE == 'QUAD8   ') THEN
+                LINE_BUF(12:19) = 'CENTER  '
              ELSE
-               WRITE(F06,1524) FILL(1: 0), EID_OUT_ARRAY(I,1), '        ', (OGEL(K,J),J=1,8)
+                LINE_BUF(12:19) = '        '
              ENDIF
+             J1 = 25
+             DO J=1,8
+                CALL FAST_FMT_F06_E14_6 ( SHELL_VALUES_8(J), LINE_BUF(J1:J1+13) )
+                J1 = J1 + 14
+             ENDDO
+             WRITE(F06,'(A)') LINE_BUF(1:J1-1)
 
              DO L=2,NUM_PTS
                K = K + 1
-               WRITE(F06,1525) FILL(1: 0), GID_OUT_ARRAY(I,L),(OGEL(K,J),J=1,8)
+               SHELL_VALUES_8(1:8) = OGEL(K,1:8)
+               LINE_BUF = ' '
+               LINE_BUF(12:14) = 'GRD'
+               CALL FAST_FMT_I8_RJ ( GID_OUT_ARRAY(I,L), LINE_BUF(15:22) )
+               J1 = 25
+               DO J=1,8
+                  CALL FAST_FMT_F06_E14_6 ( SHELL_VALUES_8(J), LINE_BUF(J1:J1+13) )
+                  J1 = J1 + 14
+               ENDDO
+               WRITE(F06,'(A)') LINE_BUF(1:J1-1)
+             ENDDO
+          ENDDO
+          CALL GET_MAX_MIN_ABS ( 1, 8 )
+          WRITE(F06,1523) FILL(1: 0), FILL(1: 0), (MAX_ANS(J),J=1,8), FILL(1: 0), (MIN_ANS(J),J=1,8), FILL(1: 0),  &
+                                                  (ABS_ANS(J),J=1,8), FILL(1: 0)
+        ENDIF
+        NUM_TERMS = 8
+
+      ELSE IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUAD8   ')) THEN
+        IF (WRITE_OP2) THEN
+          IF (NUM_PTS <= 1) THEN
+             ! Center-only shell force output uses the simple per-element layout. The bilinear
+             ! 47-word layout is only valid when corner payloads are present as well.
+             IF (TYPE == 'QUAD4   ') THEN
+                ELEMENT_TYPE = 33
+             ELSE
+                ELEMENT_TYPE = 64
+             ENDIF
+             NUM_WIDE = 9
+             NVALUES = NUM * NUM_WIDE
+             CALL WRITE_OEF3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, &
+                                    TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+             WRITE(OP2) NVALUES
+             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(I,J),4), J=1,8), I=1,NUM)
+          ELSE
+             IF (TYPE == 'QUAD4   ') THEN
+                ELEMENT_TYPE = 144
+             ELSE
+                ELEMENT_TYPE = 64
+             ENDIF
+             NUM_WIDE = 47
+             NELEMENTS = NUM / NUM_PTS
+             NVALUES = NELEMENTS * NUM_WIDE
+             CALL WRITE_OEF3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ANALYSIS_CODE, ELEMENT_TYPE, NUM_WIDE, &
+                                    TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+             WRITE(OP2) NVALUES
+             WRITE(OP2) (EID_OUT_ARRAY(IPOINT,1)*10+DEVICE_CODE, "CEN/", 4,                                                     &
+                         (REAL(OGEL(IPOINT,J),4), J=1,8),                                                                          &
+                         GID_OUT_ARRAY(IPOINT,2), (REAL(OGEL(IPOINT+1,J),4), J=1,8),                                              &
+                         GID_OUT_ARRAY(IPOINT,3), (REAL(OGEL(IPOINT+2,J),4), J=1,8),                                              &
+                         GID_OUT_ARRAY(IPOINT,4), (REAL(OGEL(IPOINT+3,J),4), J=1,8),                                              &
+                         GID_OUT_ARRAY(IPOINT,5), (REAL(OGEL(IPOINT+4,J),4), J=1,8),                                              &
+                         IPOINT=1,NUM,NUM_PTS)
+          ENDIF
+        ENDIF
+
+        IF (WRITE_F06)  THEN
+          K = 0
+          DO I=1,NUM,NUM_PTS
+             K = K + 1
+             SHELL_VALUES_8(1:8) = OGEL(K,1:8)
+             IF(TYPE == 'QUAD8   ') THEN
+                LINE_BUF = ' '
+                CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(I,1), LINE_BUF(2:9) )
+                LINE_BUF(12:19) = 'CENTER  '
+             ELSE
+                LINE_BUF = ' '
+                CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(I,1), LINE_BUF(2:9) )
+                LINE_BUF(12:19) = '        '
+             ENDIF
+             J1 = 25
+             DO J=1,8
+                CALL FAST_FMT_F06_E14_6 ( SHELL_VALUES_8(J), LINE_BUF(J1:J1+13) )
+                J1 = J1 + 14
+             ENDDO
+             WRITE(F06,'(A)') LINE_BUF(1:J1-1)
+
+             DO L=2,NUM_PTS
+               K = K + 1
+               SHELL_VALUES_8(1:8) = OGEL(K,1:8)
+               LINE_BUF = ' '
+               LINE_BUF(12:14) = 'GRD'
+               CALL FAST_FMT_I8_RJ ( GID_OUT_ARRAY(I,L), LINE_BUF(15:22) )
+               J1 = 25
+               DO J=1,8
+                  CALL FAST_FMT_F06_E14_6 ( SHELL_VALUES_8(J), LINE_BUF(J1:J1+13) )
+                  J1 = J1 + 14
+               ENDDO
+               WRITE(F06,'(A)') LINE_BUF(1:J1-1)
              ENDDO
           ENDDO
           CALL GET_MAX_MIN_ABS ( 1, 8 )
@@ -627,7 +724,7 @@ headr:IF (IHDR == 'Y') THEN
 
          IF (WRITE_F06)  THEN  ! f06/print
            DO I=1,NUM
-              WRITE(F06,1602) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(I,J),J=1,6)
+              CALL WRITE_I8_PLUS_R14_LINE ( 16, EID_OUT_ARRAY(I,1), OGEL(I,1:6), 6 )
            ENDDO
            CALL GET_MAX_MIN_ABS ( 1, 6 )
            WRITE(F06,1603) FILL(1: 0), FILL(1: 0), (MAX_ANS(J),J=1,6), FILL(1: 0), (MIN_ANS(J),J=1,6), FILL(1: 0),  &
@@ -807,6 +904,30 @@ headr:IF (IHDR == 'Y') THEN
       ENDDO
 
       END SUBROUTINE GET_MAX_MIN_ABS
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_I8_PLUS_R14_LINE ( NLEAD, IDVAL, VALUES, NVALS )
+
+      INTEGER(LONG), INTENT(IN)       :: NLEAD, IDVAL, NVALS
+      REAL(DOUBLE), INTENT(IN)        :: VALUES(NVALS)
+
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT
+      INTEGER(LONG)                   :: I, POS
+
+      LINE_BUF = ' '
+      CALL FAST_FMT_I8_RJ ( IDVAL, ID_TEXT )
+      LINE_BUF(NLEAD+1:NLEAD+8) = ID_TEXT
+      POS = NLEAD + 9
+      DO I=1,NVALS
+         CALL FAST_FMT_F06_E14_6 ( VALUES(I), VAL_TEXT )
+         LINE_BUF(POS:POS+13) = VAL_TEXT
+         POS = POS + 14
+      ENDDO
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_I8_PLUS_R14_LINE
 
       END SUBROUTINE WRITE_ELEM_ENGR_FORCE
 

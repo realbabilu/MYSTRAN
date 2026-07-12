@@ -32,7 +32,7 @@
       USE TPLT1_Interface
       USE TPLT2_Interface
       USE outa_here_Interface
-      USE MATMULT_FFF_Interface
-      USE MATMULT_FFF_T_Interface
+      USE MATMULX_FFF_Interface
+      USE MATMULX_FFF_T_Interface
 
       END MODULE TREL1_USE_IFs

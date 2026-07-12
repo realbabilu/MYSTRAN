@@ -73,9 +73,11 @@
       ! concatenate the strings
       STRN_OUT = TRIM(FOUND_PRINT) // TRIM(FOUND_PLOT) // TRIM(FOUND_PUNCH) // TRIM(FOUND_NEU) // TRIM(FOUND_CSV)
 
-      ! default to print
+      ! For bare "STRN = ALL" requests, default to PRINT+PLOT so classic
+      ! OP2 strain tables are emitted without requiring explicit "(PLOT)"
+      ! qualifiers on the Case Control entry.
       IF (STRN_OUT(1:5) == 'NNNNN') THEN
-        STRN_OUT = 'YNNNN'
+        STRN_OUT = 'YYNNN'
       ENDIF
 
       ! Set CASE CONTROL output request variable to SETID

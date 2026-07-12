@@ -173,7 +173,7 @@
 
 ! EALP is needed to calculate both PTE and STE2
 
-      CALL MATMULT_FFF ( ES, ALP, 6, 6, 1, EALP )
+      EALP = MATMUL(ES,ALP)
 
 ! Calc TBAR (used for PTE, STEi)
 
@@ -271,7 +271,7 @@
                   GAUSS_PT = GAUSS_PT + 1
                   CALL SHP3DH ( I, J, K, ELGP, SUBR_NAME, IORD_MSG, IORD, SSS(I), SSS(J), SSS(K), 'N', PSH,DPSHG )
                   CALL JAC3D ( SSS(I), SSS(J), SSS(K), DPSHG, 'N', JAC, JACI, DETJ(GAUSS_PT) )
-                  CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
+                  DPSHX = MATMUL(JACI,DPSHG)
                   CALL B3D_ISOPARAMETRIC ( DPSHX, GAUSS_PT, I, J, K, 'direct strains', 'Y', BI )
                   DO L=1,6
                      DO M=1,3*ELGP
@@ -350,7 +350,7 @@
                         GAUSS_PT = GAUSS_PT + 1
                         CALL SHP3DH ( I, J, K, ELGP, SUBR_NAME, IORD_MSG, IORD_SH, SSS_SH(I), SSS_SH(J), SSS_SH(K), 'N', PSH,DPSHG )
                         CALL JAC3D ( SSS_SH(I), SSS_SH(J), SSS_SH(K), DPSHG, 'N', JAC, JACI, DETJ(GAUSS_PT) )
-                        CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
+                        DPSHX = MATMUL(JACI,DPSHG)
                         CALL B3D_ISOPARAMETRIC ( DPSHX, GAUSS_PT, I, J, K, 'direct strains', 'Y', BI )
                         DO L=4,6
                            DO M=1,3*ELGP
@@ -372,11 +372,7 @@
 
       IF (OPT(2) == 'Y') THEN
 
-         DO N=1,NTSUB
-            DO L=1,ELGP
-               GRID_DT_ARRAY(L,N) = DT(L,N)
-            ENDDO
-         ENDDO
+         GRID_DT_ARRAY = DT(:ELGP,:NTSUB)
 
          DO N=1,NTSUB
 
@@ -391,16 +387,12 @@
                DO J=1,IORD
                   DO I=1,IORD
                      GAUSS_PT = GAUSS_PT + 1
-                     DO L=1,6
-                        DO M=1,3*ELGP
-                           BI(L,M) = B(L,M,GAUSS_PT)
-                        ENDDO
-                     ENDDO
-                     CALL MATMULT_FFF_T ( BI, EALP, 6, 3*ELGP, 1, DUM0 )
+                     BI = B(:,:,GAUSS_PT)
+                     DUM0 = MATMUL(TRANSPOSE(BI),EALP)
                      INTFAC = DETJ(GAUSS_PT)*HHH(I)*HHH(J)*HHH(K)
                      IF (DEBUG(191) == 0) THEN             ! Use temperatures at Gauss points for PTE
                         CALL SHP3DH ( I, J, K, ELGP, SUBR_NAME, IORD_MSG, IORD, SSS(I), SSS(J), SSS(K), 'N', PSH, DPSHG )
-                        CALL MATMULT_FFF ( PSH, GRID_DT_ARRAY, 1, ELGP, NTSUB, TGAUSS )
+                        TGAUSS = MATMUL(RESHAPE(PSH,(/1,ELGP/)),GRID_DT_ARRAY)
                         TEMP = TGAUSS(1,N) - TREF1
                      ELSE                                  ! Use avg element temperature for PTE
                         TEMP = TBAR(N)
@@ -459,9 +451,9 @@
           IORD_MSG = 'for 3-D solid strains,                      = '
           CALL SHP3DH ( 0, 0, 0, ELGP, SUBR_NAME, IORD_MSG, 1, SSI, SSJ, SSK, 'N', PSH, DPSHG )
           CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, DUM_DETJ )
-          CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
+          DPSHX = MATMUL(JACI,DPSHG)
           CALL B3D_ISOPARAMETRIC ( DPSHX, 0, 1, 1, 1, 'all strains', 'N', BI )
-          CALL MATMULT_FFF ( ES, BI, 6, 6, 3*ELGP, DUM2 )
+          DUM2 = MATMUL(ES,BI)
 
           DO I=1,3                                         ! Stress-displ matrices
             DO J=1,3*ELGP
@@ -504,13 +496,9 @@
             DO J=1,IORD
                DO I=1,IORD
                   GAUSS_PT = GAUSS_PT + 1
-                  DO L=1,6
-                     DO M=1,3*ELGP
-                        BI(L,M) = B(L,M,GAUSS_PT)
-                     ENDDO
-                  ENDDO
-                  CALL MATMULT_FFF ( ES, BI, 6, 6, 3*ELGP, DUM4 )
-                  CALL MATMULT_FFF_T ( BI, DUM4, 6, 3*ELGP, 3*ELGP, DUM5 )
+                  BI = B(:,:,GAUSS_PT)
+                  DUM4 = MATMUL(ES,BI)
+                  DUM5 = MATMUL(TRANSPOSE(BI),DUM4)
                   INTFAC = DETJ(GAUSS_PT)*HHH(I)*HHH(J)*HHH(K)
                   DO L=1,3*ELGP
                      DO M=1,3*ELGP
@@ -653,8 +641,8 @@
                   CBAR(2,3*(L-1)+1) =  HALF*DPSHX(3,L) ; CBAR(2,3*(L-1)+2) =  ZERO            ; CBAR(2,3*(L-1)+3)= -HALF*DPSHX(1,L)
                   CBAR(3,3*(L-1)+1) = -HALF*DPSHX(2,L) ; CBAR(3,3*(L-1)+2) =  HALF*DPSHX(1,L) ; CBAR(3,3*(L-1)+3)=  ZERO
                 ENDDO
-                CALL MATMULT_FFF ( KWW, CBAR, 3, 3, 3*ELGP, DUM6 )
-                CALL MATMULT_FFF_T ( CBAR, DUM6, 3, 3*ELGP, 3*ELGP, DUM5 )
+                DUM6 = MATMUL(KWW,CBAR)
+                DUM5 = MATMUL(TRANSPOSE(CBAR),DUM6)
                 INTFAC = DETJ(GAUSS_PT)*HHH(I)*HHH(J)*HHH(K)
                 DO L=1,3*ELGP
                   DO M=1,3*ELGP
@@ -709,8 +697,8 @@
                     DPSHX(2,L) = B(2,3*(L-1)+2,GAUSS_PT)
                     DPSHX(3,L) = B(3,3*(L-1)+3,GAUSS_PT)
                   ENDDO
-                  CALL MATMULT_FFF ( KWW, DPSHX, 3, 3, ELGP, DUM9)
-                  CALL MATMULT_FFF_T ( DPSHX, DUM9, 3, ELGP, ELGP, DUM8)
+                  DUM9 = MATMUL(KWW,DPSHX)
+                  DUM8 = MATMUL(TRANSPOSE(DPSHX),DUM9)
                   INTFAC = DETJ(GAUSS_PT)*HHH(I)*HHH(J)*HHH(K)
                   DO L=1,ELGP
                      DO M=1,ELGP

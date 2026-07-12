@@ -31,8 +31,8 @@
       USE ORDER_GAUSS_Interface
       USE SHP2DQ_Interface
       USE JAC2D_Interface
-      USE MATMULT_FFF_Interface
+      USE MATMULX_FFF_Interface
       USE BMQMEM_Interface
-      USE MATMULT_FFF_T_Interface
+      USE MATMULX_FFF_T_Interface
 
       END MODULE QSHEAR_USE_IFs

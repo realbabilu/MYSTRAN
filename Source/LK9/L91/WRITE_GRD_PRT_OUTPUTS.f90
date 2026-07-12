@@ -39,6 +39,7 @@
       USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, MAXREQ, OGEL
       USE MODEL_STUF, ONLY            :  LABEL, SCNUM, SUBLOD, STITLE, TITLE
       USE MACHINE_PARAMS, ONLY        :  MACH_LARGE_NUM
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_BUILD_GRID_F06_LINE
 
       USE WRITE_GRD_PRT_OUTPUTS_USE_IFs
 
@@ -50,6 +51,7 @@
       CHARACTER(1*BYTE), INTENT(IN)   :: ALL_SAME_CID      ! Indicator of whether all grids, for the output set, have the same
 !                                                            global coord sys
       CHARACTER(14*BYTE)              :: OGEL_CHAR(MOGEL)  ! Char representation of 1 row of OGEL outputs
+      CHARACTER(108*BYTE)             :: GRID_LINE         ! Fully assembled F06 line for one grid row
 
       CHARACTER( 1*BYTE)              :: PRINT_TOTALS      ! This will be set to 'Y' if DEBUG(92) > 0 so OLOAD, SPCF, MPCF force
 !                                                            totals will be printed even if ALL_SAME_CID = 'N'
@@ -69,6 +71,7 @@
 
 
       REAL(DOUBLE)                    :: ABS_ANS(6)        ! Max Abs for all grids output for each of the 6 disp components
+      REAL(DOUBLE)                    :: GRID_VALUES(6)    ! Local contiguous copy to avoid strided slice temporaries
       REAL(DOUBLE)                    :: MAX_ANS(6)        ! Max for all grids output for each of the 6 disp components
       REAL(DOUBLE)                    :: MIN_ANS(6)        ! Min for all grids output for each of the 6 disp components
       REAL(DOUBLE)                    :: TOTALS(6)         ! Totals of each of the 6 components output
@@ -239,23 +242,9 @@
 
       DO I=1,6
 
-         IF (ABS_ANS(I) == 0.0) THEN
-            WRITE(ABS_ANS_CHAR(I),'(A)') '  0.0         '
-         ELSE
-            WRITE(ABS_ANS_CHAR(I),'(1ES14.6)') ABS_ANS(I)
-         ENDIF
-
-         IF (MAX_ANS(I) == 0.0) THEN
-            WRITE(MAX_ANS_CHAR(I),'(A)') '  0.0         '
-         ELSE
-            WRITE(MAX_ANS_CHAR(I),'(1ES14.6)') MAX_ANS(I)
-         ENDIF
-
-         IF (MIN_ANS(I) == 0.0) THEN
-            WRITE(MIN_ANS_CHAR(I),'(A)') '  0.0         '
-         ELSE
-            WRITE(MIN_ANS_CHAR(I),'(1ES14.6)') MIN_ANS(I)
-         ENDIF
+         CALL FAST_FMT_F06_E14_6 ( ABS_ANS(I), ABS_ANS_CHAR(I) )
+         CALL FAST_FMT_F06_E14_6 ( MAX_ANS(I), MAX_ANS_CHAR(I) )
+         CALL FAST_FMT_F06_E14_6 ( MIN_ANS(I), MIN_ANS_CHAR(I) )
 
       ENDDO
 
@@ -272,19 +261,16 @@
          IF ((WHAT == 'OLOAD') .OR. (WHAT == 'SPCF') .OR. (WHAT == 'MPCF')) THEN
             DO J=1,6
                TOTALS(J) = TOTALS(J) + OGEL(I,J)
-               IF (TOTALS(J) == 0.0) THEN
-                  WRITE(TOTALS_CHAR(J),'(A)') '  0.0         '
-               ELSE
-                  WRITE(TOTALS_CHAR(J),'(1ES14.6)') TOTALS(J)
-               ENDIF
+               CALL FAST_FMT_F06_E14_6 ( TOTALS(J), TOTALS_CHAR(J) )
             ENDDO
          ENDIF
 
          IF (WRITE_OGEL(I) == 'Y') THEN
 
-            CALL WRT_REAL_TO_CHAR_VAR ( OGEL, MAXREQ, MOGEL, I, OGEL_CHAR )
+            GRID_VALUES(1:6) = OGEL(I,1:6)
+            CALL FAST_BUILD_GRID_F06_LINE ( GID_OUT_ARRAY(I,1), GID_OUT_ARRAY(I,2), GRID_VALUES, GRID_LINE )
 
-            WRITE(F06,9902) GID_OUT_ARRAY(I,1),GID_OUT_ARRAY(I,2),(OGEL_CHAR(J),J=1,6)
+            WRITE(F06,'(A)') GRID_LINE
 
             IF (GID_OUT_ARRAY(I,MELGP+1) > 0) THEN
                DO J=1,GID_OUT_ARRAY(I,MELGP+1)

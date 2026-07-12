@@ -37,7 +37,8 @@
       USE CONSTANTS_1, ONLY           :  ZERO, HALF
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP, PRTNEU
+      USE PARAMS, ONLY                :  OTMSKIP
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_ELFO
       USE MODEL_STUF, ONLY            :  AGRID, ANY_ELFE_OUTPUT, BUSH_CID, BUSH_VVEC, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL,    &
                                          EDAT, ELAS_COMP, ELEM_LEN_12, ELEM_LEN_AB, EPNT, ETYPE, EID, ELMTYP, ELOUT, FCONV,        &
                                          METYPE, NUM_EMG_FATAL_ERRS, OFFDIS_GA_GB, OFFDIS_L, PBEAM_NSTATIONS, PE_GA_GB, PEL,       &
@@ -124,7 +125,7 @@
       ITABLE = 0
 
 
-      WRITE_NEU = (PRTNEU == 'Y')
+      WRITE_NEU = WRITE_NEU_ELFO
 
 ! **********************************************************************************************************************************
 ! Process element engineering force requests for BAR, BUSH, ELAS, ROD. Use subr CALC_ELEM_NODE_FORCES and then convert the node

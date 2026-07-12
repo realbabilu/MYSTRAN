@@ -196,7 +196,7 @@
 
             CALL ALLOCATE_FULL_MAT ( 'DUM1', NDOFA, NSUB, SUBR_NAME )
 
-            CALL MATMULT_FFF_T (GOA_FULL, PO_FULL, NDOFO, NDOFA, NSUB, DUM1 )
+            CALL MATMULX_FFF_T (GOA_FULL, PO_FULL, NDOFO, NDOFA, NSUB, DUM1 )
 
             CALL DEALLOCATE_FULL_MAT ( 'PO_FULL' )
             CALL DEALLOCATE_FULL_MAT ( 'GOA_FULL' )
@@ -256,4 +256,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE REDUCE_PF_TO_PA
-

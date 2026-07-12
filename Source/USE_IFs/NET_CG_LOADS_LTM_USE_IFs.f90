@@ -29,9 +29,9 @@
 
       USE OURTIM_Interface
       USE MATMULT_SFF_Interface
-      USE MATMULT_FFF_T_Interface
+      USE MATMULX_FFF_T_Interface
       USE INVERT_FF_MAT_Interface
-      USE MATMULT_FFF_Interface
+      USE MATMULX_FFF_Interface
       USE CNT_NONZ_IN_FULL_MAT_Interface
       USE ALLOCATE_SCR_CRS_MAT_Interface
       USE FULL_TO_SPARSE_CRS_Interface

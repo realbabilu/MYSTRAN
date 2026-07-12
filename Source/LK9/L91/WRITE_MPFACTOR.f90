@@ -29,12 +29,13 @@
       ! Writes output for modal participation factors
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, NDOFG, NDOFR, NVEC, SOL_NAME
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, NDOFG, NDOFR, NVEC, NSUB, SOL_NAME, MODE_SUBCASE
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, TWO, PI
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, MPFACTOR_NR, MPFACTOR_N6
-      USE MODEL_STUF, ONLY            :  LABEL, STITLE, TITLE
+      USE MODEL_STUF, ONLY            :  LABEL, STITLE, TITLE, SCNUM, MPFACTOR_REQ_PARTFAC, MPFACTOR_REQ_PARTFAC_SUB,            &
+                                         MEFMLOC_SUB, MEFMGRID_SUB
       USE PARAMS, ONLY                :  GRDPNT, MEFMCORD, MEFMGRID, MEFMLOC, MPFOUT, PRTF06, PRTOP2
       USE DOF_TABLES, ONLY            :  TDOFI
 
@@ -47,7 +48,10 @@
       CHARACTER(1*BYTE)               :: IHDR   = 'Y'      ! Indicator of whether to write an output header
 
       INTEGER(LONG)                   :: I,J               ! DO loop indices
+      INTEGER(LONG)                   :: ISUB
       INTEGER(LONG)                   :: K                 ! Counter
+      INTEGER(LONG)                   :: MODE_NUM_OUT
+      INTEGER(LONG)                   :: NUM_SUB_LOOPS
       INTEGER(LONG)                   :: R_SET_GRIDS(NDOFR)! Array of grids for the R-set
       INTEGER(LONG)                   :: R_SET_COMPS(NDOFR)! Array of displ components for the R-set
       INTEGER(LONG)                   :: R_SET_COL         ! Col in TDOFI array where R-set exists
@@ -57,11 +61,17 @@
       !LOGICAL                        :: WRITE_F06  ! flag
       !LOGICAL                        :: WRITE_OP2  ! flag
       LOGICAL                         :: IS_LOW_PRECISION  ! Print MPFACTOR, MEFFMASS values with 2 decimal places of accuracy rather than 6
+      LOGICAL                         :: HAS_SUBCASE_MAP
+      LOGICAL                         :: WRITE_PARTFAC
+      CHARACTER(6*BYTE)               :: LOCAL_MEFMLOC
+      INTEGER(LONG)                   :: LOCAL_MEFMGRID
 
 
 
 ! **********************************************************************************************************************************
       IS_LOW_PRECISION = (DEBUG(174) == 0)
+      HAS_SUBCASE_MAP = ALLOCATED(MODE_SUBCASE)
+      NUM_SUB_LOOPS = MAX(1,NSUB)
       !--------------------------------------------------
 
       CALL TDOF_COL_NUM ( 'R ', R_SET_COL )
@@ -74,79 +84,105 @@
          ENDIF
       ENDDO
 
-      WRITE(F06,*)
-      ! Write output headers.
-      IF (IHDR == 'Y') THEN
-         WRITE(F06,9000)
-         ! There is always a TITLE(1), etc (even if they are blank)
-         WRITE(F06,9003) TITLE(1)
-         WRITE(F06,9003) STITLE(1)
-         WRITE(F06,9003) LABEL(1)
+      DO ISUB=1,NUM_SUB_LOOPS
+         IF (ALLOCATED(MPFACTOR_REQ_PARTFAC_SUB)) THEN
+            WRITE_PARTFAC = (MPFACTOR_REQ_PARTFAC_SUB(ISUB) == 'Y')
+         ELSE
+            IF (ISUB > 1) CYCLE
+            WRITE_PARTFAC = (MPFACTOR_REQ_PARTFAC == 'Y')
+         ENDIF
+         IF (.NOT. WRITE_PARTFAC) CYCLE
+
+         LOCAL_MEFMLOC = MEFMLOC
+         LOCAL_MEFMGRID = MEFMGRID
+         IF (ALLOCATED(MEFMLOC_SUB)) THEN
+            IF (MEFMLOC_SUB(ISUB) /= '      ') LOCAL_MEFMLOC = MEFMLOC_SUB(ISUB)
+         ENDIF
+         IF (ALLOCATED(MEFMGRID_SUB)) LOCAL_MEFMGRID = MEFMGRID_SUB(ISUB)
+
          WRITE(F06,*)
-      ENDIF
-                                                           ! Write modal participation factors for CB analyses
-      IF ((SOL_NAME(1:12) == 'GEN CB MODEL') .AND. (MPFOUT == 'R')) THEN
-
-         WRITE(F06,9004) MEFMCORD
-
-         IF (IS_LOW_PRECISION) THEN
-            WRITE(F06,9101) (I,I=1,NDOFR)
-            WRITE(F06,9102) (R_SET_GRIDS(I), R_SET_COMPS(I),I=1,NDOFR)
-            WRITE(F06,9103)
-         ELSE
-            WRITE(F06,9201) (I,I=1,NDOFR)
-            WRITE(F06,9202) (R_SET_GRIDS(I), R_SET_COMPS(I),I=1,NDOFR)
-            WRITE(F06,9203)
+         IF (IHDR == 'Y') THEN
+            WRITE(F06,9000)
+            IF (NSUB > 1) WRITE(F06,9010) SCNUM(ISUB)
+            WRITE(F06,9003) TITLE(ISUB)
+            WRITE(F06,9003) STITLE(ISUB)
+            WRITE(F06,9003) LABEL(ISUB)
+            WRITE(F06,*)
          ENDIF
 
-         DO I=1,NVEC
+         IF ((SOL_NAME(1:12) == 'GEN CB MODEL') .AND. (MPFOUT == 'R')) THEN
 
-            CYCLES = DSQRT(DABS(EIGEN_VAL(I)))/(TWO*PI)
+            WRITE(F06,9004) MEFMCORD
 
             IF (IS_LOW_PRECISION) THEN
-               WRITE(F06,9301) I, CYCLES, (MPFACTOR_NR(I,J),J=1,NDOFR)
+               WRITE(F06,9101) (I,I=1,NDOFR)
+               WRITE(F06,9102) (R_SET_GRIDS(I), R_SET_COMPS(I),I=1,NDOFR)
+               WRITE(F06,9103)
             ELSE
-               WRITE(F06,9302) I, CYCLES, (MPFACTOR_NR(I,J),J=1,NDOFR)
+               WRITE(F06,9201) (I,I=1,NDOFR)
+               WRITE(F06,9202) (R_SET_GRIDS(I), R_SET_COMPS(I),I=1,NDOFR)
+               WRITE(F06,9203)
             ENDIF
 
-         ENDDO
+            MODE_NUM_OUT = 0
+            DO I=1,NVEC
+               IF (HAS_SUBCASE_MAP) THEN
+                  IF (I > SIZE(MODE_SUBCASE)) EXIT
+                  IF (MODE_SUBCASE(I) /= ISUB) CYCLE
+               ELSE
+                  IF (ISUB > 1) CYCLE
+               ENDIF
+               MODE_NUM_OUT = MODE_NUM_OUT + 1
+               CYCLES = DSQRT(DABS(EIGEN_VAL(I)))/(TWO*PI)
+               IF (IS_LOW_PRECISION) THEN
+                  WRITE(F06,9301) MODE_NUM_OUT, CYCLES, (MPFACTOR_NR(I,J),J=1,NDOFR)
+               ELSE
+                  WRITE(F06,9302) MODE_NUM_OUT, CYCLES, (MPFACTOR_NR(I,J),J=1,NDOFR)
+               ENDIF
+            ENDDO
 
-      ELSE
-
-         WRITE(F06,9005) MEFMCORD
-         IF      (MEFMLOC == 'GRDPNT') THEN
-            IF (MEFMGRID == 0) THEN
-               WRITE(F06,9006)
-            ELSE
-               WRITE(F06,9007) GRDPNT
-            ENDIF
-         ELSE IF (MEFMLOC == 'CG    ') THEN
-            WRITE(F06,9008)
-         ELSE IF (MEFMLOC == 'GRID  ') THEN
-            WRITE(F06,9009) MEFMGRID
-         ENDIF
-
-         IF (IS_LOW_PRECISION) THEN
-            WRITE(F06,9501)
          ELSE
-            WRITE(F06,9502)
-         ENDIF
 
-         DO I=1,NVEC
-
-            CYCLES = DSQRT(DABS(EIGEN_VAL(I)))/(TWO*PI)
+            WRITE(F06,9005) MEFMCORD
+            IF      (LOCAL_MEFMLOC == 'GRDPNT') THEN
+               IF (LOCAL_MEFMGRID == 0) THEN
+                  WRITE(F06,9006)
+               ELSE
+                  WRITE(F06,9007) GRDPNT
+               ENDIF
+            ELSE IF (LOCAL_MEFMLOC == 'CG    ') THEN
+               WRITE(F06,9008)
+            ELSE IF (LOCAL_MEFMLOC == 'GRID  ') THEN
+               WRITE(F06,9009) LOCAL_MEFMGRID
+            ENDIF
 
             IF (IS_LOW_PRECISION) THEN
-               WRITE(F06,9503) I, CYCLES, (MPFACTOR_N6(I,J),J=1,6)
+               WRITE(F06,9501)
             ELSE
-               WRITE(F06,9504) I, CYCLES, (MPFACTOR_N6(I,J),J=1,6)
+               WRITE(F06,9502)
             ENDIF
 
-         ENDDO
+            MODE_NUM_OUT = 0
+            DO I=1,NVEC
+               IF (HAS_SUBCASE_MAP) THEN
+                  IF (I > SIZE(MODE_SUBCASE)) EXIT
+                  IF (MODE_SUBCASE(I) /= ISUB) CYCLE
+               ELSE
+                  IF (ISUB > 1) CYCLE
+               ENDIF
+               MODE_NUM_OUT = MODE_NUM_OUT + 1
+               CYCLES = DSQRT(DABS(EIGEN_VAL(I)))/(TWO*PI)
+               IF (IS_LOW_PRECISION) THEN
+                  WRITE(F06,9503) MODE_NUM_OUT, CYCLES, (MPFACTOR_N6(I,J),J=1,6)
+               ELSE
+                  WRITE(F06,9504) MODE_NUM_OUT, CYCLES, (MPFACTOR_N6(I,J),J=1,6)
+               ENDIF
+            ENDDO
 
-      ENDIF
+         ENDIF
 
-      WRITE(F06,*)
+         WRITE(F06,*)
+      ENDDO
 
 
 
@@ -157,6 +193,8 @@
             ,'----------------')
 
  9003 FORMAT(1X,A)
+
+ 9010 FORMAT(1X,'OUTPUT FOR SUBCASE ',I8)
 
  9004 FORMAT(13X,'                           M O D A L   P A R T I C I P A T I O N   F A C T O R S',/,                             &
              13X,'              (dimensionless, in coordinate sys ',I8,' with cols marked by R-set grid/comp)',/)

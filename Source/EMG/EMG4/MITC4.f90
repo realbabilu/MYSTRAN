@@ -48,6 +48,8 @@
       USE OUTA_HERE_Interface
       USE MATMULT_FFF_Interface
       USE MATMULT_FFF_T_Interface
+      USE MATMULX_FFF_Interface
+      USE MATMULX_FFF_T_Interface
       USE MITC_DETJ_Interface
       USE MITC4_B_Interface
       USE MITC4_CARTESIAN_LOCAL_BASIS_Interface
@@ -56,6 +58,8 @@
       USE MATL_TRANSFORM_MATRIX_Interface
       USE MATMULT_FFF_Interface
       USE MATMULT_FFF_T_Interface
+      USE MATMULX_FFF_Interface
+      USE MATMULX_FFF_T_Interface
       USE MITC_ELASTICITY_Interface
       USE CROSS_Interface
       USE MITC_SHAPE_FUNCTIONS_Interface
@@ -297,7 +301,7 @@
                   CALL MITC4_B( R, S, T, .TRUE., .TRUE., .TRUE., BI)
 
                                                            ! DUM3 = BI^T * E3
-                  CALL MATMULT_FFF_T ( BI, E3, 6, 6*ELGP, 6, DUM3 )
+                  CALL MATMULX_FFF_T ( BI, E3, 6, 6*ELGP, 6, DUM3 )
 
                                                            ! PTE += DUM3 * unit_ε_thermal * det(J) * GaussWeight
                   UNIT_PTE = UNIT_PTE + MATMUL ( DUM3, CTE ) * INTFAC
@@ -470,8 +474,8 @@
                      CALL MATMULT_FFF_T ( T66 , DUM66 , 6, 6, 6, E3    )
 
                      CALL MITC4_B( R, S, T, .TRUE., .TRUE., .TRUE., BI)
-                     CALL MATMULT_FFF ( E3, BI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( E3, BI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
                   ELSEIF(.TRUE.) THEN
@@ -485,27 +489,27 @@
                                                            ! Membrane
                                                            ! ∫ B_m' E_m B_m dv
                      CALL MITC4_B( R, S, T, .TRUE., .FALSE., .FALSE., BMI)
-                     CALL MATMULT_FFF ( EM3, BMI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( EM3, BMI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
                                                            ! Bending and transverse shear
                                                            ! including bending-shear coupling
                                                            ! ∫ B_b' (E_b + E_t) B_b dv
                      CALL MITC4_B( R, S, T, .FALSE., .TRUE., .TRUE., BBI)
-                     CALL MATMULT_FFF ( EB3, BBI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( EB3, BBI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
                                                            ! Geometric bending-membrane coupling
                                                            ! This is coupling due to the geometry of the element (warped or
                                                            ! with SNORM), not unsymmetric composites or MID4 on PSHELL.
                                                            ! ∫ B_m' E_m B_b dv + ∫ B_b' E_m' B_m dv
-                     CALL MATMULT_FFF ( EM3, BBI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( EM3, BBI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
-                     CALL MATMULT_FFF_T ( EM3, BMI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF_T ( EM3, BMI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
                   ELSE
@@ -519,46 +523,46 @@
 
                                                            ! Membrane
                      CALL MITC4_B( R, S, T, .TRUE., .FALSE., .FALSE., BMI)
-                     CALL MATMULT_FFF ( EM3, BMI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( EM3, BMI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
                                                            ! Bending
                      CALL MITC4_B( R, S, T, .FALSE., .TRUE., .FALSE., BBI)
-                     CALL MATMULT_FFF ( EB3, BBI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( EB3, BBI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
                                                            ! Transverse shear
                                                            ! Use bending+transverse shear elasticity
                                                            ! because MID3 requires MID2 but not MID1.
                      CALL MITC4_B( R, S, T, .FALSE., .FALSE., .TRUE., BSI)
-                     CALL MATMULT_FFF ( EB3, BSI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BSI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( EB3, BSI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BSI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
                                                            ! Bending-membrane coupling
-                     CALL MATMULT_FFF ( EM3, BBI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( EM3, BBI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
-                     CALL MATMULT_FFF ( TRANSPOSE(EM3), BMI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF_T ( EM3, BMI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
                                                            ! Membrane-shear coupling
-                     CALL MATMULT_FFF ( EM3, BSI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( EM3, BSI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BMI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
-                     CALL MATMULT_FFF ( TRANSPOSE(EM3), BMI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BSI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF_T ( EM3, BMI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BSI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
                                                            ! Bending-shear coupling
-                     CALL MATMULT_FFF ( EB3, BSI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF ( EB3, BSI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
-                     CALL MATMULT_FFF ( TRANSPOSE(EB3), BBI, 6, 6, 6*ELGP, DUM1 )
-                     CALL MATMULT_FFF_T ( BSI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                     CALL MATMULX_FFF_T ( EB3, BBI, 6, 6, 6*ELGP, DUM1 )
+                     CALL MATMULX_FFF_T ( BSI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
 

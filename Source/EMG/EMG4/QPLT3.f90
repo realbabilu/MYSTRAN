@@ -516,7 +516,7 @@ trias:DO K=1,NUM_TRIAS
                ENDDO
             ENDDO
                                                            ! Transform to quad local axes
-            CALL MATMULT_FFF_T ( D, PTM_TT, 9, 9, NTSUB, PTM_TQ )
+            CALL MATMULX_FFF_T ( D, PTM_TT, 9, 9, NTSUB, PTM_TQ )
 
             DO I=1,9                                       ! Expand up to 15 DOF for the 5 node quad
                DO J=1,NTSUB
@@ -581,8 +581,8 @@ trias:DO K=1,NUM_TRIAS
                ENDDO
             ENDDO
                                                            ! Transform to quad local axes
-            CALL MATMULT_FFF   ( KM_TT, D , 9, 9, 9, DUM1 )
-            CALL MATMULT_FFF_T ( D, DUM1, 9, 9, 9, KM_TQ )
+            CALL MATMULX_FFF   ( KM_TT, D , 9, 9, 9, DUM1 )
+            CALL MATMULX_FFF_T ( D, DUM1, 9, 9, 9, KM_TQ )
 
             DO I=1,9                                       ! Expand to 15 DOF quad (5 nodes/3 DOF each)
                DO J=1,9
@@ -602,7 +602,7 @@ trias:DO K=1,NUM_TRIAS
                ENDDO
             ENDDO
                                                            ! Transform to quad local axes
-            CALL MATMULT_FFF_T ( D, PPM_TT, 9, 9, NSUB, PPM_TQ )
+            CALL MATMULX_FFF_T ( D, PPM_TT, 9, 9, NSUB, PPM_TQ )
 
             DO I=1,9                                       ! Expand to 15 DOF quad (5 nodes/3 DOF each)
                DO J=1,NSUB
@@ -1407,7 +1407,7 @@ trias:DO K=1,NUM_TRIAS
 
       IF (OPT_MIN4T(2) == 'Y') THEN
 
-         CALL MATMULT_FFF_T ( B54, PTM_QQ_5, 15, 12, NTSUB, PTM_QQ_4 )
+         CALL MATMULX_FFF_T ( B54, PTM_QQ_5, 15, 12, NTSUB, PTM_QQ_4 )
 
       ENDIF
 
@@ -1451,8 +1451,8 @@ trias:DO K=1,NUM_TRIAS
 
       IF (OPT_MIN4T(4) == 'Y') THEN
 
-         CALL MATMULT_FFF   ( KM_QQ_5, B54, 15, 15, 12, DUM2 )
-         CALL MATMULT_FFF_T ( B54, DUM2, 15, 12, 12, KM_QQ_4 )
+         CALL MATMULX_FFF   ( KM_QQ_5, B54, 15, 15, 12, DUM2 )
+         CALL MATMULX_FFF_T ( B54, DUM2, 15, 12, 12, KM_QQ_4 )
 
       ENDIF
 
@@ -1460,7 +1460,7 @@ trias:DO K=1,NUM_TRIAS
 
       IF (OPT_MIN4T(5) == 'Y') THEN
 
-         CALL MATMULT_FFF_T ( B54, PPM_QQ_5, 15, 12, NSUB, PPM_QQ_4 )
+         CALL MATMULX_FFF_T ( B54, PPM_QQ_5, 15, 12, NSUB, PPM_QQ_4 )
 
       ENDIF
 
@@ -1616,7 +1616,7 @@ trias:DO K=1,NUM_TRIAS
             ENDDO
          ENDDO
 
-         CALL MATMULT_FFF ( GOAT, PTO, 12, 3, NTSUB, DUM3 )
+         CALL MATMULX_FFF ( GOAT, PTO, 12, 3, NTSUB, DUM3 )
          CALL MATADD_FFF  ( PTAB, DUM3, 12, NTSUB, ONE, -ONE, 0, PTM_QQ_4 )
 
       ENDIF
@@ -1675,7 +1675,7 @@ trias:DO K=1,NUM_TRIAS
 
       IF (OPT_MIN4T(4) == 'Y') THEN
 
-         CALL MATMULT_FFF ( GOAT, KOA , 12,  3,  12, DUM2 )
+         CALL MATMULX_FFF ( GOAT, KOA , 12,  3,  12, DUM2 )
          CALL MATADD_FFF  ( KAAB, DUM2, 12, 12, ONE, -ONE, 0, KM_QQ_4 )
 
       ENDIF
@@ -1696,7 +1696,7 @@ trias:DO K=1,NUM_TRIAS
             ENDDO
          ENDDO
 
-         CALL MATMULT_FFF ( GOAT, PPO, 12, 3, NSUB, DUM4 )
+         CALL MATMULX_FFF ( GOAT, PPO, 12, 3, NSUB, DUM4 )
          CALL MATADD_FFF  ( PPAB, DUM4, 12, NSUB, ONE, -ONE, 0, PPM_QQ_4 )
 
 

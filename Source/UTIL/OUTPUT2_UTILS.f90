@@ -44,12 +44,9 @@
 !===================================================================================================================================
       SUBROUTINE  END_OP2_TABLE(ITABLE)
       USE PENTIUM_II_KIND, ONLY       :  LONG
-      USE IOUNT1, ONLY                :  ERR, OP2
+      USE IOUNT1, ONLY                :  OP2
       IMPLICIT NONE
       INTEGER(LONG) :: ITABLE
-      WRITE(ERR,9114) ITABLE
-
- 9114 FORMAT(" *DEBUG:       END_OP2_TABLE; ITABLE=", I8)
       WRITE(OP2) ITABLE
       WRITE(OP2) 1
       WRITE(OP2) 0
@@ -58,11 +55,9 @@
 
 !===================================================================================================================================
       SUBROUTINE  END_OP2_TABLES()
-      USE IOUNT1, ONLY                :  ERR, OP2, OP2FIL
+      USE IOUNT1, ONLY                :  OP2, OP2FIL
       IMPLICIT NONE
       LOGICAL                         :: FILE_OPND
- 9115 FORMAT(" *DEBUG:       END_OP2_TABLES", A)
-      WRITE(ERR,9115) " "
       INQUIRE ( FILE=OP2FIL, OPENED=FILE_OPND )
       IF (FILE_OPND) THEN
         WRITE(OP2) 0

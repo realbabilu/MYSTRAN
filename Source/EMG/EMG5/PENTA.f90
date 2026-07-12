@@ -441,7 +441,7 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
           CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, DUM_DETJ )
           CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
           CALL B3D_ISOPARAMETRIC ( DPSHX, 0, 1, 1, 1, 'all strains', 'N', BI )
-          CALL MATMULT_FFF ( ES, BI, 6, 6, 3*ELGP, DUM2 )
+          CALL MATMULX_FFF ( ES, BI, 6, 6, 3*ELGP, DUM2 )
 
           DO I=1,3
             DO J=1,3*ELGP
@@ -488,8 +488,8 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
                      BI(L,M) = B(L,M,GAUSS_PT)
                   ENDDO
                ENDDO
-               CALL MATMULT_FFF ( ES, BI, 6, 6, 3*ELGP, DUM4 )
-               CALL MATMULT_FFF_T ( BI, DUM4, 6, 3*ELGP, 3*ELGP, DUM5 )
+               CALL MATMULX_FFF ( ES, BI, 6, 6, 3*ELGP, DUM4 )
+               CALL MATMULX_FFF_T ( BI, DUM4, 6, 3*ELGP, 3*ELGP, DUM5 )
                INTFAC = DETJ(GAUSS_PT)*HH_IJ(IJ)*HH_K(K)
                DO L=1,3*ELGP
                   DO M=1,3*ELGP
@@ -557,8 +557,8 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
               CBAR(2,3*(L-1)+1) =  HALF*DPSHX(3,L) ; CBAR(2,3*(L-1)+2) =  ZERO            ; CBAR(2,3*(L-1)+3)= -HALF*DPSHX(1,L)
               CBAR(3,3*(L-1)+1) = -HALF*DPSHX(2,L) ; CBAR(3,3*(L-1)+2) =  HALF*DPSHX(1,L) ; CBAR(3,3*(L-1)+3)=  ZERO
             ENDDO
-            CALL MATMULT_FFF ( KWW, CBAR, 3, 3, 3*ELGP, DUM6 )
-            CALL MATMULT_FFF_T ( CBAR, DUM6, 3, 3*ELGP, 3*ELGP, DUM5 )
+            CALL MATMULX_FFF ( KWW, CBAR, 3, 3, 3*ELGP, DUM6 )
+            CALL MATMULX_FFF_T ( CBAR, DUM6, 3, 3*ELGP, 3*ELGP, DUM5 )
             INTFAC = DETJ(GAUSS_PT)*HH_IJ(IJ)*HH_K(K)
             DO L=1,3*ELGP
               DO M=1,3*ELGP

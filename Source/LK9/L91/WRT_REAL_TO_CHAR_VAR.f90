@@ -33,7 +33,7 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  FATAL_ERR
-      USE CONSTANTS_1, ONLY           :  ZERO
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6
 
       USE WRT_REAL_TO_CHAR_VAR_USE_IFs                        ! Added 2019/07/14
 
@@ -53,11 +53,7 @@
          CHAR_VAR(J)(1:) = ' '
       ENDDO
       DO J=1,NCOLS
-         IF (ABS(REAL_VAR(ROW_NUM,J)) == ZERO) THEN
-            WRITE(CHAR_VAR(J),'(A)') '  0.0         '
-         ELSE
-            WRITE(CHAR_VAR(J),'(1ES14.6)') REAL_VAR(ROW_NUM,J)
-         ENDIF
+         CALL FAST_FMT_F06_E14_6 ( REAL_VAR(ROW_NUM,J), CHAR_VAR(J) )
       ENDDO
 
       RETURN
@@ -65,4 +61,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE WRT_REAL_TO_CHAR_VAR
-

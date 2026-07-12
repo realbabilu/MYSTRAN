@@ -37,7 +37,7 @@
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_OPT
       USE LINK9_STUFF, ONLY           :  OGEL
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  PRTNEU
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRE
 
       USE SOLID_STRESS_OUTPUTS_USE_IFs
 
@@ -63,7 +63,7 @@
       INTRINSIC DMAX1,DMIN1
 
 
-      WRITE_NEU = (PRTNEU == 'Y')
+      WRITE_NEU = WRITE_NEU_STRE
 
 ! **********************************************************************************************************************************
 ! Calc engineering stresses from array STRESS and put into array OGEL

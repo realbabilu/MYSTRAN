@@ -6,7 +6,45 @@
       CHARACTER(8*BYTE), INTENT(IN)    :: ETYPE          ! name of element type
       CHARACTER(8*BYTE), INTENT(INOUT) :: TABLE_NAME     ! name of the op2 table name
       INTEGER(LONG),INTENT(INOUT)      :: ITABLE         ! the subtable
-      CALL SET_OES_OST_TABLE_NAME (ETYPE, TABLE_NAME, ITABLE, "OSTR1X  ", "OSTR1X  ")
+      CHARACTER(8*BYTE)                :: TABLE_NAME_NEW
+      LOGICAL                          :: RETURN_FLAG
+
+      RETURN_FLAG = .TRUE.
+      IF      ((ETYPE == 'BAR     ') .OR. (ETYPE == 'BEAM    ')) THEN
+        TABLE_NAME_NEW = "OSTR1X  "
+        RETURN_FLAG = .FALSE.
+      ELSE IF ((ETYPE == 'ELAS1   ') .OR. (ETYPE == 'ELAS2   ') .OR. (ETYPE == 'ELAS3   ') .OR. (ETYPE == 'ELAS4   ') .OR.       &
+               (ETYPE == 'BUSH    ') .OR. (ETYPE == 'ROD     ') .OR.                                                             &
+               (ETYPE == 'TRIA3   ') .OR. (ETYPE == 'QUAD4   ') .OR. (ETYPE == 'QUADR   ') .OR. (ETYPE == 'QUAD8   ') .OR.      &
+               (ETYPE == 'SHEAR   ') .OR.                                                                                         &
+               (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'PYRA5   ') .OR. (ETYPE == 'TETRA4  ') .OR.      &
+               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRA14  ') .OR. (ETYPE == 'TETRA10 ')) THEN
+        TABLE_NAME_NEW = "OSTR1X  "
+        RETURN_FLAG = .FALSE.
+      ELSE
+        TABLE_NAME_NEW = "OES ERR "
+        IF (ITABLE < -1) THEN
+          CALL END_OP2_TABLE(ITABLE)
+        ENDIF
+        ITABLE = 0
+      ENDIF
+
+      IF (RETURN_FLAG) THEN
+        TABLE_NAME = TABLE_NAME_NEW
+      ELSE
+        IF (TABLE_NAME /= TABLE_NAME_NEW) THEN
+          IF (ITABLE < -1) THEN
+            CALL END_OP2_TABLE(ITABLE)
+          ENDIF
+          TABLE_NAME = TABLE_NAME_NEW
+          ITABLE = -1
+        ENDIF
+
+        IF (ITABLE == -1) THEN
+          CALL WRITE_TABLE_HEADER(TABLE_NAME)
+          ITABLE = -3
+        ENDIF
+      ENDIF
       END SUBROUTINE SET_OST_TABLE_NAME
 !==================================================================================================
 

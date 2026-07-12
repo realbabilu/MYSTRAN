@@ -47,8 +47,8 @@
       USE MITC_INITIALIZE_Interface
       USE ORDER_GAUSS_Interface
       USE OUTA_HERE_Interface
-      USE MATMULT_FFF_Interface
-      USE MATMULT_FFF_T_Interface
+      USE MATMULX_FFF_Interface
+      USE MATMULX_FFF_T_Interface
       USE MITC_DETJ_Interface
       USE MITC8_B_Interface
       USE MITC8_CARTESIAN_LOCAL_BASIS_Interface
@@ -301,8 +301,8 @@
                   ! coordinate system here. The rotation angle may be different at each Gauss point.
                   EE(:,:) = E(:,:)
 
-                  CALL MATMULT_FFF ( EE, BI, 6, 6, 6*ELGP, DUM1 )
-                  CALL MATMULT_FFF_T ( BI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
+                  CALL MATMULX_FFF ( EE, BI, 6, 6, 6*ELGP, DUM1 )
+                  CALL MATMULX_FFF_T ( BI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                   DETJ = MITC_DETJ ( R, S, T )
                   INTFAC = DETJ*HH_IJ(I)*HH_IJ(J)*HH_K(K)
                   KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC

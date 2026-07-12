@@ -40,7 +40,8 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, TWO, FOUR
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP, PRTNEU
+      USE PARAMS, ONLY                :  OTMSKIP
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRN
       USE MODEL_STUF, ONLY            :  AGRID, ANY_STRN_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, ELGP, ELMTYP,     &
                                          ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, PBEAM_NSTATIONS, PCOMP_PROPS, PLY_NUM, STRAIN, &
                                          TYPE, SHELL_STR_ANGLE, ZS
@@ -115,7 +116,7 @@
       ITABLE = 0
       TABLE_NAME = "OES ERR "
 
-      WRITE_NEU = (PRTNEU == 'Y')
+      WRITE_NEU = WRITE_NEU_STRN
 
 ! **********************************************************************************************************************************
 ! Process element strain output (STRAIN) requests for all elems except composite shells

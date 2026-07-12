@@ -363,6 +363,10 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
   "${CMAKE_SOURCE_DIR}/*.F03"
 )
 
+set(MYSTRAN_C_HELPER_FILES
+  "${PROJECT_SOURCE_DIR}/Source/UTIL/f06_fast.c"
+)
+
 # ! --- MUMPS_COO add begin --- !
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/Source/Modules/LAPACK/LAPACK_LIN_EQN_DPB.f")
@@ -552,6 +556,7 @@ endif()
 add_executable(
   mystran
   ${ALL_FORTRAN_FILES}
+  ${MYSTRAN_C_HELPER_FILES}
   ${SLU_DRIVER}
   ${missing_blas_src}
 )

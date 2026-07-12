@@ -73,9 +73,11 @@
       ! concatenate the strings
       STRE_OUT = TRIM(FOUND_PRINT) // TRIM(FOUND_PLOT) // TRIM(FOUND_PUNCH) // TRIM(FOUND_NEU) // TRIM(FOUND_CSV)
 
-      ! default to print
+      ! For bare "STRE = ALL" requests, default to PRINT+PLOT so classic
+      ! OP2 stress tables are emitted without requiring explicit "(PLOT)"
+      ! qualifiers on the Case Control entry.
       IF (STRE_OUT(1:5) == 'NNNNN') THEN
-        STRE_OUT = 'YNNNN'
+        STRE_OUT = 'YYNNN'
       ENDIF
 
       ! Set CASE CONTROL output request variable to SETID

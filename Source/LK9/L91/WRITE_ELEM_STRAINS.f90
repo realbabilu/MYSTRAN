@@ -41,6 +41,11 @@
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE MODEL_STUF, ONLY            :  ELEM_ONAME, ELMTYP, LABEL, SCNUM, STITLE, TITLE, TYPE
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRN_OPT, STRN_OUT, STRN_CUR
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_I8_RJ,                                            &
+                                         FAST_BUILD_QUAD_1403_LINE, FAST_BUILD_QUAD_1404_LINE,                            &
+                                         FAST_BUILD_QUAD_1405_LINE, FAST_BUILD_QUAD_1406_LINE,                            &
+                                         FAST_BUILD_TRIA_1703_LINE, FAST_BUILD_TRIA_1704_LINE,                            &
+                                         FAST_BUILD_TRIA_1706_LINE
 
       USE WRITE_ELEM_STRAINS_USE_IFs
 
@@ -52,6 +57,11 @@
                                                            ! Array of different notes to write regarding poly fit errors
       CHARACTER( 50*BYTE)             :: ERR_INDEX_NOTE(MAX_NUM_STR)
       CHARACTER(119*BYTE)             :: FILL              ! Padding for output format
+      CHARACTER(160*BYTE)             :: LINE_BUF
+      CHARACTER(145*BYTE)             :: QUAD_CENTER_LINE
+      CHARACTER(119*BYTE)             :: QUAD_LOWER_LINE
+      CHARACTER(157*BYTE)             :: QUAD_GRID_NOTE_LINE
+      CHARACTER(154*BYTE)             :: QUAD_GRID_LINE
       CHARACTER(LEN=LEN(ELEM_ONAME))  :: ONAME             ! Element name to write out in F06 file
       CHARACTER( 1*BYTE)              :: WRITE_NOTES = 'N' ! Indicator of whether to write any WRT_ERR_INDEX_NOTE(i)
 
@@ -77,6 +87,8 @@
       REAL(DOUBLE)                    :: MIN_ANS(11)       ! Min for all element output
       REAL(DOUBLE)                    :: ANGLE
       REAL(DOUBLE)                    :: MEAN
+      REAL(DOUBLE)                    :: QUAD_VALUES_10(10)! Local contiguous copy to avoid strided slice temporaries
+      REAL(DOUBLE)                    :: QUAD_VALUES_8(8)  ! Local contiguous copy to avoid strided slice temporaries
       REAL(DOUBLE)                    :: SMAJ
       REAL(DOUBLE)                    :: SMIN
       REAL(DOUBLE)                    :: SXYMAX
@@ -88,7 +100,7 @@
                                          SMIN_RAW(11), MST_RAW(11), MSC_RAW(11)
       REAL(DOUBLE)                    :: Z1, Z2, Z_DEN
       REAL(DOUBLE), ALLOCATABLE       :: BEAM_XI(:,:), BEAM_SXC(:,:), BEAM_SXD(:,:), BEAM_SXE(:,:), BEAM_SXF(:,:),               &
-                                         BEAM_SMAX(:,:), BEAM_SMIN(:,:), BEAM_MST(:,:), BEAM_MSC(:,:)
+                                         BEAM_SMAX(:,:), BEAM_SMIN(:,:), BEAM_MST(:,:), BEAM_MSC(:,:), QUAD_CENTER(:,:)
       INTEGER(LONG), ALLOCATABLE      :: BEAM_EID(:), BEAM_GRID(:,:)
 
       ! op2 info
@@ -640,11 +652,11 @@
          DO I=1,NUM,NUM_PTS
             K = K + 1
             ! Center
-            WRITE(F06,1303) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,NCOLS)
+            CALL WRITE_STRAIN_SOLID_CENTER_LINE ( EID_OUT_ARRAY(I,1), OGEL(K,1:NCOLS), NCOLS )
             ! Corner
             DO L=1,NUM_PTS-1
                K = K + 1
-               WRITE(F06,1306) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,NCOLS)
+               CALL WRITE_STRAIN_SOLID_GRID_LINE ( GID_OUT_ARRAY(I,L+1), OGEL(K,1:NCOLS), NCOLS )
             ENDDO
          ENDDO
 
@@ -661,7 +673,7 @@
          IF (WRITE_OP2) THEN
            !CALL WRITE_OST_CQUAD4 ( NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI )
 
-            IF ((STRN_LOC == 'CENTER  ') .AND. (TYPE(1:5) /= 'QUAD8')) THEN
+             IF ((STRN_LOC /= 'CORNER  ') .AND. (TYPE(1:5) /= 'QUAD8')) THEN
                CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         0)
                ! CQUAD4-33
                !(eid_device,
@@ -676,10 +688,11 @@
                ! just a copy of the CTRIA3 code
                ! op2 version of the upper & lower layers all in one call, but without the transverse shear
                WRITE(OP2) NVALUES
-               DO I=1,NUM
-                  Z1 = OGEL(2*I-1,1)
-                  Z2 = OGEL(2*I  ,1)
-                  Z_DEN = Z1 - Z2
+                ALLOCATE(QUAD_CENTER(NUM,16))
+                DO I=1,NUM
+                   Z1 = OGEL(2*I-1,1)
+                   Z2 = OGEL(2*I  ,1)
+                   Z_DEN = Z1 - Z2
                   ROW_MEM(1) = 0.0D0
                   ROW_CURV(1) = -1.0D0
                   IF (DABS(Z_DEN) > 1.0D-12) THEN
@@ -699,16 +712,25 @@
                   ROW_MEM(7) = SMIN
                   ROW_MEM(8) = VONMISES
                   CALL PRINCIPAL_2D(ROW_CURV(2), ROW_CURV(3), ROW_CURV(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
-                  ROW_CURV(5) = ANGLE
-                  ROW_CURV(6) = SMAJ
-                  ROW_CURV(7) = SMIN
-                  ROW_CURV(8) = VONMISES
-                  WRITE(OP2) EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8)
-               ENDDO
-            ELSE
+                   ROW_CURV(5) = ANGLE
+                   ROW_CURV(6) = SMAJ
+                   ROW_CURV(7) = SMIN
+                   ROW_CURV(8) = VONMISES
+                   DO J=1,8
+                      QUAD_CENTER(I,J   ) = ROW_MEM(J)
+                      QUAD_CENTER(I,J+8 ) = ROW_CURV(J)
+                   ENDDO
+                ENDDO
+                WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(QUAD_CENTER(I,J),4), J=1,16), I=1,NUM)
+                DEALLOCATE(QUAD_CENTER)
+             ELSE
                CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         1)
-               ! CQUAD4-144
-               ELEMENT_TYPE = 144
+               ! CQUAD4-144 / CQUAD8-64
+               IF (TYPE(1:5) == 'QUAD8') THEN
+                  ELEMENT_TYPE = 64
+               ELSE
+                  ELEMENT_TYPE = 144
+               ENDIF
                NUM_WIDE = 87 ! 2 + 17 * (4+1)  ! 4 nodes + 1 centroid
 
                ! TODO: probably wrong...divide NUM by NUM_PTS?
@@ -746,21 +768,33 @@
             DO I=1,NUM,NUM_PTS
                K = K + 1
                WRITE(F06,*)
-               WRITE(F06,1403) FILL(1: 0), EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
+               QUAD_VALUES_10(1:10) = OGEL(K,1:10)
+               CALL FAST_BUILD_QUAD_1403_LINE ( EID_OUT_ARRAY(I,1), QUAD_VALUES_10, QUAD_CENTER_LINE )
+               WRITE(F06,'(A)') QUAD_CENTER_LINE
                K = K + 1
-               WRITE(F06,1404) FILL(1: 0), (OGEL(K,J),J=1,8)
+               QUAD_VALUES_8(1:8) = OGEL(K,1:8)
+               CALL FAST_BUILD_QUAD_1404_LINE ( QUAD_VALUES_8, QUAD_LOWER_LINE )
+               WRITE(F06,'(A)') QUAD_LOWER_LINE
 
                DO L=1,NUM_PTS-1
                   K = K + 1
                   WRITE(F06,*)
                   IF (DABS(POLY_FIT_ERR(I+L)) >= 0.01D0) THEN
-                     WRITE(F06,1405) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10), POLY_FIT_ERR(I+L), POLY_FIT_ERR_INDEX(I+L)
+                     QUAD_VALUES_10(1:10) = OGEL(K,1:10)
+                     CALL FAST_BUILD_QUAD_1405_LINE ( GID_OUT_ARRAY(I,L+1), QUAD_VALUES_10, POLY_FIT_ERR(I+L),                 &
+                                                      POLY_FIT_ERR_INDEX(I+L), QUAD_GRID_NOTE_LINE )
+                     WRITE(F06,'(A)') QUAD_GRID_NOTE_LINE
                      WRT_ERR_INDEX_NOTE(POLY_FIT_ERR_INDEX(I+L)) = 'Y'
                   ELSE
-                     WRITE(F06,1406) FILL(1: 0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10), POLY_FIT_ERR(I+L)
+                     QUAD_VALUES_10(1:10) = OGEL(K,1:10)
+                     CALL FAST_BUILD_QUAD_1406_LINE ( GID_OUT_ARRAY(I,L+1), QUAD_VALUES_10, POLY_FIT_ERR(I+L),                 &
+                                                      QUAD_GRID_LINE )
+                     WRITE(F06,'(A)') QUAD_GRID_LINE
                   ENDIF
                   K = K + 1
-                  WRITE(F06,1407) FILL(1: 0), (OGEL(K,J),J=1,8)
+                  QUAD_VALUES_8(1:8) = OGEL(K,1:8)
+                  CALL FAST_BUILD_QUAD_1404_LINE ( QUAD_VALUES_8, QUAD_LOWER_LINE )
+                  WRITE(F06,'(A)') QUAD_LOWER_LINE
                ENDDO
             ENDDO  ! num_pts
 
@@ -857,12 +891,12 @@
          ENDIF
 
          DO I=1,NUM
-            WRITE(F06,1802) EID_OUT_ARRAY(I,1),(OGEL(I,J),J=1,6)
+            CALL WRITE_STRAIN_I8_PLUS_R14_LINE ( 1_LONG, EID_OUT_ARRAY(I,1), OGEL(I,1:6), 6_LONG )
          ENDDO
 
       ELSE IF (TYPE == 'USERIN  ') THEN
          DO I=1,NUM
-            WRITE(F06,1902) EID_OUT_ARRAY(I,1),(OGEL(I,J),J=1,6)
+            CALL WRITE_STRAIN_I8_PLUS_R14_LINE ( 1_LONG, EID_OUT_ARRAY(I,1), OGEL(I,1:6), 6_LONG )
          ENDDO
 
       ELSE
@@ -1160,9 +1194,10 @@
       USE IOUNT1, ONLY                :  ERR, F06, OP2
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_CUR, STRN_LOC
       USE GET_MAX_MIN_ABS_STR_Interface
       USE PRINCIPAL_2D_Interface
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_BUILD_TRIA_1703_LINE, FAST_BUILD_TRIA_1704_LINE, FAST_BUILD_TRIA_1706_LINE
       IMPLICIT NONE
       !
       INTEGER(LONG), INTENT(IN)       :: NUM
@@ -1196,95 +1231,32 @@
       REAL(DOUBLE)                    :: SXYMAX
       REAL(DOUBLE)                    :: VONMISES
       REAL(DOUBLE)                    :: Z1, Z2, Z_DEN
-      INTEGER(LONG)                   :: I, J, K, L, NELEMENTS, NUM_PTS_TRI
+      INTEGER(LONG)                   :: I, J, K, L, IS_FIBER_DISTANCE
+      CHARACTER(149*BYTE)             :: TRIA_CENTER_LINE
+      CHARACTER(149*BYTE)             :: TRIA_LOWER_LINE
+      CHARACTER(139*BYTE)             :: TRIA_GRID_LINE
 
       DEVICE_CODE = 1
       K = 0
+      IF (STRN_CUR == 'FIBER') THEN
+         IS_FIBER_DISTANCE = 1
+      ELSE
+         IS_FIBER_DISTANCE = 0
+      ENDIF
 
       IF (WRITE_OP2) THEN
-          IF (STRN_LOC == 'CENTER  ') THEN
-             NUM_WIDE = 17
-             ELEMENT_TYPE = 74
-             NVALUES = NUM * NUM_WIDE
-          ELSE
-             NUM_PTS_TRI = 1
-             NUM_WIDE = 70
-             ELEMENT_TYPE = 70
-             NELEMENTS = NUM
-             NVALUES = NELEMENTS * NUM_WIDE
-          ENDIF
+          NUM_WIDE = 17
+          ELEMENT_TYPE = 74
+          NVALUES = NUM * NUM_WIDE
           NTOTAL = NVALUES * 4
 
-          CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         0)
+          CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         IS_FIBER_DISTANCE)
           CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
                                  TITLE, SUBTITLE, LABEL, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
           WRITE(OP2) NVALUES
 
-          IF (STRN_LOC == 'CENTER  ') THEN
-             DO I=1,NUM
-                Z1 = OGEL(2*I-1,1)
-                Z2 = OGEL(2*I  ,1)
-                Z_DEN = Z1 - Z2
-                ROW_MEM(1) = 0.0D0
-                ROW_CURV(1) = -1.0D0
-                IF (DABS(Z_DEN) > 1.0D-12) THEN
-                   DO J=2,4
-                      ROW_MEM(J)  = (Z1*OGEL(2*I  ,J) - Z2*OGEL(2*I-1,J)) / Z_DEN
-                      ROW_CURV(J) = (OGEL(2*I,J) - OGEL(2*I-1,J)) / Z_DEN
-                   ENDDO
-                ELSE
-                   DO J=2,4
-                      ROW_MEM(J)  = 0.5D0*(OGEL(2*I-1,J) + OGEL(2*I,J))
-                      ROW_CURV(J) = OGEL(2*I,J) - OGEL(2*I-1,J)
-                   ENDDO
-                ENDIF
-                CALL PRINCIPAL_2D(ROW_MEM(2), ROW_MEM(3), ROW_MEM(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
-                ROW_MEM(5) = ANGLE
-                ROW_MEM(6) = SMAJ
-                ROW_MEM(7) = SMIN
-                ROW_MEM(8) = VONMISES
-                CALL PRINCIPAL_2D(ROW_CURV(2), ROW_CURV(3), ROW_CURV(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
-                ROW_CURV(5) = ANGLE
-                ROW_CURV(6) = SMAJ
-                ROW_CURV(7) = SMIN
-                ROW_CURV(8) = VONMISES
-                WRITE(OP2) EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8)
-             ENDDO
-          ELSE
-             DO I=1,NELEMENTS
-                Z1 = OGEL(2*I-1,1)
-                Z2 = OGEL(2*I  ,1)
-                Z_DEN = Z1 - Z2
-                ROW_MEM(1) = 0.0D0
-                ROW_CURV(1) = -1.0D0
-                IF (DABS(Z_DEN) > 1.0D-12) THEN
-                   DO J=2,4
-                      ROW_MEM(J)  = (Z1*OGEL(2*I  ,J) - Z2*OGEL(2*I-1,J)) / Z_DEN
-                      ROW_CURV(J) = (OGEL(2*I,J) - OGEL(2*I-1,J)) / Z_DEN
-                   ENDDO
-                ELSE
-                   DO J=2,4
-                      ROW_MEM(J)  = 0.5D0*(OGEL(2*I-1,J) + OGEL(2*I,J))
-                      ROW_CURV(J) = OGEL(2*I,J) - OGEL(2*I-1,J)
-                   ENDDO
-                ENDIF
-                CALL PRINCIPAL_2D(ROW_MEM(2), ROW_MEM(3), ROW_MEM(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
-                ROW_MEM(5) = ANGLE
-                ROW_MEM(6) = SMAJ
-                ROW_MEM(7) = SMIN
-                ROW_MEM(8) = VONMISES
-                CALL PRINCIPAL_2D(ROW_CURV(2), ROW_CURV(3), ROW_CURV(4), .TRUE., ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES)
-                ROW_CURV(5) = ANGLE
-                ROW_CURV(6) = SMAJ
-                ROW_CURV(7) = SMIN
-                ROW_CURV(8) = VONMISES
-                WRITE(OP2) EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, "CEN/", 3,                               &
-                            (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8),                 &
-                            GID_OUT_ARRAY(I,2), (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8), &
-                            GID_OUT_ARRAY(I,3), (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8), &
-                            GID_OUT_ARRAY(I,4), (REAL(ROW_MEM(J),4), J=1,8), (REAL(ROW_CURV(J),4), J=1,8)
-             ENDDO
-          ENDIF
+          WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8),                                 &
+                     (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
       ENDIF
  1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
  1704 FORMAT(13X,'in elem',3X,4(1ES13.5),0PF9.3,5(1ES13.5))
@@ -1300,20 +1272,26 @@
          DO I=1,NUM
             K = K + 1
             WRITE(F06,*)
-            WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
+            CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), OGEL(K,1:10), TRIA_CENTER_LINE )
+            WRITE(F06,'(A)') TRIA_CENTER_LINE
             K = K + 1
-            WRITE(F06,1704) (OGEL(K,J),J=1,8)
+            CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K,1:8), TRIA_LOWER_LINE )
+            WRITE(F06,'(A)') TRIA_LOWER_LINE
          ENDDO
       ELSE
          DO I=1,NUM
             K = 2*I - 1
             WRITE(F06,*)
-            WRITE(F06,1703) EID_OUT_ARRAY(I,1),(OGEL(K,J),J=1,10)
-            WRITE(F06,1704) (OGEL(K+1,J),J=1,8)
+            CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), OGEL(K,1:10), TRIA_CENTER_LINE )
+            WRITE(F06,'(A)') TRIA_CENTER_LINE
+            CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K+1,1:8), TRIA_LOWER_LINE )
+            WRITE(F06,'(A)') TRIA_LOWER_LINE
             DO L=1,3
                WRITE(F06,*)
-               WRITE(F06,1706) FILL(1:0), GID_OUT_ARRAY(I,L+1),(OGEL(K,J),J=1,10)
-               WRITE(F06,1704) (OGEL(K+1,J),J=1,8)
+               CALL FAST_BUILD_TRIA_1706_LINE ( GID_OUT_ARRAY(I,L+1), OGEL(K,1:10), TRIA_GRID_LINE )
+               WRITE(F06,'(A)') TRIA_GRID_LINE
+               CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K+1,1:8), TRIA_LOWER_LINE )
+               WRITE(F06,'(A)') TRIA_LOWER_LINE
             ENDDO
          ENDDO
       ENDIF
@@ -1325,5 +1303,99 @@
                       ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),ABS_ANS(10)
 
       END SUBROUTINE WRITE_OST_CTRIA3
+
+!==============================================================================
+      SUBROUTINE WRITE_STRAIN_I8_PLUS_R14_LINE ( NLEAD, IDVAL, VALUES, NVALS )
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      USE IOUNT1, ONLY                :  F06
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_I8_RJ
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), INTENT(IN)       :: NLEAD, IDVAL, NVALS
+      REAL(DOUBLE), INTENT(IN)        :: VALUES(NVALS)
+
+      CHARACTER(160*BYTE)             :: LINE_BUF
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT
+      INTEGER(LONG)                   :: I, POS
+
+      LINE_BUF = ' '
+      CALL FAST_FMT_I8_RJ ( IDVAL, ID_TEXT )
+      LINE_BUF(NLEAD+1:NLEAD+8) = ID_TEXT
+      POS = NLEAD + 9
+      DO I=1,NVALS
+         CALL FAST_FMT_F06_E14_6 ( VALUES(I), VAL_TEXT )
+         LINE_BUF(POS:POS+13) = VAL_TEXT
+         POS = POS + 14
+      ENDDO
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_STRAIN_I8_PLUS_R14_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_STRAIN_SOLID_CENTER_LINE ( EID, VALUES, NVALS )
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      USE IOUNT1, ONLY                :  F06
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_I8_RJ
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), INTENT(IN)       :: EID, NVALS
+      REAL(DOUBLE), INTENT(IN)        :: VALUES(NVALS)
+
+      CHARACTER(139*BYTE)             :: LINE_BUF
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT
+      INTEGER(LONG)                   :: I, POS
+
+      LINE_BUF = ' '
+      CALL FAST_FMT_I8_RJ ( EID, ID_TEXT )
+      LINE_BUF(2:9) = ID_TEXT
+      LINE_BUF(12:19) = 'CENTER  '
+      POS = 28
+      DO I=1,NVALS
+         CALL FAST_FMT_F06_E14_6 ( VALUES(I), VAL_TEXT )
+         LINE_BUF(POS:POS+13) = VAL_TEXT
+         POS = POS + 14
+      ENDDO
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_STRAIN_SOLID_CENTER_LINE
+
+! ##################################################################################################################################
+
+      SUBROUTINE WRITE_STRAIN_SOLID_GRID_LINE ( GRID_ID, VALUES, NVALS )
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      USE IOUNT1, ONLY                :  F06
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_I8_RJ
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), INTENT(IN)       :: GRID_ID, NVALS
+      REAL(DOUBLE), INTENT(IN)        :: VALUES(NVALS)
+
+      CHARACTER(139*BYTE)             :: LINE_BUF
+      CHARACTER(8*BYTE)               :: ID_TEXT
+      CHARACTER(14*BYTE)              :: VAL_TEXT
+      INTEGER(LONG)                   :: I, POS
+
+      LINE_BUF = ' '
+      LINE_BUF(12:14) = 'GRD'
+      CALL FAST_FMT_I8_RJ ( GRID_ID, ID_TEXT )
+      LINE_BUF(15:22) = ID_TEXT
+      POS = 28
+      DO I=1,NVALS
+         CALL FAST_FMT_F06_E14_6 ( VALUES(I), VAL_TEXT )
+         LINE_BUF(POS:POS+13) = VAL_TEXT
+         POS = POS + 14
+      ENDDO
+      WRITE(F06,'(A)') LINE_BUF(1:POS-1)
+
+      END SUBROUTINE WRITE_STRAIN_SOLID_GRID_LINE
 
 !==============================================================================

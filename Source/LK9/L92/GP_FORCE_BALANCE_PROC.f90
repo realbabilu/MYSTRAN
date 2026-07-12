@@ -426,7 +426,8 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
             ! get applied load, thermal load, SPC force, MPC force for a single node
             CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_NUM, IGRID )
             ROW_NUM_START = TDOF_ROW_START(IGRID)
-            CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
+            ! Use the looked-up internal grid row, not the outer loop index.
+            CALL GET_GRID_NUM_COMPS ( IGRID, NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
                TDOF_ROW = ROW_NUM_START + J - 1

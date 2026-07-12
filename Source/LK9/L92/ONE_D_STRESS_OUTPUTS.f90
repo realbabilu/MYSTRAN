@@ -39,7 +39,7 @@
       USE LINK9_STUFF, ONLY           :  MSPRNT, OGEL
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_VECS
       USE DEBUG_PARAMETERS
-      USE PARAMS, ONLY                :  PRTNEU
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRE
 
       USE ONE_D_STRESS_OUTPUTS_USE_IFs
 
@@ -72,7 +72,7 @@
       INTRINSIC DABS, DMAX1,DMIN1
 
 
-      WRITE_NEU = (PRTNEU == 'Y')
+      WRITE_NEU = WRITE_NEU_STRE
 
 ! **********************************************************************************************************************************
 ! Calc engineering stresses from array STRESS and put into array OGEL

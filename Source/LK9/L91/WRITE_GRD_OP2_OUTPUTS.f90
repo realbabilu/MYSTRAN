@@ -138,11 +138,9 @@
 
       ! write the real "displacment" data
       NUM_WIDE = 8
- 100  FORMAT("*DEBUG:    NUM=",I8,"; NVALUES=",I8,"; NTOTAL=",I8)
 !      NGRID = NUM - 3
       NVALUES = NUM * NUM_WIDE
       NTOTAL = NVALUES * 4
-      WRITE(ERR,100) NUM,NVALUES,NTOTAL
       WRITE(OP2) NVALUES
       ! Nastran OP2 requires this write call be a one liner...so it's a little weird...
       ! translating:

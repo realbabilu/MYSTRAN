@@ -35,7 +35,8 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS
-      USE PARAMS, ONLY                :  OTMSKIP, PRTNEU
+      USE PARAMS, ONLY                :  OTMSKIP
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRE
       USE MODEL_STUF, ONLY            :  ANY_STRE_OUTPUT, EDAT, EPNT, ETYPE, EID, ELMTYP, ELOUT, METYPE, NUM_EMG_FATAL_ERRS,       &
                                          NUM_PLIES, PCOMP_PROPS, PLY_NUM, THETA_PLY, TYPE
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, MAXREQ, OGEL
@@ -84,7 +85,7 @@
       TABLE_NAME = "OES1C"
       ITABLE = 0
 
-      WRITE_NEU = (PRTNEU == 'Y')
+      WRITE_NEU = WRITE_NEU_STRE
 
 ! **********************************************************************************************************************************
 ! Process element stress output (STRESS) requests for composite shell elements

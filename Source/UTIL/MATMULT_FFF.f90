@@ -32,37 +32,60 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE SCONTR, ONLY                :  BLNK_SUB_NAM
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE
 
       USE MATMULT_FFF_USE_IFs
 
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'MATMULT_FFF'
+      CHARACTER( 1*BYTE), PARAMETER   :: TRANSA = 'N'
+      CHARACTER( 1*BYTE), PARAMETER   :: TRANSB = 'N'
+      CHARACTER( 1*BYTE), PARAMETER   :: TRANS  = 'T'
 
       INTEGER(LONG), INTENT(IN)       :: NROWA             ! No. rows in input matrix A
       INTEGER(LONG), INTENT(IN)       :: NCOLA             ! No. cols in input matrix A
       INTEGER(LONG), INTENT(IN)       :: NCOLB             ! No. cols in input matrix B
       INTEGER(LONG)                   :: I,J,K             ! DO loop indices or counters
+      INTEGER(LONG)                   :: MIN_DIM
       INTEGER(LONG)                   :: NROWB             !
+      REAL(DOUBLE), PARAMETER         :: DGEMM_MIN_WORK = 32768.D0
+      INTEGER(LONG), PARAMETER        :: DGEMM_MIN_DIM  = 24
+      INTEGER(LONG), PARAMETER        :: DGEMV_MIN_LEN  = 64
 
 
       REAL(DOUBLE) , INTENT(IN)       :: A(NROWA,NCOLA)    ! Input  matrix A
       REAL(DOUBLE) , INTENT(IN)       :: B(NCOLA,NCOLB)    ! Input  matrix B
       REAL(DOUBLE) , INTENT(OUT)      :: C(NROWA,NCOLB)    ! Output matrix C
+      REAL(DOUBLE) , PARAMETER        :: ALPHA = ONE
+      REAL(DOUBLE) , PARAMETER        :: BETA  = ZERO
+      REAL(DOUBLE)                    :: WORK_EST
+
+      EXTERNAL                        :: DGEMM, DGEMV
 
 
 
 ! **********************************************************************************************************************************
-! Initialize outputs
-
-      DO I=1,NROWA
-         DO J=1,NCOLB
-            C(I,J) = ZERO
-         ENDDO
-      ENDDO
-
       NROWB = NCOLA
+      MIN_DIM = MIN(NROWA,MIN(NCOLA,NCOLB))
+      WORK_EST = DBLE(NROWA)*DBLE(NCOLA)*DBLE(NCOLB)
+
+! Use BLAS for medium/large dense multiplies. Small multiplies stay in the explicit loops to avoid DGEMM call overhead.
+
+      IF ((NCOLB == 1) .AND. (NCOLA >= DGEMV_MIN_LEN)) THEN
+         CALL DGEMV ( TRANSA, NROWA, NCOLA, ALPHA, A, NROWA, B(1,1), 1, BETA, C(1,1), 1 )
+         RETURN
+      ELSE IF ((NROWA == 1) .AND. (NCOLA >= DGEMV_MIN_LEN)) THEN
+         CALL DGEMV ( TRANS, NCOLA, NCOLB, ALPHA, B, NCOLA, A(1,1), 1, BETA, C(1,1), 1 )
+         RETURN
+      ENDIF
+
+      IF ((MIN_DIM >= DGEMM_MIN_DIM) .AND. (WORK_EST >= DGEMM_MIN_WORK)) THEN
+         CALL DGEMM ( TRANSA, TRANSB, NROWA, NCOLB, NCOLA, ALPHA, A, NROWA, B, NCOLA, BETA, C, NROWA )
+         RETURN
+      ENDIF
+
+! Initialize outputs
 
 ! Multiply A x B
 

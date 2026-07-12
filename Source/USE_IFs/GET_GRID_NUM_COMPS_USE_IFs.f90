@@ -27,6 +27,7 @@
 
 ! USE Interface statements for all subroutines called by SUBROUTINE GET_GRID_NUM_COMPS
 
+      USE GET_ARRAY_ROW_NUM_Interface
       USE OURTIM_Interface
       USE OUTA_HERE_Interface
 

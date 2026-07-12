@@ -39,16 +39,19 @@
       REAL(DOUBLE),  INTENT(IN)       :: SHR_FAC
       REAL(DOUBLE)                    :: STR_TENSOR(3,3)
       REAL(DOUBLE)                    :: DUM33(3,3)
+      REAL(DOUBLE)                    :: TT(3,3)
 
 
 ! **********************************************************************************************************************************
+
+      TT(1:3,1:3) = TRANSPOSE(T)
 
                                                            ! Membrane and transverse shear
       STR_TENSOR(1,1) = STR_VEC(1)           ; STR_TENSOR(1,2) = STR_VEC(3) / SHR_FAC ;   STR_TENSOR(1,3) = STR_VEC(7) / SHR_FAC
       STR_TENSOR(2,1) = STR_VEC(3) / SHR_FAC ; STR_TENSOR(2,2) = STR_VEC(2)           ;   STR_TENSOR(2,3) = STR_VEC(8) / SHR_FAC
       STR_TENSOR(3,1) = STR_VEC(7) / SHR_FAC ; STR_TENSOR(3,2) = STR_VEC(8) / SHR_FAC ;   STR_TENSOR(3,3) = ZERO
 
-      CALL MATMULT_FFF (STR_TENSOR, TRANSPOSE(T), 3, 3, 3, DUM33 )
+      CALL MATMULT_FFF (STR_TENSOR, TT, 3, 3, 3, DUM33 )
       CALL MATMULT_FFF (T, DUM33, 3, 3, 3, STR_TENSOR )
 
       STR_VEC(1) = STR_TENSOR(1,1)
@@ -62,7 +65,7 @@
       STR_TENSOR(2,1) = STR_VEC(6) / SHR_FAC ;   STR_TENSOR(2,2) = STR_VEC(5)           ;   STR_TENSOR(2,3) = ZERO
       STR_TENSOR(3,1) = ZERO                 ;   STR_TENSOR(3,2) = ZERO                 ;   STR_TENSOR(3,3) = ZERO
 
-      CALL MATMULT_FFF (STR_TENSOR, TRANSPOSE(T), 3, 3, 3, DUM33 )
+      CALL MATMULT_FFF (STR_TENSOR, TT, 3, 3, 3, DUM33 )
       CALL MATMULT_FFF (T, DUM33, 3, 3, 3, STR_TENSOR )
 
       STR_VEC(4) = STR_TENSOR(1,1)

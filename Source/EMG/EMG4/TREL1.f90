@@ -216,8 +216,8 @@
                   ENDDO
                ENDDO
 
-               CALL MATMULT_FFF ( SHELL_B, BIG_BBI, 3, 3, ELDOF, DUM1 )
-               CALL MATMULT_FFF_T ( BIG_BMI, DUM1, 3, ELDOF, ELDOF, DUM2 )
+               CALL MATMULX_FFF ( SHELL_B, BIG_BBI, 3, 3, ELDOF, DUM1 )
+               CALL MATMULX_FFF_T ( BIG_BMI, DUM1, 3, ELDOF, ELDOF, DUM2 )
 
                DO K=1,ELDOF
                   DO L=1,ELDOF

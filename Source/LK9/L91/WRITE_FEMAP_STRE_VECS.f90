@@ -1,84 +1,77 @@
 !--- cbeam add --- begin!
 ! ##################################################################################################################################
-! Begin MIT license text.                                                                                    
+! Begin MIT license text.
 ! _______________________________________________________________________________________________________
-                                                                                                         
-! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)                                              
-                                                                                                         
-! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and      
+!
+! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 ! associated documentation files (the "Software"), to deal in the Software without restriction, including
 ! without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to   
-! the following conditions:                                                                              
-                                                                                                         
-! The above copyright notice and this permission notice shall be included in all copies or substantial   
-! portions of the Software and documentation.                                                                              
-                                                                                                         
-! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS                                
-! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,                            
-! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE                            
-! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                                 
-! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                          
-! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN                              
-! THE SOFTWARE.                                                                                          
+! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
+! the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all copies or substantial
+! portions of the Software and documentation.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+! LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+! EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+! IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+! THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ! _______________________________________________________________________________________________________
-                                                                                                        
-! End MIT license text.                                                                                      
- 
+!
+! End MIT license text.
+
       SUBROUTINE WRITE_FEMAP_STRE_VECS ( ELEM_TYP, IS_PCOMP, NUM_FEMAP_ROWS, FEMAP_SET_ID )
- 
+
 ! Writes elem stress to FEMAP neutral file for ELAS, ROD, BAR, TRIA3, QUAD4, SHEAR, HEXA, PENTA, TETRA4
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, NEU
+      USE IOUNT1, ONLY                :  WRT_LOG, ERR, F04, F06
       USE PARAMS, ONLY                :  SUPWARN
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, NGRID, WARN_ERR
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_OPT
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
+      USE FEMAP_NEU_WRITE_HELPERS, ONLY : NEU_WRITE_ELEM_VECTOR
       USE SUBR_BEGEND_LEVELS, ONLY    :  WRITE_FEMAP_STRE_VECS_BEGEND
- 
+
       USE WRITE_FEMAP_STRE_VECS_USE_IFs
 
       IMPLICIT NONE
- 
+
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'WRITE_FEMAP_STRE_VECS'
-      CHARACTER(LEN=*), INTENT(IN)    :: ELEM_TYP               ! Element type
-      CHARACTER(LEN=*), INTENT(IN)    :: IS_PCOMP               ! 'Y'/'N' for whether elements are PCOMP
-      CHARACTER( 1*BYTE)              :: CALC_WARN(22)          ! FEMAP value for record 7
-      CHARACTER( 1*BYTE)              :: CENT_TOTAL(22)         ! FEMAP value for record 7
-      CHARACTER( 1*BYTE)              :: COMP_DIR(22)           ! FEMAP value for record 7
-      CHARACTER( 1*BYTE)              :: ENT_TYPE = '8'         ! FEMAP value for record 6
-      CHARACTER(LEN=LEN(ELEM_TYP))    :: ELEM_NAME              ! ELEM_TYP with trailing blanks stripped
-      CHARACTER( 1*BYTE)              :: OUT_TYPE = '4'         ! FEMAP value for record 6
-      CHARACTER(25*BYTE)              :: TITLE_E(22)            ! Titles for vectors written to NEU
+      CHARACTER(LEN=*), INTENT(IN)    :: ELEM_TYP
+      CHARACTER(LEN=*), INTENT(IN)    :: IS_PCOMP
+      CHARACTER( 1*BYTE)              :: CALC_WARN(22)
+      CHARACTER( 1*BYTE)              :: CENT_TOTAL(22)
+      CHARACTER( 1*BYTE)              :: COMP_DIR(22)
+      CHARACTER( 1*BYTE)              :: ENT_TYPE = '8'
+      CHARACTER(LEN=LEN(ELEM_TYP))    :: ELEM_NAME
+      CHARACTER( 1*BYTE)              :: OUT_TYPE = '4'
+      CHARACTER(25*BYTE)              :: TITLE_E(22)
 
-      INTEGER(LONG), INTENT(IN)       :: NUM_FEMAP_ROWS         ! Number of rows of FEMAP data to write
-      INTEGER(LONG), INTENT(IN)       :: FEMAP_SET_ID           ! FEMAP set ID to write out
-      INTEGER(LONG)                   :: ELEM_MAX               ! Elem ID where vector is max
-      INTEGER(LONG)                   :: ELEM_MIN               ! Elem ID where vector is min
-
-                                                                ! Col from FEMAP_EL_NUMS (elem ID's)
+      INTEGER(LONG), INTENT(IN)       :: NUM_FEMAP_ROWS
+      INTEGER(LONG), INTENT(IN)       :: FEMAP_SET_ID
+      INTEGER(LONG)                   :: ELEM_MAX
+      INTEGER(LONG)                   :: ELEM_MIN
+      INTEGER(LONG)                   :: ELEM_NAME_LEN
       INTEGER(LONG), ALLOCATABLE      :: ELEM_NUMS(:)
-
-      INTEGER(LONG)                   :: ELEM_NAME_LEN          ! Length of ELEM_TYP without trailing blanks
-      INTEGER(LONG)                   :: I,J                    ! DO loop indices
-      INTEGER(LONG)                   :: ID(22)                 ! Vector ID's for FEMAP output
-      INTEGER(LONG)                   :: VEC_ID_OFFSET          ! Offset in determining output vector ID
-      INTEGER(LONG)                   :: VEC_ID                 ! Vector ID for FEMAP output
+      INTEGER(LONG)                   :: I, J
+      INTEGER(LONG)                   :: ID(20)
+      INTEGER(LONG)                   :: VEC_ID_OFFSET
       INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = WRITE_FEMAP_STRE_VECS_BEGEND
 
-                                                                ! One column from FEMAP_EL_VECS
       REAL(DOUBLE), ALLOCATABLE       :: ELEM_VEC(:)
+      REAL(DOUBLE)                    :: VEC_ABS
+      REAL(DOUBLE)                    :: VEC_MAX
+      REAL(DOUBLE)                    :: VEC_MIN
 
-      REAL(DOUBLE)                    :: VEC_ABS                ! Abs value in vector
-      REAL(DOUBLE)                    :: VEC_MAX                ! Max value in vector
-      REAL(DOUBLE)                    :: VEC_MIN                ! Min value in vector
- 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM                                          
-        WRITE(F04,9001) SUBR_NAME,TSEC
+         CALL OURTIM
+         WRITE(F04,9001) SUBR_NAME,TSEC
  9001    FORMAT(1X,A,' BEGN ',F10.3)
       ENDIF
 
@@ -86,12 +79,9 @@
       ELEM_NAME_LEN = LEN(ELEM_TYP)
       ELEM_NAME(1:) = ELEM_TYP(1:)
       DO I=LEN(ELEM_TYP),1,-1
-         IF (ELEM_TYP(I:I) == ' ') THEN
-            CYCLE
-         ELSE
-            ELEM_NAME_LEN = I
-            EXIT
-         ENDIF
+         IF (ELEM_TYP(I:I) == ' ') CYCLE
+         ELEM_NAME_LEN = I
+         EXIT
       ENDDO
 
       ALLOCATE ( ELEM_NUMS(NUM_FEMAP_ROWS) )
@@ -130,12 +120,8 @@
       ELSE
          WARN_ERR = WARN_ERR + 1
          WRITE(ERR,943) TRIM(ELEM_TYP), 'STRESS', TRIM(SUBR_NAME)
-         IF (SUPWARN == 'N') THEN
-            WRITE(F06,943) TRIM(ELEM_TYP), 'STRESS', TRIM(SUBR_NAME)
-         ENDIF
+         IF (SUPWARN == 'N') WRITE(F06,943) TRIM(ELEM_TYP), 'STRESS', TRIM(SUBR_NAME)
       ENDIF
-
-! Process elements
 
       IF (ELEM_TYP == 'BEAM    ') THEN
 
@@ -153,83 +139,22 @@
          TITLE_E(12) = 'EndB Min Stress'     ;   CALC_WARN(12) = '1';   COMP_DIR(12) = '3';   CENT_TOTAL(12) = '1'
 
          DO J=1,12
-            VEC_ID = VEC_ID_OFFSET + J
-            WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
-            WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
-            DO I=1,NUM_FEMAP_ROWS
-               ELEM_VEC(I)  = FEMAP_EL_VECS(I,J)
-               ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-            ENDDO
-            CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-            WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-            DO I=1,20
-               ID(I) = 0
-            ENDDO
-            WRITE(NEU,1004) (ID(I),I= 1,10)
-            WRITE(NEU,1004) (ID(I),I=11,20)
-            WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-            WRITE(NEU,1006) CALC_WARN(J), COMP_DIR(J), CENT_TOTAL(J)
-            DO I=1,NUM_FEMAP_ROWS
-               WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-            ENDDO
-            WRITE(NEU,1008)
+            ID = 0
+            CALL WRITE_STRE_COLUMN ( J, VEC_ID_OFFSET + J, ID )
          ENDDO
 
-      ELSE IF (ELEM_TYP(1:4) == 'ELAS')  THEN
+      ELSE IF (ELEM_TYP(1:4) == 'ELAS') THEN
 
          TITLE_E(1) = 'EndA Stress';   CALC_WARN(1) = '0';   COMP_DIR(1) = '0';   CENT_TOTAL(1) = '1'
          TITLE_E(2) = 'EndB Stress';   CALC_WARN(2) = '0';   COMP_DIR(2) = '0';   CENT_TOTAL(2) = '1'
 
          DO J=1,2,2
-
-            VEC_ID = VEC_ID_OFFSET + J
-            WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
-            WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
-            DO I=1,NUM_FEMAP_ROWS
-               ELEM_VEC(I)  = FEMAP_EL_VECS(I,J)
-               ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-            ENDDO
-            CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-            WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-            ID(1) = VEC_ID
-            ID(2) = VEC_ID + 1
-            DO I=3,20
-               ID(I) = 0
-            ENDDO
-            WRITE(NEU,1004) (ID(I),I= 1,10)
-            WRITE(NEU,1004) (ID(I),I=11,20)
-            WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-            WRITE(NEU,1006) CALC_WARN(J), COMP_DIR(J), CENT_TOTAL(J)
-            DO I=1,NUM_FEMAP_ROWS
-               WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-            ENDDO
-            WRITE(NEU,1008)
-
-            VEC_ID = VEC_ID_OFFSET + J
-            WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID+1
-            WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J+1)
-            DO I=1,NUM_FEMAP_ROWS
-               ELEM_VEC(I)  = FEMAP_EL_VECS(I,J+1)
-               ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-            ENDDO
-            CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-            WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-            ID(1) = VEC_ID
-            ID(2) = VEC_ID + 1
-            DO I=3,20
-               ID(I) = 0
-            ENDDO
-            WRITE(NEU,1004) (ID(I),I= 1,10)
-            WRITE(NEU,1004) (ID(I),I=11,20)
-            WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-            WRITE(NEU,1006) CALC_WARN(J+1), COMP_DIR(J+1), CENT_TOTAL(J+1)
-            DO I=1,NUM_FEMAP_ROWS
-               WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-            ENDDO
-            WRITE(NEU,1008)
-
+            ID = 0
+            ID(1) = VEC_ID_OFFSET + J
+            ID(2) = VEC_ID_OFFSET + J + 1
+            CALL WRITE_STRE_COLUMN ( J  , VEC_ID_OFFSET + J    , ID )
+            CALL WRITE_STRE_COLUMN ( J+1, VEC_ID_OFFSET + J + 1, ID )
          ENDDO
-
 
       ELSE IF (ELEM_TYP == 'ROD     ') THEN
 
@@ -239,53 +164,11 @@
          TITLE_E(4) = 'EndB Torsional Stress';   CALC_WARN(4) = '0';   COMP_DIR(4) = '0';   CENT_TOTAL(4) = '1'
 
          DO J=1,4,2
-
-            VEC_ID = VEC_ID_OFFSET + J
-            WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
-            WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
-            DO I=1,NUM_FEMAP_ROWS
-               ELEM_VEC(I)  = FEMAP_EL_VECS(I,J)
-               ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-            ENDDO
-            CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-            WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-            ID(1) = VEC_ID
-            ID(2) = VEC_ID + 1
-            DO I=3,20
-               ID(I) = 0
-            ENDDO
-            WRITE(NEU,1004) (ID(I),I= 1,10)
-            WRITE(NEU,1004) (ID(I),I=11,20)
-            WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-            WRITE(NEU,1006) CALC_WARN(J), COMP_DIR(J), CENT_TOTAL(J)
-            DO I=1,NUM_FEMAP_ROWS
-               WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-            ENDDO
-            WRITE(NEU,1008)
-
-            VEC_ID = VEC_ID_OFFSET + J
-            WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID+1
-            WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J+1)
-            DO I=1,NUM_FEMAP_ROWS
-               ELEM_VEC(I)  = FEMAP_EL_VECS(I,J+1)
-               ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-            ENDDO
-            CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-            WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-            ID(1) = VEC_ID
-            ID(2) = VEC_ID + 1
-            DO I=3,20
-               ID(I) = 0
-            ENDDO
-            WRITE(NEU,1004) (ID(I),I= 1,10)
-            WRITE(NEU,1004) (ID(I),I=11,20)
-            WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-            WRITE(NEU,1006) CALC_WARN(J+1), COMP_DIR(J+1), CENT_TOTAL(J+1)
-            DO I=1,NUM_FEMAP_ROWS
-               WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-            ENDDO
-            WRITE(NEU,1008)
-
+            ID = 0
+            ID(1) = VEC_ID_OFFSET + J
+            ID(2) = VEC_ID_OFFSET + J + 1
+            CALL WRITE_STRE_COLUMN ( J  , VEC_ID_OFFSET + J    , ID )
+            CALL WRITE_STRE_COLUMN ( J+1, VEC_ID_OFFSET + J + 1, ID )
          ENDDO
 
       ELSE IF (ELEM_TYP == 'BAR     ') THEN
@@ -298,65 +181,22 @@
          TITLE_E( 6) = 'EndB Pt3 Comb Stress';   CALC_WARN( 6) = '0';   COMP_DIR( 6) = '3';   CENT_TOTAL( 6) = '1'
          TITLE_E( 7) = 'EndA Pt4 Comb Stress';   CALC_WARN( 7) = '0';   COMP_DIR( 7) = '3';   CENT_TOTAL( 7) = '1'
          TITLE_E( 8) = 'EndB Pt4 Comb Stress';   CALC_WARN( 8) = '0';   COMP_DIR( 8) = '3';   CENT_TOTAL( 8) = '1'
-         TITLE_E( 9) = 'EndA Max Stress'     ;   CALC_WARN( 9) = '1';   COMP_DIR( 9) = '3';   CENT_TOTAL( 9) = '1' 
+         TITLE_E( 9) = 'EndA Max Stress'     ;   CALC_WARN( 9) = '1';   COMP_DIR( 9) = '3';   CENT_TOTAL( 9) = '1'
          TITLE_E(10) = 'EndB Max Stress'     ;   CALC_WARN(10) = '1';   COMP_DIR(10) = '3';   CENT_TOTAL(10) = '1'
          TITLE_E(11) = 'EndA Min Stress'     ;   CALC_WARN(11) = '1';   COMP_DIR(11) = '3';   CENT_TOTAL(11) = '1'
          TITLE_E(12) = 'EndB Min Stress'     ;   CALC_WARN(12) = '1';   COMP_DIR(12) = '3';   CENT_TOTAL(12) = '1'
 
          DO J=1,12,2
-
-            VEC_ID = VEC_ID_OFFSET + J
-            WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
-            WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
-            DO I=1,NUM_FEMAP_ROWS
-               ELEM_VEC(I)  = FEMAP_EL_VECS(I,J)
-               ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-            ENDDO
-            CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-            WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-            ID(1) = VEC_ID
-            ID(2) = VEC_ID + 1
-            DO I=3,20
-               ID(I) = 0
-            ENDDO
-            WRITE(NEU,1004) (ID(I),I= 1,10)
-            WRITE(NEU,1004) (ID(I),I=11,20)
-            WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-            WRITE(NEU,1006) CALC_WARN(J), COMP_DIR(J), CENT_TOTAL(J)
-            DO I=1,NUM_FEMAP_ROWS
-               WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-            ENDDO
-            WRITE(NEU,1008)
-
-            VEC_ID = VEC_ID_OFFSET + J
-            WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID+1
-            WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J+1)
-            DO I=1,NUM_FEMAP_ROWS
-               ELEM_VEC(I)  = FEMAP_EL_VECS(I,J+1)
-               ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-            ENDDO
-            CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-            WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-            ID(1) = VEC_ID
-            ID(2) = VEC_ID + 1
-            DO I=3,20
-               ID(I) = 0
-            ENDDO
-            WRITE(NEU,1004) (ID(I),I= 1,10)
-            WRITE(NEU,1004) (ID(I),I=11,20)
-            WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-            WRITE(NEU,1006) CALC_WARN(J+1), COMP_DIR(J+1), CENT_TOTAL(J+1)
-            DO I=1,NUM_FEMAP_ROWS
-               WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-            ENDDO
-            WRITE(NEU,1008)
-
+            ID = 0
+            ID(1) = VEC_ID_OFFSET + J
+            ID(2) = VEC_ID_OFFSET + J + 1
+            CALL WRITE_STRE_COLUMN ( J  , VEC_ID_OFFSET + J    , ID )
+            CALL WRITE_STRE_COLUMN ( J+1, VEC_ID_OFFSET + J + 1, ID )
          ENDDO
 
       ELSE IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4')) THEN
 
          IF (IS_PCOMP == 'N') THEN
-
             TITLE_E( 1) = 'Top X Direct Stress' ;   CALC_WARN( 1) = '0';   COMP_DIR( 1) = '0';   CENT_TOTAL( 1) = '1'
             TITLE_E( 2) = 'Top Y Direct Stress' ;   CALC_WARN( 2) = '0';   COMP_DIR( 2) = '0';   CENT_TOTAL( 2) = '1'
             TITLE_E( 3) = 'Top XY Shear Stress' ;   CALC_WARN( 3) = '0';   COMP_DIR( 3) = '0';   CENT_TOTAL( 3) = '1'
@@ -368,7 +208,6 @@
             TITLE_E( 9) = 'Top Von Mises Stress';   CALC_WARN( 9) = '1';   COMP_DIR( 9) = '0';   CENT_TOTAL( 9) = '1'
             TITLE_E(10) = 'Top XZ Shear Stress' ;   CALC_WARN(10) = '0';   COMP_DIR(10) = '0';   CENT_TOTAL(10) = '1'
             TITLE_E(11) = 'Top YZ Shear Stress' ;   CALC_WARN(11) = '0';   COMP_DIR(11) = '0';   CENT_TOTAL(11) = '1'
-
             TITLE_E(12) = 'Bot X Direct Stress' ;   CALC_WARN(12) = '0';   COMP_DIR(12) = '0';   CENT_TOTAL(12) = '1'
             TITLE_E(13) = 'Bot Y Direct Stress' ;   CALC_WARN(13) = '0';   COMP_DIR(13) = '0';   CENT_TOTAL(13) = '1'
             TITLE_E(14) = 'Bot XY Shear Stress' ;   CALC_WARN(14) = '0';   COMP_DIR(14) = '0';   CENT_TOTAL(14) = '1'
@@ -380,41 +219,18 @@
             TITLE_E(20) = 'Bot Von Mises Stress';   CALC_WARN(20) = '1';   COMP_DIR(20) = '0';   CENT_TOTAL(20) = '1'
             TITLE_E(21) = 'Bot XZ Shear Stress' ;   CALC_WARN(21) = '0';   COMP_DIR(21) = '0';   CENT_TOTAL(21) = '1'
             TITLE_E(22) = 'Bot YZ Shear Stress' ;   CALC_WARN(22) = '0';   COMP_DIR(22) = '0';   CENT_TOTAL(22) = '1'
-
             DO J=1,22
-               VEC_ID = VEC_ID_OFFSET + J
-               WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
-               WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
-               DO I=1,NUM_FEMAP_ROWS
-                  ELEM_VEC(I)  = FEMAP_EL_VECS(I,J)
-                  ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-               ENDDO
-               CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-               WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-               DO I=1,20
-                  ID(I) = 0
-               ENDDO
-               WRITE(NEU,1004) (ID(I),I= 1,10)
-               WRITE(NEU,1004) (ID(I),I=11,20)
-               WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-               WRITE(NEU,1006) CALC_WARN(J), COMP_DIR(J), CENT_TOTAL(J)
-               DO I=1,NUM_FEMAP_ROWS
-                  WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-               ENDDO
-               WRITE(NEU,1008)
+               ID = 0
+               CALL WRITE_STRE_COLUMN ( J, VEC_ID_OFFSET + J, ID )
             ENDDO
-
          ELSE
-
             WRITE(ERR,*) ' *WARNING    : CODE NOT WRITTEN FOR FEMAP PROCESSING OF STRESSES FOR PCOMP TYPE ELEMWMTS'
             WRITE(F06,*) ' *WARNING    : CODE NOT WRITTEN FOR FEMAP PROCESSING OF STRESSES FOR PCOMP TYPE ELEMWMTS'
-
          ENDIF
-  
+
       ELSE IF (ELEM_TYP(1:5) == 'SHEAR') THEN
 
          IF (IS_PCOMP == 'N') THEN
-
             TITLE_E( 1) = 'X Direct Stress' ;   CALC_WARN( 1) = '0';   COMP_DIR( 1) = '0';   CENT_TOTAL( 1) = '1'
             TITLE_E( 2) = 'Y Direct Stress' ;   CALC_WARN( 2) = '0';   COMP_DIR( 2) = '0';   CENT_TOTAL( 2) = '1'
             TITLE_E( 3) = 'XY Shear Stress' ;   CALC_WARN( 3) = '0';   COMP_DIR( 3) = '0';   CENT_TOTAL( 3) = '1'
@@ -426,36 +242,13 @@
             TITLE_E( 9) = 'Von Mises Stress';   CALC_WARN( 9) = '1';   COMP_DIR( 9) = '0';   CENT_TOTAL( 9) = '1'
             TITLE_E(10) = 'XZ Shear Stress' ;   CALC_WARN(10) = '0';   COMP_DIR(10) = '0';   CENT_TOTAL(10) = '1'
             TITLE_E(11) = 'YZ Shear Stress' ;   CALC_WARN(11) = '0';   COMP_DIR(11) = '0';   CENT_TOTAL(11) = '1'
-
             DO J=1,11
-               VEC_ID = VEC_ID_OFFSET + J
-               WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
-               WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
-               DO I=1,NUM_FEMAP_ROWS
-                  ELEM_VEC(I)  = FEMAP_EL_VECS(I,J)
-                  ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-               ENDDO
-
-               CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-               WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-               DO I=1,20
-                  ID(I) = 0
-               ENDDO
-               WRITE(NEU,1004) (ID(I),I= 1,10)
-               WRITE(NEU,1004) (ID(I),I=11,20)
-               WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-               WRITE(NEU,1006) CALC_WARN(J), COMP_DIR(J), CENT_TOTAL(J)
-               DO I=1,NUM_FEMAP_ROWS
-                  WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-               ENDDO
-               WRITE(NEU,1008)
+               ID = 0
+               CALL WRITE_STRE_COLUMN ( J, VEC_ID_OFFSET + J, ID )
             ENDDO
-
          ELSE
-
             WRITE(ERR,*) ' *WARNING    : CODE NOT WRITTEN FOR FEMAP PROCESSING OF STRESSES FOR PCOMP TYPE ELEMWMTS'
             WRITE(F06,*) ' *WARNING    : CODE NOT WRITTEN FOR FEMAP PROCESSING OF STRESSES FOR PCOMP TYPE ELEMWMTS'
-
          ENDIF
 
       ELSE IF ((ELEM_TYP == 'HEXA8   ') .OR. (ELEM_TYP == 'PENTA6  ') .OR. (ELEM_TYP == 'TETRA4  ') .OR.                           &
@@ -467,12 +260,10 @@
          TITLE_E( 4) = 'XY Shear Stress' ;   CALC_WARN( 4) = '0';   COMP_DIR( 4) = '0';   CENT_TOTAL( 4) = '1'
          TITLE_E( 5) = 'YZ Shear Stress' ;   CALC_WARN( 5) = '0';   COMP_DIR( 5) = '0';   CENT_TOTAL( 5) = '1'
          TITLE_E( 6) = 'ZX Shear Stress' ;   CALC_WARN( 6) = '0';   COMP_DIR( 6) = '0';   CENT_TOTAL( 6) = '1'
-
          TITLE_E( 7) = 'Prin Stress-1'   ;   CALC_WARN( 7) = '0';   COMP_DIR( 7) = '0';   CENT_TOTAL( 7) = '1'
          TITLE_E( 8) = 'Prin Stress-2'   ;   CALC_WARN( 8) = '0';   COMP_DIR( 8) = '0';   CENT_TOTAL( 8) = '1'
          TITLE_E( 9) = 'Prin Stress-3'   ;   CALC_WARN( 9) = '0';   COMP_DIR( 9) = '0';   CENT_TOTAL( 9) = '1'
          TITLE_E(10) = 'Mean Stress'     ;   CALC_WARN(10) = '0';   COMP_DIR(10) = '0';   CENT_TOTAL(10) = '1'
-
          IF (STRE_OPT == 'VONMISES') THEN
             TITLE_E(11) = 'von Mises Stress';   CALC_WARN(11) = '1';   COMP_DIR(11) = '0';   CENT_TOTAL(11) = '1'
             TITLE_E(12) = '  (null field)  ';   CALC_WARN(12) = '1';   COMP_DIR(12) = '0';   CENT_TOTAL(12) = '1'
@@ -480,32 +271,11 @@
             TITLE_E(11) = 'Oct Dir Stress'  ;   CALC_WARN(11) = '1';   COMP_DIR(11) = '0';   CENT_TOTAL(11) = '1'
             TITLE_E(12) = 'Oct Shear Stress';   CALC_WARN(12) = '1';   COMP_DIR(12) = '0';   CENT_TOTAL(12) = '1'
          ENDIF
-
          DO J=1,12
-            VEC_ID = VEC_ID_OFFSET + J
-            WRITE(NEU,1001) FEMAP_SET_ID, VEC_ID
-            WRITE(NEU,1002) ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(J)
-            DO I=1,NUM_FEMAP_ROWS
-               ELEM_VEC(I)  = FEMAP_EL_VECS(I,J)
-               ELEM_NUMS(I) = FEMAP_EL_NUMS(I,1)
-            ENDDO
-            CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
-            WRITE(NEU,1003) VEC_MIN, VEC_MAX, VEC_ABS
-            DO I=1,20
-               ID(I) = 0
-            ENDDO
-            WRITE(NEU,1004) (ID(I),I= 1,10)
-            WRITE(NEU,1004) (ID(I),I=11,20)
-            WRITE(NEU,1005) ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE
-            WRITE(NEU,1006) CALC_WARN(J), COMP_DIR(J), CENT_TOTAL(J)
-            DO I=1,NUM_FEMAP_ROWS
-               WRITE(NEU,1007) FEMAP_EL_NUMS(I,1), ELEM_VEC(I)
-            ENDDO
-            WRITE(NEU,1008)
+            ID = 0
+            CALL WRITE_STRE_COLUMN ( J, VEC_ID_OFFSET + J, ID )
          ENDDO
-
       ENDIF
-       
 
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
@@ -514,36 +284,36 @@
  9002    FORMAT(1X,A,' END  ',F10.3)
       ENDIF
 
-      IF (ALLOCATED(ELEM_NUMS)) THEN
-         DEALLOCATE ( ELEM_NUMS )
-      ENDIF
-      IF (ALLOCATED(ELEM_VEC)) THEN
-         DEALLOCATE ( ELEM_VEC )
-      ENDIF
+      IF (ALLOCATED(ELEM_NUMS)) DEALLOCATE ( ELEM_NUMS )
+      IF (ALLOCATED(ELEM_VEC )) DEALLOCATE ( ELEM_VEC  )
 
       RETURN
 
 ! **********************************************************************************************************************************
   943 FORMAT(' *WARNING    : ELEMENT TYPE = "',A,'" FOR FEMAP ',A,' OUTPUT IN SUBROUTINE ',A,' HAS NOT BEEN PROGRAMMED')
 
- 1001 FORMAT(2(I8,','),'       1,')
+      CONTAINS
 
- 1002 FORMAT(A,1X,A)
+      SUBROUTINE WRITE_STRE_COLUMN ( COL_NUM, CUR_VEC_ID, CUR_ID )
 
- 1003 FORMAT(3(1ES17.6,','))
+      INTEGER(LONG), INTENT(IN)       :: COL_NUM, CUR_VEC_ID
+      INTEGER(LONG), INTENT(IN)       :: CUR_ID(20)
+      INTEGER(LONG)                   :: K
+      INTEGER(LONG)                   :: LOCAL_ID(20)
 
- 1004 FORMAT(10(I8,','))
+      LOCAL_ID = CUR_ID
+      DO K=1,NUM_FEMAP_ROWS
+         ELEM_VEC(K)  = FEMAP_EL_VECS(K,COL_NUM)
+         ELEM_NUMS(K) = FEMAP_EL_NUMS(K,1)
+      ENDDO
+      CALL GET_VEC_MIN_MAX_ABS ( NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC, VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX )
+      CALL NEU_WRITE_ELEM_VECTOR ( FEMAP_SET_ID, CUR_VEC_ID, ELEM_NAME(1:ELEM_NAME_LEN), TITLE_E(COL_NUM),                        &
+                                   VEC_MIN, VEC_MAX, VEC_ABS, ELEM_MIN, ELEM_MAX, OUT_TYPE, ENT_TYPE,                             &
+                                   CALC_WARN(COL_NUM), COMP_DIR(COL_NUM), CENT_TOTAL(COL_NUM), LOCAL_ID,                          &
+                                   NUM_FEMAP_ROWS, ELEM_NUMS, ELEM_VEC )
 
- 1005 FORMAT(2(I8,','),2(7X,A,','))
+      END SUBROUTINE WRITE_STRE_COLUMN
 
- 1006 FORMAT(3(7X,A,','))
-
- 1007 FORMAT(I8,',',1ES17.6,',')
-
- 1008 FORMAT('      -1,     0.          ,')
-
-! **********************************************************************************************************************************
- 
       END SUBROUTINE WRITE_FEMAP_STRE_VECS
 
 !---  cbeam add --- end!

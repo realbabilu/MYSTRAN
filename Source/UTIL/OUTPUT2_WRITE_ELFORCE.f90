@@ -13,6 +13,7 @@
       CHARACTER(8*BYTE), INTENT(INOUT) :: TABLE_NAME     ! name of the op2 table name
       CHARACTER(8*BYTE)                :: TABLE_NAME_NEW ! name of the op2 table name
       INTEGER(LONG)                    :: ITABLE         ! the subtable
+      CHARACTER(8*BYTE), SAVE          :: LAST_ETYPE = ' '
       LOGICAL                          :: RETURN_FLAG    ! return from the subroutine early
 
  1    FORMAT("*DEBUG:      OUTPUT2_WRITE_FORCE:  ", A)
@@ -41,6 +42,7 @@
         ENDIF
 !        WRITE(ERR,2) "invalidated tableA",TABLE_NAME,ITABLE
         ITABLE = 0
+        LAST_ETYPE = ' '
       ENDIF
 
       IF (RETURN_FLAG) THEN
@@ -48,7 +50,7 @@
         TABLE_NAME = TABLE_NAME_NEW
       ELSE
         !WRITE(ERR,1) "will write table header"
-        IF (TABLE_NAME /= TABLE_NAME_NEW) THEN
+        IF ((TABLE_NAME /= TABLE_NAME_NEW) .OR. (LAST_ETYPE /= ETYPE)) THEN
         ! first let's find out if we need to close off the previous table
           IF (ITABLE < -1) THEN
             WRITE(ERR,2) "closing force table",TABLE_NAME,ITABLE
@@ -57,6 +59,7 @@
           ! we're now at the beginning
           TABLE_NAME = TABLE_NAME_NEW
           ITABLE = -1
+          LAST_ETYPE = ETYPE
           WRITE(ERR,2) "will create force table",TABLE_NAME,ITABLE
         ENDIF
 
@@ -65,6 +68,7 @@
           WRITE(ERR,2) "creating force table",TABLE_NAME,ITABLE
           CALL WRITE_TABLE_HEADER(TABLE_NAME)
           ITABLE = -3
+          LAST_ETYPE = ETYPE
         ENDIF
       ENDIF
 

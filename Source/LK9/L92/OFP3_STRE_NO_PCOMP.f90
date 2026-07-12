@@ -43,7 +43,8 @@
       USE CONSTANTS_1, ONLY           :  ZERO, HALF, ONE, THREE, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP, PRTNEU
+      USE PARAMS, ONLY                :  OTMSKIP
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRE
       USE MODEL_STUF, ONLY            :  AGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
                                          ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, OGROUT, PCOMP_PROPS, PLY_NUM,   &
                                          STRESS, PBEAM_NSTATIONS, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID
@@ -115,7 +116,7 @@
       ITABLE = 0
       TABLE_NAME = "OES ERR "
 
-      WRITE_NEU = (PRTNEU == 'Y')
+      WRITE_NEU = WRITE_NEU_STRE
 
 ! **********************************************************************************************************************************
 ! Process element stress output (STRESS) requests for all elems except composite shells

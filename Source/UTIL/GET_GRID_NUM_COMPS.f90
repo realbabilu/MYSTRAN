@@ -31,7 +31,10 @@
 ! If GRID(I,6) is 6 then this is a physical grid with 6 comps of displ and if GRID(I,6) is 1 then this is an SPOINT.
 
       USE PENTIUM_II_KIND, ONLY       :  LONG
-      USE MODEL_STUF, ONLY            :  GRID
+      USE SCONTR, ONLY                :  NGRID
+      USE MODEL_STUF, ONLY            :  GRID, GRID_ID
+
+      USE GET_GRID_NUM_COMPS_USE_IFs
 
       IMPLICIT NONE
 
@@ -40,9 +43,24 @@
       INTEGER(LONG), INTENT(IN)       :: IGRID             ! An internal grid number
       INTEGER(LONG), INTENT(OUT)      :: NUM_COMPS         ! 6 if GRID_NUM is an physical grid, 1 if an SPOINT
 
+      INTEGER(LONG)                   :: RESOLVED_IGRID
+
 ! **********************************************************************************************************************************
 
-      NUM_COMPS = GRID(IGRID, 6)
+      RESOLVED_IGRID = IGRID
+
+      ! Most callers pass an internal GRID row. A few legacy paths have
+      ! historically passed the external GRID ID instead; resolve that here
+      ! so output post-processing does not crash on perfectly valid models.
+      IF ((RESOLVED_IGRID < 1) .OR. (RESOLVED_IGRID > NGRID)) THEN
+         CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', CALLING_SUBR, NGRID, GRID_ID, IGRID, RESOLVED_IGRID )
+      ENDIF
+
+      IF ((RESOLVED_IGRID < 1) .OR. (RESOLVED_IGRID > NGRID)) THEN
+         NUM_COMPS = 0
+      ELSE
+         NUM_COMPS = GRID(RESOLVED_IGRID, 6)
+      ENDIF
 
       RETURN
 

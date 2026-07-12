@@ -33,8 +33,10 @@
       USE SHP3DP_Interface
       USE JAC3D_Interface
       USE MATMULT_FFF_Interface
+      USE MATMULX_FFF_Interface
       USE B3D_ISOPARAMETRIC_Interface
       USE MATMULT_FFF_T_Interface
+      USE MATMULX_FFF_T_Interface
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
 

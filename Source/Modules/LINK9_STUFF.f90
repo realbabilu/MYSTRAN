@@ -36,6 +36,15 @@
 
       CHARACTER( 1*BYTE), ALLOCATABLE :: MSPRNT(:,:)           ! Flags for whether to print margins of safety for ROD, BAR
       CHARACTER( 4*BYTE), ALLOCATABLE :: FTNAME(:)             ! Stress failure index name output with stresses/strains
+      LOGICAL                         :: SMART_OUTPUT_MODE = .FALSE.
+      LOGICAL                         :: WRITE_NEU_GEOM    = .FALSE.
+      LOGICAL                         :: WRITE_NEU_DISP    = .FALSE.
+      LOGICAL                         :: WRITE_NEU_OLOA    = .FALSE.
+      LOGICAL                         :: WRITE_NEU_SPCF    = .FALSE.
+      LOGICAL                         :: WRITE_NEU_MPCF    = .FALSE.
+      LOGICAL                         :: WRITE_NEU_ELFO    = .FALSE.
+      LOGICAL                         :: WRITE_NEU_STRE    = .FALSE.
+      LOGICAL                         :: WRITE_NEU_STRN    = .FALSE.
 
       INTEGER(LONG)                   :: MAXREQ                ! Max number of rows needed for array OGEL
 

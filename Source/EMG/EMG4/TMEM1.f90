@@ -225,8 +225,8 @@
 
       IF (OPT(4) == 'Y') THEN
 
-         CALL MATMULT_FFF ( SHELL_A, BM, 3, 3, ELDOF, AMB )
-         CALL MATMULT_FFF_T ( BM, AMB, 3, ELDOF, ELDOF, DUM )
+         CALL MATMULX_FFF ( SHELL_A, BM, 3, 3, ELDOF, AMB )
+         CALL MATMULX_FFF_T ( BM, AMB, 3, ELDOF, ELDOF, DUM )
          DO I=1,ELDOF
             DO J=1,ELDOF
                KE(I,J) = KE(I,J) + AREA*DUM(I,J)

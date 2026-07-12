@@ -238,8 +238,8 @@
                      BI(L,M) = BM(L,M,GAUSS_PT)
                   ENDDO
                ENDDO
-               CALL MATMULT_FFF ( SHELL_A, BI, 3, 3, 8, DUM1 )
-               CALL MATMULT_FFF_T ( BI, DUM1, 3, 8, 8, DUM2 )
+               CALL MATMULX_FFF ( SHELL_A, BI, 3, 3, 8, DUM1 )
+               CALL MATMULX_FFF_T ( BI, DUM1, 3, 8, 8, DUM2 )
                CALL JAC2D ( SSS(I), SSS(J), XSD, YSD, 'Y', JAC, JACI, DETJ(GAUSS_PT) )
                INTFAC = DETJ(GAUSS_PT)*HHH(I)*HHH(J)
                DO K=1,8
@@ -251,8 +251,8 @@
          ENDDO
 
          IF ((DABS(HBAR) > MXWARP) .AND. (DEBUG(4) == 0)) THEN
-            CALL MATMULT_FFF_T ( BMEANT, DUM5, 8, 12, 8, DUM6 )
-            CALL MATMULT_FFF ( DUM6, BMEANT, 12, 8, 12, DUM7 )
+            CALL MATMULX_FFF_T ( BMEANT, DUM5, 8, 12, 8, DUM6 )
+            CALL MATMULX_FFF ( DUM6, BMEANT, 12, 8, 12, DUM7 )
             DO I=1,12
                DO J=1,12
                   KE(ID2(I),ID2(J)) = KE(ID2(I),ID2(J)) + DUM7(I,J)

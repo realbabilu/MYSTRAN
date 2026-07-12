@@ -71,7 +71,9 @@
                                          SC_MPCF, SC_OLOA, SC_SPCF, SC_STRE, SC_STRN, LOAD_SIDS, LOAD_FACS
       USE MODEL_STUF, ONLY            :  ELDT, ELOUT, GROUT, OELOUT, OGROUT, LABEL, SCNUM, STITLE, SUBLOD, TITLE
       USE MODEL_STUF, ONLY            :  CC_EIGR_SID_SUB, CC_STATSUB_SUB, EIG_PARAMS, EIG_PARAMS_TYPE, IS_BUCKLING_SUBCASE,      &
-                                         IS_MODES_SUBCASE, NUM_EIGENS_SUB
+                                         IS_MODES_SUBCASE, NUM_EIGENS_SUB, MEFFMASS_CALC_SUB, MPFACTOR_CALC_SUB,                 &
+                                         MEFFMASS_REQ_SUMMARY_SUB, MEFFMASS_REQ_MEFFM_SUB, MEFFMASS_REQ_MEFFW_SUB,               &
+                                         MEFFMASS_REQ_FRACSUM_SUB, MPFACTOR_REQ_PARTFAC_SUB, MEFMLOC_SUB, MEFMGRID_SUB
       USE MODEL_STUF, ONLY            :  SYS_LOAD
       USE MODEL_STUF, ONLY            :  CETEMP, CETEMP_ERR, CGTEMP, CGTEMP_ERR, ETEMP, ETEMP_INIT, GTEMP, GTEMP_INIT, TDATA, TPNT
       USE MODEL_STUF, ONLY            :  RIGID_ELEM_IDS
@@ -608,6 +610,132 @@
             IF (IERR /= 0) THEN
                WRITE(ERR,991) 0.0D0, 'EIG_PARAMS', SUBR_NAME, IERR
                WRITE(F06,991) 0.0D0, 'EIG_PARAMS', SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         IF (.NOT. ALLOCATED(MEFFMASS_CALC_SUB)) THEN
+            ALLOCATE (MEFFMASS_CALC_SUB(LSUB), STAT=IERR)
+            IF (IERR == 0) THEN
+               DO I=1,LSUB
+                  MEFFMASS_CALC_SUB(I) = 'N'
+               ENDDO
+            ELSE
+               WRITE(ERR,991) 0.0D0, 'MEFFMASS_CALC_SUB', SUBR_NAME, IERR
+               WRITE(F06,991) 0.0D0, 'MEFFMASS_CALC_SUB', SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         IF (.NOT. ALLOCATED(MPFACTOR_CALC_SUB)) THEN
+            ALLOCATE (MPFACTOR_CALC_SUB(LSUB), STAT=IERR)
+            IF (IERR == 0) THEN
+               DO I=1,LSUB
+                  MPFACTOR_CALC_SUB(I) = 'N'
+               ENDDO
+            ELSE
+               WRITE(ERR,991) 0.0D0, 'MPFACTOR_CALC_SUB', SUBR_NAME, IERR
+               WRITE(F06,991) 0.0D0, 'MPFACTOR_CALC_SUB', SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         IF (.NOT. ALLOCATED(MEFFMASS_REQ_SUMMARY_SUB)) THEN
+            ALLOCATE (MEFFMASS_REQ_SUMMARY_SUB(LSUB), STAT=IERR)
+            IF (IERR == 0) THEN
+               DO I=1,LSUB
+                  MEFFMASS_REQ_SUMMARY_SUB(I) = 'N'
+               ENDDO
+            ELSE
+               WRITE(ERR,991) 0.0D0, 'MEFFMASS_REQ_SUMMARY_SUB', SUBR_NAME, IERR
+               WRITE(F06,991) 0.0D0, 'MEFFMASS_REQ_SUMMARY_SUB', SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         IF (.NOT. ALLOCATED(MEFFMASS_REQ_MEFFM_SUB)) THEN
+            ALLOCATE (MEFFMASS_REQ_MEFFM_SUB(LSUB), STAT=IERR)
+            IF (IERR == 0) THEN
+               DO I=1,LSUB
+                  MEFFMASS_REQ_MEFFM_SUB(I) = 'N'
+               ENDDO
+            ELSE
+               WRITE(ERR,991) 0.0D0, 'MEFFMASS_REQ_MEFFM_SUB', SUBR_NAME, IERR
+               WRITE(F06,991) 0.0D0, 'MEFFMASS_REQ_MEFFM_SUB', SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         IF (.NOT. ALLOCATED(MEFFMASS_REQ_MEFFW_SUB)) THEN
+            ALLOCATE (MEFFMASS_REQ_MEFFW_SUB(LSUB), STAT=IERR)
+            IF (IERR == 0) THEN
+               DO I=1,LSUB
+                  MEFFMASS_REQ_MEFFW_SUB(I) = 'N'
+               ENDDO
+            ELSE
+               WRITE(ERR,991) 0.0D0, 'MEFFMASS_REQ_MEFFW_SUB', SUBR_NAME, IERR
+               WRITE(F06,991) 0.0D0, 'MEFFMASS_REQ_MEFFW_SUB', SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         IF (.NOT. ALLOCATED(MEFFMASS_REQ_FRACSUM_SUB)) THEN
+            ALLOCATE (MEFFMASS_REQ_FRACSUM_SUB(LSUB), STAT=IERR)
+            IF (IERR == 0) THEN
+               DO I=1,LSUB
+                  MEFFMASS_REQ_FRACSUM_SUB(I) = 'N'
+               ENDDO
+            ELSE
+               WRITE(ERR,991) 0.0D0, 'MEFFMASS_REQ_FRACSUM_SUB', SUBR_NAME, IERR
+               WRITE(F06,991) 0.0D0, 'MEFFMASS_REQ_FRACSUM_SUB', SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         IF (.NOT. ALLOCATED(MPFACTOR_REQ_PARTFAC_SUB)) THEN
+            ALLOCATE (MPFACTOR_REQ_PARTFAC_SUB(LSUB), STAT=IERR)
+            IF (IERR == 0) THEN
+               DO I=1,LSUB
+                  MPFACTOR_REQ_PARTFAC_SUB(I) = 'N'
+               ENDDO
+            ELSE
+               WRITE(ERR,991) 0.0D0, 'MPFACTOR_REQ_PARTFAC_SUB', SUBR_NAME, IERR
+               WRITE(F06,991) 0.0D0, 'MPFACTOR_REQ_PARTFAC_SUB', SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         IF (.NOT. ALLOCATED(MEFMLOC_SUB)) THEN
+            ALLOCATE (MEFMLOC_SUB(LSUB), STAT=IERR)
+            IF (IERR == 0) THEN
+               DO I=1,LSUB
+                  MEFMLOC_SUB(I) = '      '
+               ENDDO
+            ELSE
+               WRITE(ERR,991) 0.0D0, 'MEFMLOC_SUB', SUBR_NAME, IERR
+               WRITE(F06,991) 0.0D0, 'MEFMLOC_SUB', SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         IF (.NOT. ALLOCATED(MEFMGRID_SUB)) THEN
+            ALLOCATE (MEFMGRID_SUB(LSUB), STAT=IERR)
+            IF (IERR == 0) THEN
+               DO I=1,LSUB
+                  MEFMGRID_SUB(I) = 0
+               ENDDO
+            ELSE
+               WRITE(ERR,991) 0.0D0, 'MEFMGRID_SUB', SUBR_NAME, IERR
+               WRITE(F06,991) 0.0D0, 'MEFMGRID_SUB', SUBR_NAME, IERR
                FATAL_ERR = FATAL_ERR + 1
                JERR = JERR + 1
             ENDIF

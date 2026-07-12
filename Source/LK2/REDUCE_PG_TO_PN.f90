@@ -199,7 +199,7 @@
 
             CALL ALLOCATE_FULL_MAT ( 'DUM1', NDOFN, NSUB, SUBR_NAME )
 
-            CALL MATMULT_FFF_T (GMN_FULL, PM_FULL, NDOFM, NDOFN, NSUB, DUM1 )
+            CALL MATMULX_FFF_T (GMN_FULL, PM_FULL, NDOFM, NDOFN, NSUB, DUM1 )
 
             CALL DEALLOCATE_FULL_MAT ( 'PM_FULL' )
             CALL DEALLOCATE_FULL_MAT ( 'GMN_FULL' )
@@ -256,4 +256,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE REDUCE_PG_TO_PN
-

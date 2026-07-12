@@ -38,6 +38,8 @@
       USE CHK_OGEL_ZEROS_Interface
       USE WRITE_GRD_PRT_OUTPUTS_Interface
       USE CONVERT_VEC_COORD_SYS_Interface
+      USE ALLOCATE_RBGLOBAL_Interface
+      USE RB_DISP_MATRIX_PROC_Interface
       USE WRITE_FEMAP_GRID_VECS_Interface
       USE MERGE_COL_VECS_Interface
       USE OUTA_HERE_Interface

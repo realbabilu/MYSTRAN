@@ -91,21 +91,28 @@
 
                                                              ! 4x4 matrix used to calc Gauss pt coords from node coords
       REAL(DOUBLE)                    :: PSH_MAT(ELGP,IORD*IORD)
+      REAL(DOUBLE)                    :: PSH_COL(ELGP)
+      REAL(DOUBLE)                    :: XEL_QUAD(ELGP,3)
 
 ! **********************************************************************************************************************************
 
 ! The PSH_MAT columns are from subr SHP2DQ for each of the 4 XEP parametric coord points for the element.
 ! We want the XEA orderd in the same fashion as the element node coords in XEL (namely 1-2-3-4 clockwise around the element).
 
-      CALL SHP2DQ ( 1, 1, ELGP, SUBR_NAME, ' ', IORD, XEP(1,1), XEP(1,2), 'Y', PSH_MAT(:,1), DPSHG )
-      CALL SHP2DQ ( 2, 1, ELGP, SUBR_NAME, ' ', IORD, XEP(2,1), XEP(2,2), 'Y', PSH_MAT(:,2), DPSHG )
-      CALL SHP2DQ ( 2, 2, ELGP, SUBR_NAME, ' ', IORD, XEP(3,1), XEP(3,2), 'Y', PSH_MAT(:,3), DPSHG )
-      CALL SHP2DQ ( 1, 2, ELGP, SUBR_NAME, ' ', IORD, XEP(4,1), XEP(4,2), 'Y', PSH_MAT(:,4), DPSHG )
+      CALL SHP2DQ ( 1, 1, ELGP, SUBR_NAME, ' ', IORD, XEP(1,1), XEP(1,2), 'Y', PSH_COL, DPSHG )
+      PSH_MAT(1:ELGP,1) = PSH_COL(1:ELGP)
+      CALL SHP2DQ ( 2, 1, ELGP, SUBR_NAME, ' ', IORD, XEP(2,1), XEP(2,2), 'Y', PSH_COL, DPSHG )
+      PSH_MAT(1:ELGP,2) = PSH_COL(1:ELGP)
+      CALL SHP2DQ ( 2, 2, ELGP, SUBR_NAME, ' ', IORD, XEP(3,1), XEP(3,2), 'Y', PSH_COL, DPSHG )
+      PSH_MAT(1:ELGP,3) = PSH_COL(1:ELGP)
+      CALL SHP2DQ ( 1, 2, ELGP, SUBR_NAME, ' ', IORD, XEP(4,1), XEP(4,2), 'Y', PSH_COL, DPSHG )
+      PSH_MAT(1:ELGP,4) = PSH_COL(1:ELGP)
 
 
 ! Multiply shape functions by grid point coordinates to get Gauss point coordinates
 ! Only the first ELGP rows of XEL are used because it may have additional unused rows.
-      CALL MATMULT_FFF_T ( PSH_MAT, XEL(1:ELGP,:), ELGP, IORD*IORD, 3, XEA )
+      XEL_QUAD(1:ELGP,1:3) = XEL(1:ELGP,1:3)
+      CALL MATMULT_FFF_T ( PSH_MAT, XEL_QUAD, ELGP, IORD*IORD, 3, XEA )
 
 
 ! Debug output

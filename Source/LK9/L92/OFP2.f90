@@ -33,24 +33,26 @@
 
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, GROUT_SPCF_BIT, GROUT_MPCF_BIT, GROUT_GPFO_BIT, IBIT, INT_SC_NUM,&
                                          MELGP, MOGEL, NGRID, NDOFF, NDOFG, NDOFM, NDOFN, NDOFS, NDOFSA, NTERM_GMN,                &
-                                         NTERM_HMN, NTERM_KFS, NTERM_KFSD, NTERM_LMN, NTERM_MFS, NTERM_QS, SOL_NAME
+                                         NTERM_HMN, NTERM_KFS, NTERM_KFSD, NTERM_LMN, NTERM_MFS, NTERM_MGG, NTERM_QS, SOL_NAME
 
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START, TDOFI
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MEFFMASS, MPFACTOR_N6
-      USE MODEL_STUF, ONLY            :  ANY_SPCF_OUTPUT, ANY_MPCF_OUTPUT, GRID, GRID_ID, GROUT, MEFFMASS_CALC, MPFACTOR_CALC
-      USE PARAMS, ONLY                :  AUTOSPC_SPCF, EPSIL, MEFMCORD, OTMSKIP, PRTNEU
+      USE MODEL_STUF, ONLY            :  ANY_SPCF_OUTPUT, ANY_MPCF_OUTPUT, GRID, GRID_ID, GROUT, MEFFMASS_CALC, MPFACTOR_CALC,  &
+                                         MEFMLOC_SUB, MEFMGRID_SUB, MODEL_XCG, MODEL_YCG, MODEL_ZCG, RGRID
+      USE PARAMS, ONLY                :  AUTOSPC_SPCF, EPSIL, GRDPNT, MEFMCORD, MEFMGRID, MEFMLOC, OTMSKIP
 
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE SPARSE_MATRICES, ONLY       :  I_GMN  , J_GMN  , GMN    , I_GMNt  , J_GMNt , GMNt   , I_HMN, J_HMN, HMN,                 &
                                          I_KSF  , J_KSF  , KSF    , I_KSFD  , J_KSFD , KSFD   ,                                    &
-                                         I_LMN  , J_LMN  , LMN    , I_MSF   , J_MSF  , MSF    ,                                    &
-                                         SYM_GMN, SYM_HMN, SYM_KFS, SYM_KFSD, SYM_MFS, SYM_LMN
+                                         I_LMN  , J_LMN  , LMN    , I_MSF   , J_MSF  , MSF    , I_MGG, J_MGG, MGG,                &
+                                         SYM_GMN, SYM_HMN, SYM_KFS, SYM_KFSD, SYM_MFS, SYM_LMN, SYM_MGG
 
-      USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, MAXREQ, OGEL
+      USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, MAXREQ, OGEL, WRITE_NEU_SPCF, WRITE_NEU_MPCF
       USE COL_VECS, ONLY              :  UF_COL, UG_COL, UN_COL, PHIXG_COL, PHIXN_COL, PM_COL, PS_COL,                             &
                                          QGm_COL, QGs_COL, QM_COL, QN_COL, QS_COL, QSYS_COL
+      USE RIGID_BODY_DISP_MATS, ONLY  :  RBGLOBAL_GSET
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE OUTPUT4_MATRICES, ONLY      :  OTM_MPCF, OTM_SPCF, TXT_MPCF, TXT_SPCF
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  MPCF_OUT, SPCF_OUT
@@ -103,6 +105,8 @@
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
       INTEGER(LONG)                   :: SDOF              ! S-set DOF number
       INTEGER(LONG)                   :: SADOF             ! SA-set DOF number
+      INTEGER(LONG)                   :: REFPNT_GRID
+      INTEGER(LONG)                   :: XREF_GRID_ROW
 
       INTEGER(LONG)                   :: TDOF_ROW          ! Row no. in array TDOF to find GDOF DOF number
 
@@ -114,17 +118,17 @@
       REAL(DOUBLE)                    :: QMM_COL(NDOFM)    ! -EIGEN_VAL*LMN*UF
       REAL(DOUBLE)                    :: QGs_MEFM(NDOFG)   ! QGs_COL transformed from global to coord system MEMFCORD
       REAL(DOUBLE)                    :: QGs_MEFM_SUM(6)   ! QGs_COL transformed from global to coord system MEMFCORD
+      REAL(DOUBLE)                    :: QGs_SHIFTED_SUM(6)! QGs sums shifted to the requested modal reference point
       REAL(DOUBLE)                    :: QSA_MAX_ABS(6)    ! Max abs value of any QS force on an AUTOSPC'd DOF
       REAL(DOUBLE)                    :: QSA_SUM(6)        ! Sum of all QS forces on AUTOSPC'd DOF's
-      LOGICAL                         :: WRITE_NEU
-
+      REAL(DOUBLE), ALLOCATABLE       :: RBG_COL(:,:)      ! One rigid-body displacement vector in G-set coords
+      REAL(DOUBLE), ALLOCATABLE       :: MRRB_COL(:,:)     ! MGG * RBG_COL
+      REAL(DOUBLE)                    :: MPF6_BASIC(6)     ! Modal participation factors in the basic system at reference point
+      REAL(DOUBLE)                    :: XREF(3)           ! Requested modal effective-mass reference point in basic coordinates
+      CHARACTER(6*BYTE)               :: LOCAL_MEFMLOC
       INTRINSIC IAND
-      WRITE(ERR,9000) "OFP2 - SPC and MPC force"
- 9000 FORMAT(' *DEBUG:    RUNNING=', A)
  9003 FORMAT(' *DEBUG:    ITABLE BAD=', i4)
 
-
-      WRITE_NEU = (PRTNEU == 'Y')
 
 ! **********************************************************************************************************************************
       DO I=1,MAXREQ
@@ -142,9 +146,6 @@
       ! Process SPC force requests
       NEW_RESULT = .TRUE.
       IF (WHAT == 'SPCF') THEN
-      WRITE(ERR,9000) "OFP2 - SPC"
-      WRITE(ERR,9003) ITABLE
-
          SPCF_MEFM_MPF = 'N'
          IF ((MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y')) THEN
             IF (SOL_NAME(1:12) /= 'GEN CB MODEL') THEN
@@ -323,28 +324,111 @@
 
             IF ((MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y')) THEN
                IF (ZERO_GEN_STIFF == 'N') THEN
-                  CALL CONVERT_VEC_COORD_SYS ( 'Eigenvector', QGs_COL, QGs_MEFM, MEFMCORD )
-                  DO J=1,6
-                     QGs_MEFM_SUM(J) = ZERO
-                  ENDDO
-                  K = 0
-                  DO I=1,NGRID
-                     CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
-                     DO J=1,NUM_COMPS
-                        K = K + 1
-                        QGs_MEFM_SUM(J) = QGs_MEFM_SUM(J) + QGs_MEFM(K)
+
+                  LOCAL_MEFMLOC = MEFMLOC
+                  REFPNT_GRID = MEFMGRID
+                  IF (ALLOCATED(MEFMLOC_SUB)) THEN
+                     IF (MEFMLOC_SUB(INT_SC_NUM) /= '      ') LOCAL_MEFMLOC = MEFMLOC_SUB(INT_SC_NUM)
+                  ENDIF
+                  IF (ALLOCATED(MEFMGRID_SUB)) REFPNT_GRID = MEFMGRID_SUB(INT_SC_NUM)
+
+                  IF (SOL_NAME(1:5) == 'MODES') THEN
+
+                     IF (.NOT. ALLOCATED(RBGLOBAL_GSET)) THEN
+                        CALL ALLOCATE_RBGLOBAL ( 'G ', SUBR_NAME )
+                     ENDIF
+
+                     IF (LOCAL_MEFMLOC == 'CG    ') THEN
+                        CALL RB_DISP_MATRIX_PROC ( 'CG', 0 )
+                     ELSE
+                        IF (LOCAL_MEFMLOC == 'GRDPNT') REFPNT_GRID = GRDPNT
+                        IF (REFPNT_GRID <= 0) THEN
+                           CALL RB_DISP_MATRIX_PROC ( 'BASIC ORIGIN', 0 )
+                        ELSE
+                           CALL RB_DISP_MATRIX_PROC ( 'GRID', REFPNT_GRID )
+                        ENDIF
+                     ENDIF
+
+                     IF (.NOT. ALLOCATED(RBG_COL)) THEN
+                        ALLOCATE(RBG_COL(NDOFG,1))
+                     ENDIF
+                     IF (.NOT. ALLOCATED(MRRB_COL)) THEN
+                        ALLOCATE(MRRB_COL(NDOFG,1))
+                     ENDIF
+
+                     DEN = GEN_MASS(JVEC)
+                     DO J=1,6
+                        MPF6_BASIC(J) = ZERO
+                        RBG_COL(:,1) = RBGLOBAL_GSET(:,J)
+                        CALL MATMULT_SFF ( 'MGG', NDOFG, NDOFG, NTERM_MGG, SYM_MGG, I_MGG, J_MGG, MGG, 'RBG', NDOFG, 1, RBG_COL,  &
+                                           'N', 'MGG*RBG', ONE, MRRB_COL )
+                        DO I=1,NDOFG
+                           MPF6_BASIC(J) = MPF6_BASIC(J) + UG_COL(I)*MRRB_COL(I,1)
+                        ENDDO
+                        MPF6_BASIC(J) = MPF6_BASIC(J)/DEN
                      ENDDO
-                  ENDDO
-                  DEN = EIGEN_VAL(JVEC)*GEN_MASS(JVEC)
-                  DO J=1,6
-                     MPF = QGs_MEFM_SUM(J)/DEN
-                     IF (MPFACTOR_CALC == 'Y') THEN
-                        MPFACTOR_N6(JVEC,J) = MPF
+                     DO J=1,6
+                        IF (MPFACTOR_CALC == 'Y') THEN
+                           MPFACTOR_N6(JVEC,J) = MPF6_BASIC(J)
+                        ENDIF
+                        IF (MEFFMASS_CALC == 'Y') THEN
+                           MEFFMASS(JVEC,J) = GEN_MASS(JVEC)*MPF6_BASIC(J)*MPF6_BASIC(J)
+                        ENDIF
+                     ENDDO
+
+                  ELSE
+
+                     CALL CONVERT_VEC_COORD_SYS ( 'Eigenvector', QGs_COL, QGs_MEFM, MEFMCORD )
+                     DO J=1,6
+                        QGs_MEFM_SUM(J) = ZERO
+                        QGs_SHIFTED_SUM(J) = ZERO
+                     ENDDO
+                     K = 0
+                     DO I=1,NGRID
+                        CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
+                        DO J=1,NUM_COMPS
+                           K = K + 1
+                           QGs_MEFM_SUM(J) = QGs_MEFM_SUM(J) + QGs_MEFM(K)
+                        ENDDO
+                     ENDDO
+
+                     XREF(1) = ZERO
+                     XREF(2) = ZERO
+                     XREF(3) = ZERO
+                     IF (LOCAL_MEFMLOC == 'CG    ') THEN
+                        XREF(1) = MODEL_XCG
+                        XREF(2) = MODEL_YCG
+                        XREF(3) = MODEL_ZCG
+                     ELSE
+                        IF (LOCAL_MEFMLOC == 'GRDPNT') REFPNT_GRID = GRDPNT
+                        IF (REFPNT_GRID > 0) THEN
+                           CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, REFPNT_GRID, XREF_GRID_ROW )
+                           IF (XREF_GRID_ROW > 0) THEN
+                              XREF(1) = RGRID(XREF_GRID_ROW,1)
+                              XREF(2) = RGRID(XREF_GRID_ROW,2)
+                              XREF(3) = RGRID(XREF_GRID_ROW,3)
+                           ENDIF
+                        ENDIF
                      ENDIF
-                     IF (MEFFMASS_CALC == 'Y') THEN
-                        MEFFMASS(JVEC,J) = GEN_MASS(JVEC)*MPF*MPF
-                     ENDIF
-                  ENDDO
+
+                     QGs_SHIFTED_SUM(1) = QGs_MEFM_SUM(1)
+                     QGs_SHIFTED_SUM(2) = QGs_MEFM_SUM(2)
+                     QGs_SHIFTED_SUM(3) = QGs_MEFM_SUM(3)
+                     QGs_SHIFTED_SUM(4) = QGs_MEFM_SUM(4) - (XREF(2)*QGs_MEFM_SUM(3) - XREF(3)*QGs_MEFM_SUM(2))
+                     QGs_SHIFTED_SUM(5) = QGs_MEFM_SUM(5) - (XREF(3)*QGs_MEFM_SUM(1) - XREF(1)*QGs_MEFM_SUM(3))
+                     QGs_SHIFTED_SUM(6) = QGs_MEFM_SUM(6) - (XREF(1)*QGs_MEFM_SUM(2) - XREF(2)*QGs_MEFM_SUM(1))
+
+                     DEN = EIGEN_VAL(JVEC)*GEN_MASS(JVEC)
+                     DO J=1,6
+                        MPF = QGs_SHIFTED_SUM(J)/DEN
+                        IF (MPFACTOR_CALC == 'Y') THEN
+                           MPFACTOR_N6(JVEC,J) = MPF
+                        ENDIF
+                        IF (MEFFMASS_CALC == 'Y') THEN
+                           MEFFMASS(JVEC,J) = GEN_MASS(JVEC)*MPF*MPF
+                        ENDIF
+                     ENDDO
+                  ENDIF
                ENDIF
             ENDIF
 
@@ -414,7 +498,7 @@
 
          ENDIF
 
-         IF (WRITE_NEU .AND. (ANY_SPCF_OUTPUT > 0)) THEN
+         IF (WRITE_NEU_SPCF .AND. (ANY_SPCF_OUTPUT > 0)) THEN
             CALL WRITE_FEMAP_GRID_VECS ( QGs_COL, FEMAP_SET_ID, 'SPCF' )
          ENDIF
 
@@ -424,7 +508,6 @@
 !     Process MPC force requests
 
       ELSE IF (WHAT == 'MPCF') THEN
-         WRITE(ERR,9000) "OFP2 - MPC"
          !IF (.NOT. NEW_RESULT) THEN
          !IF (NEW_RESULT .EQV. .FALSE.) THEN
          !IF (NEW_RESULT .EQ. .FALSE.) THEN    ! bad
@@ -433,8 +516,6 @@
            NEW_RESULT = .TRUE.
            ITABLE = -1
          ENDIF
-         WRITE(ERR,9003) ITABLE
-
          ! Initialize the array for MPC forces for this solution vector
          IROW_FILE = 0
          IROW_MAT  = 0
@@ -604,7 +685,7 @@
 
          ENDDO
 
-         IF (WRITE_NEU .AND. (ANY_MPCF_OUTPUT > 0)) THEN
+         IF (WRITE_NEU_MPCF .AND. (ANY_MPCF_OUTPUT > 0)) THEN
             CALL WRITE_FEMAP_GRID_VECS ( QGm_COL, FEMAP_SET_ID, 'MPCF' )
          ENDIF
 
