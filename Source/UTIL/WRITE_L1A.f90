@@ -74,7 +74,7 @@
       USE SCONTR
       USE TIMDAT, ONLY                :  STIME, TSEC
       USE PARAMS, ONLY                :  CBMIN3, CBMIN4, ELFORCEN, HEXAXIS, IORQ1B, IORQ1M, IORQ1S, IORQ2B, IORQ2T,&
-                                         MATSPARS, MIN4TRED, QUAD4TYP, QUADAXIS, SPARSTOR
+                                         MATSPARS, MIN4TRED, QUAD4TYP, QUADAXIS, SOLIDTYP, SPARSTOR, TRIA3TYP
 
       USE WRITE_L1A_USE_IFs
 
@@ -515,6 +515,8 @@
       WRITE(L1A,191) MATSPARS, 'PARAM MATSPARS (needed for restart)'
       WRITE(L1A,191) MIN4TRED, 'PARAM MIN4TRED (needed for restart)'
       WRITE(L1A,191) QUAD4TYP, 'PARAM QUAD4TYP (needed for restart)'
+      WRITE(L1A,191) TRIA3TYP, 'PARAM TRIA3TYP (needed for restart)'
+      WRITE(L1A,191) SOLIDTYP, 'PARAM SOLIDTYP (needed for restart)'
       WRITE(L1A,191) QUADAXIS, 'PARAM QUADAXIS (needed for restart)'
       WRITE(L1A,191) SPARSTOR, 'PARAM SPARSTOR (needed for restart)'
       WRITE(L1A,192) IORQ1M  , 'PARAM IORQ1M   (needed for restart)'

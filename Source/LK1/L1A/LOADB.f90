@@ -331,6 +331,16 @@ bdf:  DO
                MELDOF = ELEM_NUM_DOFS
             ENDIF
 
+         ELSE IF ((CARD(1:6) == 'CPYRAM') .OR. (CARD(1:5) == 'CPYRA')) THEN
+            CALL BD_PYRAM  ( CARD, LARGE_FLD_INP, ELEM_NUM_GRDS )
+            ELEM_NUM_DOFS = 6*ELEM_NUM_GRDS
+            IF (MELGP < ELEM_NUM_GRDS) THEN
+               MELGP = ELEM_NUM_GRDS
+            ENDIF
+            IF (MELDOF < ELEM_NUM_DOFS) THEN
+               MELDOF = ELEM_NUM_DOFS
+            ENDIF
+
          ELSE IF (CARD(1:6) == 'CQUAD4'  ) THEN
             NUM_QUADS = NUM_QUADS + 1
             CALL BD_CQUAD   ( CARD, LARGE_FLD_INP, ELEM_NUM_GRDS )

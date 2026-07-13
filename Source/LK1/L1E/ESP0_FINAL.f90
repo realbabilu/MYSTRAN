@@ -63,6 +63,7 @@
       INTEGER(LONG)                   :: KGG_COL           ! A col no. in KGG
       INTEGER(LONG)                   :: KSTART            ! Used in deciding whether to process all elem stiffness terms or only
 !                                                            the ones on and above the diagonal (controlled by param SPARSTOR)
+      INTEGER(LONG)                   :: LTERM_MAX         ! Conservative STF3 capacity available during the final count pass
       INTEGER(LONG)                   :: NUM_COMPS         ! 6 if GRID is a physical grid, 1 if a scalar point
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
       INTEGER(LONG)                   :: TDOF_ROW_NUM      ! Row number in array TDOF
@@ -102,6 +103,7 @@
 
       IS  = 0
       ISS = IS
+      LTERM_MAX = LTERM_KGG
       LTERM_KGG = 0
       CALL COUNTER_INIT('Estimate size of KGG: process elem  ', NELE)
 elems:DO I=1,NELE
@@ -202,6 +204,8 @@ stfpnt0:          DO                                       ! so, run this loop u
          CALL COUNTER_PROGRESS(I)
       ENDDO elems
       WRITE(SC1,*) CR13
+
+      CALL CTETRA4S_SMOOTH_ASSEMBLY ( 'COUNT', LTERM_MAX, LTERM_KGG )
 
 ! Reset subr EMG option flags:
 

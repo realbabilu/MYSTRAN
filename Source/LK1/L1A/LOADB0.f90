@@ -297,6 +297,11 @@
             CALL BD_CPENTA0 ( CARD, LARGE_FLD_INP, DELTA_LEDAT )
             LEDAT = LEDAT + DELTA_LEDAT
 
+         ELSE IF ((CARD(1:6) == 'CPYRAM') .OR. (CARD(1:5) == 'CPYRA')) THEN
+            LELE  = LELE + 1
+            CALL BD_PYRAM0 ( CARD, LARGE_FLD_INP, DELTA_LEDAT )
+            LEDAT = LEDAT + DELTA_LEDAT
+
          ELSE IF (CARD(1:6) == 'CQUAD4'  ) THEN
             LELE  = LELE + 1
             LEDAT = LEDAT + MEDAT_CQUAD

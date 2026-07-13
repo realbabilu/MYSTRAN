@@ -17,8 +17,8 @@
                (ETYPE == 'BUSH    ') .OR. (ETYPE == 'ROD     ') .OR.                                                             &
                (ETYPE == 'TRIA3   ') .OR. (ETYPE == 'QUAD4   ') .OR. (ETYPE == 'QUADR   ') .OR. (ETYPE == 'QUAD8   ') .OR.      &
                (ETYPE == 'SHEAR   ') .OR.                                                                                         &
-               (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'PYRA5   ') .OR. (ETYPE == 'TETRA4  ') .OR.      &
-               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRA14  ') .OR. (ETYPE == 'TETRA10 ')) THEN
+               (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'PYRAM5  ') .OR. (ETYPE == 'TETRA4  ') .OR.      &
+               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRAM14 ') .OR. (ETYPE == 'TETRA10 ')) THEN
         TABLE_NAME_NEW = "OSTR1X  "
         RETURN_FLAG = .FALSE.
       ELSE
@@ -81,8 +81,8 @@
                (ETYPE == 'BUSH    ') .OR. (ETYPE == 'ROD     ') .OR.                                                               &
                (ETYPE == 'TRIA3   ') .OR. (ETYPE == 'QUAD4   ') .OR. (ETYPE == 'QUADR   ') .OR. (ETYPE == 'QUAD8   ') .OR.        &
                (ETYPE == 'SHEAR   ') .OR.                                                                                           &
-               (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'PYRA5   ') .OR. (ETYPE == 'TETRA4  ') .OR.        &
-               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRA14  ') .OR. (ETYPE == 'TETRA10 ')) THEN
+               (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'PYRAM5  ') .OR. (ETYPE == 'TETRA4  ') .OR.        &
+               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRAM14 ') .OR. (ETYPE == 'TETRA10 ')) THEN
         TABLE_NAME_NEW= TABLE_NAME_SHELL_SOLID !"OES1X1  "
         RETURN_FLAG = .FALSE.
       ELSE

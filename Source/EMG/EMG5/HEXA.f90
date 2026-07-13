@@ -43,7 +43,7 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  QUARTER, HALF, ZERO, ONE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  EPSIL
+      USE PARAMS, ONLY                :  EPSIL, SOLIDTYP
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  AGRID, ALPVEC, BE1, BE2, DT, EID, ELGP, NUM_EMG_FATAL_ERRS, ES, KE, KED, ME,              &
                                          NUM_EMG_FATAL_ERRS, PLOAD4_3D_DATA, PPE, PRESS, PTE, RHO, SE1, SE2, STE1, STRESS, TREF,   &
@@ -84,6 +84,7 @@
       INTEGER(LONG)                   :: ISCNUM                 ! Internal subcase number read from array PLOAD4_3D_DATA
       INTEGER(LONG)                   :: K1,K2,K3,K4            ! Array indices
       INTEGER(LONG)                   :: K5,K6,K7,K8            ! Array indices
+      INTEGER(LONG)                   :: P,Q,R                  ! Local EAS matrix indices
                                                                 ! Indicator of no output of elem data to BUG file
 
       INTEGER(LONG)                   :: STR_PT_NUM             ! Stress point number. 1 is center, 2+ are element nodes 1+.
@@ -92,7 +93,6 @@
 
       REAL(DOUBLE)                    :: B(6,3*ELGP,IORD*IORD*IORD)
                                                                 ! Strain-displ matrix for this element for all Gauss points
-
       REAL(DOUBLE)                    :: BI(6,3*ELGP)           ! Strain-displ matrix for this element for one Gauss point
 
       REAL(DOUBLE)                    :: CBAR(3,3*ELGP)         ! Derivatives of shape fcns wrt x,y,z used in diff stiff matrix
@@ -114,6 +114,17 @@
       REAL(DOUBLE)                    :: DUM9(3,ELGP)           ! Intermediate matrix used in solving for elem matrices
 
       REAL(DOUBLE)                    :: EALP(6)                ! Variable used in calc PTE therm loads & STEi therm stress coeffs
+      REAL(DOUBLE)                    :: EAS_DETJ0              ! Jacobian determinant at element center for EAS scaling
+      REAL(DOUBLE)                    :: EAS_KAA(9,9)           ! Condensed EAS alpha-alpha stiffness
+      REAL(DOUBLE)                    :: EAS_KAA_GP(9,9)        ! Gauss point alpha-alpha stiffness contribution
+      REAL(DOUBLE)                    :: EAS_KUA(3*ELGP,9)      ! Displacement/EAS coupling stiffness
+      REAL(DOUBLE)                    :: EAS_KUA_GP(3*ELGP,9)   ! Gauss point displacement/EAS coupling contribution
+      REAL(DOUBLE)                    :: EAS_M(6,9)             ! CHEXA8 EAS9 enhanced strain modes
+      REAL(DOUBLE)                    :: EAS_DM(6,9)            ! ES*EAS_M
+      REAL(DOUBLE)                    :: EAS_RHS(9,3*ELGP)      ! RHS for KAA solve, KUA transpose
+      REAL(DOUBLE)                    :: EAS_SCALE              ! detJ0/detJ scale used by EAS9
+      REAL(DOUBLE)                    :: EAS_X(9,3*ELGP)        ! inv(KAA)*KUA transpose
+      REAL(DOUBLE)                    :: EAS_CORR               ! Condensation correction term
       REAL(DOUBLE)                    :: EPS1                   ! A small number to compare to real zero
       REAL(DOUBLE)                    :: FACE_AREA              ! Area of a face of the HEXA where a PLOAD4 pressure acts
 
@@ -146,11 +157,17 @@
       REAL(DOUBLE)                    :: SSI,SSJ,SSK            ! Isoparametric coordinates of a point.
       REAL(DOUBLE)                    :: M_1DOF(ELGP,ELGP)      ! Consistent mass matrix with 1 DOF per node.
 
+! --- newsolid_add begin --- !
+      LOGICAL                          :: USE_EAS9_NEWSOLID      ! Use Python CHEXA8_EAS9_FROZEN style condensed stiffness
+! --- newsolid_add end --- !
 
 
 ! **********************************************************************************************************************************
 
       EPS1 = EPSIL(1)
+! --- newsolid_add begin --- !
+      USE_EAS9_NEWSOLID = ((SOLIDTYP == 'NEWSOLID') .AND. (ELGP == 8) .AND. (IORD == 2))
+! --- newsolid_add end --- !
 
 ! Calculate ID array
 
@@ -173,7 +190,7 @@
 
 ! EALP is needed to calculate both PTE and STE2
 
-      EALP = MATMUL(ES,ALP)
+      CALL MATMULT_FFF ( ES, ALP, 6, 6, 1, EALP )
 
 ! Calc TBAR (used for PTE, STEi)
 
@@ -271,7 +288,7 @@
                   GAUSS_PT = GAUSS_PT + 1
                   CALL SHP3DH ( I, J, K, ELGP, SUBR_NAME, IORD_MSG, IORD, SSS(I), SSS(J), SSS(K), 'N', PSH,DPSHG )
                   CALL JAC3D ( SSS(I), SSS(J), SSS(K), DPSHG, 'N', JAC, JACI, DETJ(GAUSS_PT) )
-                  DPSHX = MATMUL(JACI,DPSHG)
+                  CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
                   CALL B3D_ISOPARAMETRIC ( DPSHX, GAUSS_PT, I, J, K, 'direct strains', 'Y', BI )
                   DO L=1,6
                      DO M=1,3*ELGP
@@ -282,7 +299,7 @@
             ENDDO
          ENDDO
 
-         IF (RED_INT_SHEAR == 'Y') THEN
+         IF ((RED_INT_SHEAR == 'Y') .AND. (.NOT. USE_EAS9_NEWSOLID)) THEN
 
             IF (IORD == 2) THEN                               ! Use selective substitution for the 2x2x2 integration
 
@@ -350,7 +367,7 @@
                         GAUSS_PT = GAUSS_PT + 1
                         CALL SHP3DH ( I, J, K, ELGP, SUBR_NAME, IORD_MSG, IORD_SH, SSS_SH(I), SSS_SH(J), SSS_SH(K), 'N', PSH,DPSHG )
                         CALL JAC3D ( SSS_SH(I), SSS_SH(J), SSS_SH(K), DPSHG, 'N', JAC, JACI, DETJ(GAUSS_PT) )
-                        DPSHX = MATMUL(JACI,DPSHG)
+                        CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
                         CALL B3D_ISOPARAMETRIC ( DPSHX, GAUSS_PT, I, J, K, 'direct strains', 'Y', BI )
                         DO L=4,6
                            DO M=1,3*ELGP
@@ -372,7 +389,11 @@
 
       IF (OPT(2) == 'Y') THEN
 
-         GRID_DT_ARRAY = DT(:ELGP,:NTSUB)
+         DO N=1,NTSUB
+            DO L=1,ELGP
+               GRID_DT_ARRAY(L,N) = DT(L,N)
+            ENDDO
+         ENDDO
 
          DO N=1,NTSUB
 
@@ -387,12 +408,16 @@
                DO J=1,IORD
                   DO I=1,IORD
                      GAUSS_PT = GAUSS_PT + 1
-                     BI = B(:,:,GAUSS_PT)
-                     DUM0 = MATMUL(TRANSPOSE(BI),EALP)
+                     DO L=1,6
+                        DO M=1,3*ELGP
+                           BI(L,M) = B(L,M,GAUSS_PT)
+                        ENDDO
+                     ENDDO
+                     CALL MATMULT_FFF_T ( BI, EALP, 6, 3*ELGP, 1, DUM0 )
                      INTFAC = DETJ(GAUSS_PT)*HHH(I)*HHH(J)*HHH(K)
                      IF (DEBUG(191) == 0) THEN             ! Use temperatures at Gauss points for PTE
                         CALL SHP3DH ( I, J, K, ELGP, SUBR_NAME, IORD_MSG, IORD, SSS(I), SSS(J), SSS(K), 'N', PSH, DPSHG )
-                        TGAUSS = MATMUL(RESHAPE(PSH,(/1,ELGP/)),GRID_DT_ARRAY)
+                        CALL MATMULT_FFF ( PSH, GRID_DT_ARRAY, 1, ELGP, NTSUB, TGAUSS )
                         TEMP = TGAUSS(1,N) - TREF1
                      ELSE                                  ! Use avg element temperature for PTE
                         TEMP = TBAR(N)
@@ -451,9 +476,9 @@
           IORD_MSG = 'for 3-D solid strains,                      = '
           CALL SHP3DH ( 0, 0, 0, ELGP, SUBR_NAME, IORD_MSG, 1, SSI, SSJ, SSK, 'N', PSH, DPSHG )
           CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, DUM_DETJ )
-          DPSHX = MATMUL(JACI,DPSHG)
+          CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
           CALL B3D_ISOPARAMETRIC ( DPSHX, 0, 1, 1, 1, 'all strains', 'N', BI )
-          DUM2 = MATMUL(ES,BI)
+          CALL MATMULT_FFF ( ES, BI, 6, 6, 3*ELGP, DUM2 )
 
           DO I=1,3                                         ! Stress-displ matrices
             DO J=1,3*ELGP
@@ -490,24 +515,104 @@
             ENDDO
          ENDDO
 
+         IF (USE_EAS9_NEWSOLID) THEN
+            DO I=1,3*ELGP
+               DO J=1,9
+                  EAS_KUA(I,J) = ZERO
+               ENDDO
+            ENDDO
+            DO I=1,9
+               DO J=1,9
+                  EAS_KAA(I,J) = ZERO
+               ENDDO
+            ENDDO
+            SSI = ZERO
+            SSJ = ZERO
+            SSK = ZERO
+            IORD_MSG = 'for CHEXA8 NEWSOLID EAS9 center,      = '
+            CALL SHP3DH ( 0, 0, 0, ELGP, SUBR_NAME, IORD_MSG, 1, SSI, SSJ, SSK, 'N', PSH, DPSHG )
+            CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, EAS_DETJ0 )
+         ENDIF
+
          IORD_MSG = ' '
          GAUSS_PT = 0
          DO K=1,IORD
             DO J=1,IORD
                DO I=1,IORD
                   GAUSS_PT = GAUSS_PT + 1
-                  BI = B(:,:,GAUSS_PT)
-                  DUM4 = MATMUL(ES,BI)
-                  DUM5 = MATMUL(TRANSPOSE(BI),DUM4)
+                  DO L=1,6
+                     DO M=1,3*ELGP
+                        BI(L,M) = B(L,M,GAUSS_PT)
+                     ENDDO
+                  ENDDO
+                  CALL MATMULT_FFF ( ES, BI, 6, 6, 3*ELGP, DUM4 )
+                  CALL MATMULT_FFF_T ( BI, DUM4, 6, 3*ELGP, 3*ELGP, DUM5 )
                   INTFAC = DETJ(GAUSS_PT)*HHH(I)*HHH(J)*HHH(K)
                   DO L=1,3*ELGP
                      DO M=1,3*ELGP
                         DUM3(L,M) = DUM3(L,M) + DUM5(L,M)*INTFAC
                      ENDDO
                   ENDDO
+                  IF (USE_EAS9_NEWSOLID) THEN
+                     DO P=1,6
+                        DO Q=1,9
+                           EAS_M(P,Q) = ZERO
+                        ENDDO
+                     ENDDO
+                     EAS_SCALE = EAS_DETJ0/DETJ(GAUSS_PT)
+                     EAS_M(1,1) = EAS_SCALE*SSS(I)
+                     EAS_M(2,2) = EAS_SCALE*SSS(J)
+                     EAS_M(3,3) = EAS_SCALE*SSS(K)
+                     EAS_M(4,4) = EAS_SCALE*SSS(I)
+                     EAS_M(4,5) = EAS_SCALE*SSS(J)
+                     EAS_M(5,6) = EAS_SCALE*SSS(J)
+                     EAS_M(5,7) = EAS_SCALE*SSS(K)
+                     EAS_M(6,8) = EAS_SCALE*SSS(K)
+                     EAS_M(6,9) = EAS_SCALE*SSS(I)
+                     CALL MATMULT_FFF ( ES, EAS_M, 6, 6, 9, EAS_DM )
+                     CALL MATMULT_FFF_T ( BI, EAS_DM, 6, 3*ELGP, 9, EAS_KUA_GP )
+                     CALL MATMULT_FFF_T ( EAS_M, EAS_DM, 6, 9, 9, EAS_KAA_GP )
+                     DO P=1,3*ELGP
+                        DO Q=1,9
+                           EAS_KUA(P,Q) = EAS_KUA(P,Q) + EAS_KUA_GP(P,Q)*INTFAC
+                        ENDDO
+                     ENDDO
+                     DO P=1,9
+                        DO Q=1,9
+                           EAS_KAA(P,Q) = EAS_KAA(P,Q) + EAS_KAA_GP(P,Q)*INTFAC
+                        ENDDO
+                     ENDDO
+                  ENDIF
                ENDDO
             ENDDO
          ENDDO
+
+         IF (USE_EAS9_NEWSOLID) THEN
+            DO P=1,9
+               DO Q=1,3*ELGP
+                  EAS_RHS(P,Q) = EAS_KUA(Q,P)
+               ENDDO
+            ENDDO
+            CALL SOLVE_EAS9_SYSTEM ( EAS_KAA, EAS_RHS, EAS_X, IERR )
+            IF (IERR == 0) THEN
+               DO P=1,3*ELGP
+                  DO Q=1,3*ELGP
+                     EAS_CORR = ZERO
+                     DO R=1,9
+                        EAS_CORR = EAS_CORR + EAS_KUA(P,R)*EAS_X(R,Q)
+                     ENDDO
+                     DUM3(P,Q) = DUM3(P,Q) - EAS_CORR
+                  ENDDO
+               ENDDO
+            ENDIF
+            DO P=2,3*ELGP
+               DO Q=1,P-1
+                  EAS_CORR = HALF*(DUM3(P,Q) + DUM3(Q,P))
+                  DUM3(P,Q) = EAS_CORR
+                  DUM3(Q,P) = EAS_CORR
+               ENDDO
+            ENDDO
+         ENDIF
 
          DO I=1,3*ELGP
             DO J=1,3*ELGP
@@ -641,8 +746,8 @@
                   CBAR(2,3*(L-1)+1) =  HALF*DPSHX(3,L) ; CBAR(2,3*(L-1)+2) =  ZERO            ; CBAR(2,3*(L-1)+3)= -HALF*DPSHX(1,L)
                   CBAR(3,3*(L-1)+1) = -HALF*DPSHX(2,L) ; CBAR(3,3*(L-1)+2) =  HALF*DPSHX(1,L) ; CBAR(3,3*(L-1)+3)=  ZERO
                 ENDDO
-                DUM6 = MATMUL(KWW,CBAR)
-                DUM5 = MATMUL(TRANSPOSE(CBAR),DUM6)
+                CALL MATMULT_FFF ( KWW, CBAR, 3, 3, 3*ELGP, DUM6 )
+                CALL MATMULT_FFF_T ( CBAR, DUM6, 3, 3*ELGP, 3*ELGP, DUM5 )
                 INTFAC = DETJ(GAUSS_PT)*HHH(I)*HHH(J)*HHH(K)
                 DO L=1,3*ELGP
                   DO M=1,3*ELGP
@@ -697,8 +802,8 @@
                     DPSHX(2,L) = B(2,3*(L-1)+2,GAUSS_PT)
                     DPSHX(3,L) = B(3,3*(L-1)+3,GAUSS_PT)
                   ENDDO
-                  DUM9 = MATMUL(KWW,DPSHX)
-                  DUM8 = MATMUL(TRANSPOSE(DPSHX),DUM9)
+                  CALL MATMULT_FFF ( KWW, DPSHX, 3, 3, ELGP, DUM9)
+                  CALL MATMULT_FFF_T ( DPSHX, DUM9, 3, ELGP, ELGP, DUM8)
                   INTFAC = DETJ(GAUSS_PT)*HHH(I)*HHH(J)*HHH(K)
                   DO L=1,ELGP
                      DO M=1,ELGP
@@ -774,6 +879,100 @@
 ! ##################################################################################################################################
 
       CONTAINS
+
+! ##################################################################################################################################
+
+      SUBROUTINE SOLVE_EAS9_SYSTEM ( A_IN, B_IN, X_OUT, IERR )
+
+! Solves A*X = B for the local 9x9 CHEXA8 EAS condensation system.
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), INTENT(OUT)      :: IERR
+
+      REAL(DOUBLE), INTENT(IN)        :: A_IN(9,9)
+      REAL(DOUBLE), INTENT(IN)        :: B_IN(9,3*ELGP)
+      REAL(DOUBLE), INTENT(OUT)       :: X_OUT(9,3*ELGP)
+
+      INTEGER(LONG)                   :: ICOL
+      INTEGER(LONG)                   :: IMAX
+      INTEGER(LONG)                   :: IROW
+      INTEGER(LONG)                   :: JCOL
+      INTEGER(LONG)                   :: KROW
+
+      REAL(DOUBLE)                    :: A(9,9)
+      REAL(DOUBLE)                    :: RHS(9)
+      REAL(DOUBLE)                    :: FACTOR
+      REAL(DOUBLE)                    :: PIVOT
+      REAL(DOUBLE)                    :: TMP
+
+! **********************************************************************************************************************************
+
+      IERR = 0
+      DO IROW=1,9
+         DO JCOL=1,3*ELGP
+            X_OUT(IROW,JCOL) = ZERO
+         ENDDO
+      ENDDO
+
+      DO ICOL=1,3*ELGP
+         DO IROW=1,9
+            RHS(IROW) = B_IN(IROW,ICOL)
+            DO JCOL=1,9
+               A(IROW,JCOL) = A_IN(IROW,JCOL)
+            ENDDO
+         ENDDO
+
+         DO KROW=1,8
+            IMAX = KROW
+            PIVOT = ABS(A(KROW,KROW))
+            DO IROW=KROW+1,9
+               IF (ABS(A(IROW,KROW)) > PIVOT) THEN
+                  PIVOT = ABS(A(IROW,KROW))
+                  IMAX = IROW
+               ENDIF
+            ENDDO
+            IF (PIVOT <= EPS1) THEN
+               IERR = 1
+               RETURN
+            ENDIF
+            IF (IMAX /= KROW) THEN
+               DO JCOL=KROW,9
+                  TMP = A(KROW,JCOL)
+                  A(KROW,JCOL) = A(IMAX,JCOL)
+                  A(IMAX,JCOL) = TMP
+               ENDDO
+               TMP = RHS(KROW)
+               RHS(KROW) = RHS(IMAX)
+               RHS(IMAX) = TMP
+            ENDIF
+            DO IROW=KROW+1,9
+               FACTOR = A(IROW,KROW)/A(KROW,KROW)
+               A(IROW,KROW) = ZERO
+               DO JCOL=KROW+1,9
+                  A(IROW,JCOL) = A(IROW,JCOL) - FACTOR*A(KROW,JCOL)
+               ENDDO
+               RHS(IROW) = RHS(IROW) - FACTOR*RHS(KROW)
+            ENDDO
+         ENDDO
+
+         IF (ABS(A(9,9)) <= EPS1) THEN
+            IERR = 1
+            RETURN
+         ENDIF
+
+         DO IROW=9,1,-1
+            TMP = RHS(IROW)
+            DO JCOL=IROW+1,9
+               TMP = TMP - A(IROW,JCOL)*X_OUT(JCOL,ICOL)
+            ENDDO
+            X_OUT(IROW,ICOL) = TMP/A(IROW,IROW)
+         ENDDO
+      ENDDO
+
+! **********************************************************************************************************************************
+
+      END SUBROUTINE SOLVE_EAS9_SYSTEM
 
 ! ##################################################################################################################################
 

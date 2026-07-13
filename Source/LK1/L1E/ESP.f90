@@ -416,6 +416,8 @@ stfpnt0:          DO                                       ! so, run this loop u
       ENDDO elems
       WRITE(SC1,*) CR13
 
+      CALL CTETRA4S_SMOOTH_ASSEMBLY ( 'ADD  ', LTERM, NTERM )
+
 ! Reset subr EMG option flags:
 
       OPT(3) = 'N'

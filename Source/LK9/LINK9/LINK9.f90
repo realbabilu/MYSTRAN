@@ -1600,7 +1600,7 @@ j_do: DO JVEC=1,NUM_SOLNS
          WRITE(TSL,'("Eigenvalue ",I0," ",ES14.6,",")') MODE_OUT, FEMAP_SET_VALUE
 
       ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
-         WRITE(TSL,'("Subcase ",I0,",")') SCNUM(JVEC)
+         WRITE(TSL,'("NASTRAN Case ",I0,",")') SCNUM(JVEC)
       ENDIF
 
       END SUBROUTINE PREPARE_FEMAP_SET_HEADER
@@ -1612,7 +1612,7 @@ j_do: DO JVEC=1,NUM_SOLNS
       IMPLICIT NONE
 
 ! **********************************************************************************************************************************
-      FEMAP_FROM_PROG = 0
+      FEMAP_FROM_PROG = 14
       FEMAP_ANAL_TYPE = 0
 
       IF (SOL_NAME(1:7) == 'STATICS') THEN
@@ -1624,7 +1624,11 @@ j_do: DO JVEC=1,NUM_SOLNS
       ELSE IF (SOL_NAME(1:8) == 'MFREQ') THEN
          FEMAP_ANAL_TYPE = 5
       ELSE IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-         FEMAP_ANAL_TYPE = 7
+         IF (LOAD_ISTEP == 1) THEN
+            FEMAP_ANAL_TYPE = 1
+         ELSE
+            FEMAP_ANAL_TYPE = 7
+         ENDIF
       ELSE IF (SOL_NAME(1:8) == 'DFREQ') THEN
          FEMAP_ANAL_TYPE = 4
       ELSE

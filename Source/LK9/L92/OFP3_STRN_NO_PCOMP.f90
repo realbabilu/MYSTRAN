@@ -34,8 +34,8 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ELOUT_STRN_BIT, FATAL_ERR, IBIT, INT_SC_NUM,                                &
                                          MAX_STRESS_POINTS, MBUG, MOGEL,                                                           &
                                          NELE, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20,       &
-                                         NCPENTA6,                                                                                  &
-                                         NCPENTA15,NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCROD, NCSHEAR, NCTRIA3, NCTRIA3K,      &
+                                         NCPENTA6, NCPENTA15, NPYRAM5, NPYRAM14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCROD,   &
+                                         NCSHEAR, NCTRIA3, NCTRIA3K,                                                                &
                                          SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, TWO, FOUR
@@ -138,7 +138,8 @@
          IF((ELMTYP(I)(1:3) == 'BAR'  ) .OR. (ELMTYP(I)(1:4) == 'BEAM' ) .OR. (ELMTYP(I)(1:3) == 'ROD'  ) .OR.                    &
             (ELMTYP(I)(1:4) == 'ELAS' ) .OR. (ELMTYP(I)(1:4) == 'BUSH' ) .OR. (ELMTYP(I)(1:5) == 'TRIA3') .OR.                    &
             (ELMTYP(I)(1:5) == 'QUAD4') .OR. (ELMTYP(I)(1:5) == 'SHEAR') .OR. (ELMTYP(I)(1:4) == 'HEXA' ) .OR.                    &
-            (ELMTYP(I)(1:5) == 'PENTA') .OR. (ELMTYP(I)(1:5) == 'TETRA') .OR. (ELMTYP(I)(1:5) == 'QUAD8')) THEN
+            (ELMTYP(I)(1:5) == 'PYRAM') .OR. (ELMTYP(I)(1:5) == 'PENTA') .OR. (ELMTYP(I)(1:5) == 'TETRA') .OR.                    &
+            (ELMTYP(I)(1:5) == 'QUAD8')) THEN
             DO J=1,NELE
                CALL IS_ELEM_PCOMP_PROPS ( J )
                IF (PCOMP_PROPS == 'N') THEN
@@ -151,6 +152,7 @@
                         IF ((STRN_LOC == 'CORNER  ') .OR.                                                                         &
                             (STRN_LOC == 'GAUSS   ') .OR.                                                                         &
                             (ETYPE(J)(1:4) == 'HEXA') .OR.                                                                        &
+                            (ETYPE(J)(1:5) == 'PYRAM') .OR.                                                                       &
                             (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                       &
                             (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                       &
                             (ETYPE(J)(1:5) == 'QUAD8')) THEN
@@ -226,6 +228,7 @@ elems_7: DO J = 1,NELE
                   IF ((STRN_LOC == 'CORNER  ') .OR.                                                                                &
                       (STRN_LOC == 'GAUSS   ') .OR.                                                                                &
                       (TYPE(1:4) == 'HEXA') .OR.                                                                                   &
+                      (TYPE(1:5) == 'PYRAM') .OR.                                                                                  &
                       (TYPE(1:5) == 'PENTA') .OR.                                                                                  &
                       (TYPE(1:5) == 'TETRA') .OR.                                                                                  &
                       (TYPE(1:5) == 'QUAD8')) THEN
@@ -250,6 +253,7 @@ elems_7: DO J = 1,NELE
                         STRAIN_OUT(:,1) = (STRAIN_OUT(:,2) + STRAIN_OUT(:,3) + STRAIN_OUT(:,4) + STRAIN_OUT(:,5)) / FOUR
 
                      ELSE IF ((TYPE(1:4) == 'HEXA') .OR.                                                                           &
+                              (TYPE(1:5) == 'PYRAM') .OR.                                                                          &
                               (TYPE(1:5) == 'PENTA') .OR.                                                                          &
                               (TYPE(1:5) == 'TETRA')) THEN
 ! Strains are directly evaluated at the corner grid points. If they are going to be evaluated at Gauss points
@@ -786,6 +790,68 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
 
+         NDUM = 0
+         NUM_FROWS= 0                                      ! Write out PYRAM5 strains
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NPYRAM5, 12, SUBR_NAME )
+         DO J=1,NELE
+            CALL IS_ELEM_PCOMP_PROPS ( J )
+            IF (PCOMP_PROPS == 'N') THEN
+               EID   = EDAT(EPNT(J))
+               TYPE  = ETYPE(J)
+               IF (ETYPE(J)(1:7) == 'PYRAM5 ') THEN
+                  NUM_FROWS= NUM_FROWS+ 1
+                  DO K=0,MBUG-1
+                     WRT_BUG(K) = 0
+                  ENDDO
+                  PLY_NUM = 1
+                  CALL EMG ( J   , OPT, 'N', SUBR_NAME, 'N' )
+                  FEMAP_EL_NUMS(NUM_FROWS,1) = EID
+                  IF (NUM_EMG_FATAL_ERRS > 0) THEN
+                     IERROR = IERROR + 1
+                     CYCLE
+                  ENDIF
+                  CALL ELMDIS
+                  CALL ELEM_STRE_STRN_ARRAYS ( 1 )
+                  CALL CALC_ELEM_STRAINS ( NPYRAM5, NDUM, NUM_FROWS, 'N', 'Y' )
+               ENDIF
+            ENDIF
+         ENDDO
+         IF (NUM_FROWS > 0) THEN
+            CALL WRITE_FEMAP_STRN_VECS ( 'PYRAM5  ', 'N', NUM_FROWS, FEMAP_SET_ID )
+         ENDIF
+         CALL DEALLOCATE_FEMAP_DATA
+
+         NDUM = 0
+         NUM_FROWS= 0                                      ! Write out PYRAM14 strains
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NPYRAM14, 12, SUBR_NAME )
+         DO J=1,NELE
+            CALL IS_ELEM_PCOMP_PROPS ( J )
+            IF (PCOMP_PROPS == 'N') THEN
+               EID   = EDAT(EPNT(J))
+               TYPE  = ETYPE(J)
+               IF (ETYPE(J)(1:7) == 'PYRAM14') THEN
+                  NUM_FROWS= NUM_FROWS+ 1
+                  DO K=0,MBUG-1
+                     WRT_BUG(K) = 0
+                  ENDDO
+                  PLY_NUM = 1
+                  CALL EMG ( J   , OPT, 'N', SUBR_NAME, 'N' )
+                  FEMAP_EL_NUMS(NUM_FROWS,1) = EID
+                  IF (NUM_EMG_FATAL_ERRS > 0) THEN
+                     IERROR = IERROR + 1
+                     CYCLE
+                  ENDIF
+                  CALL ELMDIS
+                  CALL ELEM_STRE_STRN_ARRAYS ( 1 )
+                  CALL CALC_ELEM_STRAINS ( NPYRAM14, NDUM, NUM_FROWS, 'N', 'Y' )
+               ENDIF
+            ENDIF
+         ENDDO
+         IF (NUM_FROWS > 0) THEN
+            CALL WRITE_FEMAP_STRN_VECS ( 'PYRAM14 ', 'N', NUM_FROWS, FEMAP_SET_ID )
+         ENDIF
+         CALL DEALLOCATE_FEMAP_DATA
+
          NUM_FROWS= 0                                      ! Write out SHEAR strains
          CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCSHEAR, 22, SUBR_NAME )
          DO J=1,NELE
@@ -896,7 +962,7 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
          STRAIN_ITEM( 8) = '*** Not Defined ****'
          STRAIN_ITEM( 9) = '*** Not Defined ****'
 
-      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
          NUM_OTM_ENTRIES = 8
          STRAIN_ITEM( 1) = 'Normal x Strain     '
          STRAIN_ITEM( 2) = 'Normal y Strain     '

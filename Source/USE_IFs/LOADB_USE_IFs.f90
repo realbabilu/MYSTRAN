@@ -50,6 +50,7 @@
       USE BD_CONM2_Interface
       USE BD_CORD_Interface
       USE BD_CPENTA_Interface
+      USE BD_PYRAM_Interface
       USE BD_CQUAD_Interface
       USE BD_CQUAD8_Interface
       USE BD_CROD_Interface

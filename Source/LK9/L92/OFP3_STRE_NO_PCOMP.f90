@@ -35,7 +35,7 @@
                                          MAX_STRESS_POINTS, MBUG, MOGEL,                                                           &
                                          NELE, NGRID, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20,&
                                          NCPENTA6,                                                                                   &
-                                         NCPENTA15, NCPYRA5, NCPYRA14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, NCROD,    &
+                                         NCPENTA15, NPYRAM5, NPYRAM14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, NCROD,    &
                                          NCSHEAR,                                                                                     &
                                          NCTRIA3, NCTRIA3K,                                                                         &
                                          SOL_NAME
@@ -149,7 +149,7 @@
                      IF ((STRE_LOC == 'CORNER  ') .OR.                                                                            &
                          (STRE_LOC == 'GAUSS   ') .OR.                                                                            &
                          (ETYPE(J)(1:4) == 'HEXA') .OR.                                                                           &
-                         (ETYPE(J)(1:4) == 'PYRA') .OR.                                                                           &
+                         (ETYPE(J)(1:5) == 'PYRAM') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'QUAD8')) THEN
@@ -232,7 +232,7 @@ elems_5: DO J = 1,NELE
                   IF ((STRE_LOC == 'CORNER  ') .OR.                                                                                &
                       (STRE_LOC == 'GAUSS   ') .OR.                                                                                &
                       (TYPE(1:4) == 'HEXA') .OR.                                                                                   &
-                      (TYPE(1:4) == 'PYRA') .OR.                                                                                   &
+                      (TYPE(1:5) == 'PYRAM') .OR.                                                                                  &
                       (TYPE(1:5) == 'PENTA') .OR.                                                                                  &
                       (TYPE(1:5) == 'TETRA') .OR.                                                                                  &
                       (TYPE(1:5) == 'QUAD8')) THEN
@@ -256,7 +256,7 @@ elems_5: DO J = 1,NELE
                         STRESS_OUT(:,1) = (STRESS_OUT(:,2) + STRESS_OUT(:,3) + STRESS_OUT(:,4) + STRESS_OUT(:,5)) / FOUR
 
                      ELSE IF ((TYPE(1:4) == 'HEXA') .OR.                                                                           &
-                              (TYPE(1:4) == 'PYRA') .OR.                                                                           &
+                              (TYPE(1:5) == 'PYRAM') .OR.                                                                          &
                               (TYPE(1:5) == 'PENTA') .OR.                                                                          &
                               (TYPE(1:5) == 'TETRA')) THEN
 ! Stresses are directly evaluated at the corner grid points. If they are going to be evaluated at Gauss points
@@ -804,14 +804,14 @@ elems_5: DO J = 1,NELE
          CALL DEALLOCATE_FEMAP_DATA
 
          NDUM = 0
-         NUM_FROWS= 0                                      ! Write out PYRA5 stresses
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCPYRA5, 12, SUBR_NAME )
+         NUM_FROWS= 0                                      ! Write out PYRAM5 stresses
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NPYRAM5, 12, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
                EID   = EDAT(EPNT(J))
                TYPE  = ETYPE(J)
-               IF (ETYPE(J)(1:6) == 'PYRA5 ') THEN
+               IF (ETYPE(J)(1:7) == 'PYRAM5 ') THEN
                   NUM_FROWS= NUM_FROWS+ 1
                   DO K=0,MBUG-1
                      WRT_BUG(K) = 0
@@ -825,24 +825,24 @@ elems_5: DO J = 1,NELE
                   ENDIF
                   CALL ELMDIS
                   CALL ELEM_STRE_STRN_ARRAYS ( 1 )
-                  CALL CALC_ELEM_STRESSES ( NCPYRA5, NDUM, NUM_FROWS, 'N', 'Y' )
+                  CALL CALC_ELEM_STRESSES ( NPYRAM5, NDUM, NUM_FROWS, 'N', 'Y' )
                ENDIF
             ENDIF
          ENDDO
          IF (NUM_FROWS > 0) THEN
-            CALL WRITE_FEMAP_STRE_VECS ( 'CPYRAM5 ', 'N', NUM_FROWS, FEMAP_SET_ID )
+            CALL WRITE_FEMAP_STRE_VECS ( 'PYRAM5  ', 'N', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
 
          NDUM = 0
-         NUM_FROWS= 0                                      ! Write out PYRA14 stresses
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCPYRA14, 12, SUBR_NAME )
+         NUM_FROWS= 0                                      ! Write out PYRAM14 stresses
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NPYRAM14, 12, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
                EID   = EDAT(EPNT(J))
                TYPE  = ETYPE(J)
-               IF (ETYPE(J)(1:6) == 'PYRA14') THEN
+               IF (ETYPE(J)(1:7) == 'PYRAM14') THEN
                   NUM_FROWS= NUM_FROWS+ 1
                   DO K=0,MBUG-1
                      WRT_BUG(K) = 0
@@ -856,12 +856,12 @@ elems_5: DO J = 1,NELE
                   ENDIF
                   CALL ELMDIS
                   CALL ELEM_STRE_STRN_ARRAYS ( 1 )
-                  CALL CALC_ELEM_STRESSES ( NCPYRA14, NDUM, NUM_FROWS, 'N', 'Y' )
+                  CALL CALC_ELEM_STRESSES ( NPYRAM14, NDUM, NUM_FROWS, 'N', 'Y' )
                ENDIF
             ENDIF
          ENDDO
          IF (NUM_FROWS > 0) THEN
-            CALL WRITE_FEMAP_STRE_VECS ( 'CPYRAM14', 'N', NUM_FROWS, FEMAP_SET_ID )
+            CALL WRITE_FEMAP_STRE_VECS ( 'PYRAM14 ', 'N', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
 
@@ -1188,7 +1188,7 @@ elems_5: DO J = 1,NELE
          STRESS_ITEM( 8) = '*** Not Defined ****'
          STRESS_ITEM( 9) = '*** Not Defined ****'
 
-      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
          NUM_OTM_ENTRIES = 8
          STRESS_ITEM( 1) = 'Normal x Stress     '
          STRESS_ITEM( 2) = 'Normal y Stress     '

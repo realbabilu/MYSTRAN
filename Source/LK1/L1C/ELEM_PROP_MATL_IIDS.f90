@@ -146,6 +146,7 @@
                                                            ! Process property ID's for solid elements
          ELSE IF ((ETYPE(I) == 'HEXA8   ') .OR. (ETYPE(I) == 'HEXA20  ') .OR.                                                      &
                   (ETYPE(I) == 'PENTA6  ') .OR. (ETYPE(I) == 'PENTA15 ') .OR.                                                      &
+                  (ETYPE(I) == 'PYRAM5  ') .OR. (ETYPE(I) == 'PYRAM14 ') .OR.                                                      &
                   (ETYPE(I) == 'TETRA4  ') .OR. (ETYPE(I) == 'TETRA10 ')) THEN
             PROPERTY_NAME(1:6) = 'PSOLID'
             PROPERTY_ID = EDAT(EPNTK+1)

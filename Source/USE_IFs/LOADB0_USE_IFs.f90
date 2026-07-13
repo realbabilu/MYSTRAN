@@ -37,6 +37,7 @@
       USE BD_CBUSH0_Interface
       USE BD_CHEXA0_Interface
       USE BD_CPENTA0_Interface
+      USE BD_PYRAM0_Interface
       USE BD_CQUAD0_Interface
       USE BD_CQUAD80_Interface
       USE BD_CTETRA0_Interface

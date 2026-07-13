@@ -76,7 +76,7 @@
 
       USE SCONTR
       USE PARAMS, ONLY                :  CBMIN3, CBMIN4, ELFORCEN, HEXAXIS, IORQ1B, IORQ1M, IORQ1S, IORQ2B, IORQ2T,&
-                                         MATSPARS, MIN4TRED, QUAD4TYP, QUADAXIS, SPARSTOR
+                                         MATSPARS, MIN4TRED, QUAD4TYP, QUADAXIS, SOLIDTYP, SPARSTOR, TRIA3TYP
 
       USE TIMDAT, ONLY                :  STIME, TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -94,4 +94,3 @@
    END INTERFACE
 
    END MODULE READ_L1A_Interface
-

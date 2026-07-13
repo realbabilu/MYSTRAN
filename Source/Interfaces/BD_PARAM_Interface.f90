@@ -67,7 +67,8 @@
                                          PRTSCP          , PRTPSET         , PRTTSET         , PRTUSET         ,                   &
                                          PRTSTIFD        , PRTSTIFF        , PRTUO0          ,                                     &
                                          PRTYS           , PRTQSYS         ,                                                       &
-                                         Q4SURFIT        , QUADAXIS        , QUAD4TYP        , RCONDK          , RELINK3         , &
+                                         Q4SURFIT        , QUADAXIS        , QUAD4TYP        , SOLIDTYP        , TRIA3TYP        , RCONDK          , &
+                                         RELINK3         , &
                                          SEQPRT          , SEQQUIT         , SETLKTM         , SETLKTK         , SHRFXFAC        , &
                                          SKIPMGG         , SOLLIB          , SPARSE_FLAVOR   , SPARSTOR        ,                   &
                                          SPC1QUIT        , SORT_MAX        , SPC1SID         , STR_CID                           , &

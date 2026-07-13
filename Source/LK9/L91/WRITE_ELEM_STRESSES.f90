@@ -281,7 +281,7 @@
                ENDIF
                WRITE(F06,401) FILL(1: 40), ONAME
 
-            ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+            ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
                IF (STRE_OPT == 'VONMISES') THEN
                   IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                      IF(STR_CID == -2) THEN
@@ -366,7 +366,7 @@
             ELSE IF (TYPE(1:4) == 'ELAS') THEN
                WRITE(F06,1201) FILL(1:1), FILL(1:1)
 
-            ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+            ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
                IF (STRE_OPT == 'VONMISES') THEN
                   WRITE(F06,1301) FILL(1: 1), FILL(1: 1)
                ELSE
@@ -584,12 +584,12 @@
             ENDDO
          ENDIF
 
-      ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:4) == 'PYRA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
          !       12345
          ! 39  : CTETRA
          ! 67  : CHEXA
          ! 68  : CPENTA
-         ! 255 : CPYRAM
+         ! 255 : PYRAM
          IF (TYPE(1:4) == "HEXA") THEN
              ELEMENT_TYPE = 67
              NNODES = 9
@@ -599,7 +599,7 @@
          ELSE IF (TYPE(1:5) == "PENTA") THEN
              ELEMENT_TYPE = 68
              NNODES = 7
-         ELSE IF (TYPE(1:4) == "PYRA") THEN
+         ELSE IF (TYPE(1:5) == "PYRAM") THEN
              ELEMENT_TYPE = 255
              NNODES = 6
          ENDIF
@@ -626,7 +626,7 @@
 
           ! setting:
           !  - CTETRA: [element_device, cid, 'CEN/', 4]
-          !  - CPYRAM: [element_device, cid, 'CEN/', 5]
+          !  - PYRAM: [element_device, cid, 'CEN/', 5]
           !  - CPENTA: [element_device, cid, 'CEN/', 6]
           !  - CHEXA:  [element_device, cid, 'CEN/', 8]
 

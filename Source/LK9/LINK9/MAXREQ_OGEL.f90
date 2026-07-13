@@ -302,7 +302,8 @@
             ELSE
                NUMBER_ROWS(K) = 2*NUM_SEi(LETYPE)          !    CQUAD8 stress output is CORNER even if CENTER is specified.
             ENDIF
-         ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+         ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR.                            &
+                  (TYPE(1:5) == 'TETRA')) THEN
             NUMBER_ROWS(K) = NUM_SEi(LETYPE)
          ENDIF
 
@@ -328,7 +329,8 @@
                   NUMBER_ROWS(K) = 2*NUM_SEi(LETYPE)
                ENDIF
             ENDIF
-         ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+         ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR.                            &
+                  (TYPE(1:5) == 'TETRA')) THEN
             NUMBER_ROWS(K) = NUM_SEi(LETYPE)
          ENDIF
 

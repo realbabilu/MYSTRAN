@@ -1256,8 +1256,8 @@
                                                                  'USER1   ',      & !         22
                                                                  'USERIN  ',      & !         23
                                                                  'QUADR   ',      & !         24
-                                                                 'PYRA5   ',      & !         25
-                                                                 'PYRA14  '/)       !         26
+                                                                 'PYRAM5  ',      & !         25
+                                                                 'PYRAM14 '/)       !         26
 
                                                              ! Character name for output purposed in LINK9 WRTELi subr's
       CHARACTER(13*BYTE)              :: ELEM_ONAME(METYPE)  = (/'B A R        ', & !          1
@@ -1312,8 +1312,8 @@
                                                                    4,             & ! USER1   22
                                                                    0,             & ! USERIN  23
                                                                    4,             & ! QUADR   24
-                                                                   5,             & ! PYRA5   25
-                                                                  14/)              ! PYRA14  26
+                                                                   5,             & ! PYRAM5  25
+                                                                  14/)              ! PYRAM14 26
 
                                                              ! Array of number of stress recovery points for various elem types
       INTEGER(LONG)                   :: NUM_SEi(METYPE)     =  (/ 1,             & ! BAR      1
@@ -1342,8 +1342,8 @@
                                                                    1,             & ! USER1   22
                                                                    0,             & ! USERIN  23
                                                                    5,             & ! QUADR   24
-                                                                   6,             & ! PYRA5   25
-                                                                  15/)              ! PYRA14  26
+                                                                   6,             & ! PYRAM5  25
+                                                                  15/)              ! PYRAM14 26
 
 ! **********************************************************************************************************************************
 ! Individual element data generated one element at a time (in subr EMG)

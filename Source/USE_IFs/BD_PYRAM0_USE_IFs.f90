@@ -1,0 +1,6 @@
+      MODULE BD_PYRAM0_USE_IFs
+
+      USE NEXTC0_Interface
+      USE NEXTC20_Interface
+
+      END MODULE BD_PYRAM0_USE_IFs

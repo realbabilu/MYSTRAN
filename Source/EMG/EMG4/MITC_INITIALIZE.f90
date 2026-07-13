@@ -29,6 +29,7 @@
 
       USE PENTIUM_II_KIND, ONLY       :  LONG, DOUBLE
       USE MODEL_STUF, ONLY            :  ELGP, EPROP, XEL, BGRID, GRID_SNORM, TYPE, TE
+      USE PARAMS, ONLY                :  TRIA3TYP
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE MITC_STUF, ONLY             :  DIRECTOR, DIR_THICKNESS, GP_RS
       USE IOUNT1, ONLY                :  ERR, F06
@@ -128,7 +129,7 @@
 
                                                            ! Use the midsurface normal unless SNORM exists and it's
                                                            ! a linear element.
-         IF (ANY(NORMAL /= ZERO) .AND. (TYPE(1:5) == 'QUAD4')) THEN
+         IF (ANY(NORMAL /= ZERO) .AND. ((TYPE(1:5) == 'QUAD4') .OR. ((TYPE(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'MITC3+')))) THEN
                                                            ! Transform SNORM from basic to XEL element coordinates.
             CALL MATMULT_FFF(TE, NORMAL, 3, 3, 1, DIRECTOR(:,GP))
          ELSE

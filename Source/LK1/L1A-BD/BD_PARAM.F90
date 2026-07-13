@@ -59,7 +59,8 @@
                          PRTCORD, PRTDISP, PRTDLR, PRTDOF, PRTFOR, PRTHMN, PRTGMN, PRTGOA, PRTCGLTM, PRTPHIZL,      &
                          PRTIFLTM, PRTKXX, PRTMXX, PRTOU4, PRTPHIXA, PRTMASS, PRTMASSD, PRTRMG, PRTSCP, PRTPSET,    &
                          PRTTSET, PRTUSET, PRTSTIFD, PRTSTIFF, PRTUO0, PRTYS, PRTQSYS, Q4SURFIT, QUADAXIS,          &
-                         QUAD4TYP, RCONDK, RELINK3, SEQPRT, SEQQUIT, SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, SOLLIB,   &
+                         QUAD4TYP, SOLIDTYP, TRIA3TYP, RCONDK, RELINK3, SEQPRT, SEQQUIT, SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, &
+                         SOLLIB,                                                                                      &
                          SPARSE_FLAVOR, SPARSTOR, SPC1QUIT, SORT_MAX, SPC1SID, STR_CID, SUPINFO, SUPWARN, NOCOUNTS,&
                          THRESHK, THRESHK_LAP, TINY, TSTM_DEF, USR_JCT, USR_LTERM_KGG, USR_LTERM_MGG, WINAMEM,      &
                          WTMASS, K6ROT, PRTALL, PRTANS, PRTF06, PRTNEU, PRTOP2, OUTMODE
@@ -2665,6 +2666,64 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
+
+! SOLIDTYP selects isolated alternative solid formulations where available
+
+      ELSE IF (JCARD(2)(1:8) == 'SOLIDTYP') THEN
+         PARNAM = 'SOLIDTYP'
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      (CHRPARM == 'LEGACY  ') THEN
+               SOLIDTYP = 'LEGACY  '
+            ELSE IF (CHRPARM == 'NEWSOLID') THEN
+               SOLIDTYP = 'NEWSOLID'
+            ELSE IF (CHRPARM(1:3) == 'EAS') THEN
+               SOLIDTYP = 'NEWSOLID'
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'LEGACY, NEWSOLID, OR EAS',CHRPARM,SOLIDTYP
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'LEGACY, NEWSOLID, OR EAS',CHRPARM,SOLIDTYP
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+! TRIA3TYP tells which triangular plate bending/shear branch to use for CTRIA3 elements
+
+      ELSE IF (JCARD(2)(1:8) == 'TRIA3TYP') THEN
+         PARNAM = 'TRIA3TYP'
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      (CHRPARM == 'MIN3    ') THEN
+               TRIA3TYP = 'MIN3  '
+            ELSE IF (CHRPARM == 'MITC3+  ') THEN
+               TRIA3TYP = 'MITC3+'
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'MIN3 or MITC3+',CHRPARM,TRIA3TYP
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'MIN3 or MITC3+',CHRPARM,TRIA3TYP
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
 
 
       ! RCONDK = 'Y' executes LAPACK code in LINK3 to calc the recriprocal of the condition number, RCOND, of a matrix to be decomposed

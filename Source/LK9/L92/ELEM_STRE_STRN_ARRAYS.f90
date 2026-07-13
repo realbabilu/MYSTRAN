@@ -361,7 +361,7 @@
 ! **********************************************************************************************************************************
 ! Calc strains, then stresses for 3D elements
 
-      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 
          DO I=1,6
             STRESS_MECH(I)  = ZERO
@@ -462,7 +462,7 @@
 
             ENDIF
 
-         ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+         ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 
             IF (STR_CID == -2) THEN
                STR_CID_SOLID = ISOLID(3)                   ! CORDM from PSOLID card.

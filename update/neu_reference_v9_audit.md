@@ -159,6 +159,60 @@ If we want the file to identify itself more like Nastran-oriented neutral output
    - recommended for now: keep it
    - it is useful, cheap, and does not block result import
 
+### Block 451 audit status
+
+A line-by-line spot check against:
+
+- `reference_msc\103_one_subcase.neu`
+- `reference_msc\105_one_statsub.neu`
+
+shows that the current block `451` nodal-vector structure is already close to the reference pattern:
+
+- `set_id, vec_id, 1`
+- one title line
+- one `min,max,abs` real line
+- two 10-integer metadata lines
+- one grid-range line
+- one `flags` line
+- repeated `id,value` rows
+- vector terminator `-1, 0.`
+
+For the nodal `DISP` family used by modes and buckling, the main remaining compatibility issues are not in block `451` row structure itself, but in the surrounding set metadata:
+
+- `FROM_PROG`
+- `ANAL_TYPE`
+- set-title wording for buckling preload sets
+
+### Safe metadata fixes applied
+
+The current branch now makes these low-risk metadata adjustments:
+
+1. `FEMAP_FROM_PROG`
+   - changed from `0` to `14`
+   - aligns better with the reference neutral exports, which identify the source as Nastran-oriented neutral data
+
+2. Buckling preload set analysis type
+   - `SOL BUCKLING`, `LOAD_ISTEP = 1` now maps to `ANAL_TYPE = 1`
+   - this matches the reference pattern where the preload result set is treated like a static set
+
+3. Buckling preload set title
+   - changed from `Subcase n` to `NASTRAN Case n`
+   - closer to the reference text export while staying harmless to existing data payloads
+
+### Remaining known differences
+
+The following differences are still present by design:
+
+- MYSTRAN does not yet emit the richer block `450` trailer fields seen in the reference export:
+  - `From: ...`
+  - `Date : ...`
+  - `<NULL>`
+  - repeated deck title/subtitle lines
+
+- The custom phase-1 geometry snapshot remains a MYSTRAN-specific addition.
+
+- Vector metadata integer slots in block `451` have only been spot-checked so far for nodal `DISP`; element-family vector metadata still needs its own dedicated audit.
+
 ### Practical conclusion
 
 For the current branch, the important compatibility move was:

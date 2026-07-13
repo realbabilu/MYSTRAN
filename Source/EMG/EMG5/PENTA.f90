@@ -40,12 +40,12 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_TRIA, MAX_ORDER_GAUSS, NTSUB
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  HALF, THIRD, ZERO
+      USE CONSTANTS_1, ONLY           :  HALF, THIRD, TWO, ZERO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  EPSIL
+      USE PARAMS, ONLY                :  EPSIL, SOLIDTYP
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  ALPVEC, BE1, BE2, DT, EID, ELGP, NUM_EMG_FATAL_ERRS, ES, KE, KED, ME, PTE, RHO,           &
-                                         SE1, SE2, STE1, STRESS, TREF, TYPE
+                                         SE1, SE2, STE1, STRESS, TE, TREF, TYPE
 
       USE PENTA_USE_IFs
       USE EXPAND_MASS_DOFS_Interface
@@ -64,17 +64,18 @@
       INTEGER(LONG)                   :: IORD_IJ_SH              ! Integration order in the triang plane for red integr for shear
       INTEGER(LONG)                   :: IORD_K_SH               ! Integration order in Z direction for red integr for shear
       INTEGER(LONG)                   :: GAUSS_PT                ! Gauss point number (used for DEBUG output in subr SHP3DP
+      INTEGER(LONG)                   :: IERR                    ! Local error count
       INTEGER(LONG)                   :: I,J,IJ,K,L,M,N          ! DO loop indices
       INTEGER(LONG)                   :: II,JJ                   ! Counters
       INTEGER(LONG)                   :: ID(3*ELGP)              ! Array which shows equivalence of DOF's in virgin element with the
    !                                                             6 DOF/grid of the final element stiffness matrix
+      INTEGER(LONG)                   :: P,Q,R                   ! Local EAS matrix indices
 
       INTEGER(LONG)                   :: STR_PT_NUM              ! Stress point number. 1 is center, 2+ are element nodes 1+.
 
       REAL(DOUBLE)                    :: ALP(6)                  ! First col of ALPVEC
                                                                  ! Strain-displ matrix for this element for all Gauss points
       REAL(DOUBLE)                    :: B(6,3*ELGP,IORD_IJ*IORD_K)
-
       REAL(DOUBLE)                    :: BI(6,3*ELGP)            ! Strain-displ matrix for this element for one Gauss point
       REAL(DOUBLE)                    :: CBAR(3,3*ELGP)          ! Derivatives of shape fcns wrt x,y,z used in diff stiff matrix
 !                                                                  (contains terms from DPSHX matrices for each grid of the PENTA)
@@ -91,6 +92,20 @@
       REAL(DOUBLE)                    :: DUM5(3*ELGP,3*ELGP)     ! Intermediate matrix used in solving for KE elem matrices
       REAL(DOUBLE)                    :: DUM6(3,3*ELGP)          ! Intermediate matrix used in solving for elem matrices
       REAL(DOUBLE)                    :: EALP(6)                 ! Interm var used in calc PTE therm loads & STEi stress coeffs
+      REAL(DOUBLE)                    :: EAS_CORR                ! Condensation correction term
+      REAL(DOUBLE)                    :: EAS_DETJ0               ! Jacobian determinant at wedge center for EAS scaling
+      REAL(DOUBLE)                    :: EAS_DM(6,9)             ! ES*EAS_M
+      REAL(DOUBLE)                    :: EAS_KAA(9,9)            ! Condensed EAS alpha-alpha stiffness
+      REAL(DOUBLE)                    :: EAS_KAA_GP(9,9)         ! Gauss point alpha-alpha stiffness contribution
+      REAL(DOUBLE)                    :: EAS_KUA(3*ELGP,9)       ! Displacement/EAS coupling stiffness
+      REAL(DOUBLE)                    :: EAS_KUA_GP(3*ELGP,9)    ! Gauss point displacement/EAS coupling contribution
+      REAL(DOUBLE)                    :: EAS_M(6,9)              ! CPENTA6 EAS9 enhanced strain modes
+      REAL(DOUBLE)                    :: EAS_MBASIC(6,9)         ! EAS9 modes in the basic Cartesian strain basis used by Python
+      REAL(DOUBLE)                    :: EAS_REG                 ! Tiny diagonal regularization for Kaa
+      REAL(DOUBLE)                    :: EAS_RHS(9,3*ELGP)       ! RHS for KAA solve, KUA transpose
+      REAL(DOUBLE)                    :: EAS_SCALE               ! detJ0/detJ scale used by EAS9
+      REAL(DOUBLE)                    :: EAS_TRACE               ! Kaa trace for regularization scale
+      REAL(DOUBLE)                    :: EAS_X(9,3*ELGP)         ! inv(KAA)*KUA transpose
       REAL(DOUBLE)                    :: EPS1                    ! A small number to compare to real zero
 
                                                                  ! Array of all DT values at the grids GRID_DT_ARRAY(i,j) = DT(i,j)
@@ -127,10 +142,16 @@
       REAL(DOUBLE)                    :: SSI,SSJ,SSK             ! Isoparametric coordinates of a point.
       REAL(DOUBLE)                    :: M_1DOF(ELGP,ELGP)      ! Consistent mass matrix with 1 DOF per node.
 
+! --- newsolid_add begin --- !
+      LOGICAL                          :: USE_EAS9_NEWSOLID       ! Use Python CPENTA6_EAS9_TRIAL style condensed stiffness
+! --- newsolid_add end --- !
 
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
+! --- newsolid_add begin --- !
+      USE_EAS9_NEWSOLID = ((SOLIDTYP == 'NEWSOLID') .AND. (ELGP == 6) .AND. (IORD_IJ >= 3) .AND. (IORD_K >= 2))
+! --- newsolid_add end --- !
 
 ! Calculate volume by Gaussian integration
 
@@ -255,7 +276,7 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
             ENDDO
          ENDDO
 
-         IF (RED_INT_SHEAR == 'Y') THEN
+         IF ((RED_INT_SHEAR == 'Y') .AND. (.NOT. USE_EAS9_NEWSOLID)) THEN
 
             IF (IORD_IJ == 3) THEN                            ! Full integ is 2x3 so calc B using selective substit for shear terms
 !                                                               -------------------------------------------------------------------
@@ -441,7 +462,7 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
           CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, DUM_DETJ )
           CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
           CALL B3D_ISOPARAMETRIC ( DPSHX, 0, 1, 1, 1, 'all strains', 'N', BI )
-          CALL MATMULX_FFF ( ES, BI, 6, 6, 3*ELGP, DUM2 )
+          CALL MATMULT_FFF ( ES, BI, 6, 6, 3*ELGP, DUM2 )
 
           DO I=1,3
             DO J=1,3*ELGP
@@ -478,6 +499,25 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
             ENDDO
          ENDDO
 
+         IF (USE_EAS9_NEWSOLID) THEN
+            DO I=1,3*ELGP
+               DO J=1,9
+                  EAS_KUA(I,J) = ZERO
+               ENDDO
+            ENDDO
+            DO I=1,9
+               DO J=1,9
+                  EAS_KAA(I,J) = ZERO
+               ENDDO
+            ENDDO
+            SSI = THIRD
+            SSJ = THIRD
+            SSK = ZERO
+            IORD_MSG = 'for CPENTA6 NEWSOLID EAS9 center,     = '
+            CALL SHP3DP ( 1, 1, 1, ELGP, SUBR_NAME, IORD_MSG, 1, 1, SSI, SSJ, SSK, 'N', PSH, DPSHG )
+            CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, EAS_DETJ0 )
+         ENDIF
+
          IORD_MSG = ' '
          GAUSS_PT = 0
          DO K=1,IORD_K
@@ -488,16 +528,85 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
                      BI(L,M) = B(L,M,GAUSS_PT)
                   ENDDO
                ENDDO
-               CALL MATMULX_FFF ( ES, BI, 6, 6, 3*ELGP, DUM4 )
-               CALL MATMULX_FFF_T ( BI, DUM4, 6, 3*ELGP, 3*ELGP, DUM5 )
+               CALL MATMULT_FFF ( ES, BI, 6, 6, 3*ELGP, DUM4 )
+               CALL MATMULT_FFF_T ( BI, DUM4, 6, 3*ELGP, 3*ELGP, DUM5 )
                INTFAC = DETJ(GAUSS_PT)*HH_IJ(IJ)*HH_K(K)
                DO L=1,3*ELGP
                   DO M=1,3*ELGP
                      DUM3(L,M) = DUM3(L,M) + DUM5(L,M)*INTFAC
                   ENDDO
                ENDDO
+               IF (USE_EAS9_NEWSOLID) THEN
+                  DO P=1,6
+                     DO Q=1,9
+                        EAS_MBASIC(P,Q) = ZERO
+                     ENDDO
+                  ENDDO
+                  EAS_SCALE = EAS_DETJ0/DETJ(GAUSS_PT)
+                  EAS_MBASIC(1,1) = EAS_SCALE*(SS_I(IJ) - THIRD)
+                  EAS_MBASIC(2,2) = EAS_SCALE*(SS_J(IJ) - THIRD)
+                  EAS_MBASIC(3,3) = EAS_SCALE*SS_K(K)
+                  EAS_MBASIC(4,4) = EAS_SCALE*(SS_I(IJ) - THIRD)
+                  EAS_MBASIC(4,5) = EAS_SCALE*(SS_J(IJ) - THIRD)
+                  EAS_MBASIC(5,6) = EAS_SCALE*(SS_J(IJ) - THIRD)
+                  EAS_MBASIC(5,7) = EAS_SCALE*SS_K(K)
+                  EAS_MBASIC(6,8) = EAS_SCALE*SS_K(K)
+                  EAS_MBASIC(6,9) = EAS_SCALE*(SS_I(IJ) - THIRD)
+                  CALL TRANSFORM_EAS_MODES_TO_LOCAL ( EAS_MBASIC, EAS_M )
+                  CALL MATMULT_FFF ( ES, EAS_M, 6, 6, 9, EAS_DM )
+                  CALL MATMULT_FFF_T ( BI, EAS_DM, 6, 3*ELGP, 9, EAS_KUA_GP )
+                  CALL MATMULT_FFF_T ( EAS_M, EAS_DM, 6, 9, 9, EAS_KAA_GP )
+                  DO P=1,3*ELGP
+                     DO Q=1,9
+                        EAS_KUA(P,Q) = EAS_KUA(P,Q) + EAS_KUA_GP(P,Q)*INTFAC
+                     ENDDO
+                  ENDDO
+                  DO P=1,9
+                     DO Q=1,9
+                        EAS_KAA(P,Q) = EAS_KAA(P,Q) + EAS_KAA_GP(P,Q)*INTFAC
+                     ENDDO
+                  ENDDO
+               ENDIF
             ENDDO
          ENDDO
+
+         IF (USE_EAS9_NEWSOLID) THEN
+            EAS_TRACE = ZERO
+            DO P=1,9
+               EAS_TRACE = EAS_TRACE + EAS_KAA(P,P)
+            ENDDO
+            EAS_REG = 1.0D-14*ABS(EAS_TRACE)
+            IF (EAS_REG < 1.0D-14) THEN
+               EAS_REG = 1.0D-14
+            ENDIF
+            DO P=1,9
+               EAS_KAA(P,P) = EAS_KAA(P,P) + EAS_REG
+            ENDDO
+            DO P=1,9
+               DO Q=1,3*ELGP
+                  EAS_RHS(P,Q) = EAS_KUA(Q,P)
+               ENDDO
+            ENDDO
+            CALL SOLVE_EAS9_SYSTEM ( EAS_KAA, EAS_RHS, EAS_X, IERR )
+            IF (IERR == 0) THEN
+               DO P=1,3*ELGP
+                  DO Q=1,3*ELGP
+                     EAS_CORR = ZERO
+                     DO R=1,9
+                        EAS_CORR = EAS_CORR + EAS_KUA(P,R)*EAS_X(R,Q)
+                     ENDDO
+                     DUM3(P,Q) = DUM3(P,Q) - EAS_CORR
+                  ENDDO
+               ENDDO
+            ENDIF
+            DO P=2,3*ELGP
+               DO Q=1,P-1
+                  EAS_CORR = HALF*(DUM3(P,Q) + DUM3(Q,P))
+                  DUM3(P,Q) = EAS_CORR
+                  DUM3(Q,P) = EAS_CORR
+               ENDDO
+            ENDDO
+         ENDIF
 
          DO I=1,3*ELGP
             DO J=1,3*ELGP
@@ -557,8 +666,8 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
               CBAR(2,3*(L-1)+1) =  HALF*DPSHX(3,L) ; CBAR(2,3*(L-1)+2) =  ZERO            ; CBAR(2,3*(L-1)+3)= -HALF*DPSHX(1,L)
               CBAR(3,3*(L-1)+1) = -HALF*DPSHX(2,L) ; CBAR(3,3*(L-1)+2) =  HALF*DPSHX(1,L) ; CBAR(3,3*(L-1)+3)=  ZERO
             ENDDO
-            CALL MATMULX_FFF ( KWW, CBAR, 3, 3, 3*ELGP, DUM6 )
-            CALL MATMULX_FFF_T ( CBAR, DUM6, 3, 3*ELGP, 3*ELGP, DUM5 )
+            CALL MATMULT_FFF ( KWW, CBAR, 3, 3, 3*ELGP, DUM6 )
+            CALL MATMULT_FFF_T ( CBAR, DUM6, 3, 3*ELGP, 3*ELGP, DUM5 )
             INTFAC = DETJ(GAUSS_PT)*HH_IJ(IJ)*HH_K(K)
             DO L=1,3*ELGP
               DO M=1,3*ELGP
@@ -619,5 +728,170 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
  2101 FORMAT(1000(1ES14.6))
 
 ! **********************************************************************************************************************************
+
+      CONTAINS
+
+! ##################################################################################################################################
+
+      SUBROUTINE SOLVE_EAS9_SYSTEM ( A_IN, B_IN, X_OUT, IERR_OUT )
+
+! Solves A*X = B for the local 9x9 CPENTA6 EAS condensation system.
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), INTENT(OUT)      :: IERR_OUT
+
+      REAL(DOUBLE), INTENT(IN)        :: A_IN(9,9)
+      REAL(DOUBLE), INTENT(IN)        :: B_IN(9,3*ELGP)
+      REAL(DOUBLE), INTENT(OUT)       :: X_OUT(9,3*ELGP)
+
+      INTEGER(LONG)                   :: ICOL
+      INTEGER(LONG)                   :: IMAX
+      INTEGER(LONG)                   :: IROW
+      INTEGER(LONG)                   :: JCOL
+      INTEGER(LONG)                   :: KROW
+
+      REAL(DOUBLE)                    :: A(9,9)
+      REAL(DOUBLE)                    :: RHS(9)
+      REAL(DOUBLE)                    :: FACTOR
+      REAL(DOUBLE)                    :: PIVOT
+      REAL(DOUBLE)                    :: TMP
+
+! **********************************************************************************************************************************
+
+      IERR_OUT = 0
+      DO IROW=1,9
+         DO JCOL=1,3*ELGP
+            X_OUT(IROW,JCOL) = ZERO
+         ENDDO
+      ENDDO
+
+      DO ICOL=1,3*ELGP
+         DO IROW=1,9
+            RHS(IROW) = B_IN(IROW,ICOL)
+            DO JCOL=1,9
+               A(IROW,JCOL) = A_IN(IROW,JCOL)
+            ENDDO
+         ENDDO
+
+         DO KROW=1,8
+            IMAX = KROW
+            PIVOT = ABS(A(KROW,KROW))
+            DO IROW=KROW+1,9
+               IF (ABS(A(IROW,KROW)) > PIVOT) THEN
+                  PIVOT = ABS(A(IROW,KROW))
+                  IMAX = IROW
+               ENDIF
+            ENDDO
+            IF (PIVOT <= EPS1) THEN
+               IERR_OUT = 1
+               RETURN
+            ENDIF
+            IF (IMAX /= KROW) THEN
+               DO JCOL=KROW,9
+                  TMP = A(KROW,JCOL)
+                  A(KROW,JCOL) = A(IMAX,JCOL)
+                  A(IMAX,JCOL) = TMP
+               ENDDO
+               TMP = RHS(KROW)
+               RHS(KROW) = RHS(IMAX)
+               RHS(IMAX) = TMP
+            ENDIF
+            DO IROW=KROW+1,9
+               FACTOR = A(IROW,KROW)/A(KROW,KROW)
+               A(IROW,KROW) = ZERO
+               DO JCOL=KROW+1,9
+                  A(IROW,JCOL) = A(IROW,JCOL) - FACTOR*A(KROW,JCOL)
+               ENDDO
+               RHS(IROW) = RHS(IROW) - FACTOR*RHS(KROW)
+            ENDDO
+         ENDDO
+
+         IF (ABS(A(9,9)) <= EPS1) THEN
+            IERR_OUT = 1
+            RETURN
+         ENDIF
+
+         DO IROW=9,1,-1
+            TMP = RHS(IROW)
+            DO JCOL=IROW+1,9
+               TMP = TMP - A(IROW,JCOL)*X_OUT(JCOL,ICOL)
+            ENDDO
+            X_OUT(IROW,ICOL) = TMP/A(IROW,IROW)
+         ENDDO
+      ENDDO
+
+! **********************************************************************************************************************************
+
+      END SUBROUTINE SOLVE_EAS9_SYSTEM
+
+! ##################################################################################################################################
+
+      SUBROUTINE TRANSFORM_EAS_MODES_TO_LOCAL ( M_BASIC, M_LOCAL )
+
+! Transform engineering-strain EAS modes from basic axes into the element local axes.
+! CPENTA6_EAS9 in the Python reference is assembled in the model Cartesian basis; MYSTRAN
+! evaluates solid material/stiffness in the element local basis, so the condensed modes
+! must be rotated as strain tensors before they are coupled to the local B matrix.
+
+      IMPLICIT NONE
+
+      REAL(DOUBLE), INTENT(IN)        :: M_BASIC(6,9)
+      REAL(DOUBLE), INTENT(OUT)       :: M_LOCAL(6,9)
+
+      INTEGER(LONG)                   :: IMODE
+      INTEGER(LONG)                   :: IA
+      INTEGER(LONG)                   :: IB
+      INTEGER(LONG)                   :: IC
+      INTEGER(LONG)                   :: IDD
+
+      REAL(DOUBLE)                    :: E_BASIC(3,3)
+      REAL(DOUBLE)                    :: E_LOCAL(3,3)
+
+! **********************************************************************************************************************************
+
+      DO IMODE=1,9
+
+         DO IA=1,3
+            DO IB=1,3
+               E_BASIC(IA,IB) = ZERO
+               E_LOCAL(IA,IB) = ZERO
+            ENDDO
+         ENDDO
+
+         E_BASIC(1,1) = M_BASIC(1,IMODE)
+         E_BASIC(2,2) = M_BASIC(2,IMODE)
+         E_BASIC(3,3) = M_BASIC(3,IMODE)
+         E_BASIC(1,2) = HALF*M_BASIC(4,IMODE)
+         E_BASIC(2,1) = E_BASIC(1,2)
+         E_BASIC(2,3) = HALF*M_BASIC(5,IMODE)
+         E_BASIC(3,2) = E_BASIC(2,3)
+         E_BASIC(3,1) = HALF*M_BASIC(6,IMODE)
+         E_BASIC(1,3) = E_BASIC(3,1)
+
+         DO IA=1,3
+            DO IB=1,3
+               DO IC=1,3
+                  DO IDD=1,3
+                     E_LOCAL(IA,IB) = E_LOCAL(IA,IB) + TE(IA,IC)*E_BASIC(IC,IDD)*TE(IB,IDD)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+
+         M_LOCAL(1,IMODE) = E_LOCAL(1,1)
+         M_LOCAL(2,IMODE) = E_LOCAL(2,2)
+         M_LOCAL(3,IMODE) = E_LOCAL(3,3)
+         M_LOCAL(4,IMODE) = TWO*E_LOCAL(1,2)
+         M_LOCAL(5,IMODE) = TWO*E_LOCAL(2,3)
+         M_LOCAL(6,IMODE) = TWO*E_LOCAL(3,1)
+
+      ENDDO
+
+! **********************************************************************************************************************************
+
+      END SUBROUTINE TRANSFORM_EAS_MODES_TO_LOCAL
+
+! ##################################################################################################################################
 
       END SUBROUTINE PENTA

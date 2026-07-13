@@ -31,6 +31,8 @@
       USE TMEM1_Interface
       USE TPLT1_Interface
       USE TPLT2_Interface
+      USE TPLT_MITC3P_Interface
+      USE MITC_INITIALIZE_Interface
       USE outa_here_Interface
       USE MATMULX_FFF_Interface
       USE MATMULX_FFF_T_Interface

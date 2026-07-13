@@ -54,7 +54,7 @@
       USE PARAMS, ONLY                :  SUPINFO, SUPWARN, QUAD4TYP
       USE CONSTANTS_1, ONLY           :  CONV_DEG_RAD, CONV_RAD_DEG, ZERO, ONE
       USE MODEL_STUF, ONLY            :  CAN_ELEM_TYPE_OFFSET, EDAT, EID, EPNT, ETYPE, ISOLID, MATANGLE, NUM_EMG_FATAL_ERRS,       &
-                                         PCOMP_PROPS, PLY_NUM, TE_IDENT, THETAM, TYPE, XEL, TE
+                                         PCOMP_PROPS, PLY_NUM, SKIP_K6ROT, TE_IDENT, THETAM, TYPE, XEL, TE
 
       USE EMG_USE_IFs
       USE MITC8_Interface
@@ -101,9 +101,11 @@
           (TYPE == 'ROD     ') .OR. (TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR. (TYPE == 'BUSH    ') .OR.                  &
           (TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ') .OR.                                                                      &
           (TYPE == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                                      &
+          (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                                      &
           (TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ') .OR.                                                                      &
           (TYPE == 'USER1   ') .OR. (TYPE == 'USERIN  ') .OR. (TYPE == 'PLOTEL  ') .OR.                                            &
-          (TYPE == 'SHEAR   ') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE(1:5) == 'QUAD8'   )) THEN
+          (TYPE == 'SHEAR   ') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE(1:5) == 'QUAD8'   ) .OR.    &
+          (TYPE == 'QUADR   ')) THEN
          CALL ELMDAT1 ( INT_ELEM_ID, WRITE_WARN )
       ELSE
          WRITE(ERR,1916) SUBR_NAME,EID,TYPE
@@ -123,12 +125,17 @@
       IF      ((TYPE      == 'ROD     ') .OR. (TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR.                                  &
                (TYPE(1:5) == 'TRIA3'   ) .OR.                                                                                      &
                (TYPE      == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                            &
+               (TYPE      == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                            &
                (TYPE      == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ')) THEN
          CALL ELMGM1 ( INT_ELEM_ID, WRITE_WARN )
          FIX_EDAT = 'N'
 
          IF (TYPE(1:5) == 'PENTA') THEN
             IF (XEL(4,3) < ZERO) THEN
+               FIX_EDAT = 'Y'
+            ENDIF
+         ELSE IF (TYPE(1:5) == 'PYRAM') THEN
+            IF (XEL(5,3) < ZERO) THEN
                FIX_EDAT = 'Y'
             ENDIF
          ELSE IF (TYPE(1:5) == 'TETRA') THEN
@@ -146,7 +153,8 @@
       ELSE IF (TYPE == 'BUSH    ') THEN
          CALL ELMGM1_BUSH ( INT_ELEM_ID, WRITE_WARN )
 
-      ELSE IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD8   ') .OR. (TYPE == 'SHEAR   ')) THEN
+      ELSE IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD8   ') .OR. (TYPE == 'QUADR   ') .OR.            &
+               (TYPE == 'SHEAR   ')) THEN
          CALL ELMGM2 ( WRITE_WARN )
 
       ELSE IF ((TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ')) THEN
@@ -180,7 +188,7 @@
 ! Matrices of material props are not generated for 1-D elements
 ! --------
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'SHEAR   ')) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE == 'SHEAR   ')) THEN
          IF (PCOMP_PROPS == 'N') THEN                      ! SHEAR elem does not use PCOMP props
 
             THETAM = ZERO
@@ -273,6 +281,7 @@
 
       IF ((TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ') .OR.                                                                      &
           (TYPE == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                                      &
+          (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                                      &
           (TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ')) THEN
          CALL MATERIAL_PROPS_3D ( WRITE_WARN )
          CALL ROT_AXES_MATL_TO_LOC ( WRITE_WARN )
@@ -289,8 +298,8 @@
          CALL ELMOUT ( INT_ELEM_ID, DUM_BUG, CASE_NUM, OPT )
       ENDIF
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR. (TYPE(1:6) == 'SHEAR') .OR.          &
-          (TYPE == 'USER1   ')) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR. (TYPE == 'QUADR   ') .OR.            &
+          (TYPE(1:6) == 'SHEAR') .OR. (TYPE == 'USER1   ')) THEN
          CALL SHELL_ABD_MATRICES ( INT_ELEM_ID, WRITE_WARN )
       ENDIF
 
@@ -314,9 +323,11 @@
 ! For all but USERIN elem, call ELMDAT2 subr to get the rest of the data needed to calculate the matrices for this element.
 
       IF ((TYPE(1:4) == 'ELAS'    ) .OR. (TYPE      == 'ROD     ') .OR. (TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR.        &
-          (TYPE(1:5) == 'TRIA3'   ) .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE == 'SHEAR   ') .OR. (TYPE == 'USER1   ') .OR.        &
+          (TYPE(1:5) == 'TRIA3'   ) .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE == 'QUADR   ') .OR. (TYPE == 'SHEAR   ') .OR.        &
+          (TYPE == 'USER1   ') .OR.                                                                                                  &
           (TYPE      == 'HEXA8   ') .OR. (TYPE      == 'HEXA20  ') .OR.                                                            &
           (TYPE      == 'PENTA6  ') .OR. (TYPE      == 'PENTA15 ') .OR.                                                            &
+          (TYPE      == 'PYRAM5  ') .OR. (TYPE      == 'PYRAM14 ') .OR.                                                            &
           (TYPE      == 'TETRA4  ') .OR. (TYPE      == 'TETRA10 ')) THEN
          CALL ELMDAT2 ( INT_ELEM_ID, OPT, WRITE_WARN )
       ENDIF
@@ -339,7 +350,11 @@
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF (TYPE(1:5) == 'TRIA3') THEN
-         CALL TREL1 ( OPT, WRITE_WARN )
+         IF (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18) THEN
+            CALL CTRIAR_DKMT18 ( OPT, INT_ELEM_ID )
+         ELSE
+            CALL TREL1 ( OPT, WRITE_WARN )
+         ENDIF
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MIN4  ') .OR. (QUAD4TYP == 'MIN4T '))) .OR.                              &
@@ -352,12 +367,17 @@
          CALL MITC4 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
+      ELSE IF (TYPE == 'QUADR   ') THEN
+         CALL CQUADR_DKMQ24 ( OPT, INT_ELEM_ID )
+         IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
+
       ELSE IF (TYPE(1:5) == 'QUAD8') THEN
          CALL MITC8 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF ((TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ') .OR.                                                                 &
                (TYPE == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                                 &
+               (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                                 &
                (TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ')) THEN
 
          IF (ISOLID(6) == 0) THEN                          ! Integration scheme
@@ -378,6 +398,8 @@
                IORD_IJ = 7
             ENDIF
             CALL PENTA ( OPT, INT_ELEM_ID, IORD_IJ, IORD_K, RED_INT_SHEAR, WRITE_WARN )
+         ELSE IF ((TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ')) THEN
+            CALL PYRAM ( OPT, INT_ELEM_ID, RED_INT_SHEAR, WRITE_WARN )
          ELSE IF ((TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ')) THEN
             IF (ISOLID(4) == 2) THEN                       ! Integration order
                INT_ORDER  = 1
@@ -401,11 +423,20 @@
 ! For plate elements, process offsets (since they are specified in local element coordinates)
 ! Then add drilling stiffness at the grid points.
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+         SKIP_K6ROT = 'N'
+         IF ((TYPE(1:5) == 'TRIA3') .AND. (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18)) THEN
+            SKIP_K6ROT = 'Y'
+         ELSE IF (TYPE == 'QUADR   ') THEN
+            SKIP_K6ROT = 'Y'
+         ENDIF
          CALL ELMOFF ( OPT, WRITE_WARN )
          IF (OPT(4) == 'Y') THEN
-            CALL CALC_K6ROT()
+            IF (SKIP_K6ROT == 'N') THEN
+               CALL CALC_K6ROT()
+            ENDIF
          ENDIF
+         SKIP_K6ROT = 'N'
       ENDIF
 
 ! **********************************************************************************************************************************
@@ -773,6 +804,19 @@
          EDAT(EPNTK+3) = DUM_AGRID(3)
          EDAT(EPNTK+4) = DUM_AGRID(2)
          EDAT(EPNTK+5) = DUM_AGRID(4)
+
+      ELSE IF (TYPE == 'PYRAM5  ') THEN
+
+         DUM_AGRID(1)  = EDAT(EPNTK+2)
+         DUM_AGRID(2)  = EDAT(EPNTK+3)
+         DUM_AGRID(3)  = EDAT(EPNTK+4)
+         DUM_AGRID(4)  = EDAT(EPNTK+5)
+         DUM_AGRID(5)  = EDAT(EPNTK+6)
+         EDAT(EPNTK+2) = DUM_AGRID(4)
+         EDAT(EPNTK+3) = DUM_AGRID(3)
+         EDAT(EPNTK+4) = DUM_AGRID(2)
+         EDAT(EPNTK+5) = DUM_AGRID(1)
+         EDAT(EPNTK+6) = DUM_AGRID(5)
 
       ENDIF
 
