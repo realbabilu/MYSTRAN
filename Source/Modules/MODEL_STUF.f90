@@ -431,6 +431,7 @@
 
       INTEGER(LONG)                   :: ANY_ACCE_OUTPUT     ! > 0 if requests for output of accels in a any S/C
       INTEGER(LONG)                   :: ANY_DISP_OUTPUT     ! > 0 if requests for output of displs in a any S/C
+      INTEGER(LONG)                   :: ANY_VELO_OUTPUT     ! > 0 if requests for output of velocities in a any S/C
       INTEGER(LONG)                   :: ANY_OLOA_OUTPUT     ! > 0 if requests for output of applied loads in a any S/C
       INTEGER(LONG)                   :: ANY_SPCF_OUTPUT     ! > 0 if requests for output of SPC forces in a any S/C
       INTEGER(LONG)                   :: ANY_MPCF_OUTPUT     ! > 0 if requests for output of MPC forces in a any S/C
@@ -459,6 +460,7 @@
 
       INTEGER(LONG)    , ALLOCATABLE  :: SC_ACCE(:)          ! C.C. ACCEL request info.         Indicator for "ALL", "NONE", "SETID"
       INTEGER(LONG)    , ALLOCATABLE  :: SC_DISP(:)          ! C.C. DISP request info.          Indicator for "ALL", "NONE", "SETID"
+      INTEGER(LONG)    , ALLOCATABLE  :: SC_VELO(:)          ! C.C. VELOCITY request info.      Indicator for "ALL", "NONE", "SETID"
       INTEGER(LONG)    , ALLOCATABLE  :: SC_ELFN(:)          ! C.C. ELFORCE(NODE) request info. Indicator for "ALL", "NONE", "SETID"
       INTEGER(LONG)    , ALLOCATABLE  :: SC_ELFE(:)          ! C.C. ELFORCE(engr) request info. Indicator for "ALL", "NONE", "SETID"
       INTEGER(LONG)    , ALLOCATABLE  :: SC_GPFO(:)          ! C.C. GPFORCE request info.       Indicator for "ALL", "NONE", "SETID"
@@ -1935,6 +1937,9 @@
          CHARACTER(LEN=JCARD_LEN)     :: METHOD              = ' '
          CHARACTER(LEN=JCARD_LEN)     :: NORM                = 'MASS'
          CHARACTER(LEN=JCARD_LEN)     :: LAP_MAT_TYPE        = 'DPB'
+         CHARACTER(LEN=JCARD_LEN)     :: EXTRACT_METHOD      = 'ARPACK'
+         CHARACTER(LEN=JCARD_LEN)     :: EXTRACT_MODE        = ' '
+         CHARACTER(LEN=JCARD_LEN)     :: EXTRACT_SOURCE      = 'DEFAULT'
          CHARACTER(1*BYTE)            :: VECS                = 'Y'
          INTEGER(LONG)                :: SID                 = 0
          INTEGER(LONG)                :: N1                  = 0
@@ -1945,10 +1950,19 @@
          INTEGER(LONG)                :: MODE                = 2
          INTEGER(LONG)                :: MSGLVL              = 0
          INTEGER(LONG)                :: NCVFACL             = 3
+         INTEGER(LONG)                :: FEAST_M0            = 48
+         INTEGER(LONG)                :: FEAST_TOL_DIGITS    = 8
+         INTEGER(LONG)                :: FEAST_MAX_LOOP      = 60
+         INTEGER(LONG)                :: FEAST_N_CONTOUR     = 8
+         INTEGER(LONG)                :: SUBSPACE_NSUB       = 24
+         INTEGER(LONG)                :: SUBSPACE_MAX_ITER   = 40
+         INTEGER(LONG)                :: DENSE_NEX           = 64
          REAL(DOUBLE)                 :: CRIT                = ZERO
          REAL(DOUBLE)                 :: FRQ1                = ZERO
          REAL(DOUBLE)                 :: FRQ2                = ZERO
          REAL(DOUBLE)                 :: SIGMA               = -ONE
+         REAL(DOUBLE)                 :: FEAST_SEARCH_SCALE  = 1.10D0
+         REAL(DOUBLE)                 :: SUBSPACE_TOL        = 1.0D-06
          INTEGER(LONG)                :: NUM_EIGENS          = 0
          INTEGER(LONG)                :: NVEC                = 0
          INTEGER(LONG)                :: NUM_FAIL_CRIT       = 0

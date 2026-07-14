@@ -59,10 +59,13 @@
       USE BD_CTRIA_Interface
       USE BD_CUSER1_Interface
       USE BD_CUSERIN_Interface
+      USE BD_DLOAD_Interface
+      USE BD_DTI_Interface
       USE BD_DEBUG_Interface
       USE BD_EIGR_Interface
       USE BD_EIGRL_Interface
       USE BD_FORMOM_Interface
+      USE BD_FREQ1_Interface
       USE BD_GRAV_Interface
       USE BD_GRDSET_Interface
       USE BD_GRID_Interface
@@ -99,6 +102,7 @@
       USE BD_RBE1_Interface
       USE BD_RBE2_Interface
       USE BD_RBE3_Interface
+      USE BD_RLOAD1_Interface
       USE BD_RFORCE_Interface
       USE BD_RSPLINE_Interface
       USE BD_SEQGP_Interface
@@ -109,6 +113,8 @@
       USE BD_SPCADD_Interface
       USE BD_SPOINT_Interface
       USE BD_SUPORT_Interface
+      USE BD_TABDMP1_Interface
+      USE BD_TABLED1_Interface
       USE BD_TEMP_Interface
       USE BD_TEMPD_Interface
       USE BD_TEMPRP_Interface

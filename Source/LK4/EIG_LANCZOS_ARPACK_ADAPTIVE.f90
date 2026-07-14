@@ -118,6 +118,7 @@
       INTEGER(LONG)                   :: IERR              ! Error return from LAPACK factorization
       REAL(DOUBLE)                    :: DUM_COL(1)        ! Dummy column for SuperLU deallocation
       INTEGER(LONG)                   :: MIN_NCV, MAX_NCV
+      INTEGER(LONG)                   :: MAX_NEV_FEASIBLE  ! Largest NEV that can still admit a valid NCV window
 
       ! Temporary arrays for filtering
       REAL(DOUBLE), ALLOCATABLE       :: TEMP_EIGEN_VAL(:) ! Temporary eigenvalues for filtering
@@ -172,6 +173,22 @@
          MAX_NEV = MAX(MAX_NEV, EIG_N2)
       ENDIF
       MAX_NEV = MIN(MAX_NEV, INITIAL_NEV*(2**MAX_DOUBLINGS))
+
+      ! ARPACK requires NCV >= NEV + 2. On very small models the adaptive
+      ! starter value can exceed the feasible window and abort before the
+      ! search begins. Clip NEV to the largest value that still leaves room
+      ! for a valid Krylov subspace, matching the small-model fallback used
+      ! in the fixed-NEV ARPACK path.
+      MAX_NEV_FEASIBLE = NDOFL - NUM_MLL_DIAG_ZEROS - 4
+      IF (MAX_NEV_FEASIBLE < 1) THEN
+         MAX_NEV_FEASIBLE = 1
+      ENDIF
+      IF (MAX_NEV > MAX_NEV_FEASIBLE) THEN
+         MAX_NEV = MAX_NEV_FEASIBLE
+      ENDIF
+      IF (INITIAL_NEV > MAX_NEV) THEN
+         INITIAL_NEV = MAX_NEV
+      ENDIF
 
       ! Compute sigma (shift point in omega^2 = eigenvalue space)
       OMEGA_FRQ1_SQ = (TWO * PI * EIG_FRQ1)**2

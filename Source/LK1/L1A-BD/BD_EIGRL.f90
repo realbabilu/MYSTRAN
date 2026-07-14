@@ -30,10 +30,10 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1M
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LSUB, NSUB, SOL_NAME
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LSUB, NSUB, SOL_NAME, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONEPM4
-      USE PARAMS, ONLY                :  LANCMETH
+      USE PARAMS, ONLY                :  LANCMETH, LANCMATTYPE, SUPWARN
       USE MODEL_STUF, ONLY            :  CC_EIGR_SID, CC_EIGR_SID_SUB, CC_EIGR_SID_DECK, EIG_PARAMS, EIG_COMP, EIG_CRIT,          &
                                          EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_LANCZOS_NEV_DELT, EIG_METH, EIG_MSGLVL,                 &
                                          EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA,   &
@@ -56,6 +56,7 @@
 ! --- feast_subspace_dense --- begin !
       CHARACTER(LEN=JCARD_LEN)        :: JCARD_MAIN(10)    ! Saved copy of the parent EIGRL card fields
 ! --- feast_subspace_dense --- end !
+      CHARACTER(LEN=JCARD_LEN)        :: LAP_TYPE_OLD
 
       INTEGER(LONG)                   :: I4INP             ! An integer*4 value read
       INTEGER(LONG)                   :: I_SUB             ! DO loop index over subcases
@@ -259,6 +260,9 @@
                   EIG_PARAMS(I_SUB)%METHOD            = EIG_METH
                   EIG_PARAMS(I_SUB)%NORM              = EIG_NORM
                   EIG_PARAMS(I_SUB)%LAP_MAT_TYPE      = EIG_LAP_MAT_TYPE
+                  EIG_PARAMS(I_SUB)%EXTRACT_METHOD    = EIG_EXTRACT_METHOD
+                  EIG_PARAMS(I_SUB)%EXTRACT_MODE      = EIG_EXTRACT_MODE
+                  EIG_PARAMS(I_SUB)%EXTRACT_SOURCE    = EIG_EXTRACT_SOURCE
                   EIG_PARAMS(I_SUB)%VECS              = EIG_VECS
                   EIG_PARAMS(I_SUB)%SID               = EIG_SID
                   EIG_PARAMS(I_SUB)%N1                = EIG_N1
@@ -269,10 +273,19 @@
                   EIG_PARAMS(I_SUB)%MODE              = EIG_MODE
                   EIG_PARAMS(I_SUB)%MSGLVL            = EIG_MSGLVL
                   EIG_PARAMS(I_SUB)%NCVFACL           = EIG_NCVFACL
+                  EIG_PARAMS(I_SUB)%FEAST_M0          = EIG_FEAST_M0
+                  EIG_PARAMS(I_SUB)%FEAST_TOL_DIGITS  = EIG_FEAST_TOL_DIGITS
+                  EIG_PARAMS(I_SUB)%FEAST_MAX_LOOP    = EIG_FEAST_MAX_LOOP
+                  EIG_PARAMS(I_SUB)%FEAST_N_CONTOUR   = EIG_FEAST_N_CONTOUR
+                  EIG_PARAMS(I_SUB)%SUBSPACE_NSUB     = EIG_SUBSPACE_NSUB
+                  EIG_PARAMS(I_SUB)%SUBSPACE_TOL      = EIG_SUBSPACE_TOL
+                  EIG_PARAMS(I_SUB)%SUBSPACE_MAX_ITER = EIG_SUBSPACE_MAX_ITER
+                  EIG_PARAMS(I_SUB)%DENSE_NEX         = EIG_DENSE_NEX
                   EIG_PARAMS(I_SUB)%CRIT              = EIG_CRIT
                   EIG_PARAMS(I_SUB)%FRQ1              = EIG_FRQ1
                   EIG_PARAMS(I_SUB)%FRQ2              = EIG_FRQ2
                   EIG_PARAMS(I_SUB)%SIGMA             = EIG_SIGMA
+                  EIG_PARAMS(I_SUB)%FEAST_SEARCH_SCALE= EIG_FEAST_SEARCH_SCALE
                ENDIF
             ENDDO
          ENDIF
@@ -394,13 +407,18 @@
       ELSE
          EIG_MODE = 3
       ENDIF
-      EIG_LAP_MAT_TYPE      = 'DGB     '
+      EIG_LAP_MAT_TYPE      = 'DPB     '
       EIG_LANCZOS_NEV_DELT  = 2
       CALL APPLY_METHOD_SIZED_DEFAULTS
 
       IF (LANCMETH(1:6) == 'ARPACK') THEN
          EIG_EXTRACT_METHOD = 'ARPACK  '
          EIG_EXTRACT_SOURCE = 'PARAM   '
+         IF (LANCMATTYPE(1:3) == 'DGB') THEN
+            EIG_LAP_MAT_TYPE = 'DGB     '
+         ELSE
+            EIG_LAP_MAT_TYPE = 'DPB     '
+         ENDIF
       ELSE IF (LANCMETH(1:5) == 'FEAST') THEN
          EIG_EXTRACT_METHOD = 'FEAST   '
          EIG_EXTRACT_SOURCE = 'PARAM   '
@@ -443,7 +461,6 @@
       CHARACTER(LEN=JCARD_LEN), INTENT(IN) :: JCARDX(10)
       INTEGER(LONG), INTENT(INOUT)         :: JERRX
       CHARACTER(LEN=JCARD_LEN)             :: METHOD
-
       METHOD = '        '
 
       IF (JCARDX(2)(1:) == ' ') THEN
@@ -455,17 +472,7 @@
 
       IF ((METHOD(1:6) == 'ARPACK') .OR. (METHOD(1:5) == 'FEAST') .OR.                                                          &
           (METHOD(1:5) == 'SUBSP')  .OR. (METHOD(1:5) == 'DENSE')) THEN
-
-         IF (METHOD(1:6) == 'ARPACK') THEN
-            EIG_EXTRACT_METHOD = 'ARPACK  '
-         ELSE IF (METHOD(1:5) == 'FEAST') THEN
-            EIG_EXTRACT_METHOD = 'FEAST   '
-         ELSE IF (METHOD(1:5) == 'SUBSP') THEN
-            EIG_EXTRACT_METHOD = 'SUBSP   '
-         ELSE
-            EIG_EXTRACT_METHOD = 'DENSE   '
-         ENDIF
-         EIG_EXTRACT_SOURCE = 'EIGRL   '
+         CALL WARN_EIGRL_BACKEND_DEPRECATED ( METHOD )
 
          IF (JCARDX(3)(1:) /= ' ') THEN
             CALL CHAR_FLD ( JCARDX(3), JF(3), EIG_EXTRACT_MODE )
@@ -488,7 +495,9 @@
                IF (IERRFL(7) == 'N') EIG_MODE = I4INP
             ENDIF
             IF (JCARDX(8)(1:) /= ' ') THEN
+               LAP_TYPE_OLD = EIG_LAP_MAT_TYPE
                CALL CHAR_FLD ( JCARDX(8), JF(8), EIG_LAP_MAT_TYPE )
+               CALL WARN_EIGRL_LAP_MAT_DEPRECATED ( LAP_TYPE_OLD, EIG_LAP_MAT_TYPE )
             ENDIF
 
          ELSE IF (EIG_EXTRACT_METHOD(1:5) == 'FEAST') THEN
@@ -541,7 +550,9 @@
             IF (IERRFL(2) == 'N') EIG_MODE = I4INP
          ENDIF
          IF (JCARDX(3)(1:) /= ' ') THEN
+            LAP_TYPE_OLD = EIG_LAP_MAT_TYPE
             CALL CHAR_FLD ( JCARDX(3), JF(3), EIG_LAP_MAT_TYPE )
+            CALL WARN_EIGRL_LAP_MAT_DEPRECATED ( LAP_TYPE_OLD, EIG_LAP_MAT_TYPE )
          ENDIF
          IF (JCARDX(4)(1:) /= ' ') THEN
             CALL I4FLD ( JCARDX(4), JF(4), I4INP )
@@ -553,6 +564,52 @@
       CALL CARD_FLDS_NOT_BLANK ( JCARDX,0,0,0,0,0,0,0,0 )
 
       END SUBROUTINE PARSE_EIGRL_CONTINUATION
+
+! ##################################################################################################################################
+
+      SUBROUTINE WARN_EIGRL_BACKEND_DEPRECATED ( METHOD_IN )
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(IN) :: METHOD_IN
+      CHARACTER(256)               :: WARN1, WARN2
+
+      WRITE(WARN1,'(A,A,A)') ' *WARNING    : EIGRL continuation specified extraction backend "',TRIM(METHOD_IN),'".'
+      WRITE(WARN2,'(A,A,A)') '              THIS LEGACY OPTION IS IGNORED FOR COMMERCIAL-NASTRAN COMPATIBILITY; USE PARAM,LANCMETH,', &
+                              TRIM(METHOD_IN),'.'
+      WARN_ERR = WARN_ERR + 1
+      WRITE(ERR,'(A)') TRIM(WARN1)
+      WRITE(ERR,'(A)') TRIM(WARN2)
+      IF (SUPWARN == 'N') THEN
+         WRITE(F06,'(A)') TRIM(WARN1)
+         WRITE(F06,'(A)') TRIM(WARN2)
+      ENDIF
+
+      END SUBROUTINE WARN_EIGRL_BACKEND_DEPRECATED
+
+! ##################################################################################################################################
+
+      SUBROUTINE WARN_EIGRL_LAP_MAT_DEPRECATED ( LAP_TYPE_OLD, LAP_TYPE_NEW )
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(IN) :: LAP_TYPE_OLD, LAP_TYPE_NEW
+      CHARACTER(256)               :: WARN1, WARN2
+
+      IF ((LAP_TYPE_NEW(1:3) == 'DPB') .OR. (LAP_TYPE_NEW(1:3) == 'DGB')) THEN
+         WRITE(WARN1,'(A,A,A)') ' *WARNING    : EIGRL continuation specified LAPACK matrix type "',TRIM(LAP_TYPE_NEW),'".'
+         WRITE(WARN2,'(A,A,A,A)') '              THIS LEGACY OPTION IS DEPRECATED; PREFER PARAM,LANCMETH,ARPACK,',             &
+                                   TRIM(LAP_TYPE_NEW),' OR PARAM,LANCMETH,ARPACK,',TRIM(LAP_TYPE_OLD)//'.'
+         WARN_ERR = WARN_ERR + 1
+         WRITE(ERR,'(A)') TRIM(WARN1)
+         WRITE(ERR,'(A)') TRIM(WARN2)
+         IF (SUPWARN == 'N') THEN
+            WRITE(F06,'(A)') TRIM(WARN1)
+            WRITE(F06,'(A)') TRIM(WARN2)
+         ENDIF
+      ENDIF
+
+      END SUBROUTINE WARN_EIGRL_LAP_MAT_DEPRECATED
 
       END SUBROUTINE BD_EIGRL
 ! --- feast_subspace_dense --- end !

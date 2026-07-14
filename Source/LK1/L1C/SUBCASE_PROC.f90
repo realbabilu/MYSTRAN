@@ -33,6 +33,7 @@
 
 !         SC_ACCE for displacement output requests
 !         SC_DISP for displacement output requests
+!         SC_VELO for velocity output requests
 !         SC_ELFN for elem nodal force output requests
 !         SC_ELFE for elem engineering force output requests
 !         SC_GPFO for G.P. force balance output requests
@@ -53,7 +54,7 @@
 ! is put into arrays OGROUT and GROUT (for grid related outputs), OELOUT and ELOUT (for element related outputs)
 ! (for element force and stress), and ELDT (for element debug output):
 
-!  (1) ACCE, DISP, GPFO, MPCF, OLOA, SPCF output requests are put into arrays OGROUT and  GROUT
+!  (1) ACCE, DISP, VELO, GPFO, MPCF, OLOA, SPCF output requests are put into arrays OGROUT and  GROUT
 !      (a) OGROUT is NSUB  x 1    with an indicator for every S/C as to whether any grid related outputs were requested
 !      (b) GROUT  is NGRID x NSUB with an indicator for every G.P.-S/C for which grid related output was requested
 
@@ -71,18 +72,20 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_ENTRY_LEN, DATA_NAM_LEN, FATAL_ERR, IBIT, WARN_ERR, LSETLN,              &
                                          MELDTS, MELOUTS, METYPE, MGROUTS, NELE, NGRID, NSUB
 
-      USE SCONTR, ONLY                :  GROUT_ACCE_BIT, GROUT_DISP_BIT, GROUT_GPFO_BIT, GROUT_MPCF_BIT, GROUT_OLOA_BIT,           &
-                                         GROUT_SPCF_BIT, ELOUT_ELFE_BIT, ELOUT_ELFN_BIT, ELOUT_STRE_BIT, ELOUT_STRN_BIT
+      USE SCONTR, ONLY                :  GROUT_ACCE_BIT, GROUT_DISP_BIT, GROUT_VELO_BIT, GROUT_GPFO_BIT, GROUT_MPCF_BIT,           &
+                                         GROUT_OLOA_BIT, GROUT_SPCF_BIT, ELOUT_ELFE_BIT, ELOUT_ELFN_BIT, ELOUT_STRE_BIT,           &
+                                         ELOUT_STRN_BIT
 
       USE PARAMS, ONLY                :  PRTSCP, SUPWARN
       USE TIMDAT, ONLY                :  TSEC
 
-      USE MODEL_STUF, ONLY            :  CCELDT, ONE_SET_ARRAY, SC_ACCE, SC_DISP, SC_ELFN, SC_ELFE, SC_GPFO, SC_MPCF,              &
-                                         SC_OLOA, SC_SPCF, SC_STRE, SC_STRN, ELDT, OELDT, ELOUT, OELOUT, GROUT, OGROUT, LABEL,     &
-                                         SCNUM, STITLE, TITLE, SUBLOD, GRID, GRID_ID, ESORT1, ETYPE
+      USE MODEL_STUF, ONLY            :  CCELDT, ONE_SET_ARRAY, SC_ACCE, SC_DISP, SC_VELO, SC_ELFN, SC_ELFE, SC_GPFO,              &
+                                         SC_MPCF, SC_OLOA, SC_SPCF, SC_STRE, SC_STRN, ELDT, OELDT, ELOUT, OELOUT, GROUT, OGROUT,   &
+                                         LABEL, SCNUM, STITLE, TITLE, SUBLOD, GRID, GRID_ID, ESORT1, ETYPE
 
-      USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_MPCF_OUTPUT, ANY_SPCF_OUTPUT, ANY_OLOA_OUTPUT,      &
-                                         ANY_GPFO_OUTPUT, ANY_ELFE_OUTPUT, ANY_ELFN_OUTPUT, ANY_STRE_OUTPUT, ANY_STRN_OUTPUT
+      USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_VELO_OUTPUT, ANY_MPCF_OUTPUT, ANY_SPCF_OUTPUT,      &
+                                         ANY_OLOA_OUTPUT, ANY_GPFO_OUTPUT, ANY_ELFE_OUTPUT, ANY_ELFN_OUTPUT, ANY_STRE_OUTPUT,       &
+                                         ANY_STRN_OUTPUT
       USE SUBCASE_PROC_USE_IFs
 
       IMPLICIT NONE
@@ -174,6 +177,7 @@
 ! Bit position 3 in OGROUT(i), GROUT(i) is for MPCF requests (turned on if SC_MPCF(i) > 0 which is set in subr CC_MPCF).
 ! Bit position 4 in OGROUT(i), GROUT(i) is for GPFO requests (turned on if SC_GPFO(i) > 0 which is set in subr CC_GPFO).
 ! Bit position 5 in OGROUT(i), GROUT(i) is for ACCE requests (turned on if SC_ACCE(i) > 0 which is set in subr CC_ACCE).
+! Bit position 6 in OGROUT(i), GROUT(i) is for VELO requests (turned on if SC_VELO(i) > 0 which is set in subr CC_VELO).
 
 ! SC_DISP(i), etc. are integer arrays containing SET ID's (-1 for  'ALL', 0 for 'NONE', positive integer no. for
 ! SETID) of the 4  possible G.P. related outputs requested in Case Control
@@ -198,6 +202,8 @@ j_loop1: DO J=1,NSUB
                SETID = SC_GPFO(J)
             ELSE IF (I == 5) THEN
                SETID = SC_ACCE(J)
+            ELSE IF (I == 6) THEN
+               SETID = SC_VELO(J)
             ENDIF
 
             IF (SETID ==  0) THEN                          ! Check for 'NONE'
@@ -1163,6 +1169,11 @@ token_loop3:DO                                             ! Call STOKEN in a DO
          ANY_DISP_OUTPUT = ANY_DISP_OUTPUT + IAND(OGROUT(J),IBIT(GROUT_DISP_BIT))
       ENDDO
 
+      ANY_VELO_OUTPUT = 0
+      DO J=1,NSUB
+         ANY_VELO_OUTPUT = ANY_VELO_OUTPUT + IAND(OGROUT(J),IBIT(GROUT_VELO_BIT))
+      ENDDO
+
       ANY_GPFO_OUTPUT = 0
       DO J=1,NSUB
          ANY_GPFO_OUTPUT = ANY_GPFO_OUTPUT + IAND(OGROUT(J),IBIT(GROUT_GPFO_BIT))
@@ -1266,6 +1277,7 @@ token_loop3:DO                                             ! Call STOKEN in a DO
       WRITE(L1D) DATA_SET_NAME
       WRITE(L1D) ANY_ACCE_OUTPUT
       WRITE(L1D) ANY_DISP_OUTPUT
+      WRITE(L1D) ANY_VELO_OUTPUT
       WRITE(L1D) ANY_OLOA_OUTPUT
       WRITE(L1D) ANY_SPCF_OUTPUT
       WRITE(L1D) ANY_MPCF_OUTPUT

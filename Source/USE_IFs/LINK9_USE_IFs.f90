@@ -57,8 +57,11 @@
       USE OFP2_Interface
       USE MATMULT_SFF_Interface
       USE TDOF_COL_NUM_Interface
+      USE ALLOCATE_RBGLOBAL_Interface
+      USE RB_DISP_MATRIX_PROC_Interface
       USE GP_FORCE_BALANCE_PROC_Interface
       USE OFP3_Interface
+      USE WRITE_GRD_PRT_OUTPUTS_Interface
       USE FILE_CLOSE_Interface
       USE WRITE_OU4_FULL_MAT_Interface
       USE WRITE_GRD_OT4_Interface

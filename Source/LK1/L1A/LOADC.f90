@@ -41,7 +41,9 @@
                                          MPFACTOR_REQ_PARTFAC_SUB, MEFMLOC_SUB, MEFMGRID_SUB
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_LANCZOS_NEV_DELT, EIG_METH,        &
                                          EIG_MSGLVL, EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SIGMA,&
-                                         EIG_VECS
+                                         EIG_VECS, EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, EIG_EXTRACT_SOURCE, EIG_FEAST_M0,        &
+                                         EIG_FEAST_TOL_DIGITS, EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR, EIG_FEAST_SEARCH_SCALE,   &
+                                         EIG_SUBSPACE_NSUB, EIG_SUBSPACE_TOL, EIG_SUBSPACE_MAX_ITER, EIG_DENSE_NEX
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC
 
       USE LOADC_USE_IFs
@@ -119,6 +121,9 @@ outer:DO
          ELSE IF((CARD1(1:4) == 'DISP'    ) .OR.  (CARD1(1:6) == 'VECTOR'  )) THEN
             CALL CC_DISP   ( CARD1 )
 
+         ELSE IF (CARD1(1:4) == 'VELO'    ) THEN
+            CALL CC_VELO   ( CARD1 )
+
          ELSE IF (CARD1(1:4) == 'ECHO'    ) THEN
             CALL CC_ECHO   ( CARD1 )
 
@@ -190,6 +195,9 @@ inner:         DO
 
          ELSE IF (CARD1(1:3) == 'SET'     ) THEN
             CALL CC_SET    ( CARD1 )
+
+         ELSE IF (CARD1(1:5) == 'SDAMP'   ) THEN
+            CALL CC_SDAMP  ( CARD1 )
 
          ELSE IF((CARD1(1:3) == 'SPC'     ) .AND. (CARD1(1:4) /= 'SPCF'    )) THEN
             CALL CC_SPC    ( CARD1 )
@@ -302,6 +310,9 @@ inner:         DO
                   EIG_PARAMS(I)%METHOD           = EIG_METH
                   EIG_PARAMS(I)%NORM             = EIG_NORM
                   EIG_PARAMS(I)%LAP_MAT_TYPE     = EIG_LAP_MAT_TYPE
+                  EIG_PARAMS(I)%EXTRACT_METHOD   = EIG_EXTRACT_METHOD
+                  EIG_PARAMS(I)%EXTRACT_MODE     = EIG_EXTRACT_MODE
+                  EIG_PARAMS(I)%EXTRACT_SOURCE   = EIG_EXTRACT_SOURCE
                   EIG_PARAMS(I)%VECS             = EIG_VECS
                   EIG_PARAMS(I)%SID              = CC_EIGR_SID_SUB(I)
                   EIG_PARAMS(I)%N1               = EIG_N1
@@ -312,6 +323,15 @@ inner:         DO
                   EIG_PARAMS(I)%MODE             = EIG_MODE
                   EIG_PARAMS(I)%MSGLVL           = EIG_MSGLVL
                   EIG_PARAMS(I)%NCVFACL          = EIG_NCVFACL
+                  EIG_PARAMS(I)%FEAST_M0         = EIG_FEAST_M0
+                  EIG_PARAMS(I)%FEAST_TOL_DIGITS = EIG_FEAST_TOL_DIGITS
+                  EIG_PARAMS(I)%FEAST_MAX_LOOP   = EIG_FEAST_MAX_LOOP
+                  EIG_PARAMS(I)%FEAST_N_CONTOUR  = EIG_FEAST_N_CONTOUR
+                  EIG_PARAMS(I)%FEAST_SEARCH_SCALE = EIG_FEAST_SEARCH_SCALE
+                  EIG_PARAMS(I)%SUBSPACE_NSUB    = EIG_SUBSPACE_NSUB
+                  EIG_PARAMS(I)%SUBSPACE_TOL     = EIG_SUBSPACE_TOL
+                  EIG_PARAMS(I)%SUBSPACE_MAX_ITER = EIG_SUBSPACE_MAX_ITER
+                  EIG_PARAMS(I)%DENSE_NEX        = EIG_DENSE_NEX
                   EIG_PARAMS(I)%CRIT             = EIG_CRIT
                   EIG_PARAMS(I)%FRQ1             = EIG_FRQ1
                   EIG_PARAMS(I)%FRQ2             = EIG_FRQ2

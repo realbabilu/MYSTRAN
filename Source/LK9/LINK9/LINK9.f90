@@ -32,7 +32,7 @@
       USE IOUNT1, ONLY                :  WRT_BUG, WRT_ERR
 
       USE IOUNT1, ONLY                :  ERR, F06, F25, L1E, L1M, L1R, L2A, L2B, L2C, L2D, L2I, L2J, L2R, L2S,                &
-                                         L5A, L5B, NEU, OT4, OU4, PCH, SC1
+                                         L5A, L5B, NEU, OP2, OT4, OU4, PCH, SC1
 
       USE IOUNT1, ONLY                :  F06FIL, F25FIL, LINK1B, LINK1E, LINK1M, LINK1R, LINK2A, LINK2B, LINK2C, LINK2D,           &
                                          LINK2I, LINK2J, LINK2R, LINK2S, LINK5A, LINK5B, MOT4  , MOU4  , NEUFIL, OT4FIL, OU4FIL,   &
@@ -47,7 +47,8 @@
 
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_ENTRY_LEN, COMM, IBIT, INT_SC_NUM, JTSUB, FATAL_ERR,                     &
                                          FEMAP_VERSION, LINKNO, MBUG,                                                              &
-                                         NDOFF, NDOFG, NDOFL, NDOFM, NDOFN, ndofo, NDOFR, NDOFS, NDOFSA, NGRID, NSUB, NVEC,        &
+                                         NDOFF, NDOFG, NDOFL, NDOFM, NDOFN, ndofo, NDOFR, NDOFS, NDOFSA, NGRID, NELE, NSUB, NVEC, &
+                                         MELGP,                                                                                     &
                                          NTERM_IF_LTM, NTERM_GMN, NTERM_HMN, NTERM_KFS, NTERM_KFSD, NTERM_LMN, NTERM_MFS,          &
                                          NTERM_MGG, NTERM_MLL,NTERM_PG, NTERM_PM, NTERM_PS, NTERM_QSYS,                            &
                                          NUM_CB_DOFS, NUM_EIGENS, MODE_SUBCASE,                                                   &
@@ -56,14 +57,16 @@
                                          NROWS_TXT_ACCE, NROWS_TXT_DISP, NROWS_TXT_MPCF, NROWS_TXT_SPCF,                           &
                                          NROWS_TXT_ELFE, NROWS_TXT_ELFN, NROWS_TXT_STRE, NROWS_TXT_STRN, RESTART, SOL_NAME, WARN_ERR
 
-      USE SCONTR, ONLY                :  GROUT_ACCE_BIT, GROUT_DISP_BIT, GROUT_OLOA_BIT, GROUT_SPCF_BIT, GROUT_MPCF_BIT,           &
-                                         GROUT_GPFO_BIT, ELOUT_ELFN_BIT, ELOUT_ELFE_BIT, ELOUT_STRE_BIT, ELOUT_STRN_BIT,           &
-                                         ELDT_F25_U_P_BIT
+      USE SCONTR, ONLY                :  GROUT_ACCE_BIT, GROUT_DISP_BIT, GROUT_VELO_BIT, GROUT_OLOA_BIT, GROUT_SPCF_BIT,           &
+                                         GROUT_MPCF_BIT, GROUT_GPFO_BIT, ELOUT_ELFN_BIT, ELOUT_ELFE_BIT, ELOUT_STRE_BIT,           &
+                                         ELOUT_STRN_BIT, ELDT_F25_U_P_BIT
 
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  DISP_OUT, ACCE_OUT, OLOA_OUT, SPCF_OUT, MPCF_OUT, FORC_OUT, GPFO_OUT, STRE_OUT, STRN_OUT
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  DISP_OUT, VELO_OUT, ACCE_OUT, OLOA_OUT, SPCF_OUT, MPCF_OUT, FORC_OUT, GPFO_OUT,           &
+                                         STRE_OUT, STRN_OUT
       USE TIMDAT, ONLY                :  STIME
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
-      USE PARAMS, ONLY                :  EPSIL, MPFOUT, SUPINFO, SUPWARN, WTMASS, PRTF06, PRTOP2, PRTNEU, OUTMODE
+      USE PARAMS, ONLY                :  EPSIL, MPFOUT, SUPINFO, SUPWARN, WTMASS, GRAV, PRTF06, PRTOP2, PRTNEU, OUTMODE, SCRSPEC, &
+                                         RSCOMB, GRDPNT, MEFMGRID, MEFMLOC
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE FEMAP_NEU_WRITE_HELPERS, ONLY : NEU_WRITE_TEXT, NEU_WRITE_BLOCK_END, NEU_WRITE_SET_ID, NEU_WRITE_ANALYSIS_IDS,       &
                                            NEU_WRITE_ZERO_REAL, NEU_WRITE_ZERO_INT, NEU_WRITE_SET_VEC_HEADER, NEU_WRITE_TITLES, &
@@ -71,7 +74,13 @@
                                            NEU_WRITE_VECTOR_END
       USE COL_VECS, ONLY              :  FG_COL, UG_COL, PG_COL, PM_COL, PS_COL, QSYS_COL, QGm_COL, QGr_COL, QGs_COL, QR_COL,      &
                                          PHIXG_COL, PHIXN_COL
-      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MODE_NUM
+      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MODE_NUM, MPFACTOR_N6, MPFACTOR_NR
+      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_NUM_TAB, RS_NUM_SPECSEL, RS_NUM_SUPORT, RS_SPECSEL_KIND, RS_SPECSEL_TABLED1,            &
+                                         RS_SPECSEL_DAMP,                                                                         &
+                                         RS_PRIMARY_SUPORT_COMP, RS_SUPORT_COMP_SCALE, RS_INTERP_AMP, RS_GET_PRIMARY_SUPORT_DOF,   &
+                                         RS_GET_DLOAD_SCALE_BY_TABLE, RS_DLOAD_SID, RS_SDAMP_SID, RS_GET_TABDMP1_DAMP,            &
+                                         RS_GET_TABDMP1_DAMP_AT_FREQ, RS_SPECSEL_LINE
+      USE RIGID_BODY_DISP_MATS, ONLY  :  RBGLOBAL_GSET, TR6_MEFM
       USE OUTPUT4_MATRICES, ONLY      :  NUM_OU4_REQUESTS, OU4_PART_MAT_NAMES, HAS_OU4_MAT_BEEN_PROCESSED, OU4_PART_MAT_NAMES
       USE OUTPUT4_MATRICES, ONLY      :  OTM_ACCE, OTM_DISP, OTM_MPCF, OTM_SPCF, OTM_ELFE, OTM_ELFN, OTM_STRE, OTM_STRN,           &
                                          TXT_ACCE, TXT_DISP, TXT_MPCF, TXT_SPCF, TXT_ELFE, TXT_ELFN, TXT_STRE, TXT_STRN
@@ -81,16 +90,20 @@
                                          I_MGG , J_MGG , MGG , I_MLL , J_MLL , MLL , I_MSF , J_MSF , MSF ,                         &
                                          I_PG  , J_PG  , PG  , I_PM  , J_PM  , PM  , I_PS  , J_PS  , PS  , I_QSYS, J_QSYS, QSYS
 
-      USE SPARSE_MATRICES, ONLY       :  I_IF_LTM, J_IF_LTM, IF_LTM, SYM_MGG, SYM_MSF, SYM_PG, SYM_PM
+      USE SPARSE_MATRICES, ONLY       :  I_IF_LTM, J_IF_LTM, IF_LTM, SYM_KFS, SYM_MFS, SYM_MGG, SYM_MSF, SYM_PG, SYM_PM
 
-      USE DOF_TABLES, ONLY            :  TDOF
+      USE DOF_TABLES, ONLY            :  TDOF, TDOFI, TDOF_ROW_START
 
-      USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_MPCF_OUTPUT, ANY_SPCF_OUTPUT, ANY_OLOA_OUTPUT,      &
-                                         ANY_GPFO_OUTPUT, ANY_ELFE_OUTPUT, ANY_ELFN_OUTPUT, ANY_STRE_OUTPUT, ANY_STRN_OUTPUT,      &
-                                         IS_BUCKLING_SUBCASE, NUM_EIGENS_SUB, OELDT, OELOUT, OGROUT, GRID, GRID_ID, GROUT,         &
-                                         INV_GRID_SEQ, MEFFMASS_CALC, MPFACTOR_CALC, RGRID, SCNUM, SUBLOD, TITLE, STITLE, LABEL
-      USE LINK9_STUFF, ONLY           :  MAXREQ, SMART_OUTPUT_MODE, WRITE_NEU_GEOM, WRITE_NEU_DISP, WRITE_NEU_OLOA,               &
-                                         WRITE_NEU_SPCF, WRITE_NEU_MPCF, WRITE_NEU_ELFO, WRITE_NEU_STRE, WRITE_NEU_STRN
+      USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_VELO_OUTPUT, ANY_MPCF_OUTPUT, ANY_SPCF_OUTPUT,      &
+                                         ANY_OLOA_OUTPUT, ANY_GPFO_OUTPUT, ANY_ELFE_OUTPUT, ANY_ELFN_OUTPUT, ANY_STRE_OUTPUT,      &
+                                         ANY_STRN_OUTPUT, CONM2, RCONM2, IS_BUCKLING_SUBCASE, NUM_EIGENS_SUB, OELDT, OELOUT,      &
+                                         OGROUT, GRID, GRID_ID, GROUT, INV_GRID_SEQ, MEFFMASS_CALC, MPFACTOR_CALC, RGRID, SCNUM,  &
+                                         SUBLOD, TITLE, STITLE, LABEL
+      USE LINK9_STUFF, ONLY           :  MAXREQ, GID_OUT_ARRAY, OGEL, SMART_OUTPUT_MODE, WRITE_NEU_GEOM, WRITE_NEU_DISP,          &
+                                         WRITE_NEU_OLOA, WRITE_NEU_SPCF, WRITE_NEU_MPCF, WRITE_NEU_ELFO, WRITE_NEU_STRE,          &
+                                         WRITE_NEU_STRN, RSA_MODE_SCALE, RSA_ELFE_CAPTURE, RSA_ELFE_NUM_ROWS, RSA_ELFE_SUMSQ,     &
+                                         RSA_ELFE_SUMABS,                                                                          &
+                                         RSA_ELFE_DESC
 
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
@@ -102,6 +115,17 @@
       LOGICAL                         :: WRITE_F06, WRITE_OP2, WRITE_PCH, WRITE_NEU   ! flag
       LOGICAL                         :: LEXIST            ! .TRUE. if a file exists
       LOGICAL                         :: LOPEN             ! .TRUE. if a file is opened
+      LOGICAL                         :: RSA_ACTIVE
+      LOGICAL                         :: RSA_FREQ_DEP_DAMP
+      LOGICAL                         :: RSA_HAS_RIGID_ZERO_MODE
+      LOGICAL                         :: RSA_NEEDS_MPF
+      LOGICAL                         :: RSA_OP2_OPEN
+      LOGICAL                         :: RSA_UNSUPPORTED_OUTPUTS
+      LOGICAL                         :: RSA_WRITE_OP2_ACCE
+      LOGICAL                         :: RSA_WRITE_OP2_DISP
+      LOGICAL                         :: RSA_WRITE_OP2_VELO
+      LOGICAL                         :: USER_REQ_MEFFMASS
+      LOGICAL                         :: USER_REQ_MPFACTOR
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'LINK9'
@@ -118,6 +142,7 @@
       CHARACTER( 1*BYTE)              :: NULL_COL          ! An output from subr GET_SPARSE_CRS_COL
       CHARACTER( 1*BYTE)              :: PROC_PG_OUTPUT    ! 'Y' in general. However, for BUCKLING, set to 'N' for eigen subcase
       CHARACTER( 1*BYTE)              :: READ_SPCARRAYS    ! ='Y' if we need to read KSF, etc. See test below.
+      CHARACTER( 1*BYTE), ALLOCATABLE :: RSA_WRITE_OGEL(:) ! Row mask for combined RSA displacement table
 
       INTEGER(LONG), INTENT(IN)       :: LK9_PROC_NUM      ! 2 if this is the LINK9 call for the linear buckling step of
 !                                                            SOL_NAME = 'BUCKLING. Otherwise 1 to designate that, for BUCKLING,
@@ -126,17 +151,21 @@
       INTEGER(LONG)                   :: ANY_U_P_OUTPUT    ! > 0 if requests for output of elem loads/displs in a any S/C
       INTEGER(LONG)                   :: COL_NUM           ! Col number to get when subr GET_SPARSE_CRS_COL is called
       INTEGER(LONG)                   :: FEMAP_SET_ID  = 0 ! Set ID for FEMAP output
+      INTEGER(LONG)                   :: F_SET_COL         ! Col number in TDOF where the F-set DOF's exist
       INTEGER(LONG)                   :: FORM              ! Matrix format
       INTEGER(LONG)                   :: GDOF              ! G-set DOF number
       INTEGER(LONG)                   :: RDOF              ! R-set DOF number
       INTEGER(LONG)                   :: G_SET_COL         ! Col number in TDOF where the G-set DOF's exist
       INTEGER(LONG)                   :: R_SET_COL         ! Col number in TDOF where the R-set DOF's exist
+      INTEGER(LONG)                   :: SDOF              ! S-set DOF number
+      INTEGER(LONG)                   :: S_SET_COL         ! Col number in TDOF where the S-set DOF's exist
       INTEGER(LONG)                   :: I,J,K             ! DO loop indices or counters
       INTEGER(LONG)                   :: ITE       = 0     ! Index (1 thru MOT4) for file unit num for elem OTM's text files
       INTEGER(LONG)                   :: ITG       = 0     ! Index (1 thru MOU4) for file unit num for grid OTM's text files
       INTEGER(LONG)                   :: IUE       = 0     ! Index (1 thru MOT4) for file unit num for elem OTM's unformatted files
       INTEGER(LONG)                   :: IUG       = 0     ! Index (1 thru MOU4) for file unit num for grid OTM's unformatted files
       INTEGER(LONG)                   :: IERROR            ! Error count
+      INTEGER(LONG)                   :: IGRID             ! Internal grid index
       INTEGER(LONG)                   :: IOCHK             ! IOSTAT error number when opening/reading a file
       INTEGER(LONG)                   :: JVEC              ! DO loop index - output vector no. being processed (S/C or eigenvec no.)
       INTEGER(LONG), PARAMETER        :: NUM1      = 1     ! Used in subr's that partition matrices
@@ -153,8 +182,25 @@
       INTEGER(LONG)                   :: P_LINKNO          ! Prior LINK no's that should have run before this LINK can execute
       INTEGER(LONG)                   :: PM_ROW_MAX_TERMS  ! Output from subr PARTITION_SIZE (max terms in any row of matrix)
       INTEGER(LONG)                   :: REC_NO            ! Record number when reading a file
+      INTEGER(LONG)                   :: RSA_COMP          ! Primary SUPORT component for basic RSA compatibility path
+      INTEGER(LONG)                   :: RSA_COMP_GDOF     ! Matching G-set DOF for primary SUPORT grid/component
+      INTEGER(LONG)                   :: RSA_COMP_ROW      ! Matching R-set row for primary SUPORT grid/component
+      INTEGER(LONG)                   :: RSA_GRID          ! Primary SUPORT grid for basic RSA compatibility path
+      INTEGER(LONG)                   :: RSA_NUM_OUT       ! Number of grids written in combined RSA output table
+      INTEGER(LONG)                   :: RSA_REFPNT_GRID   ! Reference grid used for rigid-body influence vectors
+      INTEGER(LONG)                   :: RSA_TABLE_ID      ! TABLED1 used for minimal RSA compatibility path
+      INTEGER(LONG)                   :: RSA_TABLE_ID_2    ! Second TABLED1 for damping interpolation
+      INTEGER(LONG)                   :: RSA_MODE_TABLE_ID ! Mode-specific TABLED1 used for minimal RSA compatibility path
+      INTEGER(LONG)                   :: RSA_MODE_TABLE_ID_2 ! Second mode-specific TABLED1 for damping interpolation
+      INTEGER(LONG)                   :: RSA_MODE_ILOW     ! Lower damping SPECSEL entry index for one mode
+      INTEGER(LONG)                   :: RSA_MODE_IHIGH    ! Upper damping SPECSEL entry index for one mode
+      INTEGER(LONG)                   :: RSA_SPECSEL_LINE_ID ! Active SPECSEL line for RSA compatibility path
+      INTEGER(LONG)                   :: RSA_SPECSEL_ILOW  ! Lower damping SPECSEL entry index
+      INTEGER(LONG)                   :: RSA_SPECSEL_IHIGH ! Upper damping SPECSEL entry index
+      INTEGER(LONG)                   :: ROW_NUM_START     ! Starting TDOF row for a grid
       INTEGER(LONG)                   :: SC_ACCE_OUTPUT    ! = 1 if requests for output of accels in a particular S/C
       INTEGER(LONG)                   :: SC_DISP_OUTPUT    ! = 1 if requests for output of displs in a particular S/C
+      INTEGER(LONG)                   :: SC_VELO_OUTPUT    ! = 1 if requests for output of velocs in a particular S/C
       INTEGER(LONG)                   :: SC_OLOA_OUTPUT    ! = 1 if requests for output of applied loads in a particular S/C
       INTEGER(LONG)                   :: SC_SPCF_OUTPUT    ! = 1 if requests for output of SPC forces in a particular S/C
       INTEGER(LONG)                   :: SC_MPCF_OUTPUT    ! = 1 if requests for output of MPC forces in a particular S/C
@@ -164,12 +210,59 @@
       INTEGER(LONG)                   :: SC_STRE_OUTPUT    ! = 1 if requests for output of elem stresses in a particular S/C
       INTEGER(LONG)                   :: SC_STRN_OUTPUT    ! = 1 if requests for output of elem strains  in a particular S/C
       INTEGER(LONG)                   :: XTIME             ! Time stamp read from an unformatted file
+      INTEGER(LONG)                   :: TDOF_ROW          ! Specific TDOF row for a grid component
 
 
       REAL(DOUBLE)                    :: EPS1              ! Small number to compare against zero
       REAL(DOUBLE)                    :: FEMAP_SET_VALUE = ZERO ! Scalar value stored in FEMAP block 450 for current set
       REAL(DOUBLE)                    :: UGV               ! A G-set vector read from file L5A
       REAL(DOUBLE)                    :: PHIXGV            ! A G-set vector read from file L5B
+      REAL(DOUBLE)                    :: RSA_AMP           ! Spectral ordinate for minimal RSA compatibility path
+      REAL(DOUBLE)                    :: RSA_BETA          ! Frequency ratio for CQC modal combination
+      REAL(DOUBLE)                    :: RSA_CQC_SUM       ! CQC accumulation for one G-set DOF
+      REAL(DOUBLE)                    :: RSA_DAMP          ! Damping associated with RSA_TABLE_ID
+      REAL(DOUBLE)                    :: RSA_DAMP_CQC      ! Effective damping used in CQC correlation term
+      REAL(DOUBLE)                    :: RSA_DAMP_MAX      ! Maximum mode damping used in RSA pass
+      REAL(DOUBLE)                    :: RSA_DAMP_MIN      ! Minimum mode damping used in RSA pass
+      REAL(DOUBLE)                    :: RSA_DAMP_TARGET   ! Damping selected by SDAMP/TABDMP1 when present
+      REAL(DOUBLE)                    :: RSA_DLOAD_SCALE   ! DLOAD/RLOAD1 scalar applied to active spectrum
+      REAL(DOUBLE)                    :: RSA_GACC          ! Gravity conversion used for acceleration spectra
+      REAL(DOUBLE)                    :: RSA_GAMMA         ! Modal participation along selected support direction
+      REAL(DOUBLE)                    :: RSA_MAX_ABS       ! Max absolute combined displacement over all G-set DOF's
+      REAL(DOUBLE)                    :: RSA_OMEGA_I       ! Circular frequency of mode i for CQC
+      REAL(DOUBLE)                    :: RSA_OMEGA_J       ! Circular frequency of mode j for CQC
+      REAL(DOUBLE)                    :: RSA_ROW_MPF       ! TR6_MEFM(row,:) dot MPFACTOR_N6 for diagnostics
+      REAL(DOUBLE)                    :: RSA_RHO           ! Modal correlation coefficient for CQC
+      REAL(DOUBLE)                    :: RSA_SCALE_NORM    ! Normalization for weighted SUPORT component combination
+      REAL(DOUBLE)                    :: RSA_SD            ! Modal spectral displacement scale
+      REAL(DOUBLE)                    :: RSA_SUPORT_CONM2_MASS ! Translational CONM2 mass located at primary SUPORT grid
+      REAL(DOUBLE)                    :: RSA_MODE_DAMP     ! Mode-specific damping selected from TABDMP1/SPECSEL
+      REAL(DOUBLE)                    :: RSA_MODE_FREQ     ! Mode frequency (Hz) for current response-spectrum evaluation
+      REAL(DOUBLE)                    :: RSA_MODE_SPEC_WT_1 ! Mode-specific weight for primary SPECSEL table
+      REAL(DOUBLE)                    :: RSA_MODE_SPEC_WT_2 ! Mode-specific weight for secondary SPECSEL table
+      REAL(DOUBLE)                    :: RSA_MODE_DLOW     ! Lower damping anchor for one mode
+      REAL(DOUBLE)                    :: RSA_MODE_DHIGH    ! Upper damping anchor for one mode
+      REAL(DOUBLE)                    :: RSA_SPEC_WT_1     ! Weight for primary SPECSEL table
+      REAL(DOUBLE)                    :: RSA_SPEC_WT_2     ! Weight for secondary SPECSEL table
+      REAL(DOUBLE)                    :: RSA_SPEC_DLOW     ! Lower damping anchor for interpolation
+      REAL(DOUBLE)                    :: RSA_SPEC_DHIGH    ! Upper damping anchor for interpolation
+      REAL(DOUBLE)                    :: RSA_MPF6_BASIC(6) ! Precomputed basic participation factors for RSA before OFP2 runs
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_QGS_TMP(:)    ! Temporary G-set SPC-force vector for RSA MPFACTOR_NR precompute
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_QS_TMP(:)     ! Temporary S-set SPC-force vector for RSA MPFACTOR_NR precompute
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_QSK_TMP(:)    ! Temporary stiffness contribution to RSA_QS_TMP
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_QSM_TMP(:)    ! Temporary inertia contribution to RSA_QS_TMP
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_UF_TMP(:)     ! Temporary F-set displacement slice for RSA MPFACTOR_NR precompute
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_MODE_OMEGA(:) ! Modal circular frequencies retained for RSA combination
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_MODE_DAMPING(:) ! Mode damping retained for RSA combination
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_MODE_GAMMA(:) ! Gamma used for the active RSA compatibility path
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_MODE_GAMMA_ALT(:) ! Alternate gamma diagnostic (prefer R-set MPF when available)
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_MODE_SD(:)    ! Modal spectral displacement used in the RSA pass
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_MODE_RESP(:,:)! Per-mode response contribution in G-set order
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_RBG_COL(:,:)  ! G-set support influence vector
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_MRRB_COL(:,:) ! MGG*RSA_RBG_COL
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_UG_SRSS(:)    ! Accumulated SRSS combined response in G-set order
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_VG_SRSS(:)    ! Combined RSA velocity in G-set order
+      REAL(DOUBLE), ALLOCATABLE       :: RSA_AG_SRSS(:)    ! Combined RSA acceleration in G-set order
       INTEGER(LONG)                   :: ITABLE            !
       INTEGER(LONG)                   :: FEMAP_FROM_PROG = 0
       INTEGER(LONG)                   :: FEMAP_ANAL_TYPE = 0
@@ -194,6 +287,38 @@
       WRITE(SC1,152) LINKNO
 
       EPS1 = EPSIL(1)
+      USER_REQ_MPFACTOR = (MPFACTOR_CALC == 'Y')
+      USER_REQ_MEFFMASS = (MEFFMASS_CALC == 'Y')
+      RSA_COMP = 0
+      RSA_COMP_GDOF = 0
+      RSA_COMP_ROW = 0
+      RSA_FREQ_DEP_DAMP = .FALSE.
+      RSA_GRID = 0
+      RSA_REFPNT_GRID = 0
+      RSA_TABLE_ID = 0
+      RSA_TABLE_ID_2 = 0
+      RSA_SPECSEL_LINE_ID = 0
+      RSA_SPECSEL_ILOW = 0
+      RSA_SPECSEL_IHIGH = 0
+      RSA_DAMP = 0.0D0
+      RSA_DAMP_MAX = -1.0D0
+      RSA_DAMP_MIN = -1.0D0
+      RSA_DAMP_TARGET = -1.0D0
+      RSA_DLOAD_SCALE = ONE
+      RSA_GACC = 386.4D0
+      RSA_MAX_ABS = ZERO
+      RSA_ACTIVE = .FALSE.
+      RSA_HAS_RIGID_ZERO_MODE = .FALSE.
+      RSA_NEEDS_MPF = .FALSE.
+      RSA_SUPORT_CONM2_MASS = ZERO
+      RSA_UNSUPPORTED_OUTPUTS = .FALSE.
+      RSA_MODE_SCALE = ZERO
+      RSA_ELFE_CAPTURE = .FALSE.
+      RSA_ELFE_NUM_ROWS = 0
+      RSA_SPEC_WT_1 = ONE
+      RSA_SPEC_WT_2 = ZERO
+      RSA_SPEC_DLOW = -1.0D0
+      RSA_SPEC_DHIGH = -1.0D0
 
       WRITE_NEU = (PRTNEU == 'Y')
       SMART_OUTPUT_MODE = (OUTMODE(1:5) == 'SMART')
@@ -214,6 +339,7 @@
       !ENDIF
       IF ((PRTF06 == 'Y') .AND. (.NOT.SMART_OUTPUT_MODE)) THEN
          DISP_OUT(1:1) = 'Y'  ! f06
+         VELO_OUT(1:1) = 'Y'
          ACCE_OUT(2:2) = 'Y'
          OLOA_OUT(1:1) = 'Y'
          SPCF_OUT(1:1) = 'Y'
@@ -225,6 +351,7 @@
       ENDIF
       IF (PRTOP2 == 'Y') THEN
          DISP_OUT(2:2) = 'Y'  ! op2
+         VELO_OUT(2:2) = 'Y'
          ACCE_OUT(2:2) = 'Y'
          OLOA_OUT(2:2) = 'Y'
          SPCF_OUT(2:2) = 'Y'
@@ -248,6 +375,17 @@
       WRITE_F06 = (DISP_OUT(1:1) == 'Y')
       WRITE_OP2 = (DISP_OUT(2:2) == 'Y')
       WRITE_PCH = (DISP_OUT(3:3) == 'Y')
+      IF ((SOL_NAME(1:5) == 'MODES') .AND. (SCRSPEC == 'Y')) THEN
+         INQUIRE ( UNIT=OP2, OPENED=LOPEN )
+         IF (LOPEN) THEN
+            IF (DISP_OUT(1:1) == 'Y') DISP_OUT(2:2) = 'Y'
+            IF (VELO_OUT(1:1) == 'Y') VELO_OUT(2:2) = 'Y'
+            IF (ACCE_OUT(1:1) == 'Y') ACCE_OUT(2:2) = 'Y'
+            IF (SPCF_OUT(1:1) == 'Y') SPCF_OUT(2:2) = 'Y'
+            IF (MPCF_OUT(1:1) == 'Y') MPCF_OUT(2:2) = 'Y'
+         ENDIF
+      ENDIF
+      WRITE_OP2 = (DISP_OUT(2:2) == 'Y')
       IF (WRITE_PCH) THEN
          INQUIRE (FILE=PCHFIL, OPENED=LOPEN)
          IF (.NOT.LOPEN) THEN                          ! Otherwise we assume it is positioned at its end and ready for write
@@ -497,9 +635,11 @@
 
       ENDIF
 
-      ! Read MGG mass matrix if this is a dynamics solution and GP force balance is requested
+      ! Read MGG mass matrix if this is a dynamics solution and GP force balance, modal effective mass,
+      ! modal participation factors, or SCRSPEC compatibility processing can need it.
       IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
-         IF (ANY_GPFO_OUTPUT > 0) THEN
+         IF ((ANY_GPFO_OUTPUT > 0) .OR. (MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y') .OR.                                  &
+             ((SOL_NAME(1:5) == 'MODES') .AND. (SCRSPEC == 'Y'))) THEN
             CALL LINK_MESSAGE('ALLOCATE SPARSE ARRAYS FOR MGG MASS ARRAYS')
             CALL ALLOCATE_SPARSE_MAT ( 'MGG', NDOFG, NTERM_MGG, SUBR_NAME )
             IF (NTERM_MGG > 0) THEN
@@ -511,9 +651,11 @@
          ENDIF
       ENDIF
 
-      ! Read MLL mass matrix if this is a dynamics solution and GP force balance is requested.
+      ! Read MLL mass matrix if this is a dynamics solution and GP force balance, modal effective mass,
+      ! modal participation factors, or SCRSPEC compatibility processing can need it.
       IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
-         IF (ANY_GPFO_OUTPUT > 0) THEN
+         IF ((ANY_GPFO_OUTPUT > 0) .OR. (MEFFMASS_CALC == 'Y') .OR. (MPFACTOR_CALC == 'Y') .OR.                                  &
+             ((SOL_NAME(1:5) == 'MODES') .AND. (SCRSPEC == 'Y'))) THEN
             CALL LINK_MESSAGE('ALLOCATE SPARSE ARRAYS FOR MLL MASS ARRAYS')
             CALL ALLOCATE_SPARSE_MAT ( 'MLL', NDOFL, NTERM_MLL, SUBR_NAME )
             IF (NTERM_MLL > 0) THEN
@@ -540,6 +682,147 @@
       ZERO_GEN_STIFF = 'N'
       IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
                                                         ! MODE_NUM is not used to det gen stiff but it is read in subr READ_L1M
+         RSA_COMP = RS_PRIMARY_SUPORT_COMP()
+         CALL RS_GET_PRIMARY_SUPORT_DOF ( RSA_GRID, RSA_COMP )
+         RSA_ACTIVE = ((SOL_NAME(1:5) == 'MODES') .AND. (SCRSPEC == 'Y') .AND. (RS_NUM_SPECSEL > 0) .AND. (RS_NUM_TAB > 0)         &
+                    .AND. (RSA_COMP > 0))
+         IF (RSA_ACTIVE) THEN
+            RSA_COMP_GDOF = 0
+            RSA_COMP_ROW = 0
+            RSA_SUPORT_CONM2_MASS = ZERO
+            IF (RSA_GRID > 0) THEN
+               CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
+               CALL TDOF_COL_NUM ( 'R ', R_SET_COL )
+               DO I=1,NDOFG
+                  IF ((TDOFI(I,1) == RSA_GRID) .AND. (TDOFI(I,2) == RSA_COMP)) THEN
+                     RSA_COMP_GDOF = TDOFI(I,G_SET_COL)
+                     RSA_COMP_ROW = TDOFI(I,R_SET_COL)
+                     EXIT
+                  ENDIF
+               ENDDO
+               IF (ALLOCATED(CONM2) .AND. ALLOCATED(RCONM2)) THEN
+                  DO I=1,SIZE(CONM2,1)
+                     IF (CONM2(I,2) == RSA_GRID) THEN
+                        RSA_SUPORT_CONM2_MASS = RSA_SUPORT_CONM2_MASS + RCONM2(I,1)
+                     ENDIF
+                  ENDDO
+               ENDIF
+            ENDIF
+            RSA_TABLE_ID = RS_SPECSEL_TABLED1(1)
+            RSA_DAMP     = RS_SPECSEL_DAMP(1)
+            RSA_TABLE_ID_2 = 0
+            RSA_SPECSEL_LINE_ID = RS_SPECSEL_LINE(1)
+            RSA_SPEC_WT_1 = ONE
+            RSA_SPEC_WT_2 = ZERO
+            RSA_DAMP_TARGET = RS_GET_TABDMP1_DAMP ( RS_SDAMP_SID )
+            IF (RSA_DAMP_TARGET > 0.0D0) THEN
+               RSA_FREQ_DEP_DAMP = (RS_SDAMP_SID > 0)
+               RSA_SPECSEL_ILOW = 0
+               RSA_SPECSEL_IHIGH = 0
+               RSA_SPEC_DLOW = -1.0D0
+               RSA_SPEC_DHIGH = -1.0D0
+               DO I=1,RS_NUM_SPECSEL
+                  IF (RS_SPECSEL_LINE(I) /= RSA_SPECSEL_LINE_ID) CYCLE
+                  IF (DABS(RS_SPECSEL_DAMP(I) - RSA_DAMP_TARGET) <= 1.0D-12) THEN
+                     RSA_TABLE_ID = RS_SPECSEL_TABLED1(I)
+                     RSA_DAMP = RS_SPECSEL_DAMP(I)
+                     RSA_TABLE_ID_2 = 0
+                     RSA_SPEC_WT_1 = ONE
+                     RSA_SPEC_WT_2 = ZERO
+                     RSA_SPECSEL_ILOW = 0
+                     RSA_SPECSEL_IHIGH = 0
+                     EXIT
+                  ENDIF
+                  IF (RS_SPECSEL_DAMP(I) <= RSA_DAMP_TARGET) THEN
+                     IF ((RSA_SPECSEL_ILOW == 0) .OR. (RS_SPECSEL_DAMP(I) > RSA_SPEC_DLOW)) THEN
+                        RSA_SPECSEL_ILOW = I
+                        RSA_SPEC_DLOW = RS_SPECSEL_DAMP(I)
+                     ENDIF
+                  ENDIF
+                  IF (RS_SPECSEL_DAMP(I) >= RSA_DAMP_TARGET) THEN
+                     IF ((RSA_SPECSEL_IHIGH == 0) .OR. (RS_SPECSEL_DAMP(I) < RSA_SPEC_DHIGH) .OR. (RSA_SPEC_DHIGH < 0.0D0)) THEN
+                        RSA_SPECSEL_IHIGH = I
+                        RSA_SPEC_DHIGH = RS_SPECSEL_DAMP(I)
+                     ENDIF
+                  ENDIF
+               ENDDO
+               IF ((RSA_TABLE_ID_2 == 0) .AND. (RSA_SPECSEL_ILOW > 0) .AND. (RSA_SPECSEL_IHIGH > 0) .AND.                        &
+                   (RSA_SPECSEL_ILOW /= RSA_SPECSEL_IHIGH) .AND. (RSA_SPEC_DHIGH > RSA_SPEC_DLOW)) THEN
+                  RSA_TABLE_ID = RS_SPECSEL_TABLED1(RSA_SPECSEL_ILOW)
+                  RSA_TABLE_ID_2 = RS_SPECSEL_TABLED1(RSA_SPECSEL_IHIGH)
+                  RSA_DAMP = RSA_DAMP_TARGET
+                  RSA_SPEC_WT_1 = (RSA_SPEC_DHIGH - RSA_DAMP_TARGET)/(RSA_SPEC_DHIGH - RSA_SPEC_DLOW)
+                  RSA_SPEC_WT_2 = (RSA_DAMP_TARGET - RSA_SPEC_DLOW)/(RSA_SPEC_DHIGH - RSA_SPEC_DLOW)
+               ELSE IF ((RSA_TABLE_ID_2 == 0) .AND. (RSA_SPECSEL_ILOW > 0)) THEN
+                  RSA_TABLE_ID = RS_SPECSEL_TABLED1(RSA_SPECSEL_ILOW)
+                  RSA_DAMP = RS_SPECSEL_DAMP(RSA_SPECSEL_ILOW)
+               ELSE IF ((RSA_TABLE_ID_2 == 0) .AND. (RSA_SPECSEL_IHIGH > 0)) THEN
+                  RSA_TABLE_ID = RS_SPECSEL_TABLED1(RSA_SPECSEL_IHIGH)
+                  RSA_DAMP = RS_SPECSEL_DAMP(RSA_SPECSEL_IHIGH)
+               ENDIF
+            ENDIF
+            RSA_DLOAD_SCALE = RS_GET_DLOAD_SCALE_BY_TABLE ( SUBLOD(1,1), RSA_TABLE_ID )
+            IF ((RSA_DLOAD_SCALE == ONE) .AND. (RS_DLOAD_SID > 0) .AND. (SUBLOD(1,1) /= RS_DLOAD_SID)) THEN
+               RSA_DLOAD_SCALE = RS_GET_DLOAD_SCALE_BY_TABLE ( RS_DLOAD_SID, RSA_TABLE_ID )
+               IF ((RSA_DLOAD_SCALE == ONE) .AND. (RSA_TABLE_ID_2 > 0)) THEN
+                  RSA_DLOAD_SCALE = RS_GET_DLOAD_SCALE_BY_TABLE ( RS_DLOAD_SID, RSA_TABLE_ID_2 )
+               ENDIF
+            ENDIF
+            RSA_NEEDS_MPF = (MPFOUT == '6')
+            IF (.NOT.RSA_NEEDS_MPF) THEN
+               WRITE(ERR,'(A)') ' *WARNING    : SCRSPEC compatibility path currently requires MPFOUT=6; RSA summary disabled.'
+               IF (SUPWARN == 'N') WRITE(F06,'(A)') ' *WARNING    : SCRSPEC compatibility path currently requires MPFOUT=6; RSA summary disabled.'
+               RSA_ACTIVE = .FALSE.
+            ELSE
+               IF (MPFACTOR_CALC /= 'Y') MPFACTOR_CALC = 'Y'
+               RSA_REFPNT_GRID = MEFMGRID
+               IF (MEFMLOC == 'GRDPNT') RSA_REFPNT_GRID = GRDPNT
+               IF (.NOT. ALLOCATED(RBGLOBAL_GSET)) THEN
+                  CALL ALLOCATE_RBGLOBAL ( 'G ', SUBR_NAME )
+               ENDIF
+               IF (MEFMLOC == 'CG    ') THEN
+                  CALL RB_DISP_MATRIX_PROC ( 'CG', 0 )
+               ELSE
+                  IF (RSA_REFPNT_GRID <= 0) THEN
+                     CALL RB_DISP_MATRIX_PROC ( 'BASIC ORIGIN', 0 )
+                  ELSE
+                     CALL RB_DISP_MATRIX_PROC ( 'GRID', RSA_REFPNT_GRID )
+                  ENDIF
+               ENDIF
+               IF (.NOT. ALLOCATED(RSA_RBG_COL)) THEN
+                  ALLOCATE(RSA_RBG_COL(NDOFG,1))
+               ENDIF
+               IF (.NOT. ALLOCATED(RSA_MRRB_COL)) THEN
+                  ALLOCATE(RSA_MRRB_COL(NDOFG,1))
+               ENDIF
+               IF ((RS_SPECSEL_KIND(1) /= 'A') .AND. (RS_SPECSEL_KIND(1) /= ' ')) THEN
+                  WRITE(ERR,'(A,A,A)') ' *WARNING    : SCRSPEC compatibility path currently treats SPECSEL kind "',               &
+                                       RS_SPECSEL_KIND(1), '" as acceleration-like.'
+                  IF (SUPWARN == 'N') WRITE(F06,'(A,A,A)') ' *WARNING    : SCRSPEC compatibility path currently treats SPECSEL kind "', &
+                                                            RS_SPECSEL_KIND(1), '" as acceleration-like.'
+               ENDIF
+               RSA_HAS_RIGID_ZERO_MODE = .FALSE.
+               DO I=1,NUM_EIGENS
+                  IF (DABS(EIGEN_VAL(I)) <= EPS1) THEN
+                     RSA_HAS_RIGID_ZERO_MODE = .TRUE.
+                     EXIT
+                  ENDIF
+               ENDDO
+               IF ((RSA_SUPORT_CONM2_MASS > EPS1) .AND. ((RSA_COMP >= 1) .AND. (RSA_COMP <= 3)) .AND. (.NOT.RSA_HAS_RIGID_ZERO_MODE)) THEN
+                  WRITE(ERR,'(A,I0,A,1ES14.6,A)') ' *WARNING    : SCRSPEC primary SUPORT grid ', RSA_GRID,                         &
+                       ' carries CONM2 mass ', RSA_SUPORT_CONM2_MASS, '. No zero-frequency rigid support mode was extracted.'
+                  WRITE(ERR,'(A)') '               Commercial large-mass RSA decks can use that rigid mode; current MYSTRAN path'
+                  WRITE(ERR,'(A)') '               continues with flexible-mode-only response-spectrum output.'
+                  IF (SUPWARN == 'N') THEN
+                     WRITE(F06,'(A,I0,A,1ES14.6,A)') ' *WARNING    : SCRSPEC primary SUPORT grid ', RSA_GRID,                     &
+                          ' carries CONM2 mass ', RSA_SUPORT_CONM2_MASS, '. No zero-frequency rigid support mode was extracted.'
+                     WRITE(F06,'(A)') '               Commercial large-mass RSA decks can use that rigid mode; current MYSTRAN path'
+                     WRITE(F06,'(A)') '               continues with flexible-mode-only response-spectrum output.'
+                  ENDIF
+               ENDIF
+            ENDIF
+         ENDIF
+
          CALL ALLOCATE_EIGEN1_MAT ( 'MODE_NUM' , NUM_EIGENS, 1, SUBR_NAME )
 !xx      CALL ALLOCATE_EIGEN1_MAT ( 'EIGEN_VAL', NUM_EIGENS, 1, SUBR_NAME )
          CALL ALLOCATE_EIGEN1_MAT ( 'GEN_MASS' , NUM_EIGENS, 1, SUBR_NAME )
@@ -568,6 +851,9 @@
                IF (MPFACTOR_CALC  == 'Y') THEN
                   IF (MPFOUT == '6') THEN
                      CALL ALLOCATE_EIGEN1_MAT ( 'MPFACTOR_N6', NVEC, 6, SUBR_NAME )
+                     IF (RSA_ACTIVE .AND. (NDOFR > 0)) THEN
+                        CALL ALLOCATE_EIGEN1_MAT ( 'MPFACTOR_NR', NVEC, NDOFR, SUBR_NAME )
+                     ENDIF
                   ELSE
                      CALL ALLOCATE_EIGEN1_MAT ( 'MPFACTOR_NR', NVEC, 6, SUBR_NAME )
                   ENDIF
@@ -608,6 +894,42 @@
 !-----------------------------------------------------------------------------------------------------------------------------------
       ! Allocate arrays particular to LINK9
       CALL ALLOCATE_LINK9_STUF ( SUBR_NAME )
+      IF (RSA_ACTIVE) THEN
+         ALLOCATE(RSA_UG_SRSS(NDOFG))
+         RSA_UG_SRSS = ZERO
+         ALLOCATE(RSA_VG_SRSS(NDOFG))
+         RSA_VG_SRSS = ZERO
+         ALLOCATE(RSA_AG_SRSS(NDOFG))
+         RSA_AG_SRSS = ZERO
+         ALLOCATE(RSA_MODE_OMEGA(NUM_EIGENS))
+         RSA_MODE_OMEGA = ZERO
+         ALLOCATE(RSA_MODE_DAMPING(NUM_EIGENS))
+         RSA_MODE_DAMPING = ZERO
+         ALLOCATE(RSA_MODE_GAMMA(NUM_EIGENS))
+         RSA_MODE_GAMMA = ZERO
+         ALLOCATE(RSA_MODE_GAMMA_ALT(NUM_EIGENS))
+         RSA_MODE_GAMMA_ALT = ZERO
+         ALLOCATE(RSA_MODE_SD(NUM_EIGENS))
+         RSA_MODE_SD = ZERO
+         ALLOCATE(RSA_MODE_RESP(NDOFG,NUM_EIGENS))
+         RSA_MODE_RESP = ZERO
+         IF (ANY_ELFE_OUTPUT > 0) THEN
+            ALLOCATE(RSA_ELFE_SUMSQ(8*MAX(NELE,1)))
+            ALLOCATE(RSA_ELFE_SUMABS(8*MAX(NELE,1)))
+            ALLOCATE(RSA_ELFE_DESC (8*MAX(NELE,1)))
+            RSA_ELFE_SUMSQ = ZERO
+            RSA_ELFE_SUMABS = ZERO
+            RSA_ELFE_DESC  = ' '
+            RSA_ELFE_CAPTURE = (RSCOMB(1:3) /= 'CQC')
+         ENDIF
+         IF (GRAV > EPS1) THEN
+            RSA_GACC = GRAV
+         ELSE IF (DABS(WTMASS - ONE) > EPS1) THEN
+            RSA_GACC = ONE/WTMASS
+         ELSE
+            RSA_GACC = 386.4D0
+         ENDIF
+      ENDIF
 
       ! Initialize JTSUB which will become the col no in the elem thermal loads matrix corresponding to the subcases below.
       JTSUB = 0
@@ -768,10 +1090,16 @@ j_do: DO JVEC=1,NUM_SOLNS
          ! Det if GP related outputs were requested in Case Control for this S/C
          SC_ACCE_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_ACCE_BIT))
          SC_DISP_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_DISP_BIT))
+         SC_VELO_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_VELO_BIT))
          SC_OLOA_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_OLOA_BIT))
          SC_SPCF_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_SPCF_BIT))
          SC_MPCF_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_MPCF_BIT))
          SC_GPFO_OUTPUT = IAND(OGROUT(INT_SC_NUM),IBIT(GROUT_GPFO_BIT))
+         IF (RSA_ACTIVE) THEN
+            IF ((SC_SPCF_OUTPUT > 0) .OR. (SC_MPCF_OUTPUT > 0) .OR. (SC_GPFO_OUTPUT > 0)) THEN
+               RSA_UNSUPPORTED_OUTPUTS = .TRUE.
+            ENDIF
+         ENDIF
 
                                                            ! Write message to screen
          IF      ((SOL_NAME(1: 7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'NLSTATIC') .OR.                                            &
@@ -798,6 +1126,207 @@ j_do: DO JVEC=1,NUM_SOLNS
             ENDIF
             UG_COL(I) = UGV
          ENDDO
+         IF (RSA_ACTIVE) THEN
+            IF ((SOL_NAME(1:5) == 'MODES') .AND. ALLOCATED(MPFACTOR_N6)) THEN
+               IF ((RSA_COMP >= 1) .AND. (RSA_COMP <= 6)) THEN
+                  IF (DABS(MPFACTOR_N6(JVEC,RSA_COMP)) <= EPS1) THEN
+                     RSA_MPF6_BASIC(1:6) = ZERO
+                     IF (DABS(GEN_MASS(JVEC)) > EPS1) THEN
+                        DO K=1,6
+                           RSA_RBG_COL(:,1) = RBGLOBAL_GSET(:,K)
+                           CALL MATMULT_SFF ( 'MGG', NDOFG, NDOFG, NTERM_MGG, SYM_MGG, I_MGG, J_MGG, MGG, 'RSA_RBG', NDOFG, 1,  &
+                                              RSA_RBG_COL, 'N', 'MGG*RSA_RBG', ONE, RSA_MRRB_COL )
+                           DO I=1,NDOFG
+                              RSA_MPF6_BASIC(K) = RSA_MPF6_BASIC(K) + UG_COL(I)*RSA_MRRB_COL(I,1)
+                           ENDDO
+                           RSA_MPF6_BASIC(K) = RSA_MPF6_BASIC(K)/GEN_MASS(JVEC)
+                        ENDDO
+                        MPFACTOR_N6(JVEC,1:6) = RSA_MPF6_BASIC(1:6)
+                     ENDIF
+                  ENDIF
+               ENDIF
+            ENDIF
+            IF ((SOL_NAME(1:5) == 'MODES') .AND. (RSA_COMP_ROW > 0) .AND. (NDOFS > 0)) THEN
+               IF (ALLOCATED(MPFACTOR_NR)) THEN
+                  IF (SIZE(MPFACTOR_NR,2) >= RSA_COMP_ROW) THEN
+                     IF (DABS(MPFACTOR_NR(JVEC,RSA_COMP_ROW)) <= EPS1) THEN
+                        IF ((.NOT.ALLOCATED(RSA_UF_TMP )) .AND. (NDOFF > 0)) ALLOCATE(RSA_UF_TMP (NDOFF))
+                        IF ((.NOT.ALLOCATED(RSA_QS_TMP )) .AND. (NDOFS > 0)) ALLOCATE(RSA_QS_TMP (NDOFS))
+                        IF ((.NOT.ALLOCATED(RSA_QSK_TMP)) .AND. (NDOFS > 0)) ALLOCATE(RSA_QSK_TMP(NDOFS))
+                        IF ((.NOT.ALLOCATED(RSA_QSM_TMP)) .AND. (NDOFS > 0)) ALLOCATE(RSA_QSM_TMP(NDOFS))
+                        IF (.NOT.ALLOCATED(RSA_QGS_TMP)) ALLOCATE(RSA_QGS_TMP(NDOFG))
+                        RSA_QGS_TMP = ZERO
+                        IF (NDOFF > 0) RSA_UF_TMP = ZERO
+                        RSA_QS_TMP  = ZERO
+                        RSA_QSK_TMP = ZERO
+                        RSA_QSM_TMP = ZERO
+                        IF (NDOFF > 0) THEN
+                           CALL TDOF_COL_NUM ( 'F ', F_SET_COL )
+                           K = 0
+                           DO I=1,NDOFG
+                              IF (TDOFI(I,F_SET_COL) > 0) THEN
+                                 K = K + 1
+                                 RSA_UF_TMP(K) = UG_COL(I)
+                              ENDIF
+                           ENDDO
+                        ENDIF
+                        IF ((NDOFF > 0) .AND. (NTERM_KFS > 0)) THEN
+                           CALL MATMULT_SFF ( 'KSF ', NDOFS, NDOFF, NTERM_KFS, SYM_KFS, I_KSF, J_KSF, KSF, 'RSA_UF', NDOFF, 1,   &
+                                              RSA_UF_TMP, 'Y', 'RSA_QSK', ONE, RSA_QSK_TMP )
+                        ENDIF
+                        IF ((NDOFF > 0) .AND. (NTERM_MFS > 0)) THEN
+                           CALL MATMULT_SFF ( 'MSF', NDOFS, NDOFF, NTERM_MFS, SYM_MFS, I_MSF, J_MSF, MSF, 'RSA_UF', NDOFF, 1,     &
+                                              RSA_UF_TMP, 'Y', 'RSA_QSM', -EIGEN_VAL(JVEC), RSA_QSM_TMP )
+                        ENDIF
+                        RSA_QS_TMP = RSA_QSK_TMP + RSA_QSM_TMP
+                        IF (DABS(EIGEN_VAL(JVEC)*GEN_MASS(JVEC)) > EPS1) THEN
+                           CALL TDOF_COL_NUM ( 'S ', S_SET_COL )
+                           CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
+                           CALL TDOF_COL_NUM ( 'R ', R_SET_COL )
+                           DO TDOF_ROW=1,NDOFG
+                              SDOF = TDOF(TDOF_ROW,S_SET_COL)
+                              GDOF = TDOF(TDOF_ROW,G_SET_COL)
+                              RDOF = TDOF(TDOF_ROW,R_SET_COL)
+                              IF ((SDOF > 0) .AND. (GDOF > 0)) THEN
+                                 RSA_QGS_TMP(GDOF) = RSA_QS_TMP(SDOF)
+                              ENDIF
+                              IF ((RDOF > 0) .AND. (GDOF > 0)) THEN
+                                 MPFACTOR_NR(JVEC,RDOF) = RSA_QGS_TMP(GDOF)/(EIGEN_VAL(JVEC)*GEN_MASS(JVEC))
+                              ENDIF
+                           ENDDO
+                        ENDIF
+                     ENDIF
+                  ENDIF
+               ENDIF
+            ENDIF
+            RSA_MODE_FREQ = DSQRT(DABS(EIGEN_VAL(JVEC)))/(TWO*PI)
+            RSA_MODE_TABLE_ID = RSA_TABLE_ID
+            RSA_MODE_TABLE_ID_2 = RSA_TABLE_ID_2
+            RSA_MODE_SPEC_WT_1 = RSA_SPEC_WT_1
+            RSA_MODE_SPEC_WT_2 = RSA_SPEC_WT_2
+            RSA_MODE_DAMP = RSA_DAMP
+            IF (RSA_FREQ_DEP_DAMP) THEN
+               RSA_DAMP_TARGET = RS_GET_TABDMP1_DAMP_AT_FREQ ( RS_SDAMP_SID, RSA_MODE_FREQ )
+               IF (RSA_DAMP_TARGET > 0.0D0) THEN
+                  RSA_MODE_TABLE_ID = RS_SPECSEL_TABLED1(1)
+                  RSA_MODE_TABLE_ID_2 = 0
+                  RSA_MODE_SPEC_WT_1 = ONE
+                  RSA_MODE_SPEC_WT_2 = ZERO
+                  RSA_MODE_DAMP = RSA_DAMP_TARGET
+                  RSA_MODE_ILOW = 0
+                  RSA_MODE_IHIGH = 0
+                  RSA_MODE_DLOW = -1.0D0
+                  RSA_MODE_DHIGH = -1.0D0
+                  DO I=1,RS_NUM_SPECSEL
+                     IF (RS_SPECSEL_LINE(I) /= RSA_SPECSEL_LINE_ID) CYCLE
+                     IF (DABS(RS_SPECSEL_DAMP(I) - RSA_DAMP_TARGET) <= 1.0D-12) THEN
+                        RSA_MODE_TABLE_ID = RS_SPECSEL_TABLED1(I)
+                        RSA_MODE_DAMP = RS_SPECSEL_DAMP(I)
+                        RSA_MODE_TABLE_ID_2 = 0
+                        RSA_MODE_SPEC_WT_1 = ONE
+                        RSA_MODE_SPEC_WT_2 = ZERO
+                        RSA_MODE_ILOW = 0
+                        RSA_MODE_IHIGH = 0
+                        EXIT
+                     ENDIF
+                     IF (RS_SPECSEL_DAMP(I) <= RSA_DAMP_TARGET) THEN
+                        IF ((RSA_MODE_ILOW == 0) .OR. (RS_SPECSEL_DAMP(I) > RSA_MODE_DLOW)) THEN
+                           RSA_MODE_ILOW = I
+                           RSA_MODE_DLOW = RS_SPECSEL_DAMP(I)
+                        ENDIF
+                     ENDIF
+                     IF (RS_SPECSEL_DAMP(I) >= RSA_DAMP_TARGET) THEN
+                        IF ((RSA_MODE_IHIGH == 0) .OR. (RS_SPECSEL_DAMP(I) < RSA_MODE_DHIGH) .OR. (RSA_MODE_DHIGH < 0.0D0)) THEN
+                           RSA_MODE_IHIGH = I
+                           RSA_MODE_DHIGH = RS_SPECSEL_DAMP(I)
+                        ENDIF
+                     ENDIF
+                  ENDDO
+                  IF ((RSA_MODE_TABLE_ID_2 == 0) .AND. (RSA_MODE_ILOW > 0) .AND. (RSA_MODE_IHIGH > 0) .AND.                      &
+                      (RSA_MODE_ILOW /= RSA_MODE_IHIGH) .AND. (RSA_MODE_DHIGH > RSA_MODE_DLOW)) THEN
+                     RSA_MODE_TABLE_ID = RS_SPECSEL_TABLED1(RSA_MODE_ILOW)
+                     RSA_MODE_TABLE_ID_2 = RS_SPECSEL_TABLED1(RSA_MODE_IHIGH)
+                     RSA_MODE_DAMP = RSA_DAMP_TARGET
+                     RSA_MODE_SPEC_WT_1 = (RSA_MODE_DHIGH - RSA_DAMP_TARGET)/(RSA_MODE_DHIGH - RSA_MODE_DLOW)
+                     RSA_MODE_SPEC_WT_2 = (RSA_DAMP_TARGET - RSA_MODE_DLOW)/(RSA_MODE_DHIGH - RSA_MODE_DLOW)
+                  ELSE IF ((RSA_MODE_TABLE_ID_2 == 0) .AND. (RSA_MODE_ILOW > 0)) THEN
+                     RSA_MODE_TABLE_ID = RS_SPECSEL_TABLED1(RSA_MODE_ILOW)
+                     RSA_MODE_DAMP = RS_SPECSEL_DAMP(RSA_MODE_ILOW)
+                  ELSE IF ((RSA_MODE_TABLE_ID_2 == 0) .AND. (RSA_MODE_IHIGH > 0)) THEN
+                     RSA_MODE_TABLE_ID = RS_SPECSEL_TABLED1(RSA_MODE_IHIGH)
+                     RSA_MODE_DAMP = RS_SPECSEL_DAMP(RSA_MODE_IHIGH)
+                  ENDIF
+               ENDIF
+            ENDIF
+            RSA_AMP = RSA_DLOAD_SCALE*(RSA_MODE_SPEC_WT_1*RS_INTERP_AMP(RSA_MODE_FREQ, RSA_GACC, RSA_MODE_TABLE_ID))
+            IF (RSA_MODE_TABLE_ID_2 > 0) THEN
+               RSA_AMP = RSA_AMP + RSA_DLOAD_SCALE*RSA_MODE_SPEC_WT_2*RS_INTERP_AMP(RSA_MODE_FREQ, RSA_GACC, RSA_MODE_TABLE_ID_2)
+            ENDIF
+            RSA_SD  = RSA_AMP/MAX(DABS(EIGEN_VAL(JVEC)),EPS1)
+            RSA_MODE_SD(JVEC) = RSA_SD
+            RSA_MODE_OMEGA(JVEC) = DSQRT(DABS(EIGEN_VAL(JVEC)))
+            RSA_MODE_DAMPING(JVEC) = RSA_MODE_DAMP
+            RSA_ROW_MPF = ZERO
+            IF ((RSA_COMP_ROW > 0) .AND. ALLOCATED(TR6_MEFM) .AND. ALLOCATED(MPFACTOR_N6)) THEN
+               DO K=1,6
+                  RSA_ROW_MPF = RSA_ROW_MPF + TR6_MEFM(RSA_COMP_ROW,K)*MPFACTOR_N6(JVEC,K)
+               ENDDO
+            ENDIF
+            IF ((RSA_DAMP_MIN < 0.0D0) .OR. (RSA_MODE_DAMP < RSA_DAMP_MIN)) RSA_DAMP_MIN = RSA_MODE_DAMP
+            IF ((RSA_DAMP_MAX < 0.0D0) .OR. (RSA_MODE_DAMP > RSA_DAMP_MAX)) RSA_DAMP_MAX = RSA_MODE_DAMP
+            RSA_GAMMA = ZERO
+            RSA_MODE_GAMMA_ALT(JVEC) = ZERO
+            RSA_SCALE_NORM = ZERO
+            DO K=1,6
+               RSA_MODE_GAMMA_ALT(JVEC) = RSA_MODE_GAMMA_ALT(JVEC) + RS_SUPORT_COMP_SCALE(K)*MPFACTOR_N6(JVEC,K)
+               RSA_SCALE_NORM = RSA_SCALE_NORM + DABS(RS_SUPORT_COMP_SCALE(K))
+            ENDDO
+            IF (RSA_SCALE_NORM > EPS1) THEN
+               RSA_MODE_GAMMA_ALT(JVEC) = RSA_MODE_GAMMA_ALT(JVEC)/RSA_SCALE_NORM
+            ENDIF
+            IF (DABS(RSA_MODE_GAMMA_ALT(JVEC)) <= EPS1) THEN
+               RSA_MODE_GAMMA_ALT(JVEC) = MPFACTOR_N6(JVEC,RSA_COMP)
+            ENDIF
+            IF (RSA_COMP_ROW > 0) THEN
+               IF (ALLOCATED(MPFACTOR_NR)) THEN
+                  IF (SIZE(MPFACTOR_NR,2) >= RSA_COMP_ROW) THEN
+                     IF (DABS(MPFACTOR_NR(JVEC,RSA_COMP_ROW)) > EPS1) THEN
+                        RSA_MODE_GAMMA_ALT(JVEC) = MPFACTOR_NR(JVEC,RSA_COMP_ROW)
+                     ENDIF
+                  ENDIF
+               ENDIF
+            ENDIF
+            IF ((RSA_COMP >= 1) .AND. (RSA_COMP <= 3) .AND. (RS_NUM_SUPORT == 1)) THEN
+               RSA_GAMMA = MPFACTOR_N6(JVEC,RSA_COMP)
+            ELSE IF ((RSA_COMP_ROW > 0) .AND. ALLOCATED(TR6_MEFM) .AND. ALLOCATED(RSA_RBG_COL) .AND. ALLOCATED(RSA_MRRB_COL)) THEN
+               RSA_RBG_COL(:,1) = ZERO
+               DO K=1,6
+                  RSA_RBG_COL(:,1) = RSA_RBG_COL(:,1) + TR6_MEFM(RSA_COMP_ROW,K)*RBGLOBAL_GSET(:,K)
+               ENDDO
+               CALL MATMULT_SFF ( 'MGG', NDOFG, NDOFG, NTERM_MGG, SYM_MGG, I_MGG, J_MGG, MGG, 'RSA_RBG', NDOFG, 1, RSA_RBG_COL,   &
+                                  'N', 'MGG*RSA_RBG', ONE, RSA_MRRB_COL )
+               DO I=1,NDOFG
+                  RSA_GAMMA = RSA_GAMMA + UG_COL(I)*RSA_MRRB_COL(I,1)
+               ENDDO
+               RSA_GAMMA = RSA_GAMMA/MAX(GEN_MASS(JVEC),EPS1)
+            ELSE
+               RSA_GAMMA = RSA_MODE_GAMMA_ALT(JVEC)
+            ENDIF
+            RSA_MODE_GAMMA(JVEC) = RSA_GAMMA
+            RSA_MODE_SCALE = RSA_GAMMA*RSA_SD
+            DO I=1,NDOFG
+               RSA_MODE_RESP(I,JVEC) = RSA_MODE_SCALE*UG_COL(I)
+               IF (RSCOMB(1:3) == 'ABS') THEN
+                  RSA_UG_SRSS(I) = RSA_UG_SRSS(I) + DABS(RSA_MODE_RESP(I,JVEC))
+                  RSA_VG_SRSS(I) = RSA_VG_SRSS(I) + DABS(RSA_MODE_OMEGA(JVEC)*RSA_MODE_RESP(I,JVEC))
+                  RSA_AG_SRSS(I) = RSA_AG_SRSS(I) + DABS(EIGEN_VAL(JVEC)*RSA_MODE_RESP(I,JVEC))
+               ELSE
+                  RSA_UG_SRSS(I) = RSA_UG_SRSS(I) + RSA_MODE_RESP(I,JVEC)*RSA_MODE_RESP(I,JVEC)
+                  RSA_VG_SRSS(I) = RSA_VG_SRSS(I) + (RSA_MODE_OMEGA(JVEC)*RSA_MODE_RESP(I,JVEC))**2
+                  RSA_AG_SRSS(I) = RSA_AG_SRSS(I) + (EIGEN_VAL(JVEC)*RSA_MODE_RESP(I,JVEC))**2
+               ENDIF
+            ENDDO
+         ENDIF
 
          ! If this is a CB soln and JVEC <= NDOFR+NVEC, formulate a col of PHIXG from data in file L5B. Otherwise zero
          IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
@@ -830,12 +1359,14 @@ j_do: DO JVEC=1,NUM_SOLNS
                CALL LINK_MESSAGE_I('PROCESS ACCEL OUTPUT REQUESTS,                    "',JVEC)
                CALL OFP1 ( JVEC, 'ACCE', SC_ACCE_OUTPUT, FEMAP_SET_ID, ITG, OT4_GROW, ITABLE, NEW_RESULT )
 !              NEW_RESULT = .FALSE.
+            ELSE IF (RSA_ACTIVE) THEN
+               CONTINUE
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,9453)
-               IF (SUPWARN == 'N') THEN
+                IF (SUPWARN == 'N') THEN
                   WRITE(F06,9453)
-               ENDIF
+                ENDIF
             ENDIF
          ENDIF
 
@@ -994,6 +1525,11 @@ j_do: DO JVEC=1,NUM_SOLNS
          IF((SC_ELFE_OUTPUT > 0) .OR. (SC_ELFN_OUTPUT > 0) .OR. (SC_STRE_OUTPUT > 0) .OR. (SC_STRN_OUTPUT > 0) .OR.                &
             ! (ANY_U_P_OUTPUT > 0) .OR.
             ((WRITE_NEU_ELFO .OR. WRITE_NEU_STRE .OR. WRITE_NEU_STRN) .AND. (SOL_NAME(1:5) /= 'MODES'))) THEN
+            IF (RSA_ACTIVE) THEN
+               IF ((SC_ELFN_OUTPUT > 0) .OR. (SC_STRE_OUTPUT > 0) .OR. (SC_STRN_OUTPUT > 0)) THEN
+                  RSA_UNSUPPORTED_OUTPUTS = .TRUE.
+               ENDIF
+            ENDIF
             CALL LINK_MESSAGE_I('PROCESS ELEM FORCE/STRESS REQUESTS,               "',JVEC)
             IF ((DEBUG(176) == 0) .AND. (JVEC == 1)) THEN
                WRITE(ERR,98980)
@@ -1051,6 +1587,302 @@ j_do: DO JVEC=1,NUM_SOLNS
          ENDIF
 
       ENDDO j_do
+
+      IF (RSA_ACTIVE) THEN
+         IF (RSCOMB(1:3) == 'CQC') THEN
+            DO I=1,NDOFG
+               RSA_CQC_SUM = ZERO
+               RSA_VG_SRSS(I) = ZERO
+               RSA_AG_SRSS(I) = ZERO
+               DO JVEC=1,NUM_SOLNS
+                  RSA_OMEGA_I = RSA_MODE_OMEGA(JVEC)
+                  IF (RSA_OMEGA_I <= EPS1) CYCLE
+                  DO K=1,NUM_SOLNS
+                     RSA_OMEGA_J = RSA_MODE_OMEGA(K)
+                     IF (RSA_OMEGA_J <= EPS1) CYCLE
+                     IF (JVEC == K) THEN
+                        RSA_RHO = ONE
+                     ELSE
+                        RSA_BETA = RSA_OMEGA_J/RSA_OMEGA_I
+                        RSA_DAMP_CQC = 0.5D0*(RSA_MODE_DAMPING(JVEC) + RSA_MODE_DAMPING(K))
+                        RSA_RHO = (8.0D0*RSA_DAMP_CQC*RSA_DAMP_CQC*(ONE + RSA_BETA)*(RSA_BETA**1.5D0))/                        &
+                                  (((ONE - RSA_BETA*RSA_BETA)*(ONE - RSA_BETA*RSA_BETA)) +                                      &
+                                   (4.0D0*RSA_DAMP_CQC*RSA_DAMP_CQC*RSA_BETA*((ONE + RSA_BETA)*(ONE + RSA_BETA))))
+                     ENDIF
+                     RSA_CQC_SUM = RSA_CQC_SUM + RSA_RHO*RSA_MODE_RESP(I,JVEC)*RSA_MODE_RESP(I,K)
+                     RSA_VG_SRSS(I) = RSA_VG_SRSS(I) + RSA_RHO*(RSA_MODE_OMEGA(JVEC)*RSA_MODE_RESP(I,JVEC))*                   &
+                                                       (RSA_MODE_OMEGA(K)*RSA_MODE_RESP(I,K))
+                     RSA_AG_SRSS(I) = RSA_AG_SRSS(I) + RSA_RHO*(EIGEN_VAL(JVEC)*RSA_MODE_RESP(I,JVEC))*                         &
+                                                       (EIGEN_VAL(K)*RSA_MODE_RESP(I,K))
+                  ENDDO
+               ENDDO
+               RSA_UG_SRSS(I) = DSQRT(MAX(RSA_CQC_SUM,ZERO))
+               RSA_VG_SRSS(I) = DSQRT(MAX(RSA_VG_SRSS(I),ZERO))
+               RSA_AG_SRSS(I) = DSQRT(MAX(RSA_AG_SRSS(I),ZERO))
+               RSA_MAX_ABS = MAX(RSA_MAX_ABS, DABS(RSA_UG_SRSS(I)))
+            ENDDO
+         ELSE IF (RSCOMB(1:3) == 'ABS') THEN
+            DO I=1,NDOFG
+               RSA_MAX_ABS = MAX(RSA_MAX_ABS, DABS(RSA_UG_SRSS(I)))
+            ENDDO
+         ELSE
+            DO I=1,NDOFG
+               RSA_UG_SRSS(I) = DSQRT(MAX(RSA_UG_SRSS(I),ZERO))
+               RSA_VG_SRSS(I) = DSQRT(MAX(RSA_VG_SRSS(I),ZERO))
+               RSA_AG_SRSS(I) = DSQRT(MAX(RSA_AG_SRSS(I),ZERO))
+               RSA_MAX_ABS = MAX(RSA_MAX_ABS, DABS(RSA_UG_SRSS(I)))
+            ENDDO
+         ENDIF
+         WRITE(ERR,'(A)') ' '
+         WRITE(ERR,'(A)') ' SCRSPEC COMPATIBILITY SUMMARY (MINIMAL MODES PATH)'
+         IF (RSA_FREQ_DEP_DAMP) THEN
+            WRITE(ERR,'(A,I0,A,I0,A,I0,A,1ES14.6,A,1ES14.6,A,1ES14.6)') '   SUPORT grid=', RSA_GRID, ', component=', RSA_COMP,   &
+                           ', TABDMP1 SID=', RS_SDAMP_SID, ', damping_min=', RSA_DAMP_MIN, ', damping_max=', RSA_DAMP_MAX,       &
+                           ', max(|UG|)=', RSA_MAX_ABS
+            WRITE(ERR,'(A,I0)') '   SPECSEL line=', RSA_SPECSEL_LINE_ID
+         ELSE IF (RSA_TABLE_ID_2 > 0) THEN
+            WRITE(ERR,'(A,I0,A,I0,A,I0,A,I0,A,1ES14.6,A,1ES14.6,A,1ES14.6,A,1ES14.6)')                                          &
+               '   SUPORT grid=', RSA_GRID, ', component=', RSA_COMP, ', TABLED1 blend=', RSA_TABLE_ID, '/', RSA_TABLE_ID_2,      &
+               ', damping=', RSA_DAMP, ', w1=', RSA_SPEC_WT_1, ', w2=', RSA_SPEC_WT_2, ', max(|UG|)=', RSA_MAX_ABS
+         ELSE
+            WRITE(ERR,'(A,I0,A,I0,A,I0,A,1ES14.6,A,1ES14.6)') '   SUPORT grid=', RSA_GRID, ', component=', RSA_COMP,               &
+                                                               ', TABLED1=', RSA_TABLE_ID, ', damping=', RSA_DAMP, ', max(|UG|)=', RSA_MAX_ABS
+         ENDIF
+         IF ((RSA_COMP_ROW > 0) .AND. ALLOCATED(TR6_MEFM)) THEN
+            WRITE(ERR,'(A,I0,A,6(1ES14.6,1X))') '   R-set row=', RSA_COMP_ROW, ', TR6_MEFM=', (TR6_MEFM(RSA_COMP_ROW,K),K=1,6)
+         ELSE
+            WRITE(ERR,'(A)') '   No matching R-set row was found for the primary SUPORT DOF; fallback global-component weighting was used.'
+         ENDIF
+         IF (RSA_SUPORT_CONM2_MASS > EPS1) THEN
+            WRITE(ERR,'(A,1ES14.6,A,L1)') '   Primary SUPORT-grid CONM2 mass=', RSA_SUPORT_CONM2_MASS, ', zero-rigid-mode-found=', &
+                                           RSA_HAS_RIGID_ZERO_MODE
+         ENDIF
+         WRITE(ERR,'(A,6(1ES14.6,1X))') '   SUPORT comp scale=', (RS_SUPORT_COMP_SCALE(K),K=1,6)
+         IF (DISP_OUT(1:1) == 'Y') THEN
+            WRITE(ERR,'(A,A,A)') '   Combined RSA displacement output was assembled with ', TRIM(RSCOMB), ' across retained modes.'
+         ELSE
+            WRITE(ERR,'(A)') '   Combined RSA displacement output is available, but DISPLACEMENT output was not requested.'
+         ENDIF
+         WRITE(ERR,'(A)') '   First retained-mode diagnostics: mode, freq(Hz), Sd, gamma(active), gamma(alt-mpf), ratio(active/alt)'
+         DO JVEC=1,MIN(NUM_EIGENS,12)
+            IF (DABS(RSA_MODE_GAMMA_ALT(JVEC)) > EPS1) THEN
+               WRITE(ERR,'(5X,I0,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6)') JVEC,                                &
+                              RSA_MODE_OMEGA(JVEC)/(TWO*PI), RSA_MODE_SD(JVEC), RSA_MODE_GAMMA(JVEC), RSA_MODE_GAMMA_ALT(JVEC),  &
+                              RSA_MODE_GAMMA(JVEC)/RSA_MODE_GAMMA_ALT(JVEC)
+            ELSE
+               WRITE(ERR,'(5X,I0,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6,2X,A)') JVEC,                                      &
+                              RSA_MODE_OMEGA(JVEC)/(TWO*PI), RSA_MODE_SD(JVEC), RSA_MODE_GAMMA(JVEC), RSA_MODE_GAMMA_ALT(JVEC),  &
+                              'n/a'
+            ENDIF
+            IF ((RSA_COMP >= 1) .AND. (RSA_COMP <= 6)) THEN
+               IF ((RSA_COMP_ROW > 0) .AND. ALLOCATED(MPFACTOR_NR)) THEN
+                  IF (SIZE(MPFACTOR_NR,2) >= RSA_COMP_ROW) THEN
+                     WRITE(ERR,'(11X,A,1ES14.6,A,1ES14.6)') 'MPF_N6(comp)=', MPFACTOR_N6(JVEC,RSA_COMP), ', MPF_NR(row)=',       &
+                                                           MPFACTOR_NR(JVEC,RSA_COMP_ROW)
+                  ELSE
+                     WRITE(ERR,'(11X,A,1ES14.6)') 'MPF_N6(comp)=', MPFACTOR_N6(JVEC,RSA_COMP)
+                  ENDIF
+               ELSE
+                  WRITE(ERR,'(11X,A,1ES14.6)') 'MPF_N6(comp)=', MPFACTOR_N6(JVEC,RSA_COMP)
+               ENDIF
+               IF ((RSA_COMP_GDOF > 0) .AND. (RSA_COMP_GDOF <= NDOFG)) THEN
+                  WRITE(ERR,'(11X,A,1ES14.6,A,1ES14.6)') 'UG(suport dof)=', UG_COL(RSA_COMP_GDOF), ', TR6.MPF6=', RSA_ROW_MPF
+               ENDIF
+            ENDIF
+         ENDDO
+          IF (RSA_UNSUPPORTED_OUTPUTS) THEN
+             WRITE(ERR,'(A)') '   Requested constraint-force and element-result families remain on the normal modal path in this compatibility pass.'
+          ENDIF
+         WRITE(F06,'(A)') ' '
+         WRITE(F06,'(A)') ' SCRSPEC COMPATIBILITY SUMMARY (MINIMAL MODES PATH)'
+         IF (RSA_FREQ_DEP_DAMP) THEN
+            WRITE(F06,'(A,I0,A,I0,A,I0,A,1ES14.6,A,1ES14.6,A,1ES14.6)') '   SUPORT grid=', RSA_GRID, ', component=', RSA_COMP,   &
+                           ', TABDMP1 SID=', RS_SDAMP_SID, ', damping_min=', RSA_DAMP_MIN, ', damping_max=', RSA_DAMP_MAX,       &
+                           ', max(|UG|)=', RSA_MAX_ABS
+            WRITE(F06,'(A,I0)') '   SPECSEL line=', RSA_SPECSEL_LINE_ID
+         ELSE IF (RSA_TABLE_ID_2 > 0) THEN
+            WRITE(F06,'(A,I0,A,I0,A,I0,A,I0,A,1ES14.6,A,1ES14.6,A,1ES14.6,A,1ES14.6)')                                          &
+               '   SUPORT grid=', RSA_GRID, ', component=', RSA_COMP, ', TABLED1 blend=', RSA_TABLE_ID, '/', RSA_TABLE_ID_2,      &
+               ', damping=', RSA_DAMP, ', w1=', RSA_SPEC_WT_1, ', w2=', RSA_SPEC_WT_2, ', max(|UG|)=', RSA_MAX_ABS
+         ELSE
+            WRITE(F06,'(A,I0,A,I0,A,I0,A,1ES14.6,A,1ES14.6)') '   SUPORT grid=', RSA_GRID, ', component=', RSA_COMP,               &
+                                                               ', TABLED1=', RSA_TABLE_ID, ', damping=', RSA_DAMP, ', max(|UG|)=', RSA_MAX_ABS
+         ENDIF
+         IF ((RSA_COMP_ROW > 0) .AND. ALLOCATED(TR6_MEFM)) THEN
+            WRITE(F06,'(A,I0,A,6(1ES14.6,1X))') '   R-set row=', RSA_COMP_ROW, ', TR6_MEFM=', (TR6_MEFM(RSA_COMP_ROW,K),K=1,6)
+         ELSE
+            WRITE(F06,'(A)') '   No matching R-set row was found for the primary SUPORT DOF; fallback global-component weighting was used.'
+         ENDIF
+         IF (RSA_SUPORT_CONM2_MASS > EPS1) THEN
+            WRITE(F06,'(A,1ES14.6,A,L1)') '   Primary SUPORT-grid CONM2 mass=', RSA_SUPORT_CONM2_MASS, ', zero-rigid-mode-found=', &
+                                           RSA_HAS_RIGID_ZERO_MODE
+         ENDIF
+         WRITE(F06,'(A,6(1ES14.6,1X))') '   SUPORT comp scale=', (RS_SUPORT_COMP_SCALE(K),K=1,6)
+         IF (DISP_OUT(1:1) == 'Y') THEN
+            WRITE(F06,'(A,A,A)') '   Combined RSA displacement output was assembled with ', TRIM(RSCOMB), ' across retained modes.'
+         ELSE
+            WRITE(F06,'(A)') '   Combined RSA displacement output is available, but DISPLACEMENT output was not requested.'
+         ENDIF
+         WRITE(F06,'(A)') '   First retained-mode diagnostics: mode, freq(Hz), Sd, gamma(active), gamma(alt-mpf), ratio(active/alt)'
+         DO JVEC=1,MIN(NUM_EIGENS,12)
+            IF (DABS(RSA_MODE_GAMMA_ALT(JVEC)) > EPS1) THEN
+               WRITE(F06,'(5X,I0,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6)') JVEC,                                &
+                              RSA_MODE_OMEGA(JVEC)/(TWO*PI), RSA_MODE_SD(JVEC), RSA_MODE_GAMMA(JVEC), RSA_MODE_GAMMA_ALT(JVEC),  &
+                              RSA_MODE_GAMMA(JVEC)/RSA_MODE_GAMMA_ALT(JVEC)
+            ELSE
+               WRITE(F06,'(5X,I0,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6,2X,1ES14.6,2X,A)') JVEC,                                      &
+                              RSA_MODE_OMEGA(JVEC)/(TWO*PI), RSA_MODE_SD(JVEC), RSA_MODE_GAMMA(JVEC), RSA_MODE_GAMMA_ALT(JVEC),  &
+                              'n/a'
+            ENDIF
+            IF ((RSA_COMP >= 1) .AND. (RSA_COMP <= 6)) THEN
+               IF ((RSA_COMP_ROW > 0) .AND. ALLOCATED(MPFACTOR_NR)) THEN
+                  IF (SIZE(MPFACTOR_NR,2) >= RSA_COMP_ROW) THEN
+                     WRITE(F06,'(11X,A,1ES14.6,A,1ES14.6)') 'MPF_N6(comp)=', MPFACTOR_N6(JVEC,RSA_COMP), ', MPF_NR(row)=',       &
+                                                           MPFACTOR_NR(JVEC,RSA_COMP_ROW)
+                  ELSE
+                     WRITE(F06,'(11X,A,1ES14.6)') 'MPF_N6(comp)=', MPFACTOR_N6(JVEC,RSA_COMP)
+                  ENDIF
+               ELSE
+                  WRITE(F06,'(11X,A,1ES14.6)') 'MPF_N6(comp)=', MPFACTOR_N6(JVEC,RSA_COMP)
+               ENDIF
+               IF ((RSA_COMP_GDOF > 0) .AND. (RSA_COMP_GDOF <= NDOFG)) THEN
+                  WRITE(F06,'(11X,A,1ES14.6,A,1ES14.6)') 'UG(suport dof)=', UG_COL(RSA_COMP_GDOF), ', TR6.MPF6=', RSA_ROW_MPF
+               ENDIF
+            ENDIF
+         ENDDO
+         IF (RSA_UNSUPPORTED_OUTPUTS) THEN
+             WRITE(F06,'(A)') '   Requested constraint-force and element-result families remain on the normal modal path in this compatibility pass.'
+          ENDIF
+         IF (RSA_ELFE_CAPTURE .AND. (RSA_ELFE_NUM_ROWS > 0) .AND. (ANY_ELFE_OUTPUT > 0)) THEN
+            WRITE(F06,'(A)') ' '
+            WRITE(F06,'(A,A,A)') ' RESPONSE SPECTRUM ', TRIM(RSCOMB), ' COMBINED ELEMENT ENGINEERING FORCE SUMMARY (1D)'
+            WRITE(F06,'(A)') '   TYPE/EID/ITEM                                        COMBINED VALUE'
+            DO I=1,RSA_ELFE_NUM_ROWS
+               IF (RSCOMB(1:3) == 'ABS') THEN
+                  WRITE(F06,'(3X,A,2X,1ES14.6)') TRIM(RSA_ELFE_DESC(I)), RSA_ELFE_SUMABS(I)
+               ELSE
+                  WRITE(F06,'(3X,A,2X,1ES14.6)') TRIM(RSA_ELFE_DESC(I)), DSQRT(MAX(RSA_ELFE_SUMSQ(I),ZERO))
+               ENDIF
+            ENDDO
+         ELSE IF ((ANY_ELFE_OUTPUT > 0) .AND. (RSCOMB(1:3) == 'CQC')) THEN
+            WRITE(F06,'(A)') '   Combined RSA ELFORCE(ENGR) summary is not yet implemented for CQC.'
+         ENDIF
+
+         IF ((DISP_OUT(1:1) == 'Y') .OR. (DISP_OUT(2:2) == 'Y') .OR. (VELO_OUT(1:1) == 'Y') .OR. (VELO_OUT(2:2) == 'Y') .OR.    &
+             (ACCE_OUT(1:1) == 'Y') .OR. (ACCE_OUT(2:2) == 'Y') .OR. WRITE_NEU_DISP) THEN
+            RSA_NUM_OUT = 0
+            ALLOCATE(RSA_WRITE_OGEL(NGRID))
+            RSA_WRITE_OGEL = 'Y'
+            DO I=1,NGRID
+               IF ((IAND(GROUT(I,1),IBIT(GROUT_DISP_BIT)) <= 0) .AND. (IAND(GROUT(I,1),IBIT(GROUT_VELO_BIT)) <= 0) .AND.         &
+                   (IAND(GROUT(I,1),IBIT(GROUT_ACCE_BIT)) <= 0)) CYCLE
+               RSA_NUM_OUT = RSA_NUM_OUT + 1
+               GID_OUT_ARRAY(RSA_NUM_OUT,1)       = GRID(I,1)
+               GID_OUT_ARRAY(RSA_NUM_OUT,2)       = GRID(I,3)
+               GID_OUT_ARRAY(RSA_NUM_OUT,MELGP+1) = GRID(I,5)
+               CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_ID(I), IGRID )
+               ROW_NUM_START = TDOF_ROW_START(IGRID)
+               DO J=1,6
+                  CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
+                  TDOF_ROW = ROW_NUM_START + J - 1
+                  GDOF = TDOF(TDOF_ROW,G_SET_COL)
+                  OGEL(RSA_NUM_OUT,J) = RSA_UG_SRSS(GDOF)
+               ENDDO
+            ENDDO
+            IF (RSA_NUM_OUT > 0) THEN
+               INQUIRE ( UNIT=OP2, OPENED=RSA_OP2_OPEN )
+               RSA_WRITE_OP2_DISP = RSA_OP2_OPEN .AND. ((DISP_OUT(2:2) == 'Y') .OR. (DISP_OUT(1:1) == 'Y'))
+               RSA_WRITE_OP2_VELO = RSA_OP2_OPEN .AND. ((VELO_OUT(2:2) == 'Y') .OR. (VELO_OUT(1:1) == 'Y'))
+               RSA_WRITE_OP2_ACCE = RSA_OP2_OPEN .AND. ((ACCE_OUT(2:2) == 'Y') .OR. (ACCE_OUT(1:1) == 'Y'))
+               IF (RSA_WRITE_OP2_DISP) THEN
+                  ITABLE = -1
+                  NEW_RESULT = .TRUE.
+                  CALL WRITE_GRD_OP2_OUTPUTS ( 0, RSA_NUM_OUT, 'DISP', ITABLE, NEW_RESULT )
+               ENDIF
+               IF (DISP_OUT(1:1) == 'Y') THEN
+                  WRITE(F06,'(A)') ' '
+                  WRITE(F06,'(A,A,A)') ' RESPONSE SPECTRUM ', TRIM(RSCOMB), ' COMBINED DISPLACEMENT VECTOR'
+                  IF (RSA_FREQ_DEP_DAMP) THEN
+                     WRITE(F06,'(A,I0,A,I0,A,1ES14.6,A,1ES14.6)') '   Based on subcase ', SCNUM(1), ', TABDMP1 SID=',            &
+                                 RS_SDAMP_SID, ', damping_min=', RSA_DAMP_MIN, ', damping_max=', RSA_DAMP_MAX
+                  ELSE IF (RSA_TABLE_ID_2 > 0) THEN
+                     WRITE(F06,'(A,I0,A,I0,A,I0,A,1ES14.6,A,1ES14.6,A,1ES14.6)') '   Based on subcase ', SCNUM(1),               &
+                                 ', TABLED1 blend=', RSA_TABLE_ID, '/', RSA_TABLE_ID_2, ', damping=', RSA_DAMP,                  &
+                                 ', w1=', RSA_SPEC_WT_1, ', w2=', RSA_SPEC_WT_2
+                  ELSE
+                     WRITE(F06,'(A,I0,A,I0,A,1ES14.6)') '   Based on subcase ', SCNUM(1), ', TABLED1=', RSA_TABLE_ID,            &
+                                                         ', damping=', RSA_DAMP
+                  ENDIF
+                  WRITE(F06,*)
+                  CALL WRITE_GRD_PRT_OUTPUTS ( 1, RSA_NUM_OUT, 'DISP', 'Y', 'Y', RSA_WRITE_OGEL )
+               ENDIF
+               IF (WRITE_NEU_DISP .AND. (ANY_DISP_OUTPUT > 0)) THEN
+                  CALL WRITE_FEMAP_GRID_VECS ( RSA_UG_SRSS, FEMAP_SET_ID, 'DISP' )
+               ENDIF
+
+               IF ((VELO_OUT(2:2) == 'Y') .OR. (VELO_OUT(1:1) == 'Y')) THEN
+                  DO I=1,RSA_NUM_OUT
+                     CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GID_OUT_ARRAY(I,1), IGRID )
+                     ROW_NUM_START = TDOF_ROW_START(IGRID)
+                     DO J=1,6
+                        CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
+                        TDOF_ROW = ROW_NUM_START + J - 1
+                        GDOF = TDOF(TDOF_ROW,G_SET_COL)
+                        OGEL(I,J) = RSA_VG_SRSS(GDOF)
+                     ENDDO
+                  ENDDO
+                  IF (RSA_WRITE_OP2_VELO) THEN
+                     ITABLE = -1
+                     NEW_RESULT = .TRUE.
+                     CALL WRITE_GRD_OP2_OUTPUTS ( 0, RSA_NUM_OUT, 'VELO', ITABLE, NEW_RESULT )
+                  ENDIF
+                  IF (VELO_OUT(1:1) == 'Y') THEN
+                     WRITE(F06,'(A)') ' '
+                     WRITE(F06,'(A,A,A)') ' RESPONSE SPECTRUM ', TRIM(RSCOMB), ' COMBINED VELOCITY VECTOR'
+                     WRITE(F06,*)
+                     CALL WRITE_GRD_PRT_OUTPUTS ( 1, RSA_NUM_OUT, 'VELO', 'Y', 'Y', RSA_WRITE_OGEL )
+                  ENDIF
+               ENDIF
+
+               IF ((ACCE_OUT(2:2) == 'Y') .OR. (ACCE_OUT(1:1) == 'Y')) THEN
+                  DO I=1,RSA_NUM_OUT
+                     CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GID_OUT_ARRAY(I,1), IGRID )
+                     ROW_NUM_START = TDOF_ROW_START(IGRID)
+                     DO J=1,6
+                        CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
+                        TDOF_ROW = ROW_NUM_START + J - 1
+                        GDOF = TDOF(TDOF_ROW,G_SET_COL)
+                        OGEL(I,J) = RSA_AG_SRSS(GDOF)
+                     ENDDO
+                  ENDDO
+                  IF (RSA_WRITE_OP2_ACCE) THEN
+                     ITABLE = -1
+                     NEW_RESULT = .TRUE.
+                     CALL WRITE_GRD_OP2_OUTPUTS ( 0, RSA_NUM_OUT, 'ACCE', ITABLE, NEW_RESULT )
+                  ENDIF
+                  IF (ACCE_OUT(1:1) == 'Y') THEN
+                     WRITE(F06,'(A)') ' '
+                     WRITE(F06,'(A,A,A)') ' RESPONSE SPECTRUM ', TRIM(RSCOMB), ' COMBINED ACCELERATION VECTOR'
+                     WRITE(F06,*)
+                     CALL WRITE_GRD_PRT_OUTPUTS ( 1, RSA_NUM_OUT, 'ACCE', 'Y', 'Y', RSA_WRITE_OGEL )
+                  ENDIF
+               ENDIF
+            ENDIF
+            DEALLOCATE(RSA_WRITE_OGEL)
+         ENDIF
+         DEALLOCATE(RSA_MODE_DAMPING)
+         DEALLOCATE(RSA_MODE_GAMMA)
+         DEALLOCATE(RSA_MODE_GAMMA_ALT)
+         DEALLOCATE(RSA_MODE_SD)
+         DEALLOCATE(RSA_MODE_OMEGA)
+         DEALLOCATE(RSA_MODE_RESP)
+         DEALLOCATE(RSA_VG_SRSS)
+         DEALLOCATE(RSA_AG_SRSS)
+         DEALLOCATE(RSA_UG_SRSS)
+         IF (ALLOCATED(RSA_ELFE_SUMSQ )) DEALLOCATE(RSA_ELFE_SUMSQ )
+         IF (ALLOCATED(RSA_ELFE_SUMABS)) DEALLOCATE(RSA_ELFE_SUMABS)
+         IF (ALLOCATED(RSA_ELFE_DESC  )) DEALLOCATE(RSA_ELFE_DESC  )
+      ENDIF
 
       !IF (POST /= 0) THEN
       !ENDIF
@@ -1190,11 +2022,11 @@ j_do: DO JVEC=1,NUM_SOLNS
 !-----------------------------------------------------------------------------------------------------------------------------------
 ! If sol is eigens (not CB) then MPFACTOR, MEFFMASS were calc'd in OFP2
 
-      IF ((MPFACTOR_CALC  == 'Y') .AND. (ZERO_GEN_STIFF == 'N')) THEN
+      IF (USER_REQ_MPFACTOR .AND. (ZERO_GEN_STIFF == 'N')) THEN
          CALL WRITE_MPFACTOR
       ENDIF
 
-      IF ((MEFFMASS_CALC == 'Y') .AND. (ZERO_GEN_STIFF == 'N')) THEN
+      IF (USER_REQ_MEFFMASS .AND. (ZERO_GEN_STIFF == 'N')) THEN
          IF (DABS(WTMASS) < EPS1) THEN
             WRITE(ERR,9991)
             IF (SUPINFO == 'N') THEN

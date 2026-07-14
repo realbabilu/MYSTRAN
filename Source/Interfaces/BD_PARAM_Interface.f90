@@ -49,13 +49,15 @@
                                          CBEAMAREA_VAL   , CBEAMSHR        , CBEAMSHR_PID    , CBEAMSHR_VAL    , &
                                          MCBEAMAREA_PID  , MCBEAMSHR_PID   , NCBEAMAREA_PID  , NCBEAMSHR_PID   , CHKGRDS         , &
                                          CUSERIN         , CUSERIN_EID     , CUSERIN_IN4     , CUSERIN_PID     , CUSERIN_SPNT_ID , &
-                                         CUSERIN_XSET    , CUSERIN_COMPTYP , DARPACK         ,                                     &
+                                         CUSERIN_XSET    , CUSERIN_COMPTYP , DARPACK         , RSPECTRA        , SCRSPEC        , &
+                                         RSCOMB          , RSTYPE          ,                                                         &
                                          DELBAN          , EIGESTL         , EIGNORM2        , ELFORCEN        , EPSERR          , &
                                          EQCHK_REF_GRID  , EQCHK_NORM      , EQCHK_OUTPUT    , EQCHK_TINY      ,                   &
                                          EPSIL           , EMP0_PAUSE      , ESP0_PAUSE      , F06_COL_START   ,                   &
                                          GRDPNT          , GRIDSEQ         , HEXAXIS         ,                                     &
                                          IORQ1M          , IORQ1S          , IORQ1B          , IORQ2B          , IORQ2T          , &
-                                         ITMAX           , KLLRAT          , KOORAT          , LANCMETH        , MATSPARS        , &
+                                         ITMAX           , KLLRAT          , KOORAT          , LANCMETH        , LANCMATTYPE     , &
+                                         MATSPARS        ,                                                                         &
                                          MEMAFAC         , MIN4TRED        , MXALLOCA        , MAXRATIO        ,                   &
                                          MEFMCORD        , MEFMLOC         , MEFMGRID        ,                                     &
                                          MPFOUT          , MXITERI         , MXITERL         , OTMSKIP         , POST            , &

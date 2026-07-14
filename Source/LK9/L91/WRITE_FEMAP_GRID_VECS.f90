@@ -39,7 +39,7 @@
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'WRITE_FEMAP_GRID_VECS'
-      CHARACTER(LEN=*), INTENT(IN)    :: WHAT              ! Indicator if GRID_VEC is DISP, OLOA, SPCF or MPCF
+      CHARACTER(LEN=*), INTENT(IN)    :: WHAT              ! Indicator if GRID_VEC is DISP, VELO, ACCE, OLOA, SPCF or MPCF
       CHARACTER(LEN= 5*BYTE)          :: TITLE1(4,2)       ! Titles for vectors written to NEU
       CHARACTER(LEN=20*BYTE)          :: TITLE2(2)         ! Titles for vectors written to NEU
 
@@ -86,6 +86,18 @@
          TITLE1(1,2) = 'Total'
          TITLE2(1) = ' Translation'
          TITLE2(2) = ' Rotation'
+      ELSE IF (WHAT == 'VELO') THEN
+         VEC_ID_OFFSET = 50000
+         TITLE1(1,1) = 'Total'
+         TITLE1(1,2) = 'Total'
+         TITLE2(1) = ' Velocity'
+         TITLE2(2) = ' RotVelocity'
+      ELSE IF (WHAT == 'ACCE') THEN
+         VEC_ID_OFFSET = 60000
+         TITLE1(1,1) = 'Total'
+         TITLE1(1,2) = 'Total'
+         TITLE2(1) = ' Accel'
+         TITLE2(2) = ' RotAccel'
       ELSE IF (WHAT == 'OLOA') THEN
          VEC_ID_OFFSET = 20000
          TITLE1(1,1) = 'Total'
@@ -135,7 +147,7 @@
          TOTR_VEC(I) = DSQRT( R1_VEC(I)*R1_VEC(I) + R2_VEC(I)*R2_VEC(I) + R3_VEC(I)*R3_VEC(I) )
          TOTT_VEC(I) = DSQRT( T1_VEC(I)*T1_VEC(I) + T2_VEC(I)*T2_VEC(I) + T3_VEC(I)*T3_VEC(I) )
 
-         IF (WHAT == 'DISP') THEN
+         IF ((WHAT == 'DISP') .OR. (WHAT == 'VELO') .OR. (WHAT == 'ACCE')) THEN
             DIS(1) = T1_VEC(I)
             DIS(2) = T2_VEC(I)
             DIS(3) = T3_VEC(I)

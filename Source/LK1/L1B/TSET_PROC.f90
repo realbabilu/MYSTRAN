@@ -72,8 +72,8 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
       USE IOUNT1, ONLY                :  ERR, F06, SC1
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NGRID, NAOCARD, NUM_SUPT_CARDS,                                  &
-                                         NDOFL, NDOFM, NDOFO, NDOFR, NDOFS, NDOFSA, NDOFSG, NDOFSB, NDOFSE, NDOFSZ
-      USE PARAMS, ONLY                :  PRTTSET
+                                         NDOFL, NDOFM, NDOFO, NDOFR, NDOFS, NDOFSA, NDOFSG, NDOFSB, NDOFSE, NDOFSZ, SOL_NAME
+      USE PARAMS, ONLY                :  PRTTSET, SCRSPEC, SUPWARN
       USE TIMDAT, ONLY                :  TSEC
       USE DOF_TABLES, ONLY            :  TSET
       USE MODEL_STUF, ONLY            :  GRID
@@ -167,7 +167,14 @@
       NDOFR = 0
       IF (NUM_SUPT_CARDS > 0) THEN
          WRITE(SC1,12345,ADVANCE='NO') '       Process SUPORTs        ', CR13
-         CALL TSET_PROC_FOR_SUPORTS ( IERRT )
+         IF ((SOL_NAME(1:5) == 'MODES') .AND. (SCRSPEC == 'Y')) THEN
+            WRITE(ERR,'(A)') ' *WARNING    : MODES + PARAM,SCRSPEC leaves SUPORT out of the structural R-set so RSA compatibility does not alter the eigenproblem.'
+            IF (SUPWARN == 'N') THEN
+               WRITE(F06,'(A)') ' *WARNING    : MODES + PARAM,SCRSPEC leaves SUPORT out of the structural R-set so RSA compatibility does not alter the eigenproblem.'
+            ENDIF
+         ELSE
+            CALL TSET_PROC_FOR_SUPORTS ( IERRT )
+         ENDIF
       ENDIF
 
 ! ----------------------------------------------------------------------------------------------------------------------------------

@@ -552,6 +552,7 @@
       INTEGER(LONG), PARAMETER :: GROUT_MPCF_BIT      =   3      ! Bit pos in OGROUT, GROUT for MPC force print requests
       INTEGER(LONG), PARAMETER :: GROUT_OLOA_BIT      =   1      ! Bit pos in OGROUT, GROUT for OLOAD print requests
       INTEGER(LONG), PARAMETER :: GROUT_SPCF_BIT      =   2      ! Bit pos in OGROUT, GROUT for SPC force print requests
+      INTEGER(LONG), PARAMETER :: GROUT_VELO_BIT      =   6      ! Bit pos in OGROUT, GROUT for G.P. velocity print requests
 
       INTEGER(LONG), PARAMETER :: ELOUT_ELFE_BIT      =   1      ! Bit pos in OELOUT, ELOUT: print requests for elem engr forces
       INTEGER(LONG), PARAMETER :: ELOUT_ELFN_BIT      =   0      ! Bit pos in OELOUT, ELOUT: print requests for elem node forces

@@ -38,10 +38,10 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START, TDOFI
-      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MEFFMASS, MPFACTOR_N6
+      USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MEFFMASS, MPFACTOR_N6, MPFACTOR_NR
       USE MODEL_STUF, ONLY            :  ANY_SPCF_OUTPUT, ANY_MPCF_OUTPUT, GRID, GRID_ID, GROUT, MEFFMASS_CALC, MPFACTOR_CALC,  &
                                          MEFMLOC_SUB, MEFMGRID_SUB, MODEL_XCG, MODEL_YCG, MODEL_ZCG, RGRID
-      USE PARAMS, ONLY                :  AUTOSPC_SPCF, EPSIL, GRDPNT, MEFMCORD, MEFMGRID, MEFMLOC, OTMSKIP
+      USE PARAMS, ONLY                :  AUTOSPC_SPCF, EPSIL, GRDPNT, MEFMCORD, MEFMGRID, MEFMLOC, OTMSKIP, SCRSPEC
 
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE SPARSE_MATRICES, ONLY       :  I_GMN  , J_GMN  , GMN    , I_GMNt  , J_GMNt , GMNt   , I_HMN, J_HMN, HMN,                 &
@@ -89,6 +89,7 @@
       INTEGER(LONG)                   :: M_SET_COL         ! Col number in TDOF where the M-set DOF's exist
       INTEGER(LONG)                   :: N_SET_COL         ! Col number in TDOF where the N-set DOF's exist
       INTEGER(LONG)                   :: F_SET_COL         ! Col number in TDOF where the F-set DOF's exist
+      INTEGER(LONG)                   :: R_SET_COL         ! Col number in TDOF where the R-set DOF's exist
       INTEGER(LONG)                   :: S_SET_COL         ! Col number in TDOF where the S-set DOF's exist
       INTEGER(LONG)                   :: SA_SET_COL        ! Col number in TDOF where the SA-set DOF's exist
       INTEGER(LONG)                   :: GDOF              ! G-set DOF number
@@ -109,6 +110,7 @@
       INTEGER(LONG)                   :: XREF_GRID_ROW
 
       INTEGER(LONG)                   :: TDOF_ROW          ! Row no. in array TDOF to find GDOF DOF number
+      INTEGER(LONG)                   :: RDOF              ! R-set DOF number
 
       REAL(DOUBLE)                    :: DEN               ! Intermediate variable
       REAL(DOUBLE)                    :: MPF               ! Intermediate variable
@@ -375,6 +377,28 @@
                            MEFFMASS(JVEC,J) = GEN_MASS(JVEC)*MPF6_BASIC(J)*MPF6_BASIC(J)
                         ENDIF
                      ENDDO
+                     IF ((SCRSPEC == 'Y') .AND. (MPFACTOR_CALC == 'Y') .AND. ALLOCATED(MPFACTOR_NR)) THEN
+                        DEN = EIGEN_VAL(JVEC)*GEN_MASS(JVEC)
+                        CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
+                        CALL TDOF_COL_NUM ( 'R ', R_SET_COL )
+                        DO TDOF_ROW=1,NDOFG
+                           RDOF = TDOF(TDOF_ROW,R_SET_COL)
+                           IF (RDOF > 0) THEN
+                              GDOF = TDOF(TDOF_ROW,G_SET_COL)
+                              IF (GDOF > 0) THEN
+                                 MPFACTOR_NR(JVEC,RDOF) = QGs_COL(GDOF)/DEN
+                              ENDIF
+                           ENDIF
+                        ENDDO
+                     ENDIF
+                     IF ((SCRSPEC == 'Y') .AND. (JVEC <= 12)) THEN
+                        WRITE(ERR,'(A,I0,A,I0,A,L1,A,L1,A,6(1ES14.6,1X))')                                                          &
+                           ' *RSA OFP2 DBG: mode=', JVEC, ', subcase=', INT_SC_NUM, ', mpf_calc=', (MPFACTOR_CALC == 'Y'),        &
+                           ', mefm_calc=', (MEFFMASS_CALC == 'Y'), ', MPF6_BASIC=', (MPF6_BASIC(J),J=1,6)
+                        WRITE(F06,'(A,I0,A,I0,A,L1,A,L1,A,6(1ES14.6,1X))')                                                          &
+                           ' *RSA OFP2 DBG: mode=', JVEC, ', subcase=', INT_SC_NUM, ', mpf_calc=', (MPFACTOR_CALC == 'Y'),        &
+                           ', mefm_calc=', (MEFFMASS_CALC == 'Y'), ', MPF6_BASIC=', (MPF6_BASIC(J),J=1,6)
+                     ENDIF
 
                   ELSE
 
@@ -419,6 +443,19 @@
                      QGs_SHIFTED_SUM(6) = QGs_MEFM_SUM(6) - (XREF(1)*QGs_MEFM_SUM(2) - XREF(2)*QGs_MEFM_SUM(1))
 
                      DEN = EIGEN_VAL(JVEC)*GEN_MASS(JVEC)
+                     IF (MPFACTOR_CALC == 'Y') THEN
+                        CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
+                        CALL TDOF_COL_NUM ( 'R ', R_SET_COL )
+                        DO TDOF_ROW=1,NDOFG
+                           RDOF = TDOF(TDOF_ROW,R_SET_COL)
+                           IF (RDOF > 0) THEN
+                              GDOF = TDOF(TDOF_ROW,G_SET_COL)
+                              IF (GDOF > 0) THEN
+                                 MPFACTOR_NR(JVEC,RDOF) = QGs_COL(GDOF)/DEN
+                              ENDIF
+                           ENDIF
+                        ENDDO
+                     ENDIF
                      DO J=1,6
                         MPF = QGs_SHIFTED_SUM(J)/DEN
                         IF (MPFACTOR_CALC == 'Y') THEN

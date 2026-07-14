@@ -45,8 +45,10 @@
       LOGICAL                         :: WRITE_NEU_ELFO    = .FALSE.
       LOGICAL                         :: WRITE_NEU_STRE    = .FALSE.
       LOGICAL                         :: WRITE_NEU_STRN    = .FALSE.
+      LOGICAL                         :: RSA_ELFE_CAPTURE  = .FALSE.
 
       INTEGER(LONG)                   :: MAXREQ                ! Max number of rows needed for array OGEL
+      INTEGER(LONG)                   :: RSA_ELFE_NUM_ROWS = 0
 
       INTEGER(LONG)     , ALLOCATABLE :: GID_OUT_ARRAY(:,:)    ! Array of integer grid no's for some output in LINK9
 
@@ -64,5 +66,9 @@
 
       REAL(DOUBLE)      , ALLOCATABLE :: POLY_FIT_ERR(:)       ! Array of polynom fit errors for elems that extrapolate stress or
 !                                                                strain values from one set of output points to another
+      REAL(DOUBLE)                    :: RSA_MODE_SCALE = 0.0D0 ! Modal RSA scale applied to non-grid result recovery in LINK9
+      REAL(DOUBLE)      , ALLOCATABLE :: RSA_ELFE_SUMSQ(:)     ! Row-wise SRSS accumulator for RSA ELFORCE(ENGR) summaries
+      REAL(DOUBLE)      , ALLOCATABLE :: RSA_ELFE_SUMABS(:)    ! Row-wise ABS accumulator for RSA ELFORCE(ENGR) summaries
+      CHARACTER(132*BYTE), ALLOCATABLE:: RSA_ELFE_DESC(:)      ! Row descriptors for RSA ELFORCE(ENGR) summaries
 
       END MODULE LINK9_STUFF

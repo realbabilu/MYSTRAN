@@ -36,6 +36,7 @@
       USE CONSTANTS_1, ONLY           :  ZERO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
+      USE PARAMS, ONLY                :  SCRSPEC
       USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, MAXREQ, OGEL
       USE MODEL_STUF, ONLY            :  LABEL, SCNUM, SUBLOD, STITLE, TITLE
       USE MACHINE_PARAMS, ONLY        :  MACH_LARGE_NUM
@@ -85,7 +86,8 @@
 ! **********************************************************************************************************************************
 !  Make sure that WHAT is a valid value
 
-      IF ((WHAT == 'ACCE') .OR. (WHAT == 'DISP') .OR. (WHAT == 'OLOAD') .OR. (WHAT == 'SPCF') .OR. (WHAT == 'MPCF')) THEN
+      IF ((WHAT == 'ACCE') .OR. (WHAT == 'DISP') .OR. (WHAT == 'VELO') .OR. (WHAT == 'OLOAD') .OR. (WHAT == 'SPCF') .OR.          &
+          (WHAT == 'MPCF')) THEN
          CONTINUE
       ELSE
          WRITE(ERR,9100) WHAT
@@ -131,7 +133,9 @@
             ENDIF
             IF (MODE_INDEX_OUT <= 0) MODE_INDEX_OUT = JVEC
             WRITE(F06,9011) SCNUM(INT_SC_NUM)
-            WRITE(F06,9012) MODE_INDEX_OUT
+            IF (.NOT. ((SCRSPEC == 'Y') .AND. ((WHAT == 'DISP') .OR. (WHAT == 'VELO') .OR. (WHAT == 'ACCE')))) THEN
+               WRITE(F06,9012) MODE_INDEX_OUT
+            ENDIF
 
          ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN   ! Write info on what CB DOF the output is for
 
@@ -170,6 +174,8 @@
          IF (WHAT == 'ACCE') THEN
             IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                WRITE(F06,9314)
+            ELSE
+               WRITE(F06,9315)
             ENDIF
 
          ELSE IF (WHAT == 'DISP') THEN
@@ -180,10 +186,17 @@
             ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
                WRITE(F06,9323)
             ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
-               WRITE(F06,9323)
+               IF (SCRSPEC == 'Y') THEN
+                  WRITE(F06,9322)
+               ELSE
+                  WRITE(F06,9323)
+               ENDIF
             ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                WRITE(F06,9324)
             ENDIF
+
+         ELSE IF (WHAT == 'VELO') THEN
+            WRITE(F06,9325)
 
          ELSE IF (WHAT == 'OLOAD') THEN
             WRITE(F06,9331)
@@ -335,6 +348,9 @@
  9314 FORMAT(1X,'                                                C B   A C C E L E R A T I O N   O T M',/,                         &
              1X,'                                             (in global coordinate system at each grid)')
 
+ 9315 FORMAT(1X,'                                                      A C C E L E R A T I O N S',/,                                &
+             1X,'                                             (in global coordinate system at each grid)')
+
  9322 FORMAT(1X,'                                                      D I S P L A C E M E N T S',/,                               &
              1X,'                                             (in global coordinate system at each grid)')
 
@@ -342,6 +358,9 @@
              1X,'                                             (in global coordinate system at each grid)')
 
  9324 FORMAT(1X,'                                                C B   D I S P L A C E M E N T   O T M',/,                         &
+             1X,'                                             (in global coordinate system at each grid)')
+
+ 9325 FORMAT(1X,'                                                          V E L O C I T I E S',/,                                  &
              1X,'                                             (in global coordinate system at each grid)')
 
  9331 FORMAT(1X,'                                                    A P P L I E D    F O R C E S',/,                              &

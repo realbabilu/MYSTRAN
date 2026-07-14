@@ -67,8 +67,8 @@
                                          USERIN_ACT_COMPS, USERIN_ACT_GRIDS, USERIN_MAT_NAMES
       USE MODEL_STUF, ONLY            :  MPC_SIDS, MPCSIDS, MPCADD_SIDS
       USE MODEL_STUF, ONLY            :  SPC_SIDS, SPC1_SIDS, SPCSIDS, SPCADD_SIDS
-      USE MODEL_STUF, ONLY            :  ALL_SETS_ARRAY, ONE_SET_ARRAY, SETS_IDS, SC_ACCE, SC_DISP, SC_ELFN, SC_ELFE, SC_GPFO,     &
-                                         SC_MPCF, SC_OLOA, SC_SPCF, SC_STRE, SC_STRN, LOAD_SIDS, LOAD_FACS
+      USE MODEL_STUF, ONLY            :  ALL_SETS_ARRAY, ONE_SET_ARRAY, SETS_IDS, SC_ACCE, SC_DISP, SC_VELO, SC_ELFN, SC_ELFE,     &
+                                         SC_GPFO, SC_MPCF, SC_OLOA, SC_SPCF, SC_STRE, SC_STRN, LOAD_SIDS, LOAD_FACS
       USE MODEL_STUF, ONLY            :  ELDT, ELOUT, GROUT, OELOUT, OGROUT, LABEL, SCNUM, STITLE, SUBLOD, TITLE
       USE MODEL_STUF, ONLY            :  CC_EIGR_SID_SUB, CC_STATSUB_SUB, EIG_PARAMS, EIG_PARAMS_TYPE, IS_BUCKLING_SUBCASE,      &
                                          IS_MODES_SUBCASE, NUM_EIGENS_SUB, MEFFMASS_CALC_SUB, MPFACTOR_CALC_SUB,                 &
@@ -307,6 +307,30 @@
                CALL ALLOCATED_MEMORY ( NAME, MB_ALLOCATED, 'ALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
                DO I=1,LSUB
                   SC_DISP = 0
+               ENDDO
+            ELSE
+               WRITE(ERR,991) MB_ALLOCATED, NAME,SUBR_NAME, IERR
+               WRITE(F06,991) MB_ALLOCATED, NAME,SUBR_NAME, IERR
+               FATAL_ERR = FATAL_ERR + 1
+               JERR = JERR + 1
+            ENDIF
+         ENDIF
+
+         NAME = 'SC_VELO'
+         IF (ALLOCATED(SC_VELO)) THEN
+            WRITE(ERR,990) SUBR_NAME, NAME
+            WRITE(F06,990) SUBR_NAME, NAME
+            FATAL_ERR = FATAL_ERR + 1
+            JERR = JERR + 1
+         ELSE
+            ALLOCATE (SC_VELO(LSUB),STAT=IERR)
+            NROWS = LSUB
+            NCOLS = 1
+            MB_ALLOCATED = RLONG*REAL(LSUB)/ONEPP6
+            IF (IERR == 0) THEN
+               CALL ALLOCATED_MEMORY ( NAME, MB_ALLOCATED, 'ALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+               DO I=1,LSUB
+                  SC_VELO = 0
                ENDDO
             ELSE
                WRITE(ERR,991) MB_ALLOCATED, NAME,SUBR_NAME, IERR

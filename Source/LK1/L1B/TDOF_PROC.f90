@@ -66,7 +66,7 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, LDOFG, MTDOF, NDOFA, NDOFF, NDOFG, NDOFL, NDOFM, NDOFN, NDOFO,   &
                                          NDOFR, NDOFS, NDOFSA, NDOFSB, NDOFSE, NDOFSG, NDOFSZ, NGRID, NUM_USET_U1, NUM_USET_U2,    &
                                          SOL_NAME, WARN_ERR
-      USE PARAMS, ONLY                :  EIGESTL, PRTDOF
+      USE PARAMS, ONLY                :  EIGESTL, PRTDOF, SCRSPEC
       USE TIMDAT, ONLY                :  TSEC
       USE DOF_TABLES, ONLY            :  TSET, TDOF, TDOFI, TDOF_ROW_START, USET
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -506,10 +506,16 @@
       IF (NDOFR > 0) THEN
          IF (NDOFR < 6) THEN
             SET_NAME = 'R-SET'
-            WRITE(ERR,1304) SET_NAME, NDOFR
-            WRITE(F06,1304) SET_NAME, NDOFR
-            FATAL_ERR = FATAL_ERR + 1
-            CALL OUTA_HERE ( 'Y' )
+            IF ((SOL_NAME(1:5) == 'MODES') .AND. (SCRSPEC == 'Y')) THEN
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,2304) SET_NAME, NDOFR
+               WRITE(F06,2304) SET_NAME, NDOFR
+            ELSE
+               WRITE(ERR,1304) SET_NAME, NDOFR
+               WRITE(F06,1304) SET_NAME, NDOFR
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
          ENDIF
       ENDIF
 
@@ -534,6 +540,10 @@
 ! **********************************************************************************************************************************
  1304 FORMAT(' *ERROR  1304: AN ',A,' HAS BEEN DEFINED VIA SUPORT BULK DATA ENTRIES AND THEREFORE MUST HAVE AT LEAST 6 DOF IN IT.' &
                         ,/,14X,' HOWEVER, THERE WERE ONLY ',I2,' DOF DEFINED IN THIS SET')
+
+ 2304 FORMAT(' *WARNING 2304: AN ',A,' HAS BEEN DEFINED VIA SUPORT BULK DATA ENTRIES WITH ONLY ',I2,' DOF.'                        &
+                        ,/,14X,' THIS IS BEING ALLOWED ONLY FOR MODES + PARAM,SCRSPEC COMPATIBILITY PATHS.'                       &
+                        ,/,14X,' LEGACY MYSTRAN BEHAVIOR STILL REQUIRES AT LEAST 6 R-SET DOF OUTSIDE THIS NARROW CASE.')
 
  1308 FORMAT('  Array TDOF_ROW_START gives the row in array TDOF where the DOF data begins for the GRID listed below',//,          &
              '                  I     GRID   TDOF_ROW_START',/)

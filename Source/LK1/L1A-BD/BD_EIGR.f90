@@ -36,7 +36,10 @@
       USE MODEL_STUF, ONLY            :  CC_EIGR_SID, CC_EIGR_SID_SUB, CC_EIGR_SID_DECK, EIG_PARAMS
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_CRIT_DEF, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL,     &
                                          EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, EIG_SID, EIG_SIGMA,    &
-                                         EIG_VECS, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
+                                         EIG_VECS, MAXMIJ, MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT, EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, &
+                                         EIG_EXTRACT_SOURCE, EIG_FEAST_M0, EIG_FEAST_TOL_DIGITS, EIG_FEAST_MAX_LOOP,               &
+                                         EIG_FEAST_N_CONTOUR, EIG_FEAST_SEARCH_SCALE, EIG_SUBSPACE_NSUB, EIG_SUBSPACE_TOL,         &
+                                         EIG_SUBSPACE_MAX_ITER, EIG_DENSE_NEX
 
       USE BD_EIGR_USE_IFs
 
@@ -261,6 +264,9 @@
                   EIG_PARAMS(I_SUB)%METHOD           = EIG_METH
                   EIG_PARAMS(I_SUB)%NORM             = EIG_NORM
                   EIG_PARAMS(I_SUB)%LAP_MAT_TYPE     = EIG_LAP_MAT_TYPE
+                  EIG_PARAMS(I_SUB)%EXTRACT_METHOD   = EIG_EXTRACT_METHOD
+                  EIG_PARAMS(I_SUB)%EXTRACT_MODE     = EIG_EXTRACT_MODE
+                  EIG_PARAMS(I_SUB)%EXTRACT_SOURCE   = EIG_EXTRACT_SOURCE
                   EIG_PARAMS(I_SUB)%VECS             = EIG_VECS
                   EIG_PARAMS(I_SUB)%SID              = EIG_SID
                   EIG_PARAMS(I_SUB)%N1               = EIG_N1
@@ -270,6 +276,15 @@
                   EIG_PARAMS(I_SUB)%MODE             = EIG_MODE
                   EIG_PARAMS(I_SUB)%MSGLVL           = EIG_MSGLVL
                   EIG_PARAMS(I_SUB)%NCVFACL          = EIG_NCVFACL
+                  EIG_PARAMS(I_SUB)%FEAST_M0         = EIG_FEAST_M0
+                  EIG_PARAMS(I_SUB)%FEAST_TOL_DIGITS = EIG_FEAST_TOL_DIGITS
+                  EIG_PARAMS(I_SUB)%FEAST_MAX_LOOP   = EIG_FEAST_MAX_LOOP
+                  EIG_PARAMS(I_SUB)%FEAST_N_CONTOUR  = EIG_FEAST_N_CONTOUR
+                  EIG_PARAMS(I_SUB)%FEAST_SEARCH_SCALE = EIG_FEAST_SEARCH_SCALE
+                  EIG_PARAMS(I_SUB)%SUBSPACE_NSUB    = EIG_SUBSPACE_NSUB
+                  EIG_PARAMS(I_SUB)%SUBSPACE_TOL     = EIG_SUBSPACE_TOL
+                  EIG_PARAMS(I_SUB)%SUBSPACE_MAX_ITER = EIG_SUBSPACE_MAX_ITER
+                  EIG_PARAMS(I_SUB)%DENSE_NEX        = EIG_DENSE_NEX
                   EIG_PARAMS(I_SUB)%CRIT             = EIG_CRIT
                   EIG_PARAMS(I_SUB)%FRQ1             = EIG_FRQ1
                   EIG_PARAMS(I_SUB)%FRQ2             = EIG_FRQ2

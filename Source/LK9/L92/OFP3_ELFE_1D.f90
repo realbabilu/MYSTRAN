@@ -37,8 +37,9 @@
       USE CONSTANTS_1, ONLY           :  ZERO, HALF
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP
-      USE LINK9_STUFF, ONLY           :  WRITE_NEU_ELFO
+      USE PARAMS, ONLY                :  OTMSKIP, RSCOMB
+      USE LINK9_STUFF, ONLY           :  WRITE_NEU_ELFO, RSA_ELFE_CAPTURE, RSA_ELFE_NUM_ROWS, RSA_ELFE_SUMSQ, RSA_ELFE_SUMABS,   &
+                                         RSA_ELFE_DESC, RSA_MODE_SCALE
       USE MODEL_STUF, ONLY            :  AGRID, ANY_ELFE_OUTPUT, BUSH_CID, BUSH_VVEC, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL,    &
                                          EDAT, ELAS_COMP, ELEM_LEN_12, ELEM_LEN_AB, EPNT, ETYPE, EID, ELMTYP, ELOUT, FCONV,        &
                                          METYPE, NUM_EMG_FATAL_ERRS, OFFDIS_GA_GB, OFFDIS_L, PBEAM_NSTATIONS, PE_GA_GB, PEL,       &
@@ -72,6 +73,7 @@
       INTEGER(LONG)                   :: NUM_ELEM          ! No. elems processed prior to writing results to F06 file
       INTEGER(LONG)                   :: NUM_FROWS         ! No. elems processed for FEMAP
       INTEGER(LONG)                   :: NUM_OGEL          ! No. rows written to array OGEL prior to writing results to F06 file
+      INTEGER(LONG)                   :: RSA_ROW           ! Row index for RSA ELFORCE(ENGR) accumulation
       INTEGER(LONG)                   :: NSTA             ! Active number of CBEAM stations for the current element
       INTEGER(LONG)                   :: ISTA             ! CBEAM station loop index
       INTEGER(LONG)                   :: WRITE_NUM_PTS    ! NUM_PTS argument for WRITE_ELEM_ENGR_FORCE
@@ -126,6 +128,7 @@
 
 
       WRITE_NEU = WRITE_NEU_ELFO
+      RSA_ROW = 0
 
 ! **********************************************************************************************************************************
 ! Process element engineering force requests for BAR, BUSH, ELAS, ROD. Use subr CALC_ELEM_NODE_FORCES and then convert the node
@@ -139,8 +142,8 @@
       OPT(6) = 'N'                                         ! OPT(6) is for calc of KE-diff stiff
 
       FORCE_ITEM(1) = 'M1a: Mom Plane1 EndA'
-      FORCE_ITEM(2) = 'M1b: Mom Plane2 EndA'
-      FORCE_ITEM(3) = 'M2a: Mom Plane1 EndB'
+      FORCE_ITEM(2) = 'M2a: Mom Plane2 EndA'
+      FORCE_ITEM(3) = 'M1b: Mom Plane1 EndB'
       FORCE_ITEM(4) = 'M2b: Mom Plane2 EndB'
       FORCE_ITEM(5) = 'V1 : Shear Plane1   '
       FORCE_ITEM(6) = 'V2 : Shear Plane2   '
@@ -494,6 +497,40 @@ elems_2: DO J = 1,NELE
                         ENDDO
 ! --- cbeam_stations end --- !
                      ENDIF !end bar
+
+                     IF (RSA_ELFE_CAPTURE) THEN
+
+                        IF (ETYPE(J)(1:4) == 'ELAS') THEN
+                           DO K=1,1
+                              CALL RSA_CAPTURE_ELFE_ROW(TYPE, EID, FORCE_ITEM(K), OGEL(NUM_OGEL,K), RSA_ROW)
+                           ENDDO
+                        ENDIF
+
+                        IF (ETYPE(J)(1:4) == 'BUSH') THEN
+                           DO K=1,6
+                              CALL RSA_CAPTURE_ELFE_ROW(TYPE, EID, FORCE_ITEM(K), OGEL(NUM_OGEL,K), RSA_ROW)
+                           ENDDO
+                        ENDIF
+
+                        IF (ETYPE(J)(1:3) == 'ROD') THEN
+                           DO K=7,8
+                              CALL RSA_CAPTURE_ELFE_ROW(TYPE, EID, FORCE_ITEM(K), OGEL(NUM_OGEL,K), RSA_ROW)
+                           ENDDO
+                        ENDIF
+
+                        IF (ETYPE(J)(1:3) == 'BAR') THEN
+                           DO K=1,8
+                              CALL RSA_CAPTURE_ELFE_ROW(TYPE, EID, FORCE_ITEM(K), OGEL(NUM_OGEL,K), RSA_ROW)
+                           ENDDO
+                        ENDIF
+
+                        IF (ETYPE(J)(1:4) == 'BEAM') THEN
+                           DO K=1,8
+                              CALL RSA_CAPTURE_ELFE_ROW(TYPE, EID, FORCE_ITEM(K), OGEL(NUM_OGEL-NSTA+1,K), RSA_ROW)
+                           ENDDO
+                        ENDIF
+
+                     ENDIF
 
                      IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
 
@@ -1147,6 +1184,39 @@ elems_2: DO J = 1,NELE
              ' CORR(M1,M2,V1,V2)=',4(1X,1ES14.6),' OUT(M1,M2,V1,V2)=',4(1X,1ES14.6))
 
 ! **********************************************************************************************************************************
+
+      CONTAINS
+
+      SUBROUTINE RSA_CAPTURE_ELFE_ROW ( ETYPE_IN, EID_IN, ITEM_IN, VALUE_IN, RSA_ROW_INOUT )
+
+      CHARACTER(LEN=*), INTENT(IN)    :: ETYPE_IN
+      CHARACTER(LEN=*), INTENT(IN)    :: ITEM_IN
+      INTEGER(LONG)   , INTENT(IN)    :: EID_IN
+      INTEGER(LONG)   , INTENT(INOUT) :: RSA_ROW_INOUT
+      REAL(DOUBLE)    , INTENT(IN)    :: VALUE_IN
+      REAL(DOUBLE)                   :: VALUE_SCALED
+
+      IF (.NOT. RSA_ELFE_CAPTURE) RETURN
+      IF (.NOT. ALLOCATED(RSA_ELFE_SUMSQ)) RETURN
+      IF (.NOT. ALLOCATED(RSA_ELFE_SUMABS)) RETURN
+      IF (.NOT. ALLOCATED(RSA_ELFE_DESC )) RETURN
+
+      RSA_ROW_INOUT = RSA_ROW_INOUT + 1
+      IF (RSA_ROW_INOUT > SIZE(RSA_ELFE_SUMSQ)) RETURN
+
+      IF (JVEC == 1) THEN
+         RSA_ELFE_NUM_ROWS = MAX(RSA_ELFE_NUM_ROWS, RSA_ROW_INOUT)
+         WRITE(RSA_ELFE_DESC(RSA_ROW_INOUT),'(A8,1X,I8,2X,A20)') ETYPE_IN, EID_IN, ITEM_IN
+      ENDIF
+
+      VALUE_SCALED = RSA_MODE_SCALE*VALUE_IN
+      IF (RSCOMB(1:3) == 'ABS') THEN
+         RSA_ELFE_SUMABS(RSA_ROW_INOUT) = RSA_ELFE_SUMABS(RSA_ROW_INOUT) + DABS(VALUE_SCALED)
+      ELSE
+         RSA_ELFE_SUMSQ(RSA_ROW_INOUT) = RSA_ELFE_SUMSQ(RSA_ROW_INOUT) + VALUE_SCALED*VALUE_SCALED
+      ENDIF
+
+      END SUBROUTINE RSA_CAPTURE_ELFE_ROW
 
       END SUBROUTINE OFP3_ELFE_1D
 

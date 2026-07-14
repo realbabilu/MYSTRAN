@@ -35,7 +35,7 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ECHO, FATAL_ERR, IERRFL, JCARD_LEN, JF, MEPSIL, MPBARLU, NUM_USETSTR,       &
                                          WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO, ONE
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, ONEPM6
       USE MACHINE_PARAMS, ONLY        :  MACH_PREC
       USE DOF_TABLES, ONLY            :  TSET_CHR_LEN
 
@@ -53,13 +53,15 @@
                          CUSERIN_PID, CUSERIN_SPNT_ID, CUSERIN_XSET, CUSERIN_COMPTYP, DARPACK, DELBAN, EIGESTL,    &
                          EIGNORM2, ELFORCEN, EPSERR, EQCHK_REF_GRID, EQCHK_NORM, EQCHK_OUTPUT, EQCHK_TINY, EPSIL,  &
                          EMP0_PAUSE, ESP0_PAUSE, F06_COL_START, GRDPNT, GRDPNT_IN, GRIDSEQ, HEXAXIS, IORQ1M,        &
-                         IORQ1S, IORQ1B, IORQ2B, IORQ2T, ITMAX, KLLRAT, KOORAT, LANCMETH, MATSPARS, MEMAFAC,        &
+                         GRAV,                                                                                       &
+                         IORQ1S, IORQ1B, IORQ2B, IORQ2T, ITMAX, KLLRAT, KOORAT, LANCMETH, LANCMATTYPE, MATSPARS, MEMAFAC,        &
                          MIN4TRED, MXALLOCA, MAXRATIO, MEFMCORD, MEFMLOC, MEFMGRID, MPFOUT, MXITERI, MXITERL,       &
                          OTMSKIP, POST, PBARLDEC, PBARLSHR, PCOMPEQ, PCHSPC1, PCMPTSTM, PRTBASIC, PRTCONN,          &
                          PRTCORD, PRTDISP, PRTDLR, PRTDOF, PRTFOR, PRTHMN, PRTGMN, PRTGOA, PRTCGLTM, PRTPHIZL,      &
                          PRTIFLTM, PRTKXX, PRTMXX, PRTOU4, PRTPHIXA, PRTMASS, PRTMASSD, PRTRMG, PRTSCP, PRTPSET,    &
                          PRTTSET, PRTUSET, PRTSTIFD, PRTSTIFF, PRTUO0, PRTYS, PRTQSYS, Q4SURFIT, QUADAXIS,          &
-                         QUAD4TYP, SOLIDTYP, TRIA3TYP, RCONDK, RELINK3, SEQPRT, SEQQUIT, SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, &
+                          QUAD4TYP, SOLIDTYP, TRIA3TYP, RCONDK, RELINK3, RSPECTRA, SCRSPEC, RSCOMB, RSTYPE, SEQPRT, SEQQUIT,   &
+                          SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, &
                          SOLLIB,                                                                                      &
                          SPARSE_FLAVOR, SPARSTOR, SPC1QUIT, SORT_MAX, SPC1SID, STR_CID, SUPINFO, SUPWARN, NOCOUNTS,&
                          THRESHK, THRESHK_LAP, TINY, TSTM_DEF, USR_JCT, USR_LTERM_KGG, USR_LTERM_MGG, WINAMEM,      &
@@ -183,6 +185,8 @@
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
 ! ART_MASS is used to add artificial mass terms to transl and/or rot DOF's (to make sure there are no zero's on diag of MGG)
+! Nastran-like/basic usage is PARAM,ART_MASS,Y which resets both fallback values to 1.0E-6.
+! Fields 4 and 5 are optional advanced overrides for translational and rotational artificial mass.
 
       ELSE IF (JCARD(2)(1:8) == 'ART_MASS ') THEN
 
@@ -209,6 +213,9 @@
          ENDIF
 
          IF (ART_MASS == 'Y') THEN
+
+            ART_TRAN_MASS = ONEPM6
+            ART_ROT_MASS  = ONEPM6
 
             IF (JCARD(4)(1:) /= ' ') THEN
                PARNAM = 'ART_TRAN_MASS'
@@ -1046,7 +1053,112 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
          CALL CRDERR ( CARD )
 
-      ! GRDPNT causes the grid point weight generator to be run to calculate mass of the model relative to G.P defined by PARAM GRDPNT.
+      ELSE IF (PARAM_NAME(1:8) == 'RSPECTRA') THEN
+         PARNAM = 'RSPECTRA'
+         RSPECTRA = 'Y'
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+      ELSE IF (PARAM_NAME(1:8) == 'SCRSPEC ') THEN
+         PARNAM = 'SCRSPEC '
+         SCRSPEC = 'Y'
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+      ELSE IF (PARAM_NAME(1:8) == 'OPTION  ') THEN
+         PARNAM = 'OPTION  '
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF (CHRPARM(1:4) == 'SRSS') THEN
+               RSCOMB = 'SRSS'
+            ELSE IF (CHRPARM(1:3) == 'CQC') THEN
+               RSCOMB = 'CQC '
+            ELSE IF (CHRPARM(1:3) == 'ABS') THEN
+               RSCOMB = 'ABS '
+            ELSE IF (CHRPARM(1:3) == 'NRL') THEN
+               RSCOMB = 'NRL '
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,'(A)') ' *WARNING    : PARAM,OPTION,NRL WAS ACCEPTED FOR RESPONSE SPECTRUM COMPATIBILITY, BUT THE CURRENT'
+               WRITE(ERR,'(A)') '               SCRSPEC APPLICATION PATH DOES NOT YET IMPLEMENT NRL. SRSS WILL BE USED INSTEAD.'
+               IF (SUPWARN == 'N') THEN
+                  WRITE(F06,'(A)') ' *WARNING    : PARAM,OPTION,NRL WAS ACCEPTED FOR RESPONSE SPECTRUM COMPATIBILITY, BUT THE CURRENT'
+                  WRITE(F06,'(A)') '               SCRSPEC APPLICATION PATH DOES NOT YET IMPLEMENT NRL. SRSS WILL BE USED INSTEAD.'
+               ENDIF
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'SRSS, CQC, ABS OR NRL',CHRPARM,RSCOMB
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'SRSS, CQC, ABS OR NRL',CHRPARM,RSCOMB
+               ENDIF
+            ENDIF
+         ENDIF
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+      ELSE IF (PARAM_NAME(1:8) == 'RSTYPE  ') THEN
+         PARNAM = 'RSTYPE  '
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      (CHRPARM(1:4) == 'PERG') THEN
+               RSTYPE = 'PERG'
+            ELSE IF (CHRPARM(1:4) == 'PERA') THEN
+               RSTYPE = 'PERA'
+            ELSE IF (CHRPARM(1:4) == 'FRQG') THEN
+               RSTYPE = 'FRQG'
+            ELSE IF (CHRPARM(1:4) == 'FRQA') THEN
+               RSTYPE = 'FRQA'
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'PERG/PERA/FRQG/FRQA',CHRPARM,RSTYPE
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'PERG/PERA/FRQG/FRQA',CHRPARM,RSTYPE
+               ENDIF
+            ENDIF
+         ENDIF
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+! GRDPNT causes the grid point weight generator to be run to calculate mass of the model relative to G.P defined by PARAM GRDPNT.
+      ELSE IF (JCARD(2)(1:8) == 'GRAV    ') THEN
+         PARNAM = 'GRAV    '
+         CALL R8FLD ( JCARD(3), JF(3), R8PARM )
+         IF (IERRFL(3) == 'N') THEN
+            IF (R8PARM > ZERO) THEN
+               GRAV = R8PARM
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,'(A,A,A,1ES13.6,A,1ES13.6,A)') ' *WARNING    : PARAMETER NAMED ',PARNAM,                                 &
+                      ' MUST BE > 0.0 BUT INPUT VALUE IS ',R8PARM,'. DEFAULT VALUE ',GRAV,' WILL BE USED'
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,'(A,A,A,1ES13.6,A,1ES13.6,A)') ' *WARNING    : PARAMETER NAMED ',PARNAM,                              &
+                         ' MUST BE > 0.0 BUT INPUT VALUE IS ',R8PARM,'. DEFAULT VALUE ',GRAV,' WILL BE USED'
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+! GRDPNT causes the grid point weight generator to be run to calculate mass of the model relative to G.P defined by PARAM GRDPNT.
       ELSE IF (JCARD(2)(1:8) == 'GRDPNT  ') THEN
          ! GRDPNT_IN is used to decide if GPWG is run in LINK0
          PARNAM = 'GRDPNT  '
@@ -1312,7 +1424,8 @@
          PARNAM = 'KOORAT  '
          CALL YES_NO_CHECK(CARD, JCARD, CHRPARM, PARNAM, KOORAT)
   
-! LANCMETH sets the method to be used for Lanczos eigen extraction
+! LANCMETH sets the method to be used for Lanczos eigen extraction.
+! Optional field 4 sets the default Lanczos LAPACK band matrix type ('DPB' or 'DGB').
 
 ! !--- CHASE and FEAST --- begin!
       ELSE IF (JCARD(2)(1:8) == 'LANCMETH') THEN
@@ -1328,23 +1441,47 @@
                LANCMETH = 'CHASE '
             ELSE IF (CHRPARM == 'DENSE   ') THEN
                LANCMETH = 'DENSE '
+            ELSE IF (CHRPARM == 'SUBSP   ') THEN
+               LANCMETH = 'SUBSP '
             ELSE IF (CHRPARM == 'MGIV    ') THEN
                LANCMETH = 'MGIV  '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'ARPACK, FEAST, CHASE, DENSE or MGIV',CHRPARM,SOLLIB
+               WRITE(ERR,1189) PARNAM,'ARPACK, FEAST, CHASE, SUBSP, DENSE or MGIV',CHRPARM,LANCMETH
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'ARPACK, FEAST, CHASE, DENSE or MGIV',CHRPARM,SOLLIB
+                  WRITE(F06,1189) PARNAM,'ARPACK, FEAST, CHASE, SUBSP, DENSE or MGIV',CHRPARM,LANCMETH
                ENDIF
             ENDIF
          ENDIF
 
-         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
-         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
+         IF (JCARD(4)(1:) /= ' ') THEN
+            CALL CHAR_FLD ( JCARD(4), JF(4), CHRPARM )
+            IF (IERRFL(4) == 'N') THEN
+               CALL LEFT_ADJ_BDFLD ( CHRPARM )
+               IF      (CHRPARM(1:3) == 'DPB') THEN
+                  LANCMATTYPE = 'DPB'
+               ELSE IF (CHRPARM(1:3) == 'DGB') THEN
+                  LANCMATTYPE = 'DGB'
+               ELSE
+                  WARN_ERR = WARN_ERR + 1
+                  WRITE(ERR,101) CARD
+                  WRITE(ERR,1189) 'LANCMATTYPE', 'DPB OR DGB', CHRPARM, LANCMATTYPE
+                  IF (SUPWARN == 'N') THEN
+                     IF (ECHO == 'NONE  ') THEN
+                        WRITE(F06,101) CARD
+                     ENDIF
+                     WRITE(F06,1189) 'LANCMATTYPE', 'DPB OR DGB', CHRPARM, LANCMATTYPE
+                  ENDIF
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,4,0,0,0,0,0 )! Make sure that there are no imbedded blanks in fields 3-4
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,5,6,7,8,9 )! Issue warning if fields 5-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 ! !--- CHASE and FEAST --- end!
 

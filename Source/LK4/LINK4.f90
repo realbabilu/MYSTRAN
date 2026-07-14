@@ -62,7 +62,7 @@
                                          NVEC, NUM_EIGENS, NUM_KLLD_DIAG_ZEROS, NUM_MLL_DIAG_ZEROS, SOL_NAME, WARN_ERR,           &
                                          NUM_MODES_SUBS, NUM_BUCKLING_SUBS, TOTAL_MODES, MODE_SUBCASE
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSTOR, SUPINFO
+      USE PARAMS, ONLY                :  EPSIL, SCRSPEC, SOLLIB, SPARSTOR, SUPINFO
       USE MODEL_STUF, ONLY            :  CC_EIGR_SID, EIG_PARAMS, IS_MODES_SUBCASE, IS_BUCKLING_SUBCASE, NUM_EIGENS_SUB,          &
                                          EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL,                  &
                                          EIG_LANCZOS_NEV_DELT, EIG_LAP_MAT_TYPE, EIG_MODE, EIG_N1, EIG_N2, EIG_NCVFACL, EIG_NORM, &
@@ -80,6 +80,7 @@
       USE LAPACK_DPB_MATRICES, ONLY   :  ABAND, BBAND
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE EIGRL_EXTRACT_SOLVERS, ONLY :  EIG_LANCZOS_FEAST, EIG_LANCZOS_SUBSPACE, EIG_LANCZOS_DENSE
+      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_NUM_SUPORT
 
       USE LINK4_USE_IFs
       USE LINK_MESSAGE_Interface
@@ -99,6 +100,7 @@
       INTEGER(LONG)                   :: KMODE               ! Per-subcase mode loop index
       INTEGER(LONG)                   :: N_MODES_ITER        ! Number of modal solves to perform
       INTEGER(LONG)                   :: NTERM_KLL_BAK       ! Snapshot of KLL nonzero count for multi-iter modal solves
+      INTEGER(LONG)                   :: RSA_ARPACK_DOF_AVAIL ! Effective modal DOF count available to adaptive ARPACK
       INTEGER(LONG)                   :: TOTAL_MODES_LOCAL   ! Sum of NUM_EIGENS_SUB across resolved modes subcases
       INTEGER(LONG)                   :: NVEC_USED           ! Safe vector count limited by allocated EIGEN_VEC columns.
       INTEGER(LONG)                   :: OUNT(2)             ! File units to write messages to. Input to subr UNFORMATTED_OPEN.
@@ -457,6 +459,18 @@ m_lp: DO ITER = 1, N_MODES_ITER
             EIG_SIGMA             = EIG_PARAMS(CUR_ISUB)%SIGMA
             EIG_LAP_MAT_TYPE      = EIG_PARAMS(CUR_ISUB)%LAP_MAT_TYPE
             EIG_LANCZOS_NEV_DELT  = EIG_PARAMS(CUR_ISUB)%LANCZOS_NEV_DELT
+            EIG_EXTRACT_METHOD    = EIG_PARAMS(CUR_ISUB)%EXTRACT_METHOD
+            EIG_EXTRACT_MODE      = EIG_PARAMS(CUR_ISUB)%EXTRACT_MODE
+            EIG_EXTRACT_SOURCE    = EIG_PARAMS(CUR_ISUB)%EXTRACT_SOURCE
+            EIG_FEAST_M0          = EIG_PARAMS(CUR_ISUB)%FEAST_M0
+            EIG_FEAST_TOL_DIGITS  = EIG_PARAMS(CUR_ISUB)%FEAST_TOL_DIGITS
+            EIG_FEAST_MAX_LOOP    = EIG_PARAMS(CUR_ISUB)%FEAST_MAX_LOOP
+            EIG_FEAST_N_CONTOUR   = EIG_PARAMS(CUR_ISUB)%FEAST_N_CONTOUR
+            EIG_FEAST_SEARCH_SCALE= EIG_PARAMS(CUR_ISUB)%FEAST_SEARCH_SCALE
+            EIG_SUBSPACE_NSUB     = EIG_PARAMS(CUR_ISUB)%SUBSPACE_NSUB
+            EIG_SUBSPACE_TOL      = EIG_PARAMS(CUR_ISUB)%SUBSPACE_TOL
+            EIG_SUBSPACE_MAX_ITER = EIG_PARAMS(CUR_ISUB)%SUBSPACE_MAX_ITER
+            EIG_DENSE_NEX         = EIG_PARAMS(CUR_ISUB)%DENSE_NEX
          ENDIF
          INT_SC_NUM = CUR_ISUB
 
@@ -476,7 +490,19 @@ m_lp: DO ITER = 1, N_MODES_ITER
                CALL EIG_LANCZOS_DENSE
             ELSE
                IF ((EIG_FRQ2 > EPS1) .AND. (SOL_NAME(1:8) /= 'BUCKLING') .AND. (SOL_NAME(1:12) /= 'GEN CB MODEL')) THEN
-                  CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+                  RSA_ARPACK_DOF_AVAIL = NDOFL - NUM_MLL_DIAG_ZEROS
+                  IF (RSA_ARPACK_DOF_AVAIL <= 4) THEN
+                     IF ((SCRSPEC == 'Y') .AND. (RS_NUM_SUPORT == 1)) THEN
+                        CALL EIG_LANCZOS_ARPACK
+                     ELSE
+                        WARN_ERR = WARN_ERR + 1
+                        WRITE(ERR,4971) EIG_N2, NDOFL
+                        WRITE(F06,4971) EIG_N2, NDOFL
+                        CALL EIG_LANCZOS_DENSE
+                     ENDIF
+                  ELSE
+                     CALL EIG_LANCZOS_ARPACK_ADAPTIVE
+                  ENDIF
                ELSE
                   CALL EIG_LANCZOS_ARPACK
                ENDIF
@@ -642,6 +668,18 @@ m_lp: DO ITER = 1, N_MODES_ITER
          EIG_CRIT         = EIG_PARAMS(CANONICAL_ISUB)%CRIT
          EIG_SIGMA        = EIG_PARAMS(CANONICAL_ISUB)%SIGMA
          EIG_LAP_MAT_TYPE = EIG_PARAMS(CANONICAL_ISUB)%LAP_MAT_TYPE
+         EIG_EXTRACT_METHOD     = EIG_PARAMS(CANONICAL_ISUB)%EXTRACT_METHOD
+         EIG_EXTRACT_MODE       = EIG_PARAMS(CANONICAL_ISUB)%EXTRACT_MODE
+         EIG_EXTRACT_SOURCE     = EIG_PARAMS(CANONICAL_ISUB)%EXTRACT_SOURCE
+         EIG_FEAST_M0           = EIG_PARAMS(CANONICAL_ISUB)%FEAST_M0
+         EIG_FEAST_TOL_DIGITS   = EIG_PARAMS(CANONICAL_ISUB)%FEAST_TOL_DIGITS
+         EIG_FEAST_MAX_LOOP     = EIG_PARAMS(CANONICAL_ISUB)%FEAST_MAX_LOOP
+         EIG_FEAST_N_CONTOUR    = EIG_PARAMS(CANONICAL_ISUB)%FEAST_N_CONTOUR
+         EIG_FEAST_SEARCH_SCALE = EIG_PARAMS(CANONICAL_ISUB)%FEAST_SEARCH_SCALE
+         EIG_SUBSPACE_NSUB      = EIG_PARAMS(CANONICAL_ISUB)%SUBSPACE_NSUB
+         EIG_SUBSPACE_TOL       = EIG_PARAMS(CANONICAL_ISUB)%SUBSPACE_TOL
+         EIG_SUBSPACE_MAX_ITER  = EIG_PARAMS(CANONICAL_ISUB)%SUBSPACE_MAX_ITER
+         EIG_DENSE_NEX          = EIG_PARAMS(CANONICAL_ISUB)%DENSE_NEX
          NUM_FAIL_CRIT    = EIG_PARAMS(CANONICAL_ISUB)%NUM_FAIL_CRIT
          MAXMIJ           = EIG_PARAMS(CANONICAL_ISUB)%MAXMIJ
          MIJ_ROW          = EIG_PARAMS(CANONICAL_ISUB)%MIJ_ROW

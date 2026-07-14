@@ -32,6 +32,7 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1T
+      USE RESPONSE_SPECTRA_STUF, ONLY :  RS_ACCUM_SUPORT
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, NUM_SUPT_CARDS
       USE TIMDAT, ONLY                :  TSEC
 
@@ -117,6 +118,7 @@
       IF (JERR == 0) THEN
          DO I=1,NUM_PAIRS
             WRITE(L1T) GRID(I), COMP(I)                 ! Write data to file LINK1T if no errors
+            CALL RS_ACCUM_SUPORT ( GRID(I), COMP(I) )
             NUM_SUPT_CARDS = NUM_SUPT_CARDS + 1
          ENDDO
       ENDIF

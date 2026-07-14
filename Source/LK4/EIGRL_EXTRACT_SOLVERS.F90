@@ -37,7 +37,6 @@
                                          EIG_FRQ2, EIG_N2, EIG_SUBSPACE_MAX_ITER, EIG_SUBSPACE_NSUB, EIG_SUBSPACE_TOL
       USE SPARSE_MATRICES, ONLY       :  I_KLL, I_MLL, J_KLL, J_MLL, KLL, MLL
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
-
       USE ALLOCATE_EIGEN1_MAT_Interface
       USE EIG_LANCZOS_ARPACK_Interface
       USE LINK_MESSAGE_Interface
@@ -722,7 +721,14 @@
       INTEGER(LONG)                   :: I
       INTEGER(LONG)                   :: LIMIT
 
-      LIMIT = MAX(1,EIG_N2)
+      LIMIT = EIG_N2
+      IF (LIMIT <= 0) THEN
+         IF (EMAX > EMIN) THEN
+            LIMIT = SIZE(EVAL_ALL)
+         ELSE
+            LIMIT = 1
+         ENDIF
+      ENDIF
       ALLOCATE(KEEP_IDX(MAX(1,MIN(LIMIT,SIZE(EVAL_ALL)))))
       KEEP_COUNT = 0
       DO I=1,SIZE(EVAL_ALL)

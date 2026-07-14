@@ -40,6 +40,7 @@
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, OGEL
       USE MODEL_STUF, ONLY            :  GRID, LABEL, SCNUM, SUBLOD, STITLE, TITLE
+      USE PARAMS, ONLY                :  SCRSPEC
       USE EIGEN_MATRICES_1 , ONLY     :  EIGEN_VAL
 
 !     TODO: not sure how to use this...
@@ -82,7 +83,7 @@
 
 ! **********************************************************************************************************************************
       ! Make sure that WHAT is a valid value
-      IF ((WHAT == 'ACCE') .OR. (WHAT == 'DISP') .OR. (WHAT == 'OLOAD') .OR. &
+      IF ((WHAT == 'ACCE') .OR. (WHAT == 'DISP') .OR. (WHAT == 'VELO') .OR. (WHAT == 'OLOAD') .OR. &
           (WHAT == 'SPCF') .OR. (WHAT == 'MPCF')) THEN
          CONTINUE
       ELSE
@@ -244,6 +245,7 @@
       USE IOUNT1, ONLY                :  ERR
       USE SCONTR, ONLY                :  SOL_NAME
       USE EIGEN_MATRICES_1 , ONLY     :  EIGEN_VAL
+      USE PARAMS, ONLY                :  SCRSPEC
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
 
       CHARACTER(LEN=128)                :: LABELI            ! Subcase label
@@ -254,7 +256,12 @@
       REAL(DOUBLE), INTENT(INOUT)     :: EIGENVALUE        ! the eigenvalue for an eigenvector solution
       INTEGER(LONG), INTENT(INOUT)    :: ISUBCASE_INDEX    ! the index into SCNUM
 
-      IF (SOL_NAME(1:7) == 'STATICS') THEN
+      IF ((SOL_NAME(1:5) == 'MODES') .AND. (SCRSPEC == 'Y') .AND. (JSUB <= 0)) THEN
+        ISUBCASE_INDEX = 1
+        ANALYSIS_CODE = 1  ! response spectrum combined result written as a static-style output set
+        EIGENVALUE = 0.0D0
+        MODE = 0
+      ELSE IF (SOL_NAME(1:7) == 'STATICS') THEN
         ISUBCASE_INDEX = JSUB
         ANALYSIS_CODE = 1  ! statics
       ELSE IF((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN

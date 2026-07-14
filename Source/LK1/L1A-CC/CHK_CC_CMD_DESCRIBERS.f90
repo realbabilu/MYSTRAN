@@ -65,6 +65,7 @@
 ! **********************************************************************************************************************************
       IF      (WHAT == 'ACCE') THEN;   OUTPUT_TYPE( 1) = 'ACCE';   JCOL =  1;
       ELSE IF (WHAT == 'DISP') THEN;   OUTPUT_TYPE( 2) = 'DISP';   JCOL =  2;
+      ELSE IF (WHAT == 'VELO') THEN;   OUTPUT_TYPE( 2) = 'VELO';   JCOL =  2;
       ELSE IF (WHAT == 'ELFO') THEN;   OUTPUT_TYPE( 3) = 'ELFO';   JCOL =  3;
       ELSE IF (WHAT == 'GPFO') THEN;   OUTPUT_TYPE( 4) = 'GPFO';   JCOL =  4;
       ELSE IF (WHAT == 'MPCF') THEN;   OUTPUT_TYPE( 5) = 'MPCF';   JCOL =  5;
@@ -79,7 +80,7 @@
          CALL OUTA_HERE ( 'Y' )
       ENDIF
 
-      IS_PLOT = ((WHAT == 'ACCE') .OR. (WHAT == 'DISP') .OR. (WHAT == 'ELFO') .OR. (WHAT == 'GPFO')  .OR.  &
+      IS_PLOT = ((WHAT == 'ACCE') .OR. (WHAT == 'DISP') .OR. (WHAT == 'VELO') .OR. (WHAT == 'ELFO') .OR. (WHAT == 'GPFO')  .OR.  &
                  (WHAT == 'MPCF') .OR. (WHAT == 'OLOA') .OR. (WHAT == 'SPCF') .OR.  &
                  (WHAT == 'STRE') .OR. (WHAT == 'STRN'))
 
@@ -87,7 +88,7 @@
       IS_PRINT = IS_PLOT
 
       ! remove GPFO from PUNCH
-      IS_PUNCH = ((WHAT == 'ACCE') .OR. (WHAT == 'DISP') .OR. (WHAT == 'ELFO') .OR.  &
+      IS_PUNCH = ((WHAT == 'ACCE') .OR. (WHAT == 'DISP') .OR. (WHAT == 'VELO') .OR. (WHAT == 'ELFO') .OR.  &
                   (WHAT == 'MPCF') .OR. (WHAT == 'OLOA') .OR. (WHAT == 'SPCF') .OR.  &
                   (WHAT == 'STRE') .OR. (WHAT == 'STRN'))
 

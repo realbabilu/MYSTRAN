@@ -419,6 +419,12 @@ bdf:  DO
   
          ELSE IF (CARD(1:5) == 'DEBUG'   )  THEN
             CALL BD_DEBUG   ( CARD )
+
+         ELSE IF (CARD(1:5) == 'DLOAD'   )  THEN
+            CALL BD_DLOAD   ( CARD )
+
+         ELSE IF (CARD(1:3) == 'DTI'     )  THEN
+            CALL BD_DTI     ( CARD )
   
          ELSE IF((CARD(1:5) == 'EIGR '   ) .OR. (CARD(1:5) == 'EIGR*'   ))  THEN
             CALL BD_EIGR    ( CARD, LARGE_FLD_INP, EIGFND )
@@ -428,6 +434,9 @@ bdf:  DO
 
          ELSE IF((CARD(1:5) == 'FORCE'   ) .OR. (CARD(1:6) == 'MOMENT'  )) THEN
             CALL BD_FORMOM  ( CARD, CC_LOAD_FND )
+
+         ELSE IF (CARD(1:5) == 'FREQ1'   )  THEN
+            CALL BD_FREQ1   ( CARD )
  
          ELSE IF (CARD(1:4) == 'GRAV'    )  THEN
             CALL BD_GRAV    ( CARD, LARGE_FLD_INP, CC_LOAD_FND )
@@ -554,6 +563,9 @@ bdf:  DO
          ELSE IF (CARD(1:4) == 'RBE3'    )  THEN
             CALL BD_RBE3    ( CARD, LARGE_FLD_INP )
 
+         ELSE IF (CARD(1:6) == 'RLOAD1'  )  THEN
+            CALL BD_RLOAD1  ( CARD )
+
          ELSE IF (CARD(1:6) == 'RFORCE'  )  THEN
             CALL BD_RFORCE  ( CARD, LARGE_FLD_INP, CC_LOAD_FND )
 
@@ -599,6 +611,12 @@ bdf:  DO
 
          ELSE IF (CARD(1:6) == 'SUPORT'  )  THEN
             CALL BD_SUPORT  ( CARD )
+
+         ELSE IF (CARD(1:7) == 'TABDMP1' )  THEN
+            CALL BD_TABDMP1 ( CARD )
+
+         ELSE IF (CARD(1:7) == 'TABLED1' )  THEN
+            CALL BD_TABLED1 ( CARD )
 
          ELSE IF((CARD(1:5) == 'TEMP '   ) .OR. (CARD(1:5) == 'TEMP*'   ))  THEN
             CALL BD_TEMP    ( CARD, CC_LOAD_FND )

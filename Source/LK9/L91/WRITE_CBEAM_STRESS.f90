@@ -96,7 +96,7 @@
       INTEGER(LONG), INTENT(IN)       :: GRID_ID
       REAL(DOUBLE), INTENT(IN)        :: XL, V1, V2, V3, V4, V5, V6, V7, V8
 
-      CHARACTER(128*BYTE)             :: LINE_BUF
+      CHARACTER(132*BYTE)             :: LINE_BUF
       CHARACTER(8*BYTE)               :: I8_TEXT
       CHARACTER(9*BYTE)               :: F9_TEXT
       CHARACTER(14*BYTE)              :: E14_TEXT

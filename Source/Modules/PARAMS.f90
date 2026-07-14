@@ -55,9 +55,9 @@
       REAL(DOUBLE)             :: ART_ROT_KED    =   ONEPM6  ! Artificial differ stiff for rotational DOF's
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-      CHARACTER(  1*BYTE)      :: ART_MASS       =    'N'    ! Indicates whether to add artificial mass terms to transl or rot DOF's
-      REAL(DOUBLE)             :: ART_TRAN_MASS  =   ONEPM6  ! Artificial mass for translational DOF's
-      REAL(DOUBLE)             :: ART_ROT_MASS   =   ONEPM6  ! Artificial mass for rotational DOF's
+      CHARACTER(  1*BYTE)      :: ART_MASS       =    'N'    ! Compatibility trigger for adding artificial mass terms
+      REAL(DOUBLE)             :: ART_TRAN_MASS  =   ONEPM6  ! Default/fallback translational artificial mass; field 4 may override
+      REAL(DOUBLE)             :: ART_ROT_MASS   =   ONEPM6  ! Default/fallback rotational artificial mass; field 5 may override
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: AUTOSPC        =    'Y'    ! 'Y'/'N' indicates whether to use automatic SPC for singular DOF's
@@ -160,10 +160,22 @@
       INTEGER(LONG)            :: DARPACK        =     2     ! Delta to add to EIG_N2 so that ARPACK will find a few more eigens 
 !                                                              than user requested (since higher ones seem to be a little bad)
 
+      CHARACTER(  1*BYTE)      :: RSPECTRA       =    'N'    ! 'Y' enables response spectrum generation compatibility mode
+      CHARACTER(  1*BYTE)      :: SCRSPEC        =    'N'    ! 'Y' enables response spectrum application compatibility mode
+      CHARACTER(  4*BYTE)      :: RSCOMB         = 'SRSS'    ! Response spectrum modal combination option accepted from PARAM,OPTION
+      CHARACTER(  4*BYTE)      :: RSTYPE         = 'FRQG'    ! Response spectrum table type:
+!                                                              FRQG = frequency / g-accel
+!                                                              FRQA = frequency / absolute acceleration
+!                                                              PERG = period / g-accel
+!                                                              PERA = period / absolute acceleration
+
       INTEGER(LONG)            :: DELBAN         =     1     ! Delete the Bandit files left over, 0 is not to. 1 is to delete them.
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       INTEGER(LONG)            :: EIGESTL        =  5000     ! Upper limit on NDOFL for running code to est # eigens below EIG_FRQ2
+
+! ----------------------------------------------------------------------------------------------------------------------------------
+      REAL(DOUBLE)             :: GRAV           = 386.4D0   ! Gravity conversion for g-based compatibility inputs (e.g. RSA PERG/FRQG)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: EIGNORM2       =    'N'    ! If 'Y' then eigenvectors will be renormed a last time by multiplying
@@ -259,6 +271,9 @@
       CHARACTER(  6*BYTE)      :: LANCMETH       = 'ARPACK'  ! Lanczos backend:
 !                                                              ARPACK (implemented)
 !                                                              FEAST / CHASE (accepted; currently fallback to ARPACK in LINK4)
+      CHARACTER(  3*BYTE)      :: LANCMATTYPE    = 'DPB'     ! Default LAPACK band matrix type for Lanczos-family runs:
+!                                                              DPB (symmetric positive-definite band) is the default.
+!                                                              DGB (general band) remains available as an advanced fallback.
 ! !--- CHASE and FEAST --- end!
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
