@@ -50,6 +50,20 @@ static inline int pow10i(int n) {
     return POWERS[n];
 }
 
+static inline char *copy_sprintf_fixed_prec(char *dst, int width, int precision, const char *fmt, double v) {
+    char buf[64];
+    int n;
+
+    memset(buf, ' ', sizeof(buf));
+    n = snprintf(buf, sizeof(buf), fmt, width, precision, v);
+    if (n < 0) {
+        memset(dst, ' ', (size_t)width);
+    } else {
+        memcpy(dst, buf, (size_t)width);
+    }
+    return dst + width;
+}
+
 static inline char *fmt_i8_rj(char *dst, int val) {
     memset(dst, ' ', 8);
 
@@ -102,15 +116,28 @@ static char *fmt_e_width_prec(char *dst, double v, int width, int precision, int
             memcpy(dst, "  0.0         ", 14);
             return dst + 14;
         }
-        {
-            int n = snprintf(dst, (size_t)width + 8u, "%*.*E", width, precision, v);
-            return dst + n;
-        }
     }
 
-    if (v == 0.0 || isnan(v) || isinf(v)) {
-        int n = snprintf(dst, (size_t)width + 8u, "%*.*E", width, precision, v);
-        return dst + n;
+    if (v == 0.0) {
+        pad = width - (precision + 7);
+        while (pad-- > 0) {
+            *dst++ = ' ';
+        }
+        *dst++ = ' ';
+        *dst++ = '0';
+        *dst++ = '.';
+        for (mant_int = 0; mant_int < precision; ++mant_int) {
+            *dst++ = '0';
+        }
+        *dst++ = 'E';
+        *dst++ = '+';
+        *dst++ = '0';
+        *dst++ = '0';
+        return dst;
+    }
+
+    if (isnan(v) || isinf(v)) {
+        return copy_sprintf_fixed_prec(dst, width, precision, "%*.*E", v);
     }
 
     neg = (v < 0.0);
@@ -120,8 +147,7 @@ static char *fmt_e_width_prec(char *dst, double v, int width, int precision, int
 
     expv = (int)floor(log10(v));
     if (expv > 99 || expv < -99) {
-        int n = snprintf(dst, (size_t)width + 8u, "%*.*E", width, precision, neg ? -v : v);
-        return dst + n;
+        return copy_sprintf_fixed_prec(dst, width, precision, "%*.*E", neg ? -v : v);
     }
 
     mant = v / pow(10.0, (double)expv);
@@ -135,14 +161,12 @@ static char *fmt_e_width_prec(char *dst, double v, int width, int precision, int
     }
 
     if (expv > 99 || expv < -99) {
-        int n = snprintf(dst, (size_t)width + 8u, "%*.*E", width, precision, neg ? -v : v);
-        return dst + n;
+        return copy_sprintf_fixed_prec(dst, width, precision, "%*.*E", neg ? -v : v);
     }
 
     scale10 = pow10i(precision);
     if (scale10 <= 0) {
-        int n = snprintf(dst, (size_t)width + 8u, "%*.*E", width, precision, neg ? -v : v);
-        return dst + n;
+        return copy_sprintf_fixed_prec(dst, width, precision, "%*.*E", neg ? -v : v);
     }
 
     scaled = mant * (double)scale10 + 0.5;
@@ -153,8 +177,7 @@ static char *fmt_e_width_prec(char *dst, double v, int width, int precision, int
     }
 
     if (expv > 99 || expv < -99) {
-        int n = snprintf(dst, (size_t)width + 8u, "%*.*E", width, precision, neg ? -v : v);
-        return dst + n;
+        return copy_sprintf_fixed_prec(dst, width, precision, "%*.*E", neg ? -v : v);
     }
 
     pad = width - (precision + 7);
@@ -196,8 +219,7 @@ static char *fmt_f8_2(char *dst, double v) {
     int ilen;
 
     if (isnan(v) || isinf(v)) {
-        int n = snprintf(dst, 16u, "%8.2f", v);
-        return dst + n;
+        return copy_sprintf_fixed_prec(dst, 8, 2, "%*.*f", v);
     }
 
     neg = (v < 0.0);
@@ -217,8 +239,7 @@ static char *fmt_f8_2(char *dst, double v) {
 
     pad = 8 - (ilen + 1 + 2 + (neg ? 1 : 0));
     if (pad < 0) {
-        int n = snprintf(dst, 16u, "%8.2f", neg ? -v : v);
-        return dst + n;
+        return copy_sprintf_fixed_prec(dst, 8, 2, "%*.*f", neg ? -v : v);
     }
 
     while (pad-- > 0) {
@@ -246,8 +267,7 @@ static char *fmt_f_width_prec(char *dst, double v, int width, int precision) {
     int ilen;
 
     if (isnan(v) || isinf(v)) {
-        int n = snprintf(dst, (size_t)width + 8u, "%*.*f", width, precision, v);
-        return dst + n;
+        return copy_sprintf_fixed_prec(dst, width, precision, "%*.*f", v);
     }
 
     neg = (v < 0.0);
@@ -257,8 +277,7 @@ static char *fmt_f_width_prec(char *dst, double v, int width, int precision) {
 
     scale10 = pow10i(precision);
     if (scale10 <= 0) {
-        int n = snprintf(dst, (size_t)width + 8u, "%*.*f", width, precision, neg ? -v : v);
-        return dst + n;
+        return copy_sprintf_fixed_prec(dst, width, precision, "%*.*f", neg ? -v : v);
     }
 
     scaled = (uint64_t)(v * (double)scale10 + 0.5);
@@ -273,8 +292,7 @@ static char *fmt_f_width_prec(char *dst, double v, int width, int precision) {
 
     pad = width - (ilen + 1 + precision + (neg ? 1 : 0));
     if (pad < 0) {
-        int n = snprintf(dst, (size_t)width + 8u, "%*.*f", width, precision, neg ? -v : v);
-        return dst + n;
+        return copy_sprintf_fixed_prec(dst, width, precision, "%*.*f", neg ? -v : v);
     }
 
     while (pad-- > 0) {
@@ -335,6 +353,7 @@ void mystran_build_grid_f06_line(int gid, int coord, const double vals[6], char 
     int j;
     char *p = out;
 
+    memset(out, ' ', 108);
     memcpy(p, "      ", 6);
     p += 6;
     *p++ = ' ';
@@ -350,6 +369,7 @@ void mystran_build_quad_1403_line(int eid, const double vals[10], char out[145])
     int j;
     char *p = out;
 
+    memset(out, ' ', 145);
     *p++ = ' ';
     p = fmt_i8_rj(p, eid);
     memcpy(p, "  CENTER     ", 13);
@@ -368,6 +388,7 @@ void mystran_build_quad_1404_line(const double vals[8], char out[119]) {
     int j;
     char *p = out;
 
+    memset(out, ' ', 119);
     memset(p, ' ', 22);
     p += 22;
     p = fmt_e_width_prec(p, vals[0], 11, 3, 0);
@@ -384,6 +405,7 @@ void mystran_build_quad_1405_line(int gid, const double vals[10], double poly_er
     int j;
     char *p = out;
 
+    memset(out, ' ', 157);
     memset(p, ' ', 11);
     p += 11;
     memcpy(p, "GRD", 3);
@@ -407,6 +429,7 @@ void mystran_build_quad_1406_line(int gid, const double vals[10], double poly_er
     int j;
     char *p = out;
 
+    memset(out, ' ', 154);
     memset(p, ' ', 11);
     p += 11;
     memcpy(p, "GRD", 3);
@@ -427,6 +450,7 @@ void mystran_build_tria_1703_line(int eid, const double vals[10], char out[149])
     int j;
     char *p = out;
 
+    memset(out, ' ', 149);
     *p++ = ' ';
     p = fmt_i8_rj(p, eid);
     memcpy(p, "    Anywhere  ", 14);
@@ -440,10 +464,11 @@ void mystran_build_tria_1703_line(int eid, const double vals[10], char out[149])
     }
 }
 
-void mystran_build_tria_1704_line(const double vals[8], char out[149]) {
+void mystran_build_tria_1704_line(const double vals[10], char out[149]) {
     int j;
     char *p = out;
 
+    memset(out, ' ', 149);
     memset(p, ' ', 13);
     p += 13;
     memcpy(p, "in elem", 7);
@@ -454,7 +479,7 @@ void mystran_build_tria_1704_line(const double vals[8], char out[149]) {
         p = fmt_e_width_prec(p, vals[j], 13, 5, 0);
     }
     p = fmt_e_width_prec(p, vals[4], 9, 3, 0);
-    for (j = 5; j < 8; ++j) {
+    for (j = 5; j < 10; ++j) {
         p = fmt_e_width_prec(p, vals[j], 13, 5, 0);
     }
 }
@@ -463,6 +488,7 @@ void mystran_build_tria_1706_line(int gid, const double vals[10], char out[139])
     int j;
     char *p = out;
 
+    memset(out, ' ', 139);
     *p++ = ' ';
     p = fmt_i8_rj(p, gid);
     memset(p, ' ', 4);

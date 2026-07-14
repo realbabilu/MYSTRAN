@@ -214,8 +214,9 @@
       CHARACTER(  1*BYTE)      :: PRTF06         =    'N'    ! 'Y', 'N' flag to write all f06 outputs regardless of other flags besides PRTALL
       CHARACTER(  1*BYTE)      :: PRTNEU         =    'N'    ! 'Y', 'N' flag to write all neu outputs regardless of other flags besides PRTALL
       CHARACTER(  1*BYTE)      :: PRTOP2         =    'N'    ! 'Y', 'N' flag to write all op2 outputs regardless of other flags besides PRTALL
-      CHARACTER(  8*BYTE)      :: OUTMODE        = 'LEGACY  '! Output routing mode: LEGACY preserves current broad behavior,
+      CHARACTER(  8*BYTE)      :: OUTMODE        = 'SMART   '! Output routing mode: LEGACY preserves current broad behavior,
 !                                                              SMART prefers OP2/NEU for payloads and leaves F06 summary-first
+!                                                              HYBRID is accepted as an alias of SMART for transition decks
 
 ! case 1: PRTALL=Y, PRTOP2=N -> all op2 output will be created and all ans/neu output 
 ! case 2: PRTALL=N, PRTOP2=Y -> all op2 output will be created

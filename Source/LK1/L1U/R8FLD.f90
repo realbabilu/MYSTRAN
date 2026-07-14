@@ -38,7 +38,7 @@
       IMPLICIT NONE
 
       CHARACTER(LEN=*), INTENT(IN)    :: JCARDI            ! The field of 8 characters to read
-      CHARACTER( 1*BYTE)              :: DEC_PT            ! 'Y'/'N' indicator of whether a decimal point was founr in JCARDI
+      CHARACTER( 1*BYTE)              :: DEC_PT            ! 'Y'/'N' indicator of whether decimal point or exponent marker was found
 
       INTEGER(LONG), INTENT(IN)       :: IFLD              ! Field (2 - 9) of a Bulk Data card to read
       INTEGER(LONG)                   :: I                 ! DO loop index
@@ -50,19 +50,24 @@
       R8INP = ZERO
       IERRFL(IFLD) = 'N'
 
-      READ(JCARDI,'(F16.0)',IOSTAT=IOCHK) R8INP
+!     Use a general real edit descriptor so Nastran-style exponent forms such as 6E-05
+!     and -6E-05 are accepted even when no decimal point is present.
+      READ(JCARDI,'(G16.0)',IOSTAT=IOCHK) R8INP
 
       IF (IOCHK /= 0) THEN
          IERRFL(IFLD) = 'Y'
          FATAL_ERR    = FATAL_ERR + 1
       ENDIF
 
-! Scan to make sure there was a decimal point. Don't set IERRFL, since an error message is written here.
+! Scan to make sure there was either a decimal point or an exponent marker. This preserves the
+! long-standing rejection of integer-looking real fields such as "5" while accepting compact
+! Nastran-style forms such as "6E-05".
 
       IF (JCARDI /= '        ') THEN
          DEC_PT = 'N'
          DO I=1,JCARD_LEN
-            IF (JCARDI(I:I) == '.') THEN
+            IF ((JCARDI(I:I) == '.') .OR. (JCARDI(I:I) == 'E') .OR. (JCARDI(I:I) == 'e') .OR. &
+                (JCARDI(I:I) == 'D') .OR. (JCARDI(I:I) == 'd')) THEN
                DEC_PT = 'Y'
                EXIT
             ENDIF
@@ -79,8 +84,8 @@
       RETURN
 
 ! **********************************************************************************************************************************
- 1701 FORMAT(' *ERROR  1701: NO DECIMAL POINT WAS FOUND IN WHAT IS SUPPOSED TO BE A REAL    NUMBER IN FIELD ',I3,' OF THE',        &
-                           ' PREVIOUS BULK DATA CARD')
+ 1701 FORMAT(' *ERROR  1701: NO DECIMAL POINT OR EXPONENT MARKER WAS FOUND IN WHAT IS SUPPOSED TO BE A REAL NUMBER IN FIELD ',I3, &
+                           ' OF THE PREVIOUS BULK DATA CARD')
 
 ! **********************************************************************************************************************************
 

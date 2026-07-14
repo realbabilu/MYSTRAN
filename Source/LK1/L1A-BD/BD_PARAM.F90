@@ -1036,15 +1036,17 @@
                OUTMODE = 'LEGACY  '
             ELSE IF (CHRPARM(1:5) == 'SMART') THEN
                OUTMODE = 'SMART   '
+            ELSE IF (CHRPARM(1:6) == 'HYBRID') THEN
+               OUTMODE = 'SMART   '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'LEGACY OR SMART',CHRPARM,OUTMODE
+               WRITE(ERR,1189) PARNAM,'LEGACY, SMART, OR HYBRID',CHRPARM,OUTMODE
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'LEGACY OR SMART',CHRPARM,OUTMODE
+                  WRITE(F06,1189) PARNAM,'LEGACY, SMART, OR HYBRID',CHRPARM,OUTMODE
                ENDIF
             ENDIF
          ENDIF

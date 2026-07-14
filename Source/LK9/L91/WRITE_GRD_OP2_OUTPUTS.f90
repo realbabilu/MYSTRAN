@@ -35,7 +35,7 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06, OP2
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, INT_SC_NUM, SOL_NAME
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, INT_SC_NUM, MODE_SUBCASE, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, OGEL
@@ -243,7 +243,7 @@
       SUBROUTINE GET_ANALYSIS_CODE_FIELD5_FIELD6(JSUB, ANALYSIS_CODE, MODE, EIGENVALUE, ISUBCASE_INDEX)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR
-      USE SCONTR, ONLY                :  SOL_NAME
+      USE SCONTR, ONLY                :  INT_SC_NUM, MODE_SUBCASE, SOL_NAME
       USE EIGEN_MATRICES_1 , ONLY     :  EIGEN_VAL
       USE PARAMS, ONLY                :  SCRSPEC
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
@@ -255,6 +255,7 @@
       INTEGER(LONG), INTENT(INOUT)    :: MODE              ! mode number for an eigenvector solution
       REAL(DOUBLE), INTENT(INOUT)     :: EIGENVALUE        ! the eigenvalue for an eigenvector solution
       INTEGER(LONG), INTENT(INOUT)    :: ISUBCASE_INDEX    ! the index into SCNUM
+      INTEGER(LONG)                   :: I
 
       IF ((SOL_NAME(1:5) == 'MODES') .AND. (SCRSPEC == 'Y') .AND. (JSUB <= 0)) THEN
         ISUBCASE_INDEX = 1
@@ -265,19 +266,31 @@
         ISUBCASE_INDEX = JSUB
         ANALYSIS_CODE = 1  ! statics
       ELSE IF((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
-        ISUBCASE_INDEX = 1
+        ISUBCASE_INDEX = INT_SC_NUM
         ANALYSIS_CODE = 2 ! eigenvectors
         EIGENVALUE = EIGEN_VAL(JSUB)
-        MODE = JSUB
+        MODE = 0
+        IF (ALLOCATED(MODE_SUBCASE)) THEN
+           DO I=1,MIN(JSUB,SIZE(MODE_SUBCASE))
+              IF (MODE_SUBCASE(I) == INT_SC_NUM) MODE = MODE + 1
+           ENDDO
+        ENDIF
+        IF (MODE <= 0) MODE = JSUB
       ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
         ISUBCASE_INDEX = 1
         ANALYSIS_CODE = 1 ! statics
 
       ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
-        ISUBCASE_INDEX = 2
+        ISUBCASE_INDEX = INT_SC_NUM
         ANALYSIS_CODE = 7 ! pre-buckling
         EIGENVALUE = EIGEN_VAL(JSUB)
-        MODE = JSUB
+        MODE = 0
+        IF (ALLOCATED(MODE_SUBCASE)) THEN
+           DO I=1,MIN(JSUB,SIZE(MODE_SUBCASE))
+              IF (MODE_SUBCASE(I) == INT_SC_NUM) MODE = MODE + 1
+           ENDDO
+        ENDIF
+        IF (MODE <= 0) MODE = JSUB
 !      ELSE IF ???
 !        ANALYSIS_CODE = 5 ! frequency
 !      ELSE IF ???
@@ -289,7 +302,7 @@
         ANALYSIS_CODE = 10 ! nonlinear statics
       ELSE
         ANALYSIS_CODE = -1 ! error
- 99     FORMAT("*ERROR: ANALYSIS_CODE=-1; SOL_NAME =",A)
+99     FORMAT("*ERROR: ANALYSIS_CODE=-1; SOL_NAME =",A)
         WRITE(ERR,99) SOL_NAME
       ENDIF
       END SUBROUTINE GET_ANALYSIS_CODE_FIELD5_FIELD6

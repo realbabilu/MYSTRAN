@@ -1253,25 +1253,25 @@
             K = K + 1
             WRITE(F06,*)
             CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), OGEL(K,1:10), TRIA_CENTER_LINE )
-            WRITE(F06,'(A)') TRIA_CENTER_LINE
+            WRITE(F06,'(A)') TRIA_CENTER_LINE(1:149)
             K = K + 1
-            CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K,1:8), TRIA_LOWER_LINE )
-            WRITE(F06,'(A)') TRIA_LOWER_LINE
+            CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K,1:10), TRIA_LOWER_LINE )
+            WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
          ENDDO
       ELSE
          DO I=1,NUM
             K = 2*I - 1
             WRITE(F06,*)
             CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), OGEL(K,1:10), TRIA_CENTER_LINE )
-            WRITE(F06,'(A)') TRIA_CENTER_LINE
-            CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K+1,1:8), TRIA_LOWER_LINE )
-            WRITE(F06,'(A)') TRIA_LOWER_LINE
+            WRITE(F06,'(A)') TRIA_CENTER_LINE(1:149)
+            CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K+1,1:10), TRIA_LOWER_LINE )
+            WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
             DO L=1,3
                WRITE(F06,*)
                CALL FAST_BUILD_TRIA_1706_LINE ( GID_OUT_ARRAY(I,L+1), OGEL(K,1:10), TRIA_GRID_LINE )
-               WRITE(F06,'(A)') TRIA_GRID_LINE
-               CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K+1,1:8), TRIA_LOWER_LINE )
-               WRITE(F06,'(A)') TRIA_LOWER_LINE
+               WRITE(F06,'(A)') TRIA_GRID_LINE(1:139)
+               CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K+1,1:10), TRIA_LOWER_LINE )
+               WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
             ENDDO
          ENDDO
       ENDIF

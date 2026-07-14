@@ -67,6 +67,8 @@
       LOGICAL                         :: WRITE_F06, WRITE_OP2   ! flag
 
       REAL(DOUBLE)                    :: ABS_ANS(8)       ! Max ABS for all element output
+      REAL(DOUBLE)                    :: FORCE_VALUES_6(6)! Local contiguous copy to avoid strided slice temporaries
+      REAL(DOUBLE)                    :: FORCE_VALUES_8(8)! Local contiguous copy to avoid strided slice temporaries
       REAL(DOUBLE)                    :: MAX_ANS(8)       ! Max for all element output
       REAL(DOUBLE)                    :: MIN_ANS(8)       ! Min for all element output
       REAL(DOUBLE)                    :: SHELL_VALUES_8(8)! Local contiguous copy to avoid strided slice temporaries
@@ -308,9 +310,10 @@ headr:IF (IHDR == 'Y') THEN
          ENDIF
 
          IF (WRITE_F06)  THEN  ! f06/print
-           DO I=1,NUM
-              CALL WRITE_I8_PLUS_R14_LINE ( 16, EID_OUT_ARRAY(I,1), OGEL(I,1:8), 8 )
-           ENDDO
+            DO I=1,NUM
+               FORCE_VALUES_8(1:8) = OGEL(I,1:8)
+               CALL WRITE_I8_PLUS_R14_LINE ( 16, EID_OUT_ARRAY(I,1), FORCE_VALUES_8, 8 )
+            ENDDO
            !CALL GET_MAX_MIN_ABS ( 1, 8 )
            WRITE(F06,1103) FILL(1: 0), FILL(1: 0), (MAX_ANS(J),J=1,8), FILL(1: 0), (MIN_ANS(J),J=1,8), FILL(1: 0),                 &
                                                    (ABS_ANS(J),J=1,8), FILL(1: 0)
@@ -572,7 +575,8 @@ headr:IF (IHDR == 'Y') THEN
       ELSE IF ((TYPE == 'TRIA3K  ') .OR. (TYPE == 'QUAD4K  ')) THEN
          IF (WRITE_F06) THEN
              DO I=1,NUM
-                CALL WRITE_I8_PLUS_R14_LINE ( 16, EID_OUT_ARRAY(I,1), OGEL(I,1:6), 6 )
+                 FORCE_VALUES_6(1:6) = OGEL(I,1:6)
+                 CALL WRITE_I8_PLUS_R14_LINE ( 16, EID_OUT_ARRAY(I,1), FORCE_VALUES_6, 6 )
              ENDDO
              CALL GET_MAX_MIN_ABS ( 1, 8 )
              WRITE(F06,1513) FILL(1: 0), FILL(1: 0), (MAX_ANS(J),J=1,6), FILL(1: 0), (MIN_ANS(J),J=1,6), FILL(1: 0),  &
@@ -722,9 +726,10 @@ headr:IF (IHDR == 'Y') THEN
          ENDIF
 
          IF (WRITE_F06)  THEN  ! f06/print
-           DO I=1,NUM
-              CALL WRITE_I8_PLUS_R14_LINE ( 16, EID_OUT_ARRAY(I,1), OGEL(I,1:6), 6 )
-           ENDDO
+            DO I=1,NUM
+               FORCE_VALUES_6(1:6) = OGEL(I,1:6)
+               CALL WRITE_I8_PLUS_R14_LINE ( 16, EID_OUT_ARRAY(I,1), FORCE_VALUES_6, 6 )
+            ENDDO
            CALL GET_MAX_MIN_ABS ( 1, 6 )
            WRITE(F06,1603) FILL(1: 0), FILL(1: 0), (MAX_ANS(J),J=1,6), FILL(1: 0), (MIN_ANS(J),J=1,6), FILL(1: 0),  &
                                                    (ABS_ANS(J),J=1,6), FILL(1: 0)

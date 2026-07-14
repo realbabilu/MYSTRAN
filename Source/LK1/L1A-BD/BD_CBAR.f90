@@ -28,10 +28,9 @@
 
       ! Processes CBAR and CBEAM Bulk Data Cards:
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
+      USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LBAROFF, LVVEC, MEDAT_CBAR, &
                                          MEDAT_CBEAM, NBAROFF, NBAROR, NBEAMOR, NCBAR, NCBEAM, NEDAT, NELE, NVVEC
-      USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
       USE PARAMS, ONLY                :  EPSIL
       USE MODEL_STUF, ONLY            :  BAROFF, BAROR_G0, BEAMOR_G0, BAROR_PID, BEAMOR_PID, BAROR_VVEC_TYPE, BEAMOR_VVEC_TYPE,    &
@@ -306,8 +305,8 @@
          ENDDO
 
          ! Get offsets, if present
-         IF ((JCARD(4)(1:) /= ' ') .OR. (JCARD(5)(1:) /= ' ') .AND. (JCARD(6)(1:) /= ' ') .OR. (JCARD(7)(1:) /= ' ') .AND.         &
-             (JCARD(8)(1:) /= ' ') .OR. (JCARD(9)(1:) /= ' ')) THEN
+         IF ((JCARD(4)(1:) /= ' ') .OR. (JCARD(5)(1:) /= ' ') .OR. (JCARD(6)(1:) /= ' ') .OR.                                      &
+             (JCARD(7)(1:) /= ' ') .OR. (JCARD(8)(1:) /= ' ') .OR. (JCARD(9)(1:) /= ' ')) THEN
             NBAROFF = NBAROFF + 1
             IF (NBAROFF > LBAROFF) THEN
                ! Coding error, so quit

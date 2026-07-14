@@ -1652,6 +1652,9 @@ j_do: DO JVEC=1,NUM_SOLNS
             WRITE(ERR,'(A,I0,A,6(1ES14.6,1X))') '   R-set row=', RSA_COMP_ROW, ', TR6_MEFM=', (TR6_MEFM(RSA_COMP_ROW,K),K=1,6)
          ELSE
             WRITE(ERR,'(A)') '   No matching R-set row was found for the primary SUPORT DOF; fallback global-component weighting was used.'
+            WRITE(ERR,'(A)') '   This minimal-modes SCRSPEC path does not yet reproduce commercial residual-structure support handling'
+            WRITE(ERR,'(A)') '   for constrained/base-excitation SUPORT definitions. Large displacement/velocity/acceleration differences'
+            WRITE(ERR,'(A)') '   are possible for portal/base-motion style decks even when beam large-mass decks compare well.'
          ENDIF
          IF (RSA_SUPORT_CONM2_MASS > EPS1) THEN
             WRITE(ERR,'(A,1ES14.6,A,L1)') '   Primary SUPORT-grid CONM2 mass=', RSA_SUPORT_CONM2_MASS, ', zero-rigid-mode-found=', &
@@ -1712,6 +1715,9 @@ j_do: DO JVEC=1,NUM_SOLNS
             WRITE(F06,'(A,I0,A,6(1ES14.6,1X))') '   R-set row=', RSA_COMP_ROW, ', TR6_MEFM=', (TR6_MEFM(RSA_COMP_ROW,K),K=1,6)
          ELSE
             WRITE(F06,'(A)') '   No matching R-set row was found for the primary SUPORT DOF; fallback global-component weighting was used.'
+            WRITE(F06,'(A)') '   This minimal-modes SCRSPEC path does not yet reproduce commercial residual-structure support handling'
+            WRITE(F06,'(A)') '   for constrained/base-excitation SUPORT definitions. Large displacement/velocity/acceleration differences'
+            WRITE(F06,'(A)') '   are possible for portal/base-motion style decks even when beam large-mass decks compare well.'
          ENDIF
          IF (RSA_SUPORT_CONM2_MASS > EPS1) THEN
             WRITE(F06,'(A,1ES14.6,A,L1)') '   Primary SUPORT-grid CONM2 mass=', RSA_SUPORT_CONM2_MASS, ', zero-rigid-mode-found=', &

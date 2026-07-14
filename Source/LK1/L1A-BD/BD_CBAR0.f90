@@ -30,8 +30,6 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, JCARD_LEN, LBAROFF, LVVEC
-      USE TIMDAT, ONLY                :  TSEC
-
       USE BD_CBAR0_USE_IFs
 
       IMPLICIT NONE
@@ -78,8 +76,8 @@
       ENDIF
       CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
       IF (ICONT == 1) THEN
-         IF ((JCARD(4)(1:) /= ' ') .OR. (JCARD(5)(1:) /= ' ') .AND. (JCARD(6)(1:) /= ' ') .OR. (JCARD(7)(1:) /= ' ') .AND.         &
-             (JCARD(8)(1:) /= ' ') .OR. (JCARD(9)(1:) /= ' '))THEN
+         IF ((JCARD(4)(1:) /= ' ') .OR. (JCARD(5)(1:) /= ' ') .OR. (JCARD(6)(1:) /= ' ') .OR.                                      &
+             (JCARD(7)(1:) /= ' ') .OR. (JCARD(8)(1:) /= ' ') .OR. (JCARD(9)(1:) /= ' ')) THEN
             LBAROFF = LBAROFF + 1
          ENDIF
       ENDIF

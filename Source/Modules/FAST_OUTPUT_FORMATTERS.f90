@@ -161,7 +161,7 @@
 
          SUBROUTINE C_MYSTRAN_BUILD_TRIA_1704_LINE ( VALUES, TEXT ) BIND(C, NAME='mystran_build_tria_1704_line')
             IMPORT :: C_CHAR, C_DOUBLE
-            REAL(C_DOUBLE)              :: VALUES(8)
+            REAL(C_DOUBLE)              :: VALUES(10)
             CHARACTER(C_CHAR)           :: TEXT(*)
          END SUBROUTINE C_MYSTRAN_BUILD_TRIA_1704_LINE
 
@@ -413,13 +413,13 @@
 
       SUBROUTINE FAST_BUILD_TRIA_1704_LINE ( VALUES, TEXT )
 
-      REAL(DOUBLE), INTENT(IN)         :: VALUES(8)
+      REAL(DOUBLE), INTENT(IN)         :: VALUES(10)
       CHARACTER(149*BYTE), INTENT(OUT) :: TEXT
 
       CHARACTER(C_CHAR)                :: C_TEXT(149)
-      REAL(C_DOUBLE)                   :: C_VALUES(8)
+      REAL(C_DOUBLE)                   :: C_VALUES(10)
 
-      CALL COPY_REAL_VECTOR_8(VALUES, C_VALUES)
+      CALL COPY_REAL_VECTOR_10(VALUES, C_VALUES)
       CALL C_MYSTRAN_BUILD_TRIA_1704_LINE(C_VALUES, C_TEXT)
       CALL COPY_C_TEXT(C_TEXT, TEXT, 149_LONG)
 

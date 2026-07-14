@@ -72,6 +72,8 @@
 !         the subcase id
       USE PENTIUM_II_KIND, ONLY  :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY           :  ERR, OP2
+      USE PARAMS, ONLY           :  SCRSPEC
+      USE SCONTR, ONLY           :  SOL_NAME
       IMPLICIT NONE
       INTEGER(LONG), INTENT(IN)        :: ITABLE, ISUBCASE, FORMAT_CODE, DEVICE_CODE, ANALYSIS_CODE, TABLE_CODE, NUM_WIDE
       CHARACTER(LEN=128), INTENT(IN)   :: TITLE            ! Solution title
@@ -117,6 +119,14 @@
       !if TABLE_NAME .EQ. "OUG1"
       !TABLE_CODE = 1
       THERMAL = 0
+      IF ((SOL_NAME(1:5) == 'MODES') .AND. (SCRSPEC == 'Y')) THEN
+         IF ((TABLE_CODE == 1) .OR. (TABLE_CODE == 10) .OR. (TABLE_CODE == 11) .OR. (TABLE_CODE == 3)) THEN
+            ! MSC/Nastran response-spectrum OP2 grid/SPCF result tables are
+            ! tagged with the thermal=4 convention used by downstream readers
+            ! to route scaled spectral response results.
+            THERMAL = 4
+         ENDIF
+      ENDIF
 
 !       static
       !ANALYSIS_CODE = 1
