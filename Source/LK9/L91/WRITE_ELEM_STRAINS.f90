@@ -95,6 +95,7 @@
       REAL(DOUBLE)                    :: TINT, XI_STD, XI0, XI1
       REAL(DOUBLE)                    :: ROW_CURV(10)
       REAL(DOUBLE)                    :: ROW_MEM(10)
+      REAL(DOUBLE)                    :: ROW_TMP(10)
       REAL(DOUBLE)                    :: VONMISES
       REAL(DOUBLE)                    :: XI_RAW(11), SXC_RAW(11), SXD_RAW(11), SXE_RAW(11), SXF_RAW(11), SMAX_RAW(11),            &
                                          SMIN_RAW(11), MST_RAW(11), MSC_RAW(11)
@@ -325,7 +326,13 @@
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                   WRITE(F06,302) FILL(1: 20)
                ELSE
-                  WRITE(F06,301) FILL(1: 42)
+                  IF (STR_CID == 0) THEN
+                     WRITE(F06,321) FILL(1: 45)
+                  ELSE IF (STR_CID > 0) THEN
+                     WRITE(F06,331) FILL(1: 41), STR_CID
+                  ELSE
+                     WRITE(F06,301) FILL(1: 42)
+                  ENDIF
                ENDIF
                WRITE(F06,401) FILL(1: 71), ONAME
 
@@ -349,7 +356,13 @@
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                   WRITE(F06,302) FILL(1: 20)
                ELSE
-                  WRITE(F06,301) FILL(1: 36)
+                  IF (STR_CID == 0) THEN
+                     WRITE(F06,321) FILL(1: 39)
+                  ELSE IF (STR_CID > 0) THEN
+                     WRITE(F06,331) FILL(1: 35), STR_CID
+                  ELSE
+                     WRITE(F06,301) FILL(1: 36)
+                  ENDIF
                ENDIF
                WRITE(F06,401) FILL(1: 65), ONAME
 
@@ -933,6 +946,10 @@
 
   312 FORMAT(1X,A,'C B   E L E M E N T   S T R A I N S   O T M   I N   M A T E R I A L   C O O R D I N A T E   S Y S T E M')
 
+  321 FORMAT(1X,A,'E L E M E N T   S T R A I N S   I N   B A S I C   C O O R D I N A T E   S Y S T E M')
+
+  331 FORMAT(1X,A,'E L E M E N T   S T R A I N S   I N   C O O R D I N A T E   S Y S T E M ',I8)
+
   401 FORMAT(A,'F O R   E L E M E N T   T Y P E   ',A11)
 
 
@@ -1228,6 +1245,7 @@
       REAL(DOUBLE)                    :: MIN_ANS(11)
       REAL(DOUBLE)                    :: ROW_CURV(10)
       REAL(DOUBLE)                    :: ROW_MEM(10)
+      REAL(DOUBLE)                    :: ROW_TMP(10)
       REAL(DOUBLE)                    :: SMAJ
       REAL(DOUBLE)                    :: SMIN
       REAL(DOUBLE)                    :: SXYMAX
@@ -1274,25 +1292,43 @@
          DO I=1,NUM
             K = K + 1
             WRITE(F06,*)
-            CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), OGEL(K,1:10), TRIA_CENTER_LINE )
+            DO J=1,10
+               ROW_TMP(J) = OGEL(K,J)
+            ENDDO
+            CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), ROW_TMP, TRIA_CENTER_LINE )
             WRITE(F06,'(A)') TRIA_CENTER_LINE(1:149)
             K = K + 1
-            CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K,1:10), TRIA_LOWER_LINE )
+            DO J=1,10
+               ROW_TMP(J) = OGEL(K,J)
+            ENDDO
+            CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
             WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
          ENDDO
       ELSE
          DO I=1,NUM
             K = 2*I - 1
             WRITE(F06,*)
-            CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), OGEL(K,1:10), TRIA_CENTER_LINE )
+            DO J=1,10
+               ROW_TMP(J) = OGEL(K,J)
+            ENDDO
+            CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), ROW_TMP, TRIA_CENTER_LINE )
             WRITE(F06,'(A)') TRIA_CENTER_LINE(1:149)
-            CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K+1,1:10), TRIA_LOWER_LINE )
+            DO J=1,10
+               ROW_TMP(J) = OGEL(K+1,J)
+            ENDDO
+            CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
             WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
             DO L=1,3
                WRITE(F06,*)
-               CALL FAST_BUILD_TRIA_1706_LINE ( GID_OUT_ARRAY(I,L+1), OGEL(K,1:10), TRIA_GRID_LINE )
+               DO J=1,10
+                  ROW_TMP(J) = OGEL(K,J)
+               ENDDO
+               CALL FAST_BUILD_TRIA_1706_LINE ( GID_OUT_ARRAY(I,L+1), ROW_TMP, TRIA_GRID_LINE )
                WRITE(F06,'(A)') TRIA_GRID_LINE(1:139)
-               CALL FAST_BUILD_TRIA_1704_LINE ( OGEL(K+1,1:10), TRIA_LOWER_LINE )
+               DO J=1,10
+                  ROW_TMP(J) = OGEL(K+1,J)
+               ENDDO
+               CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
                WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
             ENDDO
          ENDDO

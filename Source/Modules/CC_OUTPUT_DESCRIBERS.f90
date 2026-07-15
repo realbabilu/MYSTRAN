@@ -84,4 +84,11 @@
       CHARACTER(LEN(CC_CMD_DESCRIBERS)) :: STRE_OPT  = 'VONMISES'
       CHARACTER(LEN(CC_CMD_DESCRIBERS)) :: STRE_LOC  = 'CENTER  '
 
+      LOGICAL                           :: GPSTRESS_REQ      = .FALSE.
+      LOGICAL                           :: STRFIELD_REQ      = .FALSE.
+      LOGICAL                           :: OUTPUT_POST_REQ   = .FALSE.
+      INTEGER(LONG)                     :: GPSTRESS_SETID    = 0
+      INTEGER(LONG)                     :: NUM_GP_SURFACE    = 0
+      INTEGER(LONG)                     :: NUM_GP_VOLUME     = 0
+
       END MODULE CC_OUTPUT_DESCRIBERS

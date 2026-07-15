@@ -44,7 +44,7 @@
                                          EIG_VECS, EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, EIG_EXTRACT_SOURCE, EIG_FEAST_M0,        &
                                          EIG_FEAST_TOL_DIGITS, EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR, EIG_FEAST_SEARCH_SCALE,   &
                                          EIG_SUBSPACE_NSUB, EIG_SUBSPACE_TOL, EIG_SUBSPACE_MAX_ITER, EIG_DENSE_NEX
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC, OUTPUT_POST_REQ, STRFIELD_REQ, NUM_GP_SURFACE, NUM_GP_VOLUME
 
       USE LOADC_USE_IFs
 
@@ -172,6 +172,10 @@ outer:DO
          ELSE IF (CARD1(1:4) == 'OLOA'    ) THEN
             CALL CC_OLOA   ( CARD1 )
 
+         ELSE IF (CARD1(1:11) == 'OUTPUT(POST') THEN       ! MSC/NX OUTPUT(POST) keeps later SET/SURFACE/VOLUME Case Control entries active.
+            OUTPUT_POST_REQ = .TRUE.
+            CYCLE outer
+
          ELSE IF (CARD1(1:6) == 'OUTPUT' ) THEN            ! Normal OUTPUT entry is OK. Ones like OUTPUT(PLOT) we end CC processing.
             IF (INDEX(CARD,"(") > 0) THEN                  ! If we find "(" in an OUTPUT CC entry it indicates, e.g., OUTPUT(PLOT),
                WARN_ERR = WARN_ERR + 1
@@ -194,7 +198,11 @@ inner:         DO
             ENDIF
 
          ELSE IF (CARD1(1:3) == 'SET'     ) THEN
-            CALL CC_SET    ( CARD1 )
+            IF (OUTPUT_POST_REQ .AND. (INDEX(CARD1,'=') == 0)) THEN
+               CYCLE outer
+            ELSE
+               CALL CC_SET    ( CARD1 )
+            ENDIF
 
          ELSE IF (CARD1(1:5) == 'SDAMP'   ) THEN
             CALL CC_SDAMP  ( CARD1 )
@@ -211,8 +219,20 @@ inner:         DO
          ELSE IF((CARD1(1:4) == 'STRA'    ) .OR.  (CARD1(1:4) == 'STRN'    ) .OR.  (CARD1(1:8) == 'ELSTRAIN')) THEN
             CALL CC_STRN   ( CARD1 )
 
+         ELSE IF((CARD1(1:8) == 'GPSTRESS') .OR.  (CARD1(1:7) == 'GSTRESS')) THEN
+            CALL CC_STRE   ( CARD1, .TRUE. )
+
          ELSE IF((CARD1(1:4) == 'STRE'    ) .OR.  (CARD1(1:4) == 'STRS'    ) .OR.  (CARD1(1:8) == 'ELSTRESS')) THEN
             CALL CC_STRE   ( CARD1 )
+
+         ELSE IF (CARD1(1:8) == 'STRFIELD') THEN
+            STRFIELD_REQ = .TRUE.
+
+         ELSE IF (CARD1(1:7) == 'SURFACE') THEN
+            NUM_GP_SURFACE = NUM_GP_SURFACE + 1
+
+         ELSE IF (CARD1(1:6) == 'VOLUME') THEN
+            NUM_GP_VOLUME = NUM_GP_VOLUME + 1
 
          ELSE IF (CARD1(1:8) == 'SUBCASE ') THEN
             CALL CC_SUBC   ( CARD1 )

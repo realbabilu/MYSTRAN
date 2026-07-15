@@ -64,6 +64,19 @@
             PSH(4) = DUM2(2)
          ENDIF
 
+      ELSE IF (TYPE(1:5) == 'TRIA3') THEN
+
+         PSH(1) = 1.0D0 - R - S
+         PSH(2) = R
+         PSH(3) = S
+
+         DPSHG(1,1) = -1.0D0
+         DPSHG(2,1) = -1.0D0
+         DPSHG(1,2) =  1.0D0
+         DPSHG(2,2) =  0.0D0
+         DPSHG(1,3) =  0.0D0
+         DPSHG(2,3) =  1.0D0
+
       ELSE
 
         WRITE(ERR,*) ' *ERROR: INCORRECT ELEMENT TYPE ', TYPE

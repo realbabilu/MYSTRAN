@@ -90,6 +90,16 @@
          GP_RS(2,7) =  ONE
          GP_RS(2,8) =  ZERO
 
+      ELSEIF ((TYPE(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'MITC3+')) THEN
+
+         GP_RS(1,1) =  ZERO
+         GP_RS(1,2) =  ONE
+         GP_RS(1,3) =  ZERO
+
+         GP_RS(2,1) =  ZERO
+         GP_RS(2,2) =  ZERO
+         GP_RS(2,3) =  ONE
+
       ELSE
 
          WRITE(ERR,*) ' *ERROR: INCORRECT ELEMENT TYPE ', TYPE

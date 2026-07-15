@@ -794,7 +794,7 @@ elems_5: DO J = 1,NELE
                   ENDIF
                   CALL ELMDIS
                   CALL ELEM_STRE_STRN_ARRAYS ( 1 )
-                  CALL CALC_ELEM_STRESSES ( NCQUAD4, NDUM, NUM_FROWS, 'N', 'Y' )
+                  CALL CALC_ELEM_STRESSES ( NCQUAD4 + NCQUADR, NDUM, NUM_FROWS, 'N', 'Y' )
                ENDIF
             ENDIF
          ENDDO
@@ -1157,7 +1157,7 @@ elems_5: DO J = 1,NELE
          STRESS_ITEM( 8) = 'MS-Tension          '  ;  STRESS_ITEM(17) = 'MS-Compression      '
          STRESS_ITEM( 9) = 'Torsional Stress    '  ;  STRESS_ITEM(18) = 'MS-Torsion          '
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
          NUM_OTM_ENTRIES = 10
          STRESS_ITEM( 1) = 'Fibre Dist      -Z1 '  ;  STRESS_ITEM(11) = 'Fibre Dist      +Z1 '
          STRESS_ITEM( 2) = 'Normal X Stress -Z1 '  ;  STRESS_ITEM(12) = 'Normal X Stress +Z1 '

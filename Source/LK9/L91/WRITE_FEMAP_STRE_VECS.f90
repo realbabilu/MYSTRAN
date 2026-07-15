@@ -101,6 +101,8 @@
          VEC_ID_OFFSET = 60600
       ELSE IF (ELEM_TYP == 'QUAD4   ') THEN
          VEC_ID_OFFSET = 60700
+      ELSE IF (ELEM_TYP == 'QUADR   ') THEN
+         VEC_ID_OFFSET = 60700
       ELSE IF (ELEM_TYP == 'HEXA8   ') THEN
          VEC_ID_OFFSET = 60800
       ELSE IF (ELEM_TYP == 'HEXA20  ') THEN
@@ -198,7 +200,7 @@
             CALL WRITE_STRE_COLUMN ( J+1, VEC_ID_OFFSET + J + 1, ID )
          ENDDO
 
-      ELSE IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4')) THEN
+      ELSE IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4') .OR. (ELEM_TYP == 'QUADR   ')) THEN
 
          IF (IS_PCOMP == 'N') THEN
             TITLE_E( 1) = 'Top X Direct Stress' ;   CALC_WARN( 1) = '0';   COMP_DIR( 1) = '0';   CENT_TOTAL( 1) = '1'

@@ -573,12 +573,6 @@
                CLOSE_IT   = 'Y'
                CALL READ_MATRIX_1 ( LINK2C, L2C, 'N', CLOSE_IT, L2CSTAT, L2C_MSG, 'QSYS', NTERM_QSYS, 'Y', NDOFS,                  &
                                     I_QSYS, J_QSYS, QSYS )
-               COL_NUM  = 1                                   ! Put QSYS nonzero terms into QSYS_COL.
-               NUM_COLS = 1
-               IF (NTERM_QSYS > 0) THEN
-                  CALL GET_SPARSE_CRS_COL ('QSYS_COL  ', COL_NUM, NTERM_QSYS, NDOFS, NUM_COLS, I_QSYS, J_QSYS, QSYS, ONE,          &
-                                            QSYS_COL, NULL_COL)
-               ENDIF
 
             ENDIF
 
@@ -1056,6 +1050,17 @@ j_do: DO JVEC=1,NUM_SOLNS
             INT_SC_NUM   = 1
             FEMAP_SET_ID = JVEC
 
+         ENDIF
+
+         IF (NDOFS > 0) THEN
+            DO K=1,NDOFS
+               QSYS_COL(K) = ZERO
+            ENDDO
+            IF (NTERM_QSYS > 0) THEN
+               NUM_COLS = NSUB
+               CALL GET_SPARSE_CRS_COL ('QSYS_COL  ', JVEC, NTERM_QSYS, NDOFS, NUM_COLS, I_QSYS, J_QSYS, QSYS, ONE,               &
+                                         QSYS_COL, NULL_COL)
+            ENDIF
          ENDIF
 
          IF (WRITE_NEU_GEOM) THEN

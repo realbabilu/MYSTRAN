@@ -110,9 +110,9 @@
       ALLOW_CC_CMD_DESCR(12, 1) = '        ' ; ALLOW_CC_CMD_DESCR(12, 2) = '        ' ; ALLOW_CC_CMD_DESCR(12, 3) = '        '
       ALLOW_CC_CMD_DESCR(13, 1) = '        ' ; ALLOW_CC_CMD_DESCR(13, 2) = '        ' ; ALLOW_CC_CMD_DESCR(13, 3) = '        '
       ALLOW_CC_CMD_DESCR(14, 1) = '        ' ; ALLOW_CC_CMD_DESCR(14, 2) = '        ' ; ALLOW_CC_CMD_DESCR(14, 3) = '        '
-      ALLOW_CC_CMD_DESCR(15, 1) = '        ' ; ALLOW_CC_CMD_DESCR(15, 2) = '        ' ; ALLOW_CC_CMD_DESCR(15, 3) = '        '
-      ALLOW_CC_CMD_DESCR(16, 1) = '        ' ; ALLOW_CC_CMD_DESCR(16, 2) = '        ' ; ALLOW_CC_CMD_DESCR(16, 3) = '        '
-      ALLOW_CC_CMD_DESCR(17, 1) = '        ' ; ALLOW_CC_CMD_DESCR(17, 2) = '        ' ; ALLOW_CC_CMD_DESCR(17, 3) = '        '
+      ALLOW_CC_CMD_DESCR(15, 1) = '        ' ; ALLOW_CC_CMD_DESCR(15, 2) = '        ' ; ALLOW_CC_CMD_DESCR(15, 3) = 'CENTER  '
+      ALLOW_CC_CMD_DESCR(16, 1) = '        ' ; ALLOW_CC_CMD_DESCR(16, 2) = '        ' ; ALLOW_CC_CMD_DESCR(16, 3) = 'CORNER  '
+      ALLOW_CC_CMD_DESCR(17, 1) = '        ' ; ALLOW_CC_CMD_DESCR(17, 2) = '        ' ; ALLOW_CC_CMD_DESCR(17, 3) = 'BILIN   '
       ALLOW_CC_CMD_DESCR(18, 1) = '        ' ; ALLOW_CC_CMD_DESCR(18, 2) = '        ' ; ALLOW_CC_CMD_DESCR(18, 3) = '        '
       ALLOW_CC_CMD_DESCR(19, 1) = '        ' ; ALLOW_CC_CMD_DESCR(19, 2) = '        ' ; ALLOW_CC_CMD_DESCR(19, 3) = '        '
       ALLOW_CC_CMD_DESCR(20, 1) = 'PSDF    ' ; ALLOW_CC_CMD_DESCR(20, 2) = 'PSDF    ' ; ALLOW_CC_CMD_DESCR(20, 3) = 'PSDF    '
@@ -202,6 +202,17 @@ jdo_1:   DO J=1,NUM_POSS_CCD
             IF (CC_CMD_DESCRIBERS(I) == ALLOW_CC_CMD_DESCR(J,JCOL)) THEN
                FOUND = 'Y'
                EXIT jdo_1
+            ELSE IF (WHAT == 'ELFO') THEN
+               IF      (CC_CMD_DESCRIBERS(I)(1:6) == 'CENTER') THEN
+                  FOUND = 'Y'
+                  EXIT jdo_1
+               ELSE IF (CC_CMD_DESCRIBERS(I)(1:6) == 'CORNER') THEN
+                  FOUND = 'Y'
+                  EXIT jdo_1
+               ELSE IF (CC_CMD_DESCRIBERS(I)(1:5) == 'BILIN' ) THEN
+                  FOUND = 'Y'
+                  EXIT jdo_1
+               ENDIF
             ENDIF
          ENDDO jdo_1
          IF (FOUND == 'N') THEN

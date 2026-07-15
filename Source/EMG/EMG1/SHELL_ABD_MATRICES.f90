@@ -113,7 +113,8 @@
 
       TYPE  = ETYPE(INT_ELEM_ID)
 
-      IF ((TYPE(1:5) /= 'TRIA3') .AND. (TYPE(1:5) /= 'QUAD4') .AND. (TYPE(1:5) /= 'QUAD8') .AND. (TYPE(1:5) /= 'SHEAR')) THEN
+      IF ((TYPE(1:5) /= 'TRIA3') .AND. (TYPE(1:5) /= 'QUAD4') .AND. (TYPE /= 'QUADR   ') .AND. (TYPE(1:5) /= 'QUAD8') .AND.      &
+          (TYPE(1:5) /= 'SHEAR')) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
          FATAL_ERR = FATAL_ERR + 1
          WRITE(ERR,1946) TYPE, SUBR_NAME
@@ -150,7 +151,7 @@ pcom0:IF (PCOMP_PROPS == 'N') THEN                         ! Element is not a co
             FCONV(3)          =  TS
          ENDIF
 
-         IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA3')) THEN
+         IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'TRIA3')) THEN
             MASS_PER_UNIT_AREA = (RHO(1)*TM + NSM)
          ENDIF
 
@@ -326,7 +327,7 @@ ply_do:  DO K=1,NUM_PLIES_TO_PROC
             THETA_PLY = RPCOMP(INTL_PID,PLY_RPCOMP_INDEX+1)! Ply angle from elem material axis to ply longitudinal axis
             ZPLY      = RPCOMP(INTL_PID,PLY_RPCOMP_INDEX+2)! Coord of mid plane of ply relative to mid plane of elem
 
-            IF      ((TYPE == 'QDMEM   ') .OR. (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD4   ') .OR.                                 &
+            IF      ((TYPE == 'QDMEM   ') .OR. (TYPE == 'QUAD4K  ') .OR. (TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ') .OR.      &
                      (TYPE == 'TRMEM   ') .OR. (TYPE == 'TRIA3K  ') .OR. (TYPE == 'TRIA3   ')) THEN
                MASS_PER_UNIT_AREA = MASS_PER_UNIT_AREA + (RHO(1)*TPLY)
             ELSE IF ((TYPE == 'QDPLT1  ') .OR. (TYPE == 'QDPLT2  ') .OR.                                                           &

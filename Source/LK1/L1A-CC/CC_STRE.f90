@@ -24,14 +24,19 @@
 
 ! End MIT license text.
 
-      SUBROUTINE CC_STRE ( CARD )
+      SUBROUTINE CC_STRE ( CARD, IS_GPSTRESS_ALIAS )
 
-      ! Processes Case Control STRE cards for element stress output requests
+      ! Processes Case Control STRE cards for element stress output requests.
+      ! GPSTRESS/GSTRESS are accepted as a compatibility alias in this branch:
+      ! they request corner-style shell stress in the basic system. This is not
+      ! the full MSC GPSTRESS surface/volume recovery path.
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_CMD_DESCRIBERS, LSUB, NSUB, NCCCD
+      USE IOUNT1, ONLY                :  ERR, F06
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_CMD_DESCRIBERS, ECHO, LSUB, NSUB, NCCCD, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_OUT
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OUT, GPSTRESS_REQ, GPSTRESS_SETID
       USE MODEL_STUF, ONLY            :  SC_STRE
+      USE PARAMS, ONLY                :  STR_CID, SUPWARN
 
       USE CC_STRE_USE_IFs
 
@@ -39,11 +44,13 @@
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CC_STRE'
       CHARACTER(LEN=*), INTENT(IN)    :: CARD              ! A Bulk Data card
+      LOGICAL, OPTIONAL, INTENT(IN)    :: IS_GPSTRESS_ALIAS ! =.TRUE. when called for GPSTRESS/GSTRESS
       CHARACTER( 1*BYTE)              :: FOUND_PRINT       ! CC_CMD_DESCRIBERS has request for "PRINT"
       CHARACTER( 1*BYTE)              :: FOUND_PLOT        ! CC_CMD_DESCRIBERS has request for "PLOT"
       CHARACTER( 1*BYTE)              :: FOUND_PUNCH       ! CC_CMD_DESCRIBERS has request for "PUNCH"
       CHARACTER( 1*BYTE)              :: FOUND_NEU         ! CC_CMD_DESCRIBERS has request for "NEU"
       CHARACTER( 1*BYTE)              :: FOUND_CSV         ! CC_CMD_DESCRIBERS has request for "CSV"
+      LOGICAL                          :: GPSTRESS_ALIAS
 
       INTEGER(LONG)                   :: I                 ! DO loop index
       INTEGER(LONG)                   :: SETID             ! Set ID on this Case Control card
@@ -54,6 +61,9 @@
 ! **********************************************************************************************************************************
       ! CC_OUTPUTS processes all output type Case Control entries (they all
       ! have some common code so it is put there)
+
+      GPSTRESS_ALIAS = .FALSE.
+      IF (PRESENT(IS_GPSTRESS_ALIAS)) GPSTRESS_ALIAS = IS_GPSTRESS_ALIAS
 
       CALL CC_OUTPUTS ( CARD, 'STRE', SETID )
 
@@ -80,6 +90,24 @@
         STRE_OUT = 'YYNNN'
       ENDIF
 
+      IF (GPSTRESS_ALIAS) THEN
+         GPSTRESS_REQ = .TRUE.
+         GPSTRESS_SETID = SETID
+         STRE_LOC = 'CORNER'
+         IF (STR_CID == -2) STR_CID = 0
+         WARN_ERR = WARN_ERR + 1
+         WRITE(ERR,901) CARD(1:LEN_TRIM(CARD))
+         IF (SUPWARN == 'N') THEN
+            IF (ECHO == 'NONE  ') THEN
+               WRITE(F06,901) CARD(1:LEN_TRIM(CARD))
+            ENDIF
+         ENDIF
+      ELSE IF (GPSTRESS_REQ) THEN
+         ! GPSTRESS needs grid/corner stress recovery even when a later
+         ! STRESS(CENTER) request is present in the same deck.
+         STRE_LOC = 'CORNER'
+      ENDIF
+
       ! Set CASE CONTROL output request variable to SETID
       IF (NSUB == 0) THEN
          DO I = 1,LSUB
@@ -94,5 +122,7 @@
       RETURN
 
 ! **********************************************************************************************************************************
+  901 FORMAT(' *WARNING    : ',A,/,14X,' IS MAPPED TO STRESS(CORNER) WITH PARAM,STR_CID,0 IN THIS MYSTRAN BUILD.',/, &
+             14X,' OUTPUT(POST) SURFACE/VOLUME CARDS ARE ACCEPTED; OGS1 OUTPUT IS A BASELINE COMPATIBILITY WRITER.')
 
       END SUBROUTINE CC_STRE

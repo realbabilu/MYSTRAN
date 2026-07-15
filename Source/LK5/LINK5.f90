@@ -90,6 +90,7 @@
       REAL(DOUBLE)                    :: MIJ_COL_SCALE=ZERO! Scale fac for a col of gen mass matrix to renorm MAXMIJ from LINK4
       REAL(DOUBLE)                    :: MIJ_ROW_SCALE=ZERO! Scale fac for a col of gen mass matrix to renorm MAXMIJ from LINK4
       REAL(DOUBLE)                    :: PHI_SCALE_FAC     ! Scale factor that the eigenvector was renormalized to in subr RENORM
+      REAL(DOUBLE), ALLOCATABLE       :: YSE_ALL(:,:)      ! Enforced displacements on the SE-set for each subcase
 
 ! **********************************************************************************************************************************
       LINKNO = 5
@@ -209,7 +210,7 @@
       CALL LINK_MESSAGE('ALLOCATE SEVERAL ARRAYS')
       CALL ALLOCATE_SPARSE_MAT ( 'GMN', NDOFM, NTERM_GMN, SUBR_NAME )
       CALL ALLOCATE_SPARSE_MAT ( 'GOA', NDOFO, NTERM_GOA, SUBR_NAME )
-      CALL ALLOCATE_COL_VEC ( 'YSe' , NDOFS, SUBR_NAME )
+      CALL ALLOCATE_COL_VEC ( 'YSe' , NDOFSE, SUBR_NAME )
 
 ! Read GMN matrix if there are MPC's
 
@@ -246,16 +247,26 @@
             CALL FILE_OPEN ( L1H, LINK1H, OUNT, 'OLD', L1H_MSG, 'READ_STIME', 'UNFORMATTED', 'READ', 'REWIND', 'Y', 'N' )
 
             CALL LINK_MESSAGE('READ YSe ENFORCED DISPLACEMENTS')
+            ALLOCATE ( YSE_ALL(NDOFSE,NSUB) )
+            YSE_ALL = ZERO
 
             IERROR = 0
-            DO I=1,NDOFSE
-               READ(L1H,IOSTAT=IOCHK) YSe(I)
-               IF (IOCHK /= 0) THEN
-                  IERROR = IERROR + 1
-                  REC_NO = I
-                  CALL READERR ( IOCHK, LINK1H, L1H_MSG, REC_NO, OUNT )
-               ENDIF
+            REC_NO = 0
+            DO J=1,NSUB
+               DO I=1,NDOFSE
+                  REC_NO = REC_NO + 1
+                  READ(L1H,IOSTAT=IOCHK) YSE_ALL(I,J)
+                  IF (IOCHK /= 0) THEN
+                     IERROR = IERROR + 1
+                     CALL READERR ( IOCHK, LINK1H, L1H_MSG, REC_NO, OUNT )
+                  ENDIF
+               ENDDO
             ENDDO
+            IF (IERROR == 0) THEN
+               DO I=1,NDOFSE
+                  YSe(I) = YSE_ALL(I,1)
+               ENDDO
+            ENDIF
             IF (IERROR /= 0) THEN
                WRITE(ERR,9995) LINKNO,IERROR
                WRITE(F06,9995) LINKNO,IERROR
@@ -413,6 +424,13 @@ i_do:       DO I=1,NDOFG
 ! Begin loop for reading L-set displs and building up to G-set displs one subcase/solution vector at a time
 
 j_do: DO J = 1,NUM_SOLNS
+
+         IF ((NDOFSE > 0) .AND. ((SOL_NAME(1:7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'NLSTATIC') .OR.                             &
+            ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)))) THEN
+            DO I=1,NDOFSE
+               YSe(I) = YSE_ALL(I,J)
+            ENDDO
+         ENDIF
 
          CALL ALLOCATE_COL_VEC ('UL_COL', NDOFL, SUBR_NAME)! Allocate array UL_COL
 
@@ -762,6 +780,7 @@ j_do: DO J = 1,NUM_SOLNS
 !xx   WRITE(SC1,12345,ADVANCE='NO') '       Deallocate EIGEN_VAL', CR13  ;   CALL DEALLOCATE_EIGEN1_MAT ( 'EIGEN_VAL' )
       WRITE(SC1,12345,ADVANCE='NO') '       Deallocate GEN_MASS ', CR13  ;   CALL DEALLOCATE_EIGEN1_MAT ( 'GEN_MASS' )
       CALL DEALLOCATE_COL_VEC    ( 'YSe' )
+      IF (ALLOCATED(YSE_ALL)) DEALLOCATE ( YSE_ALL )
       CALL DEALLOCATE_EIGEN1_MAT ( 'EIGEN_VEC' )
 
 ! Process is now complete so set COMM(LINKNO)

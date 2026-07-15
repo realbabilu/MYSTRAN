@@ -10,14 +10,14 @@
 !   - adds only the plate/shell bending + transverse shear + light drilling penalty block
 !   - uses 2 internal bubble rotational DOF condensed at element level
 !   - membrane remains supplied by TMEM1 in TREL1 for legacy CTRIA3
-!   - pressure/thermal/stress recovery are intentionally left to legacy paths for now
+!   - pressure/thermal are intentionally left to legacy paths for now
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  BUG, BUGOUT, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE
       USE PARAMS, ONLY                :  EPSIL
-      USE MODEL_STUF, ONLY            :  EID, ELDOF, KE, SHELL_A, SHELL_D, SHELL_T, TYPE
+      USE MODEL_STUF, ONLY            :  BE2, BE3, EID, ELDOF, KE, PHI_SQ, SE2, SE3, SHELL_A, SHELL_D, SHELL_T, TYPE
       USE MITC_STUF, ONLY             :  DIRECTOR
       USE OUTA_HERE_Interface
       USE CROSS_Interface
@@ -42,12 +42,13 @@
       REAL(DOUBLE)                    :: KFULL(20,20), KAA(18,18), KAB(18,2), KBA(2,18), KBB(2,2), KBB_INV(2,2), KCOND(18,18)
       REAL(DOUBLE)                    :: KPHYS(18,18), KA(18,18), KOUT(18,18), TAE(18,18), TEA(18,18)
       REAL(DOUBLE)                    :: BB(3,8), BS(2,11), BM(3,6), KEI, FACTOR
+      REAL(DOUBLE)                    :: BB_REC(3,18), BS_REC(2,18), DUM318(3,18), DUM218(2,18)
       REAL(DOUBLE)                    :: GAUSS_R(7), GAUSS_S(7), GAUSS_W(7)
       REAL(DOUBLE)                    :: DABS_SHELL
       REAL(DOUBLE)                    :: EPS1
 
       BIG_BB = ZERO
-      IF (OPT(4) /= 'Y') RETURN
+      IF ((OPT(3) /= 'Y') .AND. (OPT(4) /= 'Y') .AND. (OPT(6) /= 'Y')) RETURN
 
       EPS1 = EPSIL(1)
       IF (AREA <= EPS1) THEN
@@ -89,6 +90,7 @@
       COV_S = MATMUL(TRANSPOSE(JINV), MATMUL(SHELL_T, JINV))
       DABS_SHELL = MAX(DABS(SHELL_T(1,1)), DABS(SHELL_T(2,2)))
       DRILL_PEN  = 1.0D-05*DABS_SHELL
+      PHI_SQ = ONE
 
       CALL MITC3P_GAUSS_7PT(GAUSS_R, GAUSS_S, GAUSS_W)
 
@@ -143,6 +145,10 @@
       CALL MITC3P_INV2(KBB, KBB_INV)
       KCOND = KAA - MATMUL(KAB, MATMUL(KBB_INV, KBA))
 
+      CALL MITC3P_BB_AT(ONE/THREE, ONE/THREE, JINV, BB)
+      CALL MITC3P_BS_AT(ONE/THREE, ONE/THREE, XY, JINV, JMAT, BS)
+      CALL MITC3P_RECOVERY_MATS(BB, BS, KBB_INV, KBA, BB_REC, BS_REC)
+
       KPHYS = KCOND
       DO I=1,3
          KPHYS(6*(I-1)+4,:) = -KPHYS(6*(I-1)+4,:)
@@ -151,21 +157,57 @@
          KPHYS(:,6*(I-1)+5) = -KPHYS(:,6*(I-1)+5)
       ENDDO
 
-      CALL MITC3P_TRANSFORMS(JINV, TAE, TEA)
-      KA = MATMUL(TRANSPOSE(TAE), MATMUL(KPHYS, TAE))
-      CALL MITC3P_ADD_DRILLING(KA, AREA, DRILL_PEN)
-      KOUT = MATMUL(TRANSPOSE(TEA), MATMUL(KA, TEA))
+      IF (OPT(4) == 'Y') THEN
+         CALL MITC3P_TRANSFORMS(JINV, TAE, TEA)
+         KA = MATMUL(TRANSPOSE(TAE), MATMUL(KPHYS, TAE))
+         CALL MITC3P_ADD_DRILLING(KA, AREA, DRILL_PEN)
+         KOUT = MATMUL(TRANSPOSE(TEA), MATMUL(KA, TEA))
 
-      DO I=1,18
-         DO J=1,18
-            KE(I,J) = KE(I,J) + 0.5D0*(KOUT(I,J) + KOUT(J,I))
+         DO I=1,18
+            DO J=1,18
+               KE(I,J) = KE(I,J) + 0.5D0*(KOUT(I,J) + KOUT(J,I))
+            ENDDO
          ENDDO
-      ENDDO
+      ENDIF
 
-      CALL MITC3P_BB_AT(ONE/THREE, ONE/THREE, JINV, BB)
-      BIG_BB(:,:,1) = ZERO
+      IF ((OPT(3) == 'Y') .OR. (OPT(6) == 'Y')) THEN
+         BE2(1:3,1:18,1) = BB_REC
+         BE3(1:2,1:18,1) = BS_REC
+         DUM318 = MATMUL(SHELL_D, BB_REC)
+         DUM218 = MATMUL(SHELL_T, BS_REC)
+         SE2(1:3,1:18,1) = DUM318
+         SE3(1:2,1:18,1) = DUM218
+      ENDIF
+
+      BIG_BB(:,:,1) = BB_REC
 
       CONTAINS
+
+      SUBROUTINE MITC3P_RECOVERY_MATS(BBIN, BSIN, KBBI, KBAI, BBOUT, BSOUT)
+         REAL(DOUBLE), INTENT(IN)  :: BBIN(3,8), BSIN(2,11), KBBI(2,2), KBAI(2,18)
+         REAL(DOUBLE), INTENT(OUT) :: BBOUT(3,18), BSOUT(2,18)
+         REAL(DOUBLE)              :: BUB_MAP(2,18)
+         INTEGER(LONG)             :: IC, IR
+         BUB_MAP = -MATMUL(KBBI, KBAI)
+         BBOUT = ZERO
+         BSOUT = ZERO
+         DO IC=1,18
+            DO IR=1,3
+               BBOUT(IR,IC) = MITC3P_BB_TERM(BBIN,IR,IC) + MITC3P_BB_TERM(BBIN,IR,19)*BUB_MAP(1,IC) + &
+                              MITC3P_BB_TERM(BBIN,IR,20)*BUB_MAP(2,IC)
+            ENDDO
+            DO IR=1,2
+               BSOUT(IR,IC) = MITC3P_BS_TERM(BSIN,IR,IC) + MITC3P_BS_TERM(BSIN,IR,19)*BUB_MAP(1,IC) + &
+                              MITC3P_BS_TERM(BSIN,IR,20)*BUB_MAP(2,IC)
+            ENDDO
+         ENDDO
+         DO IR=1,3
+            BBOUT(:,6*(IR-1)+4) = -BBOUT(:,6*(IR-1)+4)
+            BBOUT(:,6*(IR-1)+5) = -BBOUT(:,6*(IR-1)+5)
+            BSOUT(:,6*(IR-1)+4) = -BSOUT(:,6*(IR-1)+4)
+            BSOUT(:,6*(IR-1)+5) = -BSOUT(:,6*(IR-1)+5)
+         ENDDO
+      END SUBROUTINE MITC3P_RECOVERY_MATS
 
       SUBROUTINE MITC3P_BM_AT(JI, BMOUT)
          REAL(DOUBLE), INTENT(IN)  :: JI(2,2)

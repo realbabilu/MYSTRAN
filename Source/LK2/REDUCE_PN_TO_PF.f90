@@ -24,7 +24,7 @@
 
 ! End MIT license text.
 
-      SUBROUTINE REDUCE_PN_TO_PF ( PART_VEC_N_FS, PART_VEC_SUB )
+      SUBROUTINE REDUCE_PN_TO_PF ( PART_VEC_N_FS, PART_VEC_SUB, YSE_ALL )
 
 ! Call routines to reduce the PN grid point load matrix from the N-set to the F, S-sets. See Appendix B to the MYSTRAN User's
 ! Reference Manual for the derivation of the reduction equations.
@@ -39,7 +39,6 @@
       USE SPARSE_MATRICES, ONLY       :  I_KFSe, J_KFSe, KFSe, I_PN, J_PN, PN, I_PF, J_PF, PF, I_PS, J_PS, PS, I_PF_TMP, J_PF_TMP, &
                                          PF_TMP, I_PFYS, J_PFYS, PFYS, I_PFYS1, J_PFYS1, PFYS1, I_QSYS, J_QSYS, QSYS
       USE SPARSE_MATRICES, ONLY       :  SYM_KFSe, SYM_PN, SYM_PF, SYM_PFYS, SYM_PF_TMP, SYM_PS
-      USE COL_VECS, ONLY              :  YSe
       USE FULL_MATRICES, ONLY         :  KFSe_FULL, PF_FULL, PFYS_FULL, DUM1
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
@@ -57,13 +56,14 @@
 
       INTEGER(LONG), INTENT(IN)       :: PART_VEC_N_FS(NDOFN)! Partitioning vector (F set into A and O sets)
       INTEGER(LONG), INTENT(IN)       :: PART_VEC_SUB(NSUB)  ! Partitioning vector (1's for all subcases)
+      REAL(DOUBLE) , INTENT(IN)       :: YSE_ALL(NDOFSE,NSUB)! Enforced displacements on the SE-set for each subcase
       INTEGER(LONG)                   :: AROW_MAX_TERMS      ! Output from MATMULT_SFS_NTERM and input to MATMULT_SFS
       INTEGER(LONG)                   :: I,J                 ! DO loop indices
       INTEGER(LONG), PARAMETER        :: ITRNSPB     = 0     ! Transpose indicator for matrix multiply routine
       INTEGER(LONG)                   :: K                   ! Counter or DO loop index
       INTEGER(LONG), PARAMETER        :: NUM1        = 1     ! Used in subr's that partition matrices
       INTEGER(LONG), PARAMETER        :: NUM2        = 2     ! Used in subr's that partition matrices
-      INTEGER(LONG), PARAMETER        :: NUM_YS_COLS = 1     ! Variable for number of cols in array YSe
+      INTEGER(LONG)                   :: NUM_YS_COLS         ! Number of enforced displacement columns
       INTEGER(LONG)                   :: NTERM_PF_TMP   = 0  ! No. of terms in matrix PF_TMP
       INTEGER(LONG)                   :: NTERM_PFYS1 = 0     ! No. of terms in matrix PFYS1
       INTEGER(LONG)                   :: PF_ROW_MAX_TERMS    ! Output from subr PARTITION_SIZE (max terms in any row of matrix)
@@ -79,6 +79,8 @@
 
 ! **********************************************************************************************************************************
 ! Partition PF from PN (This is PF before reduction, or PF(bar) )
+
+      NUM_YS_COLS = NSUB
 
       IF (NDOFF > 0) THEN
 
@@ -119,9 +121,8 @@
 ! PF = PF(bar) and no reduction is required. If there are enforced displs (NDOFSE is used to indicate if there are enforced
 ! displs) then reduction is required. So, when NDOFSE > 0 the reduction is done in 3 steps:
 
-!     (1) calc PFYS1 = KFSe*YSe. This is 1 col since YSe is for all subcases.
-!     (2) expand PFYS1 from 1 col to NSUB cols in PFYS with all cols = KFSe*YSe
-!     (3) Calc reduced PF from PF(bar) and PFYS. This step is done 1 of 2 ways:
+!     (1) calc PFYS = KFSe*YSe for all subcases.
+!     (2) Calc reduced PF from PF(bar) and PFYS. This step is done 1 of 2 ways:
 !         (a) If there are applied loads on the F-set DOF's (i.e. if NTERM_PF > 0), then we calc PF = PF(bar) - PFYS
 !         (b) If there are no applied loads on the F-set DOF's (i.e. if NTERM_PF = 0), then we calc PF = -PFYS
 
@@ -130,39 +131,17 @@
       IF (MATSPARS == 'Y') THEN
 
          IF ((NDOFF > 0) .AND. (NDOFSE > 0)) THEN          ! Do reduction only if there is an SE-set and an F-set
-                                                           ! Step (1), calc PFYS1 = KFSe * YSe
+                                                           ! Step (1), calc PFYS = KFSe * YSe for all subcases
             CALL MATMULT_SFS_NTERM ( 'KFSe', NDOFF, NTERM_KFSe, SYM_KFSe, I_KFSe, J_KFSe                                           &
-                                     ,'YSe', NDOFSE, NUM_YS_COLS, YSe, AROW_MAX_TERMS, 'PFYS1', NTERM_PFYS1 )
-
-            CALL ALLOCATE_SPARSE_MAT ( 'PFYS1', NDOFF, NTERM_PFYS1, SUBR_NAME )
-
-            CALL MATMULT_SFS ( 'KFSe', NDOFF, NTERM_KFSe, SYM_KFSe, I_KFSe, J_KFSe, KFSe                                           &
-                              ,'YSe', NDOFSE, NUM_YS_COLS, YSe, AROW_MAX_TERMS, 'PFYS1', ONE, NTERM_PFYS1, I_PFYS1, J_PFYS1, PFYS1 )
-
-
-            NTERM_PFYS = NSUB*NTERM_PFYS1                  ! Step (2), expand PFS1 (1 col) into PFYS (NSUB cols, all = KFSe*YSe)
+                                     ,'YSe', NDOFSE, NUM_YS_COLS, YSE_ALL, AROW_MAX_TERMS, 'PFYS', NTERM_PFYS )
 
             CALL ALLOCATE_SPARSE_MAT ( 'PFYS', NDOFF, NTERM_PFYS, SUBR_NAME )
 
-            I_PFYS(1) = 1
-            DO I=2,NDOFF+1
-               I_PFYS(I) = I_PFYS(I-1) + NSUB*(I_PFYS1(I) - I_PFYS1(I-1))
-            ENDDO
-
-            K = 0
-            DO I=1,NTERM_PFYS1
-               DO J=1,NSUB
-                  K         = K + 1
-                  J_PFYS(K) = J_PFYS1(I) + (J-1)
-                    PFYS(K) = PFYS1(I)
-               ENDDO
-            ENDDO
-
-      !xx   WRITE(SC1, * )                                 ! Advance 1 line for screen messages
-            WRITE(SC1,12345,ADVANCE='NO') '       Deallocate PFYS1', CR13   ;   CALL DEALLOCATE_SPARSE_MAT ( 'PFYS1' )
+            CALL MATMULT_SFS ( 'KFSe', NDOFF, NTERM_KFSe, SYM_KFSe, I_KFSe, J_KFSe, KFSe                                           &
+                              ,'YSe', NDOFSE, NUM_YS_COLS, YSE_ALL, AROW_MAX_TERMS, 'PFYS', ONE, NTERM_PFYS, I_PFYS, J_PFYS, PFYS )
 
 
-            IF (NTERM_PF > 0) THEN                         ! Step (3a), NTERM_PF > 0 so reduced PF = PF(bar) - PFYS
+            IF (NTERM_PF > 0) THEN                         ! Step (2a), NTERM_PF > 0 so reduced PF = PF(bar) - PFYS
 
                IF (NTERM_PFYS > 0) THEN                    ! Only do step (3a) if there are nonzero's in PFYS, otherwise PF=PF(bar)
                   ALPHA =  ONE
@@ -196,11 +175,11 @@
 
                ENDIF
 
-            ELSE                                           ! Step (3b), NTERM_PF = 0 so reduced PF = PF(bar)
+            ELSE                                           ! Step (2b), NTERM_PF = 0 so reduced PF = -PFYS
 
                IF (NTERM_PFYS > 0) THEN                    ! Only do step (3b) if there are nonzero's in PFYS, otherwise PF = 0
 
-                  NTERM_PF = NTERM_PFYS*NSUB
+                  NTERM_PF = NTERM_PFYS
                   WRITE(SC1, * ) '    Reallocate PF '
             !xx   WRITE(SC1, * )                           ! Advance 1 line for screen messages
                   WRITE(SC1,12345,ADVANCE='NO') '       Deallocate PF ', CR13
@@ -211,13 +190,9 @@
                   DO I=1,NDOFF+1
                      I_PF(I) = I_PFYS(I)
                   ENDDO
-                  K = 0
                   DO I=1,NTERM_PFYS
-                     DO J=1,NSUB
-                        K = K + 1
-                        J_PF(K) = J_PFYS(I)
-                          PF(K) =  -PFYS(I)
-                     ENDDO
+                     J_PF(I) = J_PFYS(I)
+                       PF(I) = -PFYS(I)
                   ENDDO
 
 
@@ -255,7 +230,7 @@
             CALL ALLOCATE_FULL_MAT ( 'DUM1', NDOFSE, NSUB, SUBR_NAME )
             DO I=1,NDOFSE
                DO J=1,NSUB
-                  DUM1(I,J) = YSe(I)
+                  DUM1(I,J) = YSE_ALL(I,J)
                ENDDO
             ENDDO
             CALL ALLOCATE_FULL_MAT ( 'KFSe_FULL', NDOFF, NDOFSE, SUBR_NAME )

@@ -86,6 +86,7 @@
 
       REAL(DOUBLE)                    :: KFF_DIAG(NDOFF)       ! Diagonal terms from KFF
       REAL(DOUBLE)                    :: KFF_MAX_DIAG          ! Max diag term from KFF
+      REAL(DOUBLE), ALLOCATABLE       :: YSE_ALL(:,:)          ! Enforced displacements on the SE-set for each subcase
 
 
       ! ensure output units are set
@@ -116,19 +117,29 @@
 ! Read enforced displ's if there are any
 
       CALL ALLOCATE_COL_VEC ( 'YSe', NDOFSE, SUBR_NAME )
+      ALLOCATE ( YSE_ALL(NDOFSE,NSUB) )
+      YSE_ALL = 0.0D0
       IF (NDOFSE > 0) THEN
 
          CALL FILE_OPEN ( L1H, LINK1H, OUNT, 'OLD', L1H_MSG, 'READ_STIME', 'UNFORMATTED', 'READ', 'REWIND', 'Y', 'N' )
 
          IERROR = 0
-         DO I=1,NDOFSE
-            READ(L1H,IOSTAT=IOCHK) YSe(I)
-            IF (IOCHK /= 0) THEN
-               IERROR = IERROR + 1
-               REC_NO = I
-               CALL READERR ( IOCHK, LINK1H, L1H_MSG, REC_NO, OUNT )
-            ENDIF
+         REC_NO = 0
+         DO J=1,NSUB
+            DO I=1,NDOFSE
+               REC_NO = REC_NO + 1
+               READ(L1H,IOSTAT=IOCHK) YSE_ALL(I,J)
+               IF (IOCHK /= 0) THEN
+                  IERROR = IERROR + 1
+                  CALL READERR ( IOCHK, LINK1H, L1H_MSG, REC_NO, OUNT )
+               ENDIF
+            ENDDO
          ENDDO
+         IF (IERROR == 0) THEN
+            DO I=1,NDOFSE
+               YSe(I) = YSE_ALL(I,1)
+            ENDDO
+         ENDIF
          IF (IERROR /= 0) THEN
             WRITE(ERR,9995) LINKNO,IERROR
             WRITE(F06,9995) LINKNO,IERROR
@@ -211,7 +222,7 @@
                ENDIF
                WRITE(SC1,2092) MODNAM,HOUR,MINUTE,SEC,SFRAC
 
-               CALL REDUCE_PN_TO_PF ( PART_VEC_N_FS, PART_VEC_SUB )
+               CALL REDUCE_PN_TO_PF ( PART_VEC_N_FS, PART_VEC_SUB, YSE_ALL )
 
             ENDIF
 
@@ -290,7 +301,7 @@
             IF (NTERM_KSSe > 0) THEN                          ! Calc QSYS = KSSe * YSe
 
                CALL MATMULT_SFS_NTERM ( 'KSSe', NDOFS, NTERM_KSSe, SYM_KSSe, I_KSSe, J_KSSe                                        &
-                                        ,'YSe', NDOFSE, NUM_YS_COLS, YSe, AROW_MAX_TERMS, 'QSYS', NTERM_QSYS )
+                                        ,'YSe', NDOFSE, NSUB, YSE_ALL, AROW_MAX_TERMS, 'QSYS', NTERM_QSYS )
 
                CALL ALLOCATE_SPARSE_MAT ( 'QSYS', NDOFS, NTERM_QSYS, SUBR_NAME )
 
@@ -302,7 +313,7 @@
                IF (NTERM_QSYS > 0) THEN
 
                   CALL MATMULT_SFS ( 'KSSe', NDOFS, NTERM_KSSe, SYM_KSSe, I_KSSe, J_KSSe, KSSe                                     &
-                                    ,'YSe', NDOFSE, NUM_YS_COLS, YSe, AROW_MAX_TERMS, 'QSYS', ONE, NTERM_QSYS, I_QSYS, J_QSYS, QSYS)
+                                    ,'YSe', NDOFSE, NSUB, YSE_ALL, AROW_MAX_TERMS, 'QSYS', ONE, NTERM_QSYS, I_QSYS, J_QSYS, QSYS)
 
                   CLOSE_IT   = 'Y'
                   CLOSE_STAT = 'KEEP'
@@ -327,6 +338,7 @@
          WRITE(SC1,12345,ADVANCE='NO') '       Deallocate KSSe', CR13   ;   CALL DEALLOCATE_SPARSE_MAT ( 'KSSe' )
          WRITE(SC1,12345,ADVANCE='NO') '       Deallocate QSYS', CR13   ;   CALL DEALLOCATE_SPARSE_MAT ( 'QSYS' )
          WRITE(SC1,12345,ADVANCE='NO') '       Deallocate YSe ', CR13   ;   CALL DEALLOCATE_COL_VEC ( 'YSe' )
+         IF (ALLOCATED(YSE_ALL)) DEALLOCATE ( YSE_ALL )
          WRITE(SC1,*) CR13
 
 ! Print out stiffness matrix partitions, if requested

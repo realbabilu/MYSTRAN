@@ -60,6 +60,44 @@ This is intended to align MYSTRAN SCRSPEC grid/SPCF OP2 output with the MSC/NX r
 
 Fresh verification against `beam_RS.dat` could not be completed in this pass because that deck currently stops earlier in LINK0 on unrelated deck parsing issues (`SPC1` formatting / prior deck compatibility noise), so the new OP2 header path still needs rerun confirmation on a clean RSA deck.
 
+### Follow-up verification on clean deck
+
+A MYSTRAN-safe reference-aligned deck was created and run successfully:
+
+- `D:\18a\femap_RSA\beam_RS_msc2_mystran.dat`
+
+Observed behavior from the resulting OP2:
+
+- file produced: `D:\18a\femap_RSA\beam_RS_msc2_mystran.OP2`
+- readback showed normal modal content:
+  - eigenvectors present
+  - beam stress present
+- but no combined RSA grid-result containers were observed by the current OP2Query readback:
+  - no `SC/1/DISPLACEMENTS/GID/...`
+  - no `SC/1/VELOCITY/GID/...`
+  - no `SC/1/ACCELERATION/GID/...`
+
+This means the writer patch to tag RSA-style grid/SPCF result headers is necessary but not sufficient: the combined RSA OUG/OQG payloads are still either:
+
+1. not being written at all,
+2. being written with malformed table/subtable structure, or
+3. colliding with the existing modal OUG content in a way that prevents downstream readers from materializing them as separate RSA results.
+
+### Most likely next choke points
+
+Primary source files to inspect next:
+
+- `D:\18a\MYSTRAN\Source\LK9\LINK9\LINK9.f90`
+- `D:\18a\MYSTRAN\Source\LK9\L91\WRITE_GRD_OP2_OUTPUTS.f90`
+- `D:\18a\MYSTRAN\Source\UTIL\OUTPUT2_WRITE_TABLE.f90`
+
+Specific suspicion:
+
+- combined RSA sets currently call `WRITE_GRD_OP2_OUTPUTS(JSUB=0, ...)`
+- that path currently routes them through static-style `WRITE_OUG3_STATIC`
+- modal OUG content in the same file is also present
+- result separation may require a distinct table/header convention closer to MSC response-spectrum OUPV1 handling rather than plain static-style OUG reuse
+
 ### Next recommended check
 
 Run a clean SCRSPEC deck that reaches LINK9 and then verify:

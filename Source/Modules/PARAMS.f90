@@ -535,8 +535,8 @@
 !                                                              If 'SPARSE  ', use value determined by parameter SPARSE_FLAVOR
 !                                                              defined in field 4 of the PARAM, SOLLIB entry
                                                              
-      CHARACTER(  8*BYTE)      :: SPARSE_FLAVOR  = 'SUPERLU '! This denotes which SPARSE SOLLIB to use. Currently SuperLU is the
-!                                                              only option
+      CHARACTER(  8*BYTE)      :: SPARSE_FLAVOR  = 'MUMPS   '! This denotes which SPARSE SOLLIB to use. SuperLU is the
+!                                                              option 'SUPERLU ' as default before
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       INTEGER(LONG)            :: SORT_MAX       =     5     ! Max number of times to run sort algorithm before stopping with error.

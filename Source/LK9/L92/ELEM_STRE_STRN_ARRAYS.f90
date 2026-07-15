@@ -42,7 +42,7 @@
       USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, INT_SC_NUM, JTSUB
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO, one, four
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE MODEL_STUF, ONLY            :  ALPVEC, BE1, BE2, BE3, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_NSTATIONS, CBEAM_FORCE_B1,           &
                                          CBEAM_FORCE_B2, DT, EM, EB, ES, ET, ELDOF, PEL, PHI_SQ, STRAIN, STRESS, SUBLOD, TREF, TYPE,&
                                          UEL, UEB, SE1, SE2, SE3, STE1, STE2, STE3, ELGP, ISOLID, EID, SHELL_T
@@ -400,65 +400,59 @@
 
       IF (STR_CID /= -1) THEN                         ! User req diff stress/strain/engr force output coord sys than elem local
 
-! Warning. For STR_CID >= 0, the titles of stress and strain in .f06 still say
-! L O C A L   E L E M E N T   C O O R D I N A T E   S Y S T E M even when it's transformed here.
-! STR_CID == -2 says M A T E R I A L   C O O R D I N A T E   S Y S T E M for solids.
+! STR_CID selects the requested stress/strain output coordinate system.
+! Shell titles are written in the LK9/L91 output routines according to the same
+! setting, so transformed shell output is no longer labelled as local output.
+! For solids, STR_CID == -2 means use CORDM from the PSOLID card.
 
-         IF      ((TYPE (1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'TRIA3')) THEN
+         IF      ((TYPE (1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE == 'QUADR   ') .OR.                         &
+                  (TYPE (1:5) == 'QUAD8')) THEN
 
             IF (STR_CID /= -2) THEN
-! Shells don't work because STR_TENSOR_TRANSFORM should be between setting STR_TENSOR and setting stress
-! and shear strain may need factor of 2 before transforming.
-               WRITE(ERR,9303)
-               WRITE(F06,9303)
-               FATAL_ERR = FATAL_ERR + 1
-               CALL OUTA_HERE ( 'Y' )
-
-! Some of this code could be replaced with calls to TRANSFORM_SHELL_STR
                                                               ! Transform 2D membrane and transverse shear stresses
                STR_TENSOR(1,1) = STRESS(1)   ;   STR_TENSOR(1,2) = STRESS(3)   ;   STR_TENSOR(1,3) = STRESS(7)
                STR_TENSOR(2,1) = STRESS(3)   ;   STR_TENSOR(2,2) = STRESS(2)   ;   STR_TENSOR(2,3) = STRESS(8)
                STR_TENSOR(3,1) = STRESS(7)   ;   STR_TENSOR(3,2) = STRESS(8)   ;   STR_TENSOR(3,3) = ZERO
+
+               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
 
                STRESS(1) = STR_TENSOR(1,1)
                STRESS(2) = STR_TENSOR(2,2)
                STRESS(3) = STR_TENSOR(1,2)
                STRESS(7) = STR_TENSOR(1,3)
                STRESS(8) = STR_TENSOR(2,3)
-
-               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
                                                               ! Transform 2D bending stresses
                STR_TENSOR(1,1) = STRESS(4)   ;   STR_TENSOR(1,2) = STRESS(6)   ;   STR_TENSOR(1,3) = ZERO
                STR_TENSOR(2,1) = STRESS(6)   ;   STR_TENSOR(2,2) = STRESS(5)   ;   STR_TENSOR(2,3) = ZERO
                STR_TENSOR(3,1) = ZERO        ;   STR_TENSOR(3,2) = ZERO        ;   STR_TENSOR(3,3) = ZERO
 
+               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
+
                STRESS(4) = STR_TENSOR(1,1)
                STRESS(5) = STR_TENSOR(2,2)
                STRESS(6) = STR_TENSOR(1,2)
+                                                              ! Transform 2D membrane and transverse shear strains
+               STR_TENSOR(1,1) = STRAIN(1)   ;   STR_TENSOR(1,2) = STRAIN(3)/TWO ; STR_TENSOR(1,3) = STRAIN(7)/TWO
+               STR_TENSOR(2,1) = STRAIN(3)/TWO ; STR_TENSOR(2,2) = STRAIN(2)     ; STR_TENSOR(2,3) = STRAIN(8)/TWO
+               STR_TENSOR(3,1) = STRAIN(7)/TWO ; STR_TENSOR(3,2) = STRAIN(8)/TWO ; STR_TENSOR(3,3) = ZERO
 
                CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
-                                                              ! Transform 2D membrane and transverse shear strains
-               STR_TENSOR(1,1) = STRAIN(1)   ;   STR_TENSOR(1,2) = STRAIN(3)   ;   STR_TENSOR(1,3) = STRAIN(7)
-               STR_TENSOR(2,1) = STRAIN(3)   ;   STR_TENSOR(2,2) = STRAIN(2)   ;   STR_TENSOR(2,3) = STRAIN(8)
-               STR_TENSOR(3,1) = STRAIN(7)   ;   STR_TENSOR(3,2) = STRAIN(8)   ;   STR_TENSOR(3,3) = ZERO
 
                STRAIN(1) = STR_TENSOR(1,1)
                STRAIN(2) = STR_TENSOR(2,2)
-               STRAIN(3) = STR_TENSOR(1,2)
-               STRAIN(7) = STR_TENSOR(1,3)
-               STRAIN(8) = STR_TENSOR(2,3)
+               STRAIN(3) = TWO*STR_TENSOR(1,2)
+               STRAIN(7) = TWO*STR_TENSOR(1,3)
+               STRAIN(8) = TWO*STR_TENSOR(2,3)
+                                                              ! Transform 2D bending strains
+               STR_TENSOR(1,1) = STRAIN(4)   ;   STR_TENSOR(1,2) = STRAIN(6)/TWO ; STR_TENSOR(1,3) = ZERO
+               STR_TENSOR(2,1) = STRAIN(6)/TWO ; STR_TENSOR(2,2) = STRAIN(5)     ; STR_TENSOR(2,3) = ZERO
+               STR_TENSOR(3,1) = ZERO          ; STR_TENSOR(3,2) = ZERO          ; STR_TENSOR(3,3) = ZERO
 
                CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
-                                                              ! Transform 2D bending strains
-               STR_TENSOR(1,1) = STRAIN(4)   ;   STR_TENSOR(1,2) = STRAIN(6)   ;   STR_TENSOR(1,3) = ZERO
-               STR_TENSOR(2,1) = STRAIN(6)   ;   STR_TENSOR(2,2) = STRAIN(5)   ;   STR_TENSOR(2,3) = ZERO
-               STR_TENSOR(3,1) = ZERO        ;   STR_TENSOR(3,2) = ZERO        ;   STR_TENSOR(3,3) = ZERO
 
                STRAIN(4) = STR_TENSOR(1,1)
                STRAIN(5) = STR_TENSOR(2,2)
-               STRAIN(6) = STR_TENSOR(1,2)
-
-               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
+               STRAIN(6) = TWO*STR_TENSOR(1,2)
 
             ENDIF
 
@@ -548,8 +542,6 @@
 
   9203 FORMAT(' *ERROR  9203: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' INCORRECT ELEMENT TYPE = "',A,'"')
-
- 9303 FORMAT(' *ERROR  9303: PARAM,STR_CID not implemented for QUAD and TRIA elements.' )
 
  9304 FORMAT(' *ERROR  9304: PSOLID field 4, CORDM <= -2 not allowed for solid elements.' )
 

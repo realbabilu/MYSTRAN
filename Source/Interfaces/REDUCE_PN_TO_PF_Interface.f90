@@ -28,7 +28,7 @@
 
    INTERFACE
 
-      SUBROUTINE REDUCE_PN_TO_PF ( PART_VEC_N_FS, PART_VEC_SUB )
+      SUBROUTINE REDUCE_PN_TO_PF ( PART_VEC_N_FS, PART_VEC_SUB, YSE_ALL )
 
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -41,7 +41,6 @@
       USE SPARSE_MATRICES, ONLY       :  I_KFSe, J_KFSe, KFSe, I_PN, J_PN, PN, I_PF, J_PF, PF, I_PS, J_PS, PS, I_PF_TMP, J_PF_TMP, &
                                          PF_TMP, I_PFYS, J_PFYS, PFYS, I_PFYS1, J_PFYS1, PFYS1, I_QSYS, J_QSYS, QSYS
       USE SPARSE_MATRICES, ONLY       :  SYM_KFSe, SYM_PN, SYM_PF, SYM_PFYS, SYM_PF_TMP, SYM_PS
-      USE COL_VECS, ONLY              :  YSe
       USE FULL_MATRICES, ONLY         :  KFSe_FULL, PF_FULL, PFYS_FULL, DUM1
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
@@ -53,10 +52,11 @@
 
       INTEGER(LONG), INTENT(IN)       :: PART_VEC_N_FS(NDOFN)! Partitioning vector (F set into A and O sets)
       INTEGER(LONG), INTENT(IN)       :: PART_VEC_SUB(NSUB)  ! Partitioning vector (1's for all subcases)
+      REAL(DOUBLE) , INTENT(IN)       :: YSE_ALL(NDOFSE,NSUB)! Enforced displacements on the SE-set for each subcase
       INTEGER(LONG), PARAMETER        :: ITRNSPB     = 0     ! Transpose indicator for matrix multiply routine
       INTEGER(LONG), PARAMETER        :: NUM1        = 1     ! Used in subr's that partition matrices
       INTEGER(LONG), PARAMETER        :: NUM2        = 2     ! Used in subr's that partition matrices
-      INTEGER(LONG), PARAMETER        :: NUM_YS_COLS = 1     ! Variable for number of cols in array YSe
+      INTEGER(LONG)                   :: NUM_YS_COLS         ! Variable for number of cols in array YSe
 
 
       END SUBROUTINE REDUCE_PN_TO_PF
@@ -64,4 +64,3 @@
    END INTERFACE
 
    END MODULE REDUCE_PN_TO_PF_Interface
-

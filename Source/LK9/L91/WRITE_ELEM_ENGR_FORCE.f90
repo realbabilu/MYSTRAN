@@ -634,12 +634,12 @@ headr:IF (IHDR == 'Y') THEN
         ENDIF
         NUM_TERMS = 8
 
-      ELSE IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUAD8   ')) THEN
+      ELSE IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ') .OR. (TYPE == 'QUAD8   ')) THEN
         IF (WRITE_OP2) THEN
           IF (NUM_PTS <= 1) THEN
              ! Center-only shell force output uses the simple per-element layout. The bilinear
              ! 47-word layout is only valid when corner payloads are present as well.
-             IF (TYPE == 'QUAD4   ') THEN
+             IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) THEN
                 ELEMENT_TYPE = 33
              ELSE
                 ELEMENT_TYPE = 64
@@ -651,7 +651,7 @@ headr:IF (IHDR == 'Y') THEN
              WRITE(OP2) NVALUES
              WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(I,J),4), J=1,8), I=1,NUM)
           ELSE
-             IF (TYPE == 'QUAD4   ') THEN
+             IF ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) THEN
                 ELEMENT_TYPE = 144
              ELSE
                 ELEMENT_TYPE = 64

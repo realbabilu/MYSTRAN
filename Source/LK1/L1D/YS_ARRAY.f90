@@ -32,7 +32,7 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR,     F06,    L1H
       USE IOUNT1, ONLY                :  WRT_ERR,                           LINK1H
       USE IOUNT1, ONLY                :  WRT_ERR,                           L1H_MSG
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, NDOFSE, NGRID
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, NDOFSE, NGRID, NSUB
       USE TIMDAT, ONLY                :  STIME, TSEC
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE MODEL_STUF, ONLY            :  GRID_ID
@@ -54,11 +54,13 @@
       INTEGER(LONG)                   :: REC_NO            ! Record number when reading a file
       INTEGER(LONG)                   :: ROW_NUM_START     ! Row no. in array TDOF where data begins for GRID_ID(GRID_ID_ROW_NUM)
       INTEGER(LONG)                   :: SE_SET_COL_NUM    ! Col no., in TDOF array, of the SE-set DOF list
+      INTEGER(LONG)                   :: ISUB              ! Internal subcase number from file LINK1H
       INTEGER(LONG)                   :: TDOF_ROW_NUM      ! Row num in array TDOF for DOF corresponding to GRID_ID_ROW_NUM, COMP
       INTEGER(LONG)                   :: YSDOF             ! SE-set DOF number for the DOF corresponding to GRID_ID_ROW_NUM, COMP
 
 
       REAL(DOUBLE)                    :: YSV               ! Enforced displ value read from file LINK1H
+      REAL(DOUBLE), ALLOCATABLE       :: YSE_ALL(:,:)      ! Ordered enforced displacements per subcase
 
 
 
@@ -70,12 +72,19 @@
 
 ! Get YSV values from file L1H array This subr is only called if NDOFSE > 0 so we can assume there is a SE-set
 
+      ALLOCATE (YSE_ALL(NDOFSE,NSUB))
+      YSE_ALL = 0.0D0
+
       IERR1H = 0
-      DO I = 1,NDOFSE
-         READ(L1H,IOSTAT=IOCHK) GRID_ID_ROW_NUM,COMP,YSV
+      REC_NO = 0
+      DO
+         READ(L1H,IOSTAT=IOCHK) ISUB, GRID_ID_ROW_NUM, COMP, YSV
+         IF (IOCHK < 0) EXIT
+         REC_NO = REC_NO + 1
          IF (IOCHK /= 0) THEN
-            REC_NO = I
             CALL READERR ( IOCHK, LINK1H, L1H_MSG, REC_NO, OUNT )
+            IERR1H = IERR1H + 1
+         ELSE IF ((ISUB < 1) .OR. (ISUB > NSUB)) THEN
             IERR1H = IERR1H + 1
          ELSE
             CALL TDOF_COL_NUM ( 'SE', SE_SET_COL_NUM )
@@ -83,7 +92,7 @@
             ROW_NUM_START = TDOF_ROW_START(IGRID)
             TDOF_ROW_NUM = ROW_NUM_START + COMP - 1
             YSDOF = TDOF(TDOF_ROW_NUM,SE_SET_COL_NUM)
-            YSe(YSDOF) = YSV
+            YSE_ALL(YSDOF,ISUB) = YSV
          ENDIF
       ENDDO
 
@@ -98,9 +107,14 @@
 
       REWIND (L1H)
       WRITE(L1H) STIME
-      DO I = 1,NDOFSE
-         WRITE(L1H) YSe(I)
+      DO ISUB = 1,NSUB
+         DO I = 1,NDOFSE
+            YSe(I) = YSE_ALL(I,ISUB)
+            WRITE(L1H) YSe(I)
+         ENDDO
       ENDDO
+
+      DEALLOCATE (YSE_ALL)
 
 
 

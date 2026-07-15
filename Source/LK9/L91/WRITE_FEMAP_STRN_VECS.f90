@@ -86,6 +86,8 @@
          VEC_ID_OFFSET = 70600
       ELSE IF (ELEM_TYP == 'QUAD4   ') THEN
          VEC_ID_OFFSET = 70700
+      ELSE IF (ELEM_TYP == 'QUADR   ') THEN
+         VEC_ID_OFFSET = 70700
       ELSE IF (ELEM_TYP == 'HEXA8   ') THEN
          VEC_ID_OFFSET = 70800
       ELSE IF (ELEM_TYP == 'HEXA20  ') THEN
@@ -132,7 +134,7 @@
             CALL WRITE_STRN_COLUMN ( J, VEC_ID_OFFSET + J, ID )
          ENDDO
 
-      ELSE IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4')) THEN
+      ELSE IF ((ELEM_TYP(1:5) == 'TRIA3') .OR. (ELEM_TYP(1:5) == 'QUAD4') .OR. (ELEM_TYP == 'QUADR   ')) THEN
 
          IF (IS_PCOMP == 'N') THEN
             TITLE_E( 1) = 'Top X Direct Strain' ;   CALC_WARN( 1) = '0';   COMP_DIR( 1) = '0';   CENT_TOTAL( 1) = '1'

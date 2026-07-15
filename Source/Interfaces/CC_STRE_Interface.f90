@@ -28,7 +28,7 @@
 
    INTERFACE
 
-      SUBROUTINE CC_STRE ( CARD )
+      SUBROUTINE CC_STRE ( CARD, IS_GPSTRESS_ALIAS )
 
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -39,6 +39,7 @@
       IMPLICIT NONE
 
       CHARACTER(LEN=*), INTENT(IN)    :: CARD              ! A Bulk Data card
+      LOGICAL, OPTIONAL, INTENT(IN)    :: IS_GPSTRESS_ALIAS ! =.TRUE. when called for GPSTRESS/GSTRESS
 
 
 
@@ -47,4 +48,3 @@
    END INTERFACE
 
    END MODULE CC_STRE_Interface
-

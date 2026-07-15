@@ -34,11 +34,11 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1H, L1O, L1O_MSG, LINK1O
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ENFORCED, FATAL_ERR, LSPCADDC, NDOFSB, NDOFSE, NDOFSG, NGRID, NSPCADD,      &
-                                         NUM_SPC_RECORDS, NUM_SPC1_RECORDS, NUM_SPCSIDS
+                                         NUM_SPC_RECORDS, NUM_SPC1_RECORDS, NUM_SPCSIDS, NSUB
       USE TIMDAT, ONLY                :  TSEC
       USE PARAMS, ONLY                :  EPSIL
       USE DOF_TABLES, ONLY            :  TSET_CHR_LEN, TSET
-      USE MODEL_STUF, ONLY            :  GRID, GRID_ID, SPCADD_SIDS, SPCSET, SPCSIDS
+      USE MODEL_STUF, ONLY            :  GRID, GRID_ID, SPCADD_SIDS, SPCSET, SPCSIDS, SUBLOD
 
       IMPLICIT NONE
 
@@ -50,4 +50,3 @@
    END INTERFACE
 
    END MODULE TSET_PROC_FOR_SPCS_Interface
-

@@ -59,7 +59,9 @@
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to.
       INTEGER(LONG)                   :: REC_NO    = 0     ! Record number when reading a file
       INTEGER(LONG)                   :: SETID             ! An SPC set ID read from file LINK1O
+      INTEGER(LONG)                   :: SUBCASE_MATCH(NSUB)! Subcases activated by current SPCD/SPC record
       LOGICAL                         :: PROCESS_SETID     ! True when this SPC/SPCD record is active for current run
+      LOGICAL                         :: APPLY_ALL_SUBCASES! True when current record applies to all subcases
 
 
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare real zero
@@ -170,17 +172,40 @@ i_do6:DO I=1,NUM_SPC_RECORDS + NUM_SPC1_RECORDS
 ! No error, so processes data. First, make sure SETID is the one called for in Case Control:
 
          PROCESS_SETID = .FALSE.
-         DO J=1,NUM_SPCSIDS
-            IF (SETID == SPCSIDS(J)) THEN
-               PROCESS_SETID = .TRUE.
-               EXIT
-            ENDIF
+         APPLY_ALL_SUBCASES = .FALSE.
+         DO J=1,NSUB
+            SUBCASE_MATCH(J) = 0
          ENDDO
-         IF (.NOT. PROCESS_SETID) THEN
+         IF (DOFSET == 'SB') THEN
+            DO J=1,NUM_SPCSIDS
+               IF (SETID == SPCSIDS(J)) THEN
+                  PROCESS_SETID = .TRUE.
+                  APPLY_ALL_SUBCASES = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (APPLY_ALL_SUBCASES) THEN
+               DO J=1,NSUB
+                  SUBCASE_MATCH(J) = 1
+               ENDDO
+            ENDIF
+         ELSE
+            DO J=1,NUM_SPCSIDS
+               IF (SETID == SPCSIDS(J)) THEN
+                  PROCESS_SETID = .TRUE.
+                  APPLY_ALL_SUBCASES = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (APPLY_ALL_SUBCASES) THEN
+               DO J=1,NSUB
+                  SUBCASE_MATCH(J) = 1
+               ENDDO
+            ENDIF
             DO J=1,NSUB
                IF (SETID == SUBLOD(J,1)) THEN
                   PROCESS_SETID = .TRUE.
-                  EXIT
+                  SUBCASE_MATCH(J) = 1
                ENDIF
             ENDDO
          ENDIF
@@ -224,11 +249,19 @@ i_do6:DO I=1,NUM_SPC_RECORDS + NUM_SPC1_RECORDS
                                                            ! Write enforced displs to L1H. If ENFORCED = 'Y' write all terms
                                  IF (ENFORCED == 'Y') THEN
                                     IF (DOFSET == 'SE') THEN
-                                       WRITE(L1H) GRID_ID_ROW_NUM, K, RSPC
+                                       DO J=1,NSUB
+                                          IF (SUBCASE_MATCH(J) == 1) THEN
+                                             WRITE(L1H) J, GRID_ID_ROW_NUM, K, RSPC
+                                          ENDIF
+                                       ENDDO
                                     ENDIF
                                  ELSE                   ! If ENFORCED = 'N' write only nonzero terms
                                     IF ((DOFSET == 'SE') .AND. (ABS(RSPC) > EPS1)) THEN
-                                       WRITE(L1H) GRID_ID_ROW_NUM, K, RSPC
+                                       DO J=1,NSUB
+                                          IF (SUBCASE_MATCH(J) == 1) THEN
+                                             WRITE(L1H) J, GRID_ID_ROW_NUM, K, RSPC
+                                          ENDIF
+                                       ENDDO
                                     ENDIF
                                  ENDIF
                               ELSE

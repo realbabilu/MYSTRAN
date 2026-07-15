@@ -34,7 +34,8 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ELOUT_STRN_BIT, FATAL_ERR, IBIT, INT_SC_NUM,                                &
                                          MAX_STRESS_POINTS, MBUG, MOGEL,                                                           &
                                          NELE, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20,       &
-                                         NCPENTA6, NCPENTA15, NPYRAM5, NPYRAM14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCROD,   &
+                                         NCPENTA6, NCPENTA15, NPYRAM5, NPYRAM14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, &
+                                         NCROD,                                                                                      &
                                          NCSHEAR, NCTRIA3, NCTRIA3K,                                                                &
                                          SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
@@ -574,14 +575,14 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
          CALL DEALLOCATE_FEMAP_DATA
 
          NDUM = 0
-         NUM_FROWS= 0                                      ! Write out QUAD4 strains
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCQUAD4, 22, SUBR_NAME )
+         NUM_FROWS= 0                                      ! Write out QUAD4/CQUADR strains
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NCQUAD4 + NCQUADR, 22, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
                EID   = EDAT(EPNT(J))
                TYPE  = ETYPE(J)
-               IF (ETYPE(J)(1:6) == 'QUAD4 ') THEN
+               IF ((ETYPE(J)(1:6) == 'QUAD4 ') .OR. (ETYPE(J) == 'QUADR   ')) THEN
                   NUM_FROWS= NUM_FROWS+ 1
                   DO K=0,MBUG-1
                      WRT_BUG(K) = 0
@@ -595,12 +596,12 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   ENDIF
                   CALL ELMDIS
                   CALL ELEM_STRE_STRN_ARRAYS ( 1 )
-                  CALL CALC_ELEM_STRAINS ( NCQUAD4, NDUM, NUM_FROWS, 'N', 'Y' )
+                  CALL CALC_ELEM_STRAINS ( NCQUAD4 + NCQUADR, NDUM, NUM_FROWS, 'N', 'Y' )
                ENDIF
             ENDIF
          ENDDO
          IF (NUM_FROWS > 0) THEN
-            CALL WRITE_FEMAP_STRN_VECS ( 'QUAD4   ', 'N', NUM_FROWS, FEMAP_SET_ID )
+            CALL WRITE_FEMAP_STRN_VECS ( 'QUADR   ', 'N', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
 
@@ -931,7 +932,7 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
          STRAIN_ITEM( 3) = 'Torsional Strain    '
          STRAIN_ITEM( 4) = 'MS - Torsion        '
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
          NUM_OTM_ENTRIES = 10
          STRAIN_ITEM( 1) = 'Fibre Dist      -Z1 '  ;  STRAIN_ITEM(11) = 'Fibre Dist      +Z1 '
          STRAIN_ITEM( 2) = 'Normal X Strain -Z1 '  ;  STRAIN_ITEM(12) = 'Normal X Strain +Z1 '

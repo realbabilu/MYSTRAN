@@ -1930,6 +1930,14 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
+      ! POSTEXT is accepted for MSC/NX OP2-post compatibility. MYSTRAN writes its
+      ! current OP2 dialect regardless of this flag, so the value is intentionally ignored.
+      ELSE IF (JCARD(2)(1:8) == 'POSTEXT ') THEN
+         PARNAM = 'POSTEXT '
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
+         CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
+
 
       ! PRTBASIC prints the grid coordinates in the basic coord system
       ELSE IF (JCARD(2)(1:8) == 'PRTBASIC') THEN

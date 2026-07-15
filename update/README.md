@@ -31,3 +31,11 @@ Files:
   - modal and buckling set-header examples
   - what the current MYSTRAN writer already matches
   - what remains custom or lighter than the reference exports
+
+- `min4_basic_stress_patch_test.md`
+  Patch-test note for ordinary shell element stress validation using `PARAM,STR_CID,0`.
+  This records the `OES1X1`/`SHELLSTRESSES/EID` path for SAP2000 `2-001` style global element stress checks.
+
+- `gpstress_patch_test_example.md`
+  Separate GPSTRESS/GSTRESS example note for MSC-style grid-point stress output.
+  This records the `OUTPUT(POST)`/`SURFACE` shape and clarifies that GPSTRESS maps to `OGS1`, not ordinary element stress.

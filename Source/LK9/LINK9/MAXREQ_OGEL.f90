@@ -264,7 +264,7 @@
             IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 5
          ENDIF
 
-         IF (TYPE(1:5) == 'QUAD4') THEN
+         IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
             IF (FORC_LOC == 'CENTER  ') THEN            !    PSHELL requires 2 rows of output/elem for FORC_LOC = 'CENTER'
                NUMBER_ROWS(K) = 1
             ELSE                                        !    PSHELL requires more lines of output for other FORC_LOC
@@ -286,7 +286,7 @@
                IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 10
          ELSE IF  (TYPE(1:3) == 'BAR  ') THEN
                NUMBER_ROWS(K) = 2                          !    BAR stresses require 2 rows of output/elem
-         ELSE IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4')) THEN
+         ELSE IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
             IF (PCOMP_PROPS == 'Y') THEN
                NUMBER_ROWS(K) = NUM_PLIES                  !    PCOMP requires NUM_PLIES rows of output/elem
             ELSE
@@ -319,7 +319,7 @@
          IF (TYPE(1:4) == 'BEAM') THEN
             NUMBER_ROWS(K) = 2*PBEAM_NSTATIONS(EDAT(EPNT(INT_ELEM_ID)+1))
             IF (NUMBER_ROWS(K) <= 0) NUMBER_ROWS(K) = 10
-         ELSE IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'SHEAR')) THEN
+         ELSE IF ((TYPE(1:5) == 'TRIA3' ) .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'SHEAR')) THEN
             IF (PCOMP_PROPS == 'Y') THEN
                NUMBER_ROWS(K) = NUM_PLIES                  !    PCOMP requires NUM_PLIES rows of output/elem
             ELSE
