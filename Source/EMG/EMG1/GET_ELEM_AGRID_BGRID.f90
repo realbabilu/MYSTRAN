@@ -75,6 +75,10 @@
             DELTA = MEDAT0_CUSERIN - 1
          ENDIF
          AGRID(I) = EDAT(EPNTK+I+DELTA)
+         IF ((TYPE(1:5) == 'ELAS1') .AND. (I == 2) .AND. (AGRID(I) <= 0)) THEN
+            BGRID(I) = 0
+            CYCLE
+         ENDIF
          CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID(I), BGRID(I) )
          IF (BGRID(I) == -1) THEN
             WRITE(ERR,1900) AGRID(I), EID, TYPE

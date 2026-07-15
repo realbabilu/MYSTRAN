@@ -69,6 +69,14 @@
          ELGP  = EDAT(EPNTK+2)
          FOUND = 'Y'
 
+      ELSE IF ((TYPE == 'ELAS1   ') .AND. (EDAT(EPNTK+3) <= 0)) THEN
+
+         ! MSC-style grounded CELAS1 shorthand is stored with G2 = 0.
+         ! Treat it as a one-grid spring so the EMG path does not dereference
+         ! a synthetic GRID 0 entry.
+         ELGP  = 1
+         FOUND = 'Y'
+
       ELSE
 
          DO I=1,METYPE

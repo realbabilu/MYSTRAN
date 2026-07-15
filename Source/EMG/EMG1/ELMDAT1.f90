@@ -192,9 +192,15 @@
          ENDDO
       ENDDO
       DO I=1,ELGP
-         XEB(I,1) = RGRID(BGRID(I),1)
-         XEB(I,2) = RGRID(BGRID(I),2)
-         XEB(I,3) = RGRID(BGRID(I),3)
+         IF (BGRID(I) > 0) THEN
+            XEB(I,1) = RGRID(BGRID(I),1)
+            XEB(I,2) = RGRID(BGRID(I),2)
+            XEB(I,3) = RGRID(BGRID(I),3)
+         ELSE
+            XEB(I,1) = ZERO
+            XEB(I,2) = ZERO
+            XEB(I,3) = ZERO
+         ENDIF
       ENDDO
 
 ! For BUSH, make sure CID (field 9 of CBUSH) was specified if the 2 grids are coincident

@@ -258,7 +258,7 @@ headr:IF (IHDR == 'Y') THEN
                 ENDIF
                 WRITE(F06,401) FILL(1:32), ONAME
 
-             ELSE IF((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+             ELSE IF((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
                 IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                    WRITE(F06,302) FILL(1:33)
                 ELSE
@@ -282,7 +282,7 @@ headr:IF (IHDR == 'Y') THEN
              ELSE IF (TYPE(1:5) == 'SHEAR') THEN
                 WRITE(F06,1401) FILL(1: 0), FILL(1: 0)
 
-             ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+             ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
                 WRITE(F06,1501) FILL(1: 0), FILL(1: 0), FILL(1: 0)
 
              ELSE IF (TYPE(1:4) == 'BUSH') THEN

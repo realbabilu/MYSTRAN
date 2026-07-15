@@ -34,7 +34,7 @@
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, MEDAT_CELAS1, NCELAS1, NELE, NEDAT
       USE TIMDAT, ONLY                :  TSEC
-      USE MODEL_STUF, ONLY            :  EDAT, ETYPE
+      USE MODEL_STUF, ONLY            :  EDAT, EPNT, ETYPE
 
       USE BD_CELAS1_USE_IFs
 
@@ -45,8 +45,10 @@
       CHARACTER(LEN=JCARD_LEN)        :: JCARD(10)         ! The 10 fields of characters making up CARD
       CHARACTER(LEN(JCARD))           :: CELAS_ELID        ! Field 2 of CELAS1 card (this CELAS1's elem ID)
       CHARACTER(LEN(JCARD))           :: JCARD_EDAT(10)    ! JCARD but with fields 5 and 6 switched to get G.P.'s together in EDAT
+      CHARACTER(1*BYTE)               :: GROUND_COMPAT     ! 'Y' if CELAS1 is given in short grounded form
 
       INTEGER(LONG)                   :: I                 ! DO loop index
+      INTEGER(LONG)                   :: I4INP             ! An integer read
       INTEGER(LONG)                   :: IDOF              ! Displ component (1,2,3,4,5 or 6) that one end of CELSA conn. to
 
 
@@ -70,6 +72,20 @@
 
       CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
       CELAS_ELID = JCARD(2)
+      GROUND_COMPAT = 'N'
+
+! Nastran/MSC decks sometimes use a short grounded CELAS1 form with only
+! one grid/component pair present on the connection fields.  Treat that as
+! a spring to basic ground so validation decks do not need a dummy node.
+!
+! Example accepted compatibility form:
+!   CELAS1, EID, PID, G1, C1
+! becomes internally:
+!   G1, C1, G2=0, C2=C1
+
+      IF ((JCARD(6)(1:) == ' ') .AND. (JCARD(7)(1:) == ' ')) THEN
+         GROUND_COMPAT = 'Y'
+      ENDIF
 
 ! Make JCARD_EDAT, which is the version that will have JCARD fields 5, 6 switched when subr ELEPRO called
 
@@ -88,28 +104,78 @@
       JCARD_EDAT(5) = JCARD(6)
       JCARD_EDAT(6) = JCARD(5)
 
-      CALL ELEPRO ( 'Y', JCARD_EDAT, 6, MEDAT_CELAS1, 'Y', 'Y', 'Y', 'Y', 'N', 'N', 'N', 'N' )
-      NCELAS1 = NCELAS1+1
-      ETYPE(NELE) = 'ELAS1   '
+      IF (GROUND_COMPAT == 'Y') THEN
 
-! Check to make sure that numbers in fields 5 and 7 are valid component numbers
+! Grounded MSC shorthand:
+!   CELAS1,EID,PID,G1,C1
+! Internally normalize to:
+!   EID, PID, G1, 0, C1, 0
+! so ELAS1 can treat it as a spring to ground.
 
-      IF (IERRFL(JF(5)) == 'N') THEN
-         CALL I4FLD ( JCARD(5), JF(5), IDOF )
+         CALL I4FLD ( JCARD(4), JF(4), IDOF )              ! G1
+         IF (IDOF <= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,1133) IDOF, JF(4), CELAS_ELID
+            WRITE(F06,1133) IDOF, JF(4), CELAS_ELID
+         ENDIF
+
+         CALL I4FLD ( JCARD(5), JF(5), IDOF )              ! C1
          IF ((IDOF <= 0) .OR. (IDOF > 6)) THEN
             FATAL_ERR = FATAL_ERR + 1
             WRITE(ERR,1133) IDOF, JF(5), CELAS_ELID
             WRITE(F06,1133) IDOF, JF(5), CELAS_ELID
          ENDIF
-      ENDIF
 
-      IF (IERRFL(JF(7)) == 'N') THEN
-         CALL I4FLD ( JCARD(7), JF(7), IDOF )
-         IF ((IDOF <= 0) .OR. (IDOF > 6)) THEN
-            FATAL_ERR = FATAL_ERR + 1
-            WRITE(ERR,1133) IDOF, JF(7), CELAS_ELID
-            WRITE(F06,1133) IDOF, JF(7), CELAS_ELID
+         NELE      = NELE + 1
+         NCELAS1   = NCELAS1 + 1
+         ETYPE(NELE) = 'ELAS1   '
+         EPNT(NELE)  = NEDAT + 1
+
+         CALL I4FLD ( JCARD(2), JF(2), I4INP )              ! EID
+         EDAT(NEDAT+1) = I4INP
+
+         IF (JCARD(3)(1:) == ' ') THEN
+            EDAT(NEDAT+2) = I4INP                           ! PID defaults to EID
+         ELSE
+            CALL I4FLD ( JCARD(3), JF(3), I4INP )           ! PID
+            EDAT(NEDAT+2) = I4INP
          ENDIF
+
+         CALL I4FLD ( JCARD(4), JF(4), I4INP )              ! G1
+         EDAT(NEDAT+3) = I4INP
+         EDAT(NEDAT+4) = 0
+
+         CALL I4FLD ( JCARD(5), JF(5), I4INP )              ! C1
+         EDAT(NEDAT+5) = I4INP
+         EDAT(NEDAT+6) = 0
+         NEDAT = NEDAT + MEDAT_CELAS1
+
+      ELSE
+
+         CALL ELEPRO ( 'Y', JCARD_EDAT, 6, MEDAT_CELAS1, 'Y', 'Y', 'Y', 'Y', 'N', 'N', 'N', 'N' )
+         NCELAS1 = NCELAS1+1
+         ETYPE(NELE) = 'ELAS1   '
+
+! Check to make sure that numbers in fields 5 and 7 are valid component numbers
+
+         IF (IERRFL(JF(5)) == 'N') THEN
+            CALL I4FLD ( JCARD(5), JF(5), IDOF )
+            IF ((IDOF <= 0) .OR. (IDOF > 6)) THEN
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,1133) IDOF, JF(5), CELAS_ELID
+               WRITE(F06,1133) IDOF, JF(5), CELAS_ELID
+            ENDIF
+         ENDIF
+
+         IF (IERRFL(JF(7)) == 'N') THEN
+            CALL I4FLD ( JCARD(7), JF(7), IDOF )
+            IF ((IDOF <= 0) .OR. (IDOF > 6)) THEN
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,1133) IDOF, JF(7), CELAS_ELID
+               WRITE(F06,1133) IDOF, JF(7), CELAS_ELID
+            ENDIF
+         ENDIF
+
       ENDIF
 
 ! Issue warning if fields 8, 9 are not blank

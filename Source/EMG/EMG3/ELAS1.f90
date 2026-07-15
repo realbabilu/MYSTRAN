@@ -62,14 +62,23 @@
       CALL GET_GRID_NUM_COMPS ( BGRID(1), NUM_COMPS_GRID_1, SUBR_NAME )
       I2       = NUM_COMPS_GRID_1 + ELAS_COMP(2)
 
+! A grounded CELAS1 shorthand is normalized by BD_CELAS1 so that the
+! second grid/component end is zeroed. In that case the element acts as a
+! spring to ground and only contributes a diagonal term at the first DOF.
+      IF (BGRID(2) <= 0) THEN
+         I2 = 0
+      ENDIF
+
 ! **********************************************************************************************************************************
 ! Calculate the element stiffness matrix in global coordinates.
 
       IF (OPT(4) == 'Y') THEN
          KE(I1,I1) =  K
-         KE(I1,I2) = -KE(I1,I1)
-         KE(I2,I1) = -KE(I1,I1)
-         KE(I2,I2) =  KE(I1,I1)
+         IF (I2 > 0) THEN
+            KE(I1,I2) = -KE(I1,I1)
+            KE(I2,I1) = -KE(I1,I1)
+            KE(I2,I2) =  KE(I1,I1)
+         ENDIF
       ENDIF
 
 ! **********************************************************************************************************************************
@@ -77,7 +86,9 @@
 
       IF (OPT(3) == 'Y') THEN
          SE1(1,I1,1) =  K*FCONV(1)
-         SE1(1,I2,1) = -K*FCONV(1)
+         IF (I2 > 0) THEN
+            SE1(1,I2,1) = -K*FCONV(1)
+         ENDIF
       ENDIF
 
 
