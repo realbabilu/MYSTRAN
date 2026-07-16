@@ -49,7 +49,9 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONEPM4, ONE, TWO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE MODEL_STUF, ONLY            :  AGRID, BAROFF, BUSH_CID, BUSH_OCID, BUSH_VVEC, BUSH_VVEC_OR_CID, BUSHOFF, BGRID,          &
-                                         CAN_ELEM_TYPE_OFFSET, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_RPROPS, CORD, DOFPIN, EDAT, EID,    &
+                                         CAN_ELEM_TYPE_OFFSET, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_RPROPS, CBEAM_ACTIVE_STIFFMOD, &
+                                         CBEAM_ACTIVE_AREA_MOD, CBEAM_ACTIVE_I1_MOD, CBEAM_ACTIVE_I2_MOD, CBEAM_ACTIVE_K1_MOD, CBEAM_ACTIVE_K2_MOD, &
+                                         CBEAM_ACTIVE_J_MOD, CBEAM_ACTIVE_RIOFFSET, CBEAM_ACTIVE_TAPER_MODE, CORD, DOFPIN, EDAT, EID,    &
                                          ELAS_COMP, ELDOF, ELEM_LEN_12, ELGP, ELMTYP, EMAT, EOFF, NUM_EMG_FATAL_ERRS, EPROP, EPNT, &
                                          ETYPE, GRID, RGRID, GRID_ID, INTL_MID, INTL_PID, ISOLID, MATANGLE, MATL, MTRL_TYPE,       &
                                          NUM_SEi, OFFDIS, OFFDIS_O, OFFSET, PBAR, PBEAM, PBEAM_NSTATIONS, PBEAM_XL, PBEAM_RPROPS, PCOMP,          &
@@ -358,6 +360,15 @@
          DO I=1,MRPBEAM
             EPROP(I) = RPBEAM(INTL_PID,I)
          ENDDO
+         CBEAM_ACTIVE_STIFFMOD   = EPROP(46)
+         CBEAM_ACTIVE_RIOFFSET   = EPROP(47)
+         CBEAM_ACTIVE_TAPER_MODE = NINT(EPROP(48))
+         CBEAM_ACTIVE_AREA_MOD   = EPROP(49)
+         CBEAM_ACTIVE_I1_MOD     = EPROP(50)
+         CBEAM_ACTIVE_I2_MOD     = EPROP(51)
+         CBEAM_ACTIVE_K1_MOD     = EPROP(52)
+         CBEAM_ACTIVE_K2_MOD     = EPROP(53)
+         CBEAM_ACTIVE_J_MOD      = EPROP(54)
          IF (DEBUG(233) > 0) THEN
             WRITE(F06,'(A)') '*** CBEAM PROPERTY DEBUG *******************************************************'
             WRITE(F06,'(A,I0)') '  Element ID       : ', EID

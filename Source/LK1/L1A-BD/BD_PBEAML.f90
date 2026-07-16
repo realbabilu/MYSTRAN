@@ -38,7 +38,7 @@
       USE PARAMS, ONLY                :  EPSIL, SUPINFO
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LPBEAM, NPBEAM,             &
                                           MPBEAM_STATIONS, WARN_ERR
-      USE CONSTANTS_1, ONLY           :  ZERO
+      USE CONSTANTS_1, ONLY           :  ONE, ZERO
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  PBEAM, PBEAM_NSTATIONS, PBEAM_XL, PBEAM_RPROPS, RPBEAM
 
@@ -56,6 +56,7 @@
       CHARACTER(LEN=JCARD_LEN)        :: JCARD(10)
       CHARACTER(LEN=JCARD_LEN)        :: TOKENS(MAXTOK)
       CHARACTER(LEN=JCARD_LEN)        :: WORDS(32)
+      CHARACTER(LEN=JCARD_LEN)        :: CARD_NAME
       CHARACTER(LEN=JCARD_LEN)        :: ID
       CHARACTER(LEN=JCARD_LEN)        :: SEC_TYPE
       CHARACTER(LEN=JCARD_LEN)        :: SOFLAG
@@ -74,6 +75,7 @@
       INTEGER(LONG)                   :: NTOK
       INTEGER(LONG)                   :: PROPERTY_ID
       INTEGER(LONG)                   :: STATION_COUNT
+      INTEGER(LONG)                   :: TAPER_MODE
 
       REAL(DOUBLE)                    :: DIMS_A(10)
       REAL(DOUBLE)                    :: DIMS_B(10)
@@ -81,16 +83,28 @@
       REAL(DOUBLE)                    :: NSM_A
       REAL(DOUBLE)                    :: NSM_B
       REAL(DOUBLE)                    :: NSM_CUR
+      REAL(DOUBLE)                    :: AREA_MOD
+      REAL(DOUBLE)                    :: I1_MOD
+      REAL(DOUBLE)                    :: I2_MOD
+      REAL(DOUBLE)                    :: K1_MOD
+      REAL(DOUBLE)                    :: K2_MOD
+      REAL(DOUBLE)                    :: J_MOD
+      REAL(DOUBLE)                    :: ROFSET
+      REAL(DOUBLE)                    :: STIFFMOD
       REAL(DOUBLE)                    :: STATION_XL
+      LOGICAL                         :: IS_PBEAMZ
 
 ! **********************************************************************************************************************************
       CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
+      CARD_NAME = JCARD(1)
+      CALL TO_UPPER ( CARD_NAME )
+      IS_PBEAMZ = (CARD_NAME(1:6) == 'PBEAMZ')
       ID = JCARD(2)
 
       IF (LARGE_FLD_INP == 'Y') THEN
          FATAL_ERR = FATAL_ERR + 1
-         WRITE(ERR,1301) 'large-field PBEAML'
-         WRITE(F06,1301) 'large-field PBEAML'
+         WRITE(ERR,1301) TRIM(CARD_NAME)
+         WRITE(F06,1301) TRIM(CARD_NAME)
          RETURN
       ENDIF
 
@@ -124,8 +138,8 @@
       DO I=1,NPBEAM-1
          IF (PROPERTY_ID == PBEAM(I,1)) THEN
             FATAL_ERR = FATAL_ERR + 1
-            WRITE(ERR,1145) 'PBEAML', PROPERTY_ID
-            WRITE(F06,1145) 'PBEAML', PROPERTY_ID
+            WRITE(ERR,1145) TRIM(CARD_NAME), PROPERTY_ID
+            WRITE(F06,1145) TRIM(CARD_NAME), PROPERTY_ID
             RETURN
          ENDIF
       ENDDO
@@ -154,7 +168,7 @@ collect_tokens: DO
          ENDDO
          IF (IFIRST == 0) CYCLE collect_tokens
          IF (RAW_LINE(IFIRST:IFIRST) == '$') CYCLE collect_tokens
-         IF (RAW_LINE(IFIRST:IFIRST) /= '+') THEN
+         IF ((RAW_LINE(IFIRST:IFIRST) /= '+') .AND. (RAW_LINE(IFIRST:IFIRST) /= ',')) THEN
             BACKSPACE(IN1)
             EXIT collect_tokens
          ENDIF
@@ -197,7 +211,7 @@ collect_tokens: DO
       NSM_A = ZERO
       IF (ITOK <= NTOK) THEN
          IF (LEN_TRIM(TOKENS(ITOK)) > 0) THEN
-            IF (.NOT. IS_SO_TOKEN(TOKENS(ITOK))) THEN
+            IF ((.NOT. IS_SO_TOKEN(TOKENS(ITOK))) .AND. (.NOT. (IS_PBEAMZ .AND. IS_PBEAMZ_OPTION(TOKENS(ITOK))))) THEN
                READ(TOKENS(ITOK),*,ERR=900) NSM_A
                ITOK = ITOK + 1
             ENDIF
@@ -208,6 +222,15 @@ collect_tokens: DO
       DIMS_B = DIMS_A
       NSM_B  = NSM_A
       STATION_COUNT = 1
+      STIFFMOD   = 1.0D0
+      ROFSET     = 0.0D0
+      TAPER_MODE = 0
+      AREA_MOD   = 1.0D0
+      I1_MOD     = 1.0D0
+      I2_MOD     = 1.0D0
+      K1_MOD     = 1.0D0
+      K2_MOD     = 1.0D0
+      J_MOD      = 1.0D0
 
 ! --- cbeam_pbeaml_constant begin --- !
 ! Support the standard constant-section PBEAML form where the only continuation
@@ -218,6 +241,8 @@ collect_tokens: DO
          PBEAM_NSTATIONS(NPBEAM) = STATION_COUNT
          PBEAM_XL(NPBEAM,STATION_COUNT) = 1.0D0
          CALL LOAD_SECTION_B ( SEC_TYPE, NDIM_SEC, DIMS_B, NSM_B )
+         CALL STORE_PBEAMZ_META ( STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+         IF (IS_PBEAMZ) CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET )
          RETURN
       ENDIF
 ! --- cbeam_pbeaml_constant end --- !
@@ -225,6 +250,10 @@ collect_tokens: DO
 station_parse: DO WHILE (ITOK <= NTOK)
          SOFLAG = TOKENS(ITOK)
          IF (.NOT. IS_SO_TOKEN(SOFLAG)) THEN
+            IF (IS_PBEAMZ .AND. IS_PBEAMZ_OPTION(SOFLAG)) THEN
+               CALL READ_PBEAMZ_OPTION ( SOFLAG, ITOK, STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+               CYCLE station_parse
+            ENDIF
             FATAL_ERR = FATAL_ERR + 1
             WRITE(ERR,1306) ID, TOKENS(ITOK)
             WRITE(F06,1306) ID, TOKENS(ITOK)
@@ -246,7 +275,7 @@ station_parse: DO WHILE (ITOK <= NTOK)
          ENDDO
          NSM_CUR = ZERO
          IF (ITOK <= NTOK) THEN
-            IF (.NOT. IS_SO_TOKEN(TOKENS(ITOK))) THEN
+            IF ((.NOT. IS_SO_TOKEN(TOKENS(ITOK))) .AND. (.NOT. (IS_PBEAMZ .AND. IS_PBEAMZ_OPTION(TOKENS(ITOK))))) THEN
                READ(TOKENS(ITOK),*,ERR=900) NSM_CUR
                ITOK = ITOK + 1
             ENDIF
@@ -268,6 +297,14 @@ station_parse: DO WHILE (ITOK <= NTOK)
       ENDDO station_parse
 
       IF (PBEAM_NSTATIONS(NPBEAM) <= 1) THEN
+         IF (IS_PBEAMZ) THEN
+            PBEAM_NSTATIONS(NPBEAM) = 2
+            PBEAM_XL(NPBEAM,2) = 1.0D0
+            CALL LOAD_SECTION_B ( SEC_TYPE, NDIM_SEC, DIMS_B, NSM_B )
+            CALL STORE_PBEAMZ_META ( STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+            CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET )
+            RETURN
+         ENDIF
          FATAL_ERR = FATAL_ERR + 1
          WRITE(ERR,1308) ID
          WRITE(F06,1308) ID
@@ -275,6 +312,8 @@ station_parse: DO WHILE (ITOK <= NTOK)
       ENDIF
 
       CALL LOAD_SECTION_B ( SEC_TYPE, NDIM_SEC, DIMS_B, NSM_B )
+      CALL STORE_PBEAMZ_META ( STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+      IF (IS_PBEAMZ) CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET )
 
       RETURN
 
@@ -297,6 +336,9 @@ station_parse: DO WHILE (ITOK <= NTOK)
  1308 FORMAT(' *ERROR  1308: PBEAML ID = ',A,' DID NOT DEFINE ANY STATION BEYOND END A')
  1309 FORMAT(' *ERROR  1309: PBEAML ID = ',A,' HAS NONNUMERIC TYPE=I DIMENSION DATA')
  1310 FORMAT(' *ERROR  1310: PBEAML ID = ',A,' CURRENTLY REQUIRES FREE-FIELD COMMA INPUT IN THIS PHASE-1 IMPLEMENTATION')
+ 1311 FORMAT(' *ERROR  1311: ',A,' ENTRY HAS OPTION "',A,'" WITHOUT A FOLLOWING VALUE')
+ 1312 FORMAT(' *ERROR  1312: ',A,' ENTRY HAS INVALID VALUE "',A,'" FOR OPTION "',A,'"')
+ 1313 FORMAT(' *ERROR  1313: ',A,' ENTRY HAS INVALID TAPER VALUE "',A,'" IN TOKEN "',A,'"')
 
 ! ##################################################################################################################################
 
@@ -442,10 +484,495 @@ station_parse: DO WHILE (ITOK <= NTOK)
       PBEAM_RPROPS(NPBEAM,ISTA_IN,5) = JTOR
       PBEAM_RPROPS(NPBEAM,ISTA_IN,6) = NSM
 
+! Default runtime modifiers for all beam properties. PBEAMZ can overwrite them later.
+      RPBEAM(NPBEAM,46) = ONE
+      RPBEAM(NPBEAM,47) = ZERO
+      RPBEAM(NPBEAM,48) = ZERO
+      RPBEAM(NPBEAM,49) = ONE
+      RPBEAM(NPBEAM,50) = ONE
+      RPBEAM(NPBEAM,51) = ONE
+      RPBEAM(NPBEAM,52) = ONE
+      RPBEAM(NPBEAM,53) = ONE
+      RPBEAM(NPBEAM,54) = ONE
+
       CALL WRITE_PBEAML_CONVERTED_PBEAM_DEBUG ( 'S', PBEAM_XL(NPBEAM,ISTA_IN), SEC_TYPE_IN, NDIM_IN, DIMS, AREA, I1, I2, I12,   &
                                                 JTOR, NSM, K1, K2, YC, ZC, YS, ZS, IWARP, STRE )
 
       END SUBROUTINE STORE_SECTION_PROPS
+
+! ##################################################################################################################################
+
+      SUBROUTINE STORE_PBEAMZ_META ( STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+
+      REAL(DOUBLE), INTENT(IN)     :: STIFFMOD
+      REAL(DOUBLE), INTENT(IN)     :: ROFSET
+      INTEGER(LONG), INTENT(IN)    :: TAPER_MODE
+      REAL(DOUBLE), INTENT(IN)     :: AREA_MOD
+      REAL(DOUBLE), INTENT(IN)     :: I1_MOD
+      REAL(DOUBLE), INTENT(IN)     :: I2_MOD
+      REAL(DOUBLE), INTENT(IN)     :: K1_MOD
+      REAL(DOUBLE), INTENT(IN)     :: K2_MOD
+      REAL(DOUBLE), INTENT(IN)     :: J_MOD
+
+      IF (.NOT. IS_PBEAMZ) RETURN
+
+      ! Do not use STIFFMOD as a global scalar multiplier for PBEAMZ.
+      ! Keep the legacy column neutral; per-component modifiers live in cols 49-54.
+      RPBEAM(NPBEAM,46) = ONE
+      RPBEAM(NPBEAM,47) = ROFSET
+      RPBEAM(NPBEAM,48) = DBLE(TAPER_MODE)
+      RPBEAM(NPBEAM,49) = AREA_MOD
+      RPBEAM(NPBEAM,50) = I1_MOD
+      RPBEAM(NPBEAM,51) = I2_MOD
+      RPBEAM(NPBEAM,52) = K1_MOD
+      RPBEAM(NPBEAM,53) = K2_MOD
+      RPBEAM(NPBEAM,54) = J_MOD
+
+      END SUBROUTINE STORE_PBEAMZ_META
+
+! ##################################################################################################################################
+
+      SUBROUTINE FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET )
+
+      INTEGER(LONG), INTENT(IN)    :: TAPER_MODE
+      REAL(DOUBLE), INTENT(IN)     :: AREA_MOD
+      REAL(DOUBLE), INTENT(IN)     :: I1_MOD
+      REAL(DOUBLE), INTENT(IN)     :: I2_MOD
+      REAL(DOUBLE), INTENT(IN)     :: K1_MOD
+      REAL(DOUBLE), INTENT(IN)     :: K2_MOD
+      REAL(DOUBLE), INTENT(IN)     :: J_MOD
+      REAL(DOUBLE), INTENT(IN)     :: ROFSET
+
+      IF (.NOT. IS_PBEAMZ) RETURN
+
+      IF (PBEAM_NSTATIONS(NPBEAM) <= 2) THEN
+         CALL EXPAND_PBEAMZ_DEFAULT_STATIONS ( TAPER_MODE )
+      ENDIF
+
+      CALL APPLY_PBEAMZ_INTERNAL_MODIFIERS ( AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+      CALL REFRESH_PBEAMZ_RPBEAM_SNAPSHOTS ()
+
+      RPBEAM(NPBEAM,46) = ONE
+      RPBEAM(NPBEAM,47) = ROFSET
+      RPBEAM(NPBEAM,48) = ZERO
+      RPBEAM(NPBEAM,49) = ONE
+      RPBEAM(NPBEAM,50) = ONE
+      RPBEAM(NPBEAM,51) = ONE
+      RPBEAM(NPBEAM,52) = ONE
+      RPBEAM(NPBEAM,53) = ONE
+      RPBEAM(NPBEAM,54) = ONE
+
+      END SUBROUTINE FINALIZE_PBEAMZ_GENERATED_PBEAM
+
+! ##################################################################################################################################
+
+      SUBROUTINE APPLY_PBEAMZ_INTERNAL_MODIFIERS ( AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+
+      REAL(DOUBLE), INTENT(IN)     :: AREA_MOD
+      REAL(DOUBLE), INTENT(IN)     :: I1_MOD
+      REAL(DOUBLE), INTENT(IN)     :: I2_MOD
+      REAL(DOUBLE), INTENT(IN)     :: K1_MOD
+      REAL(DOUBLE), INTENT(IN)     :: K2_MOD
+      REAL(DOUBLE), INTENT(IN)     :: J_MOD
+
+      INTEGER(LONG)                :: ISTA
+
+      DO ISTA=1,PBEAM_NSTATIONS(NPBEAM)
+         PBEAM_RPROPS(NPBEAM,ISTA,1) = PBEAM_RPROPS(NPBEAM,ISTA,1)*AREA_MOD
+         PBEAM_RPROPS(NPBEAM,ISTA,2) = PBEAM_RPROPS(NPBEAM,ISTA,2)*I1_MOD
+         PBEAM_RPROPS(NPBEAM,ISTA,3) = PBEAM_RPROPS(NPBEAM,ISTA,3)*I2_MOD
+         PBEAM_RPROPS(NPBEAM,ISTA,5) = PBEAM_RPROPS(NPBEAM,ISTA,5)*J_MOD
+      ENDDO
+
+      RPBEAM(NPBEAM,30) = RPBEAM(NPBEAM,30)*K1_MOD
+      RPBEAM(NPBEAM,31) = RPBEAM(NPBEAM,31)*K2_MOD
+
+      END SUBROUTINE APPLY_PBEAMZ_INTERNAL_MODIFIERS
+
+! ##################################################################################################################################
+
+      SUBROUTINE REFRESH_PBEAMZ_RPBEAM_SNAPSHOTS ()
+
+      INTEGER(LONG)                :: NSTA_LOC
+
+      NSTA_LOC = PBEAM_NSTATIONS(NPBEAM)
+      IF (NSTA_LOC < 1) RETURN
+
+      RPBEAM(NPBEAM, 1) = PBEAM_RPROPS(NPBEAM,1,1)
+      RPBEAM(NPBEAM, 2) = PBEAM_RPROPS(NPBEAM,1,2)
+      RPBEAM(NPBEAM, 3) = PBEAM_RPROPS(NPBEAM,1,3)
+      RPBEAM(NPBEAM, 4) = PBEAM_RPROPS(NPBEAM,1,4)
+      RPBEAM(NPBEAM, 5) = PBEAM_RPROPS(NPBEAM,1,5)
+      RPBEAM(NPBEAM, 6) = PBEAM_RPROPS(NPBEAM,1,6)
+      RPBEAM(NPBEAM,15) = PBEAM_XL(NPBEAM,NSTA_LOC)
+      RPBEAM(NPBEAM,16) = PBEAM_RPROPS(NPBEAM,NSTA_LOC,1)
+      RPBEAM(NPBEAM,17) = PBEAM_RPROPS(NPBEAM,NSTA_LOC,2)
+      RPBEAM(NPBEAM,18) = PBEAM_RPROPS(NPBEAM,NSTA_LOC,3)
+      RPBEAM(NPBEAM,19) = PBEAM_RPROPS(NPBEAM,NSTA_LOC,4)
+      RPBEAM(NPBEAM,20) = PBEAM_RPROPS(NPBEAM,NSTA_LOC,5)
+      RPBEAM(NPBEAM,21) = PBEAM_RPROPS(NPBEAM,NSTA_LOC,6)
+
+      END SUBROUTINE REFRESH_PBEAMZ_RPBEAM_SNAPSHOTS
+
+! ##################################################################################################################################
+
+      SUBROUTINE EXPAND_PBEAMZ_DEFAULT_STATIONS ( TAPER_MODE )
+
+      INTEGER(LONG), INTENT(IN)    :: TAPER_MODE
+
+      INTEGER(LONG), PARAMETER     :: NSEG_DEFAULT = 10
+      INTEGER(LONG)                :: ISTA
+      INTEGER(LONG)                :: TAPER_EXP
+      REAL(DOUBLE)                 :: FRAC
+      REAL(DOUBLE)                 :: A1, A2, I1A, I1B, I2A, I2B, I12A, I12B, J1, J2, NSM1, NSM2
+      REAL(DOUBLE)                 :: AREA_OUT, I1_OUT, I2_OUT, I12_OUT, JTOR_OUT, NSM_OUT
+
+      IF (.NOT. IS_PBEAMZ) RETURN
+      IF (PBEAM_NSTATIONS(NPBEAM) > 2) RETURN
+
+      A1   = PBEAM_RPROPS(NPBEAM,1,1)
+      I1A  = PBEAM_RPROPS(NPBEAM,1,2)
+      I2A  = PBEAM_RPROPS(NPBEAM,1,3)
+      I12A = PBEAM_RPROPS(NPBEAM,1,4)
+      J1   = PBEAM_RPROPS(NPBEAM,1,5)
+      NSM1 = PBEAM_RPROPS(NPBEAM,1,6)
+      A2   = PBEAM_RPROPS(NPBEAM,2,1)
+      I1B  = PBEAM_RPROPS(NPBEAM,2,2)
+      I2B  = PBEAM_RPROPS(NPBEAM,2,3)
+      I12B = PBEAM_RPROPS(NPBEAM,2,4)
+      J2   = PBEAM_RPROPS(NPBEAM,2,5)
+      NSM2 = PBEAM_RPROPS(NPBEAM,2,6)
+
+      PBEAM_NSTATIONS(NPBEAM) = NSEG_DEFAULT + 1
+      TAPER_EXP = MAX(0, MIN(3, TAPER_MODE))
+
+      DO ISTA=1,NSEG_DEFAULT+1
+         FRAC = DBLE(ISTA-1)/DBLE(NSEG_DEFAULT)
+         PBEAM_XL(NPBEAM,ISTA) = FRAC
+         CALL INTERP_PBEAMZ_STATION ( FRAC, TAPER_EXP, A1, A2, I1A, I1B, I2A, I2B, I12A, I12B, J1, J2, NSM1, NSM2,   &
+                                      AREA_OUT, I1_OUT, I2_OUT, I12_OUT, JTOR_OUT, NSM_OUT )
+         PBEAM_RPROPS(NPBEAM,ISTA,1) = AREA_OUT
+         PBEAM_RPROPS(NPBEAM,ISTA,2) = I1_OUT
+         PBEAM_RPROPS(NPBEAM,ISTA,3) = I2_OUT
+         PBEAM_RPROPS(NPBEAM,ISTA,4) = I12_OUT
+         PBEAM_RPROPS(NPBEAM,ISTA,5) = JTOR_OUT
+         PBEAM_RPROPS(NPBEAM,ISTA,6) = NSM_OUT
+      ENDDO
+
+      PBEAM_XL(NPBEAM,1) = ZERO
+      PBEAM_XL(NPBEAM,NSEG_DEFAULT+1) = ONE
+      RPBEAM(NPBEAM,15) = ONE
+      RPBEAM(NPBEAM,16) = PBEAM_RPROPS(NPBEAM,NSEG_DEFAULT+1,1)
+      RPBEAM(NPBEAM,17) = PBEAM_RPROPS(NPBEAM,NSEG_DEFAULT+1,2)
+      RPBEAM(NPBEAM,18) = PBEAM_RPROPS(NPBEAM,NSEG_DEFAULT+1,3)
+      RPBEAM(NPBEAM,19) = PBEAM_RPROPS(NPBEAM,NSEG_DEFAULT+1,4)
+      RPBEAM(NPBEAM,20) = PBEAM_RPROPS(NPBEAM,NSEG_DEFAULT+1,5)
+      RPBEAM(NPBEAM,21) = PBEAM_RPROPS(NPBEAM,NSEG_DEFAULT+1,6)
+
+      END SUBROUTINE EXPAND_PBEAMZ_DEFAULT_STATIONS
+
+! ##################################################################################################################################
+
+      SUBROUTINE INTERP_PBEAMZ_STATION ( FRAC, TAPER_MODE, A1, A2, I1A, I1B, I2A, I2B, I12A, I12B, J1, J2, NSM1, NSM2, &
+                                         AREA_OUT, I1_OUT, I2_OUT, I12_OUT, JTOR_OUT, NSM_OUT )
+
+      REAL(DOUBLE), INTENT(IN)     :: FRAC
+      INTEGER(LONG), INTENT(IN)    :: TAPER_MODE
+      REAL(DOUBLE), INTENT(IN)     :: A1, A2, I1A, I1B, I2A, I2B, I12A, I12B, J1, J2, NSM1, NSM2
+      REAL(DOUBLE), INTENT(OUT)    :: AREA_OUT, I1_OUT, I2_OUT, I12_OUT, JTOR_OUT, NSM_OUT
+
+      INTEGER(LONG)                :: NEXP
+      REAL(DOUBLE)                 :: INVN
+
+      IF (TAPER_MODE <= 0) THEN
+         AREA_OUT = A1
+         I1_OUT   = I1A
+         I2_OUT   = I2A
+         I12_OUT  = I12A
+         JTOR_OUT = J1
+         NSM_OUT  = NSM1
+         RETURN
+      ENDIF
+
+      NEXP = MAX(1, MIN(3, TAPER_MODE))
+      INVN = ONE/DBLE(NEXP)
+
+      AREA_OUT = (ONE - FRAC)*A1 + FRAC*A2
+      IF ((I1A > ZERO) .AND. (I1B > ZERO)) THEN
+         I1_OUT = ((I1A**INVN)*(ONE - FRAC) + (I1B**INVN)*FRAC)**DBLE(NEXP)
+      ELSE
+         I1_OUT = (ONE - FRAC)*I1A + FRAC*I1B
+      ENDIF
+      IF ((I2A > ZERO) .AND. (I2B > ZERO)) THEN
+         I2_OUT = ((I2A**INVN)*(ONE - FRAC) + (I2B**INVN)*FRAC)**DBLE(NEXP)
+      ELSE
+         I2_OUT = (ONE - FRAC)*I2A + FRAC*I2B
+      ENDIF
+      ! Keep torsion linear by default; the taper mode only governs section inertia interpolation.
+      JTOR_OUT = (ONE - FRAC)*J1 + FRAC*J2
+      I12_OUT = (ONE - FRAC)*I12A + FRAC*I12B
+      NSM_OUT  = (ONE - FRAC)*NSM1  + FRAC*NSM2
+
+      END SUBROUTINE INTERP_PBEAMZ_STATION
+
+! ##################################################################################################################################
+
+      LOGICAL FUNCTION IS_PBEAMZ_OPTION ( TOKEN )
+
+      CHARACTER(LEN=*), INTENT(IN) :: TOKEN
+      CHARACTER(LEN=JCARD_LEN)     :: TOKEN_UP
+
+      TOKEN_UP = TOKEN
+      CALL TO_UPPER ( TOKEN_UP )
+
+      IF ((TRIM(TOKEN_UP) == 'STIFFMOD') .OR. (TRIM(TOKEN_UP) == 'ROFSET') .OR. (TRIM(TOKEN_UP) == 'RIOFFSET') .OR. (TRIM(TOKEN_UP) == 'TAPER') .OR. &
+          (TRIM(TOKEN_UP) == 'END') .OR. &
+          (TRIM(TOKEN_UP) == 'AREAMOD') .OR. (TRIM(TOKEN_UP) == 'I1MOD') .OR. (TRIM(TOKEN_UP) == 'I2MOD') .OR. (TRIM(TOKEN_UP) == 'K1MOD') .OR. &
+          (TRIM(TOKEN_UP) == 'K2MOD') .OR. (TRIM(TOKEN_UP) == 'JMOD')) THEN
+         IS_PBEAMZ_OPTION = .TRUE.
+      ELSE
+         IS_PBEAMZ_OPTION = .FALSE.
+      ENDIF
+
+      END FUNCTION IS_PBEAMZ_OPTION
+
+! ##################################################################################################################################
+
+      SUBROUTINE READ_PBEAMZ_OPTION ( OPTION_TOKEN, ITOK, STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+
+      CHARACTER(LEN=*), INTENT(IN)    :: OPTION_TOKEN
+      INTEGER(LONG), INTENT(INOUT)    :: ITOK
+      REAL(DOUBLE), INTENT(INOUT)     :: STIFFMOD
+      REAL(DOUBLE), INTENT(INOUT)     :: ROFSET
+      INTEGER(LONG), INTENT(INOUT)    :: TAPER_MODE
+      REAL(DOUBLE), INTENT(INOUT)     :: AREA_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: I1_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: I2_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: K1_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: K2_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: J_MOD
+
+      CHARACTER(LEN=JCARD_LEN)        :: OPTION_UP
+      CHARACTER(LEN=JCARD_LEN)        :: VALUE_TOKEN
+      CHARACTER(LEN=JCARD_LEN)        :: NEXT_TOKEN
+      INTEGER(LONG)                   :: IOCHK
+      INTEGER(LONG)                   :: JVAL
+      INTEGER(LONG)                   :: NUM_COMPACT_MODS
+      LOGICAL                         :: HIT_PBEAMZ_KEYWORD
+      REAL(DOUBLE)                    :: MODVALS(6)
+      REAL(DOUBLE)                    :: TMP_MODVALS(6)
+
+      OPTION_UP = OPTION_TOKEN
+      CALL TO_UPPER ( OPTION_UP )
+
+      IF (TRIM(OPTION_UP) == 'END') THEN
+         ITOK = NTOK + 1
+         RETURN
+      ENDIF
+
+      IF (TRIM(OPTION_UP) == 'STIFFMOD') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+
+         ! PBEAMZ compact syntax:
+         !   STIFFMOD,area,i1,i2,k1,k2,j
+         ! The numeric tail is interpreted as per-component modifiers in the
+         ! order axial area, I1, I2, K1, K2, J. Missing trailing values default
+         ! to 1.0.
+         MODVALS(1) = ONE
+         MODVALS(2) = ONE
+         MODVALS(3) = ONE
+         MODVALS(4) = ONE
+         MODVALS(5) = ONE
+         MODVALS(6) = ONE
+         TMP_MODVALS = ONE
+         JVAL = 1
+         NUM_COMPACT_MODS = 0
+         HIT_PBEAMZ_KEYWORD = .FALSE.
+         DO WHILE ((ITOK < NTOK) .AND. (JVAL <= 6))
+            ITOK = ITOK + 1
+            NEXT_TOKEN = TOKENS(ITOK)
+            CALL TO_UPPER ( NEXT_TOKEN )
+            IF (IS_PBEAMZ_OPTION ( NEXT_TOKEN )) THEN
+               HIT_PBEAMZ_KEYWORD = .TRUE.
+               EXIT
+            ENDIF
+            READ(TOKENS(ITOK),*,IOSTAT=IOCHK) TMP_MODVALS(JVAL)
+            IF (IOCHK /= 0) EXIT
+            NUM_COMPACT_MODS = NUM_COMPACT_MODS + 1
+            JVAL = JVAL + 1
+         ENDDO
+
+         IF (.NOT. HIT_PBEAMZ_KEYWORD) ITOK = NTOK + 1
+
+         IF (NUM_COMPACT_MODS > 0) THEN
+            AREA_MOD = TMP_MODVALS(1)
+            I1_MOD   = TMP_MODVALS(2)
+            I2_MOD   = TMP_MODVALS(3)
+            K1_MOD   = TMP_MODVALS(4)
+            K2_MOD   = TMP_MODVALS(5)
+            J_MOD    = TMP_MODVALS(6)
+         ELSE
+            AREA_MOD = ONE
+         ENDIF
+
+      ELSE IF ((TRIM(OPTION_UP) == 'ROFSET') .OR. (TRIM(OPTION_UP) == 'RIOFFSET')) THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         READ(TOKENS(ITOK),*,IOSTAT=IOCHK) ROFSET
+         IF (IOCHK /= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+
+      ELSE IF (TRIM(OPTION_UP) == 'AREAMOD') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         READ(TOKENS(ITOK),*,IOSTAT=IOCHK) AREA_MOD
+         IF (IOCHK /= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+
+      ELSE IF (TRIM(OPTION_UP) == 'I1MOD') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         READ(TOKENS(ITOK),*,IOSTAT=IOCHK) I1_MOD
+         IF (IOCHK /= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+
+      ELSE IF (TRIM(OPTION_UP) == 'I2MOD') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         READ(TOKENS(ITOK),*,IOSTAT=IOCHK) I2_MOD
+         IF (IOCHK /= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+
+      ELSE IF (TRIM(OPTION_UP) == 'K1MOD') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         READ(TOKENS(ITOK),*,IOSTAT=IOCHK) K1_MOD
+         IF (IOCHK /= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+
+      ELSE IF (TRIM(OPTION_UP) == 'K2MOD') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         READ(TOKENS(ITOK),*,IOSTAT=IOCHK) K2_MOD
+         IF (IOCHK /= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+
+      ELSE IF (TRIM(OPTION_UP) == 'JMOD') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         READ(TOKENS(ITOK),*,IOSTAT=IOCHK) J_MOD
+         IF (IOCHK /= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+
+      ELSE IF (TRIM(OPTION_UP) == 'TAPER') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         VALUE_TOKEN = TOKENS(ITOK)
+         READ(VALUE_TOKEN,*,IOSTAT=IOCHK) TAPER_MODE
+      IF (IOCHK /= 0) THEN
+         CALL TO_UPPER ( VALUE_TOKEN )
+            IF ((TRIM(VALUE_TOKEN) == 'LINEAR') .OR. (TRIM(VALUE_TOKEN) == 'DEFAULT')) THEN
+               TAPER_MODE = 1
+            ELSE IF (TRIM(VALUE_TOKEN) == 'PARABOLIC') THEN
+               TAPER_MODE = 2
+            ELSE IF (TRIM(VALUE_TOKEN) == 'CUBIC') THEN
+               TAPER_MODE = 3
+            ELSE IF ((TRIM(VALUE_TOKEN) == 'NONE') .OR. (TRIM(VALUE_TOKEN) == 'NONTAPER') .OR. &
+                     (TRIM(VALUE_TOKEN) == 'NON-TAPER') .OR. (TRIM(VALUE_TOKEN) == 'CONSTANT') .OR. &
+                     (TRIM(VALUE_TOKEN) == 'PRISMATIC') .OR. (TRIM(VALUE_TOKEN) == 'OFF')) THEN
+               TAPER_MODE = 0
+            ELSE
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1313: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID TAPER VALUE "', TRIM(VALUE_TOKEN), '" IN TOKEN "', TRIM(OPTION_UP), '"'
+               WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1313: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID TAPER VALUE "', TRIM(VALUE_TOKEN), '" IN TOKEN "', TRIM(OPTION_UP), '"'
+               RETURN
+            ENDIF
+         ENDIF
+         ITOK = ITOK + 1
+
+      ENDIF
+
+      END SUBROUTINE READ_PBEAMZ_OPTION
 
 ! ##################################################################################################################################
 

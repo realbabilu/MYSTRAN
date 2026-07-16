@@ -720,6 +720,15 @@
 !             (42) Col 42: z coord of neutral axis for end A, N2(A)       , (optional  6th entry, field 7)
 !             (43) Col 43: y coord of neutral axis for end B, N1(B)       , (optional  6th entry, field 8)
 !             (44) Col 44: z coord of neutral axis for end B, N2(B)       , (optional  6th entry, field 9)
+!             (46) Col 46: legacy PBEAMZ compatibility slot (kept neutral)
+!             (47) Col 47: PBEAMZ rigid-offset request, RIOFFSET/ROFSET , (optional PBEAMZ metadata)
+!             (48) Col 48: PBEAMZ taper mode (1=linear,2=parabolic,3=cubic), TAPER
+!             (49) Col 49: PBEAMZ axial area stiffness modifier           , (optional PBEAMZ metadata)
+!             (50) Col 50: PBEAMZ major-axis bending inertia modifier     , (optional PBEAMZ metadata)
+!             (51) Col 51: PBEAMZ minor-axis bending inertia modifier     , (optional PBEAMZ metadata)
+!             (52) Col 52: PBEAMZ shear-plane-1 modifier                  , (optional PBEAMZ metadata)
+!             (53) Col 53: PBEAMZ shear-plane-2 modifier                  , (optional PBEAMZ metadata)
+!             (54) Col 54: PBEAMZ torsion modifier                        , (optional PBEAMZ metadata)
 !
 !  PBEAM_XL = Stored x/L station values for each PBEAM property. Phase-1 beam redevelopment stores the continuation chain explicitly
 !             so that CBEAM output can later be made station-aware independently of legacy CBAR end-only output.
@@ -731,6 +740,16 @@
 !             (4) I12
 !             (5) J
 !             (6) NSM
+!  PBEAMZ metadata is stored in the unused RPBEAM columns 46-54 as:
+!             (46) legacy compatibility slot (kept at 1.0)
+!             (47) RIOFFSET (legacy alias ROFSET accepted in parser)
+!             (48) TAPER mode code
+!             (49) AREA stiffness modifier
+!             (50) I1 bending stiffness modifier
+!             (51) I2 bending stiffness modifier
+!             (52) K1 shear modifier
+!             (53) K2 shear modifier
+!             (54) J torsion modifier
 
 !  PBUSH  = Array of integer data from PBUSH Bulk Data entries
 !             ( 1) Col  1: PID          Prop ID
@@ -1152,6 +1171,24 @@
                                                              ! Active [A,I1,I2,I12,J,NSM] station properties for the current BEAM runtime state
       REAL(DOUBLE)                    :: CBEAM_ACTIVE_AREA_SCALE = ONE
                                                              ! Active stiffness-only area scale for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_STIFFMOD = ONE
+                                                             ! Overall stiffness scale for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_AREA_MOD = ONE
+                                                             ! Axial area stiffness modifier for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_I1_MOD = ONE
+                                                             ! Major-axis bending stiffness modifier for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_I2_MOD = ONE
+                                                             ! Minor-axis bending stiffness modifier for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_K1_MOD = ONE
+                                                             ! Shear modifier for plane 1 for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_K2_MOD = ONE
+                                                             ! Shear modifier for plane 2 for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_J_MOD = ONE
+                                                             ! Torsion stiffness modifier for the current BEAM runtime state
+      REAL(DOUBLE)                    :: CBEAM_ACTIVE_RIOFFSET = ZERO
+                                                             ! PBEAMZ rigid-offset request for the current BEAM runtime state
+      INTEGER(LONG)                   :: CBEAM_ACTIVE_TAPER_MODE = 0
+                                                             ! PBEAMZ taper mode code for the current BEAM runtime state
       REAL(DOUBLE)                    :: CBEAM_FORCE_B1(3,6) = ZERO
                                                              ! Beam section-force-to-stress map at the reference side
       REAL(DOUBLE)                    :: CBEAM_FORCE_B2(3,6) = ZERO

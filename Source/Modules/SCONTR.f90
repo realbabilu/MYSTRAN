@@ -483,7 +483,7 @@
       INTEGER(LONG), PARAMETER :: MELDTS              =  16      ! No. of types of ELDATA related outputs
       INTEGER(LONG), PARAMETER :: MELOUTS             =   4      ! No. of types of elem related outputs (ELFN, ELFE, STRE)
       INTEGER(LONG), PARAMETER :: MEOFIL              =   4      ! Max no. elem disk debug output files
-      INTEGER(LONG), PARAMETER :: MEPROP              =  50      ! Max no. element properties that cab be stored in array EPROP
+      INTEGER(LONG), PARAMETER :: MEPROP              =  54      ! Max no. element properties that cab be stored in array EPROP
       INTEGER(LONG), PARAMETER :: MEPSIL              =   6      ! Max no. variables in EPSIL array
       INTEGER(LONG), PARAMETER :: METYPE              =  26      ! Max number of element types
       INTEGER(LONG), PARAMETER :: MFIJ                =   5      ! Max number of disk files for WRT_FIJ (F21, F22, etc files)
@@ -500,7 +500,7 @@
       INTEGER(LONG), PARAMETER :: MPBAR               =   3      ! No. cols allowed in dimensioning array PBAR
       INTEGER(LONG), PARAMETER :: MPBARLU             =   6      ! Max num of dec places in format for writing PBAR equivs of PBARL
       INTEGER(LONG), PARAMETER :: MPBEAM              =   4      ! No. cols allowed in dimensioning array PBEAM
-      INTEGER(LONG), PARAMETER :: MPBEAM_STATIONS     =  11      ! Max stored x/L stations for NX-style PBEAM/CBEAM output
+      INTEGER(LONG), PARAMETER :: MPBEAM_STATIONS     =  21      ! Max stored x/L stations for NX-style PBEAM/CBEAM output
       INTEGER(LONG), PARAMETER :: MPBUSH              =   2      ! No. cols allowed in dimensioning array PBUSH
       INTEGER(LONG), PARAMETER :: MPLOAD4_3D_DATA     =   5      ! No. cols allowed for array PLOAD4_3D_DATA
       INTEGER(LONG), PARAMETER :: MPCOMP0             =   6      ! No. integer data on PCOMP parent entry (PID,FT,LAM) + NUM_LAYERS
@@ -525,7 +525,7 @@
       INTEGER(LONG), PARAMETER :: MEMATR              = MRMATLC+2! No. rows allowed in dimensioning array EMAT
       INTEGER(LONG), PARAMETER :: MEMATC              =   4      ! No. cols allowed in dimensioning array EMAT
       INTEGER(LONG), PARAMETER :: MRPBAR              =  17      ! No. cols allowed in dimensioning array RPBAR
-      INTEGER(LONG), PARAMETER :: MRPBEAM             =  45      ! No. cols allowed in dimensioning array RPBEAM
+      INTEGER(LONG), PARAMETER :: MRPBEAM             =  54      ! No. cols allowed in dimensioning array RPBEAM
       INTEGER(LONG), PARAMETER :: MRPBUSH             =  23      ! No. cols allowed in dimensioning array RPBUSH
       INTEGER(LONG), PARAMETER :: MRPCOMP0            =   6      ! No. real data on PCOMP parent entry (Z0, NSM, SB, TREF, GE)
       INTEGER(LONG), PARAMETER :: MRPCOMP_PLIES       =   3      ! No. real data for each layer on PCOMP (Ti, THETAi) plus

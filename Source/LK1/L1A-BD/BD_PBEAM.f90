@@ -527,6 +527,19 @@ station_loop: DO
          ENDIF
       ENDIF
 
+! Legacy PBEAM decks do not carry the runtime modifier tail used by the newer
+! beam path. Leave those slots at neutral defaults so CBEAM stiffness assembly
+! does not see a zero multiplier.
+      RPBEAM(NPBEAM,46) = ONE
+      RPBEAM(NPBEAM,47) = ZERO
+      RPBEAM(NPBEAM,48) = ZERO
+      RPBEAM(NPBEAM,49) = ONE
+      RPBEAM(NPBEAM,50) = ONE
+      RPBEAM(NPBEAM,51) = ONE
+      RPBEAM(NPBEAM,52) = ONE
+      RPBEAM(NPBEAM,53) = ONE
+      RPBEAM(NPBEAM,54) = ONE
+
 ! Emit a compact converted-PBEAM debug trace so F06 shows the exact section
 ! properties that CBEAM will inherit, using the same A/B plus station framing
 ! we have been comparing against NX tube conversions.

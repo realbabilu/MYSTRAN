@@ -397,7 +397,7 @@
             LPBAR  = LPBAR  + 1
             NPBARL = NPBARL + 1
  
-         ELSE IF (CARD(1:6) == 'PBEAML'  )  THEN
+         ELSE IF ((CARD(1:6) == 'PBEAML'  ) .OR. (CARD(1:6) == 'PBEAMZ'  ))  THEN
             LPBEAM = LPBEAM + 1
 
          ELSE IF (CARD(1:5) == 'PBEAM'   )  THEN

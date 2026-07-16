@@ -36,13 +36,15 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  F06
-      USE SCONTR, ONLY                :  NSUB, NTSUB, BLNK_SUB_NAM
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, MPBEAM_STATIONS, NSUB, NTSUB
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, TEN, TWELVE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  EPSIL, ART_KED, ART_ROT_KED, ART_TRAN_KED
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_AREA_SCALE, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_RPROPS, CBEAM_FORCE_B1, CBEAM_FORCE_B2, DOFPIN, DT, EID,&
+      USE MODEL_STUF, ONLY            :  CBEAM_ACTIVE_AREA_SCALE, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_RPROPS,                         &
+                                         CBEAM_ACTIVE_AREA_MOD, CBEAM_ACTIVE_I1_MOD, CBEAM_ACTIVE_I2_MOD, CBEAM_ACTIVE_K1_MOD, CBEAM_ACTIVE_K2_MOD,           &
+                                         CBEAM_ACTIVE_J_MOD, CBEAM_ACTIVE_RIOFFSET, CBEAM_ACTIVE_TAPER_MODE, CBEAM_FORCE_B1, CBEAM_FORCE_B2, DOFPIN, DT, EID,&
                                          ELDOF, KE, KED, PEL, PPE, PRESS, PTE, SE1, SE2, STE1, STE2, TE, UEL, ZS
 
       USE BEAM_USE_IFs
@@ -134,10 +136,19 @@
       REAL(DOUBLE)                    :: XI_WGT(3)
       REAL(DOUBLE)                    :: PROJ_FAC
       REAL(DOUBLE)                    :: AREA_REF
+      REAL(DOUBLE)                    :: AREA_STIFF
       REAL(DOUBLE)                    :: I1_REF
+      REAL(DOUBLE)                    :: I1_STIFF
       REAL(DOUBLE)                    :: I2_REF
+      REAL(DOUBLE)                    :: I2_STIFF
       REAL(DOUBLE)                    :: I12_REF
+      REAL(DOUBLE)                    :: I12_STIFF
       REAL(DOUBLE)                    :: JTOR_REF
+      REAL(DOUBLE)                    :: JTOR_STIFF
+      REAL(DOUBLE)                    :: K1_STIFF
+      REAL(DOUBLE)                    :: K2_STIFF
+      REAL(DOUBLE)                    :: K1_SEG_STIFF
+      REAL(DOUBLE)                    :: K2_SEG_STIFF
 
 ! MYSTRAN's 1D force/recovery conventions tie:
 !   plane 1 -> DOFs (UY,RZ) with I1 and K2
@@ -160,8 +171,16 @@
       I2_REF   = I2
       I12_REF  = I12
       JTOR_REF = JTOR
+      AREA_STIFF = AREA*CBEAM_ACTIVE_AREA_MOD
+      I1_STIFF   = I1  *CBEAM_ACTIVE_I1_MOD
+      I2_STIFF   = I2  *CBEAM_ACTIVE_I2_MOD
+      I12_STIFF  = I12
+      JTOR_STIFF = JTOR*CBEAM_ACTIVE_J_MOD
+      K1_STIFF   = K1  *CBEAM_ACTIVE_K1_MOD
+      K2_STIFF   = K2  *CBEAM_ACTIVE_K2_MOD
 
       NSTA = CBEAM_ACTIVE_NSTATIONS
+      IF (NSTA > 0) CALL ADD_PLOAD1_POINT_STATIONS ( NSTA )
       HAS_NONUNIFORM_STATIONS = .FALSE.
       IF (NSTA > 1) THEN
          DO ISTA=2,NSTA
@@ -174,40 +193,42 @@
          ENDDO
       ENDIF
       USE_STATIONED_KE = (NSTA > 1) .AND. HAS_NONUNIFORM_STATIONS
-      IF (USE_STATIONED_KE) THEN
+      IF ((CBEAM_ACTIVE_TAPER_MODE > 0) .AND. (NSTA >= 2)) THEN
+         CALL BUILD_PBEAMZ_TAPERED_BEAM_KE ( L, E, AREA_REF, I1_REF, I2_REF, I12_REF, JTOR_REF )
+      ELSE IF (USE_STATIONED_KE) THEN
          CALL BUILD_TAPERED_BEAM_KE ( L, E, AREA_REF, I1_REF, I2_REF, I12_REF, JTOR_REF )
       ELSE
-         FAC1 = E*I1/(L*L*L)
-         FAC2 = E*I2/(L*L*L)
-         RG   = G*JTOR/L
+         FAC1 = E*I1_STIFF/(L*L*L)
+         FAC2 = E*I2_STIFF/(L*L*L)
+         RG   = G*JTOR_STIFF/L
 
          IF (DEBUG(203) > 0) CALL DEBUG_BEAM ( 1 )
 
          PHI1 = ZERO
          PHI2 = ZERO
-         IF ((DABS(K1) <= EPS1) .AND. (DABS(K2) <= EPS1)) THEN
+         IF ((DABS(K1_STIFF) <= EPS1) .AND. (DABS(K2_STIFF) <= EPS1)) THEN
             PHI1 = ZERO
             PHI2 = ZERO
          ELSE
-            IF (DABS(K2*G*AREA*L*L) > EPS1) THEN
-               PHI1 = TWELVE*E*I1/(K2*G*AREA*L*L)
+            IF (DABS(K2_STIFF*G*AREA_STIFF*L*L) > EPS1) THEN
+               PHI1 = TWELVE*E*I1_STIFF/(K2_STIFF*G*AREA_STIFF*L*L)
             ENDIF
-            IF (DABS(K1*G*AREA*L*L) > EPS1) THEN
-               PHI2 = TWELVE*E*I2/(K1*G*AREA*L*L)
+            IF (DABS(K1_STIFF*G*AREA_STIFF*L*L) > EPS1) THEN
+               PHI2 = TWELVE*E*I2_STIFF/(K1_STIFF*G*AREA_STIFF*L*L)
             ENDIF
          ENDIF
 
          FAC1 = FAC1/(ONE + PHI1)
          FAC2 = FAC2/(ONE + PHI2)
 
-         DEN     = I1*I2 - I12*I12
+         DEN     = I1_STIFF*I2_STIFF - I12_STIFF*I12_STIFF
          DELTA1  = ZERO
          DELTA2  = ZERO
          DELTA12 = ZERO
          IF (DABS(DEN) > EPS1) THEN
-            DELTA1  = I2/DEN
-            DELTA2  = I1/DEN
-            DELTA12 = I12/DEN
+            DELTA1  = I2_STIFF/DEN
+            DELTA2  = I1_STIFF/DEN
+            DELTA12 = I12_STIFF/DEN
          ENDIF
 
          IF (DEBUG(203) > 0) CALL DEBUG_BEAM ( 2 )
@@ -215,7 +236,7 @@
 ! **********************************************************************************************************************************
 ! Stiffness matrix
 
-         KE( 1, 1) = AREA*E/L
+         KE( 1, 1) = AREA_STIFF*E/L
          KE( 1, 7) =-KE(1,1)
          KE( 7, 7) = KE(1,1)
 
@@ -229,14 +250,14 @@
          KE( 2, 8) = -TWELVE*FAC1
          KE( 2,12) =  SIX*L*FAC1
 
-         KE( 6, 6) = (FOUR + PHI1)*E*I1/(L*(ONE + PHI1))
+         KE( 6, 6) = (FOUR + PHI1)*E*I1_STIFF/(L*(ONE + PHI1))
          KE( 6, 8) = -SIX*L*FAC1
-         KE( 6,12) = (TWO - PHI1)*E*I1/(L*(ONE + PHI1))
+         KE( 6,12) = (TWO - PHI1)*E*I1_STIFF/(L*(ONE + PHI1))
 
          KE( 8, 8) =  TWELVE*FAC1
          KE( 8,12) = -SIX*L*FAC1
 
-         KE(12,12) = (FOUR + PHI1)*E*I1/(L*(ONE + PHI1))
+         KE(12,12) = (FOUR + PHI1)*E*I1_STIFF/(L*(ONE + PHI1))
 
 ! Plane 2 DSB bending block on DOFs (UZ, RY, UZ, RY)
          KE( 3, 3) =  TWELVE*FAC2
@@ -244,27 +265,27 @@
          KE( 3, 9) = -TWELVE*FAC2
          KE( 3,11) = -SIX*L*FAC2
 
-         KE( 5, 5) = (FOUR + PHI2)*E*I2/(L*(ONE + PHI2))
+         KE( 5, 5) = (FOUR + PHI2)*E*I2_STIFF/(L*(ONE + PHI2))
          KE( 5, 9) =  SIX*L*FAC2
-         KE( 5,11) = (TWO - PHI2)*E*I2/(L*(ONE + PHI2))
+         KE( 5,11) = (TWO - PHI2)*E*I2_STIFF/(L*(ONE + PHI2))
 
          KE( 9, 9) =  TWELVE*FAC2
          KE( 9,11) =  SIX*L*FAC2
 
-         KE(11,11) = (FOUR + PHI2)*E*I2/(L*(ONE + PHI2))
+         KE(11,11) = (FOUR + PHI2)*E*I2_STIFF/(L*(ONE + PHI2))
       ENDIF
 
       IF (USE_STATIONED_KE) THEN
          PHI1 = ZERO
          PHI2 = ZERO
-         DEN     = I1_REF*I2_REF - I12_REF*I12_REF
+         DEN     = I1_STIFF*I2_STIFF - I12_STIFF*I12_STIFF
          DELTA1  = ZERO
          DELTA2  = ZERO
          DELTA12 = ZERO
          IF (DABS(DEN) > EPS1) THEN
-            DELTA1  = I2_REF/DEN
-            DELTA2  = I1_REF/DEN
-            DELTA12 = I12_REF/DEN
+            DELTA1  = I2_STIFF/DEN
+            DELTA2  = I1_STIFF/DEN
+            DELTA12 = I12_STIFF/DEN
          ENDIF
       ENDIF
 
@@ -323,22 +344,22 @@
          ENDDO
 
          ABAR(1,1) =  ONE
-         ABAR(2,2) =  DELTA1*I1*L/SIX
-         ABAR(2,3) =  DELTA1*I1*L/THREE
-         ABAR(2,4) = -DELTA12*I2*L/SIX
-         ABAR(2,5) = -DELTA12*I2*L/THREE
-         ABAR(3,2) = -DELTA12*I1*L/SIX
-         ABAR(3,3) = -DELTA12*I1*L/THREE
-         ABAR(3,4) =  DELTA2*I2*L/SIX
-         ABAR(3,5) =  DELTA2*I2*L/THREE
-         ABAR(5,2) = -DELTA12*I1/TWO
-         ABAR(5,3) = -DELTA12*I1/TWO
-         ABAR(5,4) =  DELTA2*I2/TWO
-         ABAR(5,5) =  DELTA2*I2/TWO
-         ABAR(6,2) = -DELTA1*I1/TWO
-         ABAR(6,3) = -DELTA1*I1/TWO
-         ABAR(6,4) =  DELTA12*I2/TWO
-         ABAR(6,5) =  DELTA12*I2/TWO
+         ABAR(2,2) =  DELTA1*I1_STIFF*L/SIX
+         ABAR(2,3) =  DELTA1*I1_STIFF*L/THREE
+         ABAR(2,4) = -DELTA12*I2_STIFF*L/SIX
+         ABAR(2,5) = -DELTA12*I2_STIFF*L/THREE
+         ABAR(3,2) = -DELTA12*I1_STIFF*L/SIX
+         ABAR(3,3) = -DELTA12*I1_STIFF*L/THREE
+         ABAR(3,4) =  DELTA2*I2_STIFF*L/SIX
+         ABAR(3,5) =  DELTA2*I2_STIFF*L/THREE
+         ABAR(5,2) = -DELTA12*I1_STIFF/TWO
+         ABAR(5,3) = -DELTA12*I1_STIFF/TWO
+         ABAR(5,4) =  DELTA2*I2_STIFF/TWO
+         ABAR(5,5) =  DELTA2*I2_STIFF/TWO
+         ABAR(6,2) = -DELTA1*I1_STIFF/TWO
+         ABAR(6,3) = -DELTA1*I1_STIFF/TWO
+         ABAR(6,4) =  DELTA12*I2_STIFF/TWO
+         ABAR(6,5) =  DELTA12*I2_STIFF/TWO
 
          DO I=1,6
             DO J=1,5
@@ -953,6 +974,115 @@
 
       END SUBROUTINE ADD_AXIAL_PLOAD1
 
+      SUBROUTINE ADD_PLOAD1_POINT_STATIONS ( NSTA )
+
+      INTEGER(LONG), INTENT(INOUT)    :: NSTA
+
+      REAL(DOUBLE)                    :: LOAD_X(MPBEAM_STATIONS)
+      REAL(DOUBLE)                    :: XL_CUR
+      REAL(DOUBLE)                    :: XL_LEFT
+      REAL(DOUBLE)                    :: XL_RIGHT
+      REAL(DOUBLE)                    :: FRAC
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: J
+      INTEGER(LONG)                   :: K
+      INTEGER(LONG)                   :: INS
+      INTEGER(LONG)                   :: NLOAD
+      LOGICAL                         :: FOUND
+
+      NLOAD = 0
+      DO J=1,NSUB
+         CALL CAPTURE_PLOAD1_POINT ( PRESS(3 ,J), PRESS(4 ,J), LOAD_X, NLOAD )
+         CALL CAPTURE_PLOAD1_POINT ( PRESS(7 ,J), PRESS(8 ,J), LOAD_X, NLOAD )
+         CALL CAPTURE_PLOAD1_POINT ( PRESS(11,J), PRESS(12,J), LOAD_X, NLOAD )
+         CALL CAPTURE_PLOAD1_POINT ( PRESS(15,J), PRESS(16,J), LOAD_X, NLOAD )
+         CALL CAPTURE_PLOAD1_POINT ( PRESS(19,J), PRESS(20,J), LOAD_X, NLOAD )
+         CALL CAPTURE_PLOAD1_POINT ( PRESS(23,J), PRESS(24,J), LOAD_X, NLOAD )
+      ENDDO
+
+      IF (NLOAD <= 0) RETURN
+
+      DO I=1,NLOAD-1
+         DO K=I+1,NLOAD
+            IF (LOAD_X(K) < LOAD_X(I)) THEN
+               FRAC      = LOAD_X(I)
+               LOAD_X(I) = LOAD_X(K)
+               LOAD_X(K) = FRAC
+            ENDIF
+         ENDDO
+      ENDDO
+
+      DO K=1,NLOAD
+         XL_CUR = LOAD_X(K)
+         IF ((XL_CUR <= ZERO + EPS1) .OR. (XL_CUR >= ONE - EPS1)) CYCLE
+         IF (NSTA >= MPBEAM_STATIONS) EXIT
+
+         FOUND = .FALSE.
+         DO I=1,NSTA
+            IF (DABS(CBEAM_ACTIVE_XL(I) - XL_CUR) <= EPS1) THEN
+               FOUND = .TRUE.
+               EXIT
+            ENDIF
+         ENDDO
+         IF (FOUND) CYCLE
+
+         INS = 1
+         DO WHILE ((INS <= NSTA) .AND. (CBEAM_ACTIVE_XL(INS) < XL_CUR))
+            INS = INS + 1
+         ENDDO
+         IF ((INS <= 1) .OR. (INS > NSTA)) CYCLE
+         IF (DABS(CBEAM_ACTIVE_XL(INS) - XL_CUR) <= EPS1) CYCLE
+         IF (NSTA + 1 > MPBEAM_STATIONS) EXIT
+
+         DO J=NSTA,INS,-1
+            CBEAM_ACTIVE_XL(J+1) = CBEAM_ACTIVE_XL(J)
+            DO I=1,6
+               CBEAM_ACTIVE_RPROPS(J+1,I) = CBEAM_ACTIVE_RPROPS(J,I)
+            ENDDO
+         ENDDO
+
+         XL_LEFT  = CBEAM_ACTIVE_XL(INS-1)
+         XL_RIGHT = CBEAM_ACTIVE_XL(INS+1)
+         IF (XL_RIGHT - XL_LEFT <= EPS1) CYCLE
+         FRAC = (XL_CUR - XL_LEFT)/(XL_RIGHT - XL_LEFT)
+         CBEAM_ACTIVE_XL(INS) = XL_CUR
+         DO I=1,6
+            CBEAM_ACTIVE_RPROPS(INS,I) = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(INS-1,I) + FRAC*CBEAM_ACTIVE_RPROPS(INS+1,I)
+         ENDDO
+         NSTA = NSTA + 1
+      ENDDO
+
+      END SUBROUTINE ADD_PLOAD1_POINT_STATIONS
+
+      SUBROUTINE CAPTURE_PLOAD1_POINT ( X1_IN, X2_IN, LOAD_X, NLOAD )
+
+      REAL(DOUBLE), INTENT(IN)     :: X1_IN
+      REAL(DOUBLE), INTENT(IN)     :: X2_IN
+      REAL(DOUBLE), INTENT(INOUT)  :: LOAD_X(MPBEAM_STATIONS)
+      INTEGER(LONG), INTENT(INOUT) :: NLOAD
+
+      INTEGER(LONG)                :: I
+      LOGICAL                      :: FOUND
+
+      IF (DABS(X2_IN - X1_IN) > EPS1) RETURN
+      IF (X1_IN < ZERO) RETURN
+      IF ((X1_IN <= ZERO + EPS1) .OR. (X1_IN >= ONE - EPS1)) RETURN
+
+      FOUND = .FALSE.
+      DO I=1,NLOAD
+         IF (DABS(LOAD_X(I) - X1_IN) <= EPS1) THEN
+            FOUND = .TRUE.
+            EXIT
+         ENDIF
+      ENDDO
+      IF (FOUND) RETURN
+      IF (NLOAD >= MPBEAM_STATIONS) RETURN
+
+      NLOAD = NLOAD + 1
+      LOAD_X(NLOAD) = X1_IN
+
+      END SUBROUTINE CAPTURE_PLOAD1_POINT
+
       SUBROUTINE BUILD_TAPERED_BEAM_KE ( L_IN, E_IN, AREA_AVG, I1_AVG, I2_AVG, I12_AVG, JTOR_AVG )
 
       REAL(DOUBLE), INTENT(IN)      :: L_IN
@@ -1110,7 +1240,7 @@
       I2_AVG   = ZERO
       I12_AVG  = ZERO
       JTOR_AVG = ZERO
-      CALL BUILD_TAPERED_BEAM_KE_DIRECT ( L_IN, E_IN, AREA_AVG, I1_AVG, I2_AVG, I12_AVG, JTOR_AVG )
+      CALL BUILD_PBEAMZ_TAPERED_BEAM_KE_DIRECT ( L_IN, E_IN, AREA_AVG, I1_AVG, I2_AVG, I12_AVG, JTOR_AVG )
 
       IF (AREA_AVG <= EPS1) AREA_AVG = AREA
       IF (I1_AVG   <= EPS1) I1_AVG   = I1
@@ -1118,6 +1248,171 @@
       IF (JTOR_AVG <= EPS1) JTOR_AVG = JTOR
 
       END SUBROUTINE BUILD_TAPERED_BEAM_KE
+
+      SUBROUTINE BUILD_PBEAMZ_TAPERED_BEAM_KE ( L_IN, E_IN, AREA_AVG, I1_AVG, I2_AVG, I12_AVG, JTOR_AVG )
+
+      REAL(DOUBLE), INTENT(IN)      :: L_IN
+      REAL(DOUBLE), INTENT(IN)      :: E_IN
+      REAL(DOUBLE), INTENT(OUT)     :: AREA_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: I1_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: I2_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: I12_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: JTOR_AVG
+
+      INTEGER(LONG), PARAMETER      :: MAX_SEG = 10
+      INTEGER(LONG), PARAMETER      :: MAX_NODE = MAX_SEG + 1
+      INTEGER(LONG), PARAMETER      :: MAX_DOF = 6*MAX_NODE
+
+      REAL(DOUBLE)                  :: AREA_GP, I1_GP, I2_GP, I12_GP, JTOR_GP, NSM_GP
+      REAL(DOUBLE)                  :: DXI_LOC, XI_A, XI_B, XI_SEG
+      REAL(DOUBLE)                  :: KCHAIN(MAX_DOF,MAX_DOF)
+      REAL(DOUBLE)                  :: KSEG(12,12)
+      REAL(DOUBLE)                  :: KEE(12,12)
+      REAL(DOUBLE)                  :: KEI(12,MAX_DOF-12)
+      REAL(DOUBLE)                  :: KIE(MAX_DOF-12,12)
+      REAL(DOUBLE)                  :: KII(MAX_DOF-12,MAX_DOF-12)
+      REAL(DOUBLE)                  :: YSOL(MAX_DOF-12,12)
+      REAL(DOUBLE)                  :: KSUB(MAX_DOF-12,MAX_DOF-12)
+      INTEGER(LONG)                 :: END_DOF(12)
+      INTEGER(LONG)                 :: INT_DOF(MAX_DOF-12)
+      INTEGER(LONG)                 :: IEND(12)
+      INTEGER(LONG)                 :: IINT(MAX_DOF-12)
+      INTEGER(LONG)                 :: I, J, IA, IB, IROW, ICOL, ISEG, NSEG, NNODE, NDOF, NINT
+      REAL(DOUBLE)                  :: XI_FRAC
+      LOGICAL                       :: USED_CHAIN
+
+      USED_CHAIN = .FALSE.
+      NSEG = MAX_SEG
+      NNODE = NSEG + 1
+      NDOF  = 6*NNODE
+      NINT  = NDOF - 12
+
+      DO I=1,NDOF
+         DO J=1,NDOF
+            KCHAIN(I,J) = ZERO
+         ENDDO
+      ENDDO
+
+      AREA_AVG = ZERO
+      I1_AVG   = ZERO
+      I2_AVG   = ZERO
+      I12_AVG  = ZERO
+      JTOR_AVG = ZERO
+
+      DO ISEG=1,NSEG
+         XI_A = DBLE(ISEG-1)/DBLE(NSEG)
+         XI_B = DBLE(ISEG  )/DBLE(NSEG)
+         DXI_LOC = XI_B - XI_A
+         IF (DXI_LOC <= EPS1) CYCLE
+
+         XI_SEG = 0.5D0*(XI_A + XI_B)
+         CALL GET_PBEAMZ_TAPER_PROPS ( XI_SEG, AREA_GP, I1_GP, I2_GP, I12_GP, JTOR_GP, NSM_GP )
+         CALL BUILD_PRISM_BEAM_SEG_KE ( DXI_LOC*L_IN, E_IN, AREA_GP, I1_GP, I2_GP, I12_GP, JTOR_GP, KSEG )
+
+         AREA_AVG = AREA_AVG + DXI_LOC*AREA_GP
+         I1_AVG   = I1_AVG   + DXI_LOC*I1_GP
+         I2_AVG   = I2_AVG   + DXI_LOC*I2_GP
+         I12_AVG  = I12_AVG  + DXI_LOC*I12_GP
+         JTOR_AVG = JTOR_AVG + DXI_LOC*JTOR_GP
+
+         IA = 6*(ISEG-1)
+         IB = 6*ISEG
+         DO IROW=1,12
+            DO ICOL=1,12
+               IF (IROW <= 6) THEN
+                  I = IA + IROW
+               ELSE
+                  I = IB + IROW - 6
+               ENDIF
+               IF (ICOL <= 6) THEN
+                  J = IA + ICOL
+               ELSE
+                  J = IB + ICOL - 6
+               ENDIF
+               KCHAIN(I,J) = KCHAIN(I,J) + KSEG(IROW,ICOL)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      IF (AREA_AVG <= EPS1) AREA_AVG = AREA_REF
+      IF (I1_AVG   <= EPS1) I1_AVG   = I1_REF
+      IF (I2_AVG   <= EPS1) I2_AVG   = I2_REF
+      IF (JTOR_AVG <= EPS1) JTOR_AVG = JTOR_REF
+
+      IF (NINT <= 0) THEN
+         DO IROW=1,12
+            DO ICOL=1,12
+               KE(IROW,ICOL) = KCHAIN(IROW,ICOL)
+            ENDDO
+         ENDDO
+         USED_CHAIN = .TRUE.
+      ELSE
+         DO I=1,6
+            END_DOF(I)   = I
+            END_DOF(I+6) = NDOF - 6 + I
+         ENDDO
+
+         DO I=1,12
+            IEND(I) = END_DOF(I)
+         ENDDO
+         J = 0
+         DO I=1,NDOF
+            IF ((I <= 6) .OR. (I > NDOF-6)) CYCLE
+            J = J + 1
+            INT_DOF(J) = I
+            IINT(J) = I
+         ENDDO
+
+         DO IROW=1,12
+            DO ICOL=1,12
+               KEE(IROW,ICOL) = KCHAIN(IEND(IROW),IEND(ICOL))
+            ENDDO
+         ENDDO
+         DO IROW=1,12
+            DO ICOL=1,NINT
+               KEI(IROW,ICOL) = KCHAIN(IEND(IROW),IINT(ICOL))
+            ENDDO
+         ENDDO
+         DO IROW=1,NINT
+            DO ICOL=1,12
+               KIE(IROW,ICOL) = KCHAIN(IINT(IROW),IEND(ICOL))
+            ENDDO
+         ENDDO
+         DO IROW=1,NINT
+            DO ICOL=1,NINT
+               KII(IROW,ICOL) = KCHAIN(IINT(IROW),IINT(ICOL))
+               KSUB(IROW,ICOL) = KII(IROW,ICOL)
+            ENDDO
+         ENDDO
+
+         CALL SOLVE_MULTI_RHS_GAUSS ( KSUB, NINT, KIE, 12, YSOL, USED_CHAIN )
+         IF (USED_CHAIN) THEN
+            DO IROW=1,12
+               DO ICOL=1,12
+                  KE(IROW,ICOL) = KEE(IROW,ICOL)
+                  DO J=1,NINT
+                     KE(IROW,ICOL) = KE(IROW,ICOL) - KEI(IROW,J)*YSOL(J,ICOL)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
+      ENDIF
+
+      IF (USED_CHAIN) RETURN
+
+      AREA_AVG = ZERO
+      I1_AVG   = ZERO
+      I2_AVG   = ZERO
+      I12_AVG  = ZERO
+      JTOR_AVG = ZERO
+      CALL BUILD_TAPERED_BEAM_KE_DIRECT ( L_IN, E_IN, AREA_AVG, I1_AVG, I2_AVG, I12_AVG, JTOR_AVG )
+
+      IF (AREA_AVG <= EPS1) AREA_AVG = AREA_REF
+      IF (I1_AVG   <= EPS1) I1_AVG   = I1_REF
+      IF (I2_AVG   <= EPS1) I2_AVG   = I2_REF
+      IF (JTOR_AVG <= EPS1) JTOR_AVG = JTOR_REF
+
+      END SUBROUTINE BUILD_PBEAMZ_TAPERED_BEAM_KE
 
       SUBROUTINE BUILD_TAPERED_BEAM_KE_DIRECT ( L_IN, E_IN, AREA_AVG, I1_AVG, I2_AVG, I12_AVG, JTOR_AVG )
 
@@ -1206,6 +1501,98 @@
 
       END SUBROUTINE BUILD_TAPERED_BEAM_KE_DIRECT
 
+      SUBROUTINE BUILD_PBEAMZ_TAPERED_BEAM_KE_DIRECT ( L_IN, E_IN, AREA_AVG, I1_AVG, I2_AVG, I12_AVG, JTOR_AVG )
+
+      REAL(DOUBLE), INTENT(IN)      :: L_IN
+      REAL(DOUBLE), INTENT(IN)      :: E_IN
+      REAL(DOUBLE), INTENT(OUT)     :: AREA_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: I1_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: I2_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: I12_AVG
+      REAL(DOUBLE), INTENT(OUT)     :: JTOR_AVG
+
+      INTEGER(LONG), PARAMETER      :: MAX_SEG = 10
+      INTEGER(LONG), PARAMETER      :: MAX_NODE = MAX_SEG + 1
+      INTEGER(LONG), PARAMETER      :: MAX_DOF = 6*MAX_NODE
+
+      REAL(DOUBLE)                  :: AREA_GP, I1_GP, I2_GP, I12_GP, JTOR_GP, NSM_GP
+      REAL(DOUBLE)                  :: BAX(12), BTOR(12), BB1(12), BB2(12)
+      REAL(DOUBLE)                  :: DXI_LOC, XI_A, XI_B, XI_SEG, WT_SEG
+      REAL(DOUBLE)                  :: N1PP, N2PP, N3PP, N4PP
+      REAL(DOUBLE)                  :: GAUSS(2), WGTG(2)
+      INTEGER(LONG)                 :: ICOL, IGP, IROW, ISEG
+      INTEGER(LONG)                 :: NSEG
+
+      GAUSS(1) = -0.577350269189626D0
+      GAUSS(2) =  0.577350269189626D0
+      WGTG(1)  =  ONE
+      WGTG(2)  =  ONE
+      NSEG     = MAX_SEG
+
+      AREA_AVG = ZERO
+      I1_AVG   = ZERO
+      I2_AVG   = ZERO
+      I12_AVG  = ZERO
+      JTOR_AVG = ZERO
+
+      DO IROW=1,12
+         BAX(IROW)  = ZERO
+         BTOR(IROW) = ZERO
+      ENDDO
+      BAX(1)   = -ONE/L_IN
+      BAX(7)   =  ONE/L_IN
+      BTOR(4)  = -ONE/L_IN
+      BTOR(10) =  ONE/L_IN
+
+      DO ISEG=1,NSEG
+         XI_A = DBLE(ISEG-1)/DBLE(NSEG)
+         XI_B = DBLE(ISEG  )/DBLE(NSEG)
+         DXI_LOC = XI_B - XI_A
+         IF (DXI_LOC <= EPS1) CYCLE
+
+         DO IGP=1,2
+            XI_SEG = 0.5D0*(XI_A + XI_B) + 0.5D0*DXI_LOC*GAUSS(IGP)
+            WT_SEG = 0.5D0*DXI_LOC*WGTG(IGP)*L_IN
+
+            CALL GET_PBEAMZ_TAPER_PROPS ( XI_SEG, AREA_GP, I1_GP, I2_GP, I12_GP, JTOR_GP, NSM_GP )
+
+            AREA_AVG = AREA_AVG + 0.5D0*DXI_LOC*WGTG(IGP)*AREA_GP
+            I1_AVG   = I1_AVG   + 0.5D0*DXI_LOC*WGTG(IGP)*I1_GP
+            I2_AVG   = I2_AVG   + 0.5D0*DXI_LOC*WGTG(IGP)*I2_GP
+            I12_AVG  = I12_AVG  + 0.5D0*DXI_LOC*WGTG(IGP)*I12_GP
+            JTOR_AVG = JTOR_AVG + 0.5D0*DXI_LOC*WGTG(IGP)*JTOR_GP
+
+            N1PP = (-SIX + TWELVE*XI_SEG)/(L_IN*L_IN)
+            N2PP = (-FOUR + SIX*XI_SEG)/L_IN
+            N3PP = ( SIX - TWELVE*XI_SEG)/(L_IN*L_IN)
+            N4PP = (-TWO + SIX*XI_SEG)/L_IN
+
+            DO IROW=1,12
+               BB1(IROW) = ZERO
+               BB2(IROW) = ZERO
+            ENDDO
+            BB1(2)  = N1PP
+            BB1(6)  = N2PP
+            BB1(8)  = N3PP
+            BB1(12) = N4PP
+            BB2(3)  = N1PP
+            BB2(5)  = -N2PP
+            BB2(9)  = N3PP
+            BB2(11) = -N4PP
+
+            DO IROW=1,12
+               DO ICOL=1,12
+                  KE(IROW,ICOL) = KE(IROW,ICOL) + E_IN*AREA_GP*BAX(IROW)*BAX(ICOL)*WT_SEG
+                  KE(IROW,ICOL) = KE(IROW,ICOL) + G*JTOR_GP*BTOR(IROW)*BTOR(ICOL)*WT_SEG
+                  KE(IROW,ICOL) = KE(IROW,ICOL) + E_IN*I1_GP*BB1(IROW)*BB1(ICOL)*WT_SEG
+                  KE(IROW,ICOL) = KE(IROW,ICOL) + E_IN*I2_GP*BB2(IROW)*BB2(ICOL)*WT_SEG
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+
+      END SUBROUTINE BUILD_PBEAMZ_TAPERED_BEAM_KE_DIRECT
+
       SUBROUTINE BUILD_PRISM_BEAM_SEG_KE ( LSEG, ESEG, AREA_SEG, I1_SEG, I2_SEG, I12_SEG, JTOR_SEG, KSEG )
 
       REAL(DOUBLE), INTENT(IN)      :: LSEG, ESEG, AREA_SEG, I1_SEG, I2_SEG, I12_SEG, JTOR_SEG
@@ -1228,19 +1615,22 @@
 
       PHI1_SEG = ZERO
       PHI2_SEG = ZERO
-      IF (.NOT. ((DABS(K1) <= EPS1) .AND. (DABS(K2) <= EPS1))) THEN
-         IF (DABS(K2*G*AREA_SEG*LSEG*LSEG) > EPS1) THEN
-            PHI1_SEG = TWELVE*ESEG*I1_SEG/(K2*G*AREA_SEG*LSEG*LSEG)
+      K1_SEG_STIFF = K1*CBEAM_ACTIVE_K1_MOD
+      K2_SEG_STIFF = K2*CBEAM_ACTIVE_K2_MOD
+
+      IF (.NOT. ((DABS(K1_SEG_STIFF) <= EPS1) .AND. (DABS(K2_SEG_STIFF) <= EPS1))) THEN
+         IF (DABS(K2_SEG_STIFF*G*AREA_SEG*LSEG*LSEG) > EPS1) THEN
+            PHI1_SEG = TWELVE*ESEG*I1_SEG/(K2_SEG_STIFF*G*AREA_SEG*LSEG*LSEG)
          ENDIF
-         IF (DABS(K1*G*AREA_SEG*LSEG*LSEG) > EPS1) THEN
-            PHI2_SEG = TWELVE*ESEG*I2_SEG/(K1*G*AREA_SEG*LSEG*LSEG)
+         IF (DABS(K1_SEG_STIFF*G*AREA_SEG*LSEG*LSEG) > EPS1) THEN
+            PHI2_SEG = TWELVE*ESEG*I2_SEG/(K1_SEG_STIFF*G*AREA_SEG*LSEG*LSEG)
          ENDIF
       ENDIF
 
       FAC1_SEG = FAC1_SEG/(ONE + PHI1_SEG)
       FAC2_SEG = FAC2_SEG/(ONE + PHI2_SEG)
 
-      KSEG( 1, 1) = AREA_SEG*ESEG/LSEG
+         KSEG( 1, 1) = AREA_SEG*ESEG/LSEG
       KSEG( 1, 7) =-KSEG(1,1)
       KSEG( 7, 7) = KSEG(1,1)
 
@@ -1362,10 +1752,11 @@
       INTEGER(LONG)                 :: IST
 
       AREA_OUT = CBEAM_ACTIVE_AREA_SCALE*CBEAM_ACTIVE_RPROPS(1,1)
-      I1_OUT   = CBEAM_ACTIVE_RPROPS(1,2)
-      I2_OUT   = CBEAM_ACTIVE_RPROPS(1,3)
+      AREA_OUT = AREA_OUT*CBEAM_ACTIVE_AREA_MOD
+      I1_OUT   = CBEAM_ACTIVE_RPROPS(1,2)*CBEAM_ACTIVE_I1_MOD
+      I2_OUT   = CBEAM_ACTIVE_RPROPS(1,3)*CBEAM_ACTIVE_I2_MOD
       I12_OUT  = CBEAM_ACTIVE_RPROPS(1,4)
-      JTOR_OUT = CBEAM_ACTIVE_RPROPS(1,5)
+      JTOR_OUT = CBEAM_ACTIVE_RPROPS(1,5)*CBEAM_ACTIVE_J_MOD
       NSM_OUT  = CBEAM_ACTIVE_RPROPS(1,6)
 
       IF (NSTA <= 1) RETURN
@@ -1377,24 +1768,106 @@
             IF (DXI_LOC <= EPS1) RETURN
             FRAC = (XI_IN - CBEAM_ACTIVE_XL(IST))/DXI_LOC
             AREA_OUT = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,1) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,1)
-            AREA_OUT = CBEAM_ACTIVE_AREA_SCALE*AREA_OUT
-            I1_OUT   = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,2) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,2)
-            I2_OUT   = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,3) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,3)
-            I12_OUT  = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,4) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,4)
-            JTOR_OUT = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,5) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,5)
+            AREA_OUT = AREA_OUT*CBEAM_ACTIVE_AREA_SCALE*CBEAM_ACTIVE_AREA_MOD
+            I1_OUT   = ((ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,2) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,2))                          &
+                     * CBEAM_ACTIVE_I1_MOD
+            I2_OUT   = ((ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,3) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,3))                          &
+                     * CBEAM_ACTIVE_I2_MOD
+            I12_OUT  = ((ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,4) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,4))
+            JTOR_OUT = ((ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,5) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,5))                          &
+                     * CBEAM_ACTIVE_J_MOD
             NSM_OUT  = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(IST,6) + FRAC*CBEAM_ACTIVE_RPROPS(IST+1,6)
             RETURN
          ENDIF
       ENDDO
 
       AREA_OUT = CBEAM_ACTIVE_AREA_SCALE*CBEAM_ACTIVE_RPROPS(NSTA,1)
-      I1_OUT   = CBEAM_ACTIVE_RPROPS(NSTA,2)
-      I2_OUT   = CBEAM_ACTIVE_RPROPS(NSTA,3)
+      AREA_OUT = AREA_OUT*CBEAM_ACTIVE_AREA_MOD
+      I1_OUT   = CBEAM_ACTIVE_RPROPS(NSTA,2)*CBEAM_ACTIVE_I1_MOD
+      I2_OUT   = CBEAM_ACTIVE_RPROPS(NSTA,3)*CBEAM_ACTIVE_I2_MOD
       I12_OUT  = CBEAM_ACTIVE_RPROPS(NSTA,4)
-      JTOR_OUT = CBEAM_ACTIVE_RPROPS(NSTA,5)
+      JTOR_OUT = CBEAM_ACTIVE_RPROPS(NSTA,5)*CBEAM_ACTIVE_J_MOD
       NSM_OUT  = CBEAM_ACTIVE_RPROPS(NSTA,6)
 
       END SUBROUTINE GET_STATION_PROPS
+
+      SUBROUTINE GET_PBEAMZ_TAPER_PROPS ( XI_IN, AREA_OUT, I1_OUT, I2_OUT, I12_OUT, JTOR_OUT, NSM_OUT )
+
+      REAL(DOUBLE), INTENT(IN)      :: XI_IN
+      REAL(DOUBLE), INTENT(OUT)     :: AREA_OUT, I1_OUT, I2_OUT, I12_OUT, JTOR_OUT, NSM_OUT
+
+      REAL(DOUBLE)                  :: FRAC, INVN, A1, A2, I1A, I1B, I2A, I2B, J1, J2
+      INTEGER(LONG)                 :: NEXP
+
+      IF (NSTA < 2) THEN
+         AREA_OUT = AREA_REF
+         I1_OUT   = I1_REF
+         I2_OUT   = I2_REF
+         I12_OUT  = I12_REF
+         JTOR_OUT = JTOR_REF
+         NSM_OUT  = ZERO
+         RETURN
+      ENDIF
+
+      IF (CBEAM_ACTIVE_TAPER_MODE <= 0) THEN
+         AREA_OUT = CBEAM_ACTIVE_RPROPS(1,1)
+         I1_OUT   = CBEAM_ACTIVE_RPROPS(1,2)
+         I2_OUT   = CBEAM_ACTIVE_RPROPS(1,3)
+         I12_OUT  = CBEAM_ACTIVE_RPROPS(1,4)
+         JTOR_OUT = CBEAM_ACTIVE_RPROPS(1,5)
+         NSM_OUT  = CBEAM_ACTIVE_RPROPS(1,6)
+         AREA_OUT = AREA_OUT*CBEAM_ACTIVE_AREA_MOD
+         I1_OUT   = I1_OUT  *CBEAM_ACTIVE_I1_MOD
+         I2_OUT   = I2_OUT  *CBEAM_ACTIVE_I2_MOD
+         I12_OUT  = I12_OUT
+         JTOR_OUT = JTOR_OUT*CBEAM_ACTIVE_J_MOD
+         RETURN
+      ENDIF
+
+      FRAC = XI_IN
+      IF (FRAC < ZERO) FRAC = ZERO
+      IF (FRAC > ONE)  FRAC = ONE
+
+      NEXP = CBEAM_ACTIVE_TAPER_MODE
+      IF (NEXP < 1) NEXP = 1
+      IF (NEXP > 3) NEXP = 3
+      INVN = ONE/DBLE(NEXP)
+
+      A1  = CBEAM_ACTIVE_RPROPS(1,1)
+      A2  = CBEAM_ACTIVE_RPROPS(NSTA,1)
+      I1A = CBEAM_ACTIVE_RPROPS(1,2)
+      I1B = CBEAM_ACTIVE_RPROPS(NSTA,2)
+      I2A = CBEAM_ACTIVE_RPROPS(1,3)
+      I2B = CBEAM_ACTIVE_RPROPS(NSTA,3)
+      J1  = CBEAM_ACTIVE_RPROPS(1,5)
+      J2  = CBEAM_ACTIVE_RPROPS(NSTA,5)
+
+      AREA_OUT = (ONE - FRAC)*A1 + FRAC*A2
+      IF ((I1A > ZERO) .AND. (I1B > ZERO)) THEN
+         I1_OUT = ((I1A**INVN)*(ONE - FRAC) + (I1B**INVN)*FRAC)**DBLE(NEXP)
+      ELSE
+         I1_OUT = (ONE - FRAC)*I1A + FRAC*I1B
+      ENDIF
+      IF ((I2A > ZERO) .AND. (I2B > ZERO)) THEN
+         I2_OUT = ((I2A**INVN)*(ONE - FRAC) + (I2B**INVN)*FRAC)**DBLE(NEXP)
+      ELSE
+         I2_OUT = (ONE - FRAC)*I2A + FRAC*I2B
+      ENDIF
+      IF ((J1 > ZERO) .AND. (J2 > ZERO)) THEN
+         JTOR_OUT = ((J1**INVN)*(ONE - FRAC) + (J2**INVN)*FRAC)**DBLE(NEXP)
+      ELSE
+         JTOR_OUT = (ONE - FRAC)*J1 + FRAC*J2
+      ENDIF
+      I12_OUT = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(1,4) + FRAC*CBEAM_ACTIVE_RPROPS(NSTA,4)
+      NSM_OUT  = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(1,6) + FRAC*CBEAM_ACTIVE_RPROPS(NSTA,6)
+
+      AREA_OUT = AREA_OUT*CBEAM_ACTIVE_AREA_MOD
+      I1_OUT   = I1_OUT  *CBEAM_ACTIVE_I1_MOD
+      I2_OUT   = I2_OUT  *CBEAM_ACTIVE_I2_MOD
+      I12_OUT  = I12_OUT
+      JTOR_OUT = JTOR_OUT*CBEAM_ACTIVE_J_MOD
+
+      END SUBROUTINE GET_PBEAMZ_TAPER_PROPS
 
       END SUBROUTINE BEAM
 

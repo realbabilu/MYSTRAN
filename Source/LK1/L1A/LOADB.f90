@@ -501,7 +501,7 @@ bdf:  DO
             IPBARL = IPBARL + 1
             PBARL_SEC_TYPES(IPBARL) = SEC_TYPE
  
-         ELSE IF (CARD(1:6) == 'PBEAML'  )  THEN
+         ELSE IF ((CARD(1:6) == 'PBEAML'  ) .OR. (CARD(1:6) == 'PBEAMZ'  ))  THEN
             CALL BD_PBEAML  ( CARD, LARGE_FLD_INP )
 
          ELSE IF (CARD(1:5) == 'PBEAM'   )  THEN
