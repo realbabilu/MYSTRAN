@@ -35,7 +35,12 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, IN1
-      USE PARAMS, ONLY                :  EPSIL, SUPINFO
+      USE PARAMS, ONLY                :  BEAMAMO, BEAMAMO_PID, BEAMAMO_VAL, BEAMM1MO, BEAMM1MO_PID, BEAMM1MO_VAL,      &
+                                         BEAMM2MO, BEAMM2MO_PID, BEAMM2MO_VAL, BEAMTMO, BEAMTMO_PID, BEAMTMO_VAL,      &
+                                         BEAMV1MO, BEAMV1MO_PID, BEAMV1MO_VAL, BEAMV2MO, BEAMV2MO_PID, BEAMV2MO_VAL,    &
+                                         EPSIL, MBEAMAMO_PID, MBEAMM1MO_PID, MBEAMM2MO_PID, MBEAMTMO_PID,              &
+                                         MBEAMV1MO_PID, MBEAMV2MO_PID, NBEAMAMO_PID, NBEAMM1MO_PID, NBEAMM2MO_PID,      &
+                                         NBEAMTMO_PID, NBEAMV1MO_PID, NBEAMV2MO_PID, SUPINFO
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, IERRFL, JCARD_LEN, JF, LPBEAM, NPBEAM,             &
                                           MPBEAM_STATIONS, WARN_ERR
       USE CONSTANTS_1, ONLY           :  ONE, ZERO
@@ -75,6 +80,8 @@
       INTEGER(LONG)                   :: NTOK
       INTEGER(LONG)                   :: PROPERTY_ID
       INTEGER(LONG)                   :: STATION_COUNT
+      INTEGER(LONG)                   :: NSEG_STATIONS
+      INTEGER(LONG)                   :: NSTATION_EXTRA
       INTEGER(LONG)                   :: TAPER_MODE
 
       REAL(DOUBLE)                    :: DIMS_A(10)
@@ -92,7 +99,11 @@
       REAL(DOUBLE)                    :: ROFSET
       REAL(DOUBLE)                    :: STIFFMOD
       REAL(DOUBLE)                    :: STATION_XL
+      REAL(DOUBLE)                    :: STATION_EXTRA(3)
       LOGICAL                         :: IS_PBEAMZ
+      LOGICAL                         :: DIM0A_SEEN
+      LOGICAL                         :: DIM1A_SEEN
+      LOGICAL                         :: PBEAMZ_B_SECTION_READ
 
 ! **********************************************************************************************************************************
       CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
@@ -149,6 +160,9 @@
       ENDDO
       NTOK = 0
       CARD_WORK = CARD
+      DIM0A_SEEN = .FALSE.
+      DIM1A_SEEN = .FALSE.
+      PBEAMZ_B_SECTION_READ = .FALSE.
 
 collect_tokens: DO
          READ(IN1,'(A)',IOSTAT=IOCHK) RAW_LINE
@@ -182,6 +196,10 @@ collect_tokens: DO
          DO I=1,NWORDS
             TOKEN_WORK = ADJUSTL(WORDS(I))
             IF (TOKEN_WORK(1:1) == ' ') CYCLE
+            IF (IS_PBEAMZ .AND. IS_PBEAMZ_DIM_LABEL(TOKEN_WORK)) THEN
+               CALL SET_PBEAMZ_DIM_LABEL_FLAGS ( TOKEN_WORK, DIM0A_SEEN, DIM1A_SEEN )
+               CYCLE
+            ENDIF
             IF (NTOK >= MAXTOK) THEN
                FATAL_ERR = FATAL_ERR + 1
                WRITE(ERR,1304) ID, MAXTOK
@@ -193,22 +211,45 @@ collect_tokens: DO
          ENDDO
       ENDDO collect_tokens
 
+      IF (IS_PBEAMZ .AND. (.NOT. DIM0A_SEEN)) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,A)') ' *ERROR  1316: PBEAMZ ENTRY DOES NOT DEFINE DIM0A'
+         WRITE(F06,'(A,A)') ' *ERROR  1316: PBEAMZ ENTRY DOES NOT DEFINE DIM0A'
+         RETURN
+      ENDIF
+
+      IF (IS_PBEAMZ .AND. DIM1A_SEEN .AND. (.NOT. DIM0A_SEEN)) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,A)') ' *ERROR  1316: PBEAMZ ENTRY HAS DIM1A BUT DOES NOT DEFINE DIM0A'
+         WRITE(F06,'(A,A)') ' *ERROR  1316: PBEAMZ ENTRY HAS DIM1A BUT DOES NOT DEFINE DIM0A'
+         RETURN
+      ENDIF
+
+      IF (IS_PBEAMZ) THEN
+         CALL PARSE_PBEAMZ_TOKENS ( NDIM_SEC, NTOK, TOKENS, DIMS_A, DIMS_B, NSM_A, NSM_B, DIMS_CUR, STIFFMOD, ROFSET, TAPER_MODE, &
+                                    AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, NSEG_STATIONS, NSTATION_EXTRA, STATION_EXTRA )
+         RETURN
+      ENDIF
+
       IF (NTOK < NDIM_SEC) THEN
          FATAL_ERR = FATAL_ERR + 1
-         WRITE(ERR,1305) ID
-         WRITE(F06,1305) ID
+         WRITE(ERR,'(A,A)') ' *ERROR  1305: PBEAMZ ID = ', ID
+         WRITE(F06,'(A,A)') ' *ERROR  1305: PBEAMZ ID = ', ID
          RETURN
       ENDIF
 
       DIMS_A = ZERO
       DIMS_B = ZERO
       DIMS_CUR = ZERO
+      STATION_EXTRA = ZERO
 
       DO I=1,NDIM_SEC
          READ(TOKENS(I),*,ERR=900) DIMS_A(I)
       ENDDO
       ITOK = NDIM_SEC + 1
       NSM_A = ZERO
+      NSEG_STATIONS = 10
+      NSTATION_EXTRA = 0
       IF (ITOK <= NTOK) THEN
          IF (LEN_TRIM(TOKENS(ITOK)) > 0) THEN
             IF ((.NOT. IS_SO_TOKEN(TOKENS(ITOK))) .AND. (.NOT. (IS_PBEAMZ .AND. IS_PBEAMZ_OPTION(TOKENS(ITOK))))) THEN
@@ -242,7 +283,7 @@ collect_tokens: DO
          PBEAM_XL(NPBEAM,STATION_COUNT) = 1.0D0
          CALL LOAD_SECTION_B ( SEC_TYPE, NDIM_SEC, DIMS_B, NSM_B )
          CALL STORE_PBEAMZ_META ( STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
-         IF (IS_PBEAMZ) CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET )
+         IF (IS_PBEAMZ) CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, NSEG_STATIONS, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET, NSTATION_EXTRA, STATION_EXTRA )
          RETURN
       ENDIF
 ! --- cbeam_pbeaml_constant end --- !
@@ -251,7 +292,28 @@ station_parse: DO WHILE (ITOK <= NTOK)
          SOFLAG = TOKENS(ITOK)
          IF (.NOT. IS_SO_TOKEN(SOFLAG)) THEN
             IF (IS_PBEAMZ .AND. IS_PBEAMZ_OPTION(SOFLAG)) THEN
-               CALL READ_PBEAMZ_OPTION ( SOFLAG, ITOK, STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+               CALL READ_PBEAMZ_OPTION ( SOFLAG, ITOK, STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, NSM_A, NSM_B, NSEG_STATIONS, NSTATION_EXTRA, STATION_EXTRA )
+               CYCLE station_parse
+            ENDIF
+            IF (IS_PBEAMZ .AND. DIM1A_SEEN .AND. (.NOT. PBEAMZ_B_SECTION_READ)) THEN
+               IF (ITOK + NDIM_SEC - 1 > NTOK) THEN
+                  FATAL_ERR = FATAL_ERR + 1
+                  WRITE(ERR,1307) ID
+                  WRITE(F06,1307) ID
+                  RETURN
+               ENDIF
+               DO I=1,NDIM_SEC
+                  READ(TOKENS(ITOK),*,ERR=900) DIMS_B(I)
+                  ITOK = ITOK + 1
+               ENDDO
+               NSM_B = NSM_A
+               IF (ITOK <= NTOK) THEN
+                  IF ((.NOT. IS_SO_TOKEN(TOKENS(ITOK))) .AND. (.NOT. (IS_PBEAMZ .AND. IS_PBEAMZ_OPTION(TOKENS(ITOK))))) THEN
+                     READ(TOKENS(ITOK),*,ERR=900) NSM_B
+                     ITOK = ITOK + 1
+                  ENDIF
+               ENDIF
+               PBEAMZ_B_SECTION_READ = .TRUE.
                CYCLE station_parse
             ENDIF
             FATAL_ERR = FATAL_ERR + 1
@@ -302,7 +364,7 @@ station_parse: DO WHILE (ITOK <= NTOK)
             PBEAM_XL(NPBEAM,2) = 1.0D0
             CALL LOAD_SECTION_B ( SEC_TYPE, NDIM_SEC, DIMS_B, NSM_B )
             CALL STORE_PBEAMZ_META ( STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
-            CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET )
+            CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, NSEG_STATIONS, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET, NSTATION_EXTRA, STATION_EXTRA )
             RETURN
          ENDIF
          FATAL_ERR = FATAL_ERR + 1
@@ -313,7 +375,7 @@ station_parse: DO WHILE (ITOK <= NTOK)
 
       CALL LOAD_SECTION_B ( SEC_TYPE, NDIM_SEC, DIMS_B, NSM_B )
       CALL STORE_PBEAMZ_META ( STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
-      IF (IS_PBEAMZ) CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET )
+      IF (IS_PBEAMZ) CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, NSEG_STATIONS, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET, NSTATION_EXTRA, STATION_EXTRA )
 
       RETURN
 
@@ -528,13 +590,64 @@ station_parse: DO WHILE (ITOK <= NTOK)
       RPBEAM(NPBEAM,53) = K2_MOD
       RPBEAM(NPBEAM,54) = J_MOD
 
+      CALL STORE_PBEAMZ_BEAM_PARAM_OVERRIDE ( 'BEAMAMO', BEAMAMO, BEAMAMO_PID, BEAMAMO_VAL, NBEAMAMO_PID, MBEAMAMO_PID, &
+                                              INT(PBEAM(NPBEAM,1), KIND=LONG), AREA_MOD )
+      CALL STORE_PBEAMZ_BEAM_PARAM_OVERRIDE ( 'BEAMV1MO', BEAMV1MO, BEAMV1MO_PID, BEAMV1MO_VAL, NBEAMV1MO_PID, MBEAMV1MO_PID, &
+                                              INT(PBEAM(NPBEAM,1), KIND=LONG), K1_MOD )
+      CALL STORE_PBEAMZ_BEAM_PARAM_OVERRIDE ( 'BEAMV2MO', BEAMV2MO, BEAMV2MO_PID, BEAMV2MO_VAL, NBEAMV2MO_PID, MBEAMV2MO_PID, &
+                                              INT(PBEAM(NPBEAM,1), KIND=LONG), K2_MOD )
+      CALL STORE_PBEAMZ_BEAM_PARAM_OVERRIDE ( 'BEAMM1MO', BEAMM1MO, BEAMM1MO_PID, BEAMM1MO_VAL, NBEAMM1MO_PID, MBEAMM1MO_PID, &
+                                              INT(PBEAM(NPBEAM,1), KIND=LONG), I1_MOD )
+      CALL STORE_PBEAMZ_BEAM_PARAM_OVERRIDE ( 'BEAMM2MO', BEAMM2MO, BEAMM2MO_PID, BEAMM2MO_VAL, NBEAMM2MO_PID, MBEAMM2MO_PID, &
+                                              INT(PBEAM(NPBEAM,1), KIND=LONG), I2_MOD )
+      CALL STORE_PBEAMZ_BEAM_PARAM_OVERRIDE ( 'BEAMTMO', BEAMTMO, BEAMTMO_PID, BEAMTMO_VAL, NBEAMTMO_PID, MBEAMTMO_PID, &
+                                              INT(PBEAM(NPBEAM,1), KIND=LONG), J_MOD )
+
       END SUBROUTINE STORE_PBEAMZ_META
 
 ! ##################################################################################################################################
 
-      SUBROUTINE FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET )
+      SUBROUTINE STORE_PBEAMZ_BEAM_PARAM_OVERRIDE ( PARNAM, GLOBAL_VAL, PID_ARR, VAL_ARR, NPID, MPID, PID_IN, VALUE_IN )
+
+      CHARACTER(LEN=*), INTENT(IN)    :: PARNAM
+      REAL(DOUBLE), INTENT(INOUT)     :: GLOBAL_VAL
+      INTEGER(LONG), INTENT(INOUT)    :: PID_ARR(:)
+      REAL(DOUBLE), INTENT(INOUT)     :: VAL_ARR(:)
+      INTEGER(LONG), INTENT(INOUT)    :: NPID
+      INTEGER(LONG), INTENT(IN)       :: MPID
+      INTEGER(LONG), INTENT(IN)       :: PID_IN
+      REAL(DOUBLE), INTENT(IN)        :: VALUE_IN
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: ISLOT
+
+      ISLOT = 0
+      DO I=1,NPID
+         IF (PID_ARR(I) == PID_IN) THEN
+            ISLOT = I
+            EXIT
+         ENDIF
+      ENDDO
+
+      IF (ISLOT == 0) THEN
+         IF (NPID < MIN(MPID,SIZE(PID_ARR))) THEN
+            NPID = NPID + 1
+            ISLOT = NPID
+         ENDIF
+      ENDIF
+
+      IF (ISLOT > 0) THEN
+         PID_ARR(ISLOT) = PID_IN
+         VAL_ARR(ISLOT) = VALUE_IN
+      ENDIF
+
+      END SUBROUTINE STORE_PBEAMZ_BEAM_PARAM_OVERRIDE
+
+! ##################################################################################################################################
+
+      SUBROUTINE FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, NSEG_STATIONS, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET, NSTATION_EXTRA, STATION_EXTRA )
 
       INTEGER(LONG), INTENT(IN)    :: TAPER_MODE
+      INTEGER(LONG), INTENT(IN)    :: NSEG_STATIONS
       REAL(DOUBLE), INTENT(IN)     :: AREA_MOD
       REAL(DOUBLE), INTENT(IN)     :: I1_MOD
       REAL(DOUBLE), INTENT(IN)     :: I2_MOD
@@ -542,52 +655,22 @@ station_parse: DO WHILE (ITOK <= NTOK)
       REAL(DOUBLE), INTENT(IN)     :: K2_MOD
       REAL(DOUBLE), INTENT(IN)     :: J_MOD
       REAL(DOUBLE), INTENT(IN)     :: ROFSET
+      INTEGER(LONG), INTENT(IN)    :: NSTATION_EXTRA
+      REAL(DOUBLE), INTENT(IN)     :: STATION_EXTRA(3)
 
       IF (.NOT. IS_PBEAMZ) RETURN
 
       IF (PBEAM_NSTATIONS(NPBEAM) <= 2) THEN
-         CALL EXPAND_PBEAMZ_DEFAULT_STATIONS ( TAPER_MODE )
+         CALL EXPAND_PBEAMZ_DEFAULT_STATIONS ( TAPER_MODE, NSEG_STATIONS )
       ENDIF
 
-      CALL APPLY_PBEAMZ_INTERNAL_MODIFIERS ( AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+      IF (NSTATION_EXTRA > 0) THEN
+         CALL INSERT_PBEAMZ_EXTRA_STATIONS ( NSTATION_EXTRA, STATION_EXTRA )
+      ENDIF
+
       CALL REFRESH_PBEAMZ_RPBEAM_SNAPSHOTS ()
 
-      RPBEAM(NPBEAM,46) = ONE
-      RPBEAM(NPBEAM,47) = ROFSET
-      RPBEAM(NPBEAM,48) = ZERO
-      RPBEAM(NPBEAM,49) = ONE
-      RPBEAM(NPBEAM,50) = ONE
-      RPBEAM(NPBEAM,51) = ONE
-      RPBEAM(NPBEAM,52) = ONE
-      RPBEAM(NPBEAM,53) = ONE
-      RPBEAM(NPBEAM,54) = ONE
-
       END SUBROUTINE FINALIZE_PBEAMZ_GENERATED_PBEAM
-
-! ##################################################################################################################################
-
-      SUBROUTINE APPLY_PBEAMZ_INTERNAL_MODIFIERS ( AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
-
-      REAL(DOUBLE), INTENT(IN)     :: AREA_MOD
-      REAL(DOUBLE), INTENT(IN)     :: I1_MOD
-      REAL(DOUBLE), INTENT(IN)     :: I2_MOD
-      REAL(DOUBLE), INTENT(IN)     :: K1_MOD
-      REAL(DOUBLE), INTENT(IN)     :: K2_MOD
-      REAL(DOUBLE), INTENT(IN)     :: J_MOD
-
-      INTEGER(LONG)                :: ISTA
-
-      DO ISTA=1,PBEAM_NSTATIONS(NPBEAM)
-         PBEAM_RPROPS(NPBEAM,ISTA,1) = PBEAM_RPROPS(NPBEAM,ISTA,1)*AREA_MOD
-         PBEAM_RPROPS(NPBEAM,ISTA,2) = PBEAM_RPROPS(NPBEAM,ISTA,2)*I1_MOD
-         PBEAM_RPROPS(NPBEAM,ISTA,3) = PBEAM_RPROPS(NPBEAM,ISTA,3)*I2_MOD
-         PBEAM_RPROPS(NPBEAM,ISTA,5) = PBEAM_RPROPS(NPBEAM,ISTA,5)*J_MOD
-      ENDDO
-
-      RPBEAM(NPBEAM,30) = RPBEAM(NPBEAM,30)*K1_MOD
-      RPBEAM(NPBEAM,31) = RPBEAM(NPBEAM,31)*K2_MOD
-
-      END SUBROUTINE APPLY_PBEAMZ_INTERNAL_MODIFIERS
 
 ! ##################################################################################################################################
 
@@ -616,11 +699,10 @@ station_parse: DO WHILE (ITOK <= NTOK)
 
 ! ##################################################################################################################################
 
-      SUBROUTINE EXPAND_PBEAMZ_DEFAULT_STATIONS ( TAPER_MODE )
+      SUBROUTINE EXPAND_PBEAMZ_DEFAULT_STATIONS ( TAPER_MODE, NSEG_DEFAULT )
 
       INTEGER(LONG), INTENT(IN)    :: TAPER_MODE
-
-      INTEGER(LONG), PARAMETER     :: NSEG_DEFAULT = 10
+      INTEGER(LONG), INTENT(IN)    :: NSEG_DEFAULT
       INTEGER(LONG)                :: ISTA
       INTEGER(LONG)                :: TAPER_EXP
       REAL(DOUBLE)                 :: FRAC
@@ -629,6 +711,7 @@ station_parse: DO WHILE (ITOK <= NTOK)
 
       IF (.NOT. IS_PBEAMZ) RETURN
       IF (PBEAM_NSTATIONS(NPBEAM) > 2) RETURN
+      IF (NSEG_DEFAULT <= 0) RETURN
 
       A1   = PBEAM_RPROPS(NPBEAM,1,1)
       I1A  = PBEAM_RPROPS(NPBEAM,1,2)
@@ -670,6 +753,81 @@ station_parse: DO WHILE (ITOK <= NTOK)
       RPBEAM(NPBEAM,21) = PBEAM_RPROPS(NPBEAM,NSEG_DEFAULT+1,6)
 
       END SUBROUTINE EXPAND_PBEAMZ_DEFAULT_STATIONS
+
+! ##################################################################################################################################
+
+      SUBROUTINE INSERT_PBEAMZ_EXTRA_STATIONS ( NSTATION_EXTRA, STATION_EXTRA )
+
+      INTEGER(LONG), INTENT(IN)    :: NSTATION_EXTRA
+      REAL(DOUBLE), INTENT(IN)     :: STATION_EXTRA(3)
+
+      INTEGER(LONG), PARAMETER     :: NEXTRA_MAX = 3
+      INTEGER(LONG)                :: I, J, K, NSTA_OLD, NSTA_NEW, INSERT_POS, NEXTRA, IDX(3)
+      REAL(DOUBLE)                 :: FRAC, EPSF, F1, F2, W, V1, V2
+      REAL(DOUBLE)                 :: ROW(6)
+
+      IF (.NOT. IS_PBEAMZ) RETURN
+      NEXTRA = MAX(0, MIN(NEXTRA_MAX, NSTATION_EXTRA))
+      IF (NEXTRA <= 0) RETURN
+
+      IDX = (/1, 2, 3/)
+      DO I=1,NEXTRA-1
+         DO J=I+1,NEXTRA
+            IF (STATION_EXTRA(IDX(J)) < STATION_EXTRA(IDX(I))) THEN
+               K = IDX(I)
+               IDX(I) = IDX(J)
+               IDX(J) = K
+            ENDIF
+         ENDDO
+      ENDDO
+
+      EPSF = 1.0D-10
+      DO I=1,NEXTRA
+         FRAC = STATION_EXTRA(IDX(I))
+         IF ((FRAC <= ZERO) .OR. (FRAC >= ONE)) CYCLE
+
+         NSTA_OLD = PBEAM_NSTATIONS(NPBEAM)
+         INSERT_POS = 1
+         DO WHILE ((INSERT_POS <= NSTA_OLD) .AND. (PBEAM_XL(NPBEAM,INSERT_POS) < FRAC))
+            INSERT_POS = INSERT_POS + 1
+         ENDDO
+
+         IF ((INSERT_POS <= NSTA_OLD) .AND. (ABS(PBEAM_XL(NPBEAM,INSERT_POS) - FRAC) <= EPSF)) CYCLE
+
+         IF (NSTA_OLD >= MPBEAM_STATIONS) THEN
+            WARN_ERR = WARN_ERR + 1
+            WRITE(ERR,'(A,A,A)') ' *WARNING 1197: PBEAMZ ID = ', ID, ' cannot add extra stations because the station buffer is full'
+            WRITE(F06,'(A,A,A)') ' *WARNING 1197: PBEAMZ ID = ', ID, ' cannot add extra stations because the station buffer is full'
+            RETURN
+         ENDIF
+
+         IF (INSERT_POS > NSTA_OLD) CYCLE
+
+         F1 = PBEAM_XL(NPBEAM,MAX(1,INSERT_POS-1))
+         F2 = PBEAM_XL(NPBEAM,INSERT_POS)
+         IF (ABS(F2 - F1) <= EPSF) CYCLE
+         W = (FRAC - F1)/(F2 - F1)
+
+         DO J=NSTA_OLD,INSERT_POS,-1
+            PBEAM_XL(NPBEAM,J+1) = PBEAM_XL(NPBEAM,J)
+            DO K=1,6
+               PBEAM_RPROPS(NPBEAM,J+1,K) = PBEAM_RPROPS(NPBEAM,J,K)
+            ENDDO
+         ENDDO
+
+         PBEAM_XL(NPBEAM,INSERT_POS) = FRAC
+         DO K=1,6
+            V1 = PBEAM_RPROPS(NPBEAM,INSERT_POS-1,K)
+            V2 = PBEAM_RPROPS(NPBEAM,INSERT_POS+1,K)
+            ROW(K) = (ONE - W)*V1 + W*V2
+         ENDDO
+         DO K=1,6
+            PBEAM_RPROPS(NPBEAM,INSERT_POS,K) = ROW(K)
+         ENDDO
+         PBEAM_NSTATIONS(NPBEAM) = NSTA_OLD + 1
+      ENDDO
+
+      END SUBROUTINE INSERT_PBEAMZ_EXTRA_STATIONS
 
 ! ##################################################################################################################################
 
@@ -726,9 +884,9 @@ station_parse: DO WHILE (ITOK <= NTOK)
       CALL TO_UPPER ( TOKEN_UP )
 
       IF ((TRIM(TOKEN_UP) == 'STIFFMOD') .OR. (TRIM(TOKEN_UP) == 'ROFSET') .OR. (TRIM(TOKEN_UP) == 'RIOFFSET') .OR. (TRIM(TOKEN_UP) == 'TAPER') .OR. &
-          (TRIM(TOKEN_UP) == 'END') .OR. &
+          (TRIM(TOKEN_UP) == 'NSM') .OR. (TRIM(TOKEN_UP) == 'END') .OR. &
           (TRIM(TOKEN_UP) == 'AREAMOD') .OR. (TRIM(TOKEN_UP) == 'I1MOD') .OR. (TRIM(TOKEN_UP) == 'I2MOD') .OR. (TRIM(TOKEN_UP) == 'K1MOD') .OR. &
-          (TRIM(TOKEN_UP) == 'K2MOD') .OR. (TRIM(TOKEN_UP) == 'JMOD')) THEN
+          (TRIM(TOKEN_UP) == 'K2MOD') .OR. (TRIM(TOKEN_UP) == 'JMOD') .OR. (TRIM(TOKEN_UP) == 'STATIONS')) THEN
          IS_PBEAMZ_OPTION = .TRUE.
       ELSE
          IS_PBEAMZ_OPTION = .FALSE.
@@ -738,7 +896,180 @@ station_parse: DO WHILE (ITOK <= NTOK)
 
 ! ##################################################################################################################################
 
-      SUBROUTINE READ_PBEAMZ_OPTION ( OPTION_TOKEN, ITOK, STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+      LOGICAL FUNCTION IS_PBEAMZ_DIM_LABEL ( TOKEN )
+
+      CHARACTER(LEN=*), INTENT(IN) :: TOKEN
+      CHARACTER(LEN=JCARD_LEN)     :: TOKEN_UP
+
+      TOKEN_UP = TOKEN
+      CALL TO_UPPER ( TOKEN_UP )
+
+      IF (LEN_TRIM(TOKEN_UP) == 5) THEN
+         IF ((TOKEN_UP(1:3) == 'DIM') .AND. ((TOKEN_UP(4:4) == '0') .OR. (TOKEN_UP(4:4) == '1'))) THEN
+            IF (((TOKEN_UP(5:5) >= 'A') .AND. (TOKEN_UP(5:5) <= 'Z'))) THEN
+               IS_PBEAMZ_DIM_LABEL = .TRUE.
+               RETURN
+            ENDIF
+         ENDIF
+      ENDIF
+
+      IS_PBEAMZ_DIM_LABEL = .FALSE.
+
+      END FUNCTION IS_PBEAMZ_DIM_LABEL
+
+! ##################################################################################################################################
+
+      SUBROUTINE SET_PBEAMZ_DIM_LABEL_FLAGS ( TOKEN, DIM0A_SEEN, DIM1A_SEEN )
+
+      CHARACTER(LEN=*), INTENT(IN) :: TOKEN
+      LOGICAL, INTENT(INOUT)       :: DIM0A_SEEN
+      LOGICAL, INTENT(INOUT)       :: DIM1A_SEEN
+      CHARACTER(LEN=JCARD_LEN)     :: TOKEN_UP
+
+      TOKEN_UP = TOKEN
+      CALL TO_UPPER ( TOKEN_UP )
+      IF (TOKEN_UP(1:5) == 'DIM0A') THEN
+         DIM0A_SEEN = .TRUE.
+      ELSE IF (TOKEN_UP(1:5) == 'DIM1A') THEN
+         DIM1A_SEEN = .TRUE.
+      ENDIF
+
+      END SUBROUTINE SET_PBEAMZ_DIM_LABEL_FLAGS
+
+! ##################################################################################################################################
+
+      SUBROUTINE PARSE_PBEAMZ_TOKENS ( NDIM_SEC, NTOK, TOKENS, DIMS_A, DIMS_B, NSM_A, NSM_B, DIMS_CUR, STIFFMOD, ROFSET, TAPER_MODE, &
+                                       AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, NSEG_STATIONS, NSTATION_EXTRA, STATION_EXTRA )
+
+      INTEGER(LONG), INTENT(IN)       :: NDIM_SEC
+      INTEGER(LONG), INTENT(IN)       :: NTOK
+      CHARACTER(LEN=JCARD_LEN), INTENT(IN) :: TOKENS(MAXTOK)
+      REAL(DOUBLE), INTENT(INOUT)     :: DIMS_A(10)
+      REAL(DOUBLE), INTENT(INOUT)     :: DIMS_B(10)
+      REAL(DOUBLE), INTENT(INOUT)     :: DIMS_CUR(10)
+      REAL(DOUBLE), INTENT(INOUT)     :: NSM_A
+      REAL(DOUBLE), INTENT(INOUT)     :: NSM_B
+      REAL(DOUBLE), INTENT(INOUT)     :: STIFFMOD
+      REAL(DOUBLE), INTENT(INOUT)     :: ROFSET
+      INTEGER(LONG), INTENT(INOUT)    :: TAPER_MODE
+      REAL(DOUBLE), INTENT(INOUT)     :: AREA_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: I1_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: I2_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: K1_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: K2_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: J_MOD
+      INTEGER(LONG), INTENT(INOUT)    :: NSEG_STATIONS
+      INTEGER(LONG), INTENT(INOUT)    :: NSTATION_EXTRA
+      REAL(DOUBLE), INTENT(INOUT)     :: STATION_EXTRA(3)
+
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: ITOK_LOC
+      LOGICAL                         :: HAVE_END_SECTION
+
+      IF (NTOK < NDIM_SEC) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,A)') ' *ERROR  1305: PBEAMZ ID = ', ID
+         WRITE(F06,'(A,A)') ' *ERROR  1305: PBEAMZ ID = ', ID
+         RETURN
+      ENDIF
+
+      DIMS_A = ZERO
+      DIMS_B = ZERO
+      DIMS_CUR = ZERO
+      STATION_EXTRA = ZERO
+      NSM_A = ZERO
+      NSM_B = ZERO
+      STIFFMOD   = ONE
+      ROFSET     = ZERO
+      TAPER_MODE = 0
+      AREA_MOD   = ONE
+      I1_MOD     = ONE
+      I2_MOD     = ONE
+      K1_MOD     = ONE
+      K2_MOD     = ONE
+      J_MOD      = ONE
+      NSEG_STATIONS = 10
+      NSTATION_EXTRA = 0
+      HAVE_END_SECTION = .FALSE.
+
+      DO I=1,NDIM_SEC
+         READ(TOKENS(I),*,ERR=900) DIMS_A(I)
+      ENDDO
+      ITOK_LOC = NDIM_SEC + 1
+      IF (ITOK_LOC <= NTOK) THEN
+         IF (.NOT. IS_PBEAMZ_OPTION(TOKENS(ITOK_LOC))) THEN
+            READ(TOKENS(ITOK_LOC),*,ERR=900) NSM_A
+            ITOK_LOC = ITOK_LOC + 1
+         ENDIF
+      ENDIF
+
+      CALL LOAD_SECTION_A ( SEC_TYPE, NDIM_SEC, DIMS_A, NSM_A )
+      DIMS_B = DIMS_A
+      NSM_B  = NSM_A
+
+      DO WHILE (ITOK_LOC <= NTOK)
+         IF (IS_PBEAMZ_OPTION(TOKENS(ITOK_LOC))) THEN
+            CALL READ_PBEAMZ_OPTION ( TOKENS(ITOK_LOC), ITOK_LOC, STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, &
+                                      J_MOD, NSM_A, NSM_B, NSEG_STATIONS, NSTATION_EXTRA, STATION_EXTRA )
+            CYCLE
+         ENDIF
+
+         IF ((TAPER_MODE > 0) .AND. (.NOT. HAVE_END_SECTION)) THEN
+            IF (ITOK_LOC + NDIM_SEC - 1 > NTOK) THEN
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,'(A,A)') ' *ERROR  1307: PBEAMZ ID = ', ID
+               WRITE(F06,'(A,A)') ' *ERROR  1307: PBEAMZ ID = ', ID
+               RETURN
+            ENDIF
+            DO I=1,NDIM_SEC
+               READ(TOKENS(ITOK_LOC),*,ERR=900) DIMS_B(I)
+               ITOK_LOC = ITOK_LOC + 1
+            ENDDO
+            NSM_B = NSM_A
+            IF (ITOK_LOC <= NTOK) THEN
+               IF (.NOT. IS_PBEAMZ_OPTION(TOKENS(ITOK_LOC))) THEN
+                  READ(TOKENS(ITOK_LOC),*,ERR=900) NSM_B
+                  ITOK_LOC = ITOK_LOC + 1
+               ENDIF
+            ENDIF
+            HAVE_END_SECTION = .TRUE.
+            CYCLE
+         ENDIF
+
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,A,A)') ' *ERROR  1317: PBEAMZ ID = ', ID, ' HAS UNEXPECTED RAW TOKEN OUTSIDE DIM0A/DIM1A OR OPTION BLOCKS'
+         WRITE(F06,'(A,A,A)') ' *ERROR  1317: PBEAMZ ID = ', ID, ' HAS UNEXPECTED RAW TOKEN OUTSIDE DIM0A/DIM1A OR OPTION BLOCKS'
+         RETURN
+      ENDDO
+
+      IF ((TAPER_MODE > 0) .AND. (.NOT. HAVE_END_SECTION)) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,A)') ' *ERROR  1318: PBEAMZ ENTRY DEFINES TAPER BUT DOES NOT SUPPLY A DIM1A SECTION FOR ID = ', ID
+         WRITE(F06,'(A,A)') ' *ERROR  1318: PBEAMZ ENTRY DEFINES TAPER BUT DOES NOT SUPPLY A DIM1A SECTION FOR ID = ', ID
+         RETURN
+      ENDIF
+
+      PBEAM_NSTATIONS(NPBEAM) = 2
+      PBEAM_XL(NPBEAM,1) = ZERO
+      PBEAM_XL(NPBEAM,2) = ONE
+      CALL LOAD_SECTION_B ( SEC_TYPE, NDIM_SEC, DIMS_B, NSM_B )
+      CALL STORE_PBEAMZ_META ( STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD )
+      CALL FINALIZE_PBEAMZ_GENERATED_PBEAM ( TAPER_MODE, NSEG_STATIONS, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, ROFSET, &
+                                             NSTATION_EXTRA, STATION_EXTRA )
+
+      RETURN
+
+  900 CONTINUE
+      FATAL_ERR = FATAL_ERR + 1
+      WRITE(ERR,'(A,A)') ' *ERROR  1309: PBEAMZ ID = ', ID
+      WRITE(F06,'(A,A)') ' *ERROR  1309: PBEAMZ ID = ', ID
+      RETURN
+
+      END SUBROUTINE PARSE_PBEAMZ_TOKENS
+
+! ##################################################################################################################################
+
+      SUBROUTINE READ_PBEAMZ_OPTION ( OPTION_TOKEN, ITOK, STIFFMOD, ROFSET, TAPER_MODE, AREA_MOD, I1_MOD, I2_MOD, K1_MOD, K2_MOD, J_MOD, NSM_A, NSM_B, NSEG_STATIONS, NSTATION_EXTRA, STATION_EXTRA )
 
       CHARACTER(LEN=*), INTENT(IN)    :: OPTION_TOKEN
       INTEGER(LONG), INTENT(INOUT)    :: ITOK
@@ -751,6 +1082,11 @@ station_parse: DO WHILE (ITOK <= NTOK)
       REAL(DOUBLE), INTENT(INOUT)     :: K1_MOD
       REAL(DOUBLE), INTENT(INOUT)     :: K2_MOD
       REAL(DOUBLE), INTENT(INOUT)     :: J_MOD
+      REAL(DOUBLE), INTENT(INOUT)     :: NSM_A
+      REAL(DOUBLE), INTENT(INOUT)     :: NSM_B
+      INTEGER(LONG), INTENT(INOUT)    :: NSEG_STATIONS
+      INTEGER(LONG), INTENT(INOUT)    :: NSTATION_EXTRA
+      REAL(DOUBLE), INTENT(INOUT)     :: STATION_EXTRA(3)
 
       CHARACTER(LEN=JCARD_LEN)        :: OPTION_UP
       CHARACTER(LEN=JCARD_LEN)        :: VALUE_TOKEN
@@ -835,6 +1171,76 @@ station_parse: DO WHILE (ITOK <= NTOK)
             WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
             RETURN
          ENDIF
+         ITOK = ITOK + 1
+
+      ELSE IF (TRIM(OPTION_UP) == 'NSM') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         READ(TOKENS(ITOK),*,IOSTAT=IOCHK) NSM_A
+         IF (IOCHK /= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+            RETURN
+         ENDIF
+         NSM_B = NSM_A
+
+         IF (ITOK < NTOK) THEN
+            NEXT_TOKEN = TOKENS(ITOK+1)
+            IF (.NOT. IS_PBEAMZ_OPTION ( NEXT_TOKEN )) THEN
+               ITOK = ITOK + 1
+               READ(TOKENS(ITOK),*,IOSTAT=IOCHK) NSM_B
+               IF (IOCHK /= 0) THEN
+                  FATAL_ERR = FATAL_ERR + 1
+                  WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+                  WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+                  RETURN
+               ENDIF
+            ENDIF
+         ENDIF
+         ITOK = ITOK + 1
+
+      ELSE IF (TRIM(OPTION_UP) == 'STATIONS') THEN
+         IF (ITOK >= NTOK) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            WRITE(F06,'(A,A,A,A,A)') ' *ERROR  1311: ', TRIM(CARD_NAME), ' ENTRY HAS OPTION "', TRIM(OPTION_UP), '" WITHOUT A FOLLOWING VALUE'
+            RETURN
+         ENDIF
+         ITOK = ITOK + 1
+         READ(TOKENS(ITOK),*,IOSTAT=IOCHK) NSEG_STATIONS
+         IF (IOCHK /= 0) THEN
+            WARN_ERR = WARN_ERR + 1
+            NSEG_STATIONS = 10
+            WRITE(ERR,'(A,A,A,A,A)') ' *WARNING 1315: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID STATIONS COUNT "', TRIM(TOKENS(ITOK)), '" - DEFAULTING TO 10'
+            WRITE(F06,'(A,A,A,A,A)') ' *WARNING 1315: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID STATIONS COUNT "', TRIM(TOKENS(ITOK)), '" - DEFAULTING TO 10'
+         ELSE IF (NSEG_STATIONS <= 0) THEN
+            WARN_ERR = WARN_ERR + 1
+            NSEG_STATIONS = 10
+            WRITE(ERR,'(A,A,A,I0)') ' *WARNING 1315: ', TRIM(CARD_NAME), ' ENTRY HAS STATIONS COUNT OUT OF RANGE, DEFAULTING TO 10. VALUE = ', NSEG_STATIONS
+            WRITE(F06,'(A,A,A,I0)') ' *WARNING 1315: ', TRIM(CARD_NAME), ' ENTRY HAS STATIONS COUNT OUT OF RANGE, DEFAULTING TO 10. VALUE = ', NSEG_STATIONS
+         ENDIF
+         STATION_EXTRA = ZERO
+         NSTATION_EXTRA = 0
+         DO JVAL=1,3
+            IF (ITOK >= NTOK) EXIT
+            NEXT_TOKEN = TOKENS(ITOK+1)
+            IF (IS_PBEAMZ_OPTION ( NEXT_TOKEN )) EXIT
+            ITOK = ITOK + 1
+            READ(TOKENS(ITOK),*,IOSTAT=IOCHK) STATION_EXTRA(JVAL)
+            IF (IOCHK /= 0) THEN
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+               WRITE(F06,'(A,A,A,A,A,A,A)') ' *ERROR  1312: ', TRIM(CARD_NAME), ' ENTRY HAS INVALID VALUE "', TRIM(TOKENS(ITOK)), '" FOR OPTION "', TRIM(OPTION_UP), '"'
+               RETURN
+            ENDIF
+            NSTATION_EXTRA = NSTATION_EXTRA + 1
+         ENDDO
          ITOK = ITOK + 1
 
       ELSE IF (TRIM(OPTION_UP) == 'AREAMOD') THEN
@@ -1326,12 +1732,11 @@ station_parse: DO WHILE (ITOK <= NTOK)
       I12 = ZERO
       A = DMAX1(H,B)/2.D0
       BT = DMIN1(H,B)/2.D0
-      IF (DABS(A-BT) < 1.D-10) THEN
-         JTOR = 2.25D0*A**4
-      ELSE
-         RATIO = BT/A
-         JTOR = A*BT**3*(16.D0/3.D0 - 3.36D0*RATIO*(1.D0 - RATIO**4/12.D0))
-      ENDIF
+      ! Use the same closed-form rectangle expression for the full aspect-ratio range,
+      ! including squares, so generated BAR torsion constants stay consistent with the
+      ! explicit PBEAM station values used in validation decks.
+      RATIO = BT/A
+      JTOR = A*BT**3*(16.D0/3.D0 - 3.36D0*RATIO*(1.D0 - RATIO**4/12.D0))
       K1 = 5.D0/6.D0 ; K2 = 5.D0/6.D0
       STRE = (/ 0.5D0*B, 0.5D0*H, -0.5D0*B, 0.5D0*H, -0.5D0*B, -0.5D0*H, 0.5D0*B, -0.5D0*H /)
       END SUBROUTINE CALC_BAR_SECTION
@@ -1491,3 +1896,4 @@ station_parse: DO WHILE (ITOK <= NTOK)
 ! ##################################################################################################################################
 
       END SUBROUTINE BD_PBEAML
+

@@ -216,15 +216,15 @@ headr:IF (IHDR == 'Y') THEN
                 ELSE
                    WRITE(F06,301) FILL(1:39)
                 ENDIF
-                WRITE(F06,401) FILL(1:45), ONAME
+                WRITE(F06,401) FILL(1:29), ONAME
 
              ELSE IF (TYPE(1:4) == 'BEAM') THEN
                 IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                    WRITE(F06,302) FILL(1:33)
                 ELSE
-                   WRITE(F06,301) FILL(1:39)
+                   WRITE(F06,301) FILL(1:25)
                 ENDIF
-                WRITE(F06,401) FILL(1:45), ONAME
+                WRITE(F06,401) FILL(1:30), ONAME
 
              ELSE IF (TYPE(1:4) == 'BUSH') THEN
                 IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
@@ -447,8 +447,8 @@ headr:IF (IHDR == 'Y') THEN
 
          IF (WRITE_F06)  THEN
             WRITE(F06,'(A,/,A,/,A)') '                                 F O R C E S   I N   B E A M   E L E M E N T S        ( C B E A M )', &
-                                      '         ELEMENT-ID        - BENDING MOMENTS -            - WEB  SHEARS -           AXIAL       TOTAL        WARPING', &
-                                      '    GRID   STAT X/L       PLANE 1       PLANE 2        PLANE 1       PLANE 2        FORCE       TORQUE       TORQUE'
+                                      '         ELEMENT-ID      - BENDING MOMENTS -          - WEB  SHEARS -           AXIAL       TOTAL        WARPING', &
+                                      '    GRID   STAT X/L     PLANE 1       PLANE 2      PLANE 1       PLANE 2        FORCE       TORQUE       TORQUE'
             I = 1
             DO WHILE (I <= NUM)
                IBEG = I

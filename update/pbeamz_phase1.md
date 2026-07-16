@@ -4,14 +4,20 @@
 
 - `PBEAMZ` is treated as a `PBEAML`-based beam property with extra metadata and beam-station expansion.
 - `LOADB` and `LOADB0` now count `PBEAMZ` as a beam property entry.
+- The canonical compatibility reference remains:
+  - `prob_001_inclined_frame_pbeaml.dat`
+  - `prob_001_inclined_frame_pbeaml_msc.dat`
+- `PBEAML` syntax must stay valid and unchanged; `PBEAMZ` should look like it first, then add wizard keywords after the section data.
 
 ## Stored metadata
 
 `BD_PBEAML` recognizes the optional `PBEAMZ` tokens:
 
+- `NSM`
 - `STIFFMOD`
 - `RIOFFSET` / legacy `ROFSET`
 - `TAPER`
+- `STATIONS`
 - `AREAMOD`
 - `I1MOD`
 - `I2MOD`
@@ -20,6 +26,38 @@
 - `JMOD`
 
 The extra metadata is stored in unused `RPBEAM` columns `46:54`.
+
+## Syntax shape
+
+`PBEAMZ` follows the same section-body style as `PBEAML`, then adds a small wizard tail:
+
+- the non-tapered form uses only the first section block
+- the section dimensions are still written as raw values on the continuation line(s), just like `PBEAML`
+- continuation labels such as `DIM0A` and `DIM1A` are accepted as ignored markers on those lines
+- the section values are not written as `x/L` markers
+- if taper is active, `TAPER` appears before the end-B section data
+- the end-B section block is only present when taper is active
+- `NSM` is optional and applies to mass/selfweight
+- `STIFFMOD` is optional and applies to stiffness only
+- `RIOFFSET` / `ROFSET` is optional and applies rigid offsets
+- `STATIONS` is optional and uses the form `STATIONS,<base_segments>,<extra1>,<extra2>,<extra3>`
+- the first value after `STATIONS` is the base segment count
+- the optional extra values are extra breakpoints in `x/L` and are inserted into the beam station list
+- `END` is mandatory for `PBEAMZ`
+
+Suggested compact form:
+
+```text
+PBEAMZ, PID, MID, GROUP, TYPE/NAME
++ , DIM0A, <section A raw dimensions ...>
++ , TAPER, Tapertype
++ , DIM1A, <section B raw dimensions ...>    ! only when tapered
++ , NSM, realNSM1, realNSM2
++ , STIFFMOD, AREAmod, Imajmod, Iminmod, Ashear1mod, Ashear2mod, Torsionmod
++ , STATIONS, 10, 0.33, 0.66
++ , RIOFFSET, offset_i, offset_j
++ , END
+```
 
 ## Stationing behavior
 
@@ -53,8 +91,10 @@ The extra metadata is stored in unused `RPBEAM` columns `46:54`.
 
 - `PBEAML` baseline for `rob_001_inclined_frame_pbeaml.dat` now runs through `END OF JOB`.
 - `PBEAMZ` nominal baseline `rob_001_inclined_frame_pbeamz_nomod.dat` also runs normally.
+- `PBEAMZ` smoke deck with explicit station control `prob_001_inclined_frame_pbeamz_stations.dat` also runs normally.
 - `PBEAMZ` metadata is stored in `RPBEAM(46:54)` and is visible in `ELMDAT1` / `BEAM`.
 - `PBEAMZ` default station expansion currently uses 11 stations when only end stations are supplied.
+- `PBEAMZ` input syntax keeps the `DIM0A` continuation label in the deck and allows `STATIONS,10,0.33,0.66` as an optional station-control tail.
 
 ## Decks in reference_msc/cbeam
 
@@ -66,4 +106,18 @@ The extra metadata is stored in unused `RPBEAM` columns `46:54`.
 
 - Compare `PBEAMZ` nominal vs `PBEAML` baseline first.
 - Then compare `PBEAMZ` modifier deck with `AREAMOD=1000.0` and `K1MOD/K2MOD=0.0`.
+- Recheck `prob_001a` against the same syntax rule once the parser/doc are aligned.
 - If those are stable, add the axial-gravity / concentrated-load cases next.
+
+## `prob_001_inclined_frame` comparison note
+
+- `prob_001_inclined_frame_pbeamz_mod.dat` now matches `prob_001_inclined_frame.dat` on the parts that should match structurally:
+  - subcase 2 to 7 displacements
+  - SPC forces
+  - grid-point force balance
+  - beam engineering forces
+- The remaining mismatch against `prob_001_inclined_frame.F06` is in the beam stress table, and that mismatch is expected for the current semantics:
+  - the legacy reference `PBEAM` deck uses a fictitious geometric area (`A=144000`) to emulate an axial stiffness multiplier
+  - `PBEAMZ` keeps the physical section geometry (`12 x 12`) and applies the multiplier only to stiffness
+  - therefore local stress recovery is not numerically identical to the legacy fake-geometry deck even when the global response is matched
+- This means `PBEAMZ` should be validated against the legacy deck primarily on response quantities, not on local stress magnitudes from the fake-area workaround deck.

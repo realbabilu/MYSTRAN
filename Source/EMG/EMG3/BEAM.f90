@@ -193,7 +193,10 @@
          ENDDO
       ENDIF
       USE_STATIONED_KE = (NSTA > 1) .AND. HAS_NONUNIFORM_STATIONS
-      IF ((CBEAM_ACTIVE_TAPER_MODE > 0) .AND. (NSTA >= 2)) THEN
+      ! Only use the abstract 2-end PBEAMZ taper path when the active property still
+      ! consists of just start/end sections. Once PBEAMZ has already been expanded into
+      ! explicit stations, route it through the same stationed beam path as PBEAM.
+      IF ((CBEAM_ACTIVE_TAPER_MODE > 0) .AND. (NSTA == 2)) THEN
          CALL BUILD_PBEAMZ_TAPERED_BEAM_KE ( L, E, AREA_REF, I1_REF, I2_REF, I12_REF, JTOR_REF )
       ELSE IF (USE_STATIONED_KE) THEN
          CALL BUILD_TAPERED_BEAM_KE ( L, E, AREA_REF, I1_REF, I2_REF, I12_REF, JTOR_REF )
@@ -1853,11 +1856,9 @@
       ELSE
          I2_OUT = (ONE - FRAC)*I2A + FRAC*I2B
       ENDIF
-      IF ((J1 > ZERO) .AND. (J2 > ZERO)) THEN
-         JTOR_OUT = ((J1**INVN)*(ONE - FRAC) + (J2**INVN)*FRAC)**DBLE(NEXP)
-      ELSE
-         JTOR_OUT = (ONE - FRAC)*J1 + FRAC*J2
-      ENDIF
+      ! PBEAMZ requirement: torsion J varies linearly even when bending inertia
+      ! uses parabolic/cubic interpolation.
+      JTOR_OUT = (ONE - FRAC)*J1 + FRAC*J2
       I12_OUT = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(1,4) + FRAC*CBEAM_ACTIVE_RPROPS(NSTA,4)
       NSM_OUT  = (ONE - FRAC)*CBEAM_ACTIVE_RPROPS(1,6) + FRAC*CBEAM_ACTIVE_RPROPS(NSTA,6)
 
