@@ -108,6 +108,9 @@ PBEAMZ, PID, MID, GROUP, TYPE/NAME
 - Then compare `PBEAMZ` modifier deck with `AREAMOD=1000.0` and `K1MOD/K2MOD=0.0`.
 - Recheck `prob_001a` against the same syntax rule once the parser/doc are aligned.
 - If those are stable, add the axial-gravity / concentrated-load cases next.
+- Add a new radius-aware I-shape family, tentatively `I2`, instead of changing the meaning of the current `I` shape.
+- `I2` should accept the same basic I-section dimensions plus root-radius data and compute `A`, `I1`, `I2`, and `J` automatically from the fuller section definition.
+- Keep the current `I` shape as the simpler no-radius formulation so existing `PBEAML` / `PBEAMZ` decks stay stable.
 
 ## `prob_001_inclined_frame` comparison note
 
