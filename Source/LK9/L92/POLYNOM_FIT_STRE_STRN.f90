@@ -174,6 +174,24 @@
                PCT_ERR(I,J) = POLY_PCT_ERR(J-1)
             ENDDO
          ENDDO
+
+         IF ((DEBUG(238) > 0) .AND. (EID <= 8) .AND. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))) THEN
+            WRITE(F06,'(A)') ' '
+            WRITE(F06,'(A,I8,2A)') 'POLYFIT238 EID=', EID, ' TYPE=', TYPE
+            WRITE(F06,'(A,1X,I3,1X,A,1X,I3)') 'POLYFIT238 NROW', NROW, 'NCOL', NCOL
+            DO J=1,NCOL-1
+               WRITE(F06,'(A,I2,A,2(1X,ES15.7))') '  POLYFIT238 IN_PT', J, ' XY=', XI(J), YI(J)
+            ENDDO
+            DO J=1,NCOL-1
+               WRITE(F06,'(A,I2,A,2(1X,ES15.7))') '  POLYFIT238 OUT_PT', J, ' XY=', XO(J), YO(J)
+            ENDDO
+            DO I=1,NROW
+               WRITE(F06,'(A,I2)') '  POLYFIT238 ROW', I
+               WRITE(F06,'(A,4(1X,ES15.7))') '    IN ', (STR_IN(I,J), J=2,NCOL)
+               WRITE(F06,'(A,4(1X,ES15.7))') '    OUT', (STR_OUT(I,J), J=2,NCOL)
+               WRITE(F06,'(A,4(1X,ES15.7))') '    ERR', (PCT_ERR(I,J), J=2,NCOL)
+            ENDDO
+         ENDIF
                                                            ! Sort over rows of PCT_ERR to get largest abs val for all stress/strain
          DO J=2,NCOL                                       ! values for each stress point
             DO I=1,NROW
@@ -204,4 +222,3 @@
 ! **********************************************************************************************************************************
 
       END SUBROUTINE POLYNOM_FIT_STRE_STRN
-

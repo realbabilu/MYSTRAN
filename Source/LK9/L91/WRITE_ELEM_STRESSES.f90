@@ -745,7 +745,7 @@
            ENDIF
            IF (GPSTRESS_REQ .AND. ((STRE_LOC == 'CORNER  ') .OR. (TYPE(1:5) == 'QUAD8'))) THEN
               CALL WRITE_OGS1_SURFACE_STRESS ( ITABLE, ISUBCASE, NUM, NUM_PTS, DEVICE_CODE, ANALYSIS_CODE, FIELD5_INT_MODE, &
-                                               FIELD6_EIGENVALUE, TITLEI, STITLEI, LABELI, 'QUAD' )
+                                               FIELD6_EIGENVALUE, TITLEI, STITLEI, LABELI, 'QUAD', WRITE_F06 )
            ENDIF
          ENDIF  ! end of op2
 
@@ -1257,7 +1257,7 @@
                      (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
           IF (GPSTRESS_REQ .AND. (STRE_LOC == 'CORNER  ')) THEN
              CALL WRITE_OGS1_SURFACE_STRESS ( ITABLE, ISUBCASE, NUM, 4_LONG, DEVICE_CODE, ANALYSIS_CODE, FIELD5_INT_MODE,   &
-                                              FIELD6_EIGENVALUE, TITLE, SUBTITLE, LABEL, 'TRIA' )
+                                              FIELD6_EIGENVALUE, TITLE, SUBTITLE, LABEL, 'TRIA', WRITE_F06 )
           ENDIF
       ENDIF  ! write op2
 
@@ -1329,12 +1329,19 @@
 
 !==============================================================================
       SUBROUTINE WRITE_OGS1_SURFACE_STRESS ( ITABLE, ISUBCASE, NUM, NUM_PTS, DEVICE_CODE, ANALYSIS_CODE, FIELD5_INT_MODE,        &
-                                             FIELD6_EIGENVALUE, TITLE, SUBTITLE, LABEL, FAMILY )
+                                             FIELD6_EIGENVALUE, TITLE, SUBTITLE, LABEL, FAMILY, WRITE_F06 )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  OP2
-      USE CONSTANTS_1, ONLY           :  ZERO
+      USE IOUNT1, ONLY                :  OP2, F06
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL
+      USE MODEL_STUF, ONLY            :  GRID_ID, RGRID
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  GPSTRESS_REQ, NUM_GP_SURFACE, MAX_GP_SURFACES, GP_SURFACE_IDS,                 &
+                                         GP_SURFACE_NORMAL_MODE
+      USE GPSTRESS_SURFACE_UTILS, ONLY:  GPSTRESS_COLLECT_SURFACE_PATCH
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_I8_RJ, FAST_FMT_F06_E14_6
+
+      USE GET_ARRAY_ROW_NUM_Interface
 
       IMPLICIT NONE
 
@@ -1350,6 +1357,7 @@
       CHARACTER(LEN=128), INTENT(IN)  :: SUBTITLE
       CHARACTER(LEN=128), INTENT(IN)  :: LABEL
       CHARACTER(LEN=*), INTENT(IN)    :: FAMILY
+      LOGICAL, INTENT(IN)             :: WRITE_F06
 
       CHARACTER(8*BYTE)               :: TABLE_NAME
       CHARACTER(LEN=128)              :: TITLE2
@@ -1359,7 +1367,9 @@
       INTEGER(LONG)                   :: AXIS
       INTEGER(LONG)                   :: FORMAT_CODE
       INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: IERR
       INTEGER(LONG)                   :: L
+      INTEGER(LONG)                   :: NOUT
       INTEGER(LONG)                   :: NROWS
       INTEGER(LONG)                   :: NUM_WIDE
       INTEGER(LONG)                   :: NVALUES
@@ -1368,9 +1378,20 @@
       INTEGER(LONG)                   :: OGS_ITABLE
       INTEGER(LONG)                   :: REFID
       INTEGER(LONG)                   :: S_CODE
+      INTEGER(LONG)                   :: SURF
       INTEGER(LONG)                   :: TABLE_CODE
       INTEGER(LONG)                   :: THERMAL
+      INTEGER(LONG), ALLOCATABLE      :: PATCH_ELEMS(:)
+      INTEGER(LONG), ALLOCATABLE      :: PATCH_GRIDS(:)
+      INTEGER(LONG), ALLOCATABLE      :: OUT_EIDS(:)
+      INTEGER(LONG), ALLOCATABLE      :: OUT_GRIDS(:)
+      INTEGER(LONG)                   :: SURF_START(MAX_GP_SURFACES)
+      INTEGER(LONG)                   :: SURF_END(MAX_GP_SURFACES)
+      REAL(DOUBLE), ALLOCATABLE       :: OUT_Z1(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: OUT_Z2(:,:)
       REAL(DOUBLE)                    :: FIELD7
+      REAL(DOUBLE)                    :: MID_ROW(8)
+      LOGICAL                         :: USED_RECOVERY
 
       IF (NUM <= 0) RETURN
 
@@ -1418,22 +1439,56 @@
       CALL WRITE_ITABLE(OGS_ITABLE)
       OGS_ITABLE = OGS_ITABLE - 1
 
-      IF (FAMILY(1:4) == 'TRIA') THEN
-         NROWS = 6 * NUM
+      USED_RECOVERY = .FALSE.
+      NOUT = 0
+      SURF_START = 0
+      SURF_END = 0
+      IF (GPSTRESS_REQ .AND. (NUM_GP_SURFACE > 0) .AND. ((FAMILY(1:4) == 'TRIA') .OR. (FAMILY(1:4) == 'QUAD'))) THEN
+         ALLOCATE(PATCH_ELEMS(MAX(1_LONG,NUM)))
+         ALLOCATE(PATCH_GRIDS(MAX(1_LONG,4*NUM)))
+         ALLOCATE(OUT_EIDS(MAX(1_LONG,4*NUM)))
+         ALLOCATE(OUT_GRIDS(MAX(1_LONG,4*NUM)))
+         ALLOCATE(OUT_Z1(8,MAX(1_LONG,4*NUM)))
+         ALLOCATE(OUT_Z2(8,MAX(1_LONG,4*NUM)))
+         OUT_EIDS = 0
+         OUT_GRIDS = 0
+         OUT_Z1 = ZERO
+         OUT_Z2 = ZERO
+         DO SURF=1,NUM_GP_SURFACE
+            SURF_START(SURF) = NOUT + 1
+            CALL BUILD_SURFACE_PATCH_OUTPUT ( SURF, PATCH_ELEMS, PATCH_GRIDS, OUT_EIDS, OUT_GRIDS, OUT_Z1, OUT_Z2, NOUT, IERR )
+            IF (IERR == 0) USED_RECOVERY = .TRUE.
+            SURF_END(SURF) = NOUT
+         ENDDO
+      ENDIF
+
+      IF (USED_RECOVERY .AND. (NOUT > 0)) THEN
+         NROWS = 2 * NOUT
       ELSE
-         NROWS = 2 * (NUM_PTS - 1) * (NUM / NUM_PTS)
+         IF (FAMILY(1:4) == 'TRIA') THEN
+            NROWS = 6 * NUM
+         ELSE
+            NROWS = 2 * (NUM_PTS - 1) * (NUM / NUM_PTS)
+         ENDIF
       ENDIF
       NVALUES = NUM_WIDE * NROWS
       WRITE(OP2) NVALUES
 
-      IF (FAMILY(1:4) == 'TRIA') THEN
-         WRITE(OP2) ((GID_OUT_ARRAY(I,L+1)*10+DEVICE_CODE, EID_OUT_ARRAY(I,1), 'Z1  ',                                 &
+      IF (USED_RECOVERY .AND. (NOUT > 0)) THEN
+         WRITE(OP2) (OUT_GRIDS(I)*10+DEVICE_CODE, OUT_EIDS(I), 'Z1  ',                                                   &
+                     REAL(OUT_Z1(1,I),4), REAL(OUT_Z1(2,I),4), REAL(OUT_Z1(3,I),4), REAL(OUT_Z1(4,I),4),                &
+                     REAL(OUT_Z1(5,I),4), REAL(OUT_Z1(6,I),4), REAL(OUT_Z1(7,I),4), REAL(OUT_Z1(8,I),4),                &
+                     OUT_GRIDS(I)*10+DEVICE_CODE, OUT_EIDS(I), 'Z2  ',                                                   &
+                     REAL(OUT_Z2(1,I),4), REAL(OUT_Z2(2,I),4), REAL(OUT_Z2(3,I),4), REAL(OUT_Z2(4,I),4),                &
+                     REAL(OUT_Z2(5,I),4), REAL(OUT_Z2(6,I),4), REAL(OUT_Z2(7,I),4), REAL(OUT_Z2(8,I),4), I=1,NOUT)
+      ELSE IF (FAMILY(1:4) == 'TRIA') THEN
+         WRITE(OP2) ((GID_OUT_ARRAY(I,L+1)*10+DEVICE_CODE, EID_OUT_ARRAY(I,1), 'Z1  ',                                  &
                       REAL(OGEL(2*I-1,2),4), REAL(OGEL(2*I-1,3),4), REAL(OGEL(2*I-1,4),4),                              &
                       REAL(OGEL(2*I-1,6),4), REAL(OGEL(2*I-1,7),4), REAL(OGEL(2*I-1,8),4),                              &
                       REAL(0.5D0*ABS(OGEL(2*I-1,7)-OGEL(2*I-1,8)),4), REAL(OGEL(2*I-1,9),4),                            &
                       GID_OUT_ARRAY(I,L+1)*10+DEVICE_CODE, EID_OUT_ARRAY(I,1), 'Z2  ',                                  &
-                      REAL(OGEL(2*I,2),4), REAL(OGEL(2*I,3),4), REAL(OGEL(2*I,4),4), REAL(OGEL(2*I,6),4),                &
-                      REAL(OGEL(2*I,7),4), REAL(OGEL(2*I,8),4), REAL(0.5D0*ABS(OGEL(2*I,7)-OGEL(2*I,8)),4),              &
+                      REAL(OGEL(2*I,2),4), REAL(OGEL(2*I,3),4), REAL(OGEL(2*I,4),4), REAL(OGEL(2*I,6),4),               &
+                      REAL(OGEL(2*I,7),4), REAL(OGEL(2*I,8),4), REAL(0.5D0*ABS(OGEL(2*I,7)-OGEL(2*I,8)),4),             &
                       REAL(OGEL(2*I,9),4), L=1,3), I=1,NUM)
       ELSE
          WRITE(OP2) ((GID_OUT_ARRAY(I,L+1)*10+DEVICE_CODE, EID_OUT_ARRAY(I,1), 'Z1  ',                                 &
@@ -1447,8 +1502,495 @@
                       L=1,NUM_PTS-1), I=1,NUM,NUM_PTS)
       ENDIF
 
+      IF (WRITE_F06 .AND. USED_RECOVERY .AND. (NOUT > 0)) THEN
+         DO SURF=1,NUM_GP_SURFACE
+            IF ((SURF_START(SURF) <= 0) .OR. (SURF_END(SURF) < SURF_START(SURF))) CYCLE
+            WRITE(F06,*)
+            WRITE(F06,'(1X,A)') TITLE
+            WRITE(F06,*)
+            WRITE(F06,'(''0     '',A,101X,''SUBCASE '',I8)') TRIM(SUBTITLE), ISUBCASE
+            WRITE(F06,'(34X,''S T R E S S E S   A T   G R I D   P O I N T S   - -     S U R F A C E'',I8)') GP_SURFACE_IDS(SURF)
+            WRITE(F06,'(''0'',23X,''SURFACE X-AXIS X  NORMAL(Z-AXIS)  Z         REFERENCE COORDINATE SYSTEM FOR SURFACE DEFINITION CID'',I9)') 0
+            WRITE(F06,'(5X,''GRID'',6X,''ELEMENT'',12X,''STRESSES IN SURFACE SYSTEM'',11X,''PRINCIPAL STRESSES'',12X,''MAX'',/,&
+                        5X,''ID'',10X,''ID'',4X,''FIBER'',3X,''NORMAL-X'',3X,''NORMAL-Y'',3X,''SHEAR-XY'',5X,''ANGLE'',6X,''MAJOR'',6X,''MINOR'',6X,''SHEAR'',5X,''VON MISES'')')
+            DO I=SURF_START(SURF),SURF_END(SURF)
+               MID_ROW(1:8) = 0.5D0 * (OUT_Z1(1:8,I) + OUT_Z2(1:8,I))
+               CALL WRITE_OGS1_F06_ROW ( OUT_GRIDS(I), 0_LONG, 'Z1 ', OUT_Z1(:,I) )
+               CALL WRITE_OGS1_F06_ROW ( 0_LONG,       0_LONG, 'Z2 ', OUT_Z2(:,I) )
+               CALL WRITE_OGS1_F06_ROW ( 0_LONG,       0_LONG, 'MID', MID_ROW )
+            ENDDO
+         ENDDO
+      ENDIF
+
       CALL END_OP2_TABLE(OGS_ITABLE)
       ITABLE = 0
+
+      IF (ALLOCATED(PATCH_ELEMS)) DEALLOCATE(PATCH_ELEMS)
+      IF (ALLOCATED(PATCH_GRIDS)) DEALLOCATE(PATCH_GRIDS)
+      IF (ALLOCATED(OUT_EIDS)) DEALLOCATE(OUT_EIDS)
+      IF (ALLOCATED(OUT_GRIDS)) DEALLOCATE(OUT_GRIDS)
+      IF (ALLOCATED(OUT_Z1)) DEALLOCATE(OUT_Z1)
+      IF (ALLOCATED(OUT_Z2)) DEALLOCATE(OUT_Z2)
+
+      CONTAINS
+
+      SUBROUTINE BUILD_SURFACE_PATCH_OUTPUT ( SURF_INDEX, PATCH_ELEMS, PATCH_GRIDS, OUT_EIDS, OUT_GRIDS, OUT_Z1, OUT_Z2, NOUT, IERR )
+
+      INTEGER(LONG), INTENT(IN)       :: SURF_INDEX
+      INTEGER(LONG), INTENT(INOUT)    :: PATCH_ELEMS(:)
+      INTEGER(LONG), INTENT(INOUT)    :: PATCH_GRIDS(:)
+      INTEGER(LONG), INTENT(INOUT)    :: OUT_EIDS(:)
+      INTEGER(LONG), INTENT(INOUT)    :: OUT_GRIDS(:)
+      REAL(DOUBLE), INTENT(INOUT)     :: OUT_Z1(:,:)
+      REAL(DOUBLE), INTENT(INOUT)     :: OUT_Z2(:,:)
+      INTEGER(LONG), INTENT(INOUT)    :: NOUT
+      INTEGER(LONG), INTENT(OUT)      :: IERR
+
+      INTEGER(LONG)                   :: EID
+      INTEGER(LONG)                   :: GID
+      INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: IELEM
+      INTEGER(LONG)                   :: IPATCH
+      INTEGER(LONG)                   :: J
+      INTEGER(LONG)                   :: NSAMP
+      INTEGER(LONG)                   :: NPATCH_ELEMS
+      INTEGER(LONG)                   :: NPATCH_GRIDS
+      INTEGER(LONG)                   :: ROW1
+      INTEGER(LONG)                   :: ROW2
+      REAL(DOUBLE)                    :: AREA
+      REAL(DOUBLE)                    :: GXYZ(3)
+      REAL(DOUBLE)                    :: SAMP_S1(3,MAX(1,4*NUM))
+      REAL(DOUBLE)                    :: SAMP_S2(3,MAX(1,4*NUM))
+      REAL(DOUBLE)                    :: SAMP_U(MAX(1,4*NUM))
+      REAL(DOUBLE)                    :: SAMP_V(MAX(1,4*NUM))
+      REAL(DOUBLE)                    :: SAMP_W(MAX(1,4*NUM))
+      REAL(DOUBLE)                    :: SUMW1, SUMW2
+      REAL(DOUBLE)                    :: SURF_S1(3)
+      REAL(DOUBLE)                    :: SURF_S2(3)
+      REAL(DOUBLE)                    :: VALS1(3), VALS2(3), OUTVAL(8)
+
+      IERR = 0
+      CALL GPSTRESS_COLLECT_SURFACE_PATCH ( SURF_INDEX, PATCH_ELEMS, NPATCH_ELEMS, PATCH_GRIDS, NPATCH_GRIDS, IERR )
+      IF (IERR /= 0) RETURN
+
+      ! MSC-style OGS1 keeps one output row per contributing grid-element corner pair.
+      ! Do not collapse repeated grids across adjacent elements here.
+      IF (FAMILY(1:4) == 'TRIA') THEN
+         DO I=1,NUM
+            IELEM = EID_OUT_ARRAY(I,1)
+            IF (FIND_INT(IELEM, PATCH_ELEMS, NPATCH_ELEMS) == 0) CYCLE
+            DO J=1,3
+               GID = GID_OUT_ARRAY(I,J+1)
+               IF (FIND_INT(GID, PATCH_GRIDS, NPATCH_GRIDS) == 0) CYCLE
+               ROW1 = 2*I - 1
+               ROW2 = 2*I
+               IF (NOUT >= SIZE(OUT_GRIDS)) EXIT
+               NOUT = NOUT + 1
+               OUT_GRIDS(NOUT) = GID
+               OUT_EIDS(NOUT) = IELEM
+               CALL BUILD_SURFACE_RESULT_ROW ( (/ OGEL(ROW1,2), OGEL(ROW1,3), OGEL(ROW1,4) /), OUTVAL )
+               OUT_Z1(:,NOUT) = OUTVAL
+               CALL BUILD_SURFACE_RESULT_ROW ( (/ OGEL(ROW2,2), OGEL(ROW2,3), OGEL(ROW2,4) /), OUTVAL )
+               OUT_Z2(:,NOUT) = OUTVAL
+            ENDDO
+         ENDDO
+         RETURN
+      ELSE
+         DO I=1,NUM,NUM_PTS
+            IELEM = EID_OUT_ARRAY(I,1)
+            IF (FIND_INT(IELEM, PATCH_ELEMS, NPATCH_ELEMS) == 0) CYCLE
+            DO J=1,NUM_PTS-1
+               GID = GID_OUT_ARRAY(I,J+1)
+               IF (FIND_INT(GID, PATCH_GRIDS, NPATCH_GRIDS) == 0) CYCLE
+               ROW1 = 2*I + 2*J - 1
+               ROW2 = 2*I + 2*J
+               IF (NOUT >= SIZE(OUT_GRIDS)) EXIT
+               NOUT = NOUT + 1
+               OUT_GRIDS(NOUT) = GID
+               OUT_EIDS(NOUT) = IELEM
+               CALL BUILD_SURFACE_RESULT_ROW ( (/ OGEL(ROW1,2), OGEL(ROW1,3), OGEL(ROW1,4) /), OUTVAL )
+               OUT_Z1(:,NOUT) = OUTVAL
+               CALL BUILD_SURFACE_RESULT_ROW ( (/ OGEL(ROW2,2), OGEL(ROW2,3), OGEL(ROW2,4) /), OUTVAL )
+               OUT_Z2(:,NOUT) = OUTVAL
+            ENDDO
+         ENDDO
+         RETURN
+      ENDIF
+
+      NSAMP = 0
+      SAMP_U = ZERO
+      SAMP_V = ZERO
+      SAMP_W = ZERO
+      SAMP_S1 = ZERO
+      SAMP_S2 = ZERO
+
+      IF (FAMILY(1:4) /= 'TRIA') THEN
+         DO I=1,NUM,NUM_PTS
+            IELEM = EID_OUT_ARRAY(I,1)
+            IF (FIND_INT(IELEM, PATCH_ELEMS, NPATCH_ELEMS) == 0) CYCLE
+            AREA = GET_QUAD_AREA(I)
+            IF (AREA <= ZERO) CYCLE
+            DO J=1,NUM_PTS-1
+               ROW1 = 2*I + 2*J - 1
+               ROW2 = 2*I + 2*J
+               CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(I,J+1), GXYZ )
+               CALL MAP_SURFACE_COORDS ( SURF_INDEX, GXYZ, SAMP_U(NSAMP+1), SAMP_V(NSAMP+1) )
+               SAMP_W(NSAMP+1)      = AREA / 4.0D0
+               SAMP_S1(:,NSAMP+1)   = (/ OGEL(ROW1,2), OGEL(ROW1,3), OGEL(ROW1,4) /)
+               SAMP_S2(:,NSAMP+1)   = (/ OGEL(ROW2,2), OGEL(ROW2,3), OGEL(ROW2,4) /)
+               NSAMP = NSAMP + 1
+            ENDDO
+         ENDDO
+      ENDIF
+
+      DO IPATCH=1,NPATCH_GRIDS
+         GID = PATCH_GRIDS(IPATCH)
+         IF (FIND_INT(GID, OUT_GRIDS, NOUT) > 0) CYCLE
+
+         SUMW1 = ZERO
+         SUMW2 = ZERO
+         VALS1 = ZERO
+         VALS2 = ZERO
+         EID = 0
+
+         CALL GET_GRID_BASIC_COORDS ( GID, GXYZ )
+
+         IF (FAMILY(1:4) == 'TRIA') THEN
+            DO I=1,NUM
+               IELEM = EID_OUT_ARRAY(I,1)
+               IF (FIND_INT(IELEM, PATCH_ELEMS, NPATCH_ELEMS) == 0) CYCLE
+               AREA = GET_TRIA_AREA(I)
+               IF (AREA <= ZERO) CYCLE
+               DO J=1,3
+                  IF (GID_OUT_ARRAY(I,J+1) /= GID) CYCLE
+                  ROW1 = 2*I - 1
+                  ROW2 = 2*I
+                  VALS1 = VALS1 + (AREA/3.0D0) * (/ OGEL(ROW1,2), OGEL(ROW1,3), OGEL(ROW1,4) /)
+                  VALS2 = VALS2 + (AREA/3.0D0) * (/ OGEL(ROW2,2), OGEL(ROW2,3), OGEL(ROW2,4) /)
+                  SUMW1 = SUMW1 + AREA/3.0D0
+                  SUMW2 = SUMW2 + AREA/3.0D0
+                  IF (EID == 0) EID = IELEM
+               ENDDO
+            ENDDO
+         ELSE
+            CALL EVAL_SURFACE_PATCH_FIT ( SURF_INDEX, NSAMP, SAMP_U, SAMP_V, SAMP_W, SAMP_S1, GXYZ, SURF_S1, SUMW1 )
+            CALL EVAL_SURFACE_PATCH_FIT ( SURF_INDEX, NSAMP, SAMP_U, SAMP_V, SAMP_W, SAMP_S2, GXYZ, SURF_S2, SUMW2 )
+            IF ((SUMW1 > ZERO) .AND. (SUMW2 > ZERO)) THEN
+               VALS1 = SURF_S1
+               VALS2 = SURF_S2
+               EID = GET_FIRST_PATCH_ELEM_FOR_GRID ( GID, PATCH_ELEMS, NPATCH_ELEMS )
+            ENDIF
+         ENDIF
+
+         IF ((SUMW1 > ZERO) .AND. (SUMW2 > ZERO)) THEN
+            IF (NOUT >= SIZE(OUT_GRIDS)) EXIT
+            NOUT = NOUT + 1
+            OUT_GRIDS(NOUT) = GID
+            OUT_EIDS(NOUT) = EID
+            CALL BUILD_SURFACE_RESULT_ROW ( VALS1 / SUMW1, OUTVAL )
+            OUT_Z1(:,NOUT) = OUTVAL
+            CALL BUILD_SURFACE_RESULT_ROW ( VALS2 / SUMW2, OUTVAL )
+            OUT_Z2(:,NOUT) = OUTVAL
+         ENDIF
+      ENDDO
+
+      END SUBROUTINE BUILD_SURFACE_PATCH_OUTPUT
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE MAP_SURFACE_COORDS ( SURF_INDEX, XYZ, U, V )
+
+      INTEGER(LONG), INTENT(IN)       :: SURF_INDEX
+      REAL(DOUBLE), INTENT(IN)        :: XYZ(3)
+      REAL(DOUBLE), INTENT(OUT)       :: U
+      REAL(DOUBLE), INTENT(OUT)       :: V
+
+      CHARACTER(8*BYTE)               :: NMODE
+
+      NMODE = GP_SURFACE_NORMAL_MODE(SURF_INDEX)
+
+      IF (NMODE(1:1) == 'X') THEN
+         U = XYZ(2)
+         V = XYZ(3)
+      ELSE IF (NMODE(1:1) == 'Y') THEN
+         U = XYZ(1)
+         V = XYZ(3)
+      ELSE
+         U = XYZ(1)
+         V = XYZ(2)
+      ENDIF
+
+      END SUBROUTINE MAP_SURFACE_COORDS
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE EVAL_SURFACE_PATCH_FIT ( SURF_INDEX, NSAMP, SU, SV, SW, SVAL, XYZ, FITVAL, STATUS )
+
+      INTEGER(LONG), INTENT(IN)       :: SURF_INDEX
+      INTEGER(LONG), INTENT(IN)       :: NSAMP
+      REAL(DOUBLE), INTENT(IN)        :: SU(:)
+      REAL(DOUBLE), INTENT(IN)        :: SV(:)
+      REAL(DOUBLE), INTENT(IN)        :: SW(:)
+      REAL(DOUBLE), INTENT(IN)        :: SVAL(:,:)
+      REAL(DOUBLE), INTENT(IN)        :: XYZ(3)
+      REAL(DOUBLE), INTENT(OUT)       :: FITVAL(3)
+      REAL(DOUBLE), INTENT(OUT)       :: STATUS
+
+      REAL(DOUBLE)                    :: A(3,3), B(3), COEF(3), DET
+      REAL(DOUBLE)                    :: U, V, W
+      INTEGER(LONG)                   :: I, K
+
+      FITVAL = ZERO
+      STATUS = ZERO
+      IF (NSAMP <= 0) RETURN
+
+      CALL MAP_SURFACE_COORDS ( SURF_INDEX, XYZ, U, V )
+
+      DO K=1,3
+         A = ZERO
+         B = ZERO
+         DO I=1,NSAMP
+            W = MAX(SW(I), 1.0D-12)
+            A(1,1) = A(1,1) + W
+            A(1,2) = A(1,2) + W*SU(I)
+            A(1,3) = A(1,3) + W*SV(I)
+            A(2,2) = A(2,2) + W*SU(I)*SU(I)
+            A(2,3) = A(2,3) + W*SU(I)*SV(I)
+            A(3,3) = A(3,3) + W*SV(I)*SV(I)
+            B(1)   = B(1)   + W*SVAL(K,I)
+            B(2)   = B(2)   + W*SU(I)*SVAL(K,I)
+            B(3)   = B(3)   + W*SV(I)*SVAL(K,I)
+         ENDDO
+         A(2,1) = A(1,2)
+         A(3,1) = A(1,3)
+         A(3,2) = A(2,3)
+
+         CALL SOLVE_3X3 ( A, B, COEF, DET )
+         IF (DABS(DET) <= 1.0D-20) THEN
+            FITVAL(K) = SUM(SW(1:NSAMP)*SVAL(K,1:NSAMP)) / MAX(SUM(SW(1:NSAMP)), 1.0D-12)
+         ELSE
+            FITVAL(K) = COEF(1) + COEF(2)*U + COEF(3)*V
+         ENDIF
+      ENDDO
+
+      STATUS = 1.0D0
+
+      END SUBROUTINE EVAL_SURFACE_PATCH_FIT
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE SOLVE_3X3 ( A, B, X, DET )
+
+      REAL(DOUBLE), INTENT(IN)        :: A(3,3), B(3)
+      REAL(DOUBLE), INTENT(OUT)       :: X(3)
+      REAL(DOUBLE), INTENT(OUT)       :: DET
+
+      REAL(DOUBLE)                    :: A1(3,3), A2(3,3), A3(3,3)
+
+      DET = DET3X3(A)
+      IF (DABS(DET) <= 1.0D-20) THEN
+         X = ZERO
+         RETURN
+      ENDIF
+
+      A1 = A
+      A2 = A
+      A3 = A
+      A1(:,1) = B
+      A2(:,2) = B
+      A3(:,3) = B
+      X(1) = DET3X3(A1) / DET
+      X(2) = DET3X3(A2) / DET
+      X(3) = DET3X3(A3) / DET
+
+      END SUBROUTINE SOLVE_3X3
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      REAL(DOUBLE) FUNCTION DET3X3 ( A )
+
+      REAL(DOUBLE), INTENT(IN)        :: A(3,3)
+
+      DET3X3 = A(1,1)*(A(2,2)*A(3,3) - A(2,3)*A(3,2)) -                                                        &
+               A(1,2)*(A(2,1)*A(3,3) - A(2,3)*A(3,1)) +                                                        &
+               A(1,3)*(A(2,1)*A(3,2) - A(2,2)*A(3,1))
+
+      END FUNCTION DET3X3
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      INTEGER(LONG) FUNCTION GET_FIRST_PATCH_ELEM_FOR_GRID ( GID, PATCH_ELEMS, NPATCH_ELEMS )
+
+      INTEGER(LONG), INTENT(IN)       :: GID
+      INTEGER(LONG), INTENT(IN)       :: PATCH_ELEMS(:)
+      INTEGER(LONG), INTENT(IN)       :: NPATCH_ELEMS
+
+      INTEGER(LONG)                   :: I, J, IELEM
+
+      GET_FIRST_PATCH_ELEM_FOR_GRID = 0
+      IF (FAMILY(1:4) == 'TRIA') THEN
+         DO I=1,NUM
+            IELEM = EID_OUT_ARRAY(I,1)
+            IF (FIND_INT(IELEM, PATCH_ELEMS, NPATCH_ELEMS) == 0) CYCLE
+            DO J=1,3
+               IF (GID_OUT_ARRAY(I,J+1) == GID) THEN
+                  GET_FIRST_PATCH_ELEM_FOR_GRID = IELEM
+                  RETURN
+               ENDIF
+            ENDDO
+         ENDDO
+      ELSE
+         DO I=1,NUM,NUM_PTS
+            IELEM = EID_OUT_ARRAY(I,1)
+            IF (FIND_INT(IELEM, PATCH_ELEMS, NPATCH_ELEMS) == 0) CYCLE
+            DO J=1,NUM_PTS-1
+               IF (GID_OUT_ARRAY(I,J+1) == GID) THEN
+                  GET_FIRST_PATCH_ELEM_FOR_GRID = IELEM
+                  RETURN
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDIF
+
+      END FUNCTION GET_FIRST_PATCH_ELEM_FOR_GRID
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE BUILD_SURFACE_RESULT_ROW ( STRESS3, RESULT8 )
+
+      REAL(DOUBLE), INTENT(IN)        :: STRESS3(3)
+      REAL(DOUBLE), INTENT(OUT)       :: RESULT8(8)
+
+      REAL(DOUBLE)                    :: ANGLE, AVG, DIFF, RAD, SMAJ, SMIN, SXYMAX, VM
+      REAL(DOUBLE), PARAMETER         :: RAD2DEG = 180.0D0 / 3.1415926535897932384626433832795D0
+
+      AVG = 0.5D0 * (STRESS3(1) + STRESS3(2))
+      DIFF = 0.5D0 * (STRESS3(1) - STRESS3(2))
+      RAD = DSQRT(DIFF*DIFF + STRESS3(3)*STRESS3(3))
+      SMAJ = AVG + RAD
+      SMIN = AVG - RAD
+      ANGLE = 0.5D0 * DATAN2(2.0D0*STRESS3(3), STRESS3(1) - STRESS3(2)) * RAD2DEG
+      SXYMAX = 0.5D0 * DABS(SMAJ - SMIN)
+      VM = DSQRT(STRESS3(1)*STRESS3(1) - STRESS3(1)*STRESS3(2) + STRESS3(2)*STRESS3(2) + 3.0D0*STRESS3(3)*STRESS3(3))
+
+      RESULT8(1) = STRESS3(1)
+      RESULT8(2) = STRESS3(2)
+      RESULT8(3) = STRESS3(3)
+      RESULT8(4) = ANGLE
+      RESULT8(5) = SMAJ
+      RESULT8(6) = SMIN
+      RESULT8(7) = SXYMAX
+      RESULT8(8) = VM
+
+      END SUBROUTINE BUILD_SURFACE_RESULT_ROW
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      REAL(DOUBLE) FUNCTION GET_TRIA_AREA ( ISTART )
+
+      INTEGER(LONG), INTENT(IN)       :: ISTART
+      REAL(DOUBLE)                    :: X1(3), X2(3), X3(3), C(3)
+
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,2), X1 )
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,3), X2 )
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,4), X3 )
+      C(1) = (X2(2)-X1(2))*(X3(3)-X1(3)) - (X2(3)-X1(3))*(X3(2)-X1(2))
+      C(2) = (X2(3)-X1(3))*(X3(1)-X1(1)) - (X2(1)-X1(1))*(X3(3)-X1(3))
+      C(3) = (X2(1)-X1(1))*(X3(2)-X1(2)) - (X2(2)-X1(2))*(X3(1)-X1(1))
+      GET_TRIA_AREA = 0.5D0 * DSQRT(C(1)*C(1) + C(2)*C(2) + C(3)*C(3))
+
+      END FUNCTION GET_TRIA_AREA
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      REAL(DOUBLE) FUNCTION GET_QUAD_AREA ( ISTART )
+
+      INTEGER(LONG), INTENT(IN)       :: ISTART
+      REAL(DOUBLE)                    :: X1(3), X2(3), X3(3), X4(3)
+
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,2), X1 )
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,3), X2 )
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,4), X3 )
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,5), X4 )
+      GET_QUAD_AREA = TRI_AREA_FROM_XYZ ( X1, X2, X3 ) + TRI_AREA_FROM_XYZ ( X1, X3, X4 )
+
+      END FUNCTION GET_QUAD_AREA
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      REAL(DOUBLE) FUNCTION TRI_AREA_FROM_XYZ ( X1, X2, X3 )
+
+      REAL(DOUBLE), INTENT(IN)        :: X1(3), X2(3), X3(3)
+      REAL(DOUBLE)                    :: C(3)
+
+      C(1) = (X2(2)-X1(2))*(X3(3)-X1(3)) - (X2(3)-X1(3))*(X3(2)-X1(2))
+      C(2) = (X2(3)-X1(3))*(X3(1)-X1(1)) - (X2(1)-X1(1))*(X3(3)-X1(3))
+      C(3) = (X2(1)-X1(1))*(X3(2)-X1(2)) - (X2(2)-X1(2))*(X3(1)-X1(1))
+      TRI_AREA_FROM_XYZ = 0.5D0 * DSQRT(C(1)*C(1) + C(2)*C(2) + C(3)*C(3))
+
+      END FUNCTION TRI_AREA_FROM_XYZ
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE GET_GRID_BASIC_COORDS ( GRID_NUM, XYZ )
+
+      INTEGER(LONG), INTENT(IN)       :: GRID_NUM
+      REAL(DOUBLE), INTENT(OUT)       :: XYZ(3)
+
+      CHARACTER(32*BYTE)              :: SUBR_NAME = 'WRITE_OGS1_SURFACE_STRESS'
+      INTEGER(LONG)                   :: IGRID
+
+      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, SIZE(GRID_ID), GRID_ID, GRID_NUM, IGRID )
+      IF (IGRID > 0) THEN
+         XYZ(1) = RGRID(IGRID,1)
+         XYZ(2) = RGRID(IGRID,2)
+         XYZ(3) = RGRID(IGRID,3)
+      ELSE
+         XYZ = ZERO
+      ENDIF
+
+      END SUBROUTINE GET_GRID_BASIC_COORDS
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      INTEGER(LONG) FUNCTION FIND_INT ( VALUE, ARRAY, NUSED )
+
+      INTEGER(LONG), INTENT(IN)       :: VALUE
+      INTEGER(LONG), INTENT(IN)       :: ARRAY(:)
+      INTEGER(LONG), INTENT(IN)       :: NUSED
+
+      INTEGER(LONG)                   :: I
+
+      FIND_INT = 0
+      DO I=1,NUSED
+         IF (ARRAY(I) == VALUE) THEN
+            FIND_INT = I
+            EXIT
+         ENDIF
+      ENDDO
+
+      END FUNCTION FIND_INT
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE WRITE_OGS1_F06_ROW ( GRID_NUM, ELEM_NUM, FIBER, VALUES )
+
+      INTEGER(LONG), INTENT(IN)       :: GRID_NUM
+      INTEGER(LONG), INTENT(IN)       :: ELEM_NUM
+      CHARACTER(LEN=*), INTENT(IN)    :: FIBER
+      REAL(DOUBLE), INTENT(IN)        :: VALUES(8)
+
+      CHARACTER(160*BYTE)             :: LINE_BUF
+      INTEGER(LONG)                   :: POS, J
+
+      LINE_BUF = ' '
+      IF (GRID_NUM > 0) THEN
+         CALL FAST_FMT_I8_RJ ( GRID_NUM, LINE_BUF(2:9) )
+         CALL FAST_FMT_I8_RJ ( ELEM_NUM, LINE_BUF(11:18) )
+      ENDIF
+      LINE_BUF(24:26) = FIBER(1:3)
+      POS = 31
+      DO J=1,3
+         CALL FAST_FMT_F06_E14_6 ( VALUES(J), LINE_BUF(POS:POS+13) )
+         POS = POS + 14
+      ENDDO
+      WRITE(LINE_BUF(73:81),'(F9.4)') VALUES(4)
+      POS = 83
+      DO J=5,8
+         CALL FAST_FMT_F06_E14_6 ( VALUES(J), LINE_BUF(POS:POS+13) )
+         POS = POS + 14
+      ENDDO
+      WRITE(F06,'(A)') TRIM(LINE_BUF)
+
+      END SUBROUTINE WRITE_OGS1_F06_ROW
 
       END SUBROUTINE WRITE_OGS1_SURFACE_STRESS
 

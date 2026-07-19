@@ -39,3 +39,11 @@ Files:
 - `gpstress_patch_test_example.md`
   Separate GPSTRESS/GSTRESS example note for MSC-style grid-point stress output.
   This records the `OUTPUT(POST)`/`SURFACE` shape and clarifies that GPSTRESS maps to `OGS1`, not ordinary element stress.
+
+- `gpstress_recovery_design.md`
+  Phase-1 implementation design for moving GPSTRESS from the current corner-copy
+  compatibility writer toward surface-driven grid-point recovery.
+  The current source tree now includes the first metadata foundation for this:
+  - structured `SURFACE` parsing in `LOADC`
+  - stored `surface_id/set_id/normal` descriptors
+  - a helper path to resolve shell element/grid membership from the referenced set

@@ -234,7 +234,7 @@ elems_7: DO J = 1,NELE
                       (TYPE(1:5) == 'TETRA') .OR.                                                                                  &
                       (TYPE(1:5) == 'QUAD8')) THEN
 
-                     IF (TYPE(1:5) == 'QUAD4') THEN
+                     IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                         CALL POLYNOM_FIT_STRE_STRN ( STRAIN_RAW, 9, NUM_PTS_CUR, STRAIN_OUT, STRAIN_OUT_PCT_ERR,                  &
                                                      STRAIN_OUT_ERR_INDEX, PCT_ERR_MAX )
 

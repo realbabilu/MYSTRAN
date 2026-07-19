@@ -316,6 +316,17 @@
             STRESS(I+6) = STRESS3(I)
          ENDDO
 
+         IF ((((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .AND. (DEBUG(238) > 0)) .AND. (EID <= 8)) THEN
+            WRITE(F06,'(A,1X,I8,1X,A,1X,I3,1X,A)') 'RECOV238 EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM, 'TYPE='//TYPE
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN1', STRAIN1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN2', STRAIN2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN3', STRAIN3
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS1', STRESS1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS2', STRESS2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS3', STRESS3
+            WRITE(F06,'(A,9(1X,ES15.7))') '  STRESS ', STRESS
+         ENDIF
+
          IF ((TYPE == 'QUADR   ') .AND. (DEBUG(233) > 0)) THEN
             WRITE(F06,'(A,1X,I8,1X,A,1X,I3)') 'CQUADR RECOVERY EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM
             WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN1', STRAIN1
@@ -396,7 +407,14 @@
       ENDIF
 
 ! **********************************************************************************************************************************
-! Transform coord for STRESS/STRAIN arrays, if requested (and if for 2D or 3D elements)
+! Transform coord for STRESS/STRAIN arrays, if requested.
+!
+! Important shell note:
+! Raw shell stress/strain recovery for TRIA/QUAD families is still consumed later by
+! shell-specific corner/GPSTRESS output paths that assume the unreoriented recovery basis.
+! Applying STR_CID here rotates that raw data too early and breaks patch-test style shell
+! output (notably QUAD4/CQUADR GPSTRESS/basic output). Keep the historical shell recovery
+! basis here and leave shell-family output-space handling to the later shell output path.
 
       IF (STR_CID /= -1) THEN                         ! User req diff stress/strain/engr force output coord sys than elem local
 
@@ -408,53 +426,8 @@
          IF      ((TYPE (1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE == 'QUADR   ') .OR.                         &
                   (TYPE (1:5) == 'QUAD8')) THEN
 
-            IF (STR_CID /= -2) THEN
-                                                              ! Transform 2D membrane and transverse shear stresses
-               STR_TENSOR(1,1) = STRESS(1)   ;   STR_TENSOR(1,2) = STRESS(3)   ;   STR_TENSOR(1,3) = STRESS(7)
-               STR_TENSOR(2,1) = STRESS(3)   ;   STR_TENSOR(2,2) = STRESS(2)   ;   STR_TENSOR(2,3) = STRESS(8)
-               STR_TENSOR(3,1) = STRESS(7)   ;   STR_TENSOR(3,2) = STRESS(8)   ;   STR_TENSOR(3,3) = ZERO
-
-               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
-
-               STRESS(1) = STR_TENSOR(1,1)
-               STRESS(2) = STR_TENSOR(2,2)
-               STRESS(3) = STR_TENSOR(1,2)
-               STRESS(7) = STR_TENSOR(1,3)
-               STRESS(8) = STR_TENSOR(2,3)
-                                                              ! Transform 2D bending stresses
-               STR_TENSOR(1,1) = STRESS(4)   ;   STR_TENSOR(1,2) = STRESS(6)   ;   STR_TENSOR(1,3) = ZERO
-               STR_TENSOR(2,1) = STRESS(6)   ;   STR_TENSOR(2,2) = STRESS(5)   ;   STR_TENSOR(2,3) = ZERO
-               STR_TENSOR(3,1) = ZERO        ;   STR_TENSOR(3,2) = ZERO        ;   STR_TENSOR(3,3) = ZERO
-
-               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
-
-               STRESS(4) = STR_TENSOR(1,1)
-               STRESS(5) = STR_TENSOR(2,2)
-               STRESS(6) = STR_TENSOR(1,2)
-                                                              ! Transform 2D membrane and transverse shear strains
-               STR_TENSOR(1,1) = STRAIN(1)   ;   STR_TENSOR(1,2) = STRAIN(3)/TWO ; STR_TENSOR(1,3) = STRAIN(7)/TWO
-               STR_TENSOR(2,1) = STRAIN(3)/TWO ; STR_TENSOR(2,2) = STRAIN(2)     ; STR_TENSOR(2,3) = STRAIN(8)/TWO
-               STR_TENSOR(3,1) = STRAIN(7)/TWO ; STR_TENSOR(3,2) = STRAIN(8)/TWO ; STR_TENSOR(3,3) = ZERO
-
-               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
-
-               STRAIN(1) = STR_TENSOR(1,1)
-               STRAIN(2) = STR_TENSOR(2,2)
-               STRAIN(3) = TWO*STR_TENSOR(1,2)
-               STRAIN(7) = TWO*STR_TENSOR(1,3)
-               STRAIN(8) = TWO*STR_TENSOR(2,3)
-                                                              ! Transform 2D bending strains
-               STR_TENSOR(1,1) = STRAIN(4)   ;   STR_TENSOR(1,2) = STRAIN(6)/TWO ; STR_TENSOR(1,3) = ZERO
-               STR_TENSOR(2,1) = STRAIN(6)/TWO ; STR_TENSOR(2,2) = STRAIN(5)     ; STR_TENSOR(2,3) = ZERO
-               STR_TENSOR(3,1) = ZERO          ; STR_TENSOR(3,2) = ZERO          ; STR_TENSOR(3,3) = ZERO
-
-               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID )
-
-               STRAIN(4) = STR_TENSOR(1,1)
-               STRAIN(5) = STR_TENSOR(2,2)
-               STRAIN(6) = TWO*STR_TENSOR(1,2)
-
-            ENDIF
+            ! Shell 2D families: do not apply STR_CID rotation at raw recovery stage.
+            ! See note above.
 
          ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
 

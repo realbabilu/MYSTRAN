@@ -47,6 +47,7 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'LOADC0'
       CHARACTER(LEN=CC_ENTRY_LEN)     :: CARD              ! Case Control card
       CHARACTER(LEN=CC_ENTRY_LEN)     :: CARD1             ! CARD shifted to begin in col 1
+      CHARACTER(LEN=CC_ENTRY_LEN)     :: CARD_SET_NORM     ! CARD1 after normalizing MSC/NX "SET n ..." syntax
       CHARACTER(12*BYTE)              :: DECK_NAME   = 'CASE CONTROL'
       CHARACTER(10*BYTE)              :: END_CARD
 
@@ -54,6 +55,9 @@
       INTEGER(LONG)                   :: IERR              ! Error indicator. If CHAR not found, IERR set to 1
       INTEGER(LONG)                   :: IOCHK             ! IOSTAT error number when reading a Case Control card from unit IN1
       INTEGER(LONG)                   :: JERR              ! Error count
+      INTEGER(LONG)                   :: K
+      INTEGER(LONG)                   :: SETID_END
+      LOGICAL                         :: SEEN_SETID
 
 
 
@@ -95,8 +99,33 @@
             LSUB = LSUB + 1
 
          ELSE IF (CARD1(1: 3) == 'SET'       ) THEN
+            CARD_SET_NORM = CARD1
+            IF (INDEX(CARD_SET_NORM,'=') == 0) THEN
+               SEEN_SETID = .FALSE.
+               SETID_END = 0
+               DO K=5,CC_ENTRY_LEN
+                  IF (CARD_SET_NORM(K:K) /= ' ') THEN
+                     SEEN_SETID = .TRUE.
+                  ELSE IF (SEEN_SETID) THEN
+                     SETID_END = K - 1
+                     EXIT
+                  ENDIF
+               ENDDO
+               IF (SEEN_SETID .AND. (SETID_END == 0)) THEN
+                  SETID_END = CC_ENTRY_LEN
+                  DO K=CC_ENTRY_LEN,5,-1
+                     IF (CARD_SET_NORM(K:K) /= ' ') THEN
+                        SETID_END = K
+                        EXIT
+                     ENDIF
+                  ENDDO
+               ENDIF
+               IF ((SETID_END >= 5) .AND. (SETID_END < CC_ENTRY_LEN)) THEN
+                  CARD_SET_NORM = CARD_SET_NORM(1:SETID_END)//' = '//CARD_SET_NORM(SETID_END+2:)
+               ENDIF
+            ENDIF
             LSETS = LSETS + 1
-            CALL CC_SET0 ( CARD1 )
+            CALL CC_SET0 ( CARD_SET_NORM )
 
          ELSE IF (CARD1(1:10) == 'BEGIN BULK') THEN
             EXIT

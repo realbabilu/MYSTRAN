@@ -44,7 +44,9 @@
                                          EIG_VECS, EIG_EXTRACT_METHOD, EIG_EXTRACT_MODE, EIG_EXTRACT_SOURCE, EIG_FEAST_M0,        &
                                          EIG_FEAST_TOL_DIGITS, EIG_FEAST_MAX_LOOP, EIG_FEAST_N_CONTOUR, EIG_FEAST_SEARCH_SCALE,   &
                                          EIG_SUBSPACE_NSUB, EIG_SUBSPACE_TOL, EIG_SUBSPACE_MAX_ITER, EIG_DENSE_NEX
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC, OUTPUT_POST_REQ, STRFIELD_REQ, NUM_GP_SURFACE, NUM_GP_VOLUME
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC, OUTPUT_POST_REQ, STRFIELD_REQ, NUM_GP_SURFACE, NUM_GP_VOLUME,&
+                                         RESET_GPSTRESS_POST_STATE
+      USE GPSTRESS_SURFACE_UTILS, ONLY:  PARSE_GPSTRESS_SET_CARD, PARSE_GPSTRESS_SURFACE_CARD
 
       USE LOADC_USE_IFs
 
@@ -55,6 +57,7 @@
       CHARACTER( 1*BYTE)              :: DOLLAR_WARN       ! Indicator of whether there was a $ sign in col 1
       CHARACTER(LEN=CC_ENTRY_LEN)     :: CARD              ! Case Control card
       CHARACTER(LEN=CC_ENTRY_LEN)     :: CARD1             ! CARD shifted to begin in col 1
+      CHARACTER(LEN=CC_ENTRY_LEN)     :: CARD_SET_NORM     ! CARD1 after normalizing MSC/NX "SET n ..." syntax
       CHARACTER(12*BYTE)              :: DECK_NAME   = 'CASE CONTROL'
       CHARACTER(10*BYTE), PARAMETER   :: END_CARD    = 'BEGIN BULK'
       CHARACTER(LEN=CC_ENTRY_LEN)     :: QUAD4_LOC
@@ -65,8 +68,11 @@
       INTEGER(LONG)                   :: IOCHK             ! IOSTAT error number when reading a Case Control card from unit IN1
       INTEGER(LONG)                   :: FIRST_MEFM_SUB
       INTEGER(LONG)                   :: RESOLVED_MEFMGRID
+      INTEGER(LONG)                   :: K
+      INTEGER(LONG)                   :: SETID_END
       CHARACTER(6*BYTE)               :: RESOLVED_MEFMLOC
       LOGICAL                         :: MEFM_CONFLICT
+      LOGICAL                         :: SEEN_SETID
 
 
 
@@ -74,6 +80,7 @@
 ! **********************************************************************************************************************************
 
       ! Process CASE CONTROL DECK
+      CALL RESET_GPSTRESS_POST_STATE
 
 outer:DO
          DOLLAR_WARN = 'N'
@@ -198,10 +205,35 @@ inner:         DO
             ENDIF
 
          ELSE IF (CARD1(1:3) == 'SET'     ) THEN
-            IF (OUTPUT_POST_REQ .AND. (INDEX(CARD1,'=') == 0)) THEN
-               CYCLE outer
+            IF (OUTPUT_POST_REQ) THEN
+               CALL PARSE_GPSTRESS_SET_CARD ( CARD1 )
             ELSE
-               CALL CC_SET    ( CARD1 )
+               CARD_SET_NORM = CARD1
+               IF (INDEX(CARD_SET_NORM,'=') == 0) THEN
+                  SEEN_SETID = .FALSE.
+                  SETID_END = 0
+                  DO K=5,CC_ENTRY_LEN
+                     IF (CARD_SET_NORM(K:K) /= ' ') THEN
+                        SEEN_SETID = .TRUE.
+                     ELSE IF (SEEN_SETID) THEN
+                        SETID_END = K - 1
+                        EXIT
+                     ENDIF
+                  ENDDO
+                  IF (SEEN_SETID .AND. (SETID_END == 0)) THEN
+                     SETID_END = CC_ENTRY_LEN
+                     DO K=CC_ENTRY_LEN,5,-1
+                        IF (CARD_SET_NORM(K:K) /= ' ') THEN
+                           SETID_END = K
+                           EXIT
+                        ENDIF
+                     ENDDO
+                  ENDIF
+                  IF ((SETID_END >= 5) .AND. (SETID_END < CC_ENTRY_LEN)) THEN
+                     CARD_SET_NORM = CARD_SET_NORM(1:SETID_END)//' = '//CARD_SET_NORM(SETID_END+2:)
+                  ENDIF
+               ENDIF
+               CALL CC_SET    ( CARD_SET_NORM )
             ENDIF
 
          ELSE IF (CARD1(1:5) == 'SDAMP'   ) THEN
@@ -229,7 +261,11 @@ inner:         DO
             STRFIELD_REQ = .TRUE.
 
          ELSE IF (CARD1(1:7) == 'SURFACE') THEN
-            NUM_GP_SURFACE = NUM_GP_SURFACE + 1
+            IF (OUTPUT_POST_REQ) THEN
+               CALL PARSE_GPSTRESS_SURFACE_CARD ( CARD1 )
+            ELSE
+               NUM_GP_SURFACE = NUM_GP_SURFACE + 1
+            ENDIF
 
          ELSE IF (CARD1(1:6) == 'VOLUME') THEN
             NUM_GP_VOLUME = NUM_GP_VOLUME + 1
