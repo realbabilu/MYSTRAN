@@ -1,10 +1,14 @@
-MYSTRAN
-=======
+MYSTRAN 18.a
+============
 
 MYSTRAN is an acronym for “My Structural Analysis” (https://www.mystran.com)
 This is a beta repository using added some features to test
 
 ---
+This Mystran is fork of MYSTRANSOLVER. The different is this MYSTRAN are using some decks that not existed in Nastran.
+For Example: PBEAMZ, PBeamZ is PBeamL but using more variables like auto-Tapered Cubic/Linear/Parabolic, and
+Stiffness Modifier that made Area Stiffness different, but real area can be used for grav selfweight density,
+More easier dimension parameter for section, etc. 
 
 [Build Instructions](#Build-Instructions) |
 [Introduction](#Introduction) |
@@ -102,7 +106,6 @@ It also contains information and files related to pre- and post-processors relev
 - Discover and resolve bugs
 - Improve performance
 
-
 # Ways You Can Help
 
 - Join the MYSTRAN Discord Channel and/or Forum (links below)
@@ -113,4 +116,4 @@ It also contains information and files related to pre- and post-processors relev
 # Community
 
 - [Join our Discord Channel](https://discord.gg/9k76SkHpHM) - Very active.
-- [Join our Forums](https://mystran.com/forums) - Little activity. Mostly for archive purposes.
+
