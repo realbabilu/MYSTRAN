@@ -30,6 +30,51 @@
 
       END FUNCTION DMUMPS_COMPILED_IN
 
+      LOGICAL FUNCTION DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC ( N, NTERM, I_CRS, J_CRS, A_CRS )
+
+      INTEGER(LONG), INTENT(IN)       :: N
+      INTEGER(LONG), INTENT(IN)       :: NTERM
+      INTEGER(LONG), INTENT(IN)       :: I_CRS(N+1)
+      INTEGER(LONG), INTENT(IN)       :: J_CRS(NTERM)
+      REAL(DOUBLE), INTENT(IN)        :: A_CRS(NTERM)
+
+      INTEGER(LONG)                   :: IROW
+      INTEGER(LONG)                   :: JCOL
+      INTEGER(LONG)                   :: K
+      INTEGER(LONG)                   :: KK
+      LOGICAL                         :: FOUND_PAIR
+      REAL(DOUBLE)                    :: SCALE
+      REAL(DOUBLE), PARAMETER         :: SYM_TOL = 1.0D-10
+
+      DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC = .TRUE.
+
+      DO IROW=1,N
+         DO K=I_CRS(IROW),I_CRS(IROW+1)-1
+            JCOL = J_CRS(K)
+            IF (JCOL == IROW) CYCLE
+
+            FOUND_PAIR = .FALSE.
+            DO KK=I_CRS(JCOL),I_CRS(JCOL+1)-1
+               IF (J_CRS(KK) == IROW) THEN
+                  FOUND_PAIR = .TRUE.
+                  SCALE = MAX(1.0D0, ABS(A_CRS(K)), ABS(A_CRS(KK)))
+                  IF (ABS(A_CRS(K) - A_CRS(KK)) > SYM_TOL*SCALE) THEN
+                     DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC = .FALSE.
+                     RETURN
+                  ENDIF
+                  EXIT
+               ENDIF
+            ENDDO
+
+            IF (.NOT. FOUND_PAIR) THEN
+               DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC = .FALSE.
+               RETURN
+            ENDIF
+         ENDDO
+      ENDDO
+
+      END FUNCTION DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC
+
       SUBROUTINE DMUMPS_FACTOR_CRS ( N, NTERM, I_CRS, J_CRS, A_CRS, SYM_FLAG, INFO_OUT )
 
       INTEGER(LONG), INTENT(IN)       :: N

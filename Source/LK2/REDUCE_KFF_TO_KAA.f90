@@ -43,7 +43,7 @@
       USE FULL_MATRICES, ONLY         :  KAA_FULL, KAO_FULL, GOA_FULL, DUM1, DUM2
       USE SPARSE_MATRICES, ONLY       :  I_KFF, J_KFF, KFF, I_KAA, J_KAA, KAA, I_KAO, J_KAO, KAO, I_GOA, J_GOA, GOA,               &
                                          I_KOO, J_KOO, KOO
-      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS, DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC
 
       USE SPARSE_MATRICES, ONLY       :  SYM_GOA, SYM_KFF, SYM_KAA, SYM_KAO, SYM_KOO
       USE SCRATCH_MATRICES
@@ -58,6 +58,7 @@
       CHARACTER(  8*BYTE)             :: CLOSE_STAT          ! Char constant for the CLOSE status of a file
       CHARACTER(  1*BYTE)             :: EQUED               ! 'Y' if the stiff matrix was equilibrated in subr EQUILIBRATE
       CHARACTER(  1*BYTE)             :: EQUIL_KOO           ! 'Y'/'N' for whether to equilibrate KOO in subr SYM_MAT_DECOMP_LAPACK
+      CHARACTER(  1*BYTE)             :: MUMPS_KOO_FLAG      ! 'Y' if KOO should be treated as symmetric by MUMPS
       CHARACTER(  1*BYTE)             :: SYM_CRS2            ! Storage format for matrix CRS2 (either 'Y' for sym storage or
 !                                                              'N' for nonsymmetric storage)
 
@@ -177,7 +178,17 @@
                ENDIF
 
                INFO = 0
-               CALL DMUMPS_FACTOR_CRS ( NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, 'Y', INFO )
+               IF (SPARSTOR == 'NONSYM') THEN
+                  IF (DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC ( NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO )) THEN
+                     MUMPS_KOO_FLAG = 'Y'
+                  ELSE
+                     MUMPS_KOO_FLAG = 'N'
+                  ENDIF
+               ELSE
+                  MUMPS_KOO_FLAG = 'Y'
+               ENDIF
+               WRITE(F06,9813) 'KOO', MUMPS_KOO_FLAG, SUBR_NAME
+               CALL DMUMPS_FACTOR_CRS ( NDOFO, NTERM_KOO, I_KOO, J_KOO, KOO, MUMPS_KOO_FLAG, INFO )
                IF (INFO /= 0) THEN
                   FATAL_ERR = FATAL_ERR + 1
                   WRITE(ERR,9811) INFO, SUBR_NAME
@@ -386,6 +397,8 @@
                     ,/,14X,A,' = ',A,' WAS REQUESTED BUT THIS BUILD WAS NOT COMPILED WITH DMUMPS_Solver.')
 
 9811 FORMAT(' *ERROR  9811: MUMPS FACTORIZATION FAILED WITH INFOG(1) = ',I12,' IN SUBR ',A)
+
+9813 FORMAT(' *INFORMATION: MUMPS symmetry audit for matrix ',A,' chose mode ',A1,' in subr ',A)
 
 12345 FORMAT(A,10X,A)
 

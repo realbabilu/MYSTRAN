@@ -46,7 +46,8 @@
       USE LAPACK_LIN_EQN_DGB
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 ! --- MUMPS_COO add begin --- !
-      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS, DMUMPS_SOLVE_VECTOR, DMUMPS_FREE_FACTORS
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS, DMUMPS_SOLVE_VECTOR, DMUMPS_FREE_FACTORS,        &
+                                         DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC
 ! --- MUMPS_COO add end --- !
 
       USE EIG_INV_PWR_USE_IFs
@@ -57,6 +58,7 @@
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'EIG_INV_PWR'
       CHARACTER(  1*BYTE)             :: EQUED             ! 'Y' if KLL stiff matrix was equilibrated in subr EQUILIBRATE
+      CHARACTER(  1*BYTE)             :: MUMPS_KMSM_FLAG   ! 'Y' if KMSM should be treated as symmetric by MUMPS
 
       INTEGER(LONG)                   :: DEB_PRT(2)        ! Debug numbers to say whether to write ABAND and/or its decomp to output
 !                                                            file in called subr SYM_MAT_DECOMP_LAPACK (ABAND = band form of KLL)
@@ -217,7 +219,17 @@
                CALL OUTA_HERE ( 'Y' )
             ENDIF
 
-            CALL DMUMPS_FACTOR_CRS ( NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, 'Y', INFO )
+            IF (SPARSTOR == 'NONSYM') THEN
+               IF (DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC ( NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM )) THEN
+                  MUMPS_KMSM_FLAG = 'Y'
+               ELSE
+                  MUMPS_KMSM_FLAG = 'N'
+               ENDIF
+            ELSE
+               MUMPS_KMSM_FLAG = 'Y'
+            ENDIF
+            WRITE(F06,9813) 'KMSM', MUMPS_KMSM_FLAG, SUBR_NAME
+            CALL DMUMPS_FACTOR_CRS ( NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM, MUMPS_KMSM_FLAG, INFO )
             IF (INFO /= 0) THEN
                WRITE(ERR,9811) INFO, SUBR_NAME
                WRITE(F06,9811) INFO, SUBR_NAME
@@ -498,6 +510,8 @@ iters:DO
  9811 FORMAT(' *ERROR  9811: MUMPS FACTORIZATION FAILED WITH INFOG(1) = ',I12,' IN SUBR ',A)
 
  9812 FORMAT(' *ERROR  9812: MUMPS SOLVE FAILED WITH INFOG(1) = ',I12,' AT ITERATION ',I12,' IN SUBR ',A)
+
+ 9813 FORMAT(' *INFORMATION: MUMPS symmetry audit for matrix ',A,' chose mode ',A1,' in subr ',A)
 
 12345 FORMAT(10X,I4,3X,1ES15.6,2X,1ES15.2,A)
 

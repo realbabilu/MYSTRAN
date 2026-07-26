@@ -40,7 +40,7 @@
                                          NTERM_KLL, NTERM_PL, NTERM_RMG, NMPC, NRIGEL, RESTART, SOL_NAME, WARN_ERR
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, TEN, ONEPP6
       USE PARAMS, ONLY                :  BAILOUT, CRS_CCS, EPSERR, EPSIL, KLLRAT, RELINK3, RCONDK, SOLLIB, SUPINFO, SUPWARN,     &
-                                         SPARSE_FLAVOR, WINAMEM
+                                         SPARSE_FLAVOR, SPARSTOR, WINAMEM
       USE FULL_MATRICES, ONLY         :  DUM1
       USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_PL, J_PL, PL
       USE LAPACK_DPB_MATRICES, ONLY   :  RES
@@ -54,7 +54,8 @@
       USE SCRATCH_MATRICES, ONLY      :  I_CCS1, J_CCS1, CCS1
       USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO
 ! --- MUMPS_COO add begin --- !
-      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS, DMUMPS_SOLVE_VECTOR, DMUMPS_FREE_FACTORS
+      USE DMUMPS_STUF, ONLY           :  DMUMPS_COMPILED_IN, DMUMPS_FACTOR_CRS, DMUMPS_SOLVE_VECTOR, DMUMPS_FREE_FACTORS,        &
+                                         DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC
 ! --- MUMPS_COO add end --- !
 
 ! Interface module not needed for subr's DPBTRF and DPBTRS. These are "CONTAIN'ed" in module LAPACK_LIN_EQN_DPB,
@@ -76,6 +77,7 @@
       CHARACTER(  2*BYTE)             :: L_SET    = 'L '   ! L-set designator
       CHARACTER(  1*BYTE)             :: EQUED             ! 'Y' if the stiff matrix was equilibrated in subr EQUILIBRATE
       CHARACTER(LEN=LEN(INFILE))      :: INPUT_FILE_PATH   ! Full path of the current input deck
+      CHARACTER(  1*BYTE)             :: MUMPS_KLL_FLAG    ! 'Y' if KLL should be treated as symmetric by MUMPS
       CHARACTER(  1*BYTE)             :: NULL_COL          ! 'Y' if a col of KAO(transpose) is null
 
       INTEGER(LONG)                   :: DEB_PRT(2)        ! Debug numbers to say whether to write ABAND and/or its decomp to output
@@ -134,6 +136,7 @@
       LOGICAL                         :: USE_DGB_FALLBACK  ! Use DGBTRF/DGBTRS if DPBTRF fails
       LOGICAL                         :: USE_DENSE_FALLBACK ! Use DGETRF/DGETRS if DGBTRF fails
       LOGICAL                         :: USE_SPARSE_FALLBACK ! Use SuperLU fallback if banded paths fail
+      LOGICAL                         :: KLL_NUMERICALLY_SYMMETRIC ! True if full CRS KLL is pairwise symmetric numerically
       REAL(DOUBLE), ALLOCATABLE       :: RFAC_DGB(:,:)     ! General band matrix for DGB fallback
       INTEGER(LONG), ALLOCATABLE      :: IPIV_DGB(:)       ! Pivot vector for DGB fallback
       INTEGER(LONG), ALLOCATABLE      :: IPIV_DGE(:)       ! Pivot vector for DGETRF/DGETRS fallback
@@ -414,7 +417,18 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
             ENDIF
 
             INFO = 0
-            CALL DMUMPS_FACTOR_CRS ( NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, 'Y', INFO )
+            IF (SPARSTOR == 'NONSYM') THEN
+               KLL_NUMERICALLY_SYMMETRIC = DMUMPS_CRS_IS_NUMERICALLY_SYMMETRIC ( NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL )
+               IF (KLL_NUMERICALLY_SYMMETRIC) THEN
+                  MUMPS_KLL_FLAG = 'Y'
+               ELSE
+                  MUMPS_KLL_FLAG = 'N'
+               ENDIF
+            ELSE
+               MUMPS_KLL_FLAG = 'Y'
+            ENDIF
+            WRITE(F06,9813) 'KLL', MUMPS_KLL_FLAG, SUBR_NAME
+            CALL DMUMPS_FACTOR_CRS ( NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL, MUMPS_KLL_FLAG, INFO )
             IF (INFO /= 0) THEN
                FATAL_ERR = FATAL_ERR + 1
                WRITE(ERR,9811) INFO, SUBR_NAME
@@ -768,6 +782,8 @@ FreeS:IF ((SOLLIB == 'SPARSE  ') .OR. USE_SPARSE_FALLBACK) THEN      ! Last, fre
   9811 FORMAT(' *ERROR  9811: MUMPS FACTORIZATION FAILED WITH INFOG(1) = ',I12,' IN SUBR ',A)
 
   9812 FORMAT(' *ERROR  9812: MUMPS SOLVE FAILED WITH INFOG(1) = ',I12,' FOR SUBCASE ',I12,' IN SUBR ',A)
+
+  9813 FORMAT(' *INFORMATION: MUMPS symmetry audit for matrix ',A,' chose mode ',A1,' in subr ',A)
 
   9998 FORMAT(' *ERROR  9998: COMM ',I3,' INDICATES UNSUCCESSFUL LINK ',I2,' COMPLETION.'                                          &
              ,/,14X,' FATAL ERROR - CANNOT START LINK ',I2)

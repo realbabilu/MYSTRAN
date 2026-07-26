@@ -3088,6 +3088,36 @@
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
 
+! SPARSE_FLAVOR sets the sparse direct solver flavor while keeping PARAM,SOLLIB,SPARSE as a simple 3-word choice
+
+      ELSE IF (JCARD(2)(1:8) == 'SPARSE_F') THEN
+         PARNAM = 'SPARSE_FLAVOR'
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      (CHRPARM(1:7) == 'SUPERLU') THEN
+               SOLLIB        = 'SPARSE  '
+               SPARSE_FLAVOR = 'SUPERLU '
+            ELSE IF (CHRPARM(1:5) == 'MUMPS') THEN
+               SOLLIB        = 'SPARSE  '
+               SPARSE_FLAVOR = 'MUMPS   '
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'SUPERLU or MUMPS',CHRPARM,SPARSE_FLAVOR
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'SUPERLU or MUMPS',CHRPARM,SPARSE_FLAVOR
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
+         CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
+
 ! SORT_MAX sets the max number of times SORT algorithms are executed
 
       ELSE IF (JCARD(2)(1:8) == 'SORT_MAX') THEN
