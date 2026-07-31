@@ -238,6 +238,8 @@ Primary head-to-head labels:
 
 - `MY-DKMQ24` = `CQUADR + PARAM,QUADRTYP,DKMQ24`
 - `MY-SIMO93` = `CQUADR + PARAM,QUADRTYP,SIMO`
+- `MY-MITCP+DHB` = `CQUADR + PARAM,QUADRTYP,MITC4PD`
+- `MY-SIMO89` = `CQUAD4 + PARAM,QUAD4TYP,SIMO`
 - `MY-MITC4P` = `CQUAD4 + PARAM,QUAD4TYP,MITC4+`
 
 Existing plot files in the Python workspace:

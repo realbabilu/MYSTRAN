@@ -145,7 +145,10 @@ Use this mapping for future head-to-head tests:
 | MYSTRAN label | PARAM selector | Fortran kernel | Correct Python comparison |
 |---|---|---|---|
 | `MY-DKMQ20` | `PARAM,QUAD4TYP,DKMQ20` | `CQUAD4_DKMQ20_RHR.f90` | `DKMQ20_ShellElement_RHR_6dof_AU_K6ROT.py` |
+| `MY-SIMO89` | `PARAM,QUAD4TYP,SIMO` | `CQUAD4_SIMO1989.f90` | Simo1989-style 5-DOF Python shell, with MYSTRAN K6ROT handling for drilling |
 | `MY-DKMQ24` | default CQUADR DKMQ24 path | CQUADR DKMQ24/MYSTRAN path | `DKMQ24_MystranCQUADR_ShellElement_RHR.py` |
+| `MY-SIMO93` | `PARAM,QUADRTYP,SIMO` | `CQUADR_SIMO1993.f90` | `Simo1993_ShellElement_v1p6.py` |
+| `MY-MITCP+DHB` | `PARAM,QUADRTYP,MITC4PD` | `CQUADR_MITC4PHB.f90` + `CQUADR_MITC4PHB_B.f90` | MITC4+/D Hughes-Brezzi research/beta branch; not patch-test-clean yet |
 | Python original DKMQ24 | n/a | n/a | `DKMQ24_ShellElement_RHR.py`; do not assume it equals MYSTRAN DKMQ24 |
 | `MY-MITC4P` | `PARAM,QUAD4TYP,MITC4+` or default CQUAD4 MITC4+ path | MYSTRAN MITC4/MITC4+ files | `MITC4p_MystranCQUAD4_ShellElement_6dof.py` if comparing MYSTRAN-like behavior; not the older plain MITC4+ prototype |
 
@@ -160,6 +163,9 @@ Recommended labels:
 - `MY-DKMQ20` for MYSTRAN CQUAD4 DKMQ20.
 - `DKMQ24-orig` for original Python DKMQ24.
 - `DKMQ24-MY` or `MY-DKMQ24` for the MYSTRAN-like DKMQ24/AU path.
+- `SIMO89-MY` or `MY-SIMO89` for CQUAD4 Simo1989 with MYSTRAN K6ROT.
+- `SIMO93-MY` or `MY-SIMO93` for CQUADR Simo1993.
+- `MITC4PD-HB-MY` or `MY-MITCP+DHB` for the CQUADR MITC4+ drilling/Hughes-Brezzi beta branch.
 - `MITC4+PY` for standalone Python MITC4+.
 - `MITC4+MY` or `MY-MITC4P` for MYSTRAN CQUAD4 MITC4+.
 

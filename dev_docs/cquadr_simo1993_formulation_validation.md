@@ -277,6 +277,8 @@ The current documentation target is to compare:
 
 - `MY-SIMO93` = `CQUADR + PARAM,QUADRTYP,SIMO`
 - `MY-DKMQ24` = `CQUADR + PARAM,QUADRTYP,DKMQ24`
+- `MY-MITCP+DHB` = `CQUADR + PARAM,QUADRTYP,MITC4PD`
+- `MY-SIMO89` = `CQUAD4 + PARAM,QUAD4TYP,SIMO`
 - `MY-MITC4P` = `CQUAD4 + PARAM,QUAD4TYP,MITC4+`
 - `NASTRAN CQUAD4` = MSC Nastran deck with `CQUAD4`
 - `NASTRAN CQUADR` = MSC Nastran deck mechanically converted from the same
