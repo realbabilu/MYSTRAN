@@ -1,6 +1,6 @@
 # Shell QUAD formulation notes: DKMQ20, DKMQ24, and MITC4+
 
-Context: these notes document the current comparison between the Python prototype elements under `D:\18a\bending_only\Shell\gemini2\shit` and the MYSTRAN Fortran ports under `D:\18a\MYSTRAN\Source\EMG\EMG4`.
+Context: these notes document the current comparison between the Python prototype elements under `D:\18a\bending_only\Shell\gemini2` and the MYSTRAN Fortran ports under `D:\18a\MYSTRAN\Source\EMG\EMG4`.
 
 The main benchmark referenced here is Problem 2-004 MacNeal twisted beam, thick case, after rerunning the stale MYSTRAN F06 files for `MY-DKMQ20`.
 
