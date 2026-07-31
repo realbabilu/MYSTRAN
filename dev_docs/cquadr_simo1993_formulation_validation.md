@@ -7,7 +7,7 @@ This note documents the current MYSTRAN `CQUADR` Simo1993 branch:
 - selector: `PARAM,QUADRTYP,SIMO`
 - dispatcher: `Source/EMG/EMG1/EMG.f90`
 - kernel: `Source/EMG/EMG4/CQUADR_SIMO1993.f90`
-- Python reference: `D:\18a\bending_only\Shell\gemini2\shit\Simo1993_ShellElement_v1p6.py`
+- Python reference: `D:\18a\bending_only\Shell\gemini2\\Simo1993_ShellElement_v1p6.py`
 
 The implementation is intentionally treated as an isolated `CQUADR` kernel. It
 does not call the `CQUAD4` MITC4/MITC4+ path and does not reuse the DKMQ24
@@ -233,7 +233,7 @@ because `SHELL_T(1,1)` contains the `5/6 * G * h` isotropic shear scale.
 Deck used:
 
 ```text
-D:\18a\bending_only\Shell\gemini2\shit\working_mystran\prob_2_001_patch\prob_2_001_thick_my_cquadr_simo93.dat
+D:\18a\bending_only\Shell\gemini2\\working_mystran\prob_2_001_patch\prob_2_001_thick_my_cquadr_simo93.dat
 ```
 
 Source deck:
@@ -269,9 +269,9 @@ CQUADR/SIMO93 now passes the engineering-force patch output for problem 2-001.
 
 Existing comparison plots:
 
-- `D:\18a\bending_only\Shell\gemini2\shit\prob_2_002_convergence.png`
-- `D:\18a\bending_only\Shell\gemini2\shit\prob_2_003_convergence.png`
-- `D:\18a\bending_only\Shell\gemini2\shit\prob_2_004_convergence.png`
+- `D:\18a\bending_only\Shell\gemini2\\prob_2_002_convergence.png`
+- `D:\18a\bending_only\Shell\gemini2\\prob_2_003_convergence.png`
+- `D:\18a\bending_only\Shell\gemini2\\prob_2_004_convergence.png`
 
 The current documentation target is to compare:
 
@@ -286,9 +286,9 @@ The current documentation target is to compare:
 
 Current regenerated plot files:
 
-- `D:\18a\bending_only\Shell\gemini2\shit\value_convergence_2_002_thick.png`
-- `D:\18a\bending_only\Shell\gemini2\shit\prob_2_003_convergence.png`
-- `D:\18a\bending_only\Shell\gemini2\shit\macneal_twisted_beam_convergence.png`
+- `D:\18a\bending_only\Shell\gemini2\\value_convergence_2_002_thick.png`
+- `D:\18a\bending_only\Shell\gemini2\\prob_2_003_convergence.png`
+- `D:\18a\bending_only\Shell\gemini2\\macneal_twisted_beam_convergence.png`
 
 MacNeal 2-004, N=24, after adding MSC Nastran `CQUADR`:
 
