@@ -103,16 +103,19 @@ triangular patch-test script, but the MYSTRAN production selector remains
 Reference values were taken from the SAP2000 v20 verification PDFs under:
 
 ```text
-C:\Program Files\Computers and Structures\SAP2000 20\Manuals\Verification\Analysis\Shells
+[SAP2000 20\Manuals\Verification\Analysis\Shells]
+https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Shells/Problem%202-001.pdf
+to
+https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Shells/Problem%202-017.pdf
 ```
 
 The local comparison scripts are:
 
 ```text
-D:\18a\bending_only\Shell\gemini2\shit\problem_2_001_mystran.py
-D:\18a\bending_only\Shell\gemini2\shit\problem_2_002_mystran.py
-D:\18a\bending_only\Shell\gemini2\shit\problem_2_003_mystran.py
-D:\18a\bending_only\Shell\gemini2\shit\problem_2_004_mystran.py
+problem_2_001_mystran.py
+problem_2_002_mystran.py
+problem_2_003_mystran.py
+problem_2_004_mystran.py
 ```
 
 ### Problem 2-001 patch test
@@ -223,10 +226,10 @@ values are extreme relative to the modern shell branches.  Also exclude
 Python triangular scripts run successfully for Problem 2-001 through 2-004:
 
 ```text
-D:\18a\bending_only\Shell\gemini2\shit\prob_2_001_6dof_triangle.py
-D:\18a\bending_only\Shell\gemini2\shit\prob_2_002_6dof_Triangle.py
-D:\18a\bending_only\Shell\gemini2\shit\prob_2_003_6dof_Triangle.py
-D:\18a\bending_only\Shell\gemini2\shit\prob_2_004_6dof_Triangle.py
+D:\18a\bending_only\Shell\gemini2\\prob_2_001_6dof_triangle.py
+D:\18a\bending_only\Shell\gemini2\\prob_2_002_6dof_Triangle.py
+D:\18a\bending_only\Shell\gemini2\\prob_2_003_6dof_Triangle.py
+D:\18a\bending_only\Shell\gemini2\\prob_2_004_6dof_Triangle.py
 ```
 
 Problem 2-001 triangular patch run status:
