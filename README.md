@@ -1,9 +1,9 @@
 MYSTRAN
 =======
+**This is not the active branch for this repo: **
+GO HERE: https://github.com/realbabilu/MYSTRAN/tree/v18.00.a
 
 MYSTRAN is an acronym for “My Structural Analysis” (https://www.mystran.com)
-
-
 ---
 
 [Build Instructions](#Build-Instructions) |
