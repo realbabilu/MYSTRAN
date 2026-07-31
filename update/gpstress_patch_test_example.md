@@ -11,8 +11,9 @@ This note records the separate GPSTRESS/GSTRESS validation path.
 A GPSTRESS-style deck should keep ordinary element stress requested and add an `OUTPUT(POST)` surface definition:
 
 ```nastran
-GPSTRESS = ALL
-STRFIELD = ALL
+SET 10 = 100
+GPSTRESS = 10
+STRFIELD = 10
 
 SUBCASE 1
   SPC = 1
@@ -31,9 +32,18 @@ SET 1 ALL
 SURFACE 100 SET 1 NORMAL Z
 
 BEGIN BULK
-PARAM,POST,-1
-PARAM,POSTEXT,YES
+$PARAM,POST,-1
+$PARAM,POSTEXT,YES
 ```
+
+Notes:
+
+- in the MSC/Nastran-style deck used for the shell patch test, `GPSTRESS` and `STRFIELD`
+  are tied to the surface ID through `SET 10 = 100`
+- if `OUTPUT(POST)` is used, `PARAM,POST,-1` and `PARAM,POSTEXT,YES` should stay commented out
+  or omitted; enabling both paths together can cause a fatal conflict
+- ordinary element stress tables and `GPSTRESS` surface tables are separate print paths, so
+  repeated/cut-looking headers in F06 should not be interpreted as the same output family
 
 For current MYSTRAN compatibility, `GPSTRESS/GSTRESS` also defaults the stress coordinate request to basic/global when the deck has not explicitly set `PARAM,STR_CID`.
 
@@ -92,4 +102,3 @@ Use GPSTRESS examples to verify:
 Use `PARAM,STR_CID,0` ordinary element stress tests for SAP2000 `2-001` global element-stress comparison.
 
 Use `GPSTRESS` tests for future MSC-style grid-point stress recovery work.
-

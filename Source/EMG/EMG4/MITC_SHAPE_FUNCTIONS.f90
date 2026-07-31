@@ -46,12 +46,12 @@
 ! **********************************************************************************************************************************
 
                                                            ! Shape function derivatives at R,S
-      IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
 
          CALL SHP2DQ ( 0, 0, ELGP, 'MITC_SHAPE_FUNCTIONS', '', 0, R, S, 'N', PSH, DPSHG )
 
                                                            ! Change node numbering to match Bathe's MITC4+ paper.
-         IF (TYPE(1:5) == 'QUAD4') THEN
+         IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
             DUM = DPSHG
             DPSHG(:,1) = DUM(:,3)
             DPSHG(:,2) = DUM(:,4)

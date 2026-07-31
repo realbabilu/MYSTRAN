@@ -67,7 +67,7 @@
 
          AREA = ZERO
 
-         IF ((TYPE(1:5) == "QUAD4")) THEN
+         IF ((TYPE(1:5) == "QUAD4") .OR. (TYPE == "QUADR   ")) THEN
 
             XSD(1) = XEL(1,1) - XEL(2,1)
             XSD(2) = XEL(2,1) - XEL(3,1)

@@ -60,7 +60,8 @@
                          PRTCORD, PRTDISP, PRTDLR, PRTDOF, PRTFOR, PRTHMN, PRTGMN, PRTGOA, PRTCGLTM, PRTPHIZL,      &
                          PRTIFLTM, PRTKXX, PRTMXX, PRTOU4, PRTPHIXA, PRTMASS, PRTMASSD, PRTRMG, PRTSCP, PRTPSET,    &
                          PRTTSET, PRTUSET, PRTSTIFD, PRTSTIFF, PRTUO0, PRTYS, PRTQSYS, Q4SURFIT, QUADAXIS,          &
-                          QUAD4TYP, SOLIDTYP, TRIA3TYP, RCONDK, RELINK3, RSPECTRA, SCRSPEC, RSCOMB, RSTYPE, SEQPRT, SEQQUIT,   &
+                          QUAD4TYP, QUADRTYP, SOLIDTYP, TRIA3TYP, RCONDK, RELINK3, RSPECTRA, SCRSPEC, RSCOMB,       &
+                          RSTYPE, SEQPRT, SEQQUIT,   &
                           SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, &
                          SOLLIB,                                                                                      &
                          SPARSE_FLAVOR, SPARSTOR, SPC1QUIT, SORT_MAX, SPC1SID, STR_CID, SUPINFO, SUPWARN, NOCOUNTS,&
@@ -2797,15 +2798,19 @@
                QUAD4TYP = 'MITC4 '
             ELSE IF (CHRPARM == 'MITC4+  ') THEN
                QUAD4TYP = 'MITC4+'
+            ELSE IF (CHRPARM == 'DKMQ20  ') THEN
+               QUAD4TYP = 'DKMQ20'
+            ELSE IF (CHRPARM == 'SIMO    ') THEN
+               QUAD4TYP = 'SIMO  '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'MIN4T, MIN4, MITC4 or MITC4+',CHRPARM,QUAD4TYP
+               WRITE(ERR,1189) PARNAM,'MIN4T, MIN4, MITC4, MITC4+, DKMQ20 or SIMO',CHRPARM,QUAD4TYP
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'MIN4T, MIN4, MITC4 or MITC4+',CHRPARM,QUAD4TYP
+                  WRITE(F06,1189) PARNAM,'MIN4T, MIN4, MITC4, MITC4+, DKMQ20 or SIMO',CHRPARM,QUAD4TYP
                ENDIF
             ENDIF
          ENDIF
@@ -2813,6 +2818,38 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )! Make sure that there are no imbedded blanks in field 3
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )! Issue warning if fields 4-9 not blank
          CALL CRDERR ( CARD )                              ! CRDERR prints errors found when reading fields
+
+! QUADRTYP tells which element to use for the MYSTRAN CQUADR element
+
+      ELSE IF (JCARD(2)(1:8) == 'QUADRTYP') THEN
+         PARNAM = 'QUADRTYP'
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      (CHRPARM == 'DKMQ24  ') THEN
+               QUADRTYP = 'DKMQ24  '
+            ELSE IF (CHRPARM == 'DKMQ24N ') THEN
+               QUADRTYP = 'DKMQ24N '
+            ELSE IF (CHRPARM == 'SIMO    ') THEN
+               QUADRTYP = 'SIMO    '
+            ELSE IF (CHRPARM == 'MITC4PD ') THEN
+               QUADRTYP = 'MITC4PD '
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'DKMQ24, DKMQ24N, SIMO or MITC4PD',CHRPARM,QUADRTYP
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'DKMQ24, DKMQ24N, SIMO or MITC4PD',CHRPARM,QUADRTYP
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
 
 ! SOLIDTYP selects isolated alternative solid formulations where available
 

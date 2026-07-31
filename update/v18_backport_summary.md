@@ -97,6 +97,9 @@ Main source themes:
 - RFORCE and load-processing fixes
 - K6ROT-related source additions and stabilization fixes
 - `MEFFMASS/MPFACTOR` Case Control compatibility bridge plus backend corrections
+- `GPSTRESS/GSTRESS` acceptance plus initial `OGS1` writer compatibility work
+- thin-shell `PSHELL/CQUAD4` compatibility fix when `MID3` is blank
+- `PBEAMZ` parser and beam-property expansion path for modifier/taper-style beam input
 - shell stress, shell strain, and element force writer backports
 - principal stress and principal strain helper backports
 - `NEU` writer architecture cleanup for more consistent and faster text output
@@ -200,6 +203,9 @@ Main retained July source changes:
 - subcase/state reconstruction support for multiple subcase workflows
 - RFORCE corrections in the source path
 - K6ROT helper introduction and wiring
+- `GPSTRESS/GSTRESS` parser and OP2/F06 writer-side compatibility updates
+- restored `PSHELL` thin-shell fallback so blank `MID3` inherits `MID2`
+- `PBEAMZ` deck parsing, metadata storage, and section/station expansion
 - writer-side shell stress/strain/force updates
 - principal 2D stress/strain output updates
 
@@ -245,6 +251,158 @@ Current boundary of this work:
 - it does not yet claim full import-grade FEMAP geometry export beyond the current snapshot approach
 - block `450` is now closer to FEMAP v9 reference exports for modal and buckling-eigen sets, but it still does not
   reproduce the full `From:/Date:/<NULL>/title-trailer` metadata used by FEMAP text exports
+
+## GPSTRESS / GSTRESS update
+
+Current July status:
+
+- `GPSTRESS` and `GSTRESS` are accepted in the Case Control path.
+- `STRFIELD` is accepted for the same workflow.
+- MSC-style `OUTPUT(POST)` decks with `SET` and `SURFACE` are now parseable in the local MYSTRAN path.
+- the OP2 writer now emits a readable `OGS1` table for the investigated shell patch-test workflow
+  and the row/framing issues that previously caused `pyNastran` to abort were corrected in the current branch state
+- local validation tooling was hardened so `GRIDPOINTSURFACESTRESSES` invariants are recomputed from
+  `NX/NY/TXY` instead of trusting the later raw `OGS1` payload slots
+
+Important scope note:
+
+- this is an initial compatibility implementation, not full MSC-style weighted grid-point stress recovery yet
+- ordinary shell element stress remains the main path for element-level validation
+- `GPSTRESS` is the grid/surface-style path and should be treated as its own result family
+
+Typical usage pattern:
+
+```nastran
+GPSTRESS = ALL
+STRFIELD = ALL
+
+SUBCASE 1
+  SPC = 1
+  LOAD = 1
+  DISPLACEMENT = ALL
+  STRESS(CENTER,CORNER) = ALL
+
+SUBCASE 2
+  SPC = 2
+  LOAD = 2
+  DISPLACEMENT = ALL
+  STRESS(CENTER,CORNER) = ALL
+
+OUTPUT(POST)
+SET 1 ALL
+SURFACE 100 SET 1 NORMAL Z
+
+BEGIN BULK
+PARAM,POST,-1
+PARAM,POSTEXT,YES
+```
+
+Notes for current use:
+
+- if the deck has not explicitly requested `PARAM,STR_CID`, the GPSTRESS/GSTRESS path currently defaults the
+  stress-coordinate request toward the basic/global style needed by the patch-test comparisons
+- when validating with OP2, `OGS1` should be treated separately from ordinary shell `OES1X1`
+- useful local references:
+  - `update/gpstress_patch_test_example.md`
+  - `update/gpstress_recovery_design.md`
+  - `update/pynastran_gpstress_notes.md`
+  - `update/ogs1_writer_audit_2026-07-19.md`
+
+## Thin-shell `PSHELL` / `CQUAD4` blank `MID3` compatibility fix
+
+Current July status:
+
+- `Source/LK1/L1A-BD/BD_PSHEL.f90` now restores the old compatibility fallback:
+  when `MID3` is blank, it is reset to `MID2`
+- this keeps thin-shell-style `PSHELL` input compatible with decks that specify membrane and bending material
+  but leave the transverse-shear material field blank
+- this fix matters especially for `CQUAD4` shell paths where older decks intended “thin-shell-ish” behavior
+  but were losing the expected material carry-over when `MID3` was left blank
+
+Typical usage pattern:
+
+```nastran
+PSHELL,1,1,0.001,1
+```
+
+Meaning in the current branch:
+
+- `MID1 = 1` supplies membrane material
+- `MID2 = 1` supplies bending material
+- blank `MID3` now inherits `MID2` again for compatibility
+- field 6 (`12I/TM^3`) still defaults to `1.0` when blank, so ordinary bending inertia remains active
+
+Practical outcome:
+
+- thin shell patch-test and compatibility decks no longer require a forced explicit `MID3` entry just to
+  preserve the historic MYSTRAN/Nastran-style intent
+- this is a compatibility fix, not a new shell formulation
+
+## `PBEAMZ` beam-property deck support
+
+Current July status:
+
+- `PBEAMZ` was added as a beam-property input path built around `PBEAML`-style section definitions
+  plus a small wizard-style metadata tail
+- the current branch stores extra `PBEAMZ` metadata in the beam property arrays and expands the property
+  into a beam-station representation for downstream beam use
+- `PBEAMZ` is intended to support section-based beam input while separating:
+  - physical section geometry
+  - stiffness-only modifiers
+  - optional taper metadata
+  - optional rigid-offset metadata
+
+Current recognized metadata tail:
+
+- `STIFFMOD`
+- `NSM`
+- `TAPER`
+- `STATIONS`
+- `RIOFFSET` / `ROFSET`
+
+Minimal non-tapered example:
+
+```nastran
+PBEAMZ,1,1,,BAR
++,DIM0A,12.0,12.0,
++,END
+```
+
+Modifier example:
+
+```nastran
+PBEAMZ,1,1,,BAR
++,DIM0A,12.0,12.0,
++,STIFFMOD,1000.,1.0,1.0,0.0,0.0
++,END
+```
+
+Station-control example:
+
+```nastran
+PBEAMZ,1,1,,BAR
++,DIM0A,12.0,12.0,
++,STATIONS,10,0.33,0.66
++,END
+```
+
+Current semantics:
+
+- `DIM0A` defines the start/end section for a prismatic member
+- a tapered member adds `TAPER` and an end-section block such as `DIM1A`
+- default stationing currently expands the beam into 11 stations (`0.0, 0.1, ..., 1.0`) unless overridden
+- `STIFFMOD` is stiffness-only; it is meant to avoid the older fake-geometry workaround where area/inertia were
+  exaggerated just to emulate a modifier
+- `NSM` applies to mass/selfweight intent, not stiffness
+
+Local validation direction used in this workspace:
+
+- `prob_001_inclined_frame_pbeaml.dat` is the main baseline deck
+- `prob_001_inclined_frame_pbeamz_nomod.dat` is the no-modifier `PBEAMZ` comparison deck
+- `prob_001_inclined_frame_pbeamz_mod.dat` is the modifier comparison deck
+- broader notes live in:
+  - `update/pbeamz_phase1.md`
+  - `update/pbeamz_torsion_audit.md`
 
 ## Scope Note
 

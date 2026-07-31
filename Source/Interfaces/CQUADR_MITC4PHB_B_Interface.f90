@@ -1,3 +1,4 @@
+! ###############################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -23,44 +24,24 @@
 
 ! End MIT license text.
 
-      MODULE EMG_USE_IFs
+   MODULE CQUADR_MITC4PHB_B_Interface
 
-! USE Interface statements for all subroutines called by SUBROUTINE EMG
+   INTERFACE
 
-      USE IS_ELEM_PCOMP_PROPS_Interface
-      USE OURTIM_Interface
-      USE ELMDAT1_Interface
-      USE OUTA_HERE_Interface
-      USE ELMGM1_Interface
-      USE ELMGM2_Interface
-      USE ELMGM3_Interface
-      USE GET_MATANGLE_FROM_CID_Interface
-      USE MATERIAL_PROPS_2D_Interface
-      USE ROT_AXES_MATL_TO_LOC_Interface
-      USE MATERIAL_PROPS_3D_Interface
-      USE ELMOUT_Interface
-      USE SHELL_ABD_MATRICES_Interface
-      USE ELMDAT2_Interface
-      USE ELAS1_Interface
-      USE BREL1_Interface
-      USE BUSH_Interface
-      USE TREL1_Interface
-      USE CTRIAR_DKMT18_Interface
-       USE QDEL1_Interface
-       USE CQUAD4_DKMQ20_RHR_Interface
-       USE CQUAD4_SIMO1989_Interface
-       USE CQUADR_DKMQ24_Interface
-       USE CQUADR_DKMQ24N_Interface
-       USE CQUADR_MITC4PHB_B_Interface
-       USE CQUADR_MITC4PHB_Interface
-       USE CQUADR_SIMO1993_Interface
-       USE HEXA_Interface
-      USE PENTA_Interface
-      USE PYRAM_Interface
-      USE TETRA_Interface
-      USE KUSER1_Interface
-      USE USERIN_Interface
-      USE ELMOFF_Interface
-      USE MITC8_Interface
+      SUBROUTINE CQUADR_MITC4PHB_B ( R, S, T, MEMBRANE, BENDING, SHEAR, B )
 
-      END MODULE EMG_USE_IFs
+      USE PENTIUM_II_KIND, ONLY       :  LONG, DOUBLE
+      USE MODEL_STUF, ONLY            :  ELGP
+
+      REAL(DOUBLE) , INTENT(IN)       :: R, S, T           ! Isoparametric coordinates
+      REAL(DOUBLE) , INTENT(OUT)      :: B(6, 6*ELGP)      ! Strain-displacement matrix
+
+      LOGICAL      , INTENT(IN)       :: MEMBRANE          ! If true, generate membrane parts of B (rows 1,2,4)
+      LOGICAL      , INTENT(IN)       :: BENDING           ! If true, generate bending parts of B (rows 1,2,4)
+      LOGICAL      , INTENT(IN)       :: SHEAR             ! If true, generate shear parts of B (rows 5,6)
+
+      END SUBROUTINE CQUADR_MITC4PHB_B
+
+   END INTERFACE
+
+   END MODULE CQUADR_MITC4PHB_B_Interface

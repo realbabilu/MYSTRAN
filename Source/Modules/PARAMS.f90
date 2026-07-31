@@ -477,6 +477,15 @@
 !                                                              'MIN4  ': Use Tessler's MIN4 element 
 !                                                              'MITC4 ': Use Bathe's MITC4 (1983)
 !                                                              'MITC4+': Use Ko/Bathe's 2nd MITC4+ (Nov 2016)
+!                                                              'DKMQ20': 6-DOF DKMQ20/Hughes-Brezzi shell branch (experimental)
+!                                                              'SIMO  ': 6-DOF Simo1989/Hughes-Brezzi shell branch (experimental)
+
+! ----------------------------------------------------------------------------------------------------------------------------------
+      CHARACTER(  8*BYTE)      :: QUADRTYP       = 'DKMQ24  ' ! Which element to use in MYSTRAN as the CQUADR element
+!                                                              'DKMQ24  ': DKMQ24 with SNORM when supplied
+!                                                              'DKMQ24N ': DKMQ24 using geometric normals only
+!                                                              'SIMO    ': Simo1993-style CQUADR branch (experimental)
+!                                                              'MITC4PD ': MITC4+/D Hughes-Brezzi branch (experimental)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  8*BYTE)      :: SOLIDTYP       = 'LEGACY  '! Solid formulation selector.

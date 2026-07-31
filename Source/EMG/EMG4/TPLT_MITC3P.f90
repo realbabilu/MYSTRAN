@@ -7,7 +7,7 @@
 !
 ! Scope in this first port:
 !   - 18 shell DOF: u, v, w, rx, ry, rz at each of 3 CTRIA3 grids
-!   - adds only the plate/shell bending + transverse shear + light drilling penalty block
+!   - adds only the plate/shell bending + transverse shear
 !   - uses 2 internal bubble rotational DOF condensed at element level
 !   - membrane remains supplied by TMEM1 in TREL1 for legacy CTRIA3
 !   - pressure/thermal are intentionally left to legacy paths for now
@@ -33,18 +33,16 @@
       REAL(DOUBLE), INTENT(IN)        :: Y3E
       REAL(DOUBLE), INTENT(OUT)       :: BIG_BB(3,ELDOF,1)
 
-      INTEGER(LONG), PARAMETER        :: IDX_RZ(3)= (/ 6, 12, 18 /)
       INTEGER(LONG), PARAMETER        :: IDX_M(6) = (/ 1, 2, 7, 8, 13, 14 /)
 
       INTEGER(LONG)                   :: I, J, K, L, GP
       REAL(DOUBLE)                    :: XY(3,2), JMAT(2,2), JINV(2,2), DETJ
-      REAL(DOUBLE)                    :: COV_S(2,2), DRILL_PEN
+      REAL(DOUBLE)                    :: COV_S(2,2)
       REAL(DOUBLE)                    :: KFULL(20,20), KAA(18,18), KAB(18,2), KBA(2,18), KBB(2,2), KBB_INV(2,2), KCOND(18,18)
       REAL(DOUBLE)                    :: KPHYS(18,18), KA(18,18), KOUT(18,18), TAE(18,18), TEA(18,18)
       REAL(DOUBLE)                    :: BB(3,8), BS(2,11), BM(3,6), KEI, FACTOR
       REAL(DOUBLE)                    :: BB_REC(3,18), BS_REC(2,18), DUM318(3,18), DUM218(2,18)
       REAL(DOUBLE)                    :: GAUSS_R(7), GAUSS_S(7), GAUSS_W(7)
-      REAL(DOUBLE)                    :: DABS_SHELL
       REAL(DOUBLE)                    :: EPS1
 
       BIG_BB = ZERO
@@ -88,8 +86,6 @@
       JINV(2,2) =  JMAT(1,1)/DETJ
 
       COV_S = MATMUL(TRANSPOSE(JINV), MATMUL(SHELL_T, JINV))
-      DABS_SHELL = MAX(DABS(SHELL_T(1,1)), DABS(SHELL_T(2,2)))
-      DRILL_PEN  = 1.0D-05*DABS_SHELL
       PHI_SQ = ONE
 
       CALL MITC3P_GAUSS_7PT(GAUSS_R, GAUSS_S, GAUSS_W)
@@ -160,7 +156,6 @@
       IF (OPT(4) == 'Y') THEN
          CALL MITC3P_TRANSFORMS(JINV, TAE, TEA)
          KA = MATMUL(TRANSPOSE(TAE), MATMUL(KPHYS, TAE))
-         CALL MITC3P_ADD_DRILLING(KA, AREA, DRILL_PEN)
          KOUT = MATMUL(TRANSPOSE(TEA), MATMUL(KA, TEA))
 
          DO I=1,18
@@ -371,21 +366,6 @@
          A(3,3) = ONE
          A = A + VX + VX2/(ONE + C)
       END SUBROUTINE MITC3P_ROTATION_FROM_E3
-
-      SUBROUTINE MITC3P_ADD_DRILLING(KAIN, AREA_IN, CUSER)
-         REAL(DOUBLE), INTENT(INOUT) :: KAIN(18,18)
-         REAL(DOUBLE), INTENT(IN)    :: AREA_IN, CUSER
-         REAL(DOUBLE)                :: M(3,3), COEFF
-         INTEGER(LONG)               :: I3, J3
-
-         M = RESHAPE((/ TWO, ONE, ONE, ONE, TWO, ONE, ONE, ONE, TWO /), (/3,3/)) * (AREA_IN/12.0D0)
-         COEFF = CUSER/MAX(AREA_IN/THREE, 1.0D-30)
-         DO I3=1,3
-            DO J3=1,3
-               KAIN(IDX_RZ(I3),IDX_RZ(J3)) = KAIN(IDX_RZ(I3),IDX_RZ(J3)) + COEFF*M(I3,J3)
-            ENDDO
-         ENDDO
-      END SUBROUTINE MITC3P_ADD_DRILLING
 
       SUBROUTINE MITC3P_GAUSS_7PT(R, S, W)
          REAL(DOUBLE), INTENT(OUT) :: R(7), S(7), W(7)

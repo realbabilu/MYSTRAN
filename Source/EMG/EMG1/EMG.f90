@@ -51,7 +51,7 @@
                                          WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  SUPINFO, SUPWARN, QUAD4TYP
+      USE PARAMS, ONLY                :  SUPINFO, SUPWARN, QUAD4TYP, QUADRTYP
       USE CONSTANTS_1, ONLY           :  CONV_DEG_RAD, CONV_RAD_DEG, ZERO, ONE
       USE MODEL_STUF, ONLY            :  CAN_ELEM_TYPE_OFFSET, EDAT, EID, EPNT, ETYPE, ISOLID, MATANGLE, NUM_EMG_FATAL_ERRS,       &
                                          PCOMP_PROPS, PLY_NUM, SKIP_K6ROT, TE_IDENT, THETAM, TYPE, XEL, TE
@@ -70,7 +70,6 @@
       CHARACTER( 2*BYTE)              :: LOC                ! Location where THETAM is calculated (for DEBUG output purposes)
       CHARACTER( 1*BYTE)              :: FIX_EDAT      = 'N'! If 'Y', run code to change order of grids in EDAT for 3D elems
       CHARACTER( 1*BYTE)              :: RED_INT_SHEAR = 'N'! If 'Y', use Gaussian weighted average of B matrices for shear terms
-
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID        ! Internal element ID for which
       INTEGER(LONG)                   :: CASE_NUM    = 0    ! Can be subcase number (e.g. for UEL, PEL outout)
       INTEGER(LONG)                   :: DUM_BUG(0:MBUG-1)  ! Values from WRT_BUG sent to subr ELMOUT in a particular call
@@ -367,8 +366,29 @@
          CALL MITC4 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
+      ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20')) THEN
+         CALL CQUAD4_DKMQ20_RHR ( OPT, INT_ELEM_ID )
+         IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
+
+      ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'SIMO  ')) THEN
+         CALL CQUAD4_SIMO1989 ( OPT, INT_ELEM_ID )
+         IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
+
       ELSE IF (TYPE == 'QUADR   ') THEN
-         CALL CQUADR_DKMQ24 ( OPT, INT_ELEM_ID )
+         IF (QUADRTYP == 'DKMQ24  ') THEN
+            CALL CQUADR_DKMQ24 ( OPT, INT_ELEM_ID )
+         ELSE IF (QUADRTYP == 'DKMQ24N ') THEN
+            CALL CQUADR_DKMQ24N ( OPT, INT_ELEM_ID )
+         ELSE IF (QUADRTYP == 'SIMO    ') THEN
+            CALL CQUADR_SIMO1993 ( OPT, INT_ELEM_ID )
+         ELSE IF (QUADRTYP == 'MITC4PD ') THEN
+            CALL CQUADR_MITC4PHB ( OPT, INT_ELEM_ID )
+         ELSE
+            NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,I8)') ' *ERROR: Illegal PARAM,QUADRTYP value "', TRIM(QUADRTYP), '" for CQUADR element ', EID
+            WRITE(F06,'(A,A,A,I8)') ' *ERROR: Illegal PARAM,QUADRTYP value "', TRIM(QUADRTYP), '" for CQUADR element ', EID
+         ENDIF
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF (TYPE(1:5) == 'QUAD8') THEN

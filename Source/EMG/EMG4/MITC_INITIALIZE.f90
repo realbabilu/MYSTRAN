@@ -57,7 +57,7 @@
 ! ----------------------------------------------------------------------------------------------------------------------------------
 ! R, S coordiantes of each node
 
-      IF (TYPE(1:5) == 'QUAD4') THEN
+      IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
 
          ! Bathe's node numbering relationship to R,S coordinates.
          GP_RS(1,1) =  ONE
@@ -139,7 +139,8 @@
 
                                                            ! Use the midsurface normal unless SNORM exists and it's
                                                            ! a linear element.
-         IF (ANY(NORMAL /= ZERO) .AND. ((TYPE(1:5) == 'QUAD4') .OR. ((TYPE(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'MITC3+')))) THEN
+         IF (ANY(NORMAL /= ZERO) .AND. (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR.                         &
+                                        ((TYPE(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'MITC3+')))) THEN
                                                            ! Transform SNORM from basic to XEL element coordinates.
             CALL MATMULT_FFF(TE, NORMAL, 3, 3, 1, DIRECTOR(:,GP))
          ELSE
