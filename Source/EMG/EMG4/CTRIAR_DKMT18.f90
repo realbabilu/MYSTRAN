@@ -36,7 +36,7 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE, FOUR, SIX, TWELVE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA,                       &
-                                         NUM_EMG_FATAL_ERRS, SHELL_A, TE, XEB, FCONV, STRESS, BGRID, GRID_SNORM
+                                         NUM_EMG_FATAL_ERRS, SHELL_A, TE, XEB, FCONV, STRESS, BGRID, GRID_SNORM, PRESS, PPE
 
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
@@ -54,7 +54,7 @@
       REAL(DOUBLE), PARAMETER         :: HALF = 5.0D-1
       REAL(DOUBLE), PARAMETER         :: KAPPA = 5.0D0/6.0D0
 
-      INTEGER(LONG)                   :: I, J, K, IA, IB, RR, CC
+      INTEGER(LONG)                   :: I, J, K, IA, IB, RR, CC, JSUB
       REAL(DOUBLE)                    :: H, E, NU, AREA, XI0, ETA0
       REAL(DOUBLE)                    :: KFAC, ROT_KG_FAC
       REAL(DOUBLE)                    :: K18(18,18), KMEM(18,18), KBEND(18,18), KSHEAR(18,18), KFICT(18,18)
@@ -130,6 +130,16 @@
          DO I=0,2
             DO J=1,3
                ME(6*I+J,6*I+J) = MASS_NODE
+            ENDDO
+         ENDDO
+      ENDIF
+
+      IF (OPT(5) == 'Y') THEN
+         DO JSUB=1,SIZE(PPE,2)
+            DO I=1,3
+               PPE(6*(I-1)+1,JSUB) = PPE(6*(I-1)+1,JSUB) + PRESS(3,JSUB) * AREA * NVEC(1) / THREE
+               PPE(6*(I-1)+2,JSUB) = PPE(6*(I-1)+2,JSUB) + PRESS(3,JSUB) * AREA * NVEC(2) / THREE
+               PPE(6*(I-1)+3,JSUB) = PPE(6*(I-1)+3,JSUB) + PRESS(3,JSUB) * AREA * NVEC(3) / THREE
             ENDDO
          ENDDO
       ENDIF
