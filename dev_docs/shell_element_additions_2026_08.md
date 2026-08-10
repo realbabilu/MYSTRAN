@@ -36,7 +36,6 @@ Quadrilateral families:
 | `Q4RS` | `PARAM,QUADRTYP,Q4RS` | `Source/EMG/EMG4/CQUADR_Q4RS.f90` | added |
 | `Q4EASANS` | `PARAM,QUADRTYP,Q4EASANS` | `Source/EMG/EMG4/CQUADR_Q4EASANS.f90` | added |
 | `DKMQ24EA` / `DKM24EA` | `PARAM,QUADRTYP,DKM24EA` plus `DKMQ24EA` aliases | `Source/EMG/EMG4/CQUADR_DKM24EA.f90` | added alias/selector branch |
-| `MITC4+HB` | `PARAM,QUADRTYP,MITC4+HB` | `Source/EMG/EMG4/CQUADR_DKM24EA.f90` | mapped to the DKM24EA/Hughes-Brezzi branch |
 | `DKM24AU` | `PARAM,QUADRTYP,DKM24AU` | `Source/EMG/EMG4/CQUADR_DKM24AU.f90` | added selector wrapper |
 | changed `DKMQ20` | `PARAM,QUAD4TYP,DKMQ20` | `Source/EMG/EMG4/CQUAD4_DKMQ20_RHR.f90` | changed to AU/K6ROT-compatible 6-DOF branch |
 
@@ -53,7 +52,8 @@ entry points, including `CTRIA6` sizing/read support.
 
 Naming note: the code accepts `DKMQ24EA` aliases, but the canonical internal
 selector string is `DKM24EA`. The spelling `DKMQ24AE` is not a separate
-implemented selector.
+implemented selector. `MITC4+HB` was previously routed into this same branch,
+but it is not documented here as a separate valid MITC4+HB formulation.
 
 ## Mass support
 
