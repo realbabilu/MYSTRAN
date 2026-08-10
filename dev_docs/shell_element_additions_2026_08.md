@@ -24,26 +24,36 @@ Stress/force recovery is only partially touched where needed by existing
 output paths. It should not be treated as fully validated for all new element
 families yet.
 
-## Added or exposed shell formulations
+## Added or changed shell formulations
+
+This note is meant to track the practical formulation names used in validation
+and case-control parameters, not only the Fortran file names.
 
 Quadrilateral families:
 
-- `CQUAD4_DKMT20`
-- `CQUAD8_SIMOEAS1`
-- `CQUADR_DKM24AU`
-- `CQUADR_DKM24EA`
-- `CQUADR_Q4EASANS`
-- `CQUADR_Q4RS`
+| Validation/formulation name | MYSTRAN selector | Main source path | Status in this package |
+|---|---|---|---|
+| `Q4RS` | `PARAM,QUADRTYP,Q4RS` | `Source/EMG/EMG4/CQUADR_Q4RS.f90` | added |
+| `Q4EASANS` | `PARAM,QUADRTYP,Q4EASANS` | `Source/EMG/EMG4/CQUADR_Q4EASANS.f90` | added |
+| `DKMQ24EA` / `DKM24EA` | `PARAM,QUADRTYP,DKM24EA` plus `DKMQ24EA` aliases | `Source/EMG/EMG4/CQUADR_DKM24EA.f90` | added alias/selector branch |
+| `MITC4+HB` | `PARAM,QUADRTYP,MITC4+HB` | `Source/EMG/EMG4/CQUADR_DKM24EA.f90` | mapped to the DKM24EA/Hughes-Brezzi branch |
+| `DKM24AU` | `PARAM,QUADRTYP,DKM24AU` | `Source/EMG/EMG4/CQUADR_DKM24AU.f90` | added selector wrapper |
+| changed `DKMQ20` | `PARAM,QUAD4TYP,DKMQ20` | `Source/EMG/EMG4/CQUAD4_DKMQ20_RHR.f90` | changed to AU/K6ROT-compatible 6-DOF branch |
 
 Triangular families:
 
-- `CTRIA3_T3FF`
-- `CTRIA6_SIMO1993`
-- `CTRIAR_MITC3PHB`
-- `CTRIAR_T3FFD`
+| Validation/formulation name | MYSTRAN selector | Main source path | Status in this package |
+|---|---|---|---|
+| `T3FF` | `PARAM,TRIA3TYP,T3FF` | `Source/EMG/EMG4/CTRIA3_T3FF.f90` | added |
+| `T3FFD` / `T3FFA` | `PARAM,TRIARTYP,T3FFD` or `T3FFA` | `Source/EMG/EMG4/CTRIAR_T3FFD.f90` | added selector wrapper around T3FF core |
+| `MITC3+HB` | `PARAM,TRIARTYP,MITC3+HB` | `Source/EMG/EMG4/CTRIAR_MITC3PHB.f90` | added Hughes-Brezzi triangular branch |
 
 Related interface modules and bulk-data readers were added for the new element
 entry points, including `CTRIA6` sizing/read support.
+
+Naming note: the code accepts `DKMQ24EA` aliases, but the canonical internal
+selector string is `DKM24EA`. The spelling `DKMQ24AE` is not a separate
+implemented selector.
 
 ## Mass support
 
