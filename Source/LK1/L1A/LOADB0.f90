@@ -38,7 +38,8 @@
                                          LRIGEL, LSEQ, LSLOAD, LSNORM, LSPC, LSPC1, LSPCADDC, LSPCADDR, LSUSERIN, LTDAT,           &
                                          MEDAT_CBAR, MEDAT_CBEAM, MEDAT_CBUSH,                                                     &
                                          MEDAT_CELAS1, MEDAT_CELAS2, MEDAT_CELAS3, MEDAT_CELAS4,                                   &
-                                         MEDAT_CQUAD, MEDAT_CQUAD8, MEDAT_CROD, MEDAT_CSHEAR, MEDAT_CTRIA, MEDAT_CUSER1,           &
+                                         MEDAT_CQUAD, MEDAT_CQUAD8, MEDAT_CROD, MEDAT_CSHEAR, MEDAT_CTRIA, MEDAT_CTRIA6,          &
+                                         MEDAT_CUSER1,                                                                            &
                                          MEDAT0_CUSERIN, MMPC,                                                                     &
                                          MPDAT_PLOAD1, MPDAT_PLOAD2, MPDAT_PLOAD4, MEDAT_PLOTEL, MRBE3, MRSPLINE, MTDAT_TEMPRB,    &
                                          MTDAT_TEMPP1,                                                                            &
@@ -329,6 +330,11 @@
             LELE  = LELE + 1
             LEDAT = LEDAT + MEDAT_CTRIA
             CALL BD_CTRIA0 ( CARD, LARGE_FLD_INP )
+
+         ELSE IF (CARD(1:6) == 'CTRIA6'  ) THEN
+            LELE  = LELE + 1
+            LEDAT = LEDAT + MEDAT_CTRIA6
+            CALL BD_CTRIA60 ( CARD, LARGE_FLD_INP )
    
          ELSE IF (CARD(1:6) == 'CUSER1'  )  THEN
             LELE  = LELE + 1

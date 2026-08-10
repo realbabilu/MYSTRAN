@@ -38,7 +38,7 @@
                                          MEDAT_CBAR    , MEDAT_CBEAM   , MEDAT_CBUSH   , MEDAT_CELAS1  , MEDAT_CELAS2  ,           &
                                          MEDAT_CELAS3  , MEDAT_CELAS4  , MEDAT_CHEXA8  , MEDAT_CHEXA20 , MEDAT_CPENTA6 ,           &
                                          MEDAT_CPENTA15, MEDAT_PLOTEL  , MEDAT_CQUAD   , MEDAT_CROD    ,                           &
-                                         MEDAT_CSHEAR  , MEDAT_CTETRA4 , MEDAT_CTETRA10, MEDAT_CTRIA   ,                           &
+                                         MEDAT_CSHEAR  , MEDAT_CTETRA4 , MEDAT_CTETRA10, MEDAT_CTRIA   , MEDAT_CTRIA6  ,           &
                                          MEDAT_CUSER1  , MEDAT0_CUSERIN, METYPE
 
       USE TIMDAT, ONLY                :  TSEC
@@ -58,4 +58,3 @@
    END INTERFACE
 
    END MODULE WRITE_EDAT_Interface
-

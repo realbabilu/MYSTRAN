@@ -42,6 +42,7 @@
       USE BD_CQUAD80_Interface
       USE BD_CTETRA0_Interface
       USE BD_CTRIA0_Interface
+      USE BD_CTRIA60_Interface
       USE BD_CUSERIN0_Interface
       USE BD_DEBUG0_Interface
       USE BD_GRDSET0_Interface

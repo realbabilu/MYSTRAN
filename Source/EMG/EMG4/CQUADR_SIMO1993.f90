@@ -45,13 +45,13 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  QUADRTYP
+      USE PARAMS, ONLY                :  COUPMASS, QUADRTYP
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,&
-                                         TE, TYPE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM
+                                         TE, TYPE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS
 
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
@@ -90,7 +90,7 @@
 
 ! **********************************************************************************************************************************
 
-      SIMO1993_MODE = ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'SIMO    '))
+      SIMO1993_MODE = ((TYPE == 'QUADR   ') .AND. ((QUADRTYP == 'SIMO    ') .OR. (QUADRTYP == 'Q4EASANS')))
 
       IF (ELGP /= 4) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -233,15 +233,25 @@
          ENDDO
 
          MBASIC = ZERO
-         MDIAG = ZERO
-         DO I=1,4
-            MDIAG(I) = SUM(M1(I,1:4))
-         ENDDO
-         DO I=1,4
-            DO K=1,3
-               MBASIC((I-1)*6+K,(I-1)*6+K) = MDIAG(I)
+         IF ((SOL_NAME(1:5) == 'MODES') .AND. (COUPMASS > 0)) THEN
+            DO I=1,4
+               DO J=1,4
+                  DO K=1,3
+                     MBASIC((I-1)*6+K,(J-1)*6+K) = M1(I,J)
+                  ENDDO
+               ENDDO
             ENDDO
-         ENDDO
+         ELSE
+            MDIAG = ZERO
+            DO I=1,4
+               MDIAG(I) = SUM(M1(I,1:4))
+            ENDDO
+            DO I=1,4
+               DO K=1,3
+                  MBASIC((I-1)*6+K,(I-1)*6+K) = MDIAG(I)
+               ENDDO
+            ENDDO
+         ENDIF
          MASS_ELEM_SUM = SUM(M1)
          MLOCAL = MATMUL(T24, MATMUL(MBASIC, T24T))
          ME(1:24,1:24) = MLOCAL
@@ -443,7 +453,7 @@
       REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3)
       REAL(DOUBLE), INTENT(OUT) :: NORMS(4,3)
       INTEGER(LONG) :: II
-      REAL(DOUBLE) :: A(3), B(3), N(3), NM, SN(3), SDOT
+      REAL(DOUBLE) :: A(3), B(3), N(3), NM
 
       A = XYZN(2,:) - XYZN(1,:)
       B = XYZN(4,:) - XYZN(1,:)
@@ -485,33 +495,8 @@
       ENDIF
       NORMS(4,:) = N / NM
 
-! --- shell_renovation begin --- !
-! SNORM support for explicit CQUADR variants. GRID_SNORM is stored in basic
-! coordinates, matching the 3D coordinates used by this routine. If no SNORM is
-! present for a grid, keep the geometric midsurface normal computed above.
-      IF (ALLOCATED(GRID_SNORM)) THEN
-         DO II=1,4
-            IF ((BGRID(II) > 0) .AND. (BGRID(II) <= SIZE(GRID_SNORM,1))) THEN
-               SN = GRID_SNORM(BGRID(II),:)
-               NM = VNORM(SN)
-               IF (NM > 1.0D-15) THEN
-                  SN = SN / NM
-                  SDOT = DOT_PRODUCT(SN, NORMS(II,:))
-                  IF (SDOT < 1.0D-2) THEN
-                     NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
-                     FATAL_ERR = FATAL_ERR + 1
-                     WRITE(ERR,'(A,A,A,I8,A,I2,A,ES14.6)') ' *ERROR: ', TRIM(SUBR_NAME), ' EID=', EID,                         &
-                        ' SNORM AT NODE ', II, ' IS TOO FAR FROM CQUADR MIDSURFACE NORMAL. DOT=', SDOT
-                     WRITE(F06,'(A,A,A,I8,A,I2,A,ES14.6)') ' *ERROR: ', TRIM(SUBR_NAME), ' EID=', EID,                         &
-                        ' SNORM AT NODE ', II, ' IS TOO FAR FROM CQUADR MIDSURFACE NORMAL. DOT=', SDOT
-                     CALL OUTA_HERE ( 'Y' )
-                  ENDIF
-                  NORMS(II,:) = SN
-               ENDIF
-            ENDIF
-         ENDDO
-      ENDIF
-! --- shell_renovation end --- !
+! Match Simo1993_ShellElement_v1p6.py: directors are generated from this
+! element's own midsurface geometry, not from user/generated SNORM.
       END SUBROUTINE CALC_NODAL_NORMALS
 
       SUBROUTINE GEOMETRY_AT ( XYZN, NORMS, XI, ETA, T1, T2, NORMV, JAC, CO, BCM )

@@ -36,17 +36,18 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, MAX_STRESS_POINTS
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, MAX_STRESS_POINTS, SOL_NAME
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  NUM_EMG_FATAL_ERRS, PCOMP_PROPS, ELGP, ES, KE, EM, ET, BE1, BE2, BE3, PHI_SQ, FCONV,      &
-                                         EPROP, SHELL_STR_ANGLE
+                                         EPROP, SHELL_STR_ANGLE, ME, MASS_PER_UNIT_AREA, PPE, PRESS, XEB
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
-      USE PARAMS, ONLY                :  TSTM_DEF
+      USE PARAMS, ONLY                :  TSTM_DEF, COUPMASS
       USE MITC_STUF, ONLY             :  GP_RS
 
       USE MITC_INITIALIZE_Interface
       USE ORDER_GAUSS_Interface
       USE OUTA_HERE_Interface
+      USE MITC_SHAPE_FUNCTIONS_Interface
       USE MATMULX_FFF_Interface
       USE MATMULX_FFF_T_Interface
       USE MITC_DETJ_Interface
@@ -83,6 +84,14 @@
       REAL(DOUBLE)                    :: EE(6,6)           ! Elasticity matrix in the cartesian local coordinate system.
       REAL(DOUBLE)                    :: LOCAL_BASIS(3,3)  ! Cartesian local basis
       REAL(DOUBLE)                    :: ELEMENT_BASIS(3,3)! Element coordinate system basis
+      REAL(DOUBLE)                    :: M_1DOF(ELGP,ELGP) ! Consistent translational mass matrix with 1 DOF per node.
+      REAL(DOUBLE)                    :: PSH(ELGP)         ! Shape functions
+      REAL(DOUBLE)                    :: DPSHG(2,ELGP)     ! Shape function derivatives
+      REAL(DOUBLE)                    :: DENSITY           ! Mass density
+      REAL(DOUBLE)                    :: MASS_ELEM         ! Total translational element mass
+      REAL(DOUBLE)                    :: MASS_NODE         ! Lumped translational mass per node
+      REAL(DOUBLE)                    :: UNIT_PPE(6*ELGP)  ! Pressure load vector for unit pressure
+      REAL(DOUBLE)                    :: DXDR(3), DXDS(3), SURF_VEC(3)
       REAL(DOUBLE)                    :: XL(3)
       REAL(DOUBLE)                    :: ZL(3)
       REAL(DOUBLE)                    :: XE(3)
@@ -163,8 +172,49 @@
 ! Generate the mass matrix for this element.
 
       IF (OPT(1) == 'Y') THEN
-        !Not implememented yet but we can't make it a fatal error because this gets called even when it doesn't need it.
+         M_1DOF = ZERO
+         MASS_ELEM = ZERO
+         DENSITY = MASS_PER_UNIT_AREA/EPROP(1)
 
+         CALL ORDER_GAUSS ( IORD_IJ, SS_IJ, HH_IJ )
+         CALL ORDER_GAUSS ( IORD_K , SS_K , HH_K  )
+
+         DO I=1,IORD_IJ
+            DO J=1,IORD_IJ
+               DO K=1,IORD_K
+                  R = SS_IJ(I)
+                  S = SS_IJ(J)
+                  T = SS_K(K)
+                  CALL MITC_SHAPE_FUNCTIONS ( R, S, PSH, DPSHG )
+                  DETJ = MITC_DETJ ( R, S, T )
+                  INTFAC = DETJ*HH_IJ(I)*HH_IJ(J)*HH_K(K)
+                  MASS_ELEM = MASS_ELEM + DENSITY*INTFAC
+                  DO L=1,ELGP
+                     DO M=1,ELGP
+                        M_1DOF(L,M) = M_1DOF(L,M) + PSH(L)*PSH(M)*DENSITY*INTFAC
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+
+         ME = ZERO
+         IF ((SOL_NAME(1:5) == 'MODES') .AND. (COUPMASS > 0)) THEN
+            DO L=1,ELGP
+               DO M=1,ELGP
+                  DO K=1,3
+                     ME(6*(L-1)+K,6*(M-1)+K) = M_1DOF(L,M)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ELSE
+            MASS_NODE = MASS_ELEM/REAL(ELGP,DOUBLE)
+            DO L=1,ELGP
+               DO K=1,3
+                  ME(6*(L-1)+K,6*(L-1)+K) = MASS_NODE
+               ENDDO
+            ENDDO
+         ENDIF
       ENDIF
 
 
@@ -320,11 +370,31 @@
 
       IF (OPT(5) == 'Y') THEN
 
-        WRITE(ERR,*) ' *ERROR: Code not written for QUAD8 pressure loads'
-        WRITE(F06,*) ' *ERROR: Code not written for QUAD8 pressure loads'
-        NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
-        FATAL_ERR = FATAL_ERR + 1
-        CALL OUTA_HERE ( 'Y' )
+         UNIT_PPE = ZERO
+         CALL ORDER_GAUSS ( IORD_IJ, SS_IJ, HH_IJ )
+         DO I=1,IORD_IJ
+            DO J=1,IORD_IJ
+               R = SS_IJ(I)
+               S = SS_IJ(J)
+               CALL MITC_SHAPE_FUNCTIONS ( R, S, PSH, DPSHG )
+               DXDR = ZERO
+               DXDS = ZERO
+               DO L=1,ELGP
+                  DXDR(:) = DXDR(:) + DPSHG(1,L)*XEB(L,:)
+                  DXDS(:) = DXDS(:) + DPSHG(2,L)*XEB(L,:)
+               ENDDO
+               CALL CROSS ( DXDR, DXDS, SURF_VEC )
+               INTFAC = HH_IJ(I)*HH_IJ(J)
+               DO L=1,ELGP
+                  UNIT_PPE(6*(L-1)+1) = UNIT_PPE(6*(L-1)+1) + PSH(L)*SURF_VEC(1)*INTFAC
+                  UNIT_PPE(6*(L-1)+2) = UNIT_PPE(6*(L-1)+2) + PSH(L)*SURF_VEC(2)*INTFAC
+                  UNIT_PPE(6*(L-1)+3) = UNIT_PPE(6*(L-1)+3) + PSH(L)*SURF_VEC(3)*INTFAC
+               ENDDO
+            ENDDO
+         ENDDO
+         DO J=1,SIZE(PPE,2)
+            PPE(1:6*ELGP,J) = PPE(1:6*ELGP,J) + UNIT_PPE(1:6*ELGP)*PRESS(3,J)
+         ENDDO
 
       ENDIF
 

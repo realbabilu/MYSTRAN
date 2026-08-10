@@ -40,7 +40,7 @@
                                          NMPCADD, NPCOMP, NRBAR, NRBE1, NRBE2, NRFORCE, NRSPLINE, NSLOAD, NSPOINT, NSPC, NSPC1,    &
                                          NSPCADD, NPBAR, NPBARL, NPLOAD, NSUB, NUM_MPCSIDS, NUM_PARTVEC_RECORDS, PROG_NAME,        &
                                          SOL_NAME, NCBAR, NCBEAM, NCBUSH, NCHEXA20, NCHEXA8, NCPENTA15, NCPENTA6, NCQUAD4,         &
-                                         NCQUAD4K, NCROD, NCSHEAR, NCTETRA10, NCTETRA4, NCTRIA3, NCTRIA3K, WARN_ERR
+                                         NCQUAD4K, NCROD, NCSHEAR, NCTETRA10, NCTETRA4, NCTRIA3, NCTRIA3K, NCTRIA6, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  GRIDSEQ, IORQ1M, IORQ1S, IORQ1B, IORQ2B, IORQ2T, QUADAXIS, SUPINFO, SUPWARN
@@ -65,4 +65,3 @@
    END INTERFACE
 
    END MODULE LOADB_Interface
-

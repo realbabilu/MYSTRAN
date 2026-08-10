@@ -48,10 +48,11 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MBUG, MEDAT0_CUSERIN, MELDOF, MEMATC, MOFFSET, NSUB, NTSUB
       USE SCONTR, ONLY                :  DEDAT_Q4_MATANG_KEY, DEDAT_Q4_POFFS_KEY, DEDAT_Q4_SHELL_KEY, DEDAT_Q4_THICK_KEY,          &
                                          DEDAT_T3_MATANG_KEY, DEDAT_T3_POFFS_KEY, DEDAT_T3_SHELL_KEY, DEDAT_T3_THICK_KEY,          &
+                                         DEDAT_T6_MATANG_KEY,                                                                       &
                                          WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  SUPINFO, SUPWARN, QUAD4TYP, QUADRTYP
+      USE PARAMS, ONLY                :  SUPINFO, SUPWARN, QUAD4TYP, QUAD8TYP, QUADRTYP, TRIA3TYP, TRIARTYP
       USE CONSTANTS_1, ONLY           :  CONV_DEG_RAD, CONV_RAD_DEG, ZERO, ONE
       USE MODEL_STUF, ONLY            :  CAN_ELEM_TYPE_OFFSET, EDAT, EID, EPNT, ETYPE, ISOLID, MATANGLE, NUM_EMG_FATAL_ERRS,       &
                                          PCOMP_PROPS, PLY_NUM, SKIP_K6ROT, TE_IDENT, THETAM, TYPE, XEL, TE
@@ -103,7 +104,8 @@
           (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                                      &
           (TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ') .OR.                                                                      &
           (TYPE == 'USER1   ') .OR. (TYPE == 'USERIN  ') .OR. (TYPE == 'PLOTEL  ') .OR.                                            &
-          (TYPE == 'SHEAR   ') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE(1:5) == 'QUAD8'   ) .OR.    &
+          (TYPE == 'SHEAR   ') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4'   ) .OR.       &
+          (TYPE(1:5) == 'QUAD8'   ) .OR.                                                                                           &
           (TYPE == 'QUADR   ')) THEN
          CALL ELMDAT1 ( INT_ELEM_ID, WRITE_WARN )
       ELSE
@@ -122,7 +124,7 @@
 
 !xx   IF      ((TYPE      == 'ROD     ') .OR. (TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR. (TYPE == 'BUSH    ') .OR.        &
       IF      ((TYPE      == 'ROD     ') .OR. (TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR.                                  &
-               (TYPE(1:5) == 'TRIA3'   ) .OR.                                                                                      &
+               (TYPE(1:5) == 'TRIA3'   ) .OR. (TYPE(1:5) == 'TRIA6'   ) .OR.                                                       &
                (TYPE      == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                            &
                (TYPE      == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                            &
                (TYPE      == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ')) THEN
@@ -187,7 +189,8 @@
 ! Matrices of material props are not generated for 1-D elements
 ! --------
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE == 'SHEAR   ')) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR.           &
+          (TYPE == 'SHEAR   ')) THEN
          IF (PCOMP_PROPS == 'N') THEN                      ! SHEAR elem does not use PCOMP props
 
             THETAM = ZERO
@@ -230,6 +233,25 @@
                   ENDIF
                ENDIF
 
+            ELSE IF (TYPE(1:5) == 'TRIA6') THEN
+               INT41 = EDAT(EPNTK+DEDAT_T6_MATANG_KEY)
+               INT42 = EDAT(EPNTK+DEDAT_T6_MATANG_KEY+1)
+               IF      (INT41 >  0) THEN                   ! Angle is defined in array MATANGLE at row INT41
+                  LOC = '#1'
+                  THETAM = CONV_DEG_RAD*MATANGLE( INT41 )
+               ELSE IF (INT41 <  0) THEN                   ! Angle is defined by a coord sys ID whose value is -INT41
+                  LOC = '#2'
+                  CALL GET_MATANGLE_FROM_CID ( -INT41 )
+               ELSE IF (INT41 ==  0) THEN                  ! Angle is either specified as defined by basic coord sys or angle is 0.
+                  IF      (INT42 == 1) THEN
+                     LOC = '#3'
+                     CALL GET_MATANGLE_FROM_CID ( 0 )
+                  ELSE IF (INT42 == 0) THEN
+                     LOC = '#4'
+                     THETAM = ZERO
+                  ENDIF
+               ENDIF
+
             ENDIF
                                                            ! Use WRITE_WARN even though the following is not a warning message
 !                                                            this will allow THETAM to be printed out in only 1 call to EMG
@@ -254,6 +276,11 @@
             IF (TYPE(1:5) == 'TRIA3') THEN
                INT41 = EDAT(EPNTK+DEDAT_T3_MATANG_KEY)
                INT42 = EDAT(EPNTK+DEDAT_T3_MATANG_KEY+1)
+            ENDIF
+
+            IF (TYPE(1:5) == 'TRIA6') THEN
+               INT41 = EDAT(EPNTK+DEDAT_T6_MATANG_KEY)
+               INT42 = EDAT(EPNTK+DEDAT_T6_MATANG_KEY+1)
             ENDIF
 
             IF (WRITE_WARN == 'Y') THEN
@@ -297,7 +324,8 @@
          CALL ELMOUT ( INT_ELEM_ID, DUM_BUG, CASE_NUM, OPT )
       ENDIF
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR. (TYPE == 'QUADR   ') .OR.            &
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8') .OR.         &
+          (TYPE == 'QUADR   ') .OR.                                                                                                &
           (TYPE(1:6) == 'SHEAR') .OR. (TYPE == 'USER1   ')) THEN
          CALL SHELL_ABD_MATRICES ( INT_ELEM_ID, WRITE_WARN )
       ENDIF
@@ -322,7 +350,8 @@
 ! For all but USERIN elem, call ELMDAT2 subr to get the rest of the data needed to calculate the matrices for this element.
 
       IF ((TYPE(1:4) == 'ELAS'    ) .OR. (TYPE      == 'ROD     ') .OR. (TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR.        &
-          (TYPE(1:5) == 'TRIA3'   ) .OR. (TYPE(1:5) == 'QUAD4'   ) .OR. (TYPE == 'QUADR   ') .OR. (TYPE == 'SHEAR   ') .OR.        &
+          (TYPE(1:5) == 'TRIA3'   ) .OR. (TYPE(1:5) == 'TRIA6'   ) .OR. (TYPE(1:5) == 'QUAD4'   ) .OR.                            &
+          (TYPE(1:5) == 'QUAD8'   ) .OR. (TYPE == 'QUADR   ') .OR. (TYPE == 'SHEAR   ') .OR.                                      &
           (TYPE == 'USER1   ') .OR.                                                                                                  &
           (TYPE      == 'HEXA8   ') .OR. (TYPE      == 'HEXA20  ') .OR.                                                            &
           (TYPE      == 'PENTA6  ') .OR. (TYPE      == 'PENTA15 ') .OR.                                                            &
@@ -350,10 +379,27 @@
 
       ELSE IF (TYPE(1:5) == 'TRIA3') THEN
          IF (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18) THEN
-            CALL CTRIAR_DKMT18 ( OPT, INT_ELEM_ID )
+            IF (TRIARTYP == 'DKMT18  ') THEN
+               CALL CTRIAR_DKMT18 ( OPT, INT_ELEM_ID )
+            ELSE IF (TRIARTYP == 'T3FFD   ') THEN
+               CALL CTRIAR_T3FFD ( OPT, INT_ELEM_ID )
+            ELSE IF (TRIARTYP == 'MITC3+HB') THEN
+               CALL CTRIAR_MITC3PHB ( OPT, INT_ELEM_ID )
+            ELSE
+               NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,'(A,A,A,I8)') ' *ERROR: Illegal PARAM,TRIARTYP value "', TRIM(TRIARTYP), '" for CTRIAR element ', EID
+               WRITE(F06,'(A,A,A,I8)') ' *ERROR: Illegal PARAM,TRIARTYP value "', TRIM(TRIARTYP), '" for CTRIAR element ', EID
+            ENDIF
+         ELSE IF (TRIA3TYP == 'T3FF  ') THEN
+            CALL CTRIA3_T3FF ( OPT, INT_ELEM_ID )
          ELSE
             CALL TREL1 ( OPT, WRITE_WARN )
          ENDIF
+         IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
+
+      ELSE IF (TYPE(1:5) == 'TRIA6') THEN
+         CALL CTRIA6_SIMO1993 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MIN4  ') .OR. (QUAD4TYP == 'MIN4T '))) .OR.                              &
@@ -370,19 +416,27 @@
          CALL CQUAD4_DKMQ20_RHR ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
+      ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMT20')) THEN
+         CALL CQUAD4_DKMT20 ( OPT, INT_ELEM_ID )
+         IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
+
       ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'SIMO  ')) THEN
          CALL CQUAD4_SIMO1989 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF (TYPE == 'QUADR   ') THEN
-         IF (QUADRTYP == 'DKMQ24  ') THEN
-            CALL CQUADR_DKMQ24 ( OPT, INT_ELEM_ID )
-         ELSE IF (QUADRTYP == 'DKMQ24N ') THEN
-            CALL CQUADR_DKMQ24N ( OPT, INT_ELEM_ID )
+         IF (QUADRTYP == 'DKM24AU ') THEN
+            CALL CQUADR_DKM24AU ( OPT, INT_ELEM_ID )
+         ELSE IF (QUADRTYP == 'DKM24EA ') THEN
+            CALL CQUADR_DKM24EA ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'SIMO    ') THEN
             CALL CQUADR_SIMO1993 ( OPT, INT_ELEM_ID )
+         ELSE IF (QUADRTYP == 'Q4EASANS') THEN
+            CALL CQUADR_Q4EASANS ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'MITC4PD ') THEN
             CALL CQUADR_MITC4PHB ( OPT, INT_ELEM_ID )
+         ELSE IF (QUADRTYP == 'Q4RS    ') THEN
+            CALL CQUADR_Q4RS ( OPT, INT_ELEM_ID )
          ELSE
             NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
             FATAL_ERR = FATAL_ERR + 1
@@ -392,7 +446,16 @@
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF (TYPE(1:5) == 'QUAD8') THEN
-         CALL MITC8 ( OPT, INT_ELEM_ID )
+         IF (QUAD8TYP == 'MITC8   ') THEN
+            CALL MITC8 ( OPT, INT_ELEM_ID )
+         ELSE IF (QUAD8TYP == 'SIMOEAS1') THEN
+            CALL CQUAD8_SIMOEAS1 ( OPT, INT_ELEM_ID )
+         ELSE
+            NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,I8)') ' *ERROR: Illegal PARAM,QUAD8TYP value "', TRIM(QUAD8TYP), '" for CQUAD8 element ', EID
+            WRITE(F06,'(A,A,A,I8)') ' *ERROR: Illegal PARAM,QUAD8TYP value "', TRIM(QUAD8TYP), '" for CQUAD8 element ', EID
+         ENDIF
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF ((TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ') .OR.                                                                 &

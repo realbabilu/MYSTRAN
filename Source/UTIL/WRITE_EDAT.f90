@@ -36,7 +36,7 @@
                                          MEDAT_CBAR    , MEDAT_CBEAM   , MEDAT_CBUSH   , MEDAT_CELAS1  , MEDAT_CELAS2  ,           &
                                          MEDAT_CELAS3  , MEDAT_CELAS4  , MEDAT_CHEXA8  , MEDAT_CHEXA20 , MEDAT_CPENTA6 ,           &
                                          MEDAT_CPENTA15, MEDAT_PLOTEL  , MEDAT_CQUAD   , MEDAT_CROD    ,                           &
-                                         MEDAT_CSHEAR  , MEDAT_CTETRA4 , MEDAT_CTETRA10, MEDAT_CTRIA   ,                           &
+                                         MEDAT_CSHEAR  , MEDAT_CTETRA4 , MEDAT_CTETRA10, MEDAT_CTRIA   , MEDAT_CTRIA6  ,           &
                                          MEDAT_CUSER1  , MEDAT0_CUSERIN, METYPE
 
       USE TIMDAT, ONLY                :  TSEC
@@ -344,6 +344,7 @@ do_1: DO K=1,NELE
          ELSE IF (ETYPE(K) == 'TETRA10 ') THEN   ;   MEDAT = MEDAT_CTETRA10
          ELSE IF (ETYPE(K) == 'TRIA3   ') THEN   ;   MEDAT = MEDAT_CTRIA
          ELSE IF (ETYPE(K) == 'TRIA3K  ') THEN   ;   MEDAT = MEDAT_CTRIA
+         ELSE IF (ETYPE(K) == 'TRIA6   ') THEN   ;   MEDAT = MEDAT_CTRIA6
          ELSE IF (ETYPE(K) == 'USER1   ') THEN   ;   MEDAT = MEDAT_CUSER1
          ELSE IF (ETYPE(K) == 'USERIN  ') THEN
             EPNTK = EPNT(K)
@@ -435,4 +436,3 @@ do_1: DO K=1,NELE
 ! **********************************************************************************************************************************
 
       END SUBROUTINE WRITE_EDAT
-

@@ -57,6 +57,7 @@
       USE BD_CSHEAR_Interface
       USE BD_CTETRA_Interface
       USE BD_CTRIA_Interface
+      USE BD_CTRIA6_Interface
       USE BD_CUSER1_Interface
       USE BD_CUSERIN_Interface
       USE BD_DLOAD_Interface

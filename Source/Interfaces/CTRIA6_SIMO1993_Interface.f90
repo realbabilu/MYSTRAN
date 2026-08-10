@@ -1,0 +1,21 @@
+! #################################################################################################################################
+   MODULE CTRIA6_SIMO1993_Interface
+
+   INTERFACE
+
+      SUBROUTINE CTRIA6_SIMO1993 ( OPT, INT_ELEM_ID )
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CTRIA6_SIMO1993'
+      CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
+      INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
+
+      END SUBROUTINE CTRIA6_SIMO1993
+
+   END INTERFACE
+
+   END MODULE CTRIA6_SIMO1993_Interface

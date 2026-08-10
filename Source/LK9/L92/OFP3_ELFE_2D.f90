@@ -37,7 +37,7 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, FOUR
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP
+      USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_ELFO
       use model_stuf, only            :  pcomp_props
       USE MODEL_STUF, ONLY            :  ANY_ELFE_OUTPUT, EDAT, EPNT, ETYPE, FCONV, EID, ELMTYP, ELOUT, METYPE, NUM_EMG_FATAL_ERRS,&
@@ -99,6 +99,7 @@
       CHARACTER(8*BYTE)               :: TABLE_NAME        ! the op2 table name
 
       LOGICAL                         :: WRITE_NEU
+      LOGICAL                         :: DIRECT_SHELL_RECOVERY
       INTRINSIC IAND
 
 ! **********************************************************************************************************************************
@@ -221,6 +222,11 @@ elems_3: DO J = 1,NELE
                         ENDDO
 
                         STRESS_OUT(:,1) = STRESS_RAW(:,1)  ! Set STRAIN_OUT for NUM_PTS(I) = 1
+                        DIRECT_SHELL_RECOVERY = ((TYPE == 'QUADR   ') .AND. ((QUADRTYP == 'DKM24EA ') .OR.                       &
+                                                                              (QUADRTYP == 'DKM24AU ') .OR.                       &
+                                                                              (QUADRTYP == 'SIMO    ') .OR.                       &
+                                                                              (QUADRTYP == 'Q4EASANS'))) .OR.                    &
+                                               ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20'))
 
                         IF ((FORC_LOC == 'CORNER  ') .OR.                                                                          &
                             (ETYPE(J)(1:5) == 'QUAD8')) THEN
@@ -228,8 +234,16 @@ elems_3: DO J = 1,NELE
                            IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
 
                                                            ! Extrapolate stress to corners
-                              CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS(I), STRESS_OUT, STRESS_OUT_PCT_ERR,              &
-                                    STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
+                              IF (DIRECT_SHELL_RECOVERY) THEN
+! Rows 1:5 and 7:9 remain Gauss samples. Row 6 is supplied by the
+! DKMQ/Simo kernels as direct center/nodal twisting recovery.
+                                 CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS(I), STRESS_OUT, STRESS_OUT_PCT_ERR,           &
+                                       STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
+                                 STRESS_OUT(6,1:NUM_PTS(I)) = STRESS_RAW(6,1:NUM_PTS(I))
+                              ELSE
+                                 CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS(I), STRESS_OUT, STRESS_OUT_PCT_ERR,           &
+                                       STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
+                              ENDIF
 
                            ELSEIF (ETYPE(J)(1:5) == 'QUAD8') THEN
 

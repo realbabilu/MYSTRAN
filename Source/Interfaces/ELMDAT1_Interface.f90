@@ -38,7 +38,8 @@
                                          NCORD, NGRID
       USE SCONTR, ONLY                :  DEDAT_Q4_MATANG_KEY, DEDAT_Q4_THICK_KEY, DEDAT_Q4_POFFS_KEY,                              &
                                          DEDAT_T3_MATANG_KEY, DEDAT_T3_THICK_KEY, DEDAT_T3_POFFS_KEY,                              &
-                                                              DEDAT_Q8_THICK_KEY, DEDAT_Q8_POFFS_KEY
+                                         DEDAT_T6_THICK_KEY, DEDAT_T6_POFFS_KEY,                                                    &
+                                                             DEDAT_Q8_THICK_KEY, DEDAT_Q8_POFFS_KEY
       USE PARAMS, ONLY                :  EPSIL, TSTM_DEF
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONEPM4, ONE, TWO
@@ -106,4 +107,3 @@
    END INTERFACE
 
    END MODULE ELMDAT1_Interface
-

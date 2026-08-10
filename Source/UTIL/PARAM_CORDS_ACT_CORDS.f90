@@ -51,7 +51,7 @@
 
 
 ! **********************************************************************************************************************************
-      IF     ((TYPE(1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      IF     ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
          CALL GET_QUAD_COORDS
       ELSE
          Write(err,*) ' *ERROR      : Code not written in subr PARAM_CORDS_ACT_CORDS for', type

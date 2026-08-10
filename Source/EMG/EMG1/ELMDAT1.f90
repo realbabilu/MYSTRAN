@@ -43,7 +43,8 @@
                                          MPBEAM_STATIONS, NCORD, NGRID, SOL_NAME
       USE SCONTR, ONLY                :  DEDAT_Q4_MATANG_KEY, DEDAT_Q4_THICK_KEY, DEDAT_Q4_POFFS_KEY,                              &
                                          DEDAT_T3_MATANG_KEY, DEDAT_T3_THICK_KEY, DEDAT_T3_POFFS_KEY,                              &
-                                                              DEDAT_Q8_THICK_KEY, DEDAT_Q8_POFFS_KEY
+                                         DEDAT_T6_THICK_KEY, DEDAT_T6_POFFS_KEY,                                                    &
+                                                             DEDAT_Q8_THICK_KEY, DEDAT_Q8_POFFS_KEY
       USE PARAMS, ONLY                :  EPSIL, TSTM_DEF
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONEPM4, ONE, TWO
@@ -448,14 +449,15 @@
             EPROP(I) = RPSHEAR(INTL_PID,I)
          ENDDO
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. ((TYPE(1:5) == 'QUAD4') .OR.                               &
+               (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
 
                                                            ! For elems that not composites do EPROP in subr SHELL_ABD_MATRICES)
          IF (PCOMP_PROPS == 'N') THEN                      ! Shell properties are in array PSHELL (except maybe membrane thickness)
 
             IF(TYPE(1:5) == 'QUAD8') THEN                  ! Features that aren't currently supported by CQUAD8.
 
-               IF(SOL_NAME(1:7) /= 'STATICS') THEN
+               IF((SOL_NAME(1:7) /= 'STATICS') .AND. (SOL_NAME(1:5) /= 'MODES')) THEN
                   WRITE(ERR,*) ' *ERROR: CQUAD8 IS NOT ALLOWED WITH SOL', SOL_NAME
                   WRITE(F06,*) ' *ERROR: CQUAD8 IS NOT ALLOWED WITH SOL', SOL_NAME
                   NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -524,6 +526,8 @@
                DELTA = DEDAT_Q4_THICK_KEY
             ELSE IF (TYPE(1:5) == 'TRIA3') THEN
                DELTA = DEDAT_T3_THICK_KEY
+            ELSE IF (TYPE(1:5) == 'TRIA6') THEN
+               DELTA = DEDAT_T6_THICK_KEY
             ELSE IF (TYPE(1:5) == 'QUAD8') THEN
                DELTA = DEDAT_Q8_THICK_KEY
             ENDIF
@@ -746,7 +750,8 @@
          ENDIF
          NUMMAT = 1
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR.                                      &
+               ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE(1:5) == 'QUAD8')) THEN
                                                            ! For elems that are not composites do EMAT in subr SHELL_ABD_MATRICES)
          IF (PCOMP_PROPS == 'N') THEN
             INTL_MID(1) = PSHEL(INTL_PID,2)
@@ -782,14 +787,6 @@
                      ENDIF
                   ENDIF
                ENDDO
-                                                           ! Density is not allowed in case it's used for
-                                                           ! gravity which doesn't currently work.
-               IF(RMATL(INTL_MID(1),4) /= ZERO) THEN
-                  WRITE(ERR,*) ' *ERROR: MAT1 DENSITY MUST BE 0.0 OR BLANK FOR QUAD8'
-                  WRITE(F06,*) ' *ERROR: MAT1 DENSITY MUST BE 0.0 OR BLANK FOR QUAD8'
-                  NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
-                  FATAL_ERR          = FATAL_ERR + 1
-               ENDIF
             ENDIF
 
             DO I=1,NUMMAT                                  ! Must be MAT1, MAT2 or MAT8 for plate elems
@@ -843,7 +840,7 @@
 ! Set transverse shear alloawbles to same as in-plane shear allowables for non PCOMP shells. The transverse shear allowables go
 ! in rows 19 and 20 of EMAT
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))) THEN
          if (PCOMP_PROPS == 'N') THEN
             DO I=1,NUMMAT
                IF      (INTL_MID(I) == 1) THEN
@@ -1002,6 +999,23 @@
                      FATAL_ERR = FATAL_ERR + 1
                   ENDIF
                ENDIF
+            ELSE
+               EOFF(INT_ELEM_ID) = 'N'
+               ZOFFS = ZERO
+            ENDIF
+
+         ELSE IF (TYPE(1:5) == 'TRIA6') THEN
+
+            IROW = EDAT(EPNTK + DEDAT_T6_POFFS_KEY)
+            IF (IROW > 0) THEN
+              EOFF(INT_ELEM_ID) = 'Y'
+              ZOFFS = PLATEOFF(IROW)
+              IF (DABS(ZOFFS) > 0.D0) THEN
+                WRITE(ERR,*) ' *ERROR  : OFFSET CANNOT BE USED FOR CTRIA6'
+                WRITE(F06,*) ' *ERROR  : OFFSET CANNOT BE USED FOR CTRIA6'
+                NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+                FATAL_ERR = FATAL_ERR + 1
+              ENDIF
             ELSE
                EOFF(INT_ELEM_ID) = 'N'
                ZOFFS = ZERO

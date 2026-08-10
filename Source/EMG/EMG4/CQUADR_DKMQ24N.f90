@@ -27,8 +27,8 @@
       SUBROUTINE CQUADR_DKMQ24N ( OPT, INT_ELEM_ID )
 
 ! --- shell_renovation begin --- !
-! DKMQ24 shell element based on the Claude Python reference:
-!   E:\mystran17\claude_dkmq24\dkmq24_element_v2.py
+! DKMQ24E shell element based on the Python reference:
+!   D:\18a\bending_only\Shell\gemini2\shit\DKMQ24_EAS4_ShellElement_RHR.py
 !
 ! Phase-1 scope:
 !   - linear stiffness
@@ -63,7 +63,7 @@
 
       IMPLICIT NONE
 
-      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUADR_DKMQ24N'
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUADR_DKMQ24E'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
 
@@ -97,7 +97,7 @@
 
       SIMO_MODE = ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'SIMO  '))
       DKMQ20_MODE = (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DKMQ20') .OR. SIMO_MODE)) .OR.                         &
-                     ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKMQ24N ')))
+                     ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24EA ')))
 
       IF (ELGP /= 4) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -535,7 +535,7 @@
 ! SNORM support for explicit CQUADR/DKMQ24. GRID_SNORM is stored in basic
 ! coordinates, matching the 3D coordinates used by this routine. If no SNORM is
 ! present for a grid, keep the geometric midsurface normal computed above.
-      IF ((QUADRTYP /= 'DKMQ24N ') .AND. ALLOCATED(GRID_SNORM)) THEN
+      IF ((QUADRTYP /= 'DKM24EA ') .AND. ALLOCATED(GRID_SNORM)) THEN
          DO II=1,4
             IF ((BGRID(II) > 0) .AND. (BGRID(II) <= SIZE(GRID_SNORM,1))) THEN
                SN = GRID_SNORM(BGRID(II),:)

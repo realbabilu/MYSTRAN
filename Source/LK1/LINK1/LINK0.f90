@@ -60,6 +60,7 @@
                                          NDOFG, NDOFR, NDOFSE, NELE, NFORCE, NGRAV, NGRID, NMPC, NPCARD,                           &
                                          NPUSERIN, NRFORCE, NRIGEL, NSLOAD, NSNORM, NSPC, NSPC1, NTCARD, NTERM_KGG,                &
                                          NUM_PARTVEC_RECORDS, NUM_SUPT_CARDS, NUM_USET_RECORDS, PROG_NAME, RESTART, SOL_NAME,      &
+                                         DEDAT_T3_THICK_KEY,                                                                         &
                                          WARN_ERR
 
       USE SCONTR, ONLY                :  ELDT_BUG_DAT1_BIT, ELDT_BUG_DAT2_BIT, ELDT_BUG_ME_BIT  , ELDT_BUG_P_T_BIT ,               &
@@ -70,11 +71,12 @@
       USE DOF_TABLES, ONLY            :  TDOFI
       USE PARAMS, ONLY                :  CHKGRDS, EPSIL, EQCHK_OUTPUT, GRDPNT, GRDPNT_IN, GRIDSEQ, MEFMGRID, MEFMLOC, PRTCONN,     &
                                          PRTBASIC, PRTCORD, PRTDOF, PRTTSET, PRTSTIFD, PRTSTIFF, SETLKTK, SETLKTM, SUPINFO,        &
-                                         SUPWARN, WTMASS, PRTF06, PRTOP2
+                                         SUPWARN, WTMASS, PRTF06, PRTOP2, QUADRTYP, TRIA3TYP, TRIARTYP, SNORM_ANG,                 &
+                                         CQUADR_NEEDS_GENERATED_SNORM, CTRIA3_NEEDS_GENERATED_SNORM, CTRIAR_NEEDS_GENERATED_SNORM
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MACHINE_PARAMS, ONLY        :  MACH_PREC
       USE MODEL_STUF, ONLY            :  ANY_GPFO_OUTPUT, EIG_METH, ELDT, ETYPE, MEFFMASS_CALC, NUM_EMG_FATAL_ERRS, PLY_NUM, OELDT,&
-                                         GRID_ID, SNORM, RSNORM, GRID_SNORM
+                                         EDAT, EPNT, GRID_ID, RGRID, SNORM, RSNORM, GRID_SNORM
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE BANDIT_MODULE
       USE RIGID_BODY_DISP_MATS, ONLY  :  RBGLOBAL_GSET, TR6_CG, TR6_MEFM, TR6_0
@@ -609,6 +611,8 @@ res14:IF (RESTART == 'N') THEN
             GRID_SNORM(BGRID,:) = RSNORM(I,:) / DSQRT(DOT_PRODUCT(RSNORM(I,:), RSNORM(I,:)))
          ENDDO
          CALL DEALLOCATE_MODEL_STUF ( 'SNORM, RSNORM' )
+
+         CALL UPDATE_GENERATED_SHELL_SNORM
 
 
       ENDIF res14
@@ -1185,6 +1189,210 @@ res20:IF (RESTART == 'N') THEN
       ENDIF
 
       CONTAINS
+
+! ##################################################################################################################################
+
+      SUBROUTINE UPDATE_GENERATED_SHELL_SNORM
+
+! Builds averaged nodal normals for selected custom shell formulations before any element stiffness matrix is generated.
+! Manual SNORM bulk data has priority: generated normals fill only grid rows whose GRID_SNORM vector is still zero.
+
+      USE PENTIUM_II_KIND, ONLY       :  LONG, DOUBLE
+      USE SCONTR, ONLY                :  NELE, NGRID
+      USE CONSTANTS_1, ONLY           :  ZERO
+      USE PARAMS, ONLY                :  EPSIL
+
+      IMPLICIT NONE
+
+      INTEGER(LONG)                   :: BGRD(4)           ! Internal grid rows for one shell element
+      INTEGER(LONG), ALLOCATABLE      :: ELEM_BGRID(:,:)   ! Internal grid rows for generated-normal shell elements
+      INTEGER(LONG), ALLOCATABLE      :: ELEM_NGRID(:)     ! Number of grids in each generated-normal shell element
+      INTEGER(LONG)                   :: ELEM_COUNT        ! Number of shell elements included in generated-normal pass
+      INTEGER(LONG)                   :: EPNTK             ! Start of this element in EDAT
+      INTEGER(LONG)                   :: I,J               ! DO loop indices
+      INTEGER(LONG)                   :: IERR              ! Local allocation status
+      INTEGER(LONG)                   :: INT_GRID          ! Internal grid row
+      INTEGER(LONG)                   :: NGP               ! Number of grids in the current shell element
+      INTEGER(LONG)                   :: SKIPPED_CREASE    ! Number of generated normals suppressed by crease detection
+      INTEGER(LONG)                   :: WRITTEN           ! Number of generated normals stored into GRID_SNORM
+
+      LOGICAL, ALLOCATABLE            :: VALID(:)          ! True when an averaged normal is valid at a grid
+
+      REAL(DOUBLE), ALLOCATABLE       :: AVG_NORMAL(:,:)   ! Accumulated/generated nodal normals
+      REAL(DOUBLE)                    :: COS_LIMIT         ! Cosine of crease threshold
+      REAL(DOUBLE)                    :: ELEM_NORMAL(3)    ! Flat normal for one shell element
+      REAL(DOUBLE)                    :: NORM              ! Vector norm
+      REAL(DOUBLE)                    :: PI
+
+      INTRINSIC                       :: DACOS, DCOS, DOT_PRODUCT, DSQRT, TRIM
+
+      IF ((.NOT. CQUADR_NEEDS_GENERATED_SNORM(QUADRTYP)) .AND. (.NOT. CTRIA3_NEEDS_GENERATED_SNORM(TRIA3TYP)) .AND.              &
+          (.NOT. CTRIAR_NEEDS_GENERATED_SNORM(TRIARTYP))) THEN
+         RETURN
+      ENDIF
+
+      ALLOCATE (AVG_NORMAL(NGRID,3), VALID(NGRID), ELEM_BGRID(NELE,4), ELEM_NGRID(NELE), STAT=IERR)
+      IF (IERR /= 0) THEN
+         WRITE(ERR,1901) 'AVG_NORMAL/VALID/ELEM_BGRID/ELEM_NGRID'
+         WRITE(F06,1901) 'AVG_NORMAL/VALID/ELEM_BGRID/ELEM_NGRID'
+         FATAL_ERR = FATAL_ERR + 1
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
+
+      AVG_NORMAL = ZERO
+      VALID = .TRUE.
+      ELEM_BGRID = 0
+      ELEM_NGRID = 0
+      ELEM_COUNT = 0
+
+      DO I=1,NELE
+         EPNTK = EPNT(I)
+         IF (ETYPE(I) == 'QUADR   ') THEN
+            IF (.NOT. CQUADR_NEEDS_GENERATED_SNORM(QUADRTYP)) CYCLE
+            NGP = 4
+         ELSE IF (ETYPE(I) == 'TRIA3   ') THEN
+            IF (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18) THEN
+               IF (.NOT. CTRIAR_NEEDS_GENERATED_SNORM(TRIARTYP)) CYCLE
+            ELSE
+               IF (.NOT. CTRIA3_NEEDS_GENERATED_SNORM(TRIA3TYP)) CYCLE
+            ENDIF
+            NGP = 3
+         ELSE
+            CYCLE
+         ENDIF
+
+         DO J=1,NGP
+            CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, EDAT(EPNTK+J+1), BGRD(J) )
+         ENDDO
+
+         CALL SHELL_ELEMENT_NORMAL ( NGP, BGRD, ELEM_NORMAL, NORM )
+         IF (NORM <= EPSIL(1)) THEN
+            CYCLE
+         ENDIF
+
+         ELEM_COUNT = ELEM_COUNT + 1
+         ELEM_NGRID(ELEM_COUNT) = NGP
+         DO J=1,NGP
+            ELEM_BGRID(ELEM_COUNT,J) = BGRD(J)
+            AVG_NORMAL(BGRD(J),:) = AVG_NORMAL(BGRD(J),:) + ELEM_NORMAL(:)
+         ENDDO
+      ENDDO
+
+      IF (ELEM_COUNT == 0) THEN
+         DEALLOCATE (AVG_NORMAL, VALID, ELEM_BGRID, ELEM_NGRID)
+         RETURN
+      ENDIF
+
+      DO I=1,NGRID
+         NORM = DSQRT(DOT_PRODUCT(AVG_NORMAL(I,:), AVG_NORMAL(I,:)))
+         IF (NORM > EPSIL(1)) THEN
+            AVG_NORMAL(I,:) = AVG_NORMAL(I,:) / NORM
+         ELSE
+            VALID(I) = .FALSE.
+         ENDIF
+      ENDDO
+
+      PI = 4.0D0*DACOS(ZERO)
+      COS_LIMIT = DCOS(SNORM_ANG*PI/180.0D0)
+      DO I=1,ELEM_COUNT
+         NGP = ELEM_NGRID(I)
+         BGRD(1:NGP) = ELEM_BGRID(I,1:NGP)
+         CALL SHELL_ELEMENT_NORMAL ( NGP, BGRD, ELEM_NORMAL, NORM )
+         IF (NORM <= EPSIL(1)) THEN
+            CYCLE
+         ENDIF
+         DO J=1,NGP
+            INT_GRID = BGRD(J)
+            IF (VALID(INT_GRID)) THEN
+               IF (DOT_PRODUCT(AVG_NORMAL(INT_GRID,:), ELEM_NORMAL(:)) < COS_LIMIT) THEN
+                  VALID(INT_GRID) = .FALSE.
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDDO
+
+      WRITTEN = 0
+      SKIPPED_CREASE = 0
+      DO I=1,NGRID
+         IF (.NOT. VALID(I)) THEN
+            IF (DSQRT(DOT_PRODUCT(AVG_NORMAL(I,:), AVG_NORMAL(I,:))) > EPSIL(1)) THEN
+               SKIPPED_CREASE = SKIPPED_CREASE + 1
+            ENDIF
+            CYCLE
+         ENDIF
+         IF (DSQRT(DOT_PRODUCT(AVG_NORMAL(I,:), AVG_NORMAL(I,:))) <= EPSIL(1)) THEN
+            CYCLE
+         ENDIF
+         IF (DSQRT(DOT_PRODUCT(GRID_SNORM(I,:), GRID_SNORM(I,:))) > EPSIL(1)) THEN
+            CYCLE
+         ENDIF
+         GRID_SNORM(I,:) = AVG_NORMAL(I,:)
+         WRITTEN = WRITTEN + 1
+      ENDDO
+
+      WRITE(ERR,1902) TRIM(QUADRTYP), TRIM(TRIA3TYP), TRIM(TRIARTYP), SNORM_ANG, WRITTEN, SKIPPED_CREASE
+      IF (SUPINFO == 'N') THEN
+         WRITE(F06,1902) TRIM(QUADRTYP), TRIM(TRIA3TYP), TRIM(TRIARTYP), SNORM_ANG, WRITTEN, SKIPPED_CREASE
+      ENDIF
+
+      DEALLOCATE (AVG_NORMAL, VALID, ELEM_BGRID, ELEM_NGRID)
+
+      RETURN
+
+! **********************************************************************************************************************************
+ 1901 FORMAT(' *ERROR  1901: CANNOT ALLOCATE ARRAYS FOR GENERATED SHELL SNORM: ',A)
+ 1902 FORMAT(' *INFORMATION: GENERATED SHELL SNORM FOR PARAM QUADRTYP/TRIA3TYP/TRIARTYP = ',A,'/',A,'/',A,                        &
+             ' USING PARAM SNORM = ',F8.3,                                                                                         &
+             ' DEG. GRID NORMALS WRITTEN = ',I8,', CREASE/JUNCTION SKIPPED = ',I8)
+
+! **********************************************************************************************************************************
+
+      END SUBROUTINE UPDATE_GENERATED_SHELL_SNORM
+
+! ##################################################################################################################################
+
+      SUBROUTINE SHELL_ELEMENT_NORMAL ( NGP, BGRD, NORMAL, NORM )
+
+      USE PENTIUM_II_KIND, ONLY       :  LONG, DOUBLE
+      USE CONSTANTS_1, ONLY           :  ZERO
+      USE PARAMS, ONLY                :  EPSIL
+
+      IMPLICIT NONE
+
+      INTEGER(LONG), INTENT(IN)       :: NGP
+      INTEGER(LONG), INTENT(IN)       :: BGRD(4)
+
+      REAL(DOUBLE), INTENT(OUT)       :: NORMAL(3)
+      REAL(DOUBLE), INTENT(OUT)       :: NORM
+
+      REAL(DOUBLE)                    :: V1(3), V2(3)
+
+      INTRINSIC                       :: DOT_PRODUCT, DSQRT
+
+      NORMAL = ZERO
+      NORM = ZERO
+
+      IF (NGP == 4) THEN
+         V1(:) = RGRID(BGRD(3),:) - RGRID(BGRD(1),:)
+         V2(:) = RGRID(BGRD(4),:) - RGRID(BGRD(2),:)
+      ELSE IF (NGP == 3) THEN
+         V1(:) = RGRID(BGRD(2),:) - RGRID(BGRD(1),:)
+         V2(:) = RGRID(BGRD(3),:) - RGRID(BGRD(1),:)
+      ELSE
+         RETURN
+      ENDIF
+
+      NORMAL(1) = V1(2)*V2(3) - V1(3)*V2(2)
+      NORMAL(2) = V1(3)*V2(1) - V1(1)*V2(3)
+      NORMAL(3) = V1(1)*V2(2) - V1(2)*V2(1)
+      NORM = DSQRT(DOT_PRODUCT(NORMAL, NORMAL))
+      IF (NORM > EPSIL(1)) THEN
+         NORMAL = NORMAL / NORM
+      ENDIF
+
+      RETURN
+
+      END SUBROUTINE SHELL_ELEMENT_NORMAL
 
 ! ##################################################################################################################################
 

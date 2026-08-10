@@ -147,7 +147,10 @@
 
                ENDIF
 
-            ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+            ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR.                         &
+                     (TYPE(1:5) == 'QUAD8') .OR. (TYPE == 'QUADR   ') .OR.                                                       &
+                     (ETYPE(INT_ELEM_ID)(1:5) == 'TRIA3') .OR. (ETYPE(INT_ELEM_ID)(1:5) == 'TRIA6') .OR.                         &
+                     (ETYPE(INT_ELEM_ID)(1:5) == 'QUAD4') .OR. (ETYPE(INT_ELEM_ID)(1:5) == 'QUAD8')) THEN
 
                IF      (PTYPE(INT_ELEM_ID) == '1') THEN
 

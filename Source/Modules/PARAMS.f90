@@ -472,20 +472,38 @@
 !                                                              'SPLITD', use angle that splits the 2 diags to define the elem x axis
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
+      INTEGER(LONG)            :: COUPMASS       =     1     ! > 0: coupled/consistent mass where available for SOL 103.
+!                                                              <=0: lumped/diagonal mass. Non-modal solutions are lumped internally.
+
+! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  6*BYTE)      :: QUAD4TYP       =  'MIN4  ' ! Which element to use in MYSTRAN as the QUAD4 element
 !                                                              'MIN4T ': Use Tessler's MIN4T element made up of 4 MIN3 triangles
 !                                                              'MIN4  ': Use Tessler's MIN4 element 
 !                                                              'MITC4 ': Use Bathe's MITC4 (1983)
 !                                                              'MITC4+': Use Ko/Bathe's 2nd MITC4+ (Nov 2016)
 !                                                              'DKMQ20': 6-DOF DKMQ20/Hughes-Brezzi shell branch (experimental)
+!                                                              'DKMT20': DKMQ20-derived starter branch for later 5-DOF/K6ROT work
 !                                                              'SIMO  ': 6-DOF Simo1989/Hughes-Brezzi shell branch (experimental)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-      CHARACTER(  8*BYTE)      :: QUADRTYP       = 'DKMQ24  ' ! Which element to use in MYSTRAN as the CQUADR element
-!                                                              'DKMQ24  ': DKMQ24 with SNORM when supplied
-!                                                              'DKMQ24N ': DKMQ24 using geometric normals only
-!                                                              'SIMO    ': Simo1993-style CQUADR branch (experimental)
+      CHARACTER(  8*BYTE)      :: QUADRTYP       = 'SIMO    ' ! Which element to use in MYSTRAN as the CQUADR element
+!                                                              'DKM24EA ': DKMQ24 with 4-parameter EAS membrane enhancement
+!                                                              'DKM24AU ': legacy AU DKMQ24 with SNORM when supplied
+!                                                              'Q4EASANS': Simo/ANS Hughes-Brezzi shell branch (experimental)
+!                                                              'Q4RS    ': Krysl Q4RS shell branch (experimental)
+!                                                              'SIMO    ': Simo1993-style CQUADR branch (default)
 !                                                              'MITC4PD ': MITC4+/D Hughes-Brezzi branch (experimental)
+
+! ----------------------------------------------------------------------------------------------------------------------------------
+      CHARACTER(  8*BYTE)      :: QUAD8TYP       = 'MITC8   ' ! Which element to use in MYSTRAN as the CQUAD8 element
+!                                                              'MITC8   ': existing Dvorkin-Bathe MITC8 CQUAD8 branch (default)
+!                                                              'SIMOEAS1': Simo1993 Q8 with one EAS shear bubble branch
+
+! ----------------------------------------------------------------------------------------------------------------------------------
+      CHARACTER(  8*BYTE)      :: TRIARTYP       = 'DKMT18  ' ! Which element to use in MYSTRAN as the CTRIAR element
+!                                                              'DKMT18  ': DKMT18/Maknun triangular shell branch
+!                                                              'T3FFD   ': Krysl T3FFD/T3FFA triangular shell branch (experimental)
+!                                                              'MITC3+HB': MITC3+ Hughes-Brezzi triangular shell branch (experimental)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  8*BYTE)      :: SOLIDTYP       = 'LEGACY  '! Solid formulation selector.
@@ -497,6 +515,7 @@
       CHARACTER(  6*BYTE)      :: TRIA3TYP       =  'MIN3  ' ! Which plate bending/shear option to use for CTRIA3
 !                                                              'MIN3  ': Use Tessler's MIN3 element
 !                                                              'MITC3+': Use MITC3+ triangular shell plate branch
+!                                                              'T3FF  ': Krysl T3FF triangular shell branch (experimental)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: RELINK3        =    'N'    ! 'Y', 'N' indicator to redo LINK3,5 on a restart
@@ -534,6 +553,9 @@
 !                                                              indicated zero shear flexibility for shell elements. The shear
 !                                                              stiffness will be reset from infinite (zero flexibility) to
 !                                                              SHRFXFAC times the average of the bending stiffnesses in the 2 planes
+
+! ----------------------------------------------------------------------------------------------------------------------------------
+      REAL(DOUBLE)             :: SNORM_ANG      =  30.0D0   ! Crease angle, in degrees, for generated shell nodal normals
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: SKIPMGG        =    'N'    ! 'Y', 'N' indicator to say whether to skip calculation of MGG
 !                                                               in which case MGG will be read from previously generated,
@@ -606,6 +628,41 @@
 
       INTEGER(LONG)            :: F06_COL_START  =     0     ! 1st col in F06 file for output data to begin. If it is not > 2, then
 !                                                              output will be written with each main header centered on one another
+
+      CONTAINS
+
+      LOGICAL FUNCTION CQUADR_NEEDS_GENERATED_SNORM ( QTYPE )
+
+      CHARACTER(LEN=*), INTENT(IN)    :: QTYPE
+
+! **********************************************************************************************************************************
+! Returns true for CQUADR formulations whose stiffness is built from generated nodal normals.
+
+      CQUADR_NEEDS_GENERATED_SNORM = ((QTYPE == 'DKM24AU ') .OR. (QTYPE == 'Q4RS    '))
+
+! **********************************************************************************************************************************
+
+      END FUNCTION CQUADR_NEEDS_GENERATED_SNORM
+
+      LOGICAL FUNCTION CTRIAR_NEEDS_GENERATED_SNORM ( TTYPE )
+
+      CHARACTER(8*BYTE), INTENT(IN)  :: TTYPE
+
+! Returns true for CTRIAR formulations whose stiffness is built from generated nodal normals.
+
+      CTRIAR_NEEDS_GENERATED_SNORM = ((TTYPE == 'DKMT18  ') .OR. (TTYPE == 'T3FFD   ') .OR. (TTYPE == 'MITC3+HB'))
+
+      END FUNCTION CTRIAR_NEEDS_GENERATED_SNORM
+
+      LOGICAL FUNCTION CTRIA3_NEEDS_GENERATED_SNORM ( TTYPE )
+
+      CHARACTER(6*BYTE), INTENT(IN)  :: TTYPE
+
+! Returns true for CTRIA3 formulations whose stiffness is built from generated nodal normals.
+
+      CTRIA3_NEEDS_GENERATED_SNORM = (TTYPE == 'T3FF  ')
+
+      END FUNCTION CTRIA3_NEEDS_GENERATED_SNORM
 
       END MODULE PARAMS
 

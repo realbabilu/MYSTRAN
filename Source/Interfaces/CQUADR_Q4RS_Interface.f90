@@ -1,0 +1,18 @@
+      MODULE CQUADR_Q4RS_Interface
+
+      INTERFACE
+
+         SUBROUTINE CQUADR_Q4RS ( OPT, INT_ELEM_ID )
+
+         USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
+
+         IMPLICIT NONE
+
+         CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
+         INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
+
+         END SUBROUTINE CQUADR_Q4RS
+
+      END INTERFACE
+
+      END MODULE CQUADR_Q4RS_Interface

@@ -33,10 +33,11 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
+      USE PARAMS, ONLY                :  COUPMASS
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,&
                                          TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM
 
@@ -213,15 +214,25 @@
          ENDDO
 
          MBASIC = ZERO
-         MDIAG = ZERO
-         DO I=1,4
-            MDIAG(I) = SUM(M1(I,1:4))
-         ENDDO
-         DO I=1,4
-            DO K=1,3
-               MBASIC((I-1)*6+K,(I-1)*6+K) = MDIAG(I)
+         IF ((SOL_NAME(1:5) == 'MODES') .AND. (COUPMASS > 0)) THEN
+            DO I=1,4
+               DO J=1,4
+                  DO K=1,3
+                     MBASIC((I-1)*6+K,(J-1)*6+K) = M1(I,J)
+                  ENDDO
+               ENDDO
             ENDDO
-         ENDDO
+         ELSE
+            MDIAG = ZERO
+            DO I=1,4
+               MDIAG(I) = SUM(M1(I,1:4))
+            ENDDO
+            DO I=1,4
+               DO K=1,3
+                  MBASIC((I-1)*6+K,(I-1)*6+K) = MDIAG(I)
+               ENDDO
+            ENDDO
+         ENDIF
          MASS_ELEM_SUM = SUM(M1)
          MLOCAL = MATMUL(T24, MATMUL(MBASIC, T24T))
          ME(1:24,1:24) = MLOCAL

@@ -1515,9 +1515,9 @@
                         5X,''ID'',10X,''ID'',4X,''FIBER'',3X,''NORMAL-X'',3X,''NORMAL-Y'',3X,''SHEAR-XY'',5X,''ANGLE'',6X,''MAJOR'',6X,''MINOR'',6X,''SHEAR'',5X,''VON MISES'')')
             DO I=SURF_START(SURF),SURF_END(SURF)
                MID_ROW(1:8) = 0.5D0 * (OUT_Z1(1:8,I) + OUT_Z2(1:8,I))
-               CALL WRITE_OGS1_F06_ROW ( OUT_GRIDS(I), 0_LONG, 'Z1 ', OUT_Z1(:,I) )
-               CALL WRITE_OGS1_F06_ROW ( 0_LONG,       0_LONG, 'Z2 ', OUT_Z2(:,I) )
-               CALL WRITE_OGS1_F06_ROW ( 0_LONG,       0_LONG, 'MID', MID_ROW )
+               CALL WRITE_OGS1_F06_ROW ( OUT_GRIDS(I), OUT_EIDS(I), 'Z1 ', OUT_Z1(:,I) )
+               CALL WRITE_OGS1_F06_ROW ( 0_LONG,       OUT_EIDS(I), 'Z2 ', OUT_Z2(:,I) )
+               CALL WRITE_OGS1_F06_ROW ( 0_LONG,       OUT_EIDS(I), 'MID', MID_ROW )
             ENDDO
          ENDDO
       ENDIF

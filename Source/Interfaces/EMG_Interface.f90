@@ -36,6 +36,7 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MBUG, MEDAT0_CUSERIN, MELDOF, MEMATC, MOFFSET, NSUB, NTSUB
       USE SCONTR, ONLY                :  DEDAT_Q4_MATANG_KEY, DEDAT_Q4_POFFS_KEY, DEDAT_Q4_SHELL_KEY, DEDAT_Q4_THICK_KEY,          &
                                          DEDAT_T3_MATANG_KEY, DEDAT_T3_POFFS_KEY, DEDAT_T3_SHELL_KEY, DEDAT_T3_THICK_KEY,          &
+                                         DEDAT_T6_MATANG_KEY,                                                                       &
                                          WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -61,4 +62,3 @@
    END INTERFACE
 
    END MODULE EMG_Interface
-

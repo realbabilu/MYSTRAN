@@ -48,10 +48,11 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
+      USE PARAMS, ONLY                :  COUPMASS
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,&
                                          TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM
 
@@ -87,6 +88,7 @@
       REAL(DOUBLE)                    :: MASS_AREA_INT, MASS_ELEM_SUM
       REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24)
       REAL(DOUBLE)                    :: GBE1(3,24,4), GBE2(3,24,4), GBE3(2,24,4)
+      REAL(DOUBLE)                    :: REC_XI(5), REC_ETA(5)
 
 ! **********************************************************************************************************************************
 
@@ -177,22 +179,23 @@
             BE1(:,:,1) = (GBE1(:,:,1) + GBE1(:,:,2) + GBE1(:,:,3) + GBE1(:,:,4)) / FOUR
             BE2(:,:,1) = (GBE2(:,:,1) + GBE2(:,:,2) + GBE2(:,:,3) + GBE2(:,:,4)) / FOUR
             BE3(1:2,:,1) = (GBE3(1:2,:,1) + GBE3(1:2,:,2) + GBE3(1:2,:,3) + GBE3(1:2,:,4)) / FOUR
+            BE1(:,:,2) = GBE1(:,:,4); BE1(:,:,3) = GBE1(:,:,3); BE1(:,:,4) = GBE1(:,:,2); BE1(:,:,5) = GBE1(:,:,1)
+            BE2(:,:,2) = GBE2(:,:,4); BE2(:,:,3) = GBE2(:,:,3); BE2(:,:,4) = GBE2(:,:,2); BE2(:,:,5) = GBE2(:,:,1)
+            BE3(1:2,:,2) = GBE3(1:2,:,4); BE3(1:2,:,3) = GBE3(1:2,:,3)
+            BE3(1:2,:,4) = GBE3(1:2,:,2); BE3(1:2,:,5) = GBE3(1:2,:,1)
 
-            ! CQUAD4 shell output ordering: center, then (+,+), (+,-), (-,+), (-,-)
-            BE1(:,:,2) = GBE1(:,:,4)
-            BE1(:,:,3) = GBE1(:,:,3)
-            BE1(:,:,4) = GBE1(:,:,2)
-            BE1(:,:,5) = GBE1(:,:,1)
-
-            BE2(:,:,2) = GBE2(:,:,4)
-            BE2(:,:,3) = GBE2(:,:,3)
-            BE2(:,:,4) = GBE2(:,:,2)
-            BE2(:,:,5) = GBE2(:,:,1)
-
-            BE3(1:2,:,2) = GBE3(1:2,:,4)
-            BE3(1:2,:,3) = GBE3(1:2,:,3)
-            BE3(1:2,:,4) = GBE3(1:2,:,2)
-            BE3(1:2,:,5) = GBE3(1:2,:,1)
+            REC_XI  = (/ ZERO,  ONE,  ONE, -ONE, -ONE /)
+            REC_ETA = (/ ZERO,  ONE, -ONE,  ONE, -ONE /)
+            DO GP=1,5
+               XI = REC_XI(GP)
+               ETA = REC_ETA(GP)
+               CALL GEOMETRY_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, NVEC, JDET, CO, BCMAT)
+               BMB = BM_AT(XI, ETA, TV1, TV2, CO)
+               BBB = BB_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, CO, BCMAT, AINV_AU)
+               BSB = BS_AT(XYZ, XI, ETA, CO, AINV_AU, EPROP(1))
+               BBL = MATMUL(BBB, T24T)
+               BE2(3,:,GP) = BBL(3,:)
+            ENDDO
          ENDIF
       ENDIF
 
@@ -216,15 +219,25 @@
          ENDDO
 
          MBASIC = ZERO
-         MDIAG = ZERO
-         DO I=1,4
-            MDIAG(I) = SUM(M1(I,1:4))
-         ENDDO
-         DO I=1,4
-            DO K=1,3
-               MBASIC((I-1)*6+K,(I-1)*6+K) = MDIAG(I)
+         IF ((SOL_NAME(1:5) == 'MODES') .AND. (COUPMASS > 0)) THEN
+            DO I=1,4
+               DO J=1,4
+                  DO K=1,3
+                     MBASIC((I-1)*6+K,(J-1)*6+K) = M1(I,J)
+                  ENDDO
+               ENDDO
             ENDDO
-         ENDDO
+         ELSE
+            MDIAG = ZERO
+            DO I=1,4
+               MDIAG(I) = SUM(M1(I,1:4))
+            ENDDO
+            DO I=1,4
+               DO K=1,3
+                  MBASIC((I-1)*6+K,(I-1)*6+K) = MDIAG(I)
+               ENDDO
+            ENDDO
+         ENDIF
          MASS_ELEM_SUM = SUM(M1)
          MLOCAL = MATMUL(T24, MATMUL(MBASIC, T24T))
          ME(1:24,1:24) = MLOCAL

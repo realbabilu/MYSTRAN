@@ -1296,7 +1296,8 @@
                                                                  'USERIN  ',      & !         23
                                                                  'QUADR   ',      & !         24
                                                                  'PYRAM5  ',      & !         25
-                                                                 'PYRAM14 '/)       !         26
+                                                                 'PYRAM14 ',      & !         26
+                                                                 'TRIA6   '/)       !         27
 
                                                              ! Character name for output purposed in LINK9 WRTELi subr's
       CHARACTER(13*BYTE)              :: ELEM_ONAME(METYPE)  = (/'B A R        ', & !          1
@@ -1324,7 +1325,8 @@
                                                                  'U S E R I N  ', & !         23
                                                                  'C Q U A D R  ', & !         24
                                                                  'C P Y R A M 5', & !         25
-                                                                 'C P Y R A M14'/)  !         26
+                                                                 'C P Y R A M14', & !         26
+                                                                 'T R I A 6    '/)  !         27
 
                                                              ! Array of number of grid points for the various element types
       INTEGER(LONG)                   :: NELGP(METYPE)       =  (/ 2,             & ! BAR      1
@@ -1352,7 +1354,8 @@
                                                                    0,             & ! USERIN  23
                                                                    4,             & ! QUADR   24
                                                                    5,             & ! PYRAM5  25
-                                                                  14/)              ! PYRAM14 26
+                                                                  14,             & ! PYRAM14 26
+                                                                   6/)              ! TRIA6   27
 
                                                              ! Array of number of stress recovery points for various elem types
       INTEGER(LONG)                   :: NUM_SEi(METYPE)     =  (/ 1,             & ! BAR      1
@@ -1382,7 +1385,8 @@
                                                                    0,             & ! USERIN  23
                                                                    5,             & ! QUADR   24
                                                                    6,             & ! PYRAM5  25
-                                                                  15/)              ! PYRAM14 26
+                                                                  15,             & ! PYRAM14 26
+                                                                   4/)              ! TRIA6   27
 
 ! **********************************************************************************************************************************
 ! Individual element data generated one element at a time (in subr EMG)

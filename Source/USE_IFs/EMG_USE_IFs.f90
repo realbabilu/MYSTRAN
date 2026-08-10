@@ -45,14 +45,24 @@
       USE BREL1_Interface
       USE BUSH_Interface
       USE TREL1_Interface
+      USE CTRIA3_T3FF_Interface
+      USE CTRIA6_SIMO1993_Interface
       USE CTRIAR_DKMT18_Interface
+      USE CTRIAR_MITC3PHB_Interface
+      USE CTRIAR_T3FFD_Interface
        USE QDEL1_Interface
        USE CQUAD4_DKMQ20_RHR_Interface
+       USE CQUAD4_DKMT20_Interface
        USE CQUAD4_SIMO1989_Interface
+       USE CQUADR_DKM24AU_Interface
+       USE CQUADR_DKM24EA_Interface
        USE CQUADR_DKMQ24_Interface
        USE CQUADR_DKMQ24N_Interface
+       USE CQUADR_HW20_Interface
        USE CQUADR_MITC4PHB_B_Interface
        USE CQUADR_MITC4PHB_Interface
+       USE CQUADR_Q4EASANS_Interface
+       USE CQUADR_Q4RS_Interface
        USE CQUADR_SIMO1993_Interface
        USE HEXA_Interface
       USE PENTA_Interface
@@ -62,5 +72,6 @@
       USE USERIN_Interface
       USE ELMOFF_Interface
       USE MITC8_Interface
+      USE CQUAD8_SIMOEAS1_Interface
 
       END MODULE EMG_USE_IFs

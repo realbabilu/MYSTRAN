@@ -359,7 +359,7 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
             ELSE IF ((NAME(1:7) == 'PLOAD4 ') .OR. (NAME(1:7) == 'PLOAD4*')) THEN
                IPPNT = NPDAT + 1                           ! Set index for pointer array, PPNT
                NPDAT = NPDAT + 1
-               READ(JCARD(K+3),'(F16.0)') RPDAT1
+               READ(JCARD(4),'(F16.0)') RPDAT1
                PDATA(NPDAT) = SCALE*RPDAT1
                DO K = 5,7
                   NPDAT = NPDAT + 1
@@ -687,13 +687,15 @@ k_do6:            DO K=EID1,EID2
       ELSE IF (NAME(1:6) == 'PLOAD2') THEN
          PTYPE(IELEM) = '1'
       ELSE IF (NAME(1:6) == 'PLOAD4') THEN
-         IF      ((ETYPE(IELEM)(1:4) == 'TRIA') .OR. (ETYPE(IELEM)(1:5) == 'TETRA') .OR. (ETYPE(IELEM)(1:5) == 'PENTA')) THEN 
+         IF      ((ETYPE(IELEM)(1:4) == 'TRIA') .OR. (ETYPE(IELEM)(1:5) == 'CTRIA') .OR.                                      &
+                  (ETYPE(IELEM)(1:5) == 'TETRA') .OR. (ETYPE(IELEM)(1:5) == 'PENTA')) THEN
             PTYPE(IELEM) = '3'
-         ELSE IF ((ETYPE(IELEM)(1:4) == 'QUAD') .OR. (ETYPE(IELEM)(1:4) == 'HEXA')) THEN
+         ELSE IF ((ETYPE(IELEM)(1:4) == 'QUAD') .OR. (ETYPE(IELEM)(1:5) == 'CQUAD') .OR.                                      &
+                  (ETYPE(IELEM)(1:4) == 'HEXA')) THEN
             PTYPE(IELEM) = '4'
          ENDIF
       ENDIF
-  
+
 ! **********************************************************************************************************************************
       IF (WRT_LOG >= SUBR_BEGEND) THEN
          CALL OURTIM

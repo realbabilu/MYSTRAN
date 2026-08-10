@@ -38,6 +38,7 @@
                                          NSPCADD, NPBAR, NPBARL, NPLOAD, NSUB, NUM_MPCSIDS, NUM_PARTVEC_RECORDS, PROG_NAME,        &
                                          SOL_NAME, NCBAR, NCBEAM, NCBUSH, NCHEXA20, NCHEXA8, NCPENTA15, NCPENTA6, NCQUAD4,         &
                                          NCQUAD4K, NCQUADR, NCQUAD8, NCROD, NCSHEAR, NCTETRA10, NCTETRA4, NCTRIA3, NCTRIA3K,       &
+                                         NCTRIA6,                                                                                 &
                                          WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -389,6 +390,16 @@ bdf:  DO
 
          ELSE IF ((CARD(1:6) == 'CTRIA3'  ) .OR. (CARD(1:6) == 'CTRIAR'  )) THEN 
             CALL BD_CTRIA   ( CARD, LARGE_FLD_INP, ELEM_NUM_GRDS )
+            ELEM_NUM_DOFS = 6*ELEM_NUM_GRDS
+            IF (MELGP < ELEM_NUM_GRDS) THEN
+               MELGP   = ELEM_NUM_GRDS
+            ENDIF
+            IF (MELDOF < ELEM_NUM_DOFS) THEN
+               MELDOF = ELEM_NUM_DOFS
+            ENDIF
+
+         ELSE IF (CARD(1:6) == 'CTRIA6'  ) THEN
+            CALL BD_CTRIA6  ( CARD, LARGE_FLD_INP, ELEM_NUM_GRDS )
             ELEM_NUM_DOFS = 6*ELEM_NUM_GRDS
             IF (MELGP < ELEM_NUM_GRDS) THEN
                MELGP   = ELEM_NUM_GRDS
@@ -756,6 +767,7 @@ bdf:  DO
       IF ((NCBAR   > 0) .OR. (NCBEAM  > 0) .OR. (NCBUSH   > 0) .OR. (NCROD    > 0)) MOFFSET = 2
       IF ((NCTRIA3 > 0) .OR. (NCTRIA3K > 0)) MOFFSET = 3
       IF ((NCQUAD4 > 0) .OR. (NCQUAD4K > 0) .OR. (NCQUADR > 0)) MOFFSET = 4
+      IF  (NCTRIA6 > 0) MOFFSET = 6
       IF  (NCQUAD8 > 0) MOFFSET = 8
 
       ! Determine max num of indep grids on MPC's and rigid elems

@@ -31,6 +31,7 @@
       USE MODEL_STUF, ONLY            :  ELGP, ME
       USE CONSTANTS_1, ONLY           :  ZERO
       USE SCONTR, ONLY                :  SOL_NAME
+      USE PARAMS, ONLY                :  COUPMASS
 
       IMPLICIT NONE
 
@@ -45,7 +46,7 @@
       ! SOL 101, 104, 105, 31(?) must use lumped mass matrix because GRAV and RFORCE assume 6x6 block diagonal structure for MGG.
       ! SOL 103 should use consistent mass matrix because quadratic elements won't solve with this row sum mass lumping. They
       !         will solve with equal-mass-per-node lumping but with slightly worse results.
-      IF ( SOL_NAME(1:5) /= 'MODES') THEN
+      IF ((SOL_NAME(1:5) /= 'MODES') .OR. (COUPMASS <= 0)) THEN
 
          ! Row sum to convert consistent to lumped mass matrix
          DO I=1,ELGP
