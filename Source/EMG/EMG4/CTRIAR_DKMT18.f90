@@ -160,6 +160,16 @@
          ENDDO
       ENDIF
 
+      IF (OPT(5) == 'Y') THEN
+         DO JSUB=1,SIZE(PPE,2)
+            DO I=1,3
+               PPE(6*(I-1)+1,JSUB) = PPE(6*(I-1)+1,JSUB) + PRESS(3,JSUB) * AREA * NVEC(1) / THREE
+               PPE(6*(I-1)+2,JSUB) = PPE(6*(I-1)+2,JSUB) + PRESS(3,JSUB) * AREA * NVEC(2) / THREE
+               PPE(6*(I-1)+3,JSUB) = PPE(6*(I-1)+3,JSUB) + PRESS(3,JSUB) * AREA * NVEC(3) / THREE
+            ENDDO
+         ENDDO
+      ENDIF
+
 ! --- shell_renovation begin --- !
 ! Differential stiffness for linear buckling. Harahap 2021 Eq. (15)
 ! includes gradients of u, v, w and rotations beta_x, beta_y.  Since SIG0 is

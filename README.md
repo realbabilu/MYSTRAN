@@ -1,13 +1,13 @@
 MYSTRAN 18.a
 ============
-Active Branch is https://github.com/realbabilu/MYSTRAN/edit/v18.00.a
+Active Branch is https://github.com/realbabilu/MYSTRAN/tree/v18.00.a
 
 
 MYSTRAN is an acronym for “My Structural Analysis” (https://www.mystran.com)
 This is a beta repository using added some features to test
 
 ---
-This Mystran is fork of MYSTRANSOLVER https://github.com/MystranSolver/MYSTRANSolver. 
+This Mystran 18.a is fork of MYSTRANSOLVER https://github.com/MystranSolver/MYSTRANSolver from version 18 edition.
 The different is this MYSTRAN are using some decks that may not existed in Nastran, but useful in the Civil Engineering Purpose.
 For Example: PBEAMZ, PBeamZ is PBeamL but using more variables like auto-Tapered Cubic/Linear/Parabolic, and
 Stiffness Modifier that made Area Stiffness different, but real area can be used for grav selfweight density,
@@ -72,8 +72,14 @@ NASTRAN. It is an independent program written in modern Fortran 95.
 - Modal analysis
 - Linear Elastic Buckling Analysis
 - Full Suite of 1D, 2D, and 3D elements
-- Support for Classical Laminated Plate Theory
 - OP2 Support
+- Added Shell: Simo1989, Simo1993, DKMQ20, DKMQ24, MITC3+, DKMT18, MITC4+/D [Hughes Brezzi Formulation Added)
+- GPSTRES for nodal averaging surface stress
+- CBEAM with PBEAML Nastran
+- Faster Solver MUMPS for alternative SUPERLU
+- Some Eigen Solver: FEAST, Subspace, DYSEV
+- Faster RCM for Banded Optimization
+- New Solid with EAS linear and quadratic including CPYRAM, CHEXA, CTETRA, CPENTA
 
 # Get EXE or Make Binary
 
@@ -119,4 +125,3 @@ It also contains information and files related to pre- and post-processors relev
 # Community
 
 - [Join our Discord Channel](https://discord.gg/9k76SkHpHM) - Very active.
-

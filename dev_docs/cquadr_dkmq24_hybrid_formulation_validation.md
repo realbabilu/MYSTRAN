@@ -244,9 +244,9 @@ Primary head-to-head labels:
 
 Existing plot files in the Python workspace:
 
-- `D:\18a\bending_only\Shell\gemini2\shit\value_convergence_2_002_thick.png`
-- `D:\18a\bending_only\Shell\gemini2\shit\prob_2_003_convergence.png`
-- `D:\18a\bending_only\Shell\gemini2\shit\macneal_twisted_beam_convergence.png`
+- `D:\18a\bending_only\Shell\gemini2\\value_convergence_2_002_thick.png`
+- `D:\18a\bending_only\Shell\gemini2\\prob_2_003_convergence.png`
+- `D:\18a\bending_only\Shell\gemini2\\macneal_twisted_beam_convergence.png`
 
 These were regenerated after adding `NASTRAN CQUADR` to the solver-series
 loader and plot whitelists. Problem 2-003 still needs a deck/loading audit for
