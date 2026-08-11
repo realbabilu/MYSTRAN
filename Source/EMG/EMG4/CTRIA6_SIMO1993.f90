@@ -4,7 +4,7 @@
       SUBROUTINE CTRIA6_SIMO1993 ( OPT, INT_ELEM_ID )
 
 ! Ported from:
-!   D:\18a\bending_only\Shell\gemini2\shit\Simo1993_Tri6_ShellElement_v1p6.py
+!   D:\18a\bending_only\Shell\gemini2\shit\validation\q8\Simo1993_Tri6_ShellElement_v1p8.py
 !
 ! Static stiffness path:
 !   6-node quadratic triangle, Simo/Fox director kinematics,
@@ -17,8 +17,8 @@
       USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_STRESS_POINTS, SOL_NAME
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, ME, BE1, BE2, BE3, NUM_EMG_FATAL_ERRS, PCOMP_PROPS,                     &
-                                         SHELL_A, SHELL_D, SHELL_T, XEB, MASS_PER_UNIT_AREA, PPE, PRESS
+      USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, DT, EID, ELGP, GRID_SNORM, KE, ME, BE1, BE2, BE3, NUM_EMG_FATAL_ERRS,    &
+                                         PCOMP_PROPS, PPE, PRESS, PTE, SHELL_A, SHELL_D, SHELL_T, TREF, XEB
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
       USE PARAMS, ONLY                :  COUPMASS
       USE OUTA_HERE_Interface
@@ -29,14 +29,15 @@
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
 
-      INTEGER(LONG)                   :: I, J, IA, IB, K, L
+      INTEGER(LONG)                   :: I, J, IA, IB, K, L, JSUB
       REAL(DOUBLE)                    :: XYZ(6,3), NORMALS(6,3)
       REAL(DOUBLE)                    :: KOUT(36,36)
       REAL(DOUBLE)                    :: BM(3,36), BB(3,36), BS(2,36), BD(1,36)
       REAL(DOUBLE)                    :: R3(3), S3(3), W3(3), R6(6), S6(6), W6(6)
       REAL(DOUBLE)                    :: R, S, WT, JAC, CDRILL, FAC
       REAL(DOUBLE)                    :: M1(6,6), N6(6), DN6(2,6), MASS_ELEM, MASS_NODE
-      REAL(DOUBLE)                    :: UNIT_PPE(36), DXDR(3), DXDS(3), SURF_VEC(3)
+      REAL(DOUBLE)                    :: UNIT_PPE(36), UNIT_PTE(36), DXDR(3), DXDS(3), SURF_VEC(3), CTE(6), TBAR
+      REAL(DOUBLE)                    :: THERMAL_STRAIN(6)
 
       IF (ELGP /= 6) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -105,11 +106,31 @@
       ENDIF
 
       IF (OPT(2) == 'Y') THEN
-         WRITE(ERR,*) ' *ERROR: Code not written for CTRIA6 Simo1993 thermal loads'
-         WRITE(F06,*) ' *ERROR: Code not written for CTRIA6 Simo1993 thermal loads'
-         NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
-         FATAL_ERR = FATAL_ERR + 1
-         CALL OUTA_HERE ( 'Y' )
+         UNIT_PTE = ZERO
+         DO I=1,6
+            R = R6(I)
+            S = S6(I)
+            WT = W6(I)
+            CALL SHAPE_T6 ( R, S, N6, DN6 )
+            CALL BM_T6_AT ( XYZ, R, S, BM, JAC )
+            CALL BB_T6_AT ( XYZ, NORMALS, R, S, BB, JAC )
+            CALL BS_T6_AT ( XYZ, NORMALS, R, S, BS, JAC )
+            CTE(:) = ALPVEC(:,1)
+            THERMAL_STRAIN = MATMUL(SHELL_A, CTE)
+            UNIT_PTE = UNIT_PTE + MATMUL( TRANSPOSE(BM), THERMAL_STRAIN ) * WT * JAC
+            THERMAL_STRAIN = MATMUL(SHELL_D, CTE)
+            UNIT_PTE = UNIT_PTE + MATMUL( TRANSPOSE(BB), THERMAL_STRAIN ) * WT * JAC
+            THERMAL_STRAIN = MATMUL(SHELL_T, CTE)
+            UNIT_PTE = UNIT_PTE + MATMUL( TRANSPOSE(BS), THERMAL_STRAIN ) * WT * JAC
+         ENDDO
+         DO JSUB=1,SIZE(PTE,2)
+            TBAR = ZERO
+            DO J=1,6
+               TBAR = TBAR + DT(J,JSUB)
+            ENDDO
+            TBAR = TBAR / 6.0D0 - TREF(1)
+            PTE(1:36,JSUB) = UNIT_PTE(1:36) * TBAR
+         ENDDO
       ENDIF
 
       IF (OPT(3) == 'Y') THEN
@@ -238,8 +259,8 @@
       SUBROUTINE CALC_NODAL_NORMALS_T6 ( XYZN, NORMS )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3)
       REAL(DOUBLE), INTENT(OUT) :: NORMS(6,3)
-      REAL(DOUBLE) :: RS(6,2), NVAL(6), DN(2,6), G1(3), G2(3), N(3), NM
-      INTEGER(LONG) :: II
+      REAL(DOUBLE) :: RS(6,2), NVAL(6), DN(2,6), G1(3), G2(3), N(3), NM, SN(3)
+      INTEGER(LONG) :: II, BIDX
       RS(1,:) = (/ZERO, ZERO/)
       RS(2,:) = (/ONE, ZERO/)
       RS(3,:) = (/ZERO, ONE/)
@@ -263,6 +284,19 @@
             NORMS(II,:) = N/NM
          ELSE
             NORMS(II,:) = (/ZERO, ZERO, ONE/)
+         ENDIF
+         IF (ALLOCATED(GRID_SNORM)) THEN
+            BIDX = 0
+            IF (II <= SIZE(BGRID)) BIDX = BGRID(II)
+            IF ((BIDX > 0) .AND. (BIDX <= SIZE(GRID_SNORM,1))) THEN
+               SN = GRID_SNORM(BIDX,:)
+               NM = VNORM(SN)
+               IF (NM > 1.0D-15) THEN
+                  SN = SN/NM
+                  IF (DOT_PRODUCT(SN, NORMS(II,:)) < ZERO) SN = -SN
+                  NORMS(II,:) = SN
+               ENDIF
+            ENDIF
          ENDIF
       ENDDO
       END SUBROUTINE CALC_NODAL_NORMALS_T6
@@ -359,21 +393,25 @@
       ENDDO
       END SUBROUTINE BM_T6_AT
 
-      SUBROUTINE BB_T6_AT ( XYZN, NORMS, R, S, BBOUT, JAC )
+      SUBROUTINE BB_T6_AT ( XYZN, NORMS, R, S, BBOUT, JAC, NORMS_EXT )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), NORMS(6,3), R, S
+      REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(6,3)
       REAL(DOUBLE), INTENT(OUT) :: BBOUT(3,36), JAC
       REAL(DOUBLE) :: NVAL(6), DN(2,6), E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), VP(3,3)
       REAL(DOUBLE) :: T1(3), T2(3), T0(3), CG1(3), CG2(3)
+      REAL(DOUBLE) :: NORMS_LOC(6,3)
       INTEGER(LONG) :: II, COL
+      NORMS_LOC = NORMS
+      IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
       CALL SHAPE_T6(R, S, NVAL, DN)
       CALL FIXED_FRAME_T6(XYZN, E1F, E2F, E3F)
       CALL COV_MAP_T6(XYZN, R, S, E1F, E2F, G1, G2, C, JAC)
-      T1 = MATMUL(DN(1,:), NORMS)
-      T2 = MATMUL(DN(2,:), NORMS)
+      T1 = MATMUL(DN(1,:), NORMS_LOC)
+      T2 = MATMUL(DN(2,:), NORMS_LOC)
       BBOUT = ZERO
       DO II=1,6
          COL = (II-1)*6
-         T0 = NORMS(II,:)
+         T0 = NORMS_LOC(II,:)
          CALL TENSOR_PHYS_T6(DN(1,II)*T1, DN(2,II)*T2, 0.5D0*(DN(1,II)*T2 + DN(2,II)*T1), C, VP)
          BBOUT(1:3,COL+1:COL+3) = VP
          CALL CROSS3(T0, G1, CG1)
@@ -383,22 +421,26 @@
       ENDDO
       END SUBROUTINE BB_T6_AT
 
-      SUBROUTINE BS_T6_AT ( XYZN, NORMS, R, S, BSOUT, JAC )
+      SUBROUTINE BS_T6_AT ( XYZN, NORMS, R, S, BSOUT, JAC, NORMS_EXT )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), NORMS(6,3), R, S
+      REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(6,3)
       REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,36), JAC
       REAL(DOUBLE) :: NVAL(6), DN(2,6), E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), BSN(2,36)
       REAL(DOUBLE) :: T0(3), T0I(3), C1(3), C2(3), NM
+      REAL(DOUBLE) :: NORMS_LOC(6,3)
       INTEGER(LONG) :: II, COL
+      NORMS_LOC = NORMS
+      IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
       CALL SHAPE_T6(R, S, NVAL, DN)
       CALL FIXED_FRAME_T6(XYZN, E1F, E2F, E3F)
       CALL COV_MAP_T6(XYZN, R, S, E1F, E2F, G1, G2, C, JAC)
-      T0 = MATMUL(NVAL, NORMS)
+      T0 = MATMUL(NVAL, NORMS_LOC)
       NM = VNORM(T0)
       IF (NM > 1.0D-15) T0 = T0/NM
       BSN = ZERO
       DO II=1,6
          COL = (II-1)*6
-         T0I = NORMS(II,:)
+         T0I = NORMS_LOC(II,:)
          BSN(1,COL+1:COL+3) = BSN(1,COL+1:COL+3) + DN(1,II)*T0
          BSN(2,COL+1:COL+3) = BSN(2,COL+1:COL+3) + DN(2,II)*T0
          CALL CROSS3(T0I, G1, C1)
@@ -410,11 +452,15 @@
       BSOUT(2,:) = C(3)*BSN(1,:) + C(4)*BSN(2,:)
       END SUBROUTINE BS_T6_AT
 
-      SUBROUTINE BDRILL_T6_AT ( XYZN, NORMS, R, S, BDOUT, JAC )
+      SUBROUTINE BDRILL_T6_AT ( XYZN, NORMS, R, S, BDOUT, JAC, NORMS_EXT )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), NORMS(6,3), R, S
+      REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(6,3)
       REAL(DOUBLE), INTENT(OUT) :: BDOUT(1,36), JAC
       REAL(DOUBLE) :: NVAL(6), DN(2,6), G1(3), G2(3), E1(3), E2(3), E3(3), A(2,2), AINV(2,2), DLOC(2,6)
+      REAL(DOUBLE) :: NORMS_LOC(6,3)
       INTEGER(LONG) :: II, COL
+      NORMS_LOC = NORMS
+      IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
       CALL SHAPE_T6(R, S, NVAL, DN)
       CALL SURFACE_BASIS_T6(XYZN, R, S, G1, G2, E1, E2, E3, JAC)
       A(1,1) = DOT_PRODUCT(G1,E1)
@@ -427,7 +473,7 @@
       DO II=1,6
          COL = (II-1)*6
          BDOUT(1,COL+1:COL+3) = 0.5D0*(DLOC(1,II)*E2 - DLOC(2,II)*E1)
-         BDOUT(1,COL+4:COL+6) = BDOUT(1,COL+4:COL+6) - NVAL(II)*NORMS(II,:)
+         BDOUT(1,COL+4:COL+6) = BDOUT(1,COL+4:COL+6) - NVAL(II)*NORMS_LOC(II,:)
       ENDDO
       END SUBROUTINE BDRILL_T6_AT
 

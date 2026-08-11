@@ -448,7 +448,7 @@
       ELSE IF (TYPE(1:5) == 'QUAD8') THEN
          IF (QUAD8TYP == 'MITC8   ') THEN
             CALL MITC8 ( OPT, INT_ELEM_ID )
-         ELSE IF (QUAD8TYP == 'SIMOEAS1') THEN
+         ELSE IF ((QUAD8TYP == 'SIMOEAS1') .OR. (QUAD8TYP == 'SIMOQ8  ')) THEN
             CALL CQUAD8_SIMOEAS1 ( OPT, INT_ELEM_ID )
          ELSE
             NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1

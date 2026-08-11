@@ -2882,7 +2882,7 @@
             CALL LEFT_ADJ_BDFLD ( CHRPARM )
             IF      (CHRPARM == 'MITC8   ') THEN
                QUAD8TYP = 'MITC8   '
-            ELSE IF ((CHRPARM == 'SIMOEAS1') .OR. (CHRPARM == 'SIMO    ')) THEN
+            ELSE IF ((CHRPARM == 'SIMOEAS1') .OR. (CHRPARM == 'SIMO    ') .OR. (CHRPARM == 'SIMOQ8  ')) THEN
                QUAD8TYP = 'SIMOEAS1'
             ELSE
                WARN_ERR = WARN_ERR + 1

@@ -495,9 +495,9 @@
 !                                                              'MITC4PD ': MITC4+/D Hughes-Brezzi branch (experimental)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-      CHARACTER(  8*BYTE)      :: QUAD8TYP       = 'MITC8   ' ! Which element to use in MYSTRAN as the CQUAD8 element
-!                                                              'MITC8   ': existing Dvorkin-Bathe MITC8 CQUAD8 branch (default)
-!                                                              'SIMOEAS1': Simo1993 Q8 with one EAS shear bubble branch
+      CHARACTER(  8*BYTE)      :: QUAD8TYP       = 'SIMOEAS1' ! Which element to use in MYSTRAN as the CQUAD8 element
+!                                                              'MITC8   ': existing Dvorkin-Bathe MITC8 CQUAD8 branch
+!                                                              'SIMOEAS1': Simo1993 Q8 with one EAS shear bubble branch (default)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  8*BYTE)      :: TRIARTYP       = 'DKMT18  ' ! Which element to use in MYSTRAN as the CTRIAR element
@@ -663,6 +663,15 @@
       CTRIA3_NEEDS_GENERATED_SNORM = (TTYPE == 'T3FF  ')
 
       END FUNCTION CTRIA3_NEEDS_GENERATED_SNORM
+
+      LOGICAL FUNCTION CTRIA6_NEEDS_GENERATED_SNORM ( )
+
+! Returns true for CTRIA6 formulations whose stiffness is built from generated nodal normals.
+! CTRIA6 currently always participates in generated nodal-normal preprocessing.
+
+      CTRIA6_NEEDS_GENERATED_SNORM = .TRUE.
+
+      END FUNCTION CTRIA6_NEEDS_GENERATED_SNORM
 
       END MODULE PARAMS
 

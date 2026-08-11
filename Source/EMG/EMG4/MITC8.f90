@@ -38,8 +38,9 @@
       USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, MAX_STRESS_POINTS, SOL_NAME
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  NUM_EMG_FATAL_ERRS, PCOMP_PROPS, ELGP, ES, KE, EM, ET, BE1, BE2, BE3, PHI_SQ, FCONV,      &
-                                         EPROP, SHELL_STR_ANGLE, ME, MASS_PER_UNIT_AREA, PPE, PRESS, XEB
+      USE MODEL_STUF, ONLY            :  ALPVEC, DT, NUM_EMG_FATAL_ERRS, PCOMP_PROPS, ELGP, ES, KE, EM, ET, BE1, BE2, BE3,       &
+                                         PHI_SQ, FCONV, EPROP, SHELL_STR_ANGLE, ME, MASS_PER_UNIT_AREA, PPE, PRESS, PTE, TREF,   &
+                                         XEB
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE PARAMS, ONLY                :  TSTM_DEF, COUPMASS
       USE MITC_STUF, ONLY             :  GP_RS
@@ -47,6 +48,10 @@
       USE MITC_INITIALIZE_Interface
       USE ORDER_GAUSS_Interface
       USE OUTA_HERE_Interface
+      USE PLANE_COORD_TRANS_21_Interface
+      USE MATL_TRANSFORM_MATRIX_Interface
+      USE MATMULT_FFF_Interface
+      USE MATMULT_FFF_T_Interface
       USE MITC_SHAPE_FUNCTIONS_Interface
       USE MATMULX_FFF_Interface
       USE MATMULX_FFF_T_Interface
@@ -65,7 +70,7 @@
       INTEGER(LONG), PARAMETER        :: IORD_IJ = 3       ! Integration order for stiffness matrix
       INTEGER(LONG), PARAMETER        :: IORD_K = 2        ! Integration order for stiffness matrix in thickness direction
       INTEGER(LONG), PARAMETER        :: IORD_STRESS_Q8 = 2! Gauss integration order for stress/strain recovery matrices
-      INTEGER(LONG)                   :: I,J,K,L,M         ! DO loop indices
+      INTEGER(LONG)                   :: I,J,K,L,M,JSUB    ! DO loop indices
       INTEGER(LONG)                   :: STR_PT_NUM        ! Stress recovery point number
 
       REAL(DOUBLE)                    :: HH_IJ(MAX_ORDER_GAUSS) ! Gauss weights for integration in in-layer directions
@@ -91,11 +96,14 @@
       REAL(DOUBLE)                    :: MASS_ELEM         ! Total translational element mass
       REAL(DOUBLE)                    :: MASS_NODE         ! Lumped translational mass per node
       REAL(DOUBLE)                    :: UNIT_PPE(6*ELGP)  ! Pressure load vector for unit pressure
+      REAL(DOUBLE)                    :: UNIT_PTE(6*ELGP)  ! Thermal load vector for unit temperature change
       REAL(DOUBLE)                    :: DXDR(3), DXDS(3), SURF_VEC(3)
       REAL(DOUBLE)                    :: XL(3)
       REAL(DOUBLE)                    :: ZL(3)
       REAL(DOUBLE)                    :: XE(3)
       REAL(DOUBLE)                    :: CROSS_XLE(3)
+      REAL(DOUBLE)                    :: CTE(6), THERMAL_STRAIN(6), TBAR, MATL_AXES_ROTATE, E3(6,6), T66(6,6), DUM66(6,6)
+      REAL(DOUBLE)                    :: CLB(3,3), TRANSFORM(3,3)
 
 ! **********************************************************************************************************************************
 
@@ -223,12 +231,47 @@
 ! Calculate element thermal loads.
 
       IF (OPT(2) == 'Y') THEN
+         E = MITC_ELASTICITY()
+         UNIT_PTE(:) = ZERO
 
-        WRITE(ERR,*) ' *ERROR: Code not written for QUAD8 thermal loads'
-        WRITE(F06,*) ' *ERROR: Code not written for QUAD8 thermal loads'
-        NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
-        FATAL_ERR = FATAL_ERR + 1
-        CALL OUTA_HERE ( 'Y' )
+         CALL ORDER_GAUSS ( IORD_IJ, SS_IJ, HH_IJ )
+         CALL ORDER_GAUSS ( IORD_K , SS_K , HH_K  )
+
+         DO I=1,IORD_IJ
+            DO J=1,IORD_IJ
+               DO K=1,IORD_K
+                  R = SS_IJ(I)
+                  S = SS_IJ(J)
+                  T = SS_K(K)
+                  CLB = MITC8_CARTESIAN_LOCAL_BASIS ( R, S )
+                  MATL_AXES_ROTATE = -ATAN2(CLB(2,1), CLB(1,1))
+                  CALL PLANE_COORD_TRANS_21 ( MATL_AXES_ROTATE, TRANSFORM, SUBR_NAME )
+                  CALL MATL_TRANSFORM_MATRIX ( TRANSFORM, T66 )
+                  T66 = TRANSPOSE(T66)
+                  CALL MATMUL_FFF   ( E  , T66   , 6, 6, 6, DUM66 )
+                  CALL MATMUL_FFF_T ( T66 , DUM66 , 6, 6, 6, E3    )
+                  CTE(:) = ALPVEC(:,1)
+                  CTE(4:6) = CTE(4:6) / TWO
+                  CTE = MATMUL(TRANSPOSE(T66), CTE)
+                  CTE(4:6) = CTE(4:6) * TWO
+                  DETJ = MITC_DETJ ( R, S, T )
+                  INTFAC = DETJ*HH_IJ(I)*HH_IJ(J)*HH_K(K)
+                  CALL MITC8_B ( R, S, T, .TRUE., .TRUE., .TRUE., BI )
+                  CALL MATMULX_FFF_T ( BI, E3, 6, 6*ELGP, 6, DUM1 )
+                  THERMAL_STRAIN = MATMUL(E3, CTE)
+                  UNIT_PTE = UNIT_PTE + MATMUL( TRANSPOSE(BI), THERMAL_STRAIN ) * INTFAC
+               ENDDO
+            ENDDO
+         ENDDO
+
+         DO JSUB=1,SIZE(PTE,2)
+            TBAR = ZERO
+            DO J=1,ELGP
+               TBAR = TBAR + DT(J,JSUB)
+            ENDDO
+            TBAR = TBAR / REAL(ELGP,DOUBLE) - TREF(1)
+            PTE(1:6*ELGP,JSUB) = UNIT_PTE(1:6*ELGP) * TBAR
+         ENDDO
 
       ENDIF
 
