@@ -190,18 +190,9 @@ i_do6:DO I=1,NUM_SPC_RECORDS + NUM_SPC1_RECORDS
                ENDDO
             ENDIF
          ELSE
-            DO J=1,NUM_SPCSIDS
-               IF (SETID == SPCSIDS(J)) THEN
-                  PROCESS_SETID = .TRUE.
-                  APPLY_ALL_SUBCASES = .TRUE.
-                  EXIT
-               ENDIF
-            ENDDO
-            IF (APPLY_ALL_SUBCASES) THEN
-               DO J=1,NSUB
-                  SUBCASE_MATCH(J) = 1
-               ENDDO
-            ENDIF
+            ! SPCD records are enforced-displacement loads.  Their SID lives in the
+            ! LOAD namespace, not the SPC namespace, so do not activate them through
+            ! SPCSIDS even when SPC=SID happens to have the same number.
             DO J=1,NSUB
                IF (SETID == SUBLOD(J,1)) THEN
                   PROCESS_SETID = .TRUE.

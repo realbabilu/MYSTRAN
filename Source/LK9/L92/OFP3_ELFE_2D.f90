@@ -41,11 +41,15 @@
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_ELFO
       use model_stuf, only            :  pcomp_props
       USE MODEL_STUF, ONLY            :  ANY_ELFE_OUTPUT, EDAT, EPNT, ETYPE, FCONV, EID, ELMTYP, ELOUT, METYPE, NUM_EMG_FATAL_ERRS,&
-                                         PLY_NUM, TYPE, STRESS, SHELL_STR_ANGLE, NUM_SEi, ELGP, AGRID
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  FORC_LOC
+                                         PLY_NUM, TYPE, STRESS, SHELL_STR_ANGLE, NUM_SEi, ELGP, AGRID, GRID_ID, RGRID
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  FORC_LOC, GPSTRESS_REQ, NUM_GP_SURFACE, MAX_GP_SURFACES, GP_SURFACE_IDS,                 &
+                                         GP_SURFACE_NORMAL_MODE
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL
       USE OUTPUT4_MATRICES, ONLY      :  OTM_ELFE, TXT_ELFE
+      USE GPSTRESS_SURFACE_UTILS, ONLY:  GPSTRESS_COLLECT_SURFACE_PATCH
+      USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_I8_RJ, FAST_FMT_F06_E14_6
 
+      USE GET_ARRAY_ROW_NUM_Interface
       USE PLANE_COORD_TRANS_21_Interface
       USE TRANSFORM_SHELL_STR_Interface
       USE OFP3_ELFE_2D_USE_IFs
@@ -305,6 +309,7 @@ elems_3: DO J = 1,NELE
                            CALL SET_OEF_TABLE_NAME(ETYPE(J), TABLE_NAME, ITABLE)
                            WRITE(ERR,100) "F4",ETYPE(J),TABLE_NAME,ITABLE
                            CALL WRITE_ELEM_ENGR_FORCE ( JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS(I), ITABLE )
+                           CALL WRITE_SURFACE_AVERAGED_FORCES_F06 ( NUM_OGEL_ROWS, NUM_PTS(I), ETYPE(J) )
                            EXIT
                         ENDIF
                      ENDIF
@@ -526,5 +531,297 @@ elems_3: DO J = 1,NELE
 
 
 ! **********************************************************************************************************************************
+
+      CONTAINS
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE WRITE_SURFACE_AVERAGED_FORCES_F06 ( NUM, NUM_PTS_PER_ELEM, FAMILY )
+
+      INTEGER(LONG), INTENT(IN)       :: NUM
+      INTEGER(LONG), INTENT(IN)       :: NUM_PTS_PER_ELEM
+      CHARACTER(LEN=*), INTENT(IN)    :: FAMILY
+
+      INTEGER(LONG)                   :: IERR
+      INTEGER(LONG)                   :: SURF
+      INTEGER(LONG)                   :: NUM_ELEMS
+      INTEGER(LONG)                   :: NUM_GRIDS
+      INTEGER(LONG)                   :: I, K, GPOS, ELEM_POS
+      INTEGER(LONG)                   :: ISTART
+      INTEGER(LONG)                   :: NELGP
+      INTEGER(LONG)                   :: GID
+      INTEGER(LONG)                   :: POINT_ROW
+      INTEGER(LONG), ALLOCATABLE      :: PATCH_ELEMS(:)
+      INTEGER(LONG), ALLOCATABLE      :: PATCH_GRIDS(:)
+      INTEGER(LONG), ALLOCATABLE      :: OUT_EIDS(:)
+      REAL(DOUBLE), ALLOCATABLE       :: SUM_FORCE(:,:)
+      REAL(DOUBLE), ALLOCATABLE       :: SUM_WT(:)
+      REAL(DOUBLE)                    :: WT
+      REAL(DOUBLE)                    :: FORCE_LOCAL(8)
+      REAL(DOUBLE)                    :: FORCE_SURF(8)
+
+      IF (.NOT. GPSTRESS_REQ) RETURN
+      IF (NUM_GP_SURFACE <= 0) RETURN
+      IF (NUM <= 0) RETURN
+      IF (.NOT. ((FAMILY(1:4) == 'TRIA') .OR. (FAMILY(1:4) == 'QUAD'))) RETURN
+
+      ALLOCATE(PATCH_ELEMS(MAX(1_LONG,NUM)))
+      ALLOCATE(PATCH_GRIDS(MAX(1_LONG,4*NUM)))
+
+      DO SURF=1,NUM_GP_SURFACE
+         CALL GPSTRESS_COLLECT_SURFACE_PATCH ( SURF, PATCH_ELEMS, NUM_ELEMS, PATCH_GRIDS, NUM_GRIDS, IERR )
+         IF ((IERR /= 0) .OR. (NUM_ELEMS <= 0) .OR. (NUM_GRIDS <= 0)) CYCLE
+
+         ALLOCATE(SUM_FORCE(8,NUM_GRIDS))
+         ALLOCATE(SUM_WT(NUM_GRIDS))
+         ALLOCATE(OUT_EIDS(NUM_GRIDS))
+         SUM_FORCE = ZERO
+         SUM_WT = ZERO
+         OUT_EIDS = 0
+
+         DO ISTART=1,NUM,MAX(1_LONG,NUM_PTS_PER_ELEM)
+            IF (FIND_INT(EID_OUT_ARRAY(ISTART,1), PATCH_ELEMS, NUM_ELEMS) == 0) CYCLE
+
+            NELGP = GET_ELEM_NUM_CORNERS ( ISTART, FAMILY )
+            IF (NELGP <= 0) CYCLE
+            WT = GET_ELEM_AREA ( ISTART, NELGP ) / REAL(NELGP,DOUBLE)
+            IF (WT <= ZERO) WT = ONE / REAL(NELGP,DOUBLE)
+
+            DO K=1,NELGP
+               GID = GID_OUT_ARRAY(ISTART,K+1)
+               GPOS = FIND_INT(GID, PATCH_GRIDS, NUM_GRIDS)
+               IF (GPOS == 0) CYCLE
+
+               IF (NUM_PTS_PER_ELEM > 1) THEN
+                  POINT_ROW = ISTART + K
+                  IF (POINT_ROW > NUM) POINT_ROW = ISTART
+               ELSE
+                  POINT_ROW = ISTART
+               ENDIF
+
+               FORCE_LOCAL(1:8) = OGEL(POINT_ROW,1:8)
+               CALL TRANSFORM_SURFACE_FORCE8 ( SURF, POINT_ROW, FORCE_LOCAL, FORCE_SURF )
+               SUM_FORCE(1:8,GPOS) = SUM_FORCE(1:8,GPOS) + WT * FORCE_SURF(1:8)
+               SUM_WT(GPOS) = SUM_WT(GPOS) + WT
+               IF (OUT_EIDS(GPOS) == 0) OUT_EIDS(GPOS) = EID_OUT_ARRAY(ISTART,1)
+            ENDDO
+         ENDDO
+
+         WRITE(F06,'(//,33X,A,I8)') 'F O R C E S   A T   G R I D   P O I N T S   - -   S U R F A C E', GP_SURFACE_IDS(SURF)
+         WRITE(F06,'(A,22X,A,A1,8X,A)') '0', 'SURFACE X-AXIS X  NORMAL(Z-AXIS)  ', GP_SURFACE_NORMAL_MODE(SURF)(1:1),              &
+                                        'REFERENCE COORDINATE SYSTEM FOR SURFACE DEFINITION CID        0'
+         WRITE(F06,'(/,8X,A,7X,A,13X,A,11X,A,11X,A,11X,A,11X,A,11X,A,12X,A,12X,A)')                                      &
+                    'GRID', 'ELEM', 'NXX', 'NYY', 'NXY', 'MXX', 'MYY', 'MXY', 'QX', 'QY'
+         DO I=1,NUM_GRIDS
+            IF (SUM_WT(I) > ZERO) THEN
+               FORCE_SURF(1:8) = SUM_FORCE(1:8,I) / SUM_WT(I)
+               CALL WRITE_SURFACE_FORCE_ROW ( PATCH_GRIDS(I), OUT_EIDS(I), FORCE_SURF )
+            ENDIF
+         ENDDO
+         WRITE(F06,*)
+
+         DEALLOCATE(SUM_FORCE)
+         DEALLOCATE(SUM_WT)
+         DEALLOCATE(OUT_EIDS)
+      ENDDO
+
+      DEALLOCATE(PATCH_ELEMS)
+      DEALLOCATE(PATCH_GRIDS)
+
+      END SUBROUTINE WRITE_SURFACE_AVERAGED_FORCES_F06
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      INTEGER(LONG) FUNCTION GET_ELEM_NUM_CORNERS ( ISTART, FAMILY )
+
+      INTEGER(LONG), INTENT(IN)       :: ISTART
+      CHARACTER(LEN=*), INTENT(IN)    :: FAMILY
+
+      INTEGER(LONG)                   :: K
+
+      GET_ELEM_NUM_CORNERS = 0
+      IF (FAMILY(1:4) == 'TRIA') THEN
+         GET_ELEM_NUM_CORNERS = 3
+      ELSE IF (FAMILY(1:4) == 'QUAD') THEN
+         GET_ELEM_NUM_CORNERS = 4
+      ENDIF
+
+      DO K=GET_ELEM_NUM_CORNERS,1,-1
+         IF (GID_OUT_ARRAY(ISTART,K+1) > 0) RETURN
+      ENDDO
+      GET_ELEM_NUM_CORNERS = 0
+
+      END FUNCTION GET_ELEM_NUM_CORNERS
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      REAL(DOUBLE) FUNCTION GET_ELEM_AREA ( ISTART, NELGP )
+
+      INTEGER(LONG), INTENT(IN)       :: ISTART
+      INTEGER(LONG), INTENT(IN)       :: NELGP
+
+      REAL(DOUBLE)                    :: X1(3), X2(3), X3(3), X4(3)
+
+      IF (NELGP == 3) THEN
+         CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,2), X1 )
+         CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,3), X2 )
+         CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,4), X3 )
+         GET_ELEM_AREA = TRI_AREA_FROM_XYZ ( X1, X2, X3 )
+      ELSE IF (NELGP == 4) THEN
+         CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,2), X1 )
+         CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,3), X2 )
+         CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,4), X3 )
+         CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,5), X4 )
+         GET_ELEM_AREA = TRI_AREA_FROM_XYZ ( X1, X2, X3 ) + TRI_AREA_FROM_XYZ ( X1, X3, X4 )
+      ELSE
+         GET_ELEM_AREA = ZERO
+      ENDIF
+
+      END FUNCTION GET_ELEM_AREA
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      REAL(DOUBLE) FUNCTION TRI_AREA_FROM_XYZ ( X1, X2, X3 )
+
+      REAL(DOUBLE), INTENT(IN)        :: X1(3), X2(3), X3(3)
+      REAL(DOUBLE)                    :: C(3)
+
+      C(1) = (X2(2)-X1(2))*(X3(3)-X1(3)) - (X2(3)-X1(3))*(X3(2)-X1(2))
+      C(2) = (X2(3)-X1(3))*(X3(1)-X1(1)) - (X2(1)-X1(1))*(X3(3)-X1(3))
+      C(3) = (X2(1)-X1(1))*(X3(2)-X1(2)) - (X2(2)-X1(2))*(X3(1)-X1(1))
+      TRI_AREA_FROM_XYZ = 0.5D0 * DSQRT(C(1)*C(1) + C(2)*C(2) + C(3)*C(3))
+
+      END FUNCTION TRI_AREA_FROM_XYZ
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE GET_GRID_BASIC_COORDS ( GRID_NUM, XYZ )
+
+      INTEGER(LONG), INTENT(IN)       :: GRID_NUM
+      REAL(DOUBLE), INTENT(OUT)       :: XYZ(3)
+
+      CHARACTER(32*BYTE)              :: LOCAL_SUBR_NAME = 'OFP3_ELFE_2D'
+      INTEGER(LONG)                   :: IGRID
+
+      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', LOCAL_SUBR_NAME, SIZE(GRID_ID), GRID_ID, GRID_NUM, IGRID )
+      IF (IGRID > 0) THEN
+         XYZ(1) = RGRID(IGRID,1)
+         XYZ(2) = RGRID(IGRID,2)
+         XYZ(3) = RGRID(IGRID,3)
+      ELSE
+         XYZ = ZERO
+      ENDIF
+
+      END SUBROUTINE GET_GRID_BASIC_COORDS
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE TRANSFORM_SURFACE_FORCE8 ( SURF_INDEX, POINT_INDEX, FORCE_LOCAL, FORCE_SURF )
+
+      INTEGER(LONG), INTENT(IN)       :: SURF_INDEX
+      INTEGER(LONG), INTENT(IN)       :: POINT_INDEX
+      REAL(DOUBLE), INTENT(IN)        :: FORCE_LOCAL(8)
+      REAL(DOUBLE), INTENT(OUT)       :: FORCE_SURF(8)
+
+      REAL(DOUBLE)                    :: SURF_BASIS(3,3)
+      REAL(DOUBLE)                    :: LOCAL_TENSOR(3,3)
+      REAL(DOUBLE)                    :: SURF_TENSOR(3,3)
+      REAL(DOUBLE)                    :: LOCAL_VEC(3)
+      REAL(DOUBLE)                    :: SURF_VEC(3)
+
+      FORCE_SURF = FORCE_LOCAL
+
+      CALL GET_SURFACE_BASIS ( SURF_INDEX, SURF_BASIS )
+
+      LOCAL_TENSOR = ZERO
+      LOCAL_TENSOR(1,1) = FORCE_LOCAL(1)
+      LOCAL_TENSOR(2,2) = FORCE_LOCAL(2)
+      LOCAL_TENSOR(1,2) = FORCE_LOCAL(3)
+      LOCAL_TENSOR(2,1) = FORCE_LOCAL(3)
+      SURF_TENSOR = MATMUL(SURF_BASIS, MATMUL(LOCAL_TENSOR, TRANSPOSE(SURF_BASIS)))
+      FORCE_SURF(1) = SURF_TENSOR(1,1)
+      FORCE_SURF(2) = SURF_TENSOR(2,2)
+      FORCE_SURF(3) = SURF_TENSOR(1,2)
+
+      LOCAL_TENSOR = ZERO
+      LOCAL_TENSOR(1,1) = FORCE_LOCAL(4)
+      LOCAL_TENSOR(2,2) = FORCE_LOCAL(5)
+      LOCAL_TENSOR(1,2) = FORCE_LOCAL(6)
+      LOCAL_TENSOR(2,1) = FORCE_LOCAL(6)
+      SURF_TENSOR = MATMUL(SURF_BASIS, MATMUL(LOCAL_TENSOR, TRANSPOSE(SURF_BASIS)))
+      FORCE_SURF(4) = SURF_TENSOR(1,1)
+      FORCE_SURF(5) = SURF_TENSOR(2,2)
+      FORCE_SURF(6) = SURF_TENSOR(1,2)
+
+      LOCAL_VEC = ZERO
+      LOCAL_VEC(1) = FORCE_LOCAL(7)
+      LOCAL_VEC(2) = FORCE_LOCAL(8)
+      SURF_VEC = MATMUL(SURF_BASIS, LOCAL_VEC)
+      FORCE_SURF(7) = SURF_VEC(1)
+      FORCE_SURF(8) = SURF_VEC(2)
+
+      END SUBROUTINE TRANSFORM_SURFACE_FORCE8
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE GET_SURFACE_BASIS ( SURF_INDEX, SURF_BASIS )
+
+      INTEGER(LONG), INTENT(IN)       :: SURF_INDEX
+      REAL(DOUBLE), INTENT(OUT)       :: SURF_BASIS(3,3)
+
+      CHARACTER(8*BYTE)               :: NMODE
+
+      SURF_BASIS = ZERO
+      NMODE = GP_SURFACE_NORMAL_MODE(SURF_INDEX)
+
+      IF (NMODE(1:1) == 'X') THEN
+         SURF_BASIS(1,2) = ONE
+         SURF_BASIS(2,3) = ONE
+         SURF_BASIS(3,1) = ONE
+      ELSE IF (NMODE(1:1) == 'Y') THEN
+         SURF_BASIS(1,3) = ONE
+         SURF_BASIS(2,1) = ONE
+         SURF_BASIS(3,2) = ONE
+      ELSE
+         SURF_BASIS(1,1) = ONE
+         SURF_BASIS(2,2) = ONE
+         SURF_BASIS(3,3) = ONE
+      ENDIF
+
+      END SUBROUTINE GET_SURFACE_BASIS
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      INTEGER(LONG) FUNCTION FIND_INT ( VALUE, ARRAY, NUSED )
+
+      INTEGER(LONG), INTENT(IN)       :: VALUE
+      INTEGER(LONG), INTENT(IN)       :: ARRAY(:)
+      INTEGER(LONG), INTENT(IN)       :: NUSED
+
+      INTEGER(LONG)                   :: I
+
+      FIND_INT = 0
+      DO I=1,NUSED
+         IF (ARRAY(I) == VALUE) THEN
+            FIND_INT = I
+            RETURN
+         ENDIF
+      ENDDO
+
+      END FUNCTION FIND_INT
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE WRITE_SURFACE_FORCE_ROW ( GRID_NUM, ELEM_NUM, VALUES )
+
+      INTEGER(LONG), INTENT(IN)       :: GRID_NUM
+      INTEGER(LONG), INTENT(IN)       :: ELEM_NUM
+      REAL(DOUBLE), INTENT(IN)        :: VALUES(8)
+
+      CHARACTER(160*BYTE)             :: LINE_BUF
+      INTEGER(LONG)                   :: POS, J
+
+      LINE_BUF = ' '
+      CALL FAST_FMT_I8_RJ ( GRID_NUM, LINE_BUF(2:9) )
+      CALL FAST_FMT_I8_RJ ( ELEM_NUM, LINE_BUF(12:19) )
+      POS = 25
+      DO J=1,8
+         CALL FAST_FMT_F06_E14_6 ( VALUES(J), LINE_BUF(POS:POS+13) )
+         POS = POS + 14
+      ENDDO
+      WRITE(F06,'(A)') TRIM(LINE_BUF)
+
+      END SUBROUTINE WRITE_SURFACE_FORCE_ROW
 
       END SUBROUTINE OFP3_ELFE_2D

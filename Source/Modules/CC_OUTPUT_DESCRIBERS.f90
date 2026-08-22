@@ -83,12 +83,14 @@
       CHARACTER(LEN(CC_CMD_DESCRIBERS)) :: STRE_MAG  = 'MAG     '
       CHARACTER(LEN(CC_CMD_DESCRIBERS)) :: STRE_OPT  = 'VONMISES'
       CHARACTER(LEN(CC_CMD_DESCRIBERS)) :: STRE_LOC  = 'CENTER  '
+      CHARACTER(LEN(CC_CMD_DESCRIBERS)) :: GPSTRESS_OUT = 'YNNNN   '
 
       INTEGER(LONG), PARAMETER          :: MAX_GP_SURFACES = 256
       INTEGER(LONG), PARAMETER          :: MAX_GP_POST_SETS = 256
       INTEGER(LONG), PARAMETER          :: GP_POST_SET_TEXT_LEN = 1024
 
       LOGICAL                           :: GPSTRESS_REQ      = .FALSE.
+      LOGICAL                           :: STRESS_USER_REQ   = .FALSE.
       LOGICAL                           :: STRFIELD_REQ      = .FALSE.
       LOGICAL                           :: OUTPUT_POST_REQ   = .FALSE.
       INTEGER(LONG)                     :: GPSTRESS_SETID    = 0
@@ -108,9 +110,11 @@
       INTEGER(LONG)                   :: I
 
       GPSTRESS_REQ    = .FALSE.
+      STRESS_USER_REQ = .FALSE.
       STRFIELD_REQ    = .FALSE.
       OUTPUT_POST_REQ = .FALSE.
       GPSTRESS_SETID  = 0
+      GPSTRESS_OUT    = 'YNNNN   '
       NUM_GP_SURFACE  = 0
       NUM_GP_VOLUME   = 0
       NUM_GP_POST_SET = 0
