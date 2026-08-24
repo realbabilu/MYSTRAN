@@ -292,6 +292,8 @@
             ELSE
                IF (GPSTRESS_REQ .AND. (TYPE(1:5) == 'TRIA3') .AND. (NUM_SEi(LETYPE) == 1)) THEN
                   NUMBER_ROWS(K) = 2*(NELGP(L) + 1)         !    GPSTRESS needs hidden center+grid rows for TRIA3 recovery
+               ELSE IF (GPSTRESS_REQ .AND. ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))) THEN
+                  NUMBER_ROWS(K) = 2*NUM_SEi(LETYPE)        !    GPSTRESS needs hidden center+grid rows for QUAD recovery
                ELSE IF (STRE_LOC == 'CENTER  ') THEN        !    PSHELL requires 2 rows of output/elem for STRE_LOC = 'CENTER'
                   NUMBER_ROWS(K) = 2
                ELSE                                        !    PSHELL requires more lines of output for other STRE_LOC

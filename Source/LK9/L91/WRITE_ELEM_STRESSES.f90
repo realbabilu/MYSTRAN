@@ -701,14 +701,16 @@
               ! fd2, sx2, sy2, txy2, angle2, major2, minor2, vm2,) = out; n=17
               NUM_WIDE = 17
               ELEMENT_TYPE = 33
-              NVALUES = NUM_WIDE * NUM
+              NELEMENTS = NUM / MAX(1_LONG,NUM_PTS)
+              NVALUES = NUM_WIDE * NELEMENTS
               CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
                                      TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
               !NUM_PTS = 1
               ! just a copy of the CTRIA3 code
               ! op2 version of the upper & lower layers all in one call, but without the transverse shear
               WRITE(OP2) NVALUES
-              WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
+              WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8), &
+                          I=1,NUM,MAX(1_LONG,NUM_PTS))
            ELSE
               CALL GET_STRESS_CODE( STRESS_CODE, 1,            0,         1)
               ! CQUAD4-144 / CQUAD8-64
@@ -768,52 +770,71 @@
                WRITE(F06,'(A)') QUAD_LOWER_LINE
             ENDIF
 
-            DO L=1,NUM_PTS-1
-               K = K + 1
-               IF (WRITE_F06) WRITE(F06,*)
-               IF (DABS(POLY_FIT_ERR(I+L)) >= 0.01D0) THEN
+            IF ((STRE_LOC == 'CORNER  ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+               DO L=1,NUM_PTS-1
+                  K = K + 1
+                  IF (WRITE_F06) WRITE(F06,*)
+                  IF (DABS(POLY_FIT_ERR(I+L)) >= 0.01D0) THEN
+                     IF (WRITE_F06) THEN
+                        QUAD_VALUES_10(1:10) = OGEL(K,1:10)
+                        CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+                        CALL FAST_BUILD_QUAD_1405_LINE ( GID_OUT_ARRAY(I,L+1), QUAD_VALUES_10, POLY_FIT_ERR(I+L),       &
+                                                         POLY_FIT_ERR_INDEX(I+L), QUAD_GRID_NOTE_LINE )
+                        WRITE(F06,'(A)') QUAD_GRID_NOTE_LINE
+                     ENDIF
+                     WRT_ERR_INDEX_NOTE(POLY_FIT_ERR_INDEX(I+L)) = 'Y'
+                  ELSE
+                     IF (WRITE_F06) THEN
+                        QUAD_VALUES_10(1:10) = OGEL(K,1:10)
+                        CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+                        CALL FAST_BUILD_QUAD_1406_LINE ( GID_OUT_ARRAY(I,L+1), QUAD_VALUES_10, POLY_FIT_ERR(I+L),       &
+                                                         QUAD_GRID_LINE )
+                        WRITE(F06,'(A)') QUAD_GRID_LINE
+                     ENDIF
+                  ENDIF
+
+                  K = K + 1
                   IF (WRITE_F06) THEN
                      QUAD_VALUES_10(1:10) = OGEL(K,1:10)
                      CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
-                     CALL FAST_BUILD_QUAD_1405_LINE ( GID_OUT_ARRAY(I,L+1), QUAD_VALUES_10, POLY_FIT_ERR(I+L),       &
-                                                      POLY_FIT_ERR_INDEX(I+L), QUAD_GRID_NOTE_LINE )
-                     WRITE(F06,'(A)') QUAD_GRID_NOTE_LINE
+                     QUAD_VALUES_8(1:8) = QUAD_VALUES_10(1:8)
+                     CALL FAST_BUILD_QUAD_1404_LINE ( QUAD_VALUES_8, QUAD_LOWER_LINE )
+                     WRITE(F06,'(A)') QUAD_LOWER_LINE
                   ENDIF
-                  WRT_ERR_INDEX_NOTE(POLY_FIT_ERR_INDEX(I+L)) = 'Y'
-               ELSE
-                  IF (WRITE_F06) THEN
-                     QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-                     CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
-                     CALL FAST_BUILD_QUAD_1406_LINE ( GID_OUT_ARRAY(I,L+1), QUAD_VALUES_10, POLY_FIT_ERR(I+L),       &
-                                                      QUAD_GRID_LINE )
-                     WRITE(F06,'(A)') QUAD_GRID_LINE
-                  ENDIF
-               ENDIF
 
-               K = K + 1
-               IF (WRITE_F06) THEN
-                  QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-                  CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
-                  QUAD_VALUES_8(1:8) = QUAD_VALUES_10(1:8)
-                  CALL FAST_BUILD_QUAD_1404_LINE ( QUAD_VALUES_8, QUAD_LOWER_LINE )
-                  WRITE(F06,'(A)') QUAD_LOWER_LINE
-               ENDIF
-
-            ENDDO
+               ENDDO
+            ELSE
+               K = K + 2*(NUM_PTS - 1)
+            ENDIF
          ENDDO
 
          MAX_ANS(1:10) = -HUGE(1.0D0)
          MIN_ANS(1:10) =  HUGE(1.0D0)
          ABS_ANS(1:10) = ZERO
-         DO K=1,NUM
-            QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-            CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
-            DO J=2,10
-               IF (QUAD_VALUES_10(J) > MAX_ANS(J)) MAX_ANS(J) = QUAD_VALUES_10(J)
-               IF (QUAD_VALUES_10(J) < MIN_ANS(J)) MIN_ANS(J) = QUAD_VALUES_10(J)
-               ABS_ANS(J) = MAX( ABS_ANS(J), DABS(QUAD_VALUES_10(J)) )
+         IF ((STRE_LOC == 'CORNER  ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
+            DO K=1,2*NUM
+               QUAD_VALUES_10(1:10) = OGEL(K,1:10)
+               CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+               DO J=2,10
+                  IF (QUAD_VALUES_10(J) > MAX_ANS(J)) MAX_ANS(J) = QUAD_VALUES_10(J)
+                  IF (QUAD_VALUES_10(J) < MIN_ANS(J)) MIN_ANS(J) = QUAD_VALUES_10(J)
+                  ABS_ANS(J) = MAX( ABS_ANS(J), DABS(QUAD_VALUES_10(J)) )
+               ENDDO
             ENDDO
-         ENDDO
+         ELSE
+            DO I=1,NUM,MAX(1_LONG,NUM_PTS)
+               DO L=0,1
+                  K = 2*I + L - 1
+                  QUAD_VALUES_10(1:10) = OGEL(K,1:10)
+                  CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+                  DO J=2,10
+                     IF (QUAD_VALUES_10(J) > MAX_ANS(J)) MAX_ANS(J) = QUAD_VALUES_10(J)
+                     IF (QUAD_VALUES_10(J) < MIN_ANS(J)) MIN_ANS(J) = QUAD_VALUES_10(J)
+                     ABS_ANS(J) = MAX( ABS_ANS(J), DABS(QUAD_VALUES_10(J)) )
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
          MAX_ANS(1) = ZERO
          MIN_ANS(1) = ZERO
          ABS_ANS(1) = ZERO
@@ -879,7 +900,7 @@
             ENDDO
          ENDIF
 
-         IF ((OP2_OPENED .OR. WRITE_GPSTRESS_F06) .AND. GPSTRESS_REQ .AND. ((STRE_LOC == 'CORNER  ') .OR. (TYPE(1:5) == 'QUAD8'))) THEN
+         IF ((OP2_OPENED .OR. WRITE_GPSTRESS_F06) .AND. GPSTRESS_REQ .AND. (NUM_PTS > 1)) THEN
             CALL WRITE_OGS1_SURFACE_STRESS ( ITABLE, ISUBCASE, NUM, NUM_PTS, DEVICE_CODE, ANALYSIS_CODE, FIELD5_INT_MODE,       &
                                              FIELD6_EIGENVALUE, TITLEI, STITLEI, LABELI, 'QUAD', WRITE_GPSTRESS_F06, OP2_OPENED )
          ENDIF
