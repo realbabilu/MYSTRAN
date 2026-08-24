@@ -894,7 +894,7 @@
                                WRITE_F06, WRITE_OP2)
 
       ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6')) THEN
-         CALL WRITE_OES_CTRIA3(NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI, &
+         CALL WRITE_OES_CTRIA3(NUM, NUM_PTS, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI, &
                                FIELD5_INT_MODE, FIELD6_EIGENVALUE,                   &
                                WRITE_F06, WRITE_OP2, OP2_OPENED, WRITE_GPSTRESS_F06)
 
@@ -1076,9 +1076,9 @@
           ,/,1X,A,'   ID                  Distance      Normal-X     Normal-Y      Shear-XY     Angle     Major        Minor',     &
           '      Shear-XY     Shear-XZ     Shear-YZ',/,1X,123X,'(max through thickness)')
 
- 1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
+ 1703 FORMAT(1X,I8,4X,'CENTER  ',4X,4(1ES13.5),0PF9.3,5(1ES13.5))
 
- 1704 FORMAT(13X,'in elem',3X,4(1ES13.5),0PF9.3,5(1ES13.5))
+ 1704 FORMAT(23X,4(1ES13.5),0PF9.3,5(1ES13.5))
 
  1705 FORMAT(37X,'------------ ------------ ------------          ------------ ------------ ------------ ------------',            &
                  ' ------------',/,                                                                                                &
@@ -1218,7 +1218,7 @@
       END SUBROUTINE WRITE_OES_CSHEAR
 
 !==============================================================================
-      SUBROUTINE WRITE_OES_CTRIA3 ( NUM, FILL, ISUBCASE, ITABLE, TITLE, SUBTITLE, LABEL, &
+      SUBROUTINE WRITE_OES_CTRIA3 ( NUM, NUM_PTS, FILL, ISUBCASE, ITABLE, TITLE, SUBTITLE, LABEL, &
                                     FIELD5_INT_MODE, FIELD6_EIGENVALUE ,                 &
                                     WRITE_F06, WRITE_OP2, OP2_OPENED, WRITE_GPSTRESS_F06)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -1231,6 +1231,7 @@
       IMPLICIT NONE
       !
       INTEGER(LONG), INTENT(IN)       :: NUM               ! the number of elements
+      INTEGER(LONG), INTENT(IN)       :: NUM_PTS           ! number of recovered stress points per element
       INTEGER(LONG), INTENT(IN)       :: ISUBCASE          ! the current subcase
       CHARACTER(LEN=128), INTENT(IN)  :: TITLE             ! the model TITLE
       CHARACTER(LEN=128), INTENT(IN)  :: SUBTITLE          ! the subcase SUBTITLE
@@ -1264,10 +1265,10 @@
       REAL(DOUBLE)                :: SXYMAX
       REAL(DOUBLE)                :: VONMISES
       REAL(DOUBLE)                :: Z1, Z2, Z_DEN
-      INTEGER(LONG)               :: I, J, K, L           ! DO loop indices
-      CHARACTER(149*BYTE)         :: TRIA_CENTER_LINE
-      CHARACTER(149*BYTE)         :: TRIA_LOWER_LINE
-      CHARACTER(139*BYTE)         :: TRIA_GRID_LINE
+      INTEGER(LONG)               :: I, J, K, L, IP       ! DO loop indices
+      CHARACTER(159*BYTE)         :: TRIA_CENTER_LINE
+      CHARACTER(159*BYTE)         :: TRIA_LOWER_LINE
+      CHARACTER(159*BYTE)         :: TRIA_GRID_LINE
 
       ! [eid, fiber_dist/curvature, oxx, oyy, txy, angle, omax, omin, ovm/max_shear,   ! upper
       !       fiber_dist/curvature, oxx, oyy, txy, angle, omax, omin, ovm/max_shear,   ! lower
@@ -1292,9 +1293,9 @@
                      (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
       ENDIF  ! write op2
 
- 1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
+ 1703 FORMAT(1X,I8,4X,'CENTER  ',4X,4(1ES13.5),0PF9.3,5(1ES13.5))
 
- 1704 FORMAT(13X,'in elem',3X,4(1ES13.5),0PF9.3,5(1ES13.5))
+ 1704 FORMAT(23X,4(1ES13.5),0PF9.3,5(1ES13.5))
  1706 FORMAT(1X,A,I8,4X,4(1ES13.5),0PF9.3,5(1ES13.5))
 
  1705 FORMAT(37X,'------------ ------------ ------------          ------------ ------------ ------------ ------------',            &
@@ -1305,27 +1306,7 @@
              1X,'*for output set')
 
       IF (STRE_LOC == 'CENTER  ') THEN
-         DO I=1,NUM
-            K = K + 1
-            IF (WRITE_F06) WRITE(F06,*)
-            DO J=1,10
-               ROW_TMP(J) = OGEL(K,J)
-            ENDDO
-            IF (WRITE_F06) THEN
-               CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), ROW_TMP, TRIA_CENTER_LINE )
-               WRITE(F06,'(A)') TRIA_CENTER_LINE(1:149)
-            ENDIF
-            K = K + 1
-            DO J=1,10
-               ROW_TMP(J) = OGEL(K,J)
-            ENDDO
-            IF (WRITE_F06) THEN
-               CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
-               WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
-            ENDIF
-         ENDDO
-      ELSE
-         DO I=1,NUM
+         DO I=1,NUM,MAX(1_LONG,NUM_PTS)
             K = 2*I - 1
             IF (WRITE_F06) WRITE(F06,*)
             DO J=1,10
@@ -1333,30 +1314,35 @@
             ENDDO
             IF (WRITE_F06) THEN
                CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), ROW_TMP, TRIA_CENTER_LINE )
-               WRITE(F06,'(A)') TRIA_CENTER_LINE(1:149)
+               WRITE(F06,'(A)') TRIA_CENTER_LINE(1:159)
             ENDIF
             DO J=1,10
                ROW_TMP(J) = OGEL(K+1,J)
             ENDDO
             IF (WRITE_F06) THEN
                CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
-               WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
+               WRITE(F06,'(A)') TRIA_LOWER_LINE(1:159)
             ENDIF
-            DO L=1,3
+         ENDDO
+      ELSE
+         DO I=1,NUM,NUM_PTS
+            DO L=1,NUM_PTS-1
+               IP = I + L
+               K = 2*IP - 1
                IF (WRITE_F06) WRITE(F06,*)
                DO J=1,10
                   ROW_TMP(J) = OGEL(K,J)
                ENDDO
                IF (WRITE_F06) THEN
-                  CALL FAST_BUILD_TRIA_1706_LINE ( GID_OUT_ARRAY(I,L+1), ROW_TMP, TRIA_GRID_LINE )
-                  WRITE(F06,'(A)') TRIA_GRID_LINE(1:139)
+                  CALL FAST_BUILD_TRIA_1706_LINE ( EID_OUT_ARRAY(I,1), GID_OUT_ARRAY(I,L+1), ROW_TMP, TRIA_GRID_LINE )
+                  WRITE(F06,'(A)') TRIA_GRID_LINE(1:159)
                ENDIF
                DO J=1,10
                   ROW_TMP(J) = OGEL(K+1,J)
                ENDDO
                IF (WRITE_F06) THEN
                   CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
-                  WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
+                  WRITE(F06,'(A)') TRIA_LOWER_LINE(1:159)
                ENDIF
             ENDDO
          ENDDO
@@ -1370,8 +1356,8 @@
                          ABS_ANS(2),ABS_ANS(3),ABS_ANS(4),ABS_ANS(6),ABS_ANS(7),ABS_ANS(8),ABS_ANS(9),ABS_ANS(10)
       ENDIF
 
-      IF ((OP2_OPENED .OR. WRITE_GPSTRESS_F06) .AND. GPSTRESS_REQ .AND. (STRE_LOC == 'CORNER  ')) THEN
-         CALL WRITE_OGS1_SURFACE_STRESS ( ITABLE, ISUBCASE, NUM, 4_LONG, DEVICE_CODE, ANALYSIS_CODE, FIELD5_INT_MODE,           &
+      IF ((OP2_OPENED .OR. WRITE_GPSTRESS_F06) .AND. GPSTRESS_REQ .AND. (NUM_PTS > 1)) THEN
+         CALL WRITE_OGS1_SURFACE_STRESS ( ITABLE, ISUBCASE, NUM, NUM_PTS, DEVICE_CODE, ANALYSIS_CODE, FIELD5_INT_MODE,          &
                                           FIELD6_EIGENVALUE, TITLE, SUBTITLE, LABEL, 'TRIA', WRITE_GPSTRESS_F06, OP2_OPENED )
       ENDIF
 

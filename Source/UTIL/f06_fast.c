@@ -446,57 +446,54 @@ void mystran_build_quad_1406_line(int gid, const double vals[10], double poly_er
     p = fmt_e_width_prec(p, poly_err, 9, 1, 0);
 }
 
-void mystran_build_tria_1703_line(int eid, const double vals[10], char out[149]) {
+void mystran_build_tria_1703_line(int eid, const double vals[10], char out[159]) {
     int j;
     char *p = out;
 
-    memset(out, ' ', 149);
+    memset(out, ' ', 159);
     *p++ = ' ';
     p = fmt_i8_rj(p, eid);
-    memcpy(p, "    Anywhere  ", 14);
+    memcpy(p, "    CENTER    ", 14);
     p += 14;
     for (j = 0; j <= 3; ++j) {
         p = fmt_e_width_prec(p, vals[j], 13, 5, 0);
     }
-    p = fmt_e_width_prec(p, vals[4], 9, 3, 0);
+    p = fmt_e_width_prec(p, vals[4], 11, 3, 0);
     for (j = 5; j < 10; ++j) {
         p = fmt_e_width_prec(p, vals[j], 13, 5, 0);
     }
 }
 
-void mystran_build_tria_1704_line(const double vals[10], char out[149]) {
+void mystran_build_tria_1704_line(const double vals[10], char out[159]) {
     int j;
     char *p = out;
 
-    memset(out, ' ', 149);
-    memset(p, ' ', 13);
-    p += 13;
-    memcpy(p, "in elem", 7);
-    p += 7;
-    memset(p, ' ', 3);
-    p += 3;
+    memset(out, ' ', 159);
+    memset(p, ' ', 23);
+    p += 23;
     for (j = 0; j <= 3; ++j) {
         p = fmt_e_width_prec(p, vals[j], 13, 5, 0);
     }
-    p = fmt_e_width_prec(p, vals[4], 9, 3, 0);
+    p = fmt_e_width_prec(p, vals[4], 11, 3, 0);
     for (j = 5; j < 10; ++j) {
         p = fmt_e_width_prec(p, vals[j], 13, 5, 0);
     }
 }
 
-void mystran_build_tria_1706_line(int gid, const double vals[10], char out[139]) {
+void mystran_build_tria_1706_line(int eid, int gid, const double vals[10], char out[159]) {
     int j;
     char *p = out;
 
-    memset(out, ' ', 139);
+    memset(out, ' ', 159);
     *p++ = ' ';
+    p = fmt_i8_rj(p, eid);
+    memcpy(p, "   GRD", 6);
+    p += 6;
     p = fmt_i8_rj(p, gid);
-    memset(p, ' ', 4);
-    p += 4;
     for (j = 0; j <= 3; ++j) {
         p = fmt_e_width_prec(p, vals[j], 13, 5, 0);
     }
-    p = fmt_e_width_prec(p, vals[4], 9, 3, 0);
+    p = fmt_e_width_prec(p, vals[4], 11, 3, 0);
     for (j = 5; j < 10; ++j) {
         p = fmt_e_width_prec(p, vals[j], 13, 5, 0);
     }

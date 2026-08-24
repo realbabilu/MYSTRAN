@@ -109,11 +109,6 @@
       ELSE
          STRESS_USER_REQ = .TRUE.
          STRE_OUT = REQUEST_OUT
-         IF (GPSTRESS_REQ) THEN
-            ! GPSTRESS needs grid/corner stress recovery even when a later
-            ! STRESS(CENTER) request is present in the same deck.
-            STRE_LOC = 'CORNER'
-         ENDIF
       ENDIF
 
       ! Set CASE CONTROL output request variable to SETID

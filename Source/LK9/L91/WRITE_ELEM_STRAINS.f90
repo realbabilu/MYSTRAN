@@ -352,7 +352,7 @@
                ENDIF
                WRITE(F06,401) FILL(1: 42), ONAME
 
-            ELSE IF (TYPE(1:5) == 'TRIA3') THEN
+            ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6')) THEN
                IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
                   WRITE(F06,302) FILL(1: 20)
                ELSE
@@ -411,7 +411,7 @@
 
             ELSE IF (TYPE(1:5) == 'SHEAR') THEN
                WRITE(F06,1601) FILL(1: 1), FILL(1: 1)
-            ELSE IF (TYPE(1:5) == 'TRIA3') THEN
+            ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6')) THEN
                WRITE(F06,1700) FIBER_HDR_1, ' Strains', ' Strains', OPT_HDR_1, FIBER_HDR_2, OPT_HDR_2
 
             ELSE IF  (TYPE == 'BUSH    ') THEN
@@ -884,7 +884,7 @@
                                 FIELD5_INT_MODE, FIELD6_EIGENVALUE,                   &
                                 WRITE_F06, WRITE_OP2)
 
-      ELSE IF (TYPE(1:5) == 'TRIA3') THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6')) THEN
          CALL WRITE_OST_CTRIA3 (NUM, FILL, ISUBCASE, ITABLE, TITLEI, STITLEI, LABELI, &
                                 FIELD5_INT_MODE, FIELD6_EIGENVALUE,                   &
                                 WRITE_F06, WRITE_OP2)
@@ -1072,9 +1072,9 @@
  '     ID                   ', A9,  '    Normal-X     Normal-Y     Shear-XY      Angle     Major        Minor  ',                &
  '    ', A9,  '    Shear-XZ     Shear-YZ')
 
- 1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
+ 1703 FORMAT(1X,I8,4X,'CENTER  ',4X,4(1ES13.5),0PF9.3,5(1ES13.5))
 
- 1704 FORMAT(13X,'in elem',3X,4(1ES13.5),0PF9.3,5(1ES13.5))
+ 1704 FORMAT(23X,4(1ES13.5),0PF9.3,5(1ES13.5))
 
  1705 FORMAT(37X,'------------ ------------ ------------          ------------ ------------ ------------ ------------',            &
                  ' ------------',/,                                                                                                &
@@ -1190,7 +1190,16 @@
          ENDIF
       ENDDO
 
-      CALL GET_MAX_MIN_ABS_STR ( NUM, 3, 'N', MAX_ANS, MIN_ANS, ABS_ANS )
+      MAX_ANS(1:3) = -HUGE(1.0D0)
+      MIN_ANS(1:3) =  HUGE(1.0D0)
+      ABS_ANS(1:3) =  0.0D0
+      DO I=1,NUM
+         DO J=1,3
+            IF (OGEL(I,J) > MAX_ANS(J)) MAX_ANS(J) = OGEL(I,J)
+            IF (OGEL(I,J) < MIN_ANS(J)) MIN_ANS(J) = OGEL(I,J)
+            ABS_ANS(J) = MAX(ABS_ANS(J), DABS(OGEL(I,J)))
+         ENDDO
+      ENDDO
 
       WRITE(F06,1604) FILL(1: 0), FILL(1: 0), MAX_ANS(1),MAX_ANS(2),MAX_ANS(3),                                                 &
                       FILL(1: 0),             MIN_ANS(1),MIN_ANS(2),MIN_ANS(3),                                                 &
@@ -1252,9 +1261,9 @@
       REAL(DOUBLE)                    :: VONMISES
       REAL(DOUBLE)                    :: Z1, Z2, Z_DEN
       INTEGER(LONG)                   :: I, J, K, L, IS_FIBER_DISTANCE
-      CHARACTER(149*BYTE)             :: TRIA_CENTER_LINE
-      CHARACTER(149*BYTE)             :: TRIA_LOWER_LINE
-      CHARACTER(139*BYTE)             :: TRIA_GRID_LINE
+      CHARACTER(159*BYTE)             :: TRIA_CENTER_LINE
+      CHARACTER(159*BYTE)             :: TRIA_LOWER_LINE
+      CHARACTER(159*BYTE)             :: TRIA_GRID_LINE
 
       DEVICE_CODE = 1
       K = 0
@@ -1278,8 +1287,8 @@
           WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8),                                 &
                      (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
       ENDIF
- 1703 FORMAT(1X,I8,4X,'Anywhere',2X,4(1ES13.5),0PF9.3,5(1ES13.5))
- 1704 FORMAT(13X,'in elem',3X,4(1ES13.5),0PF9.3,5(1ES13.5))
+ 1703 FORMAT(1X,I8,4X,'CENTER  ',4X,4(1ES13.5),0PF9.3,5(1ES13.5))
+ 1704 FORMAT(23X,4(1ES13.5),0PF9.3,5(1ES13.5))
  1705 FORMAT(37X,'------------ ------------ ------------          ------------ ------------ ------------ ------------',            &
                  ' ------------',/,                                                                                                &
              1X,'MAX* : ',28x,3(ES13.5),9X,5(ES13.5),/,                                                                            &
@@ -1296,40 +1305,29 @@
                ROW_TMP(J) = OGEL(K,J)
             ENDDO
             CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), ROW_TMP, TRIA_CENTER_LINE )
-            WRITE(F06,'(A)') TRIA_CENTER_LINE(1:149)
+            WRITE(F06,'(A)') TRIA_CENTER_LINE(1:159)
             K = K + 1
             DO J=1,10
                ROW_TMP(J) = OGEL(K,J)
             ENDDO
             CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
-            WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
+            WRITE(F06,'(A)') TRIA_LOWER_LINE(1:159)
          ENDDO
       ELSE
          DO I=1,NUM
             K = 2*I - 1
-            WRITE(F06,*)
-            DO J=1,10
-               ROW_TMP(J) = OGEL(K,J)
-            ENDDO
-            CALL FAST_BUILD_TRIA_1703_LINE ( EID_OUT_ARRAY(I,1), ROW_TMP, TRIA_CENTER_LINE )
-            WRITE(F06,'(A)') TRIA_CENTER_LINE(1:149)
-            DO J=1,10
-               ROW_TMP(J) = OGEL(K+1,J)
-            ENDDO
-            CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
-            WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
             DO L=1,3
                WRITE(F06,*)
                DO J=1,10
                   ROW_TMP(J) = OGEL(K,J)
                ENDDO
-               CALL FAST_BUILD_TRIA_1706_LINE ( GID_OUT_ARRAY(I,L+1), ROW_TMP, TRIA_GRID_LINE )
-               WRITE(F06,'(A)') TRIA_GRID_LINE(1:139)
+               CALL FAST_BUILD_TRIA_1706_LINE ( EID_OUT_ARRAY(I,1), GID_OUT_ARRAY(I,L+1), ROW_TMP, TRIA_GRID_LINE )
+               WRITE(F06,'(A)') TRIA_GRID_LINE(1:159)
                DO J=1,10
                   ROW_TMP(J) = OGEL(K+1,J)
                ENDDO
                CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
-               WRITE(F06,'(A)') TRIA_LOWER_LINE(1:149)
+               WRITE(F06,'(A)') TRIA_LOWER_LINE(1:159)
             ENDDO
          ENDDO
       ENDIF

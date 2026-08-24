@@ -37,7 +37,7 @@
                                          NCPENTA6,                                                                                   &
                                          NCPENTA15, NPYRAM5, NPYRAM14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, NCROD,    &
                                          NCSHEAR,                                                                                     &
-                                         NCTRIA3, NCTRIA3K,                                                                         &
+                                         NCTRIA3, NCTRIA3K, NCTRIA6,                                                                &
                                          SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, HALF, ONE, THREE, FOUR
@@ -47,9 +47,10 @@
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRE
       USE MODEL_STUF, ONLY            :  AGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
                                          ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, OGROUT, PCOMP_PROPS, PLY_NUM,   &
-                                         STRESS, PBEAM_NSTATIONS, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT
-      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
+                                         STRESS, PBEAM_NSTATIONS, TE, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, GPSTRESS_REQ
+      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, SHELL_OUT_TE, POLY_FIT_ERR,    &
+                                         POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRE, TXT_STRE
 
       USE PLANE_COORD_TRANS_21_Interface
@@ -86,6 +87,7 @@
       INTEGER(LONG)                   :: NUM_PTS(METYPE)   ! Num diff stress points for one element (3rd dim in arrays SEi, STEi)
       INTEGER(LONG)                   :: NUM_PTS_CUR       ! Actual number of stress points for the current element
       INTEGER(LONG)                   :: NUM_PTS_ELEM      ! Actual number of stress points for the current element in request counting
+      INTEGER(LONG)                   :: RECOVERY_POINT    ! Actual SEi/STEi recovery point used for this output point
 
                                                            ! Stress index (1 through 9) where poly fit err is max
       INTEGER(LONG)                   :: STRESS_OUT_ERR_INDEX(MAX_STRESS_POINTS+1)
@@ -111,6 +113,7 @@
       INTEGER(LONG)                   :: ITABLE       ! the subtable
       LOGICAL                         :: WRITE_NEU
       LOGICAL                         :: HAVE_SECTION_POINTS
+      LOGICAL                         :: SHELL_GPSTRESS_RECOVERY
 
       INTRINSIC DABS, DMAX1, DMIN1, IAND
       ITABLE = 0
@@ -146,13 +149,18 @@
                      IF (NUM_PTS_ELEM <= 0) NUM_PTS_ELEM = 5
                      IF (NUM_PTS_ELEM > NUM_PTS(I)) NUM_PTS(I) = NUM_PTS_ELEM
                   ELSE
-                     IF ((STRE_LOC == 'CORNER  ') .OR.                                                                            &
+                     SHELL_GPSTRESS_RECOVERY = GPSTRESS_REQ .AND.                                                                 &
+                        ((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J) == 'QUADR   '))
+                     IF (SHELL_GPSTRESS_RECOVERY .AND. (ETYPE(J)(1:5) == 'TRIA3') .AND. (NUM_SEi(I) == 1)) THEN
+                        NUM_PTS_ELEM = ELGP + 1
+                     ELSE IF ((STRE_LOC == 'CORNER  ') .OR.                                                                       &
                          (STRE_LOC == 'GAUSS   ') .OR.                                                                            &
+                         SHELL_GPSTRESS_RECOVERY .OR.                                                                             &
                          (ETYPE(J)(1:4) == 'HEXA') .OR.                                                                           &
                          (ETYPE(J)(1:5) == 'PYRAM') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                          &
-                         (ETYPE(J)(1:5) == 'QUAD8')) THEN
+                         (ETYPE(J)(1:5) == 'QUAD8') .OR. (ETYPE(J)(1:5) == 'TRIA6')) THEN
                         NUM_PTS_ELEM = NUM_SEi(I)
                      ELSE
                         NUM_PTS_ELEM = 1
@@ -172,6 +180,11 @@
       DO I=1,MAXREQ
          DO J=1,MOGEL
             OGEL(I,J) = ZERO
+         ENDDO
+         DO J=1,3
+            SHELL_OUT_TE(J,1,I) = ZERO
+            SHELL_OUT_TE(J,2,I) = ZERO
+            SHELL_OUT_TE(J,3,I) = ZERO
          ENDDO
       ENDDO
 
@@ -216,8 +229,14 @@ elems_5: DO J = 1,NELE
                       ENDIF
                    ENDIF
 ! --- CBEAM_standard end --- !
+                  SHELL_GPSTRESS_RECOVERY = GPSTRESS_REQ .AND.                                                                    &
+                     ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))
                    DO M=1,NUM_PTS_CUR
-                      CALL ELEM_STRE_STRN_ARRAYS ( M )
+                      RECOVERY_POINT = M
+                      IF (SHELL_GPSTRESS_RECOVERY .AND. (TYPE(1:5) == 'TRIA3') .AND. (NUM_SEi(I) == 1)) THEN
+                         RECOVERY_POINT = 1
+                      ENDIF
+                      CALL ELEM_STRE_STRN_ARRAYS ( RECOVERY_POINT )
                       STRESS_RAW(:,M) = STRESS(:)
                    ENDDO
 
@@ -231,6 +250,7 @@ elems_5: DO J = 1,NELE
 
                   IF ((STRE_LOC == 'CORNER  ') .OR.                                                                                &
                       (STRE_LOC == 'GAUSS   ') .OR.                                                                                &
+                      SHELL_GPSTRESS_RECOVERY .OR.                                                                                 &
                       (TYPE(1:4) == 'HEXA') .OR.                                                                                   &
                       (TYPE(1:5) == 'PYRAM') .OR.                                                                                  &
                       (TYPE(1:5) == 'PENTA') .OR.                                                                                  &
@@ -254,6 +274,10 @@ elems_5: DO J = 1,NELE
                                                            ! Center stress is the average of corner stress in element coordinates.
                                                            ! This is how MSC does it.
                         STRESS_OUT(:,1) = (STRESS_OUT(:,2) + STRESS_OUT(:,3) + STRESS_OUT(:,4) + STRESS_OUT(:,5)) / FOUR
+
+                     ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6')) THEN
+! Stresses are directly recovered at the triangular element output points.
+                        STRESS_OUT(:,:) = STRESS_RAW(:,:)
 
                      ELSE IF ((TYPE(1:4) == 'HEXA') .OR.                                                                           &
                               (TYPE(1:5) == 'PYRAM') .OR.                                                                          &
@@ -279,7 +303,8 @@ elems_5: DO J = 1,NELE
 
                         CALL GET_STRESS_ITEM_DATA
 
-                        IF ((TYPE == 'BAR     ') .OR. (TYPE == 'TRIA3   ') .OR. ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE == 'SHEAR   ')) THEN
+                        IF ((TYPE == 'BAR     ') .OR. (TYPE == 'TRIA3   ') .OR. (TYPE == 'TRIA6   ') .OR.                          &
+                            ((TYPE == 'QUAD4   ') .OR. (TYPE == 'QUADR   ')) .OR. (TYPE == 'SHEAR   ')) THEN
                            DO L=1,2
                               DO K=1,NUM_OTM_ENTRIES
                                  OT4_EROW = OT4_EROW + 1
@@ -332,8 +357,14 @@ elems_5: DO J = 1,NELE
                         CBEAM_XL_OUT(NUM_OGEL_ROWS) = ZERO
                      ENDIF
 ! --- cbeam_stations end --- !
+                     SHELL_OUT_TE(1:3,1:3,NUM_OGEL_ROWS) = ZERO
+                     IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR.                     &
+                         (TYPE == 'QUADR   ') .OR.                                                                                 &
+                         (TYPE(1:5) == 'QUAD8')) THEN
+                        SHELL_OUT_TE(1:3,1:3,NUM_OGEL_ROWS) = TE(1:3,1:3)
+                     ENDIF
                      GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
-                     IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ')) THEN
+                     IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ') .OR. SHELL_GPSTRESS_RECOVERY) THEN
                         IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                            POLY_FIT_ERR(NUM_OGEL_ROWS)       = STRESS_OUT_PCT_ERR(M)
                            POLY_FIT_ERR_INDEX(NUM_OGEL_ROWS) = STRESS_OUT_ERR_INDEX(M)
@@ -1157,7 +1188,7 @@ elems_5: DO J = 1,NELE
          STRESS_ITEM( 8) = 'MS-Tension          '  ;  STRESS_ITEM(17) = 'MS-Compression      '
          STRESS_ITEM( 9) = 'Torsional Stress    '  ;  STRESS_ITEM(18) = 'MS-Torsion          '
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
          NUM_OTM_ENTRIES = 10
          STRESS_ITEM( 1) = 'Fibre Dist      -Z1 '  ;  STRESS_ITEM(11) = 'Fibre Dist      +Z1 '
          STRESS_ITEM( 2) = 'Normal X Stress -Z1 '  ;  STRESS_ITEM(12) = 'Normal X Stress +Z1 '

@@ -35,7 +35,7 @@
       USE CONSTANTS_1, ONLY           :  ZERO
       USE MODEL_STUF, ONLY            :  EDAT, ELMTYP, ELOUT, EPNT, ESORT2, ETYPE, GROUT, MEFFMASS_CALC, MPFACTOR_CALC, NELGP,     &
                                          NUM_PLIES, PBEAM_NSTATIONS, PCOMP_PROPS, SCNUM, TYPE
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC, GPSTRESS_REQ
       USE LINK9_STUFF, ONLY           :  MAXREQ
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
@@ -290,7 +290,9 @@
             IF (PCOMP_PROPS == 'Y') THEN
                NUMBER_ROWS(K) = NUM_PLIES                  !    PCOMP requires NUM_PLIES rows of output/elem
             ELSE
-               IF (STRE_LOC == 'CENTER  ') THEN            !    PSHELL requires 2 rows of output/elem for STRE_LOC = 'CENTER'
+               IF (GPSTRESS_REQ .AND. (TYPE(1:5) == 'TRIA3') .AND. (NUM_SEi(LETYPE) == 1)) THEN
+                  NUMBER_ROWS(K) = 2*(NELGP(L) + 1)         !    GPSTRESS needs hidden center+grid rows for TRIA3 recovery
+               ELSE IF (STRE_LOC == 'CENTER  ') THEN        !    PSHELL requires 2 rows of output/elem for STRE_LOC = 'CENTER'
                   NUMBER_ROWS(K) = 2
                ELSE                                        !    PSHELL requires more lines of output for other STRE_LOC
                   NUMBER_ROWS(K) = 2*NUM_SEi(LETYPE)
