@@ -99,7 +99,7 @@
 
       SIMO_MODE = ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'SIMO  '))
       DKM24EA_MODE = ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24EA '))
-      DKMQ20_MODE = (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DKMQ20') .OR. SIMO_MODE)) .OR. DKM24EA_MODE)
+      DKMQ20_MODE = ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DKMQ20') .OR. SIMO_MODE))
 
       IF (ELGP /= 4) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -120,7 +120,10 @@
       CALL CALC_NODAL_NORMALS ( XYZ, NORMALS )
       CALL BUILD_T24 ( TE, T24 )
       T24T = TRANSPOSE(T24)
+! Match DKMQ24_EAS4_ShellElement_RHR_standalone: use EAS4 only on flat
+! elements; warped elements keep the native DKMQ24 membrane path.
       EAS4_ACTIVE = DKM24EA_MODE .AND. IS_FLAT_QUAD(XYZ)
+      IF (EAS4_ACTIVE) DKMQ20_MODE = .TRUE.
 
       AU = BUILD_AU(XYZ, NORMALS)
       ADELTA = BUILD_ADELTA(XYZ, EPROP(1))
