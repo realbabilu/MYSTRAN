@@ -79,6 +79,7 @@
       REAL(DOUBLE)                    :: SS(MAX_ORDER_GAUSS), HH(MAX_ORDER_GAUSS)
       REAL(DOUBLE)                    :: XI, ETA, WT
       REAL(DOUBLE)                    :: TV1(3), TV2(3), NVEC(3), JDET, CO(2,2), BCMAT(2,2)
+      REAL(DOUBLE)                    :: EAS_T1(3), EAS_T2(3), EAS_N(3)
       REAL(DOUBLE)                    :: DN_G(2,4), DNDX(4), DNDY(4), SIG0(2,2), KGVAL
       REAL(DOUBLE)                    :: AU(4,24), ADELTA(4,4), AINV_AU(4,24)
       REAL(DOUBLE)                    :: BMB(3,24), BBB(3,24), BSB(2,24)
@@ -98,7 +99,7 @@
 
       SIMO_MODE = ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'SIMO  '))
       DKM24EA_MODE = ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24EA '))
-      DKMQ20_MODE = ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DKMQ20') .OR. SIMO_MODE))
+      DKMQ20_MODE = (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DKMQ20') .OR. SIMO_MODE)) .OR. DKM24EA_MODE)
 
       IF (ELGP /= 4) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -171,7 +172,8 @@
                MEAS_MEAN = MEAS_MEAN / DA_SUM
             ENDIF
          ELSE IF (EAS4_ACTIVE) THEN
-            CALL EAS4_CENTER_INVERSE(XYZ, NORMALS, A0INV, DETCO0)
+            CALL EAS4_CENTER_INVERSE(XYZ, A0INV, DETCO0)
+            CALL SURFACE_BASIS(XYZ, ZERO, ZERO, EAS_T1, EAS_T2, EAS_N)
          ENDIF
 
          DO I=1,2
@@ -181,7 +183,11 @@
                WT  = HH(I)*HH(J)
 
                CALL GEOMETRY_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, NVEC, JDET, CO, BCMAT)
-                BMB = BM_AT(XI, ETA, TV1, TV2, CO)
+                IF (EAS4_ACTIVE) THEN
+                   BMB = BM_EAS4_AT(XYZ, XI, ETA, EAS_T1, EAS_T2)
+                ELSE
+                   BMB = BM_AT(XI, ETA, TV1, TV2, CO)
+                ENDIF
                 BBB = BB_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, CO, BCMAT, AINV_AU)
                 BSB = BS_AT(XYZ, XI, ETA, CO, AINV_AU, EPROP(1))
 
@@ -201,7 +207,7 @@
                   KUA = KUA + WT*JDET*MATMUL(TRANSPOSE(BMB), MATMUL(SHELL_A, MEAS))
                   KAA = KAA + WT*JDET*MATMUL(TRANSPOSE(MEAS), MATMUL(SHELL_A, MEAS))
                ELSE IF (EAS4_ACTIVE) THEN
-                  MEAS = EAS4_AT(XYZ, NORMALS, XI, ETA, A0INV, DETCO0)
+                  MEAS = EAS4_AT(XYZ, XI, ETA, A0INV, DETCO0)
                   KUA = KUA + WT*JDET*MATMUL(TRANSPOSE(BMB), MATMUL(SHELL_A, MEAS))
                   KAA = KAA + WT*JDET*MATMUL(TRANSPOSE(MEAS), MATMUL(SHELL_A, MEAS))
                ENDIF
@@ -716,6 +722,43 @@
       ENDDO
       END FUNCTION BM_AT
 
+      FUNCTION BM_EAS4_AT ( XYZN, XI, ETA, E1, E2 ) RESULT(BMOUT)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), XI, ETA, E1(3), E2(3)
+      REAL(DOUBLE) :: BMOUT(3,24), DN(2,4), A1(3), A2(3), AMAT(2,2), INVA(2,2), GC1(3), GC2(3)
+      REAL(DOUBLE) :: C11, C12, C21, C22, DEPS11(3), DEPS22(3), DEPS12(3)
+      INTEGER(LONG) :: II, COL
+
+      CALL SHAPE_DN(XI, ETA, DN)
+      A1 = MATMUL(DN(1,:), XYZN)
+      A2 = MATMUL(DN(2,:), XYZN)
+
+      AMAT(1,1) = DOT_PRODUCT(A1, A1)
+      AMAT(1,2) = DOT_PRODUCT(A1, A2)
+      AMAT(2,1) = AMAT(1,2)
+      AMAT(2,2) = DOT_PRODUCT(A2, A2)
+      CALL INV2(AMAT, INVA)
+
+      GC1 = INVA(1,1)*A1 + INVA(1,2)*A2
+      GC2 = INVA(2,1)*A1 + INVA(2,2)*A2
+
+      C11 = DOT_PRODUCT(E1, GC1)
+      C12 = DOT_PRODUCT(E1, GC2)
+      C21 = DOT_PRODUCT(E2, GC1)
+      C22 = DOT_PRODUCT(E2, GC2)
+
+      BMOUT = ZERO
+      DO II=1,4
+         COL = (II-1)*6
+         DEPS11 = DN(1,II)*A1
+         DEPS22 = DN(2,II)*A2
+         DEPS12 = 0.5D0*(DN(1,II)*A2 + DN(2,II)*A1)
+
+         BMOUT(1,COL+1:COL+3) = (C11*C11)*DEPS11 + (C12*C12)*DEPS22 + TWO*C11*C12*DEPS12
+         BMOUT(2,COL+1:COL+3) = (C21*C21)*DEPS11 + (C22*C22)*DEPS22 + TWO*C21*C22*DEPS12
+         BMOUT(3,COL+1:COL+3) = TWO*(C11*C21*DEPS11 + C12*C22*DEPS22 + (C11*C22 + C12*C21)*DEPS12)
+      ENDDO
+      END FUNCTION BM_EAS4_AT
+
       FUNCTION BB_AT ( XYZN, NORMS, XI, ETA, T1, T2, CO, BCM, AIAU ) RESULT(BBOUT)
       REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3), XI, ETA, T1(3), T2(3), CO(2,2), BCM(2,2), AIAU(4,24)
       REAL(DOUBLE) :: BBOUT(3,24), DN(2,4), DP(2,4), NIX(4), NIY(4), PKX(4), PKY(4), NBC1(4), NBC2(4)
@@ -881,23 +924,71 @@
       ENDDO
       END FUNCTION IS_FLAT_QUAD
 
-      SUBROUTINE EAS4_CENTER_INVERSE ( XYZN, NORMS, A0INV, DETCO0 )
-      REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3), NORMS(4,3)
-      REAL(DOUBLE), INTENT(OUT) :: A0INV(2,2), DETCO0
-      REAL(DOUBLE) :: T1C(3), T2C(3), NC(3), JJC, BCC(2,2)
+      SUBROUTINE SURFACE_BASIS ( XYZN, XI, ETA, E1, E2, E3 )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: E1(3), E2(3), E3(3)
+      REAL(DOUBLE) :: DN(2,4), G1(3), G2(3), G3(3), TMP(3), NM
 
-      CALL GEOMETRY_AT(XYZN, NORMS, ZERO, ZERO, T1C, T2C, NC, JJC, A0INV, BCC)
+      CALL SHAPE_DN(XI, ETA, DN)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      CALL CROSS3(G1, G2, G3)
+      NM = VNORM(G3)
+      IF (NM > 1.0D-15) THEN
+         E3 = G3 / NM
+      ELSE
+         E3 = (/ZERO, ZERO, ONE/)
+      ENDIF
+
+      CALL CROSS3(G2, E3, TMP)
+      NM = VNORM(TMP)
+      IF (NM < 1.0D-12) THEN
+         CALL CROSS3(G1, E3, TMP)
+         NM = VNORM(TMP)
+      ENDIF
+      IF (NM > 1.0D-15) THEN
+         E1 = TMP / NM
+      ELSE
+         E1 = (/ONE, ZERO, ZERO/)
+      ENDIF
+      CALL CROSS3(E3, E1, E2)
+      NM = VNORM(E2)
+      IF (NM > 1.0D-15) E2 = E2 / NM
+      END SUBROUTINE SURFACE_BASIS
+
+      SUBROUTINE EAS4_CENTER_INVERSE ( XYZN, A0INV, DETCO0 )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3)
+      REAL(DOUBLE), INTENT(OUT) :: A0INV(2,2), DETCO0
+      REAL(DOUBLE) :: DN(2,4), G1(3), G2(3), E1(3), E2(3), E3(3), AMAT(2,2)
+
+      CALL SHAPE_DN(ZERO, ZERO, DN)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      CALL SURFACE_BASIS(XYZN, ZERO, ZERO, E1, E2, E3)
+      AMAT(1,1) = DOT_PRODUCT(G1, E1)
+      AMAT(1,2) = DOT_PRODUCT(G1, E2)
+      AMAT(2,1) = DOT_PRODUCT(G2, E1)
+      AMAT(2,2) = DOT_PRODUCT(G2, E2)
+      CALL INV2(AMAT, A0INV)
       DETCO0 = A0INV(1,1)*A0INV(2,2) - A0INV(1,2)*A0INV(2,1)
       END SUBROUTINE EAS4_CENTER_INVERSE
 
-      FUNCTION EAS4_AT ( XYZN, NORMS, XI, ETA, A0INV, DETCO0 ) RESULT(GOUT)
-      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3), XI, ETA, A0INV(2,2), DETCO0
-      REAL(DOUBLE) :: GOUT(3,4), T1G(3), T2G(3), NG(3), JJG, COG(2,2), BCG(2,2)
+      FUNCTION EAS4_AT ( XYZN, XI, ETA, A0INV, DETCO0 ) RESULT(GOUT)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), XI, ETA, A0INV(2,2), DETCO0
+      REAL(DOUBLE) :: GOUT(3,4), DN(2,4), G1(3), G2(3), E1(3), E2(3), E3(3), AMAT(2,2), CO(2,2)
       REAL(DOUBLE) :: DETCO, SCALE, D5X, D5Y, D6X, D6Y
 
       GOUT = ZERO
-      CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, T1G, T2G, NG, JJG, COG, BCG)
-      DETCO = COG(1,1)*COG(2,2) - COG(1,2)*COG(2,1)
+      CALL SHAPE_DN(XI, ETA, DN)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      CALL SURFACE_BASIS(XYZN, XI, ETA, E1, E2, E3)
+      AMAT(1,1) = DOT_PRODUCT(G1, E1)
+      AMAT(1,2) = DOT_PRODUCT(G1, E2)
+      AMAT(2,1) = DOT_PRODUCT(G2, E1)
+      AMAT(2,2) = DOT_PRODUCT(G2, E2)
+      CALL INV2(AMAT, CO)
+      DETCO = CO(1,1)*CO(2,2) - CO(1,2)*CO(2,1)
       IF ((DABS(DETCO0) < 1.0D-30) .OR. (DABS(DETCO) < 1.0D-30)) RETURN
 
 ! det(A0)/det(A) scaling. Since CO is inv(A), this is det(CO)/det(CO0).

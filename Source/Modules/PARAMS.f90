@@ -645,7 +645,7 @@
 ! **********************************************************************************************************************************
 ! Returns true for CQUADR formulations whose stiffness is built from generated nodal normals.
 
-      CQUADR_NEEDS_GENERATED_SNORM = ((QTYPE == 'DKM24EA ') .OR. (QTYPE == 'DKM24AU ') .OR. (QTYPE == 'Q4RS    '))
+      CQUADR_NEEDS_GENERATED_SNORM = ((QTYPE == 'DKM24AU ') .OR. (QTYPE == 'Q4RS    '))
 
 ! **********************************************************************************************************************************
 
