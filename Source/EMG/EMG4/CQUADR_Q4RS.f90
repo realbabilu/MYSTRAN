@@ -556,11 +556,12 @@
       REAL(DOUBLE), INTENT(IN) :: XYZN(4,3)
       REAL(DOUBLE) :: D, DD
       INTEGER(LONG) :: II
-      D = ONE
+      D = ZERO
       DO II=2,4
          DD = VNORM(XYZN(II,:) - XYZN(1,:))
          IF (DD > D) D = DD
       ENDDO
+      IF (D <= ZERO) D = ONE
       END FUNCTION QUAD_DIAMETER
 
       FUNCTION NODE_XI ( INODE ) RESULT(VAL)
