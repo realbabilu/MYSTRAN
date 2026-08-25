@@ -757,7 +757,7 @@
                DO DD=1,3
                   BDR(6*(II-1)+DD) = 0.5D0*(NIX(II)*T2D(DD) - NIY(II)*T1D(DD))
                ENDDO
-               BDR(6*(II-1)+6) = -NVAL(II)
+               BDR(6*(II-1)+4:6*(II-1)+6) = BDR(6*(II-1)+4:6*(II-1)+6) - NVAL(II)*NORMS(II,:)
             ENDDO
             KD = KD + WT*JJ*CDRILL*MATMUL(RESHAPE(BDR,(/24,1/)),RESHAPE(BDR,(/1,24/)))
          ENDDO
