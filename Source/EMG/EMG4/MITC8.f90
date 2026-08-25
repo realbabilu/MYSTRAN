@@ -248,15 +248,15 @@
                   CALL PLANE_COORD_TRANS_21 ( MATL_AXES_ROTATE, TRANSFORM, SUBR_NAME )
                   CALL MATL_TRANSFORM_MATRIX ( TRANSFORM, T66 )
                   T66 = TRANSPOSE(T66)
-                  CALL MATMUL_FFF   ( E  , T66   , 6, 6, 6, DUM66 )
-                  CALL MATMUL_FFF_T ( T66 , DUM66 , 6, 6, 6, E3    )
+                  CALL MATMULT_FFF   ( E  , T66   , 6, 6, 6, DUM66 )
+                  CALL MATMULT_FFF_T ( T66 , DUM66 , 6, 6, 6, E3    )
                   CTE(:) = ALPVEC(:,1)
                   CTE(4:6) = CTE(4:6) / TWO
                   CTE = MATMUL(TRANSPOSE(T66), CTE)
                   CTE(4:6) = CTE(4:6) * TWO
                   DETJ = MITC_DETJ ( R, S, T )
                   INTFAC = DETJ*HH_IJ(I)*HH_IJ(J)*HH_K(K)
-                  CALL MITC8_B ( R, S, T, .TRUE., .TRUE., .TRUE., BI )
+                  CALL MITC8_B ( R, S, T, .TRUE., .TRUE., BI )
                   CALL MATMULX_FFF_T ( BI, E3, 6, 6*ELGP, 6, DUM1 )
                   THERMAL_STRAIN = MATMUL(E3, CTE)
                   UNIT_PTE = UNIT_PTE + MATMUL( TRANSPOSE(BI), THERMAL_STRAIN ) * INTFAC

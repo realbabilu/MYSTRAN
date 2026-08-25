@@ -239,14 +239,7 @@ Problem 2-001 triangular patch run status:
 | `DKMT18HB` | pass |
 | `DKMT18` | pass |
 | `DKMT18MaknunSNORM` | pass |
-| `MITC3+_6D` | pass |
-| `MITC3+D_HB` | pass |
-
-The convergence scripts include MYSTRAN/NASTRAN overlays where matching F06
-files exist.  Current MYSTRAN triangular labels of interest are:
-
-```text
-MY-MITC3+
+| `MITC3+_6D
 MY-DKMT18
 MY-MIN3
 NASTRAN CTRIA3
@@ -275,5 +268,12 @@ Recommended staged set for this adoption commit:
   triangle selectors;
 - documentation in `dev_docs/` and `update/`;
 - exclude transient `.bak`, `_smoke`, generated F06, and experimental plot
-  artifacts unless a release note explicitly needs them.
+  artifacts unless a release note explicitly needs them.` | pass |
+| `MITC3+D_HB` | pass |
+
+The convergence scripts include MYSTRAN/NASTRAN overlays where matching F06
+files exist.  Current MYSTRAN triangular labels of interest are:
+
+```text
+MY-MITC3+
 

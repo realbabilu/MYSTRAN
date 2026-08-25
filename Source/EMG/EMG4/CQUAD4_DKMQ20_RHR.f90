@@ -72,6 +72,7 @@
       INTEGER(LONG), PARAMETER        :: NDOF = NNODE*NDOFN
       INTEGER(LONG), PARAMETER        :: NSTRA = 3
       INTEGER(LONG), PARAMETER        :: NSHEAR = 2
+      REAL(DOUBLE), PARAMETER         :: CQUAD4_DKMQ20_DRILL_SCALE = 1.0D0
 
       INTEGER(LONG)                   :: I, J, K, GP, JSUB, STR_PT_NUM, IA, IB, RR
       REAL(DOUBLE)                    :: XYZ(4,3), NORMALS(4,3), T24(24,24), T24T(24,24)
@@ -168,7 +169,8 @@
             ENDDO
          ENDDO
 
-         KDRILL = ZERO
+         KDRILL = DRILL_STIFFNESS(XYZ, NORMALS)
+         KBASIC = KBASIC + KDRILL
          KLOCAL = MATMUL(T24, MATMUL(KBASIC, T24T))
 
          IF (OPT(4) == 'Y') THEN
@@ -729,6 +731,38 @@
       BSG = MATMUL(TRANSPOSE(CO), MATMUL(NGAM, AG))
       BSOUT = MATMUL(BSG, MATMUL(APHI, AIAU))
       END FUNCTION BS_AT
+
+      FUNCTION DRILL_STIFFNESS ( XYZN, NORMS ) RESULT(KD)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3)
+      REAL(DOUBLE) :: KD(24,24), BDR(24), DN(2,4), NVAL(4), CO(2,2), BCM(2,2), T1D(3), T2D(3), NVD(3), JJ
+      REAL(DOUBLE) :: CDRILL, WT, XI, ETA, NIX(4), NIY(4)
+      INTEGER(LONG) :: II, I1, J1, DD
+
+      KD = ZERO
+      CDRILL = CQUAD4_DKMQ20_DRILL_SCALE * 1.0D-4 * SHELL_A(3,3)
+
+      DO I1=1,2
+         DO J1=1,2
+            XI = SS(I1)
+            ETA = SS(J1)
+            WT = HH(I1)*HH(J1)
+            CALL SHAPE_N(XI, ETA, NVAL)
+            CALL SHAPE_DN(XI, ETA, DN)
+            CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, T1D, T2D, NVD, JJ, CO, BCM)
+            NIX = DN(1,:)*CO(1,1) + DN(2,:)*CO(2,1)
+            NIY = DN(1,:)*CO(1,2) + DN(2,:)*CO(2,2)
+
+            BDR = ZERO
+            DO II=1,4
+               DO DD=1,3
+                  BDR(6*(II-1)+DD) = 0.5D0*(NIX(II)*T2D(DD) - NIY(II)*T1D(DD))
+               ENDDO
+               BDR(6*(II-1)+6) = -NVAL(II)
+            ENDDO
+            KD = KD + WT*JJ*CDRILL*MATMUL(RESHAPE(BDR,(/24,1/)),RESHAPE(BDR,(/1,24/)))
+         ENDDO
+      ENDDO
+      END FUNCTION DRILL_STIFFNESS
 
       SUBROUTINE BUILD_T24 ( T3, TOUT )
       REAL(DOUBLE), INTENT(IN) :: T3(3,3)

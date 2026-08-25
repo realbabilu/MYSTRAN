@@ -52,7 +52,7 @@
                                          WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  SUPINFO, SUPWARN, QUAD4TYP, QUAD8TYP, QUADRTYP, TRIA3TYP, TRIARTYP
+      USE PARAMS, ONLY                :  SUPINFO, SUPWARN, QUAD4TYP, QUAD8TYP, QUADRTYP, TRIA3TYP, TRIA6TYP, TRIARTYP
       USE CONSTANTS_1, ONLY           :  CONV_DEG_RAD, CONV_RAD_DEG, ZERO, ONE
       USE MODEL_STUF, ONLY            :  CAN_ELEM_TYPE_OFFSET, EDAT, EID, EPNT, ETYPE, ISOLID, MATANGLE, NUM_EMG_FATAL_ERRS,       &
                                          PCOMP_PROPS, PLY_NUM, SKIP_K6ROT, TE_IDENT, THETAM, TYPE, XEL, TE
@@ -399,7 +399,20 @@
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF (TYPE(1:5) == 'TRIA6') THEN
-         CALL CTRIA6_SIMO1993 ( OPT, INT_ELEM_ID )
+         IF ((TRIA6TYP == 'SIMOT6  ') .OR. (TRIA6TYP == 'SIMO    ')) THEN
+            CALL CTRIA6_SIMO1993 ( OPT, INT_ELEM_ID )
+         ELSE IF (TRIA6TYP == 'MITC6   ') THEN
+            CALL CTRIA6_MITC6 ( OPT, INT_ELEM_ID )
+         ELSE IF (TRIA6TYP == 'MH6T    ') THEN
+            CALL CTRIA6_MH6T ( OPT, INT_ELEM_ID )
+         ELSE IF (TRIA6TYP == 'REZAIEE ') THEN
+            CALL CTRIA6_REZAIEE ( OPT, INT_ELEM_ID )
+         ELSE
+            NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,'(A,A,A,I8)') ' *ERROR: Illegal PARAM,TRIA6TYP value "', TRIM(TRIA6TYP), '" for CTRIA6 element ', EID
+            WRITE(F06,'(A,A,A,I8)') ' *ERROR: Illegal PARAM,TRIA6TYP value "', TRIM(TRIA6TYP), '" for CTRIA6 element ', EID
+         ENDIF
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MIN4  ') .OR. (QUAD4TYP == 'MIN4T '))) .OR.                              &
@@ -412,12 +425,12 @@
          CALL MITC4 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
-      ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20')) THEN
-         CALL CQUAD4_DKMQ20_RHR ( OPT, INT_ELEM_ID )
+      ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DSQK  ')) THEN
+         CALL CQUAD4_DSQK_RHR ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
-      ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMT20')) THEN
-         CALL CQUAD4_DKMT20 ( OPT, INT_ELEM_ID )
+      ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20')) THEN
+         CALL CQUAD4_DKMQ20_RHR ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
       ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'SIMO  ')) THEN
@@ -509,6 +522,8 @@
       IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
          SKIP_K6ROT = 'N'
          IF ((TYPE(1:5) == 'TRIA3') .AND. (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18)) THEN
+            SKIP_K6ROT = 'Y'
+         ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DSQK  ')) THEN
             SKIP_K6ROT = 'Y'
          ELSE IF (TYPE == 'QUADR   ') THEN
             SKIP_K6ROT = 'Y'

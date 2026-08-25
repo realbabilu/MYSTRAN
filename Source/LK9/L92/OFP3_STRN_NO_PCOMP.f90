@@ -36,7 +36,7 @@
                                          NELE, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20,       &
                                          NCPENTA6, NCPENTA15, NPYRAM5, NPYRAM14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, &
                                          NCROD,                                                                                      &
-                                         NCSHEAR, NCTRIA3, NCTRIA3K,                                                                &
+                                         NCSHEAR, NCTRIA3, NCTRIA3K, NCTRIA6,                                                       &
                                          SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, TWO, FOUR
@@ -138,6 +138,7 @@
       DO I=1,METYPE                                        ! Only count requests for elem types that can have strain output
          IF((ELMTYP(I)(1:3) == 'BAR'  ) .OR. (ELMTYP(I)(1:4) == 'BEAM' ) .OR. (ELMTYP(I)(1:3) == 'ROD'  ) .OR.                    &
             (ELMTYP(I)(1:4) == 'ELAS' ) .OR. (ELMTYP(I)(1:4) == 'BUSH' ) .OR. (ELMTYP(I)(1:5) == 'TRIA3') .OR.                    &
+            (ELMTYP(I)(1:5) == 'TRIA6') .OR.                                                                                        &
             (ELMTYP(I)(1:5) == 'QUAD4') .OR. (ELMTYP(I)(1:5) == 'SHEAR') .OR. (ELMTYP(I)(1:4) == 'HEXA' ) .OR.                    &
             (ELMTYP(I)(1:5) == 'PYRAM') .OR. (ELMTYP(I)(1:5) == 'PENTA') .OR. (ELMTYP(I)(1:5) == 'TETRA') .OR.                    &
             (ELMTYP(I)(1:5) == 'QUAD8')) THEN
@@ -156,7 +157,7 @@
                             (ETYPE(J)(1:5) == 'PYRAM') .OR.                                                                       &
                             (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                       &
                             (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                       &
-                            (ETYPE(J)(1:5) == 'QUAD8')) THEN
+                            (ETYPE(J)(1:5) == 'QUAD8') .OR. (ETYPE(J)(1:5) == 'TRIA6')) THEN
                            NUM_PTS_ELEM = NUM_SEi(I)
                         ELSE
                            NUM_PTS_ELEM = 1
@@ -276,7 +277,7 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
 
                         CALL GET_STRAIN_ITEM_DATA
 
-                        IF ((TYPE == 'TRIA3   ') .OR. (TYPE == 'QUAD4   ') .OR. (TYPE == 'SHEAR   ')) THEN
+                        IF ((TYPE == 'TRIA3   ') .OR. (TYPE == 'TRIA6   ') .OR. (TYPE == 'QUAD4   ') .OR. (TYPE == 'SHEAR   ')) THEN
                            DO L=1,2
                               DO K=1,NUM_OTM_ENTRIES
                                  OT4_EROW = OT4_EROW + 1
@@ -932,7 +933,7 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
          STRAIN_ITEM( 3) = 'Torsional Strain    '
          STRAIN_ITEM( 4) = 'MS - Torsion        '
 
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
          NUM_OTM_ENTRIES = 10
          STRAIN_ITEM( 1) = 'Fibre Dist      -Z1 '  ;  STRAIN_ITEM(11) = 'Fibre Dist      +Z1 '
          STRAIN_ITEM( 2) = 'Normal X Strain -Z1 '  ;  STRAIN_ITEM(12) = 'Normal X Strain +Z1 '

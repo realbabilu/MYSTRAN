@@ -46,13 +46,16 @@
       USE BUSH_Interface
       USE TREL1_Interface
       USE CTRIA3_T3FF_Interface
+      USE CTRIA6_MITC6_Interface
+      USE CTRIA6_MH6T_Interface
+      USE CTRIA6_REZAIEE_Interface
       USE CTRIA6_SIMO1993_Interface
       USE CTRIAR_DKMT18_Interface
       USE CTRIAR_MITC3PHB_Interface
       USE CTRIAR_T3FFD_Interface
        USE QDEL1_Interface
+       USE CQUAD4_DSQK_RHR_Interface
        USE CQUAD4_DKMQ20_RHR_Interface
-       USE CQUAD4_DKMT20_Interface
        USE CQUAD4_SIMO1989_Interface
        USE CQUADR_DKM24AU_Interface
        USE CQUADR_DKM24EA_Interface

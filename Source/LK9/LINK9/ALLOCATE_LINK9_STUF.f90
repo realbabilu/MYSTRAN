@@ -33,8 +33,8 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MELGP, MMSPRNT, MOGEL, TOT_MB_MEM_ALLOC
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE TIMDAT, ONLY                :  TSEC
-      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, GID_OUT_ARRAY, EID_OUT_ARRAY, FTNAME, MAXREQ, MSPRNT, OGEL, POLY_FIT_ERR,    &
-                                         POLY_FIT_ERR_INDEX
+      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, GID_OUT_ARRAY, EID_OUT_ARRAY, FTNAME, MAXREQ, MSPRNT, OGEL, SHELL_OUT_TE,    &
+                                         SHELL_STRESS_IN_LOCAL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
 
       USE ALLOCATE_LINK9_STUF_USE_IFs
 
@@ -218,6 +218,60 @@
                DO J=1,MOGEL
                   OGEL(I,J) = ZERO
                ENDDO
+            ENDDO
+         ELSE
+            WRITE(ERR,991) MB_ALLOCATED,NAME,SUBR_NAME,IERR
+            WRITE(F06,991) MB_ALLOCATED,NAME,SUBR_NAME,IERR
+            FATAL_ERR = FATAL_ERR + 1
+            JERR = JERR + 1
+         ENDIF
+      ENDIF
+
+! Allocate array for SHELL_OUT_TE
+
+      NAME = 'SHELL_OUT_TE'
+      NCOLS = 9
+      IF (ALLOCATED(SHELL_OUT_TE)) THEN
+         WRITE(ERR,990) SUBR_NAME, NAME
+         WRITE(F06,990) SUBR_NAME, NAME
+         FATAL_ERR = FATAL_ERR + 1
+         JERR = JERR + 1
+      ELSE
+         ALLOCATE (SHELL_OUT_TE(3,3,MAXREQ),STAT=IERR)
+         MB_ALLOCATED = 9.0D0*RDOUBLE*REAL(MAXREQ)/ONEPP6
+         IF (IERR == 0) THEN
+            CALL ALLOCATED_MEMORY ( NAME, MB_ALLOCATED, 'ALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+            DO I=1,MAXREQ
+               DO J=1,3
+                  SHELL_OUT_TE(J,1,I) = ZERO
+                  SHELL_OUT_TE(J,2,I) = ZERO
+                  SHELL_OUT_TE(J,3,I) = ZERO
+               ENDDO
+            ENDDO
+         ELSE
+            WRITE(ERR,991) MB_ALLOCATED,NAME,SUBR_NAME,IERR
+            WRITE(F06,991) MB_ALLOCATED,NAME,SUBR_NAME,IERR
+            FATAL_ERR = FATAL_ERR + 1
+            JERR = JERR + 1
+         ENDIF
+      ENDIF
+
+! Allocate array for SHELL_STRESS_IN_LOCAL
+
+      NAME = 'SHELL_STRESS_IN_LOCAL'
+      NCOLS = 1
+      IF (ALLOCATED(SHELL_STRESS_IN_LOCAL)) THEN
+         WRITE(ERR,990) SUBR_NAME, NAME
+         WRITE(F06,990) SUBR_NAME, NAME
+         FATAL_ERR = FATAL_ERR + 1
+         JERR = JERR + 1
+      ELSE
+         ALLOCATE (SHELL_STRESS_IN_LOCAL(MAXREQ),STAT=IERR)
+         MB_ALLOCATED = RLONG*REAL(MAXREQ)/ONEPP6
+         IF (IERR == 0) THEN
+            CALL ALLOCATED_MEMORY ( NAME, MB_ALLOCATED, 'ALLOC', 'Y', CUR_MB_ALLOCATED, SUBR_NAME )
+            DO I=1,MAXREQ
+               SHELL_STRESS_IN_LOCAL(I) = .FALSE.
             ENDDO
          ELSE
             WRITE(ERR,991) MB_ALLOCATED,NAME,SUBR_NAME,IERR

@@ -27,6 +27,34 @@ Files:
 - [BD_PARAM.F90](D:/18a/MYSTRAN/Source/LK1/L1A-BD/BD_PARAM.F90)
 - [EMG.f90](D:/18a/MYSTRAN/Source/EMG/EMG1/EMG.f90)
 
+### CTRIA6 default
+
+`CTRIA6` now has an explicit formulation selector through `PARAM,TRIA6TYP`.
+
+Current implementation points:
+
+- `PARAM,TRIA6TYP` default is `SIMOT6`
+- accepted Simo aliases are normalized onto `SIMOT6`
+- the dispatcher routes `SIMOT6` to `CTRIA6_SIMO1993`
+- the dispatcher routes `MITC6` to `CTRIA6_MITC6`
+- the dispatcher routes `MH6T` to `CTRIA6_MH6T`
+- the dispatcher routes `REZAIEE` to `CTRIA6_REZAIEE`
+
+Current caution:
+
+- `SIMOT6` remains the default branch
+- `MITC6`, `MH6T`, and `REZAIEE` are now active selectable branches rather than fallback placeholders
+
+Files:
+
+- [PARAMS.f90](D:/18a/MYSTRAN/Source/Modules/PARAMS.f90)
+- [BD_PARAM.F90](D:/18a/MYSTRAN/Source/LK1/L1A-BD/BD_PARAM.F90)
+- [EMG.f90](D:/18a/MYSTRAN/Source/EMG/EMG1/EMG.f90)
+- [CTRIA6_SIMO1993.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_SIMO1993.f90)
+- [CTRIA6_MITC6.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_MITC6.f90)
+- [CTRIA6_MH6T.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_MH6T.f90)
+- [CTRIA6_REZAIEE.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_REZAIEE.f90)
+
 ## Two-Step SNORM Status
 
 ### Architecture
@@ -74,6 +102,9 @@ Current status:
 - `MITC8`: now ported from thermal stub to active `OPT(2)` path
 - `CQUAD8_SIMOEAS1`: now ported from thermal stub to active `OPT(2)` path
 - `CTRIA6_SIMO1993`: now ported from thermal stub to active `OPT(2)` path
+- `CTRIA6_MITC6`: ported with the same active `OPT(2)` thermal path while replacing only membrane/shear with MITC tying
+- `CTRIA6_MH6T`: ported with the same active `OPT(2)` thermal path while replacing membrane/shear with the MacNeal assumed-strain construction
+- `CTRIA6_REZAIEE`: ported with the same active `OPT(2)` thermal path while replacing membrane/shear with the Rezaiee-based formulation
 
 Implementation note:
 
@@ -85,6 +116,9 @@ Files:
 - [MITC8.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/MITC8.f90)
 - [CQUAD8_SIMOEAS1.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CQUAD8_SIMOEAS1.f90)
 - [CTRIA6_SIMO1993.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_SIMO1993.f90)
+- [CTRIA6_MITC6.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_MITC6.f90)
+- [CTRIA6_MH6T.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_MH6T.f90)
+- [CTRIA6_REZAIEE.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_REZAIEE.f90)
 - [MITC4.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/MITC4.f90)
 
 ### New solid elements
@@ -108,6 +142,9 @@ Confirmed shell coverage includes:
 - `MITC8`
 - `CTRIA3_T3FF`
 - `CTRIA6_SIMO1993`
+- `CTRIA6_MITC6`
+- `CTRIA6_MH6T`
+- `CTRIA6_REZAIEE`
 - `CQUADR_Q4RS`
 - `CQUADR_SIMO1993`
 - `CQUADR_Q4EASANS`
@@ -138,3 +175,90 @@ Recommended next step after code changes:
 1. compile MYSTRAN
 2. run shell thermal regression cases for `MITC8`, `CQUAD8_SIMOEAS1`, and `CTRIA6_SIMO1993`
 3. compare pressure and thermal results against the Python reference models where available
+
+## CTRIA6 MITC6 Smoke Validation
+
+Quick smoke validation on August 15, 2026 with the rebuilt binary:
+
+- `D:\18a\MYSTRAN_Validation-main\working\prob_2_002_nx01_ctria6_simot6.dat` terminated normally
+- `D:\18a\MYSTRAN_Validation-main\working\prob_2_002_nx01_ctria6_mitc6.dat` terminated normally
+- `D:\18a\MYSTRAN_Validation-main\working\prob_2_002_nx04_ctria6_mitc6.dat` terminated normally
+- `D:\18a\MYSTRAN_Validation-main\working\prob_2_003_nx02_ctria6_mitc6.dat` terminated normally
+
+Initial comparison note:
+
+- for the `prob_2_002_nx01` cantilever-style check, `SIMOT6` and `MITC6` produce very close global displacement fields while remaining distinct formulations
+- this confirms the new `PARAM,TRIA6TYP,MITC6` path is active through assembly, solve, and output, not just compile-time reachable
+
+## CTRIA6 MH6T / REZAIEE Smoke Validation
+
+Quick smoke validation on August 15, 2026 with the rebuilt binary:
+
+- `D:\18a\MYSTRAN_Validation-main\working\prob_2_002_nx01_ctria6_mh6t.dat` terminated normally
+- `D:\18a\MYSTRAN_Validation-main\working\prob_2_003_nx02_ctria6_mh6t.dat` terminated normally
+- `D:\18a\MYSTRAN_Validation-main\working\prob_2_002_nx01_ctria6_rezaiee.dat` terminated normally
+- `D:\18a\MYSTRAN_Validation-main\working\prob_2_003_nx02_ctria6_rezaiee.dat` terminated normally
+
+Initial comparison note:
+
+- these runs confirm that `PARAM,TRIA6TYP,MH6T` and `PARAM,TRIA6TYP,REZAIEE` are both live through assembly, solve, and output
+- `SIMOT6` remains the default selector, but all four T6 branches are now directly callable from bulk data
+
+## Shell Output Audit Status
+
+### Family coverage
+
+The current shell output path audit now covers the main shell families:
+
+- `CQUAD4`
+- `CQUADR`
+- `CTRIA3`
+- `CTRIAR`
+- `CTRIA6`
+- `CQUAD8`
+
+Implementation notes:
+
+- `CTRIAR` follows the shared `TRIA3` output family path
+- `CTRIA6` is now included in the same shell stress/strain dispatch and writer routing used by the triangular shell family
+- `CQUAD8` remains on its own quadrilateral shell output family path together with `CQUAD4` and `CQUADR`
+
+Relevant files:
+
+- [CALC_ELEM_STRESSES.f90](D:/18a/MYSTRAN/Source/LK9/L92/CALC_ELEM_STRESSES.f90)
+- [CALC_ELEM_STRAINS.f90](D:/18a/MYSTRAN/Source/LK9/L92/CALC_ELEM_STRAINS.f90)
+- [SHELL_STRESS_OUTPUTS.f90](D:/18a/MYSTRAN/Source/LK9/L92/SHELL_STRESS_OUTPUTS.f90)
+- [SHELL_STRAIN_OUTPUTS.f90](D:/18a/MYSTRAN/Source/LK9/L92/SHELL_STRAIN_OUTPUTS.f90)
+- [OFP3_STRE_NO_PCOMP.f90](D:/18a/MYSTRAN/Source/LK9/L92/OFP3_STRE_NO_PCOMP.f90)
+- [OFP3_STRN_NO_PCOMP.f90](D:/18a/MYSTRAN/Source/LK9/L92/OFP3_STRN_NO_PCOMP.f90)
+- [WRITE_ELEM_STRESSES.f90](D:/18a/MYSTRAN/Source/LK9/L91/WRITE_ELEM_STRESSES.f90)
+- [WRITE_ELEM_STRAINS.f90](D:/18a/MYSTRAN/Source/LK9/L91/WRITE_ELEM_STRAINS.f90)
+
+### GPSTRESS / reported-basis cleanup
+
+The shell stress output cleanup now does two things:
+
+- surface `GPSTRESS` output rotates shell-local stress rows into the requested surface basis before patch reconstruction
+- the main quadrilateral shell table labels now refer to the reported coordinate system instead of the old element-coordinate wording
+
+This is an output-basis cleanup, not a change to the shell stiffness kernels.
+
+### CTRIA6 generated-normal fix
+
+During verification of the `CTRIA6` path, a `LINK0` generated-normal bug was found and fixed:
+
+- the preprocessing pass still stored shell grid rows in arrays sized for only 4 nodes
+- `CTRIA6` therefore overran the temporary `BGRD` storage during generated `GRID_SNORM` assembly
+- the generated-normal storage now accepts 6-node shell connectivity, while the flat triangle normal still uses the corner-triangle geometry
+
+Relevant file:
+
+- [LINK0.f90](D:/18a/MYSTRAN/Source/LK1/LINK1/LINK0.f90)
+
+### Verification notes
+
+Quick verification on August 13, 2026:
+
+- `prob_2_002_nx01_ctria6.dat` runs to normal termination with the patched binary
+- the original Python-generated `prob_2_002_nx01_cquad8.dat` still needs a CQUAD8 continuation card for MYSTRAN bulk-data parsing
+- a MYSTRAN-compatible corrected deck confirms that the `CQUAD8` path also runs to normal termination once the required continuation and `PSHELL` convention are respected

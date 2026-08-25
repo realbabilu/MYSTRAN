@@ -60,7 +60,7 @@
                          PRTCORD, PRTDISP, PRTDLR, PRTDOF, PRTFOR, PRTHMN, PRTGMN, PRTGOA, PRTCGLTM, PRTPHIZL,      &
                          PRTIFLTM, PRTKXX, PRTMXX, PRTOU4, PRTPHIXA, PRTMASS, PRTMASSD, PRTRMG, PRTSCP, PRTPSET,    &
                          PRTTSET, PRTUSET, PRTSTIFD, PRTSTIFF, PRTUO0, PRTYS, PRTQSYS, Q4SURFIT, QUADAXIS,          &
-                          QUAD4TYP, QUAD8TYP, QUADRTYP, SOLIDTYP, TRIA3TYP, TRIARTYP, RCONDK, RELINK3, RSPECTRA, SCRSPEC, RSCOMB,       &
+                          QUAD4TYP, QUAD8TYP, QUADRTYP, SOLIDTYP, TRIA3TYP, TRIA6TYP, TRIARTYP, RCONDK, RELINK3, RSPECTRA, SCRSPEC, RSCOMB, &
                           RSTYPE, SEQPRT, SEQQUIT,   &
                          SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, SNORM_ANG, &
                          SOLLIB,                                                                                      &
@@ -2811,21 +2811,21 @@
                QUAD4TYP = 'MITC4 '
             ELSE IF (CHRPARM == 'MITC4+  ') THEN
                QUAD4TYP = 'MITC4+'
+            ELSE IF (CHRPARM == 'DSQK    ') THEN
+               QUAD4TYP = 'DSQK  '
             ELSE IF (CHRPARM == 'DKMQ20  ') THEN
                QUAD4TYP = 'DKMQ20'
-            ELSE IF (CHRPARM == 'DKMT20  ') THEN
-               QUAD4TYP = 'DKMT20'
             ELSE IF (CHRPARM == 'SIMO    ') THEN
                QUAD4TYP = 'SIMO  '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'MIN4T, MIN4, MITC4, MITC4+, DKMQ20, DKMT20 or SIMO',CHRPARM,QUAD4TYP
+               WRITE(ERR,1189) PARNAM,'MIN4T, MIN4, MITC4, MITC4+, DSQK, DKMQ20 or SIMO',CHRPARM,QUAD4TYP
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'MIN4T, MIN4, MITC4, MITC4+, DKMQ20, DKMT20 or SIMO',CHRPARM,QUAD4TYP
+                  WRITE(F06,1189) PARNAM,'MIN4T, MIN4, MITC4, MITC4+, DSQK, DKMQ20 or SIMO',CHRPARM,QUAD4TYP
                ENDIF
             ENDIF
          ENDIF
@@ -2953,6 +2953,38 @@
                      WRITE(F06,101) CARD
                   ENDIF
                   WRITE(F06,1189) PARNAM,'MIN3, MITC3+ or T3FF',CHRPARM,TRIA3TYP
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
+         CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+
+! TRIA6TYP tells which triangular shell branch to use for CTRIA6 elements
+
+      ELSE IF (JCARD(2)(1:8) == 'TRIA6TYP') THEN
+         PARNAM = 'TRIA6TYP'
+         CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD ( CHRPARM )
+            IF      ((CHRPARM == 'SIMOT6  ') .OR. (CHRPARM == 'SIMO    ') .OR. (CHRPARM == 'SIMO1993')) THEN
+               TRIA6TYP = 'SIMOT6  '
+            ELSE IF (CHRPARM == 'MITC6   ') THEN
+               TRIA6TYP = 'MITC6   '
+            ELSE IF ((CHRPARM == 'MH6T    ') .OR. (CHRPARM == 'MACNEAL ')) THEN
+               TRIA6TYP = 'MH6T    '
+            ELSE IF ((CHRPARM == 'REZAIEE ') .OR. (CHRPARM == 'REZA2017') .OR. (CHRPARM == 'REZAI17 ')) THEN
+               TRIA6TYP = 'REZAIEE '
+            ELSE
+               WARN_ERR = WARN_ERR + 1
+               WRITE(ERR,101) CARD
+               WRITE(ERR,1189) PARNAM,'SIMOT6, MITC6, MH6T or REZAIEE',CHRPARM,TRIA6TYP
+               IF (SUPWARN == 'N') THEN
+                  IF (ECHO == 'NONE  ') THEN
+                     WRITE(F06,101) CARD
+                  ENDIF
+                  WRITE(F06,1189) PARNAM,'SIMOT6, MITC6, MH6T or REZAIEE',CHRPARM,TRIA6TYP
                ENDIF
             ENDIF
          ENDIF

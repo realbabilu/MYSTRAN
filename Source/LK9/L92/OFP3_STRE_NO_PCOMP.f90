@@ -43,14 +43,14 @@
       USE CONSTANTS_1, ONLY           :  ZERO, HALF, ONE, THREE, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP
+      USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP, TRIA3TYP, TRIARTYP
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRE
       USE MODEL_STUF, ONLY            :  AGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
                                          ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, OGROUT, PCOMP_PROPS, PLY_NUM,   &
-                                         STRESS, PBEAM_NSTATIONS, TE, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID
+                                         STRESS, PBEAM_NSTATIONS, TE, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID, XEB
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, GPSTRESS_REQ
-      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, SHELL_OUT_TE, POLY_FIT_ERR,    &
-                                         POLY_FIT_ERR_INDEX
+      USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, SHELL_OUT_TE,                 &
+                                         SHELL_STRESS_IN_LOCAL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRE, TXT_STRE
 
       USE PLANE_COORD_TRANS_21_Interface
@@ -257,7 +257,12 @@ elems_5: DO J = 1,NELE
                       (TYPE(1:5) == 'TETRA') .OR.                                                                                  &
                       (TYPE(1:5) == 'QUAD8')) THEN
 
-                     IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+                     IF (((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'Q4RS    ')) .OR.                                               &
+                         ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  '))) THEN
+! Q4RS and DSQK recovery rows are evaluated directly at the requested output points.
+                        STRESS_OUT(:,:) = STRESS_RAW(:,:)
+
+                     ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                          CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS_CUR, STRESS_OUT, STRESS_OUT_PCT_ERR,                  &
                                                       STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
 
@@ -358,10 +363,12 @@ elems_5: DO J = 1,NELE
                      ENDIF
 ! --- cbeam_stations end --- !
                      SHELL_OUT_TE(1:3,1:3,NUM_OGEL_ROWS) = ZERO
+                     SHELL_STRESS_IN_LOCAL(NUM_OGEL_ROWS) = .FALSE.
                      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR.                     &
                          (TYPE == 'QUADR   ') .OR.                                                                                 &
                          (TYPE(1:5) == 'QUAD8')) THEN
                         SHELL_OUT_TE(1:3,1:3,NUM_OGEL_ROWS) = TE(1:3,1:3)
+                        CALL SET_SHELL_STRESS_BASIS_FOR_OUTPUT ( NUM_OGEL_ROWS, M )
                      ENDIF
                      GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                      IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ') .OR. SHELL_GPSTRESS_RECOVERY) THEN
@@ -1151,6 +1158,153 @@ elems_5: DO J = 1,NELE
 ! ##################################################################################################################################
 
       CONTAINS
+
+! ##################################################################################################################################
+
+      SUBROUTINE SET_SHELL_STRESS_BASIS_FOR_OUTPUT ( ROW_NUM, POINT_NUM )
+
+      INTEGER(LONG), INTENT(IN)       :: ROW_NUM
+      INTEGER(LONG), INTENT(IN)       :: POINT_NUM
+
+      LOGICAL                         :: OK
+      REAL(DOUBLE)                    :: BASIS(3,3)
+
+      IF (ROW_NUM <= 0) RETURN
+
+      IF (TYPE(1:5) == 'TRIA3') THEN
+         IF ((TRIA3TYP == 'T3FF  ') .OR. (TRIA3TYP == 'MITC3+') .OR.                                                               &
+             (TRIARTYP == 'T3FFD   ') .OR. (TRIARTYP == 'MITC3+HB')) THEN
+            CALL BUILD_TRIA_STRESS_BASIS ( BASIS, OK )
+            IF (OK) SHELL_OUT_TE(1:3,1:3,ROW_NUM) = BASIS(1:3,1:3)
+            SHELL_STRESS_IN_LOCAL(ROW_NUM) = OK
+         ENDIF
+      ELSE IF ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  ')) THEN
+         SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
+      ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'MITC4PD ')) THEN
+         SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
+      ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'Q4RS    ')) THEN
+         CALL BUILD_QUAD_STRESS_BASIS ( POINT_NUM, BASIS, OK )
+         IF (OK) SHELL_OUT_TE(1:3,1:3,ROW_NUM) = BASIS(1:3,1:3)
+         SHELL_STRESS_IN_LOCAL(ROW_NUM) = OK
+      ENDIF
+
+      END SUBROUTINE SET_SHELL_STRESS_BASIS_FOR_OUTPUT
+
+! ##################################################################################################################################
+
+      SUBROUTINE BUILD_TRIA_STRESS_BASIS ( BASIS, OK )
+
+      REAL(DOUBLE), INTENT(OUT)       :: BASIS(3,3)
+      LOGICAL, INTENT(OUT)            :: OK
+
+      INTEGER(LONG)                   :: II
+      REAL(DOUBLE)                    :: E1(3), E2(3), E3(3), V12(3), V13(3)
+
+      BASIS = ZERO
+      OK = .FALSE.
+
+      DO II=1,3
+         V12(II) = XEB(2,II) - XEB(1,II)
+         V13(II) = XEB(3,II) - XEB(1,II)
+      ENDDO
+      IF (VEC_NORM(V12) <= 1.0D-14) RETURN
+      E1 = V12 / VEC_NORM(V12)
+      CALL CROSS3 ( E1, V13, E3 )
+      IF (VEC_NORM(E3) <= 1.0D-14) RETURN
+      E3 = E3 / VEC_NORM(E3)
+      CALL CROSS3 ( E3, E1, E2 )
+
+      BASIS(1,1:3) = E1
+      BASIS(2,1:3) = E2
+      BASIS(3,1:3) = E3
+      OK = .TRUE.
+
+      END SUBROUTINE BUILD_TRIA_STRESS_BASIS
+
+! ##################################################################################################################################
+
+      SUBROUTINE BUILD_QUAD_STRESS_BASIS ( POINT_NUM, BASIS, OK )
+
+      INTEGER(LONG), INTENT(IN)       :: POINT_NUM
+      REAL(DOUBLE), INTENT(OUT)       :: BASIS(3,3)
+      LOGICAL, INTENT(OUT)            :: OK
+
+      INTEGER(LONG)                   :: II
+      REAL(DOUBLE)                    :: DNXI(4), DNETA(4), XI, ETA
+      REAL(DOUBLE)                    :: E1(3), E2(3), E3(3), G1(3), G2(3)
+
+      BASIS = ZERO
+      OK = .FALSE.
+
+      IF (POINT_NUM == 2) THEN
+         XI = -ONE
+         ETA = -ONE
+      ELSE IF (POINT_NUM == 3) THEN
+         XI = ONE
+         ETA = -ONE
+      ELSE IF (POINT_NUM == 4) THEN
+         XI = ONE
+         ETA = ONE
+      ELSE IF (POINT_NUM == 5) THEN
+         XI = -ONE
+         ETA = ONE
+      ELSE
+         XI = ZERO
+         ETA = ZERO
+      ENDIF
+
+      DNXI(1) = -0.25D0*(ONE - ETA)
+      DNXI(2) =  0.25D0*(ONE - ETA)
+      DNXI(3) =  0.25D0*(ONE + ETA)
+      DNXI(4) = -0.25D0*(ONE + ETA)
+      DNETA(1) = -0.25D0*(ONE - XI)
+      DNETA(2) = -0.25D0*(ONE + XI)
+      DNETA(3) =  0.25D0*(ONE + XI)
+      DNETA(4) =  0.25D0*(ONE - XI)
+
+      G1 = ZERO
+      G2 = ZERO
+      DO II=1,4
+         G1(1:3) = G1(1:3) + DNXI(II)*XEB(II,1:3)
+         G2(1:3) = G2(1:3) + DNETA(II)*XEB(II,1:3)
+      ENDDO
+      IF (VEC_NORM(G1) <= 1.0D-14) RETURN
+      E1 = G1 / VEC_NORM(G1)
+      CALL CROSS3 ( E1, G2, E3 )
+      IF (VEC_NORM(E3) <= 1.0D-14) CALL CROSS3 ( G1, G2, E3 )
+      IF (VEC_NORM(E3) <= 1.0D-14) RETURN
+      E3 = E3 / VEC_NORM(E3)
+      CALL CROSS3 ( E3, E1, E2 )
+
+      BASIS(1,1:3) = E1
+      BASIS(2,1:3) = E2
+      BASIS(3,1:3) = E3
+      OK = .TRUE.
+
+      END SUBROUTINE BUILD_QUAD_STRESS_BASIS
+
+! ##################################################################################################################################
+
+      SUBROUTINE CROSS3 ( A, B, C )
+
+      REAL(DOUBLE), INTENT(IN)        :: A(3), B(3)
+      REAL(DOUBLE), INTENT(OUT)       :: C(3)
+
+      C(1) = A(2)*B(3) - A(3)*B(2)
+      C(2) = A(3)*B(1) - A(1)*B(3)
+      C(3) = A(1)*B(2) - A(2)*B(1)
+
+      END SUBROUTINE CROSS3
+
+! ##################################################################################################################################
+
+      REAL(DOUBLE) FUNCTION VEC_NORM ( V )
+
+      REAL(DOUBLE), INTENT(IN)        :: V(3)
+
+      VEC_NORM = DSQRT(DOT_PRODUCT(V,V))
+
+      END FUNCTION VEC_NORM
 
 ! ##################################################################################################################################
 

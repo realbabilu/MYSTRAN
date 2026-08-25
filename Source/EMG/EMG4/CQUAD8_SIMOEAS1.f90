@@ -34,8 +34,8 @@
       REAL(DOUBLE)                    :: BM(3,48), BB(3,48), BS(2,48), BD(1,48), BSE(2)
       REAL(DOUBLE)                    :: GP3(3), W3(3), R, S, WT, JAC, CDRILL, FAC
       REAL(DOUBLE)                    :: M1(8,8), N8(8), DN8(2,8), MASS_ELEM, MASS_NODE
-      REAL(DOUBLE)                    :: UNIT_PPE(48), UNIT_PTE(48), DXDR(3), DXDS(3), SURF_VEC(3), CTE(6), TBAR
-      REAL(DOUBLE)                    :: THERMAL_STRAIN(6)
+      REAL(DOUBLE)                    :: UNIT_PPE(48), UNIT_PTE(48), DXDR(3), DXDS(3), SURF_VEC(3), TBAR
+      REAL(DOUBLE)                    :: CTE(3), THERMAL_RESULTANT(3)
 
       IF (ELGP /= 8) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -105,15 +105,11 @@
                S = GP3(J)
                WT = W3(I)*W3(J)
                CALL BM_Q8_AT ( XYZ, R, S, BM, JAC )
-               CALL BB_Q8_AT ( XYZ, NORMALS, R, S, BB, JAC )
-               CALL BS_Q8_AT ( XYZ, NORMALS, R, S, BS, JAC )
-               CTE(:) = ALPVEC(:,1)
-               THERMAL_STRAIN = MATMUL(SHELL_A, CTE)
-               UNIT_PTE = UNIT_PTE + MATMUL( TRANSPOSE(BM), THERMAL_STRAIN ) * WT * JAC
-               THERMAL_STRAIN = MATMUL(SHELL_D, CTE)
-               UNIT_PTE = UNIT_PTE + MATMUL( TRANSPOSE(BB), THERMAL_STRAIN ) * WT * JAC
-               THERMAL_STRAIN = MATMUL(SHELL_T, CTE)
-               UNIT_PTE = UNIT_PTE + MATMUL( TRANSPOSE(BS), THERMAL_STRAIN ) * WT * JAC
+               CTE(1) = ALPVEC(1,1)
+               CTE(2) = ALPVEC(2,1)
+               CTE(3) = ALPVEC(4,1)
+               THERMAL_RESULTANT = MATMUL(SHELL_A, CTE)
+               UNIT_PTE = UNIT_PTE + MATMUL( TRANSPOSE(BM), THERMAL_RESULTANT ) * WT * JAC
             ENDDO
          ENDDO
          DO JSUB=1,SIZE(PTE,2)

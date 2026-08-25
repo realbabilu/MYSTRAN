@@ -1244,7 +1244,7 @@
                                     WRITE_F06, WRITE_OP2, OP2_OPENED, WRITE_GPSTRESS_F06)
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06, OP2
-      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, SHELL_OUT_TE
+      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, SHELL_OUT_TE, SHELL_STRESS_IN_LOCAL
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, GPSTRESS_REQ
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE GET_MAX_MIN_ABS_STR_Interface
@@ -1391,7 +1391,7 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  OP2, F06
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, SHELL_OUT_TE
+      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, SHELL_OUT_TE, SHELL_STRESS_IN_LOCAL
       USE MODEL_STUF, ONLY            :  GRID_ID, RGRID
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  GPSTRESS_REQ, NUM_GP_SURFACE, MAX_GP_SURFACES, GP_SURFACE_IDS,                 &
                                          GP_SURFACE_NORMAL_MODE
@@ -1654,9 +1654,11 @@
                   IF (GID_OUT_ARRAY(I,J+1) /= GID) CYCLE
                   ROW1 = 2*I - 1
                   ROW2 = 2*I
-                  CALL GET_SURFACE_STRESS3 ( SURF_INDEX, I, (/ OGEL(ROW1,2), OGEL(ROW1,3), OGEL(ROW1,4) /), OUTVAL(1:3) )
+                  CALL GET_SURFACE_STRESS3 ( SURF_INDEX, I, SHELL_STRESS_IN_LOCAL(I), SHELL_OUT_TE(1:3,1:3,I),                    &
+                                             (/ OGEL(ROW1,2), OGEL(ROW1,3), OGEL(ROW1,4) /), OUTVAL(1:3) )
                   VALS1 = VALS1 + (AREA/3.0D0) * OUTVAL(1:3)
-                  CALL GET_SURFACE_STRESS3 ( SURF_INDEX, I, (/ OGEL(ROW2,2), OGEL(ROW2,3), OGEL(ROW2,4) /), OUTVAL(1:3) )
+                  CALL GET_SURFACE_STRESS3 ( SURF_INDEX, I, SHELL_STRESS_IN_LOCAL(I), SHELL_OUT_TE(1:3,1:3,I),                    &
+                                             (/ OGEL(ROW2,2), OGEL(ROW2,3), OGEL(ROW2,4) /), OUTVAL(1:3) )
                   VALS2 = VALS2 + (AREA/3.0D0) * OUTVAL(1:3)
                   SUMW1 = SUMW1 + AREA/3.0D0
                   SUMW2 = SUMW2 + AREA/3.0D0
@@ -1673,9 +1675,11 @@
                   IF (GID_OUT_ARRAY(I,J+1) /= GID) CYCLE
                   ROW1 = 2*I + 2*J - 1
                   ROW2 = 2*I + 2*J
-                  CALL GET_SURFACE_STRESS3 ( SURF_INDEX, I+J, (/ OGEL(ROW1,2), OGEL(ROW1,3), OGEL(ROW1,4) /), OUTVAL(1:3) )
+                  CALL GET_SURFACE_STRESS3 ( SURF_INDEX, I+J, SHELL_STRESS_IN_LOCAL(I+J), SHELL_OUT_TE(1:3,1:3,I+J),              &
+                                             (/ OGEL(ROW1,2), OGEL(ROW1,3), OGEL(ROW1,4) /), OUTVAL(1:3) )
                   VALS1 = VALS1 + (AREA/4.0D0) * OUTVAL(1:3)
-                  CALL GET_SURFACE_STRESS3 ( SURF_INDEX, I+J, (/ OGEL(ROW2,2), OGEL(ROW2,3), OGEL(ROW2,4) /), OUTVAL(1:3) )
+                  CALL GET_SURFACE_STRESS3 ( SURF_INDEX, I+J, SHELL_STRESS_IN_LOCAL(I+J), SHELL_OUT_TE(1:3,1:3,I+J),              &
+                                             (/ OGEL(ROW2,2), OGEL(ROW2,3), OGEL(ROW2,4) /), OUTVAL(1:3) )
                   VALS2 = VALS2 + (AREA/4.0D0) * OUTVAL(1:3)
                   SUMW1 = SUMW1 + AREA/4.0D0
                   SUMW2 = SUMW2 + AREA/4.0D0
@@ -1764,15 +1768,19 @@
       END SUBROUTINE BUILD_SURFACE_RESULT_ROW
 
 !----------------------------------------------------------------------------------------------------------------------------------
-      SUBROUTINE GET_SURFACE_STRESS3 ( SURF_INDEX, POINT_INDEX, LOCAL_STRESS3, SURF_STRESS3 )
+      SUBROUTINE GET_SURFACE_STRESS3 ( SURF_INDEX, POINT_INDEX, STRESS_IN_LOCAL, TE_LOCAL, LOCAL_STRESS3, SURF_STRESS3 )
 
       INTEGER(LONG), INTENT(IN)       :: SURF_INDEX
       INTEGER(LONG), INTENT(IN)       :: POINT_INDEX
+      LOGICAL, INTENT(IN)             :: STRESS_IN_LOCAL
+      REAL(DOUBLE), INTENT(IN)        :: TE_LOCAL(3,3)
       REAL(DOUBLE), INTENT(IN)        :: LOCAL_STRESS3(3)
       REAL(DOUBLE), INTENT(OUT)       :: SURF_STRESS3(3)
 
       REAL(DOUBLE)                    :: SURF_BASIS(3,3)
+      REAL(DOUBLE)                    :: TBL(3,3)
       REAL(DOUBLE)                    :: LOCAL_TENSOR(3,3)
+      REAL(DOUBLE)                    :: BASIC_TENSOR(3,3)
       REAL(DOUBLE)                    :: SURF_TENSOR(3,3)
 
       SURF_STRESS3 = LOCAL_STRESS3
@@ -1785,7 +1793,16 @@
       LOCAL_TENSOR(1,2) = LOCAL_STRESS3(3)
       LOCAL_TENSOR(2,1) = LOCAL_STRESS3(3)
 
-      SURF_TENSOR = MATMUL(SURF_BASIS, MATMUL(LOCAL_TENSOR, TRANSPOSE(SURF_BASIS)))
+      IF (STRESS_IN_LOCAL .AND. (MAXVAL(DABS(TE_LOCAL)) > ZERO)) THEN
+         TBL = TRANSPOSE(TE_LOCAL)
+         BASIC_TENSOR = MATMUL( TBL, MATMUL(LOCAL_TENSOR, TRANSPOSE(TBL)) )
+      ELSE
+         BASIC_TENSOR = LOCAL_TENSOR
+         BASIC_TENSOR(1,2) = -BASIC_TENSOR(1,2)
+         BASIC_TENSOR(2,1) = -BASIC_TENSOR(2,1)
+      ENDIF
+
+      SURF_TENSOR = MATMUL(SURF_BASIS, MATMUL(BASIC_TENSOR, TRANSPOSE(SURF_BASIS)))
       SURF_STRESS3(1) = SURF_TENSOR(1,1)
       SURF_STRESS3(2) = SURF_TENSOR(2,2)
       SURF_STRESS3(3) = SURF_TENSOR(1,2)

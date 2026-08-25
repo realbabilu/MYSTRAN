@@ -27,7 +27,7 @@
       SUBROUTINE SHELL_STRAIN_OUTPUTS ( SIZE_ALLOCATED, NUM1, NUM_FEMAP_ROWS, WRITE_OGEL, WRITE_FEMAP )
 
 ! Calculates element specific strain output from array STRAIN (calc'd in subr ELEM_STRE_STRN_ARRAYS) for shell elements (TRIA3,
-! QUAD4, SHEAR) and puts results into array OGEL for later output to F06 file.
+! TRIA6, QUAD4, QUADR, QUAD8, SHEAR) and puts results into array OGEL for later output to F06 file.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -78,10 +78,10 @@
       WRITE_NEU = WRITE_NEU_STRN
 
 ! **********************************************************************************************************************************
-! Calculates strain output for shell elements (TRIA3, QUAD4, SHEAR) and puts results into array OGEL for later output to F06 file
+! Calculates strain output for shell elements (TRIA3, TRIA6, QUAD4, QUADR, QUAD8, SHEAR) and puts results into array OGEL for later output to F06 file
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8') .OR.         &
-          (TYPE(1:5) == 'SHEAR')) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR.         &
+          (TYPE(1:5) == 'QUAD8') .OR. (TYPE(1:5) == 'SHEAR')) THEN
 
          IF (PCOMP_PROPS == 'Y') THEN
 

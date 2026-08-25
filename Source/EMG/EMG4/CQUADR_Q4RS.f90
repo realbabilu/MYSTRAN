@@ -31,6 +31,7 @@
       INTEGER(LONG)                   :: I,J,K,GP,JSUB,IA,IB,RR
       REAL(DOUBLE)                    :: XYZ(4,3), NORMALS(4,3), T24(24,24), T24T(24,24)
       REAL(DOUBLE)                    :: SS(MAX_ORDER_GAUSS), HH(MAX_ORDER_GAUSS), XI, ETA, WT
+      REAL(DOUBLE)                    :: REC_XI(5), REC_ETA(5)
       REAL(DOUBLE)                    :: BMB(3,24), BBB(3,24), BSB(2,24), BML(3,24), BBL(3,24), BSL(2,24)
       REAL(DOUBLE)                    :: GBE1(3,24,4), GBE2(3,24,4), GBE3(2,24,4)
       REAL(DOUBLE)                    :: KBASIC(24,24), KLOCAL(24,24), KDRILL(24,24), MLOCAL(24,24), MBASIC(24,24)
@@ -94,13 +95,17 @@
          ENDIF
 
          IF (OPT(3) == 'Y') THEN
-            BE1(:,:,1) = (GBE1(:,:,1) + GBE1(:,:,2) + GBE1(:,:,3) + GBE1(:,:,4)) / FOUR
-            BE2(:,:,1) = (GBE2(:,:,1) + GBE2(:,:,2) + GBE2(:,:,3) + GBE2(:,:,4)) / FOUR
-            BE3(1:2,:,1) = (GBE3(1:2,:,1) + GBE3(1:2,:,2) + GBE3(1:2,:,3) + GBE3(1:2,:,4)) / FOUR
-            BE1(:,:,2) = GBE1(:,:,4); BE1(:,:,3) = GBE1(:,:,3); BE1(:,:,4) = GBE1(:,:,2); BE1(:,:,5) = GBE1(:,:,1)
-            BE2(:,:,2) = GBE2(:,:,4); BE2(:,:,3) = GBE2(:,:,3); BE2(:,:,4) = GBE2(:,:,2); BE2(:,:,5) = GBE2(:,:,1)
-            BE3(1:2,:,2) = GBE3(1:2,:,4); BE3(1:2,:,3) = GBE3(1:2,:,3)
-            BE3(1:2,:,4) = GBE3(1:2,:,2); BE3(1:2,:,5) = GBE3(1:2,:,1)
+            REC_XI  = (/ ZERO, -ONE,  ONE,  ONE, -ONE /)
+            REC_ETA = (/ ZERO, -ONE, -ONE,  ONE,  ONE /)
+            DO GP=1,5
+               CALL Q4RS_B_MATRICES ( XYZ, NORMALS, REC_XI(GP), REC_ETA(GP), BMB, BBB, BSB, EG, JAC )
+               BML = MATMUL(BMB, T24T)
+               BBL = MATMUL(BBB, T24T)
+               BSL = MATMUL(BSB, T24T)
+               BE1(1:3,1:24,GP) = BML
+               BE2(1:3,1:24,GP) = BBL
+               BE3(1:2,1:24,GP) = BSL
+            ENDDO
          ENDIF
 
          IF ((DEBUG(190) > 0) .AND. (OPT(4) == 'Y')) THEN

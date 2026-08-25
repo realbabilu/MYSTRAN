@@ -63,6 +63,9 @@
 ! --- cbeam_stations begin --- !
       REAL(DOUBLE)      , ALLOCATABLE :: CBEAM_XL_OUT(:)       ! x/L station metadata for beam-style output rows in LINK9
 ! --- cbeam_stations end --- !
+      REAL(DOUBLE)      , ALLOCATABLE :: SHELL_OUT_TE(:,:,:)   ! Shell output basis per stored stress/strain point row.
+!                                                                Dimensions are (3,3,MAXREQ) and TE maps basic -> shell local.
+      LOGICAL           , ALLOCATABLE :: SHELL_STRESS_IN_LOCAL(:) ! True when shell stress rows need local -> surface projection.
 
       REAL(DOUBLE)      , ALLOCATABLE :: POLY_FIT_ERR(:)       ! Array of polynom fit errors for elems that extrapolate stress or
 !                                                                strain values from one set of output points to another

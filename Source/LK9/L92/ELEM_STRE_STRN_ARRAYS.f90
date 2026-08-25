@@ -327,6 +327,25 @@
             WRITE(F06,'(A,9(1X,ES15.7))') '  STRESS ', STRESS
          ENDIF
 
+         IF ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  ') .AND. (DEBUG(239) > 0) .AND. (EID <= 8)) THEN
+            WRITE(F06,'(A,1X,I8,1X,A,1X,I3,1X,A)') 'DSQK239 EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM, 'TYPE='//TYPE
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEB( 1: 6)', (UEB(I),I=1,6)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEB( 7:12)', (UEB(I),I=7,12)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEB(13:18)', (UEB(I),I=13,18)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEB(19:24)', (UEB(I),I=19,24)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEL( 1: 6)', (UEL(I),I=1,6)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEL( 7:12)', (UEL(I),I=7,12)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEL(13:18)', (UEL(I),I=13,18)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEL(19:24)', (UEL(I),I=19,24)
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN1', STRAIN1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN2', STRAIN2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN3', STRAIN3
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS1', STRESS1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS2', STRESS2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS3', STRESS3
+            WRITE(F06,'(A,9(1X,ES15.7))') '  STRESS ', STRESS
+         ENDIF
+
          IF ((TYPE == 'QUADR   ') .AND. (DEBUG(233) > 0)) THEN
             WRITE(F06,'(A,1X,I8,1X,A,1X,I3)') 'CQUADR RECOVERY EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM
             WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN1', STRAIN1

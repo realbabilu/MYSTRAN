@@ -27,7 +27,7 @@
       SUBROUTINE SHELL_STRESS_OUTPUTS ( SIZE_ALLOCATED, NUM1, NUM_FEMAP_ROWS, WRITE_OGEL, WRITE_FEMAP )
 
 ! Calculates element specific stress output from array STRESS (calc'd in subr ELEM_STRE_STRN_ARRAYS) for shell elements (TRIA3,
-! QUAD4, SHEAR) and puts results into array OGEL for later output to F06 file
+! TRIA6, QUAD4, QUADR, QUAD8, SHEAR) and puts results into array OGEL for later output to F06 file
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -79,8 +79,8 @@
 ! **********************************************************************************************************************************
 ! Calc engineering stresses from array STRESS and put into array OGEL
 
-      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8') .OR.         &
-          (TYPE(1:5) == 'SHEAR')) THEN
+      IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR.         &
+          (TYPE(1:5) == 'QUAD8') .OR. (TYPE(1:5) == 'SHEAR')) THEN
          IF (PCOMP_PROPS == 'Y') THEN
 
             SX  = STRESS(1)
@@ -178,9 +178,9 @@
             ENDIF
 
             DO I=1,NUM_ROWS
-               SX  = STRESS(1) + ZS(I)*STRESS(4)
-               SY  = STRESS(2) + ZS(I)*STRESS(5)
-               SXY = STRESS(3) + ZS(I)*STRESS(6)
+               SX  = STRESS(1) - ZS(I)*STRESS(4)
+               SY  = STRESS(2) - ZS(I)*STRESS(5)
+               SXY = STRESS(3) - ZS(I)*STRESS(6)
                SXZ = STRESS(7)
                SYZ = STRESS(8)
                CALL PRINCIPAL_STRESS_2D ( SX, SY, SXY, ANGLE, SMAJ, SMIN, SXYMAX, MEAN, VONMISES )

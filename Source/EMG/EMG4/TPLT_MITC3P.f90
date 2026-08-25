@@ -196,12 +196,6 @@
                               MITC3P_BS_TERM(BSIN,IR,20)*BUB_MAP(2,IC)
             ENDDO
          ENDDO
-         DO IR=1,3
-            BBOUT(:,6*(IR-1)+4) = -BBOUT(:,6*(IR-1)+4)
-            BBOUT(:,6*(IR-1)+5) = -BBOUT(:,6*(IR-1)+5)
-            BSOUT(:,6*(IR-1)+4) = -BSOUT(:,6*(IR-1)+4)
-            BSOUT(:,6*(IR-1)+5) = -BSOUT(:,6*(IR-1)+5)
-         ENDDO
       END SUBROUTINE MITC3P_RECOVERY_MATS
 
       SUBROUTINE MITC3P_BM_AT(JI, BMOUT)

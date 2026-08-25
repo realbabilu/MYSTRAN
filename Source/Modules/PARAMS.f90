@@ -481,8 +481,8 @@
 !                                                              'MIN4  ': Use Tessler's MIN4 element 
 !                                                              'MITC4 ': Use Bathe's MITC4 (1983)
 !                                                              'MITC4+': Use Ko/Bathe's 2nd MITC4+ (Nov 2016)
+!                                                              'DSQK  ': DSQK 4-node shell branch (planned Python parity port)
 !                                                              'DKMQ20': 6-DOF DKMQ20/Hughes-Brezzi shell branch (experimental)
-!                                                              'DKMT20': DKMQ20-derived starter branch for later 5-DOF/K6ROT work
 !                                                              'SIMO  ': 6-DOF Simo1989/Hughes-Brezzi shell branch (experimental)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
@@ -504,6 +504,13 @@
 !                                                              'DKMT18  ': DKMT18/Maknun triangular shell branch
 !                                                              'T3FFD   ': Krysl T3FFD/T3FFA triangular shell branch (experimental)
 !                                                              'MITC3+HB': MITC3+ Hughes-Brezzi triangular shell branch (experimental)
+
+! ----------------------------------------------------------------------------------------------------------------------------------
+      CHARACTER(  8*BYTE)      :: TRIA6TYP       = 'SIMOT6  ' ! Which element to use in MYSTRAN as the CTRIA6 element
+!                                                              'SIMOT6  ': Simo1993 quadratic triangular shell branch (default)
+!                                                              'MITC6   ': MITC6 triangular shell branch
+!                                                              'MH6T    ': MacNeal MH6T triangular shell branch
+!                                                              'REZAIEE ': Rezaiee2017 triangular shell branch
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  8*BYTE)      :: SOLIDTYP       = 'LEGACY  '! Solid formulation selector.
@@ -638,7 +645,7 @@
 ! **********************************************************************************************************************************
 ! Returns true for CQUADR formulations whose stiffness is built from generated nodal normals.
 
-      CQUADR_NEEDS_GENERATED_SNORM = ((QTYPE == 'DKM24AU ') .OR. (QTYPE == 'Q4RS    '))
+      CQUADR_NEEDS_GENERATED_SNORM = ((QTYPE == 'DKM24EA ') .OR. (QTYPE == 'DKM24AU ') .OR. (QTYPE == 'Q4RS    '))
 
 ! **********************************************************************************************************************************
 

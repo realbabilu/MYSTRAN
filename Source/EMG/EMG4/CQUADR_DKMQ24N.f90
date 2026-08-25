@@ -91,13 +91,14 @@
       REAL(DOUBLE)                    :: MASS_AREA_INT, MASS_ELEM_SUM
       REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24)
       REAL(DOUBLE)                    :: GBE1(3,24,4), GBE2(3,24,4), GBE3(2,24,4)
-      LOGICAL                         :: DKMQ20_MODE, SIMO_MODE
+      REAL(DOUBLE)                    :: A0INV(2,2), DETCO0
+      LOGICAL                         :: DKMQ20_MODE, SIMO_MODE, DKM24EA_MODE, EAS4_ACTIVE
 
 ! **********************************************************************************************************************************
 
       SIMO_MODE = ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'SIMO  '))
-      DKMQ20_MODE = (((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DKMQ20') .OR. SIMO_MODE)) .OR.                         &
-                     ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24EA ')))
+      DKM24EA_MODE = ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24EA '))
+      DKMQ20_MODE = ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DKMQ20') .OR. SIMO_MODE))
 
       IF (ELGP /= 4) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -118,6 +119,7 @@
       CALL CALC_NODAL_NORMALS ( XYZ, NORMALS )
       CALL BUILD_T24 ( TE, T24 )
       T24T = TRANSPOSE(T24)
+      EAS4_ACTIVE = DKM24EA_MODE .AND. IS_FLAT_QUAD(XYZ)
 
       AU = BUILD_AU(XYZ, NORMALS)
       ADELTA = BUILD_ADELTA(XYZ, EPROP(1))
@@ -168,6 +170,8 @@
             IF (DA_SUM > 1.0D-30) THEN
                MEAS_MEAN = MEAS_MEAN / DA_SUM
             ENDIF
+         ELSE IF (EAS4_ACTIVE) THEN
+            CALL EAS4_CENTER_INVERSE(XYZ, NORMALS, A0INV, DETCO0)
          ENDIF
 
          DO I=1,2
@@ -196,6 +200,10 @@
                   MEAS = MEAS_RAW(:,:,I,J) - MEAS_MEAN
                   KUA = KUA + WT*JDET*MATMUL(TRANSPOSE(BMB), MATMUL(SHELL_A, MEAS))
                   KAA = KAA + WT*JDET*MATMUL(TRANSPOSE(MEAS), MATMUL(SHELL_A, MEAS))
+               ELSE IF (EAS4_ACTIVE) THEN
+                  MEAS = EAS4_AT(XYZ, NORMALS, XI, ETA, A0INV, DETCO0)
+                  KUA = KUA + WT*JDET*MATMUL(TRANSPOSE(BMB), MATMUL(SHELL_A, MEAS))
+                  KAA = KAA + WT*JDET*MATMUL(TRANSPOSE(MEAS), MATMUL(SHELL_A, MEAS))
                ENDIF
                KBEND  = KBEND  + WT*JDET*MATMUL(TRANSPOSE(BBB), MATMUL(SHELL_D, BBB))
                KSHEAR = KSHEAR + WT*JDET*MATMUL(TRANSPOSE(BSB), MATMUL(SHELL_T, BSB))
@@ -209,7 +217,7 @@
          ENDDO
 
          KDRILL = DRILL_STIFFNESS(XYZ, NORMALS, AINV_AU, T24T)
-         IF (SIMO_MODE) THEN
+         IF (SIMO_MODE .OR. EAS4_ACTIVE) THEN
             CALL INV4(KAA, KAAINV)
             KMEM = KMEM - MATMUL(KUA, MATMUL(KAAINV, TRANSPOSE(KUA)))
          ENDIF
@@ -535,7 +543,7 @@
 ! SNORM support for explicit CQUADR/DKMQ24. GRID_SNORM is stored in basic
 ! coordinates, matching the 3D coordinates used by this routine. If no SNORM is
 ! present for a grid, keep the geometric midsurface normal computed above.
-      IF ((QUADRTYP /= 'DKM24EA ') .AND. ALLOCATED(GRID_SNORM)) THEN
+      IF (ALLOCATED(GRID_SNORM)) THEN
          DO II=1,4
             IF ((BGRID(II) > 0) .AND. (BGRID(II) <= SIZE(GRID_SNORM,1))) THEN
                SN = GRID_SNORM(BGRID(II),:)
@@ -848,6 +856,67 @@
 
       MOUT = MATMUL(T0EAS, MHAT)
       END FUNCTION EAS_AT
+
+      LOGICAL FUNCTION IS_FLAT_QUAD ( XYZN )
+      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3)
+      REAL(DOUBLE), PARAMETER :: FLAT_TOL = 1.0D-6
+      REAL(DOUBLE), PARAMETER :: GP2(2) = (/-5.77350269189626D-01, 5.77350269189626D-01/)
+      REAL(DOUBLE) :: T1C(3), T2C(3), NC(3), T1G(3), T2G(3), NG(3)
+      REAL(DOUBLE) :: JJC, JJG, COC(2,2), BCC(2,2), COG(2,2), BCG(2,2), DEV
+      REAL(DOUBLE) :: NGEOM(4,3)
+      INTEGER(LONG) :: II, JJ
+
+      CALL CALC_NODAL_NORMALS(XYZN, NGEOM)
+      CALL GEOMETRY_AT(XYZN, NGEOM, ZERO, ZERO, T1C, T2C, NC, JJC, COC, BCC)
+      IS_FLAT_QUAD = .TRUE.
+      DO II=1,2
+         DO JJ=1,2
+            CALL GEOMETRY_AT(XYZN, NGEOM, GP2(II), GP2(JJ), T1G, T2G, NG, JJG, COG, BCG)
+            DEV = VNORM(NG - NC)
+            IF (DEV >= FLAT_TOL) THEN
+               IS_FLAT_QUAD = .FALSE.
+               RETURN
+            ENDIF
+         ENDDO
+      ENDDO
+      END FUNCTION IS_FLAT_QUAD
+
+      SUBROUTINE EAS4_CENTER_INVERSE ( XYZN, NORMS, A0INV, DETCO0 )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3), NORMS(4,3)
+      REAL(DOUBLE), INTENT(OUT) :: A0INV(2,2), DETCO0
+      REAL(DOUBLE) :: T1C(3), T2C(3), NC(3), JJC, BCC(2,2)
+
+      CALL GEOMETRY_AT(XYZN, NORMS, ZERO, ZERO, T1C, T2C, NC, JJC, A0INV, BCC)
+      DETCO0 = A0INV(1,1)*A0INV(2,2) - A0INV(1,2)*A0INV(2,1)
+      END SUBROUTINE EAS4_CENTER_INVERSE
+
+      FUNCTION EAS4_AT ( XYZN, NORMS, XI, ETA, A0INV, DETCO0 ) RESULT(GOUT)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3), XI, ETA, A0INV(2,2), DETCO0
+      REAL(DOUBLE) :: GOUT(3,4), T1G(3), T2G(3), NG(3), JJG, COG(2,2), BCG(2,2)
+      REAL(DOUBLE) :: DETCO, SCALE, D5X, D5Y, D6X, D6Y
+
+      GOUT = ZERO
+      CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, T1G, T2G, NG, JJG, COG, BCG)
+      DETCO = COG(1,1)*COG(2,2) - COG(1,2)*COG(2,1)
+      IF ((DABS(DETCO0) < 1.0D-30) .OR. (DABS(DETCO) < 1.0D-30)) RETURN
+
+! det(A0)/det(A) scaling. Since CO is inv(A), this is det(CO)/det(CO0).
+      SCALE = DETCO / DETCO0
+      D5X = A0INV(1,1)*(-TWO*XI)
+      D5Y = A0INV(2,1)*(-TWO*XI)
+      D6X = A0INV(1,2)*(-TWO*ETA)
+      D6Y = A0INV(2,2)*(-TWO*ETA)
+
+      GOUT(1,1) = D5X*SCALE
+      GOUT(2,2) = D5Y*SCALE
+      GOUT(3,1) = D5Y*SCALE
+      GOUT(3,2) = D5X*SCALE
+
+      GOUT(1,3) = D6X*SCALE
+      GOUT(2,4) = D6Y*SCALE
+      GOUT(3,3) = D6Y*SCALE
+      GOUT(3,4) = D6X*SCALE
+      END FUNCTION EAS4_AT
 
       SUBROUTINE INV4 ( A, AINV )
       REAL(DOUBLE), INTENT(IN)  :: A(4,4)

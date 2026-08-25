@@ -1,23 +1,21 @@
 ! #################################################################################################################################
-! CTRIA6 Simo1993 quadratic triangular shell.
+! CTRIA6 MH6T quadratic triangular shell.
 
-      SUBROUTINE CTRIA6_SIMO1993 ( OPT, INT_ELEM_ID )
+      SUBROUTINE CTRIA6_MH6T ( OPT, INT_ELEM_ID )
 
 ! Ported from:
-!   D:\18a\bending_only\Shell\gemini2\shit\validation\q8\Simo1993_Tri6_ShellElement_v1p8.py
+!   D:\18a\bending_only\Shell\gemini2\shit\validation\q8\MacNeal_MH6T_Tri_v1.py
 !
-! Static stiffness path:
-!   6-node quadratic triangle, Simo/Fox director kinematics,
-!   Hughes-Brezzi drilling penalty, no EAS condensation.
-!   Membrane/bending/shear use the 3-point degree-2 triangle rule.
-!   Drilling uses the 6-point degree-4 triangle rule from the Python source
-!   to avoid rank-deficient theta-z drilling modes.
+! Formulation notes:
+!   6-node quadratic triangle with the same director, bending, drilling,
+!   mass, pressure and thermal framework as CTRIA6_SIMO1993.
+!   Membrane and transverse shear are replaced with MacNeal line-integration
+!   assumed strains using element-constant local axes.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_STRESS_POINTS, SOL_NAME
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, DT, EID, ELGP, GRID_SNORM, KE, ME, BE1, BE2, BE3, MASS_PER_UNIT_AREA,    &
                                          NUM_EMG_FATAL_ERRS, PCOMP_PROPS, PPE, PRESS, PTE, RGRID, SHELL_A, SHELL_D, SHELL_T,     &
                                          TREF, XEB
@@ -27,7 +25,7 @@
 
       IMPLICIT NONE
 
-      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CTRIA6_SIMO1993'
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CTRIA6_MH6T'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
 
@@ -37,10 +35,10 @@
       REAL(DOUBLE)                    :: BM(3,36), BB(3,36), BS(2,36), BD(1,36)
       REAL(DOUBLE)                    :: R3(3), S3(3), W3(3), R6(6), S6(6), W6(6)
       REAL(DOUBLE)                    :: R, S, WT, JAC, CDRILL, FAC
+      REAL(DOUBLE)                    :: MEM_ALPHA(9,36), SHEAR_BETA(6,36)
       REAL(DOUBLE)                    :: M1(6,6), N6(6), DN6(2,6), MASS_ELEM, MASS_NODE
       REAL(DOUBLE)                    :: UNIT_PPE(36), UNIT_PTE(36), DXDR(3), DXDS(3), SURF_VEC(3), TBAR
       REAL(DOUBLE)                    :: CTE(3), THERMAL_RESULTANT(3)
-      REAL(DOUBLE)                    :: BDNORM
 
       IF (ELGP /= 6) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -53,24 +51,14 @@
       IF (PCOMP_PROPS == 'Y') THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
          FATAL_ERR = FATAL_ERR + 1
-         WRITE(ERR,*) ' *ERROR: Code not written for composite material with CTRIA6 Simo1993'
-         WRITE(F06,*) ' *ERROR: Code not written for composite material with CTRIA6 Simo1993'
+         WRITE(ERR,*) ' *ERROR: Code not written for composite material with CTRIA6 MH6T'
+         WRITE(F06,*) ' *ERROR: Code not written for composite material with CTRIA6 MH6T'
          CALL OUTA_HERE ( 'Y' )
       ENDIF
 
       CALL LOAD_BASIC_COORDS_T6 ( XYZ )
       CALL CALC_NODAL_NORMALS_T6 ( XYZ, NORMALS )
-      IF (EID == 1) THEN
-         OPEN(UNIT=246, FILE='D:\18a\MYSTRAN_Validation-main\working\ctria6_simo_debug.txt', STATUS='UNKNOWN', POSITION='APPEND')
-         WRITE(246,'(A,I8)') 'CTRIA6_SIMO EID=', EID
-         DO I=1,6
-            WRITE(246,'(A,I3,A,1P,3E16.8)') '  XYZ ', I, ' =', XYZ(I,1), XYZ(I,2), XYZ(I,3)
-         ENDDO
-         DO I=1,6
-            WRITE(246,'(A,I3,A,1P,3E16.8)') '  NODE', I, ' N =', NORMALS(I,1), NORMALS(I,2), NORMALS(I,3)
-         ENDDO
-         CLOSE(246)
-      ENDIF
+      CALL SETUP_MH6T_T6 ( XYZ, NORMALS, MEM_ALPHA, SHEAR_BETA )
 
       R3 = (/ONE/6.0D0, TWO/3.0D0, ONE/6.0D0/)
       S3 = (/ONE/6.0D0, ONE/6.0D0, TWO/3.0D0/)
@@ -91,7 +79,7 @@
             S = S6(I)
             WT = W6(I)
             CALL SHAPE_T6 ( R, S, N6, DN6 )
-            CALL BM_T6_AT ( XYZ, R, S, BM, JAC )
+            CALL BM_MH6T_AT ( XYZ, R, S, MEM_ALPHA, BM, JAC )
             MASS_ELEM = MASS_ELEM + MASS_PER_UNIT_AREA*WT*JAC
             DO K=1,6
                DO L=1,6
@@ -125,7 +113,7 @@
             R = R6(I)
             S = S6(I)
             WT = W6(I)
-            CALL BM_T6_AT ( XYZ, R, S, BM, JAC )
+            CALL BM_MH6T_AT ( XYZ, R, S, MEM_ALPHA, BM, JAC )
             CTE(1) = ALPVEC(1,1)
             CTE(2) = ALPVEC(2,1)
             CTE(3) = ALPVEC(4,1)
@@ -144,26 +132,14 @@
 
       IF (OPT(3) == 'Y') THEN
          DO I=1,3
-            CALL BM_T6_AT ( XYZ, R3(I), S3(I), BM, JAC )
+            CALL BM_MH6T_AT ( XYZ, R3(I), S3(I), MEM_ALPHA, BM, JAC )
             CALL BB_T6_AT ( XYZ, NORMALS, R3(I), S3(I), BB, JAC )
-            CALL BS_T6_AT ( XYZ, NORMALS, R3(I), S3(I), BS, JAC )
-            IF ((DEBUG(246) > 0) .AND. (EID == 1)) THEN
-               CALL BDRILL_T6_AT ( XYZ, NORMALS, R3(I), S3(I), BD, BDNORM )
-               WRITE(ERR,'(A,I8,A,I3,A,1P,4E14.6)') 'CTRIA6_SIMO246 EID=', EID, ' GP=', I, ' ||Bm||,||Bb||,||Bs||,||Bd|| =', &
-                     DSQRT(SUM(BM*BM)), DSQRT(SUM(BB*BB)), DSQRT(SUM(BS*BS)), DSQRT(SUM(BD*BD))
-            ENDIF
+            CALL BS_MH6T_AT ( XYZ, R3(I), S3(I), SHEAR_BETA, BS, JAC )
             IF (I <= MAX_STRESS_POINTS) THEN
                BE1(1:3,1:36,I) = BM
                BE2(1:3,1:36,I) = BB
                BE3(1:2,1:36,I) = BS
             ENDIF
-         ENDDO
-      ENDIF
-
-      IF ((DEBUG(246) > 0) .AND. (EID == 1)) THEN
-         WRITE(ERR,'(A,I8)') 'CTRIA6_SIMO246 NODAL NORMALS EID=', EID
-         DO I=1,6
-            WRITE(ERR,'(A,I3,A,1P,3E16.8)') '  NODE', I, ' N =', NORMALS(I,1), NORMALS(I,2), NORMALS(I,3)
          ENDDO
       ENDIF
 
@@ -175,16 +151,9 @@
             R = R3(I)
             S = S3(I)
             WT = W3(I)
-            CALL BM_T6_AT ( XYZ, R, S, BM, JAC )
+            CALL BM_MH6T_AT ( XYZ, R, S, MEM_ALPHA, BM, JAC )
             CALL BB_T6_AT ( XYZ, NORMALS, R, S, BB, JAC )
-            CALL BS_T6_AT ( XYZ, NORMALS, R, S, BS, JAC )
-            IF (EID == 1) THEN
-               CALL BDRILL_T6_AT ( XYZ, NORMALS, R, S, BD, BDNORM )
-               OPEN(UNIT=246, FILE='D:\18a\MYSTRAN_Validation-main\working\ctria6_simo_debug.txt', STATUS='UNKNOWN', POSITION='APPEND')
-               WRITE(246,'(A,I8,A,I3,A,1P,E14.6,A,4E14.6)') 'CTRIA6_SIMO EID=', EID, ' GP=', I, ' JAC=', JAC, &
-                     ' ||Bm||,||Bb||,||Bs||,||Bd|| =', DSQRT(SUM(BM*BM)), DSQRT(SUM(BB*BB)), DSQRT(SUM(BS*BS)), DSQRT(SUM(BD*BD))
-               CLOSE(246)
-            ENDIF
+            CALL BS_MH6T_AT ( XYZ, R, S, SHEAR_BETA, BS, JAC )
             KOUT = KOUT + WT*JAC*MATMUL(TRANSPOSE(BM), MATMUL(SHELL_A, BM))
             KOUT = KOUT + WT*JAC*MATMUL(TRANSPOSE(BB), MATMUL(SHELL_D, BB))
             KOUT = KOUT + WT*JAC*MATMUL(TRANSPOSE(BS), MATMUL(SHELL_T, BS))
@@ -204,15 +173,6 @@
                KE(IA,IB) = FAC
             ENDDO
          ENDDO
-         IF (EID == 1) THEN
-            OPEN(UNIT=247, FILE='D:\18a\MYSTRAN_Validation-main\working\ctria6_simo_ke.txt', STATUS='UNKNOWN', POSITION='APPEND')
-            WRITE(247,'(A,I8)') 'CTRIA6_SIMO KE EID=', EID
-            WRITE(247,'(A,1P,E16.8)') '  FROB =', DSQRT(SUM(KE*KE))
-            DO IA=1,36
-               WRITE(247,'(36(1X,1PE16.8))') (KE(IA,IB), IB=1,36)
-            ENDDO
-            CLOSE(247)
-         ENDIF
       ENDIF
 
       IF (OPT(5) == 'Y') THEN
@@ -241,8 +201,8 @@
       ENDIF
 
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
-         WRITE(ERR,*) ' *ERROR: Code not written for CTRIA6 Simo1993 differential stiffness matrix'
-         WRITE(F06,*) ' *ERROR: Code not written for CTRIA6 Simo1993 differential stiffness matrix'
+         WRITE(ERR,*) ' *ERROR: Code not written for CTRIA6 MH6T differential stiffness matrix'
+         WRITE(F06,*) ' *ERROR: Code not written for CTRIA6 MH6T differential stiffness matrix'
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
          FATAL_ERR = FATAL_ERR + 1
          CALL OUTA_HERE ( 'Y' )
@@ -341,10 +301,6 @@
                      SN = -SN
                      SDOT = -SDOT
                   ENDIF
-!                 Keep pointwise geometric normals if the generated/manual
-!                 grid normal is too far away. This is especially important
-!                 for warped quadratic triangles where midside directors vary
-!                 across the element.
                   IF (SDOT >= 0.85D0) THEN
                      NORMS(II,:) = SN
                   ENDIF
@@ -435,21 +391,78 @@
       VOUT(3,:) = TWO*(C(1)*C(3)*V11 + C(2)*C(4)*V22 + (C(1)*C(4)+C(2)*C(3))*V12)
       END SUBROUTINE TENSOR_PHYS_T6
 
-      SUBROUTINE BM_T6_AT ( XYZN, R, S, BMOUT, JAC )
-      REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), R, S
-      REAL(DOUBLE), INTENT(OUT) :: BMOUT(3,36), JAC
-      REAL(DOUBLE) :: NVAL(6), DN(2,6), E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), VP(3,3)
-      INTEGER(LONG) :: II, COL
-      CALL SHAPE_T6(R, S, NVAL, DN)
+      SUBROUTINE SETUP_MH6T_T6 ( XYZN, NORMS, MEM_ALPHA, SHEAR_BETA )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), NORMS(6,3)
+      REAL(DOUBLE), INTENT(OUT) :: MEM_ALPHA(9,36), SHEAR_BETA(6,36)
+      REAL(DOUBLE) :: E1F(3), E2F(3), E3F(3), XYL(6,2), ORIG(3), DXYZ(3), A3(3), CROSS_TMP(3), NORMI(3), NORMJ(3)
+      REAL(DOUBLE) :: BK(9,36), GAMMA(9,9), GKI(6,36), OMEGA(6,6), A(2), L2, L1D, CK, SK, XI, ETA
+      REAL(DOUBLE) :: INV9(9,9), INV6(6,6)
+      REAL(DOUBLE) :: PTS_XI(9), PTS_ETA(9)
+      INTEGER(LONG) :: MEM_I(9), MEM_J(9), SHR_I(6), SHR_J(6), IROW, ICOL, II
       CALL FIXED_FRAME_T6(XYZN, E1F, E2F, E3F)
-      CALL COV_MAP_T6(XYZN, R, S, E1F, E2F, G1, G2, C, JAC)
-      BMOUT = ZERO
+      ORIG = XYZN(1,:)
       DO II=1,6
-         COL = (II-1)*6
-         CALL TENSOR_PHYS_T6(DN(1,II)*G1, DN(2,II)*G2, 0.5D0*(DN(1,II)*G2 + DN(2,II)*G1), C, VP)
-         BMOUT(1:3,COL+1:COL+3) = VP
+         DXYZ = XYZN(II,:) - ORIG
+         XYL(II,1) = DOT_PRODUCT(DXYZ, E1F)
+         XYL(II,2) = DOT_PRODUCT(DXYZ, E2F)
       ENDDO
-      END SUBROUTINE BM_T6_AT
+      PTS_XI  = (/0.25D0, 0.75D0, 0.75D0, 0.25D0, 0.0D0, 0.0D0, 0.25D0, 0.5D0, 0.25D0/)
+      PTS_ETA = (/0.0D0, 0.0D0, 0.25D0, 0.75D0, 0.75D0, 0.25D0, 0.25D0, 0.25D0, 0.5D0/)
+      MEM_I = (/1,4,2,5,3,6,6,4,5/)
+      MEM_J = (/4,2,5,3,6,1,4,5,6/)
+      SHR_I = (/1,4,2,5,3,6/)
+      SHR_J = (/4,2,5,3,6,1/)
+      BK = ZERO
+      GAMMA = ZERO
+      DO IROW=1,9
+         A = XYL(MEM_J(IROW),:) - XYL(MEM_I(IROW),:)
+         L2 = A(1)*A(1) + A(2)*A(2)
+         IF (L2 < 1.0D-20) L2 = 1.0D-20
+         BK(IROW,6*(MEM_I(IROW)-1)+1:6*(MEM_I(IROW)-1)+3) = -(A(1)*E1F + A(2)*E2F)/L2
+         BK(IROW,6*(MEM_J(IROW)-1)+1:6*(MEM_J(IROW)-1)+3) =  (A(1)*E1F + A(2)*E2F)/L2
+         CK = A(1)/DSQRT(L2)
+         SK = A(2)/DSQRT(L2)
+         XI = PTS_XI(IROW)
+         ETA = PTS_ETA(IROW)
+         GAMMA(IROW,:) = (/CK*CK, XI*CK*CK, ETA*CK*CK, SK*SK, XI*SK*SK, ETA*SK*SK, CK*SK, XI*CK*SK, ETA*CK*SK/)
+      ENDDO
+      CALL INV9_MH6T(GAMMA, INV9)
+      MEM_ALPHA = MATMUL(INV9, BK)
+      GKI = ZERO
+      OMEGA = ZERO
+      DO IROW=1,6
+         A3 = XYZN(SHR_J(IROW),:) - XYZN(SHR_I(IROW),:)
+         L1D = VNORM(A3)
+         IF (L1D < 1.0D-20) L1D = 1.0D-20
+         GKI(IROW,6*(SHR_I(IROW)-1)+1:6*(SHR_I(IROW)-1)+3) = GKI(IROW,6*(SHR_I(IROW)-1)+1:6*(SHR_I(IROW)-1)+3) - E3F/L1D
+         GKI(IROW,6*(SHR_J(IROW)-1)+1:6*(SHR_J(IROW)-1)+3) = GKI(IROW,6*(SHR_J(IROW)-1)+1:6*(SHR_J(IROW)-1)+3) + E3F/L1D
+         NORMI = NORMS(SHR_I(IROW),:)
+         NORMJ = NORMS(SHR_J(IROW),:)
+         CALL CROSS3 ( NORMI, A3, CROSS_TMP )
+         GKI(IROW,6*(SHR_I(IROW)-1)+4:6*(SHR_I(IROW)-1)+6) = GKI(IROW,6*(SHR_I(IROW)-1)+4:6*(SHR_I(IROW)-1)+6) + 0.5D0*CROSS_TMP/L1D
+         CALL CROSS3 ( NORMJ, A3, CROSS_TMP )
+         GKI(IROW,6*(SHR_J(IROW)-1)+4:6*(SHR_J(IROW)-1)+6) = GKI(IROW,6*(SHR_J(IROW)-1)+4:6*(SHR_J(IROW)-1)+6) + 0.5D0*CROSS_TMP/L1D
+         CK = DOT_PRODUCT(A3,E1F)/L1D
+         SK = DOT_PRODUCT(A3,E2F)/L1D
+         XI = PTS_XI(IROW)
+         ETA = PTS_ETA(IROW)
+         OMEGA(IROW,:) = (/CK, XI*CK, ETA*CK, SK, XI*SK, ETA*SK/)
+      ENDDO
+      CALL INV6_MH6T(OMEGA, INV6)
+      SHEAR_BETA = MATMUL(INV6, GKI)
+      END SUBROUTINE SETUP_MH6T_T6
+
+      SUBROUTINE BM_MH6T_AT ( XYZN, R, S, MEM_ALPHA, BMOUT, JAC )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), R, S, MEM_ALPHA(9,36)
+      REAL(DOUBLE), INTENT(OUT) :: BMOUT(3,36), JAC
+      REAL(DOUBLE) :: G1(3), G2(3), E1(3), E2(3), E3(3), P(3,9)
+      CALL SURFACE_BASIS_T6(XYZN, R, S, G1, G2, E1, E2, E3, JAC)
+      P = ZERO
+      P(1,1:3) = (/ONE, R, S/)
+      P(2,4:6) = (/ONE, R, S/)
+      P(3,7:9) = (/ONE, R, S/)
+      BMOUT = MATMUL(P, MEM_ALPHA)
+      END SUBROUTINE BM_MH6T_AT
 
       SUBROUTINE BB_T6_AT ( XYZN, NORMS, R, S, BBOUT, JAC, NORMS_EXT )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), NORMS(6,3), R, S
@@ -479,36 +492,116 @@
       ENDDO
       END SUBROUTINE BB_T6_AT
 
-      SUBROUTINE BS_T6_AT ( XYZN, NORMS, R, S, BSOUT, JAC, NORMS_EXT )
-      REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), NORMS(6,3), R, S
-      REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(6,3)
+      SUBROUTINE BS_MH6T_AT ( XYZN, R, S, SHEAR_BETA, BSOUT, JAC )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), R, S, SHEAR_BETA(6,36)
       REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,36), JAC
-      REAL(DOUBLE) :: NVAL(6), DN(2,6), E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), BSN(2,36)
-      REAL(DOUBLE) :: T0(3), T0I(3), C1(3), C2(3), NM
-      REAL(DOUBLE) :: NORMS_LOC(6,3)
-      INTEGER(LONG) :: II, COL
-      NORMS_LOC = NORMS
-      IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
-      CALL SHAPE_T6(R, S, NVAL, DN)
-      CALL FIXED_FRAME_T6(XYZN, E1F, E2F, E3F)
-      CALL COV_MAP_T6(XYZN, R, S, E1F, E2F, G1, G2, C, JAC)
-      T0 = MATMUL(NVAL, NORMS_LOC)
-      NM = VNORM(T0)
-      IF (NM > 1.0D-15) T0 = T0/NM
-      BSN = ZERO
-      DO II=1,6
-         COL = (II-1)*6
-         T0I = NORMS_LOC(II,:)
-         BSN(1,COL+1:COL+3) = BSN(1,COL+1:COL+3) + DN(1,II)*T0
-         BSN(2,COL+1:COL+3) = BSN(2,COL+1:COL+3) + DN(2,II)*T0
-         CALL CROSS3(T0I, G1, C1)
-         CALL CROSS3(T0I, G2, C2)
-         BSN(1,COL+4:COL+6) = BSN(1,COL+4:COL+6) + NVAL(II)*C1
-         BSN(2,COL+4:COL+6) = BSN(2,COL+4:COL+6) + NVAL(II)*C2
+      REAL(DOUBLE) :: G1(3), G2(3), E1(3), E2(3), E3(3), Q(2,6)
+      CALL SURFACE_BASIS_T6(XYZN, R, S, G1, G2, E1, E2, E3, JAC)
+      Q = ZERO
+      Q(1,1:3) = (/ONE, R, S/)
+      Q(2,4:6) = (/ONE, R, S/)
+      BSOUT = MATMUL(Q, SHEAR_BETA)
+      END SUBROUTINE BS_MH6T_AT
+
+      SUBROUTINE INV9_MH6T ( AIN, AINVOUT )
+      REAL(DOUBLE), INTENT(IN)  :: AIN(9,9)
+      REAL(DOUBLE), INTENT(OUT) :: AINVOUT(9,9)
+      REAL(DOUBLE) :: AW(9,9), IW(9,9), TMPROW(9), PIV, FACT, ABSMAX
+      INTEGER(LONG) :: I, J, K, IPIV
+      INTEGER(LONG), PARAMETER :: N = 9
+      AW = ZERO
+      IW = ZERO
+      AW = AIN
+      DO I=1,N
+         IW(I,I) = ONE
       ENDDO
-      BSOUT(1,:) = C(1)*BSN(1,:) + C(2)*BSN(2,:)
-      BSOUT(2,:) = C(3)*BSN(1,:) + C(4)*BSN(2,:)
-      END SUBROUTINE BS_T6_AT
+      DO I=1,N
+         ABSMAX = ZERO
+         IPIV = I
+         DO K=I,N
+            IF (DABS(AW(K,I)) > ABSMAX) THEN
+               ABSMAX = DABS(AW(K,I))
+               IPIV = K
+            ENDIF
+         ENDDO
+         IF (ABSMAX <= 1.0D-20) THEN
+            AINVOUT = ZERO
+            DO K=1,N
+               AINVOUT(K,K) = ONE
+            ENDDO
+            RETURN
+         ENDIF
+         IF (IPIV /= I) THEN
+            TMPROW = AW(I,:)
+            AW(I,:) = AW(IPIV,:)
+            AW(IPIV,:) = TMPROW
+            TMPROW = IW(I,:)
+            IW(I,:) = IW(IPIV,:)
+            IW(IPIV,:) = TMPROW
+         ENDIF
+         PIV = AW(I,I)
+         AW(I,:) = AW(I,:)/PIV
+         IW(I,:) = IW(I,:)/PIV
+         DO J=1,N
+            IF (J /= I) THEN
+               FACT = AW(J,I)
+               AW(J,:) = AW(J,:) - FACT*AW(I,:)
+               IW(J,:) = IW(J,:) - FACT*IW(I,:)
+            ENDIF
+         ENDDO
+      ENDDO
+      AINVOUT = IW
+      END SUBROUTINE INV9_MH6T
+
+      SUBROUTINE INV6_MH6T ( AIN, AINVOUT )
+      REAL(DOUBLE), INTENT(IN)  :: AIN(6,6)
+      REAL(DOUBLE), INTENT(OUT) :: AINVOUT(6,6)
+      REAL(DOUBLE) :: AW(6,6), IW(6,6), TMPROW(6), PIV, FACT, ABSMAX
+      INTEGER(LONG) :: I, J, K, IPIV
+      INTEGER(LONG), PARAMETER :: N = 6
+      AW = ZERO
+      IW = ZERO
+      AW = AIN
+      DO I=1,N
+         IW(I,I) = ONE
+      ENDDO
+      DO I=1,N
+         ABSMAX = ZERO
+         IPIV = I
+         DO K=I,N
+            IF (DABS(AW(K,I)) > ABSMAX) THEN
+               ABSMAX = DABS(AW(K,I))
+               IPIV = K
+            ENDIF
+         ENDDO
+         IF (ABSMAX <= 1.0D-20) THEN
+            AINVOUT = ZERO
+            DO K=1,N
+               AINVOUT(K,K) = ONE
+            ENDDO
+            RETURN
+         ENDIF
+         IF (IPIV /= I) THEN
+            TMPROW = AW(I,:)
+            AW(I,:) = AW(IPIV,:)
+            AW(IPIV,:) = TMPROW
+            TMPROW = IW(I,:)
+            IW(I,:) = IW(IPIV,:)
+            IW(IPIV,:) = TMPROW
+         ENDIF
+         PIV = AW(I,I)
+         AW(I,:) = AW(I,:)/PIV
+         IW(I,:) = IW(I,:)/PIV
+         DO J=1,N
+            IF (J /= I) THEN
+               FACT = AW(J,I)
+               AW(J,:) = AW(J,:) - FACT*AW(I,:)
+               IW(J,:) = IW(J,:) - FACT*IW(I,:)
+            ENDIF
+         ENDDO
+      ENDDO
+      AINVOUT = IW
+      END SUBROUTINE INV6_MH6T
 
       SUBROUTINE BDRILL_T6_AT ( XYZN, NORMS, R, S, BDOUT, JAC, NORMS_EXT )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), NORMS(6,3), R, S
@@ -566,4 +659,4 @@
       ENDIF
       END SUBROUTINE INV2
 
-      END SUBROUTINE CTRIA6_SIMO1993
+      END SUBROUTINE CTRIA6_MH6T

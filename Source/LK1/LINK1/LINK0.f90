@@ -1204,7 +1204,7 @@ res20:IF (RESTART == 'N') THEN
 
       IMPLICIT NONE
 
-      INTEGER(LONG)                   :: BGRD(4)           ! Internal grid rows for one shell element
+      INTEGER(LONG)                   :: BGRD(6)           ! Internal grid rows for one shell element
       INTEGER(LONG), ALLOCATABLE      :: ELEM_BGRID(:,:)   ! Internal grid rows for generated-normal shell elements
       INTEGER(LONG), ALLOCATABLE      :: ELEM_NGRID(:)     ! Number of grids in each generated-normal shell element
       INTEGER(LONG)                   :: ELEM_COUNT        ! Number of shell elements included in generated-normal pass
@@ -1231,7 +1231,7 @@ res20:IF (RESTART == 'N') THEN
          RETURN
       ENDIF
 
-      ALLOCATE (AVG_NORMAL(NGRID,3), VALID(NGRID), ELEM_BGRID(NELE,4), ELEM_NGRID(NELE), STAT=IERR)
+      ALLOCATE (AVG_NORMAL(NGRID,3), VALID(NGRID), ELEM_BGRID(NELE,6), ELEM_NGRID(NELE), STAT=IERR)
       IF (IERR /= 0) THEN
          WRITE(ERR,1901) 'AVG_NORMAL/VALID/ELEM_BGRID/ELEM_NGRID'
          WRITE(F06,1901) 'AVG_NORMAL/VALID/ELEM_BGRID/ELEM_NGRID'
@@ -1259,7 +1259,11 @@ res20:IF (RESTART == 'N') THEN
             NGP = 3
          ELSE IF (ETYPE(I) == 'TRIA6   ') THEN
             IF (.NOT. CTRIA6_NEEDS_GENERATED_SNORM()) CYCLE
-            NGP = 6
+!           For quadratic triangles, generated GRID_SNORM is only trusted at
+!           the 3 corner grids. The midside directors are better left to the
+!           element's pointwise geometric normal unless the user supplied an
+!           explicit SNORM for that midside grid.
+            NGP = 3
          ELSE
             CYCLE
          ENDIF
@@ -1363,7 +1367,7 @@ res20:IF (RESTART == 'N') THEN
       IMPLICIT NONE
 
       INTEGER(LONG), INTENT(IN)       :: NGP
-      INTEGER(LONG), INTENT(IN)       :: BGRD(4)
+      INTEGER(LONG), INTENT(IN)       :: BGRD(6)
 
       REAL(DOUBLE), INTENT(OUT)       :: NORMAL(3)
       REAL(DOUBLE), INTENT(OUT)       :: NORM
@@ -1378,7 +1382,7 @@ res20:IF (RESTART == 'N') THEN
       IF (NGP == 4) THEN
          V1(:) = RGRID(BGRD(3),:) - RGRID(BGRD(1),:)
          V2(:) = RGRID(BGRD(4),:) - RGRID(BGRD(2),:)
-      ELSE IF (NGP == 3) THEN
+      ELSE IF ((NGP == 3) .OR. (NGP == 6)) THEN
          V1(:) = RGRID(BGRD(2),:) - RGRID(BGRD(1),:)
          V2(:) = RGRID(BGRD(3),:) - RGRID(BGRD(1),:)
       ELSE
