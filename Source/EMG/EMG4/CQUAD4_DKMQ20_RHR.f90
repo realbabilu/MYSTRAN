@@ -118,7 +118,7 @@
       AINV_AU = ZERO
       DO I=1,4
          IF (DABS(ADELTA(I,I)) > 1.0D-14) THEN
-            AINV_AU(I,1:24) = AU(I,1:24) / ADELTA(I,I)
+            AINV_AU(I,1:24) = -AU(I,1:24) / ADELTA(I,I)
          ENDIF
       ENDDO
 
@@ -835,3 +835,4 @@
       END SUBROUTINE DEBUG_PRINT_MATRIX
 
       END SUBROUTINE CQUAD4_DKMQ20_RHR
+

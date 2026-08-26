@@ -429,7 +429,7 @@
          CALL CQUAD4_DSQK_RHR ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
-      ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20')) THEN
+      ELSE IF ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20  ')) THEN
          CALL CQUAD4_DKMQ20_RHR ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
@@ -525,7 +525,7 @@
          SKIP_K6ROT = 'N'
          IF ((TYPE(1:5) == 'TRIA3') .AND. (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18)) THEN
             SKIP_K6ROT = 'Y'
-         ELSE IF ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DSQK  ') .OR. (QUAD4TYP == 'DKMQ20'))) THEN
+         ELSE IF ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DSQK    ') .OR. (QUAD4TYP == 'DKMQ20  '))) THEN
             SKIP_K6ROT = 'Y'
          ELSE IF (TYPE == 'QUADR   ') THEN
             SKIP_K6ROT = 'Y'

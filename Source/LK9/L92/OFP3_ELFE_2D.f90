@@ -231,7 +231,7 @@ elems_3: DO J = 1,NELE
                                                                               (QUADRTYP == 'SIMO    ') .OR.                       &
                                                                               (QUADRTYP == 'MBP1C0  ') .OR.                       &
                                                                               (QUADRTYP == 'Q4EASANS'))) .OR.                    &
-                                               ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20'))
+                                               ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20  '))
 
                         IF ((FORC_LOC == 'CORNER  ') .OR.                                                                          &
                             (ETYPE(J)(1:5) == 'QUAD8')) THEN

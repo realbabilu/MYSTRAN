@@ -2804,19 +2804,19 @@
          IF (IERRFL(3) == 'N') THEN
             CALL LEFT_ADJ_BDFLD ( CHRPARM )
             IF      (CHRPARM == 'MIN4T   ') THEN
-               QUAD4TYP = 'MIN4T '
+               QUAD4TYP = 'MIN4T   '
             ELSE IF (CHRPARM == 'MIN4    ') THEN
-               QUAD4TYP = 'MIN4  '
+               QUAD4TYP = 'MIN4    '
             ELSE IF (CHRPARM == 'MITC4   ') THEN
-               QUAD4TYP = 'MITC4 '
+               QUAD4TYP = 'MITC4   '
             ELSE IF (CHRPARM == 'MITC4+  ') THEN
-               QUAD4TYP = 'MITC4+'
+               QUAD4TYP = 'MITC4+  '
             ELSE IF (CHRPARM == 'DSQK    ') THEN
-               QUAD4TYP = 'DSQK  '
+               QUAD4TYP = 'DSQK    '
             ELSE IF (CHRPARM == 'DKMQ20  ') THEN
-               QUAD4TYP = 'DKMQ20'
+               QUAD4TYP = 'DKMQ20  '
             ELSE IF (CHRPARM == 'SIMO    ') THEN
-               QUAD4TYP = 'SIMO  '
+               QUAD4TYP = 'SIMO    '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
