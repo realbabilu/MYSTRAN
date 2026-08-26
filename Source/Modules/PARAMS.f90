@@ -490,6 +490,7 @@
 !                                                              'DKM24EA ': DKMQ24 with 4-parameter EAS membrane enhancement
 !                                                              'DKM24AU ': legacy AU DKMQ24 with SNORM when supplied
 !                                                              'Q4EASANS': Simo/ANS Hughes-Brezzi shell branch (experimental)
+!                                                              'MBP1C0  ': Muller-Bischoff P1C0/PBFE Q4 shell branch (experimental)
 !                                                              'Q4RS    ': Krysl Q4RS shell branch (experimental)
 !                                                              'SIMO    ': Simo1993-style CQUADR branch (default)
 !                                                              'MITC4PD ': MITC4+/D Hughes-Brezzi branch (experimental)
@@ -645,7 +646,7 @@
 ! **********************************************************************************************************************************
 ! Returns true for CQUADR formulations whose stiffness is built from generated nodal normals.
 
-      CQUADR_NEEDS_GENERATED_SNORM = ((QTYPE == 'DKM24AU ') .OR. (QTYPE == 'Q4RS    '))
+      CQUADR_NEEDS_GENERATED_SNORM = ((QTYPE == 'DKM24AU ') .OR. (QTYPE == 'Q4RS    ') .OR. (QTYPE == 'MBP1C0  '))
 
 ! **********************************************************************************************************************************
 

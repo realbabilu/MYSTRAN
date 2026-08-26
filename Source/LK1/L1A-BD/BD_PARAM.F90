@@ -2850,6 +2850,8 @@
                QUADRTYP = 'DKM24AU '
             ELSE IF (CHRPARM == 'Q4EASANS') THEN
                QUADRTYP = 'Q4EASANS'
+            ELSE IF (CHRPARM == 'MBP1C0  ') THEN
+               QUADRTYP = 'MBP1C0  '
             ELSE IF (CHRPARM == 'Q4RS    ') THEN
                QUADRTYP = 'Q4RS    '
             ELSE IF (CHRPARM == 'SIMO    ') THEN
@@ -2859,12 +2861,12 @@
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'DKM24EA, DKM24AU, Q4EASANS, Q4RS, SIMO, MITC4PD or MITC4PHB',CHRPARM,QUADRTYP
+               WRITE(ERR,1189) PARNAM,'DKM24EA, DKM24AU, Q4EASANS, MBP1C0, Q4RS, SIMO, MITC4PD or MITC4PHB',CHRPARM,QUADRTYP
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'DKM24EA, DKM24AU, Q4EASANS, Q4RS, SIMO, MITC4PD or MITC4PHB',CHRPARM,QUADRTYP
+                  WRITE(F06,1189) PARNAM,'DKM24EA, DKM24AU, Q4EASANS, MBP1C0, Q4RS, SIMO, MITC4PD or MITC4PHB',CHRPARM,QUADRTYP
                ENDIF
             ENDIF
          ENDIF

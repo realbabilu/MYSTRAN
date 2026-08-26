@@ -64,6 +64,7 @@
        USE CQUADR_HW20_Interface
        USE CQUADR_MITC4PHB_B_Interface
        USE CQUADR_MITC4PHB_Interface
+       USE CQUADR_MBP1C0_Interface
        USE CQUADR_Q4EASANS_Interface
        USE CQUADR_Q4RS_Interface
        USE CQUADR_SIMO1993_Interface

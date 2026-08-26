@@ -229,6 +229,7 @@ elems_3: DO J = 1,NELE
                         DIRECT_SHELL_RECOVERY = ((TYPE == 'QUADR   ') .AND. ((QUADRTYP == 'DKM24EA ') .OR.                       &
                                                                               (QUADRTYP == 'DKM24AU ') .OR.                       &
                                                                               (QUADRTYP == 'SIMO    ') .OR.                       &
+                                                                              (QUADRTYP == 'MBP1C0  ') .OR.                       &
                                                                               (QUADRTYP == 'Q4EASANS'))) .OR.                    &
                                                ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20'))
 
