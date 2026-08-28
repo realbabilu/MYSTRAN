@@ -487,6 +487,7 @@
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  8*BYTE)      :: QUADRTYP       = 'SIMO    ' ! Which element to use in MYSTRAN as the CQUADR element
+!                                                              'DKMQ24  ': original DKMQ24 reference port from DKMQ24_ShellElement_RHR.py
 !                                                              'DKM24EA ': DKMQ24 with 4-parameter EAS membrane enhancement
 !                                                              'DKM24AU ': legacy AU DKMQ24 with SNORM when supplied
 !                                                              'Q4EASANS': Simo/ANS Hughes-Brezzi shell branch (experimental)

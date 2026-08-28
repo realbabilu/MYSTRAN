@@ -59,6 +59,7 @@
        USE CQUAD4_SIMO1989_Interface
        USE CQUADR_DKM24AU_Interface
        USE CQUADR_DKM24EA_Interface
+       USE CQUADR_DKMQ24R_Interface
        USE CQUADR_DKMQ24_Interface
        USE CQUADR_DKMQ24N_Interface
        USE CQUADR_HW20_Interface

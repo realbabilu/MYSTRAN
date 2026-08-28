@@ -15,6 +15,7 @@
       USE PARAMS, ONLY                :  COUPMASS, TRIARTYP
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,             &
                                          TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, BGRID, GRID_SNORM, XEB, UEL
+      USE CTRIAR_DKMT18_Interface
       USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
@@ -23,6 +24,7 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CTRIA3_T3FF'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
+      CHARACTER(1*BYTE)                :: REC_OPT(6)
 
       INTEGER(LONG), PARAMETER        :: NNODE = 3
       INTEGER(LONG), PARAMETER        :: NDOFN = 6
@@ -100,21 +102,9 @@
          ENDIF
 
          IF (OPT(3) == 'Y') THEN
-            BE1(1:3,1:NDOF,1) = MATMUL(BME, TALL)
-            BE2(1:3,1:NDOF,1) = MATMUL(BBE, TALL)
-            IF (T3FFD_RECOVERY) THEN
-               CALL T3FF_BS_ORDER ( ECOORDS, AE, 1, 2, 3, BSE )
-               BE3(1:2,1:NDOF,1) = MATMUL(BSE, TALL)
-            ELSE
-               BSG = ZERO
-               CALL T3FF_BS_ORDER ( ECOORDS, AE, 1, 2, 3, BSE )
-               BSG = BSG + MATMUL(BSE, TALL)
-               CALL T3FF_BS_ORDER ( ECOORDS, AE, 2, 3, 1, BSE )
-               BSG = BSG + MATMUL(BSE, TALL)
-               CALL T3FF_BS_ORDER ( ECOORDS, AE, 3, 1, 2, BSE )
-               BSG = BSG + MATMUL(BSE, TALL)
-               BE3(1:2,1:NDOF,1) = BSG / THREE
-            ENDIF
+            REC_OPT = 'N'
+            REC_OPT(3) = 'Y'
+            CALL CTRIAR_DKMT18 ( REC_OPT, INT_ELEM_ID )
          ENDIF
 
          IF ((DEBUG(233) > 0) .AND. (OPT(4) == 'Y')) THEN
@@ -449,3 +439,37 @@
       END FUNCTION VNORM
 
       END SUBROUTINE CTRIA3_T3FF
+
+      SUBROUTINE BUILD_T3FF_STRESS_BASIS ( BASIS, OK )
+      USE PENTIUM_II_KIND, ONLY : DOUBLE, LONG
+      USE CONSTANTS_1, ONLY      : ZERO, ONE
+      USE MODEL_STUF, ONLY       : XEB
+      IMPLICIT NONE
+      REAL(DOUBLE), INTENT(OUT)  :: BASIS(3,3)
+      LOGICAL, INTENT(OUT)       :: OK
+      INTEGER(LONG)              :: II
+      REAL(DOUBLE)               :: E1(3), E2(3), E3(3), V12(3), V13(3)
+      REAL(DOUBLE)               :: NM
+      BASIS = ZERO
+      OK = .FALSE.
+      DO II=1,3
+         V12(II) = XEB(2,II) - XEB(1,II)
+         V13(II) = XEB(3,II) - XEB(1,II)
+      ENDDO
+      NM = DSQRT(DOT_PRODUCT(V12,V12))
+      IF (NM <= 1.0D-14) RETURN
+      E1 = V12 / NM
+      E3(1) = E1(2)*V13(3) - E1(3)*V13(2)
+      E3(2) = E1(3)*V13(1) - E1(1)*V13(3)
+      E3(3) = E1(1)*V13(2) - E1(2)*V13(1)
+      NM = DSQRT(DOT_PRODUCT(E3,E3))
+      IF (NM <= 1.0D-14) RETURN
+      E3 = E3 / NM
+      E2(1) = E3(2)*E1(3) - E3(3)*E1(2)
+      E2(2) = E3(3)*E1(1) - E3(1)*E1(3)
+      E2(3) = E3(1)*E1(2) - E3(2)*E1(1)
+      BASIS(1,1:3) = E1
+      BASIS(2,1:3) = E2
+      BASIS(3,1:3) = E3
+      OK = .TRUE.
+      END SUBROUTINE BUILD_T3FF_STRESS_BASIS

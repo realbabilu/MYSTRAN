@@ -16,6 +16,7 @@
       USE IOUNT1, ONLY                :  BUG, BUGOUT, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE
+      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  EPSIL
       USE MODEL_STUF, ONLY            :  BE2, BE3, EID, ELDOF, KE, PHI_SQ, SE2, SE3, SHELL_A, SHELL_D, SHELL_T, TYPE
       USE MITC_STUF, ONLY             :  DIRECTOR
@@ -166,17 +167,29 @@
       ENDIF
 
       IF ((OPT(3) == 'Y') .OR. (OPT(6) == 'Y')) THEN
-         BE2(1:3,1:18,1) = BB_REC
-         BE3(1:2,1:18,1) = BS_REC
-         DUM318 = MATMUL(SHELL_D, BB_REC)
-         DUM218 = MATMUL(SHELL_T, BS_REC)
-         SE2(1:3,1:18,1) = DUM318
-         SE3(1:2,1:18,1) = DUM218
+         CALL MITC3P_BUILD_RECOVERY ( BB_REC, BS_REC, BIG_BB )
       ENDIF
 
-      BIG_BB(:,:,1) = BB_REC
-
       CONTAINS
+
+      SUBROUTINE MITC3P_BUILD_RECOVERY ( BBIN, BSIN, BIG_BB_OUT )
+         REAL(DOUBLE), INTENT(IN)     :: BBIN(3,18), BSIN(2,18)
+         REAL(DOUBLE), INTENT(INOUT)  :: BIG_BB_OUT(3,ELDOF,1)
+
+         BE2(1:3,1:18,1) = BBIN
+         BE3(1:2,1:18,1) = BSIN
+         DUM318 = MATMUL(SHELL_D, BBIN)
+         DUM218 = MATMUL(SHELL_T, BSIN)
+         SE2(1:3,1:18,1) = DUM318
+         SE3(1:2,1:18,1) = DUM218
+         BIG_BB_OUT(:,:,1) = BBIN
+
+         IF (DEBUG(233) > 0) THEN
+            WRITE(F06,'(A,I8)') 'TPLT_MITC3P RECOVERY EID=', EID
+            CALL MITC3P_WRITE_MAT(F06, 'BB_REC', BBIN, 3, 18)
+            CALL MITC3P_WRITE_MAT(F06, 'BS_REC', BSIN, 2, 18)
+         ENDIF
+      END SUBROUTINE MITC3P_BUILD_RECOVERY
 
       SUBROUTINE MITC3P_RECOVERY_MATS(BBIN, BSIN, KBBI, KBAI, BBOUT, BSOUT)
          REAL(DOUBLE), INTENT(IN)  :: BBIN(3,8), BSIN(2,11), KBBI(2,2), KBAI(2,18)

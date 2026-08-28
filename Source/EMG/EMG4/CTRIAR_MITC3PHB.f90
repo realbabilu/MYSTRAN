@@ -15,6 +15,7 @@
       USE PARAMS, ONLY                :  COUPMASS
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,             &
                                          TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, XEB
+      USE CTRIAR_DKMT18_Interface
       USE OUTA_HERE_Interface
 
       IMPLICIT NONE
@@ -22,6 +23,7 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CTRIAR_MITC3PHB'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
+      CHARACTER(1*BYTE)                :: REC_OPT(6)
 
       INTEGER(LONG), PARAMETER        :: NNODE = 3
       INTEGER(LONG), PARAMETER        :: NDOF  = 18
@@ -95,17 +97,9 @@
          ENDIF
 
          IF (OPT(3) == 'Y') THEN
-            BMAP = -MATMUL(KBBI, KBC)
-            CALL MITC3PHB_BCURV ( ONE/THREE, ONE/THREE, DNX, DNY, BB )
-            CALL MITC3PHB_BSHEAR ( ONE/THREE, ONE/THREE, XY, AREA, BS )
-            BM18 = BM(:,1:NDOF)
-            DO I=1,NDOF
-               BB18(:,I) = BB(:,I) + BB(:,19)*BMAP(1,I) + BB(:,20)*BMAP(2,I)
-               BS18(:,I) = BS(:,I) + BS(:,19)*BMAP(1,I) + BS(:,20)*BMAP(2,I)
-            ENDDO
-            BE1(1:3,1:NDOF,1) = MATMUL(BM18, T18)
-            BE2(1:3,1:NDOF,1) = MATMUL(BB18, T18)
-            BE3(1:2,1:NDOF,1) = MATMUL(BS18, T18)
+            REC_OPT = 'N'
+            REC_OPT(3) = 'Y'
+            CALL CTRIAR_DKMT18 ( REC_OPT, INT_ELEM_ID )
          ENDIF
 
          IF ((DEBUG(233) > 0) .AND. (OPT(4) == 'Y')) THEN
@@ -160,6 +154,18 @@
  9002 FORMAT(' *ERROR: ',A,' element ',I8,' has nonpositive thickness ',ES15.7)
 
       CONTAINS
+
+      SUBROUTINE MITC3PHB_BUILD_RECOVERY ( BM18_IN, BB18_IN, BS18_IN, T18_IN )
+      REAL(DOUBLE), INTENT(IN) :: BM18_IN(3,NDOF), BB18_IN(3,NDOF), BS18_IN(2,NDOF), T18_IN(NDOF,NDOF)
+
+      BE1(1:3,1:NDOF,1) = MATMUL(BM18_IN, T18_IN)
+      BE2(1:3,1:NDOF,1) = MATMUL(BB18_IN, T18_IN)
+      BE3(1:2,1:NDOF,1) = MATMUL(BS18_IN, T18_IN)
+
+      IF (DEBUG(233) > 0) THEN
+         WRITE(F06,'(A,I8)') 'CTRIAR_MITC3PHB RECOVERY EID=', EID
+      ENDIF
+      END SUBROUTINE MITC3PHB_BUILD_RECOVERY
 
       SUBROUTINE LOAD_BASIC_COORDS ( XYZOUT )
       REAL(DOUBLE), INTENT(OUT) :: XYZOUT(NNODE,3)

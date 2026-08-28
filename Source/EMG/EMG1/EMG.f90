@@ -70,6 +70,7 @@
       CHARACTER( 1*BYTE), INTENT(IN)  :: WRT_BUG_THIS_TIME  ! If 'Y' then write to BUG file if WRT_BUG array says to
       CHARACTER( 2*BYTE)              :: LOC                ! Location where THETAM is calculated (for DEBUG output purposes)
       CHARACTER( 1*BYTE)              :: FIX_EDAT      = 'N'! If 'Y', run code to change order of grids in EDAT for 3D elems
+      CHARACTER( 1*BYTE)              :: REC_OPT(6)          ! Recovery-only option set for formulation-specific output paths
       CHARACTER( 1*BYTE)              :: RED_INT_SHEAR = 'N'! If 'Y', use Gaussian weighted average of B matrices for shear terms
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID        ! Internal element ID for which
       INTEGER(LONG)                   :: CASE_NUM    = 0    ! Can be subcase number (e.g. for UEL, PEL outout)
@@ -395,6 +396,11 @@
             CALL CTRIA3_T3FF ( OPT, INT_ELEM_ID )
          ELSE
             CALL TREL1 ( OPT, WRITE_WARN )
+            IF ((TRIA3TYP == 'MITC3+') .AND. (OPT(3) == 'Y')) THEN
+               REC_OPT = 'N'
+               REC_OPT(3) = 'Y'
+               CALL CTRIAR_DKMT18 ( REC_OPT, INT_ELEM_ID )
+            ENDIF
          ENDIF
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
@@ -442,6 +448,8 @@
             CALL CQUADR_DKM24AU ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'DKM24EA ') THEN
             CALL CQUADR_DKM24EA ( OPT, INT_ELEM_ID )
+         ELSE IF (QUADRTYP == 'DKMQ24  ') THEN
+            CALL CQUADR_DKMQ24R ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'SIMO    ') THEN
             CALL CQUADR_SIMO1993 ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'Q4EASANS') THEN
@@ -451,7 +459,12 @@
          ELSE IF (QUADRTYP == 'MITC4PD ') THEN
             CALL CQUADR_MITC4PHB ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'Q4RS    ') THEN
-            CALL CQUADR_Q4RS ( OPT, INT_ELEM_ID )
+            IF ((OPT(3) == 'Y') .AND. (OPT(1) == 'N') .AND. (OPT(4) == 'N') .AND.                                              &
+                (OPT(5) == 'N') .AND. (OPT(6) == 'N')) THEN
+               CALL CQUADR_DKMQ24R ( OPT, INT_ELEM_ID )
+            ELSE
+               CALL CQUADR_Q4RS ( OPT, INT_ELEM_ID )
+            ENDIF
          ELSE
             NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
             FATAL_ERR = FATAL_ERR + 1

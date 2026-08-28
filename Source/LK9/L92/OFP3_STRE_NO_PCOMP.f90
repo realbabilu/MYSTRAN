@@ -257,9 +257,10 @@ elems_5: DO J = 1,NELE
                       (TYPE(1:5) == 'TETRA') .OR.                                                                                  &
                       (TYPE(1:5) == 'QUAD8')) THEN
 
-                     IF (((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'Q4RS    ')) .OR.                                               &
+                     IF (((TYPE == 'QUADR   ') .AND. ((QUADRTYP == 'Q4RS    ') .OR. (QUADRTYP == 'DKM24EA ') .OR.                &
+                                                       (QUADRTYP == 'DKMQ24  '))) .OR.                                            &
                          ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  '))) THEN
-! Q4RS and DSQK recovery rows are evaluated directly at the requested output points.
+! Q4RS, original DKMQ24, DKMQ24EAS, and DSQK recovery rows are evaluated directly at the requested output points.
                         STRESS_OUT(:,:) = STRESS_RAW(:,:)
 
                      ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
@@ -1172,54 +1173,30 @@ elems_5: DO J = 1,NELE
       IF (ROW_NUM <= 0) RETURN
 
       IF (TYPE(1:5) == 'TRIA3') THEN
-         IF ((TRIA3TYP == 'T3FF  ') .OR. (TRIA3TYP == 'MITC3+') .OR.                                                               &
-             (TRIARTYP == 'T3FFD   ') .OR. (TRIARTYP == 'MITC3+HB')) THEN
-            CALL BUILD_TRIA_STRESS_BASIS ( BASIS, OK )
-            IF (OK) SHELL_OUT_TE(1:3,1:3,ROW_NUM) = BASIS(1:3,1:3)
-            SHELL_STRESS_IN_LOCAL(ROW_NUM) = OK
-         ENDIF
+! T3FF, T3FFD, MITC3+, and MITC3+HB follow the DKMT18 GPSTRESS convention:
+! keep the element TE frame selected above rather than applying a special
+! output-frame override here.
+         RETURN
       ELSE IF ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  ')) THEN
          SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
-      ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'MITC4PD ')) THEN
-         SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
-      ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'Q4RS    ')) THEN
+      ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24EA ')) THEN
+         CALL BUILD_DKM24EA_STRESS_BASIS ( POINT_NUM, BASIS, OK )
+         IF (OK) SHELL_OUT_TE(1:3,1:3,ROW_NUM) = BASIS(1:3,1:3)
+         SHELL_STRESS_IN_LOCAL(ROW_NUM) = OK
+      ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKMQ24  ')) THEN
          CALL BUILD_QUAD_STRESS_BASIS ( POINT_NUM, BASIS, OK )
          IF (OK) SHELL_OUT_TE(1:3,1:3,ROW_NUM) = BASIS(1:3,1:3)
          SHELL_STRESS_IN_LOCAL(ROW_NUM) = OK
+      ELSE IF ((TYPE == 'QUADR   ') .AND. ((QUADRTYP == 'DKM24AU ')  .OR.                                                  &
+                                            (QUADRTYP == 'MITC4PD '))) THEN
+         SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
+      ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'Q4RS    ')) THEN
+! Q4RS uses DKMQ24R recovery for stress output, so keep the element TE frame
+! selected above instead of applying a second point-local frame transform.
+         RETURN
       ENDIF
 
       END SUBROUTINE SET_SHELL_STRESS_BASIS_FOR_OUTPUT
-
-! ##################################################################################################################################
-
-      SUBROUTINE BUILD_TRIA_STRESS_BASIS ( BASIS, OK )
-
-      REAL(DOUBLE), INTENT(OUT)       :: BASIS(3,3)
-      LOGICAL, INTENT(OUT)            :: OK
-
-      INTEGER(LONG)                   :: II
-      REAL(DOUBLE)                    :: E1(3), E2(3), E3(3), V12(3), V13(3)
-
-      BASIS = ZERO
-      OK = .FALSE.
-
-      DO II=1,3
-         V12(II) = XEB(2,II) - XEB(1,II)
-         V13(II) = XEB(3,II) - XEB(1,II)
-      ENDDO
-      IF (VEC_NORM(V12) <= 1.0D-14) RETURN
-      E1 = V12 / VEC_NORM(V12)
-      CALL CROSS3 ( E1, V13, E3 )
-      IF (VEC_NORM(E3) <= 1.0D-14) RETURN
-      E3 = E3 / VEC_NORM(E3)
-      CALL CROSS3 ( E3, E1, E2 )
-
-      BASIS(1,1:3) = E1
-      BASIS(2,1:3) = E2
-      BASIS(3,1:3) = E3
-      OK = .TRUE.
-
-      END SUBROUTINE BUILD_TRIA_STRESS_BASIS
 
 ! ##################################################################################################################################
 
@@ -1282,6 +1259,129 @@ elems_5: DO J = 1,NELE
       OK = .TRUE.
 
       END SUBROUTINE BUILD_QUAD_STRESS_BASIS
+
+! ##################################################################################################################################
+
+      SUBROUTINE BUILD_DKM24EA_STRESS_BASIS ( POINT_NUM, BASIS, OK )
+
+      INTEGER(LONG), INTENT(IN)       :: POINT_NUM
+      REAL(DOUBLE), INTENT(OUT)       :: BASIS(3,3)
+      LOGICAL, INTENT(OUT)            :: OK
+
+      REAL(DOUBLE)                    :: XI, ETA
+      LOGICAL                         :: IS_FLAT
+
+      BASIS = ZERO
+      OK = .FALSE.
+
+! DKMQ24EAS uses its own surface-basis builder for both flat and warped
+! output points so the recovery frame stays aligned with the element's
+! Python reference path instead of falling back to the generic quad basis.
+      CALL IS_PLANAR_QUAD_STRESS_BASIS ( IS_FLAT )
+      IF (POINT_NUM == 2) THEN
+         XI = -ONE
+         ETA = -ONE
+      ELSE IF (POINT_NUM == 3) THEN
+         XI = ONE
+         ETA = -ONE
+      ELSE IF (POINT_NUM == 4) THEN
+         XI = ONE
+         ETA = ONE
+      ELSE IF (POINT_NUM == 5) THEN
+         XI = -ONE
+         ETA = ONE
+      ELSE
+         XI = ZERO
+         ETA = ZERO
+      ENDIF
+
+      IF (IS_FLAT) THEN
+         CALL BUILD_DKM24EA_SURFACE_BASIS ( ZERO, ZERO, BASIS, OK )
+      ELSE
+         CALL BUILD_DKM24EA_SURFACE_BASIS ( XI, ETA, BASIS, OK )
+      ENDIF
+
+      END SUBROUTINE BUILD_DKM24EA_STRESS_BASIS
+
+! ##################################################################################################################################
+
+      SUBROUTINE BUILD_DKM24EA_SURFACE_BASIS ( XI, ETA, BASIS, OK )
+
+      REAL(DOUBLE), INTENT(IN)        :: XI, ETA
+      REAL(DOUBLE), INTENT(OUT)       :: BASIS(3,3)
+      LOGICAL, INTENT(OUT)            :: OK
+
+      REAL(DOUBLE)                    :: DNXI(4), DNETA(4)
+      REAL(DOUBLE)                    :: E1(3), E2(3), E3(3), G1(3), G2(3), TMP(3)
+
+      BASIS = ZERO
+      OK = .FALSE.
+
+      DNXI(1) = -0.25D0*(ONE - ETA)
+      DNXI(2) =  0.25D0*(ONE - ETA)
+      DNXI(3) =  0.25D0*(ONE + ETA)
+      DNXI(4) = -0.25D0*(ONE + ETA)
+      DNETA(1) = -0.25D0*(ONE - XI)
+      DNETA(2) = -0.25D0*(ONE + XI)
+      DNETA(3) =  0.25D0*(ONE + XI)
+      DNETA(4) =  0.25D0*(ONE - XI)
+
+      G1 = ZERO
+      G2 = ZERO
+      G1(1:3) = DNXI(1)*XEB(1,1:3) + DNXI(2)*XEB(2,1:3) + DNXI(3)*XEB(3,1:3) + DNXI(4)*XEB(4,1:3)
+      G2(1:3) = DNETA(1)*XEB(1,1:3) + DNETA(2)*XEB(2,1:3) + DNETA(3)*XEB(3,1:3) + DNETA(4)*XEB(4,1:3)
+
+      CALL CROSS3 ( G1, G2, E3 )
+      IF (VEC_NORM(E3) <= 1.0D-14) RETURN
+      E3 = E3 / VEC_NORM(E3)
+
+      CALL CROSS3 ( G2, E3, TMP )
+      IF (VEC_NORM(TMP) <= 1.0D-12) THEN
+         CALL CROSS3 ( G1, E3, TMP )
+      ENDIF
+      IF (VEC_NORM(TMP) <= 1.0D-14) RETURN
+      E1 = TMP / VEC_NORM(TMP)
+      CALL CROSS3 ( E3, E1, E2 )
+
+      BASIS(1,1:3) = E1
+      BASIS(2,1:3) = E2
+      BASIS(3,1:3) = E3
+      OK = .TRUE.
+
+      END SUBROUTINE BUILD_DKM24EA_SURFACE_BASIS
+
+! ##################################################################################################################################
+
+      SUBROUTINE IS_PLANAR_QUAD_STRESS_BASIS ( IS_FLAT )
+
+      LOGICAL, INTENT(OUT)            :: IS_FLAT
+
+      INTEGER(LONG)                   :: POINT_NUM
+      LOGICAL                         :: OK
+      REAL(DOUBLE), PARAMETER         :: FLAT_TOL = 1.0D-6
+      REAL(DOUBLE)                    :: BASIS_C(3,3), BASIS_P(3,3), DEV
+
+      CALL BUILD_QUAD_STRESS_BASIS ( 1_LONG, BASIS_C, OK )
+      IF (.NOT. OK) THEN
+         IS_FLAT = .FALSE.
+         RETURN
+      ENDIF
+
+      IS_FLAT = .TRUE.
+      DO POINT_NUM=2,5
+         CALL BUILD_QUAD_STRESS_BASIS ( POINT_NUM, BASIS_P, OK )
+         IF (.NOT. OK) THEN
+            IS_FLAT = .FALSE.
+            RETURN
+         ENDIF
+         DEV = VEC_NORM(BASIS_P(3,1:3) - BASIS_C(3,1:3))
+         IF (DEV > FLAT_TOL) THEN
+            IS_FLAT = .FALSE.
+            RETURN
+         ENDIF
+      ENDDO
+
+      END SUBROUTINE IS_PLANAR_QUAD_STRESS_BASIS
 
 ! ##################################################################################################################################
 

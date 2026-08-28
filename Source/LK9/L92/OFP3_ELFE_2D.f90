@@ -96,8 +96,6 @@
       REAL(DOUBLE)                    :: STRESS_RAW(9,MAX_STRESS_POINTS)
                                                            ! Array of output stress values after surface fit
       REAL(DOUBLE)                    :: STRESS_OUT(9,MAX_STRESS_POINTS)
-
-
       ! OP2 parameters
       INTEGER(LONG)                   :: ITABLE            ! the op2 subtable number
       CHARACTER(8*BYTE)               :: TABLE_NAME        ! the op2 table name
@@ -242,7 +240,7 @@ elems_3: DO J = 1,NELE
                               IF (DIRECT_SHELL_RECOVERY) THEN
 ! Rows 1:5 and 7:9 remain Gauss samples. Row 6 is supplied by the
 ! DKMQ/Simo kernels as direct center/nodal twisting recovery.
-                                 CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS(I), STRESS_OUT, STRESS_OUT_PCT_ERR,           &
+                                 CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS(I), STRESS_OUT, STRESS_OUT_PCT_ERR,       &
                                        STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
                                  STRESS_OUT(6,1:NUM_PTS(I)) = STRESS_RAW(6,1:NUM_PTS(I))
                               ELSE
@@ -272,11 +270,10 @@ elems_3: DO J = 1,NELE
                         ENDIF
 
                         DO M=1,NUM_PTS(I)                  ! Calculate forces and moments from stresses
-                           STRESS(:) = STRESS_OUT(:,M)
-                           CALL SHELL_ENGR_FORCE_OGEL ( NUM_OGEL )
-
                            NUM_OGEL_ROWS = NUM_OGEL_ROWS + 1
                            EID_OUT_ARRAY(NUM_OGEL_ROWS,1) = EID
+                           STRESS(:) = STRESS_OUT(:,M)
+                           CALL SHELL_ENGR_FORCE_OGEL ( NUM_OGEL )
                            GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                            DO K=1,ELGP
                               GID_OUT_ARRAY(NUM_OGEL_ROWS,K+1) = AGRID(K)

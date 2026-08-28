@@ -18,6 +18,7 @@
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,                 &
                                          TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, BGRID, GRID_SNORM, XEB,                &
                                          KED, UEL
+      USE CQUADR_DKMQ24R_Interface
       USE ELMDIS_Interface
       USE ORDER_GAUSS_Interface
       USE OUTA_HERE_Interface
@@ -27,6 +28,7 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUADR_Q4RS'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
+      CHARACTER(1*BYTE)                :: REC_OPT(6)
 
       INTEGER(LONG)                   :: I,J,K,GP,JSUB,IA,IB,RR
       REAL(DOUBLE)                    :: XYZ(4,3), NORMALS(4,3), T24(24,24), T24T(24,24)
@@ -92,20 +94,6 @@
 
          IF (OPT(4) == 'Y') THEN
             KE(1:24,1:24) = KLOCAL
-         ENDIF
-
-         IF (OPT(3) == 'Y') THEN
-            REC_XI  = (/ ZERO, -ONE,  ONE,  ONE, -ONE /)
-            REC_ETA = (/ ZERO, -ONE, -ONE,  ONE,  ONE /)
-            DO GP=1,5
-               CALL Q4RS_B_MATRICES ( XYZ, NORMALS, REC_XI(GP), REC_ETA(GP), BMB, BBB, BSB, EG, JAC )
-               BML = MATMUL(BMB, T24T)
-               BBL = MATMUL(BBB, T24T)
-               BSL = MATMUL(BSB, T24T)
-               BE1(1:3,1:24,GP) = BML
-               BE2(1:3,1:24,GP) = BBL
-               BE3(1:2,1:24,GP) = BSL
-            ENDDO
          ENDIF
 
          IF ((DEBUG(190) > 0) .AND. (OPT(4) == 'Y')) THEN
@@ -202,6 +190,12 @@
          IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
             WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR_Q4RS KGGD EID=', EID, ' KED_NORM=', DSQRT(SUM(KED(1:24,1:24)*KED(1:24,1:24)))
          ENDIF
+      ENDIF
+
+      IF (OPT(3) == 'Y') THEN
+         REC_OPT = 'N'
+         REC_OPT(3) = 'Y'
+         CALL CQUADR_DKMQ24R ( REC_OPT, INT_ELEM_ID )
       ENDIF
 
       RETURN

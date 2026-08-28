@@ -356,6 +356,16 @@
             WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS3', STRESS3
          ENDIF
 
+         IF ((((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIAR')) .AND. (DEBUG(233) > 0)) .AND. (EID <= 8)) THEN
+            WRITE(F06,'(A,1X,I8,1X,A,1X,I3,1X,A)') 'CTRIA RECOVERY EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM, 'TYPE='//TYPE
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN1', STRAIN1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN2', STRAIN2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN3', STRAIN3
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS1', STRESS1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS2', STRESS2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS3', STRESS3
+         ENDIF
+
 
 
 

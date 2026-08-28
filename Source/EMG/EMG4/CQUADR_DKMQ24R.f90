@@ -24,11 +24,11 @@
 !
 ! End MIT license text.
 
-      SUBROUTINE CQUADR_DKMQ24 ( OPT, INT_ELEM_ID )
+      SUBROUTINE CQUADR_DKMQ24R ( OPT, INT_ELEM_ID )
 
 ! --- shell_renovation begin --- !
-! DKMQ24 shell element based on the Claude Python reference:
-!   E:\mystran17\claude_dkmq24\dkmq24_element_v2.py
+! CQUADR original DKMQ24 shell element based on the Python reference:
+!   D:\18a\python\linear\DKMQ24_ShellElement_RHR.py
 !
 ! Phase-1 scope:
 !   - linear stiffness
@@ -63,7 +63,7 @@
 
       IMPLICIT NONE
 
-      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUADR_DKMQ24'
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUADR_DKMQ24R'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
 
@@ -72,7 +72,7 @@
       INTEGER(LONG), PARAMETER        :: NDOF = NNODE*NDOFN
       INTEGER(LONG), PARAMETER        :: NSTRA = 3
       INTEGER(LONG), PARAMETER        :: NSHEAR = 2
-      REAL(DOUBLE), PARAMETER         :: CQUADR_DRILL_SCALE = 1.0D0
+      REAL(DOUBLE), PARAMETER         :: CQUADR_DKMQ24_DRILL_SCALE = 1.0D0
 
       INTEGER(LONG)                   :: I, J, K, GP, JSUB, STR_PT_NUM, IA, IB, RR
       REAL(DOUBLE)                    :: XYZ(4,3), NORMALS(4,3), T24(24,24), T24T(24,24)
@@ -118,7 +118,7 @@
       AINV_AU = ZERO
       DO I=1,4
          IF (DABS(ADELTA(I,I)) > 1.0D-14) THEN
-            AINV_AU(I,1:24) = AU(I,1:24) / ADELTA(I,I)
+            AINV_AU(I,1:24) = -AU(I,1:24) / ADELTA(I,I)
          ENDIF
       ENDDO
 
@@ -148,9 +148,9 @@
                 BSB = BS_AT(XYZ, XI, ETA, CO, AINV_AU, EPROP(1))
 
                 IF ((DEBUG(190) > 0) .AND. (I == 1) .AND. (J == 1)) THEN
-                   CALL DEBUG_PRINT_MATRIX('CQUADR GP11 BMB', BMB)
-                   CALL DEBUG_PRINT_MATRIX('CQUADR GP11 BBB', BBB)
-                   CALL DEBUG_PRINT_MATRIX('CQUADR GP11 BSB', BSB)
+                   CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 GP11 BMB', BMB)
+                   CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 GP11 BBB', BBB)
+                   CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 GP11 BSB', BSB)
                 ENDIF
 
                 BML = MATMUL(BMB, T24T)
@@ -169,7 +169,7 @@
             ENDDO
          ENDDO
 
-         KDRILL = DRILL_STIFFNESS(XYZ, NORMALS, AINV_AU, T24T)
+         KDRILL = DRILL_STIFFNESS(XYZ, NORMALS)
          KBASIC = KBASIC + KDRILL
          KLOCAL = MATMUL(T24, MATMUL(KBASIC, T24T))
 
@@ -277,12 +277,6 @@
                CALL SHAPE_DN(XI, ETA, DN_G)
                CALL GEOMETRY_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, NVEC, JDET, CO, BCMAT)
                BMB = BM_AT(XI, ETA, TV1, TV2, CO)
-               ! Python DKMQ24_MystranCQUADR_ShellElement_RHR recovers the
-               ! membrane resultants directly from the raw 24-DOF vector
-               ! (identity T-matrix). Keep the stiffness assembly on the
-               ! standard transform path, but feed stress recovery with the
-               ! same basic/global convention so GPSTRESS matches the AU
-               ! reference branch.
                BML = MATMUL(BMB, T24T)
                BE1(1:3,1:24,1) = BML
                CALL ELEM_STRE_STRN_ARRAYS ( 1 )
@@ -314,9 +308,9 @@
 ! --- shell_renovation end --- !
 
                IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
-                  WRITE(F06,'(A,I8,A,I2,A,I2,A,3(1X,ES15.7))') 'CQUADR KGGD EID=', EID, ' I=', I, ' J=', J,                      &
+                  WRITE(F06,'(A,I8,A,I2,A,I2,A,3(1X,ES15.7))') 'CQUAD4_DKMQ20 KGGD EID=', EID, ' I=', I, ' J=', J,                &
                                                                ' SIG0=', SIG0(1,1), SIG0(2,2), SIG0(1,2)
-                  WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CQUADR KGGD EID=', EID, ' NORMAL=', NVEC(1), NVEC(2), NVEC(3)
+                  WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CQUAD4_DKMQ20 KGGD EID=', EID, ' NORMAL=', NVEC(1), NVEC(2), NVEC(3)
                ENDIF
 
                DO IA=1,4
@@ -356,39 +350,39 @@
 
          KED(1:24,1:24) = KGLOCAL
          IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
-            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR KGGD EID=', EID, ' KED_NORM=', DSQRT(SUM(KED(1:24,1:24)*KED(1:24,1:24)))
-            CALL DEBUG_PRINT_MATRIX('CQUADR KGGD KED', KED(1:24,1:24))
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUAD4_DKMQ20 KGGD EID=', EID, ' KED_NORM=', DSQRT(SUM(KED(1:24,1:24)*KED(1:24,1:24)))
+            CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 KGGD KED', KED(1:24,1:24))
          ENDIF
       ENDIF
 
       IF (DEBUG(233) > 0) THEN
          IF (EID <= 8) THEN
-            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR KE EID=', EID, ' KBASIC_NORM=', DSQRT(SUM(KBASIC*KBASIC))
-            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR KE EID=', EID, ' KMEM_NORM=', DSQRT(SUM(KMEM*KMEM))
-            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR KE EID=', EID, ' KBEND_NORM=', DSQRT(SUM(KBEND*KBEND))
-            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUADR KE EID=', EID, ' KSHEAR_NORM=', DSQRT(SUM(KSHEAR*KSHEAR))
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUAD4_DKMQ20 KE EID=', EID, ' KBASIC_NORM=', DSQRT(SUM(KBASIC*KBASIC))
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUAD4_DKMQ20 KE EID=', EID, ' KMEM_NORM=', DSQRT(SUM(KMEM*KMEM))
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUAD4_DKMQ20 KE EID=', EID, ' KBEND_NORM=', DSQRT(SUM(KBEND*KBEND))
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CQUAD4_DKMQ20 KE EID=', EID, ' KSHEAR_NORM=', DSQRT(SUM(KSHEAR*KSHEAR))
          ENDIF
-         CALL DEBUG_PRINT_MATRIX('CQUADR KBASIC', KBASIC)
-         CALL DEBUG_PRINT_MATRIX('CQUADR KLOCAL', KLOCAL)
-         CALL DEBUG_PRINT_MATRIX('CQUADR KMEM', KMEM)
-         CALL DEBUG_PRINT_MATRIX('CQUADR KBEND', KBEND)
-         CALL DEBUG_PRINT_MATRIX('CQUADR KSHEAR', KSHEAR)
-         CALL DEBUG_PRINT_MATRIX('CQUADR KDRILL', KDRILL)
-          CALL DEBUG_PRINT_MATRIX('CQUADR AU V2', AU)
-          CALL DEBUG_PRINT_MATRIX('CQUADR ADELTA', ADELTA)
-          WRITE(F06,'(A,6(1X,ES14.6))') 'CQUADR EPROP1-6', (EPROP(I), I=1,6)
-          CALL DEBUG_PRINT_MATRIX('CQUADR EM', EM)
-          CALL DEBUG_PRINT_MATRIX('CQUADR EB', EB)
-         CALL DEBUG_PRINT_MATRIX('CQUADR ET', ET)
-         CALL DEBUG_PRINT_MATRIX('CQUADR SHELL_A', SHELL_A)
-         CALL DEBUG_PRINT_MATRIX('CQUADR SHELL_D', SHELL_D)
-         CALL DEBUG_PRINT_MATRIX('CQUADR SHELL_T', SHELL_T)
+         CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 KBASIC', KBASIC)
+         CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 KLOCAL', KLOCAL)
+         CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 KMEM', KMEM)
+         CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 KBEND', KBEND)
+         CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 KSHEAR', KSHEAR)
+         CALL DEBUG_PRINT_MATRIX('CQUAD4_DKMQ20 KDRILL', KDRILL)
+          CALL DEBUG_PRINT_MATRIX('CQUADR_DKMQ24 AU', AU)
+          CALL DEBUG_PRINT_MATRIX('CQUADR_DKMQ24 ADELTA', ADELTA)
+          WRITE(F06,'(A,6(1X,ES14.6))') 'CQUADR_DKMQ24 EPROP1-6', (EPROP(I), I=1,6)
+          CALL DEBUG_PRINT_MATRIX('CQUADR_DKMQ24 EM', EM)
+          CALL DEBUG_PRINT_MATRIX('CQUADR_DKMQ24 EB', EB)
+         CALL DEBUG_PRINT_MATRIX('CQUADR_DKMQ24 ET', ET)
+         CALL DEBUG_PRINT_MATRIX('CQUADR_DKMQ24 SHELL_A', SHELL_A)
+         CALL DEBUG_PRINT_MATRIX('CQUADR_DKMQ24 SHELL_D', SHELL_D)
+         CALL DEBUG_PRINT_MATRIX('CQUADR_DKMQ24 SHELL_T', SHELL_T)
          IF (OPT(1) == 'Y') THEN
-            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR MASS_PER_UNIT_AREA', MASS_PER_UNIT_AREA
-            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR MASS_AREA_INT', MASS_AREA_INT
-            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR MASS_ELEM_SUM', MASS_ELEM_SUM
-            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR MBASIC_NORM', DSQRT(SUM(MBASIC*MBASIC))
-            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR MLOCAL_NORM', DSQRT(SUM(MLOCAL*MLOCAL))
+            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR_DKMQ24 MASS_PER_UNIT_AREA', MASS_PER_UNIT_AREA
+            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR_DKMQ24 MASS_AREA_INT', MASS_AREA_INT
+            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR_DKMQ24 MASS_ELEM_SUM', MASS_ELEM_SUM
+            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR_DKMQ24 MBASIC_NORM', DSQRT(SUM(MBASIC*MBASIC))
+            WRITE(F06,'(A,1X,ES15.7)') 'CQUADR_DKMQ24 MLOCAL_NORM', DSQRT(SUM(MLOCAL*MLOCAL))
          ENDIF
       ENDIF
 
@@ -505,39 +499,17 @@
       NORMS(4,:) = N / NM
 
 ! --- shell_renovation begin --- !
-! SNORM support for explicit CQUADR/DKMQ24. GRID_SNORM is stored in basic
-! coordinates, matching the 3D coordinates used by this routine. If no SNORM is
-! present for a grid, keep the geometric midsurface normal computed above.
-      IF (ALLOCATED(GRID_SNORM)) THEN
-         DO II=1,4
-            IF ((BGRID(II) > 0) .AND. (BGRID(II) <= SIZE(GRID_SNORM,1))) THEN
-               SN = GRID_SNORM(BGRID(II),:)
-               NM = VNORM(SN)
-               IF (NM > 1.0D-15) THEN
-                  SN = SN / NM
-                  SDOT = DOT_PRODUCT(SN, NORMS(II,:))
-                  IF (SDOT < 1.0D-2) THEN
-                     NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
-                     FATAL_ERR = FATAL_ERR + 1
-                     WRITE(ERR,'(A,A,A,I8,A,I2,A,ES14.6)') ' *ERROR: ', TRIM(SUBR_NAME), ' EID=', EID,                         &
-                        ' SNORM AT NODE ', II, ' IS TOO FAR FROM CQUADR MIDSURFACE NORMAL. DOT=', SDOT
-                     WRITE(F06,'(A,A,A,I8,A,I2,A,ES14.6)') ' *ERROR: ', TRIM(SUBR_NAME), ' EID=', EID,                         &
-                        ' SNORM AT NODE ', II, ' IS TOO FAR FROM CQUADR MIDSURFACE NORMAL. DOT=', SDOT
-                     CALL OUTA_HERE ( 'Y' )
-                  ENDIF
-                  NORMS(II,:) = SN
-               ENDIF
-            ENDIF
-         ENDDO
-      ENDIF
-! --- shell_renovation end --- !
+! The original Python DKMQ24_ShellElement_RHR branch uses geometric nodal
+! directors from the element edges and does not require averaged SNORM input.
+! Keep the pure geometric directors here so the CQUADR path matches that
+! reference instead of the SNORM-aware AU family.
       END SUBROUTINE CALC_NODAL_NORMALS
 
       SUBROUTINE GEOMETRY_AT ( XYZN, NORMS, XI, ETA, T1, T2, NORMV, JAC, CO, BCM )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3), NORMS(4,3), XI, ETA
       REAL(DOUBLE), INTENT(OUT) :: T1(3), T2(3), NORMV(3), JAC, CO(2,2), BCM(2,2)
       REAL(DOUBLE) :: DN(2,4), A1(3), A2(3), AXB(3), AMAT(2,2), INVA(2,2), A1C(3), A2C(3)
-      REAL(DOUBLE) :: NHATXI(3), NHATETA(3), BNHAT(2,2), REF(3), TMP(3), NM, PROJ(3), PN
+      REAL(DOUBLE) :: NHATXI(3), NHATETA(3), BNHAT(2,2), REF(3), TMP(3), NM
 
       CALL SHAPE_DN(XI, ETA, DN)
 
@@ -563,20 +535,11 @@
       CALL CROSS3(NORMV, REF, TMP)
       NM = VNORM(TMP)
       IF (NM < 1.0D-10) THEN
-         PROJ = A1 - DOT_PRODUCT(A1, NORMV)*NORMV
-         PN = VNORM(PROJ)
-         IF (PN < 1.0D-12) THEN
-            PROJ = A2 - DOT_PRODUCT(A2, NORMV)*NORMV
-            PN = VNORM(PROJ)
-         ENDIF
-         IF (PN < 1.0D-12) THEN
-            T1 = (/ONE, ZERO, ZERO/)
-         ELSE
-            T1 = PROJ / PN
-         ENDIF
-      ELSE
-         T1 = TMP / NM
+         REF = (/ZERO, ONE, ZERO/)
+         CALL CROSS3(NORMV, REF, TMP)
+         NM = VNORM(TMP)
       ENDIF
+      T1 = TMP / NM
       CALL CROSS3(NORMV, T1, T2)
       NM = VNORM(T2)
       IF (NM > 1.0D-15) THEN
@@ -747,20 +710,15 @@
       BSOUT = MATMUL(BSG, MATMUL(APHI, AIAU))
       END FUNCTION BS_AT
 
-      FUNCTION DRILL_STIFFNESS ( XYZN, NORMS, AIAU, T24INVT ) RESULT(KD)
-      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3), AIAU(4,24), T24INVT(24,24)
-      REAL(DOUBLE) :: KD(24,24), GTH(2,24), HTH(24), DN(2,4), NVAL(4), CO(2,2), BCM(2,2), TVA(3), TVB(3), NV(3), JJ
-      REAL(DOUBLE) :: ALPHA, BETA_MAC, NU_EFF, ONE_M_NU2, WT, XI, ETA
-      INTEGER(LONG) :: II, I1, J1
+      FUNCTION DRILL_STIFFNESS ( XYZN, NORMS ) RESULT(KD)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3)
+      REAL(DOUBLE) :: KD(24,24), BDR(24), DN(2,4), NVAL(4), CO(2,2), BCM(2,2), T1D(3), T2D(3), NVD(3), JJ
+      REAL(DOUBLE) :: CDRILL, WT, XI, ETA, NIX(4), NIY(4)
+      INTEGER(LONG) :: II, I1, J1, DD
 
       KD = ZERO
-      NU_EFF = ZERO
-      IF (DABS(SHELL_A(1,1)) > 1.0D-30) THEN
-         NU_EFF = SHELL_A(1,2) / SHELL_A(1,1)
-      ENDIF
-      ONE_M_NU2 = ONE - NU_EFF*NU_EFF
-       ALPHA = CQUADR_DRILL_SCALE * 1.0D-3 * SHELL_D(1,1) * ONE_M_NU2
-       BETA_MAC = CQUADR_DRILL_SCALE * 1.0D-3 * SHELL_T(1,1) / (5.0D0/6.0D0)
+         CDRILL = CQUADR_DKMQ24_DRILL_SCALE * 1.0D-4 * SHELL_A(3,3)
+
       DO I1=1,2
          DO J1=1,2
             XI = SS(I1)
@@ -768,15 +726,18 @@
             WT = HH(I1)*HH(J1)
             CALL SHAPE_N(XI, ETA, NVAL)
             CALL SHAPE_DN(XI, ETA, DN)
-            CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, TVA, TVB, NV, JJ, CO, BCM)
-            GTH = ZERO
-            HTH = ZERO
+            CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, T1D, T2D, NVD, JJ, CO, BCM)
+            NIX = DN(1,:)*CO(1,1) + DN(2,:)*CO(2,1)
+            NIY = DN(1,:)*CO(1,2) + DN(2,:)*CO(2,2)
+
+            BDR = ZERO
             DO II=1,4
-               GTH(1,(II-1)*6+4:(II-1)*6+6) = (DN(1,II)*CO(1,1) + DN(2,II)*CO(2,1))*NORMS(II,:)
-               GTH(2,(II-1)*6+4:(II-1)*6+6) = (DN(1,II)*CO(1,2) + DN(2,II)*CO(2,2))*NORMS(II,:)
-               HTH((II-1)*6+4:(II-1)*6+6) = NVAL(II)*NORMS(II,:)
+               DO DD=1,3
+                  BDR(6*(II-1)+DD) = 0.5D0*(NIX(II)*T2D(DD) - NIY(II)*T1D(DD))
+               ENDDO
+               BDR(6*(II-1)+4:6*(II-1)+6) = BDR(6*(II-1)+4:6*(II-1)+6) - NVAL(II)*NORMS(II,:)
             ENDDO
-            KD = KD + WT*JJ*( ALPHA*MATMUL(TRANSPOSE(GTH), GTH) + BETA_MAC*MATMUL(RESHAPE(HTH,(/24,1/)),RESHAPE(HTH,(/1,24/))) )
+            KD = KD + WT*JJ*CDRILL*MATMUL(RESHAPE(BDR,(/24,1/)),RESHAPE(BDR,(/1,24/)))
          ENDDO
       ENDDO
       END FUNCTION DRILL_STIFFNESS
@@ -851,4 +812,5 @@
       ENDDO
       END SUBROUTINE DEBUG_PRINT_MATRIX
 
-      END SUBROUTINE CQUADR_DKMQ24
+      END SUBROUTINE CQUADR_DKMQ24R
+
