@@ -1187,8 +1187,11 @@ elems_5: DO J = 1,NELE
          CALL BUILD_QUAD_STRESS_BASIS ( POINT_NUM, BASIS, OK )
          IF (OK) SHELL_OUT_TE(1:3,1:3,ROW_NUM) = BASIS(1:3,1:3)
          SHELL_STRESS_IN_LOCAL(ROW_NUM) = OK
-      ELSE IF ((TYPE == 'QUADR   ') .AND. ((QUADRTYP == 'DKM24AU ')  .OR.                                                  &
-                                            (QUADRTYP == 'MITC4PD '))) THEN
+      ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24AU ')) THEN
+! DKM24AU delegates stress recovery to DKMQ24R, so keep the recovered
+! element TE frame instead of applying the AU point-local output override.
+         RETURN
+      ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'MITC4PD ')) THEN
          SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
       ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'Q4RS    ')) THEN
 ! Q4RS uses DKMQ24R recovery for stress output, so keep the element TE frame
