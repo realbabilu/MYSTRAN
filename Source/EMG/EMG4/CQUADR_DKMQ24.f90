@@ -118,7 +118,7 @@
       AINV_AU = ZERO
       DO I=1,4
          IF (DABS(ADELTA(I,I)) > 1.0D-14) THEN
-            AINV_AU(I,1:24) = AU(I,1:24) / ADELTA(I,I)
+            AINV_AU(I,1:24) = -AU(I,1:24) / ADELTA(I,I)
          ENDIF
       ENDDO
 
@@ -537,7 +537,7 @@
       REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3), NORMS(4,3), XI, ETA
       REAL(DOUBLE), INTENT(OUT) :: T1(3), T2(3), NORMV(3), JAC, CO(2,2), BCM(2,2)
       REAL(DOUBLE) :: DN(2,4), A1(3), A2(3), AXB(3), AMAT(2,2), INVA(2,2), A1C(3), A2C(3)
-      REAL(DOUBLE) :: NHATXI(3), NHATETA(3), BNHAT(2,2), REF(3), TMP(3), NM, PROJ(3), PN
+      REAL(DOUBLE) :: NHATXI(3), NHATETA(3), BNHAT(2,2), REF(3), TMP(3), NM
 
       CALL SHAPE_DN(XI, ETA, DN)
 
@@ -563,20 +563,11 @@
       CALL CROSS3(NORMV, REF, TMP)
       NM = VNORM(TMP)
       IF (NM < 1.0D-10) THEN
-         PROJ = A1 - DOT_PRODUCT(A1, NORMV)*NORMV
-         PN = VNORM(PROJ)
-         IF (PN < 1.0D-12) THEN
-            PROJ = A2 - DOT_PRODUCT(A2, NORMV)*NORMV
-            PN = VNORM(PROJ)
-         ENDIF
-         IF (PN < 1.0D-12) THEN
-            T1 = (/ONE, ZERO, ZERO/)
-         ELSE
-            T1 = PROJ / PN
-         ENDIF
-      ELSE
-         T1 = TMP / NM
+         REF = (/ZERO, ONE, ZERO/)
+         CALL CROSS3(NORMV, REF, TMP)
+         NM = VNORM(TMP)
       ENDIF
+      T1 = TMP / NM
       CALL CROSS3(NORMV, T1, T2)
       NM = VNORM(T2)
       IF (NM > 1.0D-15) THEN
@@ -749,18 +740,13 @@
 
       FUNCTION DRILL_STIFFNESS ( XYZN, NORMS, AIAU, T24INVT ) RESULT(KD)
       REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3), AIAU(4,24), T24INVT(24,24)
-      REAL(DOUBLE) :: KD(24,24), GTH(2,24), HTH(24), DN(2,4), NVAL(4), CO(2,2), BCM(2,2), TVA(3), TVB(3), NV(3), JJ
-      REAL(DOUBLE) :: ALPHA, BETA_MAC, NU_EFF, ONE_M_NU2, WT, XI, ETA
-      INTEGER(LONG) :: II, I1, J1
+      REAL(DOUBLE) :: KD(24,24), BDR(24), DN(2,4), NVAL(4), CO(2,2), BCM(2,2), T1D(3), T2D(3), NVD(3), JJ
+      REAL(DOUBLE) :: CDRILL, WT, XI, ETA, NIX(4), NIY(4)
+      INTEGER(LONG) :: II, I1, J1, DD
 
       KD = ZERO
-      NU_EFF = ZERO
-      IF (DABS(SHELL_A(1,1)) > 1.0D-30) THEN
-         NU_EFF = SHELL_A(1,2) / SHELL_A(1,1)
-      ENDIF
-      ONE_M_NU2 = ONE - NU_EFF*NU_EFF
-       ALPHA = CQUADR_DRILL_SCALE * 1.0D-3 * SHELL_D(1,1) * ONE_M_NU2
-       BETA_MAC = CQUADR_DRILL_SCALE * 1.0D-3 * SHELL_T(1,1) / (5.0D0/6.0D0)
+      CDRILL = CQUADR_DRILL_SCALE * 1.0D-4 * SHELL_A(3,3)
+
       DO I1=1,2
          DO J1=1,2
             XI = SS(I1)
@@ -768,15 +754,20 @@
             WT = HH(I1)*HH(J1)
             CALL SHAPE_N(XI, ETA, NVAL)
             CALL SHAPE_DN(XI, ETA, DN)
-            CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, TVA, TVB, NV, JJ, CO, BCM)
-            GTH = ZERO
-            HTH = ZERO
+            CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, T1D, T2D, NVD, JJ, CO, BCM)
+            NIX = DN(1,:)*CO(1,1) + DN(2,:)*CO(2,1)
+            NIY = DN(1,:)*CO(1,2) + DN(2,:)*CO(2,2)
+
+            BDR = ZERO
             DO II=1,4
-               GTH(1,(II-1)*6+4:(II-1)*6+6) = (DN(1,II)*CO(1,1) + DN(2,II)*CO(2,1))*NORMS(II,:)
-               GTH(2,(II-1)*6+4:(II-1)*6+6) = (DN(1,II)*CO(1,2) + DN(2,II)*CO(2,2))*NORMS(II,:)
-               HTH((II-1)*6+4:(II-1)*6+6) = NVAL(II)*NORMS(II,:)
+               DO DD=1,3
+                  BDR(6*(II-1)+DD) = 0.5D0*(NIX(II)*T2D(DD) - NIY(II)*T1D(DD))
+               ENDDO
+               ! Match the Python reference: penalize only the local drilling
+               ! rotation (theta_z), not the full nodal rotation vector.
+               BDR(6*(II-1)+6) = BDR(6*(II-1)+6) - NVAL(II)
             ENDDO
-            KD = KD + WT*JJ*( ALPHA*MATMUL(TRANSPOSE(GTH), GTH) + BETA_MAC*MATMUL(RESHAPE(HTH,(/24,1/)),RESHAPE(HTH,(/1,24/))) )
+            KD = KD + WT*JJ*CDRILL*MATMUL(RESHAPE(BDR,(/24,1/)),RESHAPE(BDR,(/1,24/)))
          ENDDO
       ENDDO
       END FUNCTION DRILL_STIFFNESS

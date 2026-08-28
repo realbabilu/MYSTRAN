@@ -2841,11 +2841,13 @@
          CALL CHAR_FLD ( JCARD(3), JF(3), CHRPARM )
          IF (IERRFL(3) == 'N') THEN
             CALL LEFT_ADJ_BDFLD ( CHRPARM )
-            IF      ((CHRPARM == 'DKMQ24  ') .OR. (CHRPARM == 'DKM24   ') .OR. (CHRPARM == 'DKM24E  ') .OR.                    &
+            IF      ((CHRPARM == 'DKM24   ') .OR. (CHRPARM == 'DKM24E  ') .OR.                                                  &
                      (CHRPARM == 'DKM24EA ') .OR. (CHRPARM == 'DKMQ24E ') .OR. (CHRPARM == 'DKMQ24EA') .OR.                    &
                      (CHRPARM == 'DKMQ24EAS') .OR.                                                                                 &
                      (CHRPARM == 'DKMQ24N ')) THEN
                QUADRTYP = 'DKM24EA '
+            ELSE IF (CHRPARM == 'DKMQ24  ') THEN
+               QUADRTYP = 'DKMQ24  '
             ELSE IF ((CHRPARM == 'DKM24AU ') .OR. (CHRPARM == 'DKMQ24AU')) THEN
                QUADRTYP = 'DKM24AU '
             ELSE IF (CHRPARM == 'Q4EASANS') THEN

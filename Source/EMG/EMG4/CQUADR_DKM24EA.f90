@@ -27,8 +27,8 @@
       SUBROUTINE CQUADR_DKM24EA ( OPT, INT_ELEM_ID )
 
 ! --- shell_renovation begin --- !
-! DKMQ24E shell element based on the Python reference:
-!   D:\18a\bending_only\Shell\gemini2\shit\DKMQ24_EAS4_ShellElement_RHR.py
+! DKMQ24EA shell element based on the Python reference:
+!   D:\18a\python\linear\DKMQ24_EAS4_ShellElement_RHR_standalone.py
 !
 ! Phase-1 scope:
 !   - linear stiffness
@@ -48,13 +48,13 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  QUAD4TYP, QUADRTYP
+      USE PARAMS, ONLY                :  COUPMASS
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,&
-                                         TE, TYPE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM
+                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM
 
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
@@ -85,21 +85,16 @@
       REAL(DOUBLE)                    :: BMB(3,24), BMB_NAT(3,24), BMB_DIF(3,24), BBB(3,24), BSB(2,24)
       REAL(DOUBLE)                    :: BML(3,24), BBL(3,24), BSL(2,24)
       REAL(DOUBLE)                    :: KLOCAL(24,24), KBASIC(24,24), KMEM(24,24), KBEND(24,24), KSHEAR(24,24), KDRILL(24,24)
-      REAL(DOUBLE)                    :: KUA(24,4), KAA(4,4), KAAINV(4,4), MEAS(3,4), MEAS_MEAN(3,4)
-      REAL(DOUBLE)                    :: MEAS_RAW(3,4,2,2), MEAS_DA(2,2), DA_SUM
+      REAL(DOUBLE)                    :: KUA(24,4), KAA(4,4), KAAINV(4,4), MEAS(3,4)
       REAL(DOUBLE)                    :: KGBASIC(24,24), KGLOCAL(24,24)
       REAL(DOUBLE)                    :: M1(4,4), MBASIC(24,24), MLOCAL(24,24), NVG(4), MDIAG(4), DENS_A
       REAL(DOUBLE)                    :: MASS_AREA_INT, MASS_ELEM_SUM
       REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24)
       REAL(DOUBLE)                    :: GBE1(3,24,4), GBE2(3,24,4), GBE3(2,24,4)
       REAL(DOUBLE)                    :: A0INV(2,2), DETCO0
-      LOGICAL                         :: DKMQ20_MODE, SIMO_MODE, DKM24EA_MODE, EAS4_ACTIVE
+      LOGICAL                         :: EAS4_ACTIVE
 
 ! **********************************************************************************************************************************
-
-      SIMO_MODE = ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'SIMO  '))
-      DKM24EA_MODE = ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24EA '))
-      DKMQ20_MODE = ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DKMQ20') .OR. SIMO_MODE))
 
       IF (ELGP /= 4) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -120,20 +115,14 @@
       CALL CALC_NODAL_NORMALS ( XYZ, NORMALS )
       CALL BUILD_T24 ( TE, T24 )
       T24T = TRANSPOSE(T24)
-      EAS4_ACTIVE = DKM24EA_MODE .AND. IS_FLAT_QUAD(XYZ)
+      EAS4_ACTIVE = IS_FLAT_QUAD(XYZ)
 
       AU = BUILD_AU(XYZ, NORMALS)
       ADELTA = BUILD_ADELTA(XYZ, EPROP(1))
       AINV_AU = ZERO
-      IF (DKMQ20_MODE) THEN
-         AINV_AU = AU
-      ELSE
-         DO I=1,4
-            IF (DABS(ADELTA(I,I)) > 1.0D-14) THEN
-               AINV_AU(I,1:24) = AU(I,1:24) / ADELTA(I,I)
-            ENDIF
-         ENDDO
-      ENDIF
+      DO I=1,4
+         IF (DABS(ADELTA(I,I)) > 1.0D-14) AINV_AU(I,1:24) = -AU(I,1:24) / ADELTA(I,I)
+      ENDDO
 
       KBASIC = ZERO
       KMEM = ZERO
@@ -151,29 +140,9 @@
       IF ((OPT(3) == 'Y') .OR. (OPT(4) == 'Y')) THEN
          KUA = ZERO
          KAA = ZERO
-         MEAS_MEAN = ZERO
-         MEAS_RAW = ZERO
-         MEAS_DA = ZERO
-         DA_SUM = ZERO
-         IF (SIMO_MODE) THEN
-            DO I=1,2
-               DO J=1,2
-                  XI  = SS(I)
-                  ETA = SS(J)
-                  WT  = HH(I)*HH(J)
-                  CALL GEOMETRY_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, NVEC, JDET, CO, BCMAT)
-                  MEAS_RAW(:,:,I,J) = EAS_AT(XYZ, NORMALS, XI, ETA)
-                  MEAS_DA(I,J) = WT*JDET
-                  MEAS_MEAN = MEAS_MEAN + MEAS_RAW(:,:,I,J)*MEAS_DA(I,J)
-                  DA_SUM = DA_SUM + MEAS_DA(I,J)
-               ENDDO
-            ENDDO
-            IF (DA_SUM > 1.0D-30) THEN
-               MEAS_MEAN = MEAS_MEAN / DA_SUM
-            ENDIF
-         ELSE IF (EAS4_ACTIVE) THEN
-            CALL EAS4_CENTER_INVERSE(XYZ, A0INV, DETCO0)
-            CALL SURFACE_BASIS(XYZ, ZERO, ZERO, EAS_T1, EAS_T2, EAS_N)
+         IF (EAS4_ACTIVE) THEN
+            CALL EAS4_CENTER_INVERSE(XYZ, NORMALS, A0INV, DETCO0)
+            CALL GEOMETRY_AT(XYZ, NORMALS, ZERO, ZERO, EAS_T1, EAS_T2, EAS_N, JDET, CO, BCMAT)
          ENDIF
 
          DO I=1,2
@@ -193,7 +162,7 @@
                 BBB = BB_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, CO, BCMAT, AINV_AU)
                 BSB = BS_AT(XYZ, XI, ETA, CO, AINV_AU, EPROP(1))
 
-                IF ((DEBUG(190) > 0) .AND. (I == 1) .AND. (J == 1)) THEN
+               IF ((DEBUG(190) > 0) .AND. (I == 1) .AND. (J == 1)) THEN
                    CALL DEBUG_PRINT_MATRIX('CQUADR GP11 BMB', BMB)
                    CALL DEBUG_PRINT_MATRIX('CQUADR GP11 BBB', BBB)
                    CALL DEBUG_PRINT_MATRIX('CQUADR GP11 BSB', BSB)
@@ -214,12 +183,8 @@
                 BSL = MATMUL(BSB, T24T)
 
                KMEM   = KMEM   + WT*JDET*MATMUL(TRANSPOSE(BMB), MATMUL(SHELL_A, BMB))
-               IF (SIMO_MODE) THEN
-                  MEAS = MEAS_RAW(:,:,I,J) - MEAS_MEAN
-                  KUA = KUA + WT*JDET*MATMUL(TRANSPOSE(BMB), MATMUL(SHELL_A, MEAS))
-                  KAA = KAA + WT*JDET*MATMUL(TRANSPOSE(MEAS), MATMUL(SHELL_A, MEAS))
-               ELSE IF (EAS4_ACTIVE) THEN
-                  MEAS = EAS4_AT(XYZ, XI, ETA, A0INV, DETCO0)
+               IF (EAS4_ACTIVE) THEN
+                  MEAS = EAS4_AT(XYZ, NORMALS, XI, ETA, A0INV, DETCO0)
                   KUA = KUA + WT*JDET*MATMUL(TRANSPOSE(BMB), MATMUL(SHELL_A, MEAS))
                   KAA = KAA + WT*JDET*MATMUL(TRANSPOSE(MEAS), MATMUL(SHELL_A, MEAS))
                ENDIF
@@ -234,8 +199,8 @@
             ENDDO
          ENDDO
 
-         KDRILL = DRILL_STIFFNESS(XYZ, NORMALS, AINV_AU, T24T)
-         IF (SIMO_MODE .OR. EAS4_ACTIVE) THEN
+         KDRILL = DRILL_STIFFNESS(XYZ, NORMALS)
+         IF (EAS4_ACTIVE) THEN
             CALL INV4(KAA, KAAINV)
             KMEM = KMEM - MATMUL(KUA, MATMUL(KAAINV, TRANSPOSE(KUA)))
          ENDIF
@@ -296,15 +261,25 @@
          ENDDO
 
          MBASIC = ZERO
-         MDIAG = ZERO
-         DO I=1,4
-            MDIAG(I) = SUM(M1(I,1:4))
-         ENDDO
-         DO I=1,4
-            DO K=1,3
-               MBASIC((I-1)*6+K,(I-1)*6+K) = MDIAG(I)
+         IF ((SOL_NAME(1:5) == 'MODES') .AND. (COUPMASS > 0)) THEN
+            DO I=1,4
+               DO J=1,4
+                  DO K=1,3
+                     MBASIC((I-1)*6+K,(J-1)*6+K) = M1(I,J)
+                  ENDDO
+               ENDDO
             ENDDO
-         ENDDO
+         ELSE
+            MDIAG = ZERO
+            DO I=1,4
+               MDIAG(I) = SUM(M1(I,1:4))
+            ENDDO
+            DO I=1,4
+               DO K=1,3
+                  MBASIC((I-1)*6+K,(I-1)*6+K) = MDIAG(I)
+               ENDDO
+            ENDDO
+         ENDIF
          MASS_ELEM_SUM = SUM(M1)
          MLOCAL = MATMUL(T24, MATMUL(MBASIC, T24T))
          ME(1:24,1:24) = MLOCAL
@@ -652,7 +627,6 @@
       REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3)
       REAL(DOUBLE) :: AUOUT(4,24)
       REAL(DOUBLE) :: XJI(3), LK, TSK(3), NK(3), NORMK, RNI(3,3), RNJ(3,3)
-      REAL(DOUBLE) :: V1I(3), V2I(3), V1J(3), V2J(3), CK, PHI, VNODE(3)
       INTEGER(LONG) :: KK, I1, J1, CI, CJ
       INTEGER(LONG), PARAMETER :: SIDE_I(4) = (/1,2,3,4/)
       INTEGER(LONG), PARAMETER :: SIDE_J(4) = (/2,3,4,1/)
@@ -672,25 +646,10 @@
          CALL RNMAT(NORMS(J1,1), NORMS(J1,2), NORMS(J1,3), RNJ)
          CI = (I1-1)*6
          CJ = (J1-1)*6
-         IF (DKMQ20_MODE) THEN
-            PHI = PHI_SIDE(LK, EPROP(1))
-            CK = -1.5D0 / (ONE + PHI)
-            VNODE = NORMS(I1,:)
-            CALL LOCAL_V12(VNODE, V1I, V2I)
-            VNODE = NORMS(J1,:)
-            CALL LOCAL_V12(VNODE, V1J, V2J)
-            AUOUT(KK,CI+1:CI+3) = CK*(-NK) / LK
-            AUOUT(KK,CJ+1:CJ+3) = CK*( NK) / LK
-            AUOUT(KK,CI+4) = CK*0.5D0*(-DOT_PRODUCT(V2I, TSK))
-            AUOUT(KK,CI+5) = CK*0.5D0*( DOT_PRODUCT(V1I, TSK))
-            AUOUT(KK,CJ+4) = CK*0.5D0*(-DOT_PRODUCT(V2J, TSK))
-            AUOUT(KK,CJ+5) = CK*0.5D0*( DOT_PRODUCT(V1J, TSK))
-         ELSE
-            AUOUT(KK,CI+1:CI+3) = -NK / LK
-            AUOUT(KK,CJ+1:CJ+3) =  NK / LK
-            AUOUT(KK,CI+4:CI+6) = 0.5D0*MATMUL(TRANSPOSE(RNI), TSK)
-            AUOUT(KK,CJ+4:CJ+6) = 0.5D0*MATMUL(TRANSPOSE(RNJ), TSK)
-         ENDIF
+         AUOUT(KK,CI+1:CI+3) = -NK / LK
+         AUOUT(KK,CJ+1:CJ+3) =  NK / LK
+         AUOUT(KK,CI+4:CI+6) = 0.5D0*MATMUL(TRANSPOSE(RNI), TSK)
+         AUOUT(KK,CJ+4:CJ+6) = 0.5D0*MATMUL(TRANSPOSE(RNJ), TSK)
       ENDDO
       END FUNCTION BUILD_AU
 
@@ -780,7 +739,7 @@
       FUNCTION BB_AT ( XYZN, NORMS, XI, ETA, T1, T2, CO, BCM, AIAU ) RESULT(BBOUT)
       REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3), XI, ETA, T1(3), T2(3), CO(2,2), BCM(2,2), AIAU(4,24)
       REAL(DOUBLE) :: BBOUT(3,24), DN(2,4), DP(2,4), NIX(4), NIY(4), PKX(4), PKY(4), NBC1(4), NBC2(4)
-      REAL(DOUBLE) :: BBETA(3,24), BDEL(3,4), RNI(3,3), V1(3), V2(3), XJI(3), LK, TSK(3), VNODE(3)
+      REAL(DOUBLE) :: BBETA(3,24), BDEL(3,4), RNI(3,3), V1(3), V2(3), XJI(3), LK, TSK(3)
       INTEGER(LONG) :: II, DD, COL
       INTEGER(LONG), PARAMETER :: SIDE_I(4) = (/1,2,3,4/)
       INTEGER(LONG), PARAMETER :: SIDE_J(4) = (/2,3,4,1/)
@@ -797,28 +756,17 @@
       BBETA = ZERO
       DO II=1,4
          COL = (II-1)*6
-         IF (DKMQ20_MODE) THEN
-            VNODE = NORMS(II,:)
-            CALL LOCAL_V12(VNODE, V1, V2)
-            BBETA(1,COL+4) = NIX(II)*(-DOT_PRODUCT(V2,T1))
-            BBETA(1,COL+5) = NIX(II)*( DOT_PRODUCT(V1,T1))
-            BBETA(2,COL+4) = NIY(II)*(-DOT_PRODUCT(V2,T2))
-            BBETA(2,COL+5) = NIY(II)*( DOT_PRODUCT(V1,T2))
-            BBETA(3,COL+4) = NIY(II)*(-DOT_PRODUCT(V2,T1)) + NIX(II)*(-DOT_PRODUCT(V2,T2))
-            BBETA(3,COL+5) = NIY(II)*( DOT_PRODUCT(V1,T1)) + NIX(II)*( DOT_PRODUCT(V1,T2))
-         ELSE
-            CALL RNMAT(NORMS(II,1), NORMS(II,2), NORMS(II,3), RNI)
-            V1 = MATMUL(TRANSPOSE(RNI), T1)
-            V2 = MATMUL(TRANSPOSE(RNI), T2)
-            DO DD=1,3
-               BBETA(1,COL+DD) = T1(DD)*NBC1(II)
-               BBETA(2,COL+DD) = T2(DD)*NBC2(II)
-               BBETA(3,COL+DD) = T1(DD)*NBC2(II) + T2(DD)*NBC1(II)
-            ENDDO
-            BBETA(1,COL+4:COL+6) = V1*NIX(II)
-            BBETA(2,COL+4:COL+6) = V2*NIY(II)
-            BBETA(3,COL+4:COL+6) = V1*NIY(II) + V2*NIX(II)
-         ENDIF
+         CALL RNMAT(NORMS(II,1), NORMS(II,2), NORMS(II,3), RNI)
+         V1 = MATMUL(TRANSPOSE(RNI), T1)
+         V2 = MATMUL(TRANSPOSE(RNI), T2)
+         DO DD=1,3
+            BBETA(1,COL+DD) = T1(DD)*NBC1(II)
+            BBETA(2,COL+DD) = T2(DD)*NBC2(II)
+            BBETA(3,COL+DD) = T1(DD)*NBC2(II) + T2(DD)*NBC1(II)
+         ENDDO
+         BBETA(1,COL+4:COL+6) = V1*NIX(II)
+         BBETA(2,COL+4:COL+6) = V2*NIY(II)
+         BBETA(3,COL+4:COL+6) = V1*NIY(II) + V2*NIX(II)
       ENDDO
 
       BDEL = ZERO
@@ -836,27 +784,11 @@
 
       FUNCTION BS_AT ( XYZN, XI, ETA, CO, AIAU, THICK ) RESULT(BSOUT)
       REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), XI, ETA, CO(2,2), AIAU(4,24), THICK
-      REAL(DOUBLE) :: BSOUT(2,24), NGAM(2,4), AG(4,4), APHI(4,4), BSG(2,4), LK, PHI, BGDEL(2,4), BSDEL(2,4)
+      REAL(DOUBLE) :: BSOUT(2,24), NGAM(2,4), AG(4,4), APHI(4,4), BSG(2,4), LK, PHI
       INTEGER(LONG) :: II
       INTEGER(LONG), PARAMETER :: SIDE_I(4) = (/1,2,3,4/)
       INTEGER(LONG), PARAMETER :: SIDE_J(4) = (/2,3,4,1/)
       REAL(DOUBLE), PARAMETER :: SGN(4) = (/ONE, ONE, -ONE, -ONE/)
-
-      IF (DKMQ20_MODE) THEN
-         BGDEL = ZERO
-         DO II=1,4
-            LK = VNORM(XYZN(SIDE_J(II),:) - XYZN(SIDE_I(II),:))
-            PHI = PHI_SIDE(LK, THICK)
-            IF (II == 1) BGDEL(1,II) = -((ONE-ETA)*LK*PHI) / 6.0D0
-            IF (II == 3) BGDEL(1,II) =  ((ONE+ETA)*LK*PHI) / 6.0D0
-            IF (II == 2) BGDEL(2,II) = -((ONE+XI )*LK*PHI) / 6.0D0
-            IF (II == 4) BGDEL(2,II) =  ((ONE-XI )*LK*PHI) / 6.0D0
-         ENDDO
-         BSDEL(1,:) = CO(1,1)*BGDEL(1,:) + CO(2,1)*BGDEL(2,:)
-         BSDEL(2,:) = CO(1,2)*BGDEL(1,:) + CO(2,2)*BGDEL(2,:)
-         BSOUT = MATMUL(BSDEL, AIAU)
-         RETURN
-      ENDIF
 
       NGAM = ZERO
       NGAM(1,1) = 0.5D0*(ONE-ETA)
@@ -974,15 +906,15 @@
       IF (NM > 1.0D-15) E2 = E2 / NM
       END SUBROUTINE SURFACE_BASIS
 
-      SUBROUTINE EAS4_CENTER_INVERSE ( XYZN, A0INV, DETCO0 )
-      REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3)
+      SUBROUTINE EAS4_CENTER_INVERSE ( XYZN, NORMS, A0INV, DETCO0 )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(4,3), NORMS(4,3)
       REAL(DOUBLE), INTENT(OUT) :: A0INV(2,2), DETCO0
-      REAL(DOUBLE) :: DN(2,4), G1(3), G2(3), E1(3), E2(3), E3(3), AMAT(2,2)
+      REAL(DOUBLE) :: DN(2,4), G1(3), G2(3), E1(3), E2(3), E3(3), AMAT(2,2), JJ, CO(2,2), BCM(2,2)
 
       CALL SHAPE_DN(ZERO, ZERO, DN)
       G1 = MATMUL(DN(1,:), XYZN)
       G2 = MATMUL(DN(2,:), XYZN)
-      CALL SURFACE_BASIS(XYZN, ZERO, ZERO, E1, E2, E3)
+      CALL GEOMETRY_AT(XYZN, NORMS, ZERO, ZERO, E1, E2, E3, JJ, CO, BCM)
       AMAT(1,1) = DOT_PRODUCT(G1, E1)
       AMAT(1,2) = DOT_PRODUCT(G1, E2)
       AMAT(2,1) = DOT_PRODUCT(G2, E1)
@@ -991,16 +923,16 @@
       DETCO0 = A0INV(1,1)*A0INV(2,2) - A0INV(1,2)*A0INV(2,1)
       END SUBROUTINE EAS4_CENTER_INVERSE
 
-      FUNCTION EAS4_AT ( XYZN, XI, ETA, A0INV, DETCO0 ) RESULT(GOUT)
-      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), XI, ETA, A0INV(2,2), DETCO0
-      REAL(DOUBLE) :: GOUT(3,4), DN(2,4), G1(3), G2(3), E1(3), E2(3), E3(3), AMAT(2,2), CO(2,2)
+      FUNCTION EAS4_AT ( XYZN, NORMS, XI, ETA, A0INV, DETCO0 ) RESULT(GOUT)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3), XI, ETA, A0INV(2,2), DETCO0
+      REAL(DOUBLE) :: GOUT(3,4), DN(2,4), G1(3), G2(3), E1(3), E2(3), E3(3), AMAT(2,2), CO(2,2), JJ, BCM(2,2)
       REAL(DOUBLE) :: DETCO, SCALE, D5X, D5Y, D6X, D6Y
 
       GOUT = ZERO
       CALL SHAPE_DN(XI, ETA, DN)
       G1 = MATMUL(DN(1,:), XYZN)
       G2 = MATMUL(DN(2,:), XYZN)
-      CALL SURFACE_BASIS(XYZN, XI, ETA, E1, E2, E3)
+      CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, E1, E2, E3, JJ, CO, BCM)
       AMAT(1,1) = DOT_PRODUCT(G1, E1)
       AMAT(1,2) = DOT_PRODUCT(G1, E2)
       AMAT(2,1) = DOT_PRODUCT(G2, E1)
@@ -1065,42 +997,15 @@
       AINV = AUG(:,5:8)
       END SUBROUTINE INV4
 
-      SUBROUTINE LOCAL_V12 ( VN, V1, V2 )
-      REAL(DOUBLE), INTENT(IN)  :: VN(3)
-      REAL(DOUBLE), INTENT(OUT) :: V1(3), V2(3)
-      REAL(DOUBLE) :: REF(3), TMP(3), NM
-      REF = (/ZERO, ONE, ZERO/)
-      CALL CROSS3(REF, VN, TMP)
-      NM = VNORM(TMP)
-      IF (NM < 1.0D-1) THEN
-         REF = (/ONE, ZERO, ZERO/)
-         CALL CROSS3(REF, VN, TMP)
-         NM = VNORM(TMP)
-      ENDIF
-      IF (NM < 1.0D-15) THEN
-         V1 = (/ONE, ZERO, ZERO/)
-      ELSE
-         V1 = TMP / NM
-      ENDIF
-      CALL CROSS3(VN, V1, V2)
-      NM = VNORM(V2)
-      IF (NM > 1.0D-15) V2 = V2 / NM
-      END SUBROUTINE LOCAL_V12
-
-      FUNCTION DRILL_STIFFNESS ( XYZN, NORMS, AIAU, T24INVT ) RESULT(KD)
-      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3), AIAU(4,24), T24INVT(24,24)
-      REAL(DOUBLE) :: KD(24,24), GTH(2,24), HTH(24), DN(2,4), NVAL(4), CO(2,2), BCM(2,2), TVA(3), TVB(3), NV(3), JJ
-      REAL(DOUBLE) :: ALPHA, BETA_MAC, NU_EFF, ONE_M_NU2, WT, XI, ETA
-      INTEGER(LONG) :: II, I1, J1
+      FUNCTION DRILL_STIFFNESS ( XYZN, NORMS ) RESULT(KD)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(4,3), NORMS(4,3)
+      REAL(DOUBLE) :: KD(24,24), BDR(24), DN(2,4), NVAL(4), CO(2,2), BCM(2,2), T1D(3), T2D(3), NVD(3), JJ
+      REAL(DOUBLE) :: CDRILL, WT, XI, ETA, NIX(4), NIY(4)
+      INTEGER(LONG) :: II, I1, J1, DD
 
       KD = ZERO
-      NU_EFF = ZERO
-      IF (DABS(SHELL_A(1,1)) > 1.0D-30) THEN
-         NU_EFF = SHELL_A(1,2) / SHELL_A(1,1)
-      ENDIF
-      ONE_M_NU2 = ONE - NU_EFF*NU_EFF
-       ALPHA = CQUADR_DRILL_SCALE * 1.0D-3 * SHELL_D(1,1) * ONE_M_NU2
-       BETA_MAC = CQUADR_DRILL_SCALE * 1.0D-3 * SHELL_T(1,1) / (5.0D0/6.0D0)
+      CDRILL = CQUADR_DRILL_SCALE * 1.0D-4 * SHELL_A(3,3)
+
       DO I1=1,2
          DO J1=1,2
             XI = SS(I1)
@@ -1108,15 +1013,18 @@
             WT = HH(I1)*HH(J1)
             CALL SHAPE_N(XI, ETA, NVAL)
             CALL SHAPE_DN(XI, ETA, DN)
-            CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, TVA, TVB, NV, JJ, CO, BCM)
-            GTH = ZERO
-            HTH = ZERO
+            CALL GEOMETRY_AT(XYZN, NORMS, XI, ETA, T1D, T2D, NVD, JJ, CO, BCM)
+            NIX = DN(1,:)*CO(1,1) + DN(2,:)*CO(2,1)
+            NIY = DN(1,:)*CO(1,2) + DN(2,:)*CO(2,2)
+
+            BDR = ZERO
             DO II=1,4
-               GTH(1,(II-1)*6+4:(II-1)*6+6) = (DN(1,II)*CO(1,1) + DN(2,II)*CO(2,1))*NORMS(II,:)
-               GTH(2,(II-1)*6+4:(II-1)*6+6) = (DN(1,II)*CO(1,2) + DN(2,II)*CO(2,2))*NORMS(II,:)
-               HTH((II-1)*6+4:(II-1)*6+6) = NVAL(II)*NORMS(II,:)
+               DO DD=1,3
+                  BDR(6*(II-1)+DD) = 0.5D0*(NIX(II)*T2D(DD) - NIY(II)*T1D(DD))
+               ENDDO
+               BDR(6*(II-1)+4:6*(II-1)+6) = BDR(6*(II-1)+4:6*(II-1)+6) - NVAL(II)*NORMS(II,:)
             ENDDO
-            KD = KD + WT*JJ*( ALPHA*MATMUL(TRANSPOSE(GTH), GTH) + BETA_MAC*MATMUL(RESHAPE(HTH,(/24,1/)),RESHAPE(HTH,(/1,24/))) )
+            KD = KD + WT*JJ*CDRILL*MATMUL(RESHAPE(BDR,(/24,1/)),RESHAPE(BDR,(/1,24/)))
          ENDDO
       ENDDO
       END FUNCTION DRILL_STIFFNESS
