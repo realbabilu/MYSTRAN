@@ -480,7 +480,9 @@
 !                                                              'MIN4T ': Use Tessler's MIN4T element made up of 4 MIN3 triangles
 !                                                              'MIN4  ': Use Tessler's MIN4 element 
 !                                                              'MITC4 ': Use Bathe's MITC4 (1983)
+!                                                              'MITC4R': Legacy alias for the current MITC4 branch
 !                                                              'MITC4+': Use Ko/Bathe's 2nd MITC4+ (Nov 2016)
+!                                                              'MITC4P': Legacy alias for the current MITC4+ branch
 !                                                              'DSQK  ': DSQK 4-node shell branch (planned Python parity port)
 !                                                              'DKMQ20': 6-DOF DKMQ20 shell branch
 !                                                              'SIMO  ': 6-DOF Simo1989/Hughes-Brezzi shell branch (experimental)

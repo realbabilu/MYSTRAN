@@ -103,7 +103,7 @@
       ENDDO
 
 
-      IF(QUAD4TYP == 'MITC4+') THEN
+      IF((QUAD4TYP == 'MITC4+') .OR. (QUAD4TYP == 'MITC4P ')) THEN
                                                            ! MITC4+ according to ref [1]
 
          IF(MEMBRANE) THEN
@@ -176,7 +176,7 @@
             B(1:4,:) = B(1:4,:) + BB(1:4,:)
          ENDIF
 
-      ELSEIF(QUAD4TYP == 'MITC4 ') THEN
+      ELSEIF((QUAD4TYP == 'MITC4 ') .OR. (QUAD4TYP == 'MITC4R ')) THEN
 
          IF(.TRUE.) THEN
 

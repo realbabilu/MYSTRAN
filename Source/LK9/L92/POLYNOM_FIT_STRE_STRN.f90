@@ -127,7 +127,9 @@
                                                            ! are the Gauss point coords
          IF ((QUAD4TYP == 'MIN4  ') .OR.                                                                                           &
              (QUAD4TYP == 'MITC4 ') .OR.                                                                                           &
+             (QUAD4TYP == 'MITC4R ') .OR.                                                                                          &
              (QUAD4TYP == 'MITC4+') .OR.                                                                                           &
+             (QUAD4TYP == 'MITC4P ') .OR.                                                                                          &
              (TYPE == 'QUADR   ') .OR.                                                                                              &
              (TYPE(1:6) == 'QUAD4K') .OR.                                                                                          &
              (TYPE(1:5) == 'QUAD8')) THEN

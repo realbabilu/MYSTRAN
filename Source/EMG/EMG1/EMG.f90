@@ -427,7 +427,8 @@
          CALL QDEL1 ( OPT, INT_ELEM_ID, WRITE_WARN )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
-      ELSE IF ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MITC4 ') .OR. (QUAD4TYP == 'MITC4+'))) THEN
+      ELSE IF ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'MITC4 ') .OR. (QUAD4TYP == 'MITC4R ') .OR.                              &
+                                           (QUAD4TYP == 'MITC4+') .OR. (QUAD4TYP == 'MITC4P '))) THEN
          CALL MITC4 ( OPT, INT_ELEM_ID )
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 

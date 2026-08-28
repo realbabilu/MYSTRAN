@@ -65,11 +65,13 @@
       USE MITC_SHAPE_FUNCTIONS_Interface
       USE MITC_COVARIANT_BASIS_Interface
       USE EXPAND_MASS_DOFS_Interface
+      USE CQUAD4_DKMQ20_RHR_Interface
 
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'MITC4'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)            ! 'Y'/'N' flags for whether to calc certain elem matrices
+      CHARACTER(1*BYTE)               :: REC_OPT(6)
 
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID       ! Internal element ID
       INTEGER(LONG), PARAMETER        :: IORD_IJ = 2       ! Integration order for stiffness matrix
@@ -803,6 +805,14 @@
 
 
 
+
+      IF (OPT(3) == 'Y') THEN
+! MITC4/MITC4+ keep their own stiffness path, but for shell stress recovery
+! reuse the validated DKMQ20 reporting path.
+         REC_OPT = 'N'
+         REC_OPT(3) = 'Y'
+         CALL CQUAD4_DKMQ20_RHR ( REC_OPT, INT_ELEM_ID )
+      ENDIF
 
       RETURN
 

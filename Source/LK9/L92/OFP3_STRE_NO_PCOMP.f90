@@ -1177,6 +1177,11 @@ elems_5: DO J = 1,NELE
 ! keep the element TE frame selected above rather than applying a special
 ! output-frame override here.
          RETURN
+      ELSE IF ((TYPE(1:5) == 'QUAD4') .AND. ((QUAD4TYP == 'MITC4 ') .OR. (QUAD4TYP == 'MITC4R ') .OR.                           &
+                                             (QUAD4TYP == 'MITC4+') .OR. (QUAD4TYP == 'MITC4P '))) THEN
+! MITC4/MITC4+ families delegate stress recovery to the validated CQUAD4
+! DKMQ20 path, so keep that recovered element TE frame here.
+         RETURN
       ELSE IF ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  ')) THEN
          SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
       ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24EA ')) THEN
