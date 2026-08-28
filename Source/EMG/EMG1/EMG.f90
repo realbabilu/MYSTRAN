@@ -539,6 +539,8 @@
          SKIP_K6ROT = 'N'
          IF ((TYPE(1:5) == 'TRIA3') .AND. (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18)) THEN
             SKIP_K6ROT = 'Y'
+         ELSE IF ((TYPE(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'MITC3+')) THEN
+            SKIP_K6ROT = 'Y'
          ELSE IF ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DSQK    ') .OR. (QUAD4TYP == 'DKMQ20  '))) THEN
             SKIP_K6ROT = 'Y'
          ELSE IF (TYPE == 'QUADR   ') THEN

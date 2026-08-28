@@ -18,7 +18,7 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  EPSIL
-      USE MODEL_STUF, ONLY            :  BE2, BE3, EID, ELDOF, KE, PHI_SQ, SE2, SE3, SHELL_A, SHELL_D, SHELL_T, TYPE
+      USE MODEL_STUF, ONLY            :  BE2, BE3, EID, ELDOF, EPROP, KE, PHI_SQ, SE2, SE3, SHELL_A, SHELL_D, SHELL_T, TYPE
       USE MITC_STUF, ONLY             :  DIRECTOR
       USE OUTA_HERE_Interface
       USE CROSS_Interface
@@ -35,13 +35,14 @@
       REAL(DOUBLE), INTENT(OUT)       :: BIG_BB(3,ELDOF,1)
 
       INTEGER(LONG), PARAMETER        :: IDX_M(6) = (/ 1, 2, 7, 8, 13, 14 /)
+      REAL(DOUBLE), PARAMETER         :: KAPPA = 5.0D0/6.0D0
 
       INTEGER(LONG)                   :: I, J, K, L, GP
       REAL(DOUBLE)                    :: XY(3,2), JMAT(2,2), JINV(2,2), DETJ
       REAL(DOUBLE)                    :: COV_S(2,2)
       REAL(DOUBLE)                    :: KFULL(20,20), KAA(18,18), KAB(18,2), KBA(2,18), KBB(2,2), KBB_INV(2,2), KCOND(18,18)
       REAL(DOUBLE)                    :: KPHYS(18,18)
-      REAL(DOUBLE)                    :: BB(3,8), BS(2,11), BM(3,6), KEI, FACTOR
+      REAL(DOUBLE)                    :: BB(3,8), BS(2,11), BM(3,6), KEI, FACTOR, GVAL, CDRILL
       REAL(DOUBLE)                    :: BB_REC(3,18), BS_REC(2,18), DUM318(3,18), DUM218(2,18)
       REAL(DOUBLE)                    :: GAUSS_R(7), GAUSS_S(7), GAUSS_W(7)
       REAL(DOUBLE)                    :: EPS1
@@ -134,6 +135,16 @@
             ENDDO
          ENDDO
       ENDDO
+
+! Match the Python MITC3+ port's drilling treatment: a tiny diagonal
+! stabilizer on the local rz DOF at each corner node, without the generic
+! translational coupling used by CALC_K6ROT.
+      GVAL = ZERO
+      IF (DABS(SHELL_T(1,1)) > 1.0D-20) GVAL = SHELL_T(1,1)/(KAPPA*EPROP(1))
+      CDRILL = 1.0D-4 * GVAL * EPROP(1) * AREA
+      KFULL( 6, 6) = KFULL( 6, 6) + CDRILL
+      KFULL(12,12) = KFULL(12,12) + CDRILL
+      KFULL(18,18) = KFULL(18,18) + CDRILL
 
       KAA = KFULL(1:18,1:18)
       KAB = KFULL(1:18,19:20)
@@ -432,17 +443,25 @@
       SUBROUTINE MITC3P_BB_AT(R, S, JI, BBOUT)
          REAL(DOUBLE), INTENT(IN)  :: R, S, JI(2,2)
          REAL(DOUBLE), INTENT(OUT) :: BBOUT(3,8)
-         REAL(DOUBLE) :: DFI(4,2), DFI_XY(4,2)
+         REAL(DOUBLE) :: DH(3,2), DH_XY(3,2), DF4(2), DF4_XY(2), T
          INTEGER(LONG) :: II
-         CALL MITC3P_DFI(R, S, DFI)
-         DFI_XY = MATMUL(DFI, TRANSPOSE(JI))
+         CALL MITC3P_DH(DH)
+         DH_XY = MATMUL(DH, TRANSPOSE(JI))
+         T = ONE - R - S
+         DF4(1) = 27.0D0*S*(T - R)
+         DF4(2) = 27.0D0*R*(T - S)
+         DF4_XY = MATMUL(TRANSPOSE(JI), DF4)
          BBOUT = ZERO
-         DO II=1,4
-            BBOUT(1,2*II  ) =  DFI_XY(II,1)
-            BBOUT(2,2*II-1) = -DFI_XY(II,2)
-            BBOUT(3,2*II  ) =  DFI_XY(II,2)
-            BBOUT(3,2*II-1) = -DFI_XY(II,1)
+         DO II=1,3
+            BBOUT(1,2*II  ) =  DH_XY(II,1)
+            BBOUT(2,2*II-1) = -DH_XY(II,2)
+            BBOUT(3,2*II  ) =  DH_XY(II,2)
+            BBOUT(3,2*II-1) = -DH_XY(II,1)
          ENDDO
+         BBOUT(1,8) =  DF4_XY(1)
+         BBOUT(2,7) = -DF4_XY(2)
+         BBOUT(3,8) =  DF4_XY(2)
+         BBOUT(3,7) = -DF4_XY(1)
       END SUBROUTINE MITC3P_BB_AT
 
       SUBROUTINE MITC3P_ERT_EST_ROWS(R, S, XYL, JI, JM, ERT, EST)
