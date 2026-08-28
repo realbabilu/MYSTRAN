@@ -40,7 +40,7 @@
       REAL(DOUBLE)                    :: XY(3,2), JMAT(2,2), JINV(2,2), DETJ
       REAL(DOUBLE)                    :: COV_S(2,2)
       REAL(DOUBLE)                    :: KFULL(20,20), KAA(18,18), KAB(18,2), KBA(2,18), KBB(2,2), KBB_INV(2,2), KCOND(18,18)
-      REAL(DOUBLE)                    :: KPHYS(18,18), KA(18,18), KOUT(18,18), TAE(18,18), TEA(18,18)
+      REAL(DOUBLE)                    :: KPHYS(18,18)
       REAL(DOUBLE)                    :: BB(3,8), BS(2,11), BM(3,6), KEI, FACTOR
       REAL(DOUBLE)                    :: BB_REC(3,18), BS_REC(2,18), DUM318(3,18), DUM218(2,18)
       REAL(DOUBLE)                    :: GAUSS_R(7), GAUSS_S(7), GAUSS_W(7)
@@ -89,10 +89,10 @@
       COV_S = MATMUL(TRANSPOSE(JINV), MATMUL(SHELL_T, JINV))
       PHI_SQ = ONE
 
-      CALL MITC3P_GAUSS_7PT(GAUSS_R, GAUSS_S, GAUSS_W)
+      CALL MITC3P_GAUSS_3PT(GAUSS_R, GAUSS_S, GAUSS_W)
 
       KFULL = ZERO
-      DO GP=1,7
+      DO GP=1,3
          CALL MITC3P_BM_AT(JINV, BM)
          CALL MITC3P_BB_AT(GAUSS_R(GP), GAUSS_S(GP), JINV, BB)
          CALL MITC3P_BS_AT(GAUSS_R(GP), GAUSS_S(GP), XY, JINV, JMAT, BS)
@@ -127,7 +127,7 @@
                KEI = ZERO
                DO K=1,2
                   DO L=1,2
-                     KEI = KEI + MITC3P_BS_TERM(BS,K,I)*COV_S(K,L)*MITC3P_BS_TERM(BS,L,J)
+                     KEI = KEI + MITC3P_BS_TERM(BS,K,I)*SHELL_T(K,L)*MITC3P_BS_TERM(BS,L,J)
                   ENDDO
                ENDDO
                KFULL(I,J) = KFULL(I,J) + FACTOR*KEI
@@ -147,21 +147,11 @@
       CALL MITC3P_RECOVERY_MATS(BB, BS, KBB_INV, KBA, BB_REC, BS_REC)
 
       KPHYS = KCOND
-      DO I=1,3
-         KPHYS(6*(I-1)+4,:) = -KPHYS(6*(I-1)+4,:)
-         KPHYS(:,6*(I-1)+4) = -KPHYS(:,6*(I-1)+4)
-         KPHYS(6*(I-1)+5,:) = -KPHYS(6*(I-1)+5,:)
-         KPHYS(:,6*(I-1)+5) = -KPHYS(:,6*(I-1)+5)
-      ENDDO
 
       IF (OPT(4) == 'Y') THEN
-         CALL MITC3P_TRANSFORMS(JINV, TAE, TEA)
-         KA = MATMUL(TRANSPOSE(TAE), MATMUL(KPHYS, TAE))
-         KOUT = MATMUL(TRANSPOSE(TEA), MATMUL(KA, TEA))
-
          DO I=1,18
             DO J=1,18
-               KE(I,J) = KE(I,J) + 0.5D0*(KOUT(I,J) + KOUT(J,I))
+               KE(I,J) = KE(I,J) + 0.5D0*(KPHYS(I,J) + KPHYS(J,I))
             ENDDO
          ENDDO
       ENDIF
@@ -374,21 +364,15 @@
          A = A + VX + VX2/(ONE + C)
       END SUBROUTINE MITC3P_ROTATION_FROM_E3
 
-      SUBROUTINE MITC3P_GAUSS_7PT(R, S, W)
+      SUBROUTINE MITC3P_GAUSS_3PT(R, S, W)
          REAL(DOUBLE), INTENT(OUT) :: R(7), S(7), W(7)
-         REAL(DOUBLE) :: A1, B1, A2, B2, C, W1, W2, W3
-         A1 = 0.1012865073235D0
-         B1 = 0.7974269853531D0
-         A2 = 0.4701420641051D0
-         B2 = 0.0597158717898D0
-         C  = ONE/THREE
-         W1 = 0.1259391805448D0
-         W2 = 0.1323941527885D0
-         W3 = 0.2250000000000D0
-         R = (/ A1, B1, A1, A2, B2, A2, C /)
-         S = (/ A1, A1, B1, A2, A2, B2, C /)
-         W = 0.5D0*(/ W1, W1, W1, W2, W2, W2, W3 /)
-      END SUBROUTINE MITC3P_GAUSS_7PT
+         R = ZERO
+         S = ZERO
+         W = ZERO
+         R(1:3) = (/ ONE/6.0D0, TWO/THREE, ONE/6.0D0 /)
+         S(1:3) = (/ ONE/6.0D0, ONE/6.0D0, TWO/THREE /)
+         W(1:3) = ONE/6.0D0
+      END SUBROUTINE MITC3P_GAUSS_3PT
 
       SUBROUTINE MITC3P_INV2(A, AINV)
          REAL(DOUBLE), INTENT(IN)  :: A(2,2)
@@ -488,34 +472,36 @@
       SUBROUTINE MITC3P_BS_AT(R, S, XYL, JI, JM, BSOUT)
          REAL(DOUBLE), INTENT(IN)  :: R, S, XYL(3,2), JI(2,2), JM(2,2)
          REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,11)
-         REAL(DOUBLE) :: APT(2), BPT(2), CPT(2), DPT(2), EPT(2), FPT(2)
-         REAL(DOUBLE) :: ERTA(11), ESTA(11), ERTB(11), ESTB(11), ERTC(11), ESTC(11)
-         REAL(DOUBLE) :: ERTD(11), ESTD(11), ERTE(11), ESTE(11), ERTF(11), ESTF(11)
-         REAL(DOUBLE) :: CONST_ERT(11), CONST_EST(11), CHAT(11), FAC_RT, FAC_ST, DPAR
+         REAL(DOUBLE) :: BMID(3,11), NG(2,3), JGAM(2,2), TMP(2,11)
+         REAL(DOUBLE) :: F4V
+         REAL(DOUBLE) :: X21, Y21, X31, Y31, X32, Y32, AREA2
 
-         APT = (/ ONE/6.0D0, TWO/THREE /)
-         BPT = (/ TWO/THREE, ONE/6.0D0 /)
-         CPT = (/ ONE/6.0D0, ONE/6.0D0 /)
-         DPAR = 1.0D0/10000.0D0
-         DPT = (/ ONE/THREE + DPAR   , ONE/THREE - TWO*DPAR /)
-         EPT = (/ ONE/THREE - TWO*DPAR, ONE/THREE + DPAR    /)
-         FPT = (/ ONE/THREE + DPAR   , ONE/THREE + DPAR    /)
+         BMID = ZERO
+         X21 = XYL(2,1) - XYL(1,1); Y21 = XYL(2,2) - XYL(1,2)
+         X31 = XYL(3,1) - XYL(1,1); Y31 = XYL(3,2) - XYL(1,2)
+         X32 = XYL(3,1) - XYL(2,1); Y32 = XYL(3,2) - XYL(2,2)
 
-         CALL MITC3P_ERT_EST_ROWS(APT(1), APT(2), XYL, JI, JM, ERTA, ESTA)
-         CALL MITC3P_ERT_EST_ROWS(BPT(1), BPT(2), XYL, JI, JM, ERTB, ESTB)
-         CALL MITC3P_ERT_EST_ROWS(CPT(1), CPT(2), XYL, JI, JM, ERTC, ESTC)
-         CALL MITC3P_ERT_EST_ROWS(DPT(1), DPT(2), XYL, JI, JM, ERTD, ESTD)
-         CALL MITC3P_ERT_EST_ROWS(EPT(1), EPT(2), XYL, JI, JM, ERTE, ESTE)
-         CALL MITC3P_ERT_EST_ROWS(FPT(1), FPT(2), XYL, JI, JM, ERTF, ESTF)
+         BMID(1,1) = -ONE; BMID(1,2) = -Y21/TWO; BMID(1,3) = X21/TWO
+         BMID(1,4) =  ONE; BMID(1,5) = -Y21/TWO; BMID(1,6) = X21/TWO
+         BMID(2,1) = -ONE; BMID(2,2) = -Y31/TWO; BMID(2,3) = X31/TWO
+         BMID(2,7) =  ONE; BMID(2,8) = -Y31/TWO; BMID(2,9) = X31/TWO
+         BMID(3,4) = -ONE; BMID(3,5) = -Y32/TWO; BMID(3,6) = X32/TWO
+         BMID(3,7) =  ONE; BMID(3,8) = -Y32/TWO; BMID(3,9) = X32/TWO
 
-         CONST_ERT = (TWO/THREE)*(ERTB - 0.5D0*ESTB) + (ONE/THREE)*(ERTC + ESTC)
-         CONST_EST = (TWO/THREE)*(ESTA - 0.5D0*ERTA) + (ONE/THREE)*(ERTC + ESTC)
-         CHAT      = (ERTF - ERTD) - (ESTF - ESTE)
+         AREA2 = X21*Y31 - X31*Y21
+         JGAM(1,1) =  Y31/AREA2
+         JGAM(1,2) = -Y21/AREA2
+         JGAM(2,1) = -X31/AREA2
+         JGAM(2,2) =  X21/AREA2
 
-         FAC_RT = (THREE*S - ONE)/THREE
-         FAC_ST = (ONE - THREE*R)/THREE
-         BSOUT(1,:) = CONST_ERT + FAC_RT*CHAT
-         BSOUT(2,:) = CONST_EST + FAC_ST*CHAT
+         NG(1,:) = (/ ONE - S, -S, S /)
+         NG(2,:) = (/ -R, ONE - R, R /)
+         TMP = MATMUL(NG, BMID)
+         BSOUT = MATMUL(JGAM, TMP)
+
+         F4V = 27.0D0*R*S*(ONE - R - S)
+         BSOUT(1,11) = BSOUT(1,11) - F4V
+         BSOUT(2,10) = BSOUT(2,10) + F4V
       END SUBROUTINE MITC3P_BS_AT
 
 ! --- shell_renovation begin --- !

@@ -1192,7 +1192,9 @@ elems_5: DO J = 1,NELE
 ! element TE frame instead of applying the AU point-local output override.
          RETURN
       ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'MITC4PD ')) THEN
-         SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
+! MITC4PD/HB recovery uses a fixed element-frame convention; keep that frame
+! here so GPSTRESS does not apply a second point-local basis transform.
+         RETURN
       ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'Q4RS    ')) THEN
 ! Q4RS uses DKMQ24R recovery for stress output, so keep the element TE frame
 ! selected above instead of applying a second point-local frame transform.

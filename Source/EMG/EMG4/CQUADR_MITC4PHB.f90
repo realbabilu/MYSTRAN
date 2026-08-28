@@ -65,11 +65,13 @@
       USE MITC_SHAPE_FUNCTIONS_Interface
       USE MITC_COVARIANT_BASIS_Interface
       USE EXPAND_MASS_DOFS_Interface
+      USE CQUADR_DKMQ24R_Interface
 
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUADR_MITC4PHB'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)            ! 'Y'/'N' flags for whether to calc certain elem matrices
+      CHARACTER(1*BYTE)                :: REC_OPT(6)
 
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID       ! Internal element ID
       INTEGER(LONG), PARAMETER        :: IORD_IJ = 2       ! Integration order for stiffness matrix
@@ -799,6 +801,11 @@
          ENDDO
 
 
+      ENDIF
+      IF (OPT(3) == 'Y') THEN
+         REC_OPT = 'N'
+         REC_OPT(3) = 'Y'
+         CALL CQUADR_DKMQ24R ( REC_OPT, INT_ELEM_ID )
       ENDIF
       RETURN
 
