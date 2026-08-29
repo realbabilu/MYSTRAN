@@ -3,120 +3,460 @@
 
       SUBROUTINE CQUAD8_MITC8D ( OPT, INT_ELEM_ID )
 
-! Reuse the base MITC8 path, then replace the non-D drilling penalty with the
-! pure Wilson theta_z penalty used by the Python MITC8D variant.
+! Port aligned to:
+!   D:\18a\python\quadratic\MITC8D_V2.py
+!
+! Notes:
+! - membrane, bending, and drilling terms use full 3x3 integration
+! - transverse shear uses 2x2 reduced integration
+! - drilling follows the Python V2 Bd sign convention
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE SCONTR, ONLY                :  MAX_ORDER_GAUSS
-      USE MODEL_STUF, ONLY            :  ELGP, KE, XEL
-      USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE MITC8_Interface
-      USE ORDER_GAUSS_Interface
-      USE MITC_SHAPE_FUNCTIONS_Interface
-      USE MITC8_CARTESIAN_LOCAL_BASIS_Interface
-      USE MITC_DETJ_Interface
-      USE MITC_ELASTICITY_Interface
-      USE MATMULT_FFF_T_Interface
+      USE IOUNT1, ONLY                :  ERR, F06
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_STRESS_POINTS, SOL_NAME
+      USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
+      USE MODEL_STUF, ONLY            :  ALPVEC, DT, EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA,        &
+                                         PPE, PRESS, PTE, SHELL_A, SHELL_D, SHELL_T, TREF, UEL, XEB, NUM_EMG_FATAL_ERRS,      &
+                                         PCOMP_PROPS
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
+      USE PARAMS, ONLY                :  COUPMASS
+      USE ELMDIS_Interface
+      USE OUTA_HERE_Interface
 
       IMPLICIT NONE
 
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUAD8_MITC8D'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
 
-      INTEGER(LONG), PARAMETER        :: IORD_IJ = 3
-      INTEGER(LONG), PARAMETER        :: IORD_K  = 2
-      REAL(DOUBLE), PARAMETER         :: BETA_DRILL = 1.0D-6
+      INTEGER(LONG), PARAMETER        :: NNODE = 8
+      INTEGER(LONG), PARAMETER        :: NDOF  = 48
+      REAL(DOUBLE), PARAMETER         :: KT_DRILL = 5.0D-2
+      INTEGER(LONG)                   :: I, J, K, L, IA, JSUB, GP
+      REAL(DOUBLE)                    :: XYZ(8,3), XY8(8,2)
+      REAL(DOUBLE)                    :: BM(3,NDOF), BB(3,NDOF), BS(2,NDOF), BD(1,NDOF)
+      REAL(DOUBLE)                    :: GP3(3), W3(3), GP2(2), W2(2), R, S, WT, DETJ, THICK, GVAL, CDRILL, TBAR
+      REAL(DOUBLE)                    :: M1(8,8), N8(8), DNDX(8), DNDY(8), UNIT_PPE(NDOF), UNIT_PTE(NDOF)
+      REAL(DOUBLE)                    :: DXDR(3), DXDS(3), SURF_VEC(3), MASS_ELEM, MASS_NODE
+      REAL(DOUBLE)                    :: CTE(3), THERMAL_RESULTANT(3)
+      REAL(DOUBLE)                    :: SIG0(2,2), KG8(8,8), STRAIN0(3), N0V(3)
+      REAL(DOUBLE)                    :: XBAR(3), E1F(3), E2F(3), E3F(3), V13(3), V24(3), V12(3), TMP(3), NM
+      INTEGER(LONG)                   :: KI, KJ
 
-      INTEGER(LONG)                   :: I, J, K
-      REAL(DOUBLE)                    :: E(6,6), GDRILL
-      REAL(DOUBLE)                    :: HH_IJ(MAX_ORDER_GAUSS), SS_IJ(MAX_ORDER_GAUSS)
-      REAL(DOUBLE)                    :: HH_K(MAX_ORDER_GAUSS),  SS_K(MAX_ORDER_GAUSS)
-      REAL(DOUBLE)                    :: R, S, T, DETJ, INTFAC
-      REAL(DOUBLE)                    :: BD_STD(1,6*ELGP), BD_PURE(1,6*ELGP), KD(6*ELGP,6*ELGP)
+      IF (ELGP /= 8) THEN
+         NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,9001) SUBR_NAME, EID, ELGP
+         WRITE(F06,9001) SUBR_NAME, EID, ELGP
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
 
-      CALL MITC8 ( OPT, INT_ELEM_ID )
+      IF (PCOMP_PROPS == 'Y') THEN
+         NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,*) ' *ERROR: Code not written for composite material with PARAM,QUAD8TYP,MITC8D'
+         WRITE(F06,*) ' *ERROR: Code not written for composite material with PARAM,QUAD8TYP,MITC8D'
+         CALL OUTA_HERE ( 'Y' )
+      ENDIF
 
-      IF (OPT(4) /= 'Y') RETURN
+      CALL LOAD_BASIC_COORDS_Q8(XYZ)
+      CALL FIXED_FRAME_Q8(XYZ, E1F, E2F, E3F, XBAR)
+      CALL BUILD_LOCAL_XY_Q8(XYZ, XBAR, E1F, E2F, XY8)
 
-      E = MITC_ELASTICITY()
-      GDRILL = E(4,4)
+      GP3 = (/-DSQRT(3.0D0/5.0D0), ZERO, DSQRT(3.0D0/5.0D0)/)
+      W3  = (/5.0D0/9.0D0, 8.0D0/9.0D0, 5.0D0/9.0D0/)
+      GP2 = (/-ONE/DSQRT(3.0D0), ONE/DSQRT(3.0D0)/)
+      W2  = (/ONE, ONE/)
+      THICK = EPROP(1)
 
-      CALL ORDER_GAUSS ( IORD_IJ, SS_IJ, HH_IJ )
-      CALL ORDER_GAUSS ( IORD_K , SS_K , HH_K  )
-
-      DO I=1,IORD_IJ
-         DO J=1,IORD_IJ
-            R = SS_IJ(I)
-            S = SS_IJ(J)
-            CALL MITC8_STD_DRILL_B  ( R, S, BD_STD  )
-            CALL MITC8_PURE_DRILL_B ( R, S, BD_PURE )
-            CALL MATMULT_FFF_T ( BD_PURE, BD_PURE, 1, 6*ELGP, 6*ELGP, KD )
-            CALL MATMULT_FFF_T ( BD_STD , BD_STD , 1, 6*ELGP, 6*ELGP, KE )
-            KD = KD - KE
-            DO K=1,IORD_K
-               T = SS_K(K)
-               DETJ = MITC_DETJ ( R, S, T )
-               INTFAC = DETJ*HH_IJ(I)*HH_IJ(J)*HH_K(K)
-               KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + BETA_DRILL*GDRILL*KD*INTFAC
+      IF (OPT(1) == 'Y') THEN
+         M1 = ZERO
+         MASS_ELEM = ZERO
+         DO I=1,3
+            DO J=1,3
+               R = GP3(I)
+               S = GP3(J)
+               WT = W3(I)*W3(J)
+               CALL Q8_DXY(XY8, R, S, N8, DNDX, DNDY, DETJ)
+               MASS_ELEM = MASS_ELEM + MASS_PER_UNIT_AREA*WT*DABS(DETJ)
+               DO K=1,8
+                  DO L=1,8
+                     M1(K,L) = M1(K,L) + N8(K)*N8(L)*MASS_PER_UNIT_AREA*WT*DABS(DETJ)
+                  ENDDO
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
+
+         ME = ZERO
+         IF ((SOL_NAME(1:5) == 'MODES') .AND. (COUPMASS > 0)) THEN
+            DO K=1,8
+               DO L=1,8
+                  DO IA=1,3
+                     ME(6*(K-1)+IA,6*(L-1)+IA) = M1(K,L)
+                  ENDDO
+                  DO IA=4,5
+                     ME(6*(K-1)+IA,6*(L-1)+IA) = M1(K,L) * THICK*THICK / 12.0D0
+                  ENDDO
+               ENDDO
+            ENDDO
+         ELSE
+            MASS_NODE = MASS_ELEM/8.0D0
+            DO K=1,8
+               DO IA=1,3
+                  ME(6*(K-1)+IA,6*(K-1)+IA) = MASS_NODE
+               ENDDO
+               ME(6*(K-1)+4,6*(K-1)+4) = MASS_NODE * THICK*THICK / 12.0D0
+               ME(6*(K-1)+5,6*(K-1)+5) = MASS_NODE * THICK*THICK / 12.0D0
+            ENDDO
+         ENDIF
+      ENDIF
+
+      IF (OPT(2) == 'Y') THEN
+         UNIT_PTE = ZERO
+         DO I=1,3
+            DO J=1,3
+               R = GP3(I)
+               S = GP3(J)
+               WT = W3(I)*W3(J)
+               CALL BM_Q8_AT(XY8, R, S, BM, DETJ)
+               CTE(1) = ALPVEC(1,1)
+               CTE(2) = ALPVEC(2,1)
+               CTE(3) = ALPVEC(4,1)
+               THERMAL_RESULTANT = MATMUL(SHELL_A, CTE)
+               UNIT_PTE = UNIT_PTE + MATMUL(TRANSPOSE(BM), THERMAL_RESULTANT)*WT*DABS(DETJ)
+            ENDDO
+         ENDDO
+         DO JSUB=1,SIZE(PTE,2)
+            TBAR = ZERO
+            DO J=1,8
+               TBAR = TBAR + DT(J,JSUB)
+            ENDDO
+            TBAR = TBAR/8.0D0 - TREF(1)
+            PTE(1:NDOF,JSUB) = UNIT_PTE(1:NDOF)*TBAR
+         ENDDO
+      ENDIF
+
+      IF (OPT(3) == 'Y') THEN
+         GP = 1
+         DO I=1,2
+            DO J=1,2
+               GP = GP + 1
+               R = 0.577350269189626D0
+               S = 0.577350269189626D0
+               IF (I == 1) R = -R
+               IF (J == 1) S = -S
+               CALL BM_Q8_AT(XY8, R, S, BM, DETJ)
+               CALL BB_Q8_AT(XY8, R, S, BB, DETJ)
+               CALL BS_Q8_AT(XY8, R, S, BS, DETJ)
+               IF (GP <= MAX_STRESS_POINTS) THEN
+                  BE1(1:3,1:NDOF,GP) = BM
+                  BE2(1:3,1:NDOF,GP) = BB
+                  BE3(1:2,1:NDOF,GP) = BS
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDIF
+
+      IF (OPT(4) == 'Y') THEN
+         KE = ZERO
+         GVAL = ZERO
+         IF (DABS(THICK) > 1.0D-20) GVAL = SHELL_T(1,1) / ((5.0D0/6.0D0)*THICK)
+         CDRILL = KT_DRILL * GVAL * THICK
+
+         DO I=1,3
+            DO J=1,3
+               R = GP3(I)
+               S = GP3(J)
+               WT = W3(I)*W3(J)
+               CALL BM_Q8_AT(XY8, R, S, BM, DETJ)
+               CALL BB_Q8_AT(XY8, R, S, BB, DETJ)
+               CALL BDRILL_Q8_AT(XY8, R, S, BD, DETJ)
+               KE = KE + THICK*WT*DABS(DETJ)*MATMUL(TRANSPOSE(BM), MATMUL(SHELL_A/THICK, BM))
+               KE = KE + WT*DABS(DETJ)*MATMUL(TRANSPOSE(BB), MATMUL(SHELL_D, BB))
+               KE = KE + WT*DABS(DETJ)*CDRILL*MATMUL(TRANSPOSE(BD), BD)
+            ENDDO
+         ENDDO
+
+         DO I=1,2
+            DO J=1,2
+               R = GP2(I)
+               S = GP2(J)
+               WT = W2(I)*W2(J)
+               CALL BS_Q8_AT(XY8, R, S, BS, DETJ)
+               KE = KE + THICK*WT*DABS(DETJ)*MATMUL(TRANSPOSE(BS), MATMUL(SHELL_T/THICK, BS))
+            ENDDO
+         ENDDO
+      ENDIF
+
+      IF (OPT(5) == 'Y') THEN
+         UNIT_PPE = ZERO
+         DO I=1,3
+            DO J=1,3
+               R = GP3(I)
+               S = GP3(J)
+               WT = W3(I)*W3(J)
+               CALL SHAPE_Q8_STD(R, S, N8, DXDR, DXDS, XYZ, DETJ)
+               CALL CROSS3(DXDR, DXDS, SURF_VEC)
+               DO K=1,8
+                  UNIT_PPE(6*(K-1)+1) = UNIT_PPE(6*(K-1)+1) + N8(K)*SURF_VEC(1)*WT
+                  UNIT_PPE(6*(K-1)+2) = UNIT_PPE(6*(K-1)+2) + N8(K)*SURF_VEC(2)*WT
+                  UNIT_PPE(6*(K-1)+3) = UNIT_PPE(6*(K-1)+3) + N8(K)*SURF_VEC(3)*WT
+               ENDDO
+            ENDDO
+         ENDDO
+         DO J=1,SIZE(PPE,2)
+            PPE(1:NDOF,J) = PPE(1:NDOF,J) + UNIT_PPE(1:NDOF)*PRESS(3,J)
+         ENDDO
+      ENDIF
+
+      IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
+         CALL ELMDIS
+         CALL BM_Q8_AT(XY8, ZERO, ZERO, BM, DETJ)
+         STRAIN0 = MATMUL(BM, UEL(1:NDOF))
+         N0V = MATMUL(SHELL_A, STRAIN0)
+
+         SIG0 = ZERO
+         SIG0(1,1) = N0V(1)
+         SIG0(2,2) = N0V(2)
+         SIG0(1,2) = N0V(3)
+         SIG0(2,1) = N0V(3)
+
+         KG8 = ZERO
+         DO I=1,3
+            DO J=1,3
+               R = GP3(I)
+               S = GP3(J)
+               WT = W3(I)*W3(J)
+               CALL Q8_DXY(XY8, R, S, N8, DNDX, DNDY, DETJ)
+               DO K=1,8
+                  DO L=1,8
+                     KG8(K,L) = KG8(K,L) + ( DNDX(K)*(SIG0(1,1)*DNDX(L) + SIG0(1,2)*DNDY(L)) +                     &
+                                             DNDY(K)*(SIG0(2,1)*DNDX(L) + SIG0(2,2)*DNDY(L)) ) * WT * DABS(DETJ)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+
+         KED(1:NDOF,1:NDOF) = ZERO
+         DO I=1,8
+            DO J=1,8
+               KI = 6*(I-1)
+               KJ = 6*(J-1)
+               KED(KI+1,KJ+1) = KG8(I,J)
+               KED(KI+2,KJ+2) = KG8(I,J)
+               KED(KI+3,KJ+3) = KG8(I,J)
+            ENDDO
+         ENDDO
+      ENDIF
 
       RETURN
 
+ 9001 FORMAT(' *ERROR: ',A,' expects ELGP=8 for element ',I8,' but got ',I8)
+
       CONTAINS
 
-      SUBROUTINE MITC8_STD_DRILL_B ( R, S, BDOUT )
+      SUBROUTINE LOAD_BASIC_COORDS_Q8 ( XYZOUT )
+      REAL(DOUBLE), INTENT(OUT) :: XYZOUT(8,3)
+      INTEGER(LONG) :: II, JJ
+      DO II=1,8
+         DO JJ=1,3
+            XYZOUT(II,JJ) = XEB(II,JJ)
+         ENDDO
+      ENDDO
+      END SUBROUTINE LOAD_BASIC_COORDS_Q8
 
-      REAL(DOUBLE), INTENT(IN)        :: R, S
-      REAL(DOUBLE), INTENT(OUT)       :: BDOUT(1,6*ELGP)
+      SUBROUTINE FIXED_FRAME_Q8 ( XYZN, E1OUT, E2OUT, E3OUT, XCEN )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3)
+      REAL(DOUBLE), INTENT(OUT) :: E1OUT(3), E2OUT(3), E3OUT(3), XCEN(3)
+      INTEGER(LONG) :: II
 
-      INTEGER(LONG)                   :: II
-      REAL(DOUBLE)                    :: PSH(ELGP), DPSHG(2,ELGP), CLB(3,3)
-      REAL(DOUBLE)                    :: XI_LOC(ELGP), ETA_LOC(ELGP)
-      REAL(DOUBLE)                    :: J11, J12, J21, J22, DET2
-      REAL(DOUBLE)                    :: DNDX, DNDY
+      V13 = XYZN(3,:) - XYZN(1,:)
+      V24 = XYZN(4,:) - XYZN(2,:)
+      CALL CROSS3(V13, V24, E3OUT)
+      NM = VNORM(E3OUT)
+      IF (NM > 1.0D-12) THEN
+         E3OUT = E3OUT / NM
+      ELSE
+         E3OUT = (/ZERO, ZERO, ONE/)
+      ENDIF
 
+      V12 = XYZN(2,:) - XYZN(1,:)
+      TMP = V12 - DOT_PRODUCT(V12, E3OUT) * E3OUT
+      NM = VNORM(TMP)
+      IF (NM > 1.0D-12) THEN
+         E1OUT = TMP / NM
+      ELSE
+         E1OUT = (/ONE, ZERO, ZERO/)
+      ENDIF
+
+      CALL CROSS3(E3OUT, E1OUT, E2OUT)
+      NM = VNORM(E2OUT)
+      IF (NM > 1.0D-12) THEN
+         E2OUT = E2OUT / NM
+      ELSE
+         E2OUT = (/ZERO, ONE, ZERO/)
+      ENDIF
+
+      XCEN = ZERO
+      DO II=1,8
+         XCEN = XCEN + XYZN(II,:)
+      ENDDO
+      XCEN = XCEN / 8.0D0
+      END SUBROUTINE FIXED_FRAME_Q8
+
+      SUBROUTINE BUILD_LOCAL_XY_Q8 ( XYZN, XCEN, E1IN, E2IN, XYLOC )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), XCEN(3), E1IN(3), E2IN(3)
+      REAL(DOUBLE), INTENT(OUT) :: XYLOC(8,2)
+      INTEGER(LONG) :: II
+      REAL(DOUBLE) :: DXYZ(3)
+      DO II=1,8
+         DXYZ = XYZN(II,:) - XCEN
+         XYLOC(II,1) = DOT_PRODUCT(DXYZ, E1IN)
+         XYLOC(II,2) = DOT_PRODUCT(DXYZ, E2IN)
+      ENDDO
+      END SUBROUTINE BUILD_LOCAL_XY_Q8
+
+      SUBROUTINE SHAPE_Q8_STD ( XI, ETA, NVAL, G1, G2, XYZN, DETJ )
+      REAL(DOUBLE), INTENT(IN)  :: XI, ETA, XYZN(8,3)
+      REAL(DOUBLE), INTENT(OUT) :: NVAL(8), G1(3), G2(3), DETJ
+      REAL(DOUBLE) :: DN(2,8), GV(3)
+      CALL SHAPE_Q8_STD_DERIVS(XI, ETA, NVAL, DN)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      CALL CROSS3(G1, G2, GV)
+      DETJ = VNORM(GV)
+      END SUBROUTINE SHAPE_Q8_STD
+
+      SUBROUTINE SHAPE_Q8_STD_DERIVS ( XI, ETA, NVAL, DN )
+      REAL(DOUBLE), INTENT(IN)  :: XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: NVAL(8), DN(2,8)
+      NVAL(1) = 0.25D0*(ONE-XI)*(ONE-ETA)*(-XI-ETA-ONE)
+      NVAL(2) = 0.25D0*(ONE+XI)*(ONE-ETA)*( XI-ETA-ONE)
+      NVAL(3) = 0.25D0*(ONE+XI)*(ONE+ETA)*( XI+ETA-ONE)
+      NVAL(4) = 0.25D0*(ONE-XI)*(ONE+ETA)*(-XI+ETA-ONE)
+      NVAL(5) = 0.50D0*(ONE-XI*XI)*(ONE-ETA)
+      NVAL(6) = 0.50D0*(ONE+XI)*(ONE-ETA*ETA)
+      NVAL(7) = 0.50D0*(ONE-XI*XI)*(ONE+ETA)
+      NVAL(8) = 0.50D0*(ONE-XI)*(ONE-ETA*ETA)
+
+      DN(1,1) = 0.25D0*(ONE-ETA)*(TWO*XI + ETA)
+      DN(1,2) = 0.25D0*(ONE-ETA)*(TWO*XI - ETA)
+      DN(1,3) = 0.25D0*(ONE+ETA)*(TWO*XI + ETA)
+      DN(1,4) = 0.25D0*(ONE+ETA)*(TWO*XI - ETA)
+      DN(1,5) = -XI*(ONE-ETA)
+      DN(1,6) = 0.50D0*(ONE-ETA*ETA)
+      DN(1,7) = -XI*(ONE+ETA)
+      DN(1,8) = -0.50D0*(ONE-ETA*ETA)
+
+      DN(2,1) = 0.25D0*(ONE-XI)*(XI + TWO*ETA)
+      DN(2,2) = 0.25D0*(ONE+XI)*(-XI + TWO*ETA)
+      DN(2,3) = 0.25D0*(ONE+XI)*(XI + TWO*ETA)
+      DN(2,4) = 0.25D0*(ONE-XI)*(-XI + TWO*ETA)
+      DN(2,5) = -0.50D0*(ONE-XI*XI)
+      DN(2,6) = -ETA*(ONE+XI)
+      DN(2,7) = 0.50D0*(ONE-XI*XI)
+      DN(2,8) = -ETA*(ONE-XI)
+      END SUBROUTINE SHAPE_Q8_STD_DERIVS
+
+      SUBROUTINE Q8_DXY ( XYLOC, XI, ETA, NVAL, DNDX, DNDY, DETJ )
+      REAL(DOUBLE), INTENT(IN)  :: XYLOC(8,2), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: NVAL(8), DNDX(8), DNDY(8), DETJ
+      REAL(DOUBLE) :: DN(2,8), JACM(2,2), JINV(2,2), DET
+      INTEGER(LONG) :: II
+      CALL SHAPE_Q8_STD_DERIVS(XI, ETA, NVAL, DN)
+      JACM = MATMUL(DN, XYLOC)
+      DET = JACM(1,1)*JACM(2,2) - JACM(1,2)*JACM(2,1)
+      DETJ = DET
+      IF (DABS(DET) <= 1.0D-20) THEN
+         DNDX = ZERO
+         DNDY = ZERO
+      ELSE
+         JINV(1,1) =  JACM(2,2)/DET
+         JINV(1,2) = -JACM(1,2)/DET
+         JINV(2,1) = -JACM(2,1)/DET
+         JINV(2,2) =  JACM(1,1)/DET
+         DO II=1,8
+            DNDX(II) = JINV(1,1)*DN(1,II) + JINV(1,2)*DN(2,II)
+            DNDY(II) = JINV(2,1)*DN(1,II) + JINV(2,2)*DN(2,II)
+         ENDDO
+      ENDIF
+      END SUBROUTINE Q8_DXY
+
+      SUBROUTINE BM_Q8_AT ( XYLOC, XI, ETA, BMOUT, DETJ )
+      REAL(DOUBLE), INTENT(IN)  :: XYLOC(8,2), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: BMOUT(3,NDOF), DETJ
+      REAL(DOUBLE) :: NVAL(8), DNDX(8), DNDY(8)
+      INTEGER(LONG) :: II, COL
+      CALL Q8_DXY(XYLOC, XI, ETA, NVAL, DNDX, DNDY, DETJ)
+      BMOUT = ZERO
+      DO II=1,8
+         COL = 6*(II-1)
+         BMOUT(1,COL+1) = DNDX(II)
+         BMOUT(2,COL+2) = DNDY(II)
+         BMOUT(3,COL+1) = DNDY(II)
+         BMOUT(3,COL+2) = DNDX(II)
+      ENDDO
+      END SUBROUTINE BM_Q8_AT
+
+      SUBROUTINE BB_Q8_AT ( XYLOC, XI, ETA, BBOUT, DETJ )
+      REAL(DOUBLE), INTENT(IN)  :: XYLOC(8,2), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: BBOUT(3,NDOF), DETJ
+      REAL(DOUBLE) :: NVAL(8), DNDX(8), DNDY(8)
+      INTEGER(LONG) :: II, COL
+      CALL Q8_DXY(XYLOC, XI, ETA, NVAL, DNDX, DNDY, DETJ)
+      BBOUT = ZERO
+      DO II=1,8
+         COL = 6*(II-1)
+         BBOUT(1,COL+5) =  DNDX(II)
+         BBOUT(2,COL+4) = -DNDY(II)
+         BBOUT(3,COL+5) =  DNDY(II)
+         BBOUT(3,COL+4) = -DNDX(II)
+      ENDDO
+      END SUBROUTINE BB_Q8_AT
+
+      SUBROUTINE BS_Q8_AT ( XYLOC, XI, ETA, BSOUT, DETJ )
+      REAL(DOUBLE), INTENT(IN)  :: XYLOC(8,2), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,NDOF), DETJ
+      REAL(DOUBLE) :: NVAL(8), DNDX(8), DNDY(8)
+      INTEGER(LONG) :: II, COL
+      CALL Q8_DXY(XYLOC, XI, ETA, NVAL, DNDX, DNDY, DETJ)
+      BSOUT = ZERO
+      DO II=1,8
+         COL = 6*(II-1)
+         BSOUT(1,COL+3) = DNDX(II)
+         BSOUT(1,COL+5) = NVAL(II)
+         BSOUT(2,COL+3) = DNDY(II)
+         BSOUT(2,COL+4) = -NVAL(II)
+      ENDDO
+      END SUBROUTINE BS_Q8_AT
+
+      SUBROUTINE BDRILL_Q8_AT ( XYLOC, XI, ETA, BDOUT, DETJ )
+      REAL(DOUBLE), INTENT(IN)  :: XYLOC(8,2), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: BDOUT(1,NDOF), DETJ
+      REAL(DOUBLE) :: NVAL(8), DNDX(8), DNDY(8)
+      INTEGER(LONG) :: II, COL
+      CALL Q8_DXY(XYLOC, XI, ETA, NVAL, DNDX, DNDY, DETJ)
       BDOUT = ZERO
-      CALL MITC_SHAPE_FUNCTIONS ( R, S, PSH, DPSHG )
-      CLB = MITC8_CARTESIAN_LOCAL_BASIS ( R, S )
-
-      DO II=1,ELGP
-         XI_LOC(II)  = DOT_PRODUCT( XEL(II,:), CLB(:,1) )
-         ETA_LOC(II) = DOT_PRODUCT( XEL(II,:), CLB(:,2) )
+      DO II=1,8
+         COL = 6*(II-1)
+         BDOUT(1,COL+1) =  0.5D0*DNDY(II)
+         BDOUT(1,COL+2) = -0.5D0*DNDX(II)
+         BDOUT(1,COL+6) =  NVAL(II)
       ENDDO
+      END SUBROUTINE BDRILL_Q8_AT
 
-      J11 = DOT_PRODUCT( DPSHG(1,:), XI_LOC  )
-      J12 = DOT_PRODUCT( DPSHG(1,:), ETA_LOC )
-      J21 = DOT_PRODUCT( DPSHG(2,:), XI_LOC  )
-      J22 = DOT_PRODUCT( DPSHG(2,:), ETA_LOC )
-      DET2 = J11*J22 - J12*J21
-      IF (DABS(DET2) < 1.0D-14) RETURN
+      SUBROUTINE CROSS3 ( A, B, C )
+      REAL(DOUBLE), INTENT(IN)  :: A(3), B(3)
+      REAL(DOUBLE), INTENT(OUT) :: C(3)
+      C(1) = A(2)*B(3) - A(3)*B(2)
+      C(2) = A(3)*B(1) - A(1)*B(3)
+      C(3) = A(1)*B(2) - A(2)*B(1)
+      END SUBROUTINE CROSS3
 
-      DO II=1,ELGP
-         DNDX = ( J22*DPSHG(1,II) - J12*DPSHG(2,II) ) / DET2
-         DNDY = (-J21*DPSHG(1,II) + J11*DPSHG(2,II) ) / DET2
-         BDOUT(1,6*(II-1)+1) = -0.5D0 * DNDY
-         BDOUT(1,6*(II-1)+2) =  0.5D0 * DNDX
-         BDOUT(1,6*(II-1)+6) =  PSH(II)
-      ENDDO
-
-      END SUBROUTINE MITC8_STD_DRILL_B
-
-      SUBROUTINE MITC8_PURE_DRILL_B ( R, S, BDOUT )
-
-      REAL(DOUBLE), INTENT(IN)        :: R, S
-      REAL(DOUBLE), INTENT(OUT)       :: BDOUT(1,6*ELGP)
-
-      INTEGER(LONG)                   :: II
-      REAL(DOUBLE)                    :: PSH(ELGP), DPSHG(2,ELGP)
-
-      BDOUT = ZERO
-      CALL MITC_SHAPE_FUNCTIONS ( R, S, PSH, DPSHG )
-      DO II=1,ELGP
-         BDOUT(1,6*(II-1)+6) = PSH(II)
-      ENDDO
-
-      END SUBROUTINE MITC8_PURE_DRILL_B
+      FUNCTION VNORM ( V ) RESULT(NMOUT)
+      REAL(DOUBLE), INTENT(IN) :: V(3)
+      REAL(DOUBLE) :: NMOUT
+      NMOUT = DSQRT(MAX(ZERO, DOT_PRODUCT(V,V)))
+      END FUNCTION VNORM
 
       END SUBROUTINE CQUAD8_MITC8D
