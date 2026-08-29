@@ -13,13 +13,13 @@ This note summarizes the current MYSTRAN-side Fortran port status for the upgrad
 
 ### CQUAD8 default
 
-`CQUAD8` now defaults to the Simo Q8 branch instead of `MITC8`.
+`CQUAD8` now defaults to the Python-aligned Simo Q8 branch instead of `MITC8`.
 
 Relevant implementation points:
 
-- `PARAM,QUAD8TYP` default is `SIMOEAS1`
-- `SIMOQ8` is accepted as an alias and mapped to `SIMOEAS1`
-- the dispatcher routes `SIMOEAS1` and `SIMOQ8` to `CQUAD8_SIMOEAS1`
+- `PARAM,QUAD8TYP` default is `SIMOQ8`
+- accepted Simo aliases normalize onto `SIMOQ8`
+- the dispatcher routes `SIMOQ8` to `CQUAD8_SIMOQ8`
 
 Files:
 
@@ -74,7 +74,7 @@ The generated `GRID_SNORM` preprocessing path now covers:
 - `CTRIA3_T3FF`
 - `CTRIA6_SIMO1993`
 - `CQUADR_Q4RS`
-- `CQUAD8_SIMOEAS1`
+- `CQUAD8_SIMOQ8`
 - `CTRIAR_DKMT18`
 - `CQUADR_DKMQ24`
 - `CQUADR_DKMQ24N`
@@ -100,7 +100,7 @@ Current status:
 
 - `MITC4`: supported
 - `MITC8`: now ported from thermal stub to active `OPT(2)` path
-- `CQUAD8_SIMOEAS1`: now ported from thermal stub to active `OPT(2)` path
+- `CQUAD8_SIMOQ8`: now ported from thermal stub to active `OPT(2)` path
 - `CTRIA6_SIMO1993`: now ported from thermal stub to active `OPT(2)` path
 - `CTRIA6_MITC6`: ported with the same active `OPT(2)` thermal path while replacing only membrane/shear with MITC tying
 - `CTRIA6_MH6T`: ported with the same active `OPT(2)` thermal path while replacing membrane/shear with the MacNeal assumed-strain construction
@@ -108,13 +108,13 @@ Current status:
 
 Implementation note:
 
-- the new `CQUAD8_SIMOEAS1` and `CTRIA6_SIMO1993` thermal paths currently use shell resultants assembled from `SHELL_A`, `SHELL_D`, and `SHELL_T`
+- the new `CQUAD8_SIMOQ8` and `CTRIA6_SIMO1993` thermal paths currently use shell resultants assembled from `SHELL_A`, `SHELL_D`, and `SHELL_T`
 - this is intended to activate `alpha` support consistently with the current shell stiffness formulation
 
 Files:
 
 - [MITC8.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/MITC8.f90)
-- [CQUAD8_SIMOEAS1.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CQUAD8_SIMOEAS1.f90)
+- [CQUAD8_SIMOQ8.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CQUAD8_SIMOQ8.f90)
 - [CTRIA6_SIMO1993.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_SIMO1993.f90)
 - [CTRIA6_MITC6.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_MITC6.f90)
 - [CTRIA6_MH6T.f90](D:/18a/MYSTRAN/Source/EMG/EMG4/CTRIA6_MH6T.f90)
@@ -151,7 +151,7 @@ Confirmed shell coverage includes:
 - `CQUADR_DKMQ24`
 - `CQUADR_DKMQ24N`
 - `CTRIAR_DKMT18`
-- `CQUAD8_SIMOEAS1`
+- `CQUAD8_SIMOQ8`
 
 This means the audited linear and quadratic shell branches already have pressure assembly in place.
 
@@ -173,7 +173,7 @@ This document records source-level port status only.
 Recommended next step after code changes:
 
 1. compile MYSTRAN
-2. run shell thermal regression cases for `MITC8`, `CQUAD8_SIMOEAS1`, and `CTRIA6_SIMO1993`
+2. run shell thermal regression cases for `MITC8`, `CQUAD8_SIMOQ8`, and `CTRIA6_SIMO1993`
 3. compare pressure and thermal results against the Python reference models where available
 
 ## CTRIA6 MITC6 Smoke Validation

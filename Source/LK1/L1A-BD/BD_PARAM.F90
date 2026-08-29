@@ -2886,17 +2886,25 @@
             CALL LEFT_ADJ_BDFLD ( CHRPARM )
             IF      (CHRPARM == 'MITC8   ') THEN
                QUAD8TYP = 'MITC8   '
-            ELSE IF ((CHRPARM == 'SIMOEAS1') .OR. (CHRPARM == 'SIMO    ') .OR. (CHRPARM == 'SIMOQ8  ')) THEN
-               QUAD8TYP = 'SIMOEAS1'
+            ELSE IF (CHRPARM == 'MITC8D  ') THEN
+               QUAD8TYP = 'MITC8D  '
+            ELSE IF ((CHRPARM == 'SIMO    ') .OR. (CHRPARM == 'SIMOQ8  ') .OR. (CHRPARM == 'SIMOQ8V1')) THEN
+               QUAD8TYP = 'SIMOQ8  '
+            ELSE IF (CHRPARM == 'HBQ8    ') THEN
+               QUAD8TYP = 'HBQ8    '
+            ELSE IF (CHRPARM == 'ANS8BDG6') THEN
+               QUAD8TYP = 'ANS8BDG6'
+            ELSE IF ((CHRPARM == 'MACQ8D  ') .OR. (CHRPARM == 'MACNEALD')) THEN
+               QUAD8TYP = 'MACQ8D  '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'MITC8 or SIMOEAS1',CHRPARM,QUAD8TYP
+               WRITE(ERR,1189) PARNAM,'MITC8, MITC8D, SIMOQ8, HBQ8, ANS8BDG6 or MACQ8D',CHRPARM,QUAD8TYP
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'MITC8 or SIMOEAS1',CHRPARM,QUAD8TYP
+                  WRITE(F06,1189) PARNAM,'MITC8, MITC8D, SIMOQ8, HBQ8, ANS8BDG6 or MACQ8D',CHRPARM,QUAD8TYP
                ENDIF
             ENDIF
          ENDIF

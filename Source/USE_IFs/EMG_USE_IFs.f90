@@ -77,6 +77,10 @@
       USE USERIN_Interface
       USE ELMOFF_Interface
       USE MITC8_Interface
-      USE CQUAD8_SIMOEAS1_Interface
+      USE CQUAD8_MITC8D_Interface
+      USE CQUAD8_SIMOQ8_Interface
+      USE CQUAD8_HBQ8_Interface
+      USE CQUAD8_ANS8BDG6_Interface
+      USE CQUAD8_MACQ8D_Interface
 
       END MODULE EMG_USE_IFs

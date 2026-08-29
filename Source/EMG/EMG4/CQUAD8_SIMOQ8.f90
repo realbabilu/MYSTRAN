@@ -1,30 +1,36 @@
 ! #################################################################################################################################
-! CQUAD8 Simo1993 Q8 + EAS1 shell for PARAM,QUAD8TYP,SIMOEAS1.
+! CQUAD8 Python-aligned Simo1993 Q8 shell for PARAM,QUAD8TYP,SIMOQ8.
 
-      SUBROUTINE CQUAD8_SIMOEAS1 ( OPT, INT_ELEM_ID )
+      SUBROUTINE CQUAD8_SIMOQ8 ( OPT, INT_ELEM_ID )
 
 ! Ported from:
-!   D:\18a\bending_only\Shell\gemini2\shit\validation\q8\Simo1993_Q8_ShellElement_v1p8_standalone.py
+!   D:\18a\python\quadratic\Simo1993_Q8_ShellElement_v1p8_standalone.py
+!   D:\18a\python\quadratic\Simo1993_Q8_thermal_buckling.py
 !
 ! Static stiffness path:
 !   Q8 serendipity Simo/Fox director kinematics + Hughes-Brezzi drilling,
 !   3x3 membrane/bending/drilling/shear, and one EAS shear bubble
 !   phi=(1-r^2)(1-s^2) condensed at element level.
+!
+! This branch is the active Simo Q8 path and follows the Python benchmark
+! conventions more closely, including the center-constant geometric stiffness
+! used by the thermal-buckling helper.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_STRESS_POINTS, SOL_NAME
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, DT, EID, ELGP, GRID_SNORM, KE, ME, BE1, BE2, BE3, EPROP, FCONV,         &
+      USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, DT, EID, ELGP, GRID_SNORM, KE, KED, ME, BE1, BE2, BE3, EPROP, FCONV,    &
                                          MASS_PER_UNIT_AREA, NUM_EMG_FATAL_ERRS, PCOMP_PROPS, PPE, PRESS, PTE, SHELL_A,        &
-                                         SHELL_D, SHELL_T, TREF, XEB
+                                         SHELL_D, SHELL_T, TREF, UEL, XEB
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
       USE PARAMS, ONLY                :  COUPMASS
+      USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
       IMPLICIT NONE
 
-      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUAD8_SIMOEAS1'
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUAD8_SIMOQ8'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
 
@@ -36,6 +42,9 @@
       REAL(DOUBLE)                    :: M1(8,8), N8(8), DN8(2,8), MASS_ELEM, MASS_NODE
       REAL(DOUBLE)                    :: UNIT_PPE(48), UNIT_PTE(48), DXDR(3), DXDS(3), SURF_VEC(3), TBAR
       REAL(DOUBLE)                    :: CTE(3), THERMAL_RESULTANT(3)
+      REAL(DOUBLE)                    :: DLOC(2,8), SIG0(2,2), DUM28(2,8), KG8(8,8), STRAIN0(3), N0(3)
+      REAL(DOUBLE)                    :: G1(3), G2(3), A11, A22, A12, DET, AI11, AI22, AI12
+      INTEGER(LONG)                   :: KI, KJ
 
       IF (ELGP /= 8) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -48,8 +57,8 @@
       IF (PCOMP_PROPS == 'Y') THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
          FATAL_ERR = FATAL_ERR + 1
-         WRITE(ERR,*) ' *ERROR: Code not written for composite material with PARAM,QUAD8TYP,SIMOEAS1'
-         WRITE(F06,*) ' *ERROR: Code not written for composite material with PARAM,QUAD8TYP,SIMOEAS1'
+         WRITE(ERR,*) ' *ERROR: Code not written for composite material with PARAM,QUAD8TYP,SIMOQ8'
+         WRITE(F06,*) ' *ERROR: Code not written for composite material with PARAM,QUAD8TYP,SIMOQ8'
          CALL OUTA_HERE ( 'Y' )
       ENDIF
 
@@ -217,11 +226,57 @@
       ENDIF
 
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
-         WRITE(ERR,*) ' *ERROR: Code not written for CQUAD8 SIMOEAS1 differential stiffness matrix'
-         WRITE(F06,*) ' *ERROR: Code not written for CQUAD8 SIMOEAS1 differential stiffness matrix'
-         NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
-         FATAL_ERR = FATAL_ERR + 1
-         CALL OUTA_HERE ( 'Y' )
+         CALL ELMDIS
+         CALL BM_Q8_AT ( XYZ, ZERO, ZERO, BM, JAC )
+         STRAIN0 = MATMUL(BM, UEL(1:48))
+         N0 = MATMUL(SHELL_A, STRAIN0)
+
+         SIG0 = ZERO
+         SIG0(1,1) = N0(1)
+         SIG0(2,2) = N0(2)
+         SIG0(1,2) = N0(3)
+         SIG0(2,1) = N0(3)
+
+         KG8 = ZERO
+         DO I=1,3
+            DO J=1,3
+               R = GP3(I)
+               S = GP3(J)
+               WT = W3(I)*W3(J)
+
+               CALL SHAPE_Q8 ( R, S, N8, DN8 )
+               G1 = MATMUL(DN8(1,:), XYZ)
+               G2 = MATMUL(DN8(2,:), XYZ)
+               CALL CROSS3 ( G1, G2, SURF_VEC )
+               JAC = VNORM(SURF_VEC)
+
+               A11 = DOT_PRODUCT(G1,G1)
+               A22 = DOT_PRODUCT(G2,G2)
+               A12 = DOT_PRODUCT(G1,G2)
+               DET = A11*A22 - A12*A12
+               IF (DABS(DET) <= 1.0D-30) CYCLE
+
+               AI11 =  A22/DET
+               AI22 =  A11/DET
+               AI12 = -A12/DET
+               DLOC(1,:) = AI11*DN8(1,:) + AI12*DN8(2,:)
+               DLOC(2,:) = AI12*DN8(1,:) + AI22*DN8(2,:)
+
+               DUM28 = MATMUL(SIG0, DLOC)
+               KG8 = KG8 + MATMUL(TRANSPOSE(DLOC), DUM28) * WT * JAC
+            ENDDO
+         ENDDO
+
+         KED(1:48,1:48) = ZERO
+         DO I=1,8
+            DO J=1,8
+               KI = 6*(I-1)
+               KJ = 6*(J-1)
+               KED(KI+1,KJ+1) = KG8(I,J)
+               KED(KI+2,KJ+2) = KG8(I,J)
+               KED(KI+3,KJ+3) = KG8(I,J)
+            ENDDO
+         ENDDO
       ENDIF
 
       RETURN
@@ -536,4 +591,4 @@
       ENDIF
       END SUBROUTINE INV2
 
-      END SUBROUTINE CQUAD8_SIMOEAS1
+      END SUBROUTINE CQUAD8_SIMOQ8

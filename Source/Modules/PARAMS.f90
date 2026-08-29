@@ -499,9 +499,13 @@
 !                                                              'MITC4PD ': MITC4+/D Hughes-Brezzi branch (experimental)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-      CHARACTER(  8*BYTE)      :: QUAD8TYP       = 'SIMOEAS1' ! Which element to use in MYSTRAN as the CQUAD8 element
+      CHARACTER(  8*BYTE)      :: QUAD8TYP       = 'SIMOQ8  ' ! Which element to use in MYSTRAN as the CQUAD8 element
 !                                                              'MITC8   ': existing Dvorkin-Bathe MITC8 CQUAD8 branch
-!                                                              'SIMOEAS1': Simo1993 Q8 with one EAS shear bubble branch (default)
+!                                                              'MITC8D  ': MITC8 with pure Wilson drilling penalty branch
+!                                                              'SIMOQ8  ': Python-aligned Simo1993 Q8 branch (default)
+!                                                              'HBQ8    ': Darilmaz-Kumbasar hybrid-style Q8 shell branch
+!                                                              'ANS8BDG6': Jung-Han ANS beta-delta-gamma Q8 shell branch
+!                                                              'MACQ8D  ': MacNeal Q8 modified field interpolation + drill penalty
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  8*BYTE)      :: TRIARTYP       = 'DKMT18  ' ! Which element to use in MYSTRAN as the CTRIAR element

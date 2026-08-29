@@ -40,7 +40,7 @@
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  ALPVEC, DT, NUM_EMG_FATAL_ERRS, PCOMP_PROPS, ELGP, ES, KE, EM, ET, BE1, BE2, BE3,       &
                                          PHI_SQ, FCONV, EPROP, SHELL_STR_ANGLE, ME, MASS_PER_UNIT_AREA, PPE, PRESS, PTE, TREF,   &
-                                         XEB
+                                         XEB, XEL
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE PARAMS, ONLY                :  TSTM_DEF, COUPMASS
       USE MITC_STUF, ONLY             :  GP_RS
@@ -73,6 +73,7 @@
       INTEGER(LONG)                   :: I,J,K,L,M,JSUB    ! DO loop indices
       INTEGER(LONG)                   :: STR_PT_NUM        ! Stress recovery point number
 
+      REAL(DOUBLE), PARAMETER         :: BETA_DRILL = 1.0D-4
       REAL(DOUBLE)                    :: HH_IJ(MAX_ORDER_GAUSS) ! Gauss weights for integration in in-layer directions
       REAL(DOUBLE)                    :: SS_IJ(MAX_ORDER_GAUSS) ! Gauss abscissa's for integration in in-layer directions
       REAL(DOUBLE)                    :: HH_K(MAX_ORDER_GAUSS)  ! Gauss weights for integration in thickness direction
@@ -87,6 +88,7 @@
       REAL(DOUBLE)                    :: DETJ              ! Jacobian determinant
       REAL(DOUBLE)                    :: E(6,6)            ! Elasticity matrix in the material coordinate system.
       REAL(DOUBLE)                    :: EE(6,6)           ! Elasticity matrix in the cartesian local coordinate system.
+      REAL(DOUBLE)                    :: BDRILL(1,6*ELGP)  ! Drilling strain-displacement matrix
       REAL(DOUBLE)                    :: LOCAL_BASIS(3,3)  ! Cartesian local basis
       REAL(DOUBLE)                    :: ELEMENT_BASIS(3,3)! Element coordinate system basis
       REAL(DOUBLE)                    :: M_1DOF(ELGP,ELGP) ! Consistent translational mass matrix with 1 DOF per node.
@@ -102,6 +104,7 @@
       REAL(DOUBLE)                    :: ZL(3)
       REAL(DOUBLE)                    :: XE(3)
       REAL(DOUBLE)                    :: CROSS_XLE(3)
+      REAL(DOUBLE)                    :: GDRILL
       REAL(DOUBLE)                    :: CTE(6), THERMAL_STRAIN(6), TBAR, MATL_AXES_ROTATE, E3(6,6), T66(6,6), DUM66(6,6)
       REAL(DOUBLE)                    :: CLB(3,3), TRANSFORM(3,3)
 
@@ -376,6 +379,7 @@
          ! K is in the basic coordinate system
 
          E = MITC_ELASTICITY()
+         GDRILL = E(4,4)
 
          KE(1:6*ELGP,1:6*ELGP) = ZERO
 
@@ -399,6 +403,9 @@
                   DETJ = MITC_DETJ ( R, S, T )
                   INTFAC = DETJ*HH_IJ(I)*HH_IJ(J)*HH_K(K)
                   KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
+                  CALL MITC8_DRILL_B ( R, S, BDRILL )
+                  CALL MATMULT_FFF_T ( BDRILL, BDRILL, 1, 6*ELGP, 6*ELGP, DUM2 )
+                  KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + BETA_DRILL*GDRILL*DUM2(:,:)*INTFAC
                ENDDO
             ENDDO
          ENDDO
@@ -463,6 +470,46 @@
 
 ! **********************************************************************************************************************************
 
+      CONTAINS
+
+      SUBROUTINE MITC8_DRILL_B ( R, S, BDOUT )
+
+      REAL(DOUBLE), INTENT(IN)        :: R, S
+      REAL(DOUBLE), INTENT(OUT)       :: BDOUT(1,6*ELGP)
+
+      INTEGER(LONG)                   :: II
+      REAL(DOUBLE)                    :: PSH_D(ELGP)
+      REAL(DOUBLE)                    :: DPSHG_D(2,ELGP)
+      REAL(DOUBLE)                    :: CLB_D(3,3)
+      REAL(DOUBLE)                    :: XI_LOC(ELGP), ETA_LOC(ELGP)
+      REAL(DOUBLE)                    :: J11, J12, J21, J22, DET2
+      REAL(DOUBLE)                    :: DNDX, DNDY
+
+      BDOUT = ZERO
+      CALL MITC_SHAPE_FUNCTIONS ( R, S, PSH_D, DPSHG_D )
+      CLB_D = MITC8_CARTESIAN_LOCAL_BASIS ( R, S )
+
+      DO II=1,ELGP
+         XI_LOC(II)  = DOT_PRODUCT( XEL(II,:), CLB_D(:,1) )
+         ETA_LOC(II) = DOT_PRODUCT( XEL(II,:), CLB_D(:,2) )
+      ENDDO
+
+      J11 = DOT_PRODUCT( DPSHG_D(1,:), XI_LOC  )
+      J12 = DOT_PRODUCT( DPSHG_D(1,:), ETA_LOC )
+      J21 = DOT_PRODUCT( DPSHG_D(2,:), XI_LOC  )
+      J22 = DOT_PRODUCT( DPSHG_D(2,:), ETA_LOC )
+      DET2 = J11*J22 - J12*J21
+      IF (DABS(DET2) < 1.0D-14) RETURN
+
+      DO II=1,ELGP
+         DNDX = ( J22*DPSHG_D(1,II) - J12*DPSHG_D(2,II) ) / DET2
+         DNDY = (-J21*DPSHG_D(1,II) + J11*DPSHG_D(2,II) ) / DET2
+         BDOUT(1,6*(II-1)+1) = -0.5D0 * DNDY
+         BDOUT(1,6*(II-1)+2) =  0.5D0 * DNDX
+         BDOUT(1,6*(II-1)+6) =  PSH_D(II)
+      ENDDO
+
+      END SUBROUTINE MITC8_DRILL_B
 
 ! **********************************************************************************************************************************
 

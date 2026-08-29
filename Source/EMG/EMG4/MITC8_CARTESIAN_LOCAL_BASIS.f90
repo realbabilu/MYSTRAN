@@ -35,7 +35,7 @@
 ! Second index of the result (column) is basis vector (x_l, y_l, normal)
 
       USE PENTIUM_II_KIND, ONLY       :  LONG, DOUBLE
-      USE MODEL_STUF, ONLY            :  ELGP, XEL, TYPE
+      USE MODEL_STUF, ONLY            :  ELGP, XEL, TYPE, GRID_SNORM, BGRID
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
 
       USE MITC_SHAPE_FUNCTIONS_Interface
@@ -57,6 +57,10 @@
       REAL(DOUBLE)                    :: X(3)
       REAL(DOUBLE)                    :: Y(3)
       REAL(DOUBLE)                    :: Z(3)
+      REAL(DOUBLE)                    :: SN(3)
+      REAL(DOUBLE)                    :: PSUM
+      REAL(DOUBLE)                    :: NM
+      INTEGER(LONG)                   :: BIDX
 
 
 ! **********************************************************************************************************************************
@@ -80,11 +84,43 @@
         E_ETA(:) = E_ETA(:) + XEL(I,:) * DPSHG(2,I)
       ENDDO
       CALL CROSS(E_XI, E_ETA, Z)
-      Z = Z / DSQRT(DOT_PRODUCT(Z, Z))
+      NM = DSQRT(DOT_PRODUCT(Z, Z))
+      IF (NM > 1.0D-15) THEN
+         Z = Z / NM
+      ELSE
+         Z = (/ ZERO, ZERO, ONE /)
+      ENDIF
+
+                                                           ! MITC8 v1.2-style upgrade:
+                                                           ! if SNORM data is available, use the interpolated nodal normal
+                                                           ! for the pointwise local basis while leaving T_matrix unchanged.
+      IF (ALLOCATED(GRID_SNORM)) THEN
+         SN = ZERO
+         PSUM = ZERO
+         DO I=1,ELGP
+            BIDX = 0
+            IF (I <= SIZE(BGRID)) BIDX = BGRID(I)
+            IF ((BIDX > 0) .AND. (BIDX <= SIZE(GRID_SNORM,1))) THEN
+               SN = SN + PSH(I) * GRID_SNORM(BIDX,:)
+               PSUM = PSUM + DABS(PSH(I))
+            ENDIF
+         ENDDO
+         NM = DSQRT(DOT_PRODUCT(SN, SN))
+         IF ((PSUM > ZERO) .AND. (NM > 1.0D-12)) THEN
+            SN = SN / NM
+            IF (DOT_PRODUCT(SN, Z) < ZERO) SN = -SN
+            Z = SN
+         ENDIF
+      ENDIF
 
                                                            ! Y tangent to the surface
       CALL CROSS(Z, R_G1G2, Y)
-      Y = Y / DSQRT(DOT_PRODUCT(Y, Y))
+      NM = DSQRT(DOT_PRODUCT(Y, Y))
+      IF (NM > 1.0D-15) THEN
+         Y = Y / NM
+      ELSE
+         Y = (/ ZERO, ONE, ZERO /)
+      ENDIF
 
                                                            ! Rotate the projected R_G1G2 about Y to be tangent to the surface
       CALL CROSS(Y, Z, X)

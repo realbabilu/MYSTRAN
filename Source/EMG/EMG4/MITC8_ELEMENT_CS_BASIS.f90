@@ -31,7 +31,7 @@
 ! Second index of the result is basis vector (x_l, y_l, normal)
 
       USE PENTIUM_II_KIND, ONLY       :  LONG, DOUBLE
-      USE MODEL_STUF, ONLY            :  ELGP, XEL, TYPE
+      USE MODEL_STUF, ONLY            :  ELGP, XEL, TYPE, GRID_SNORM, BGRID
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
 
       USE MITC_SHAPE_FUNCTIONS_Interface
@@ -53,6 +53,9 @@
       REAL(DOUBLE)                    :: X_L_ACB(3)
       REAL(DOUBLE)                    :: Y_L_ACB(3)
       REAL(DOUBLE)                    :: T(3,3)
+      REAL(DOUBLE)                    :: SN(3)
+      REAL(DOUBLE)                    :: NM
+      INTEGER(LONG)                   :: BIDX
 
       INTRINSIC                       :: DSQRT
 
@@ -81,7 +84,30 @@
 
                                                            ! B = common normal of e_ξ and e_η
       CALL CROSS(E_XI, E_ETA, B)
-      B = B / DSQRT(DOT_PRODUCT(B, B))
+      NM = DSQRT(DOT_PRODUCT(B, B))
+      IF (NM > 1.0D-15) THEN
+         B = B / NM
+      ELSE
+         B = (/ ZERO, ZERO, ONE /)
+      ENDIF
+
+                                                           ! Follow MITC8 v1.2 pointwise normal when SNORM is available.
+      IF (ALLOCATED(GRID_SNORM)) THEN
+         SN = ZERO
+         DO I=1,ELGP
+            BIDX = 0
+            IF (I <= SIZE(BGRID)) BIDX = BGRID(I)
+            IF ((BIDX > 0) .AND. (BIDX <= SIZE(GRID_SNORM,1))) THEN
+               SN = SN + PSH(I) * GRID_SNORM(BIDX,:)
+            ENDIF
+         ENDDO
+         NM = DSQRT(DOT_PRODUCT(SN, SN))
+         IF (NM > 1.0D-12) THEN
+            SN = SN / NM
+            IF (DOT_PRODUCT(SN, B) < ZERO) SN = -SN
+            B = SN
+         ENDIF
+      ENDIF
 
                                                            ! x_l and y_l in the A C B coordinate system.
       X_L_ACB = (/ ONE/DSQRT(TWO), -ONE/DSQRT(TWO), ZERO /)

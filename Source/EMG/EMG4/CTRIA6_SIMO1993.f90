@@ -18,11 +18,12 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_STRESS_POINTS, SOL_NAME
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, DT, EID, ELGP, GRID_SNORM, KE, ME, BE1, BE2, BE3, MASS_PER_UNIT_AREA,    &
-                                         NUM_EMG_FATAL_ERRS, PCOMP_PROPS, PPE, PRESS, PTE, RGRID, SHELL_A, SHELL_D, SHELL_T,     &
-                                         TREF, XEB
+      USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, DT, EID, ELGP, EPROP, GRID_SNORM, KE, KED, ME, BE1, BE2, BE3,           &
+                                         MASS_PER_UNIT_AREA, NUM_EMG_FATAL_ERRS, PCOMP_PROPS, PPE, PRESS, PTE, RGRID, SHELL_A,   &
+                                         SHELL_D, SHELL_T, TREF, UEL, XEB
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
       USE PARAMS, ONLY                :  COUPMASS
+      USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
       IMPLICIT NONE
@@ -41,6 +42,9 @@
       REAL(DOUBLE)                    :: UNIT_PPE(36), UNIT_PTE(36), DXDR(3), DXDS(3), SURF_VEC(3), TBAR
       REAL(DOUBLE)                    :: CTE(3), THERMAL_RESULTANT(3)
       REAL(DOUBLE)                    :: BDNORM
+      REAL(DOUBLE)                    :: DLOC(2,6), SIG0(2,2), KG6(6,6), STRAIN0(3), N0(3)
+      REAL(DOUBLE)                    :: G1K(3), G2K(3), A11, A22, A12, DET, AI11, AI22, AI12
+      INTEGER(LONG)                   :: KI, KJ
 
       IF (ELGP /= 6) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -241,11 +245,52 @@
       ENDIF
 
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
-         WRITE(ERR,*) ' *ERROR: Code not written for CTRIA6 Simo1993 differential stiffness matrix'
-         WRITE(F06,*) ' *ERROR: Code not written for CTRIA6 Simo1993 differential stiffness matrix'
-         NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
-         FATAL_ERR = FATAL_ERR + 1
-         CALL OUTA_HERE ( 'Y' )
+         CALL ELMDIS
+         CALL BM_T6_AT ( XYZ, ONE/3.0D0, ONE/3.0D0, BM, JAC )
+         STRAIN0 = MATMUL(BM, UEL(1:36))
+         N0 = MATMUL(SHELL_A, STRAIN0)
+
+         SIG0 = ZERO
+         SIG0(1,1) = EPROP(1)*N0(1)
+         SIG0(2,2) = EPROP(1)*N0(2)
+         SIG0(1,2) = EPROP(1)*N0(3)
+         SIG0(2,1) = EPROP(1)*N0(3)
+
+         KG6 = ZERO
+         DO I=1,3
+            R = R3(I)
+            S = S3(I)
+            WT = W3(I)
+
+            CALL SHAPE_T6(R, S, N6, DN6)
+            G1K = MATMUL(DN6(1,:), XYZ)
+            G2K = MATMUL(DN6(2,:), XYZ)
+            CALL CROSS3(G1K, G2K, SURF_VEC)
+            JAC = VNORM(SURF_VEC)
+
+            A11 = DOT_PRODUCT(G1K,G1K)
+            A22 = DOT_PRODUCT(G2K,G2K)
+            A12 = DOT_PRODUCT(G1K,G2K)
+            DET = A11*A22 - A12*A12
+            IF (DABS(DET) <= 1.0D-30) CYCLE
+
+            AI11 =  A22/DET
+            AI22 =  A11/DET
+            AI12 = -A12/DET
+            DLOC(1,:) = AI11*DN6(1,:) + AI12*DN6(2,:)
+            DLOC(2,:) = AI12*DN6(1,:) + AI22*DN6(2,:)
+
+            KG6 = KG6 + MATMUL(TRANSPOSE(DLOC), MATMUL(SIG0, DLOC)) * WT * JAC
+         ENDDO
+
+         KED(1:36,1:36) = ZERO
+         DO I=1,6
+            DO J=1,6
+               KI = 6*(I-1)
+               KJ = 6*(J-1)
+               KED(KI+3,KJ+3) = KG6(I,J)
+            ENDDO
+         ENDDO
       ENDIF
 
       RETURN
