@@ -39,7 +39,7 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, MAX_STRESS_POINTS, NTSUB, NSUB
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  NUM_EMG_FATAL_ERRS, PCOMP_PROPS, ELGP, ES, KE, EM, EB, ET, BE1, BE2, BE3, PHI_SQ,         &
-                                         FCONV, EPROP, PTE, ALPVEC, TREF, DT, PPE, PRESS, MASS_PER_UNIT_AREA,                      &
+                                         FCONV, EPROP, PTE, ALPVEC, TREF, DT, PPE, PRESS, MASS_PER_UNIT_AREA, SHELL_T,             &
                                          NUM_PLIES, PCOMP_LAM, PLY_NUM, TPLY, STRESS, KED
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
 
@@ -139,6 +139,10 @@
       REAL(DOUBLE)                    :: DUM14(3,3)
       REAL(DOUBLE)                    :: DUM33(3,3)
       REAL(DOUBLE)                    :: JAC2x2(2,2)
+      REAL(DOUBLE)                    :: GVAL, CDRILL
+      REAL(DOUBLE)                    :: DLOC(2,ELGP), AMAT(2,2), DETA
+      REAL(DOUBLE)                    :: BDR(1,6*ELGP)
+      REAL(DOUBLE)                    :: E1V(3), E2V(3)
 
 ! **********************************************************************************************************************************
 
@@ -259,6 +263,19 @@
 
          E2 = MITC_ELASTICITY()
 
+         EM2(:,:) = ZERO
+         EM2(1,1) = EM(1,1)
+         EM2(1,2) = EM(1,2)
+         EM2(1,4) = EM(1,3)
+         EM2(2,2) = EM(2,2)
+         EM2(2,4) = EM(2,3)
+         EM2(4,4) = EM(3,3)
+         DO I=2,6
+            DO J=1,I-1
+               EM2(I,J) = EM2(J,I)
+            ENDDO
+         ENDDO
+
          UNIT_PTE(:) = ZERO
 
          CALL ORDER_GAUSS ( IORD_IJ, SS_IJ, HH_IJ )
@@ -279,17 +296,15 @@
                                                            ! element coordinates, projection is simply ignoring the z component.
                   CLB = MITC4_CARTESIAN_LOCAL_BASIS( R, S, T )
                   MATL_AXES_ROTATE = -ATAN2(CLB(2,1), CLB(1,1))
-                                                           ! Rotate the material elasticity matrix from element coordinates
-                                                           ! to projected cartesian local coordinates. When the elasticity
-                                                           ! matrix is used, it will be assumed to be in the non-projected
-                                                           ! cartesian local coordinate system but pretend they're the same
-                                                           ! so that material properties follow the curved surface of warped
-                                                           ! elements.
+                                                           ! Rotate the membrane elasticity matrix from element coordinates
+                                                           ! to projected cartesian local coordinates. Thermal expansion for
+                                                           ! this MITC4PD path follows the Python basis and only generates
+                                                           ! membrane resultants for uniform temperature.
                   CALL PLANE_COORD_TRANS_21 ( MATL_AXES_ROTATE, TRANSFORM, SUBR_NAME )
                   CALL MATL_TRANSFORM_MATRIX ( TRANSFORM, T66 )
                   T66 = TRANSPOSE(T66)
-                  CALL MATMULT_FFF   ( E2  , T66   , 6, 6, 6, DUM66 )
-                  CALL MATMULT_FFF_T ( T66 , DUM66 , 6, 6, 6, E3    )
+                  CALL MATMULT_FFF   ( EM2 , T66   , 6, 6, 6, DUM66 )
+                  CALL MATMULT_FFF_T ( T66 , DUM66 , 6, 6, 6, EM3   )
 
                                                            ! Transform membrane thermal expansion coefficient vector
                                                            ! the same way as the elasticity matrix.
@@ -300,10 +315,11 @@
 
                   DETJ = MITC_DETJ ( R, S, T )
                   INTFAC = DETJ*HH_IJ(I)*HH_IJ(J)*HH_K(K)  ! det(J) * Gauss point weight
-                  CALL CQUADR_MITC4PHB_B( R, S, T, .TRUE., .TRUE., .TRUE., BI)
+                  CALL CQUADR_MITC4PHB_B( R, S, T, .TRUE., .FALSE., .FALSE., BMI)
 
-                                                           ! DUM3 = BI^T * E3
-                  CALL MATMULX_FFF_T ( BI, E3, 6, 6*ELGP, 6, DUM3 )
+                                                           ! DUM3 = Bm^T * Em. Keep thermal loading purely membranal so
+                                                           ! free expansion matches the Python MITC4pD_HB basis.
+                  CALL MATMULX_FFF_T ( BMI, EM3, 6, 6*ELGP, 6, DUM3 )
 
                                                            ! PTE += DUM3 * unit_ε_thermal * det(J) * GaussWeight
                   UNIT_PTE = UNIT_PTE + MATMUL ( DUM3, CTE ) * INTFAC
@@ -440,6 +456,9 @@
 
 
          KE(1:6*ELGP,1:6*ELGP) = ZERO
+         GVAL = ZERO
+         IF (DABS(EPROP(1)) > 1.0D-20) GVAL = SHELL_T(1,1)/((5.0D0/6.0D0)*EPROP(1))
+         CDRILL = 1.0D-4 * GVAL
 
          CALL ORDER_GAUSS ( IORD_IJ, SS_IJ, HH_IJ )
          CALL ORDER_GAUSS ( IORD_K, SS_K, HH_K )
@@ -514,6 +533,31 @@
                      CALL MATMULX_FFF_T ( BBI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
 
+                                                           ! Hughes-Brezzi drilling coupling for the true 6-DOF MITC4PD branch.
+                     CALL MITC_SHAPE_FUNCTIONS(R, S, PSH, DPSHG)
+                     CALL MITC_COVARIANT_BASIS(R, S, ZERO, G)
+                     CLB = MITC4_CARTESIAN_LOCAL_BASIS(R, S, ZERO)
+                     E1V(:) = CLB(:,1)
+                     E2V(:) = CLB(:,2)
+                     AMAT(1,1) = DOT_PRODUCT(G(:,1), E1V)
+                     AMAT(1,2) = DOT_PRODUCT(G(:,1), E2V)
+                     AMAT(2,1) = DOT_PRODUCT(G(:,2), E1V)
+                     AMAT(2,2) = DOT_PRODUCT(G(:,2), E2V)
+                     DETA = AMAT(1,1)*AMAT(2,2) - AMAT(1,2)*AMAT(2,1)
+                     IF (DABS(DETA) > 1.0D-20) THEN
+                        DO GP=1,ELGP
+                           DLOC(1,GP) = ( AMAT(2,2)*DPSHG(1,GP) - AMAT(1,2)*DPSHG(2,GP)) / DETA
+                           DLOC(2,GP) = (-AMAT(2,1)*DPSHG(1,GP) + AMAT(1,1)*DPSHG(2,GP)) / DETA
+                        ENDDO
+                        BDR = ZERO
+                        DO GP=1,ELGP
+                           KI = (GP-1)*6
+                           BDR(1,KI+1:KI+3) = 0.5D0*(DLOC(1,GP)*E2V - DLOC(2,GP)*E1V)
+                           BDR(1,KI+6) = BDR(1,KI+6) - PSH(GP)
+                        ENDDO
+                        KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + MATMUL(TRANSPOSE(BDR), BDR) * (CDRILL*INTFAC)
+                     ENDIF
+
                   ELSE
                                                            ! All the phenomena fully separated.
                                                            ! Not used. Delete this.
@@ -566,7 +610,6 @@
                      CALL MATMULX_FFF_T ( EB3, BBI, 6, 6, 6*ELGP, DUM1 )
                      CALL MATMULX_FFF_T ( BSI, DUM1, 6, 6*ELGP, 6*ELGP, DUM2 )
                      KE(1:6*ELGP,1:6*ELGP) = KE(1:6*ELGP,1:6*ELGP) + DUM2(:,:)*INTFAC
-
 
                   ENDIF
 

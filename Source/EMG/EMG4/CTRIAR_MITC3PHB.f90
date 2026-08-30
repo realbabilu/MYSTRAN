@@ -13,9 +13,9 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE, TWELVE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  COUPMASS
-      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,             &
-                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, XEB
-      USE CTRIAR_DKMT18_Interface
+      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE, PTE,        &
+                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, XEB, UEL, ALPVEC, DT, TREF
+      USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
       IMPLICIT NONE
@@ -23,20 +23,19 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CTRIAR_MITC3PHB'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
-      CHARACTER(1*BYTE)                :: REC_OPT(6)
-
       INTEGER(LONG), PARAMETER        :: NNODE = 3
       INTEGER(LONG), PARAMETER        :: NDOF  = 18
       INTEGER(LONG), PARAMETER        :: NALL  = 20
       REAL(DOUBLE), PARAMETER         :: KAPPA = 5.0D0/6.0D0
 
-      INTEGER(LONG)                   :: I, J, K, GP, JSUB
+      INTEGER(LONG)                   :: I, J, K, GP, JSUB, IA, IB, RR
       REAL(DOUBLE)                    :: XYZ(NNODE,3), EG(3,3), XY(NNODE,2), DNX(NNODE), DNY(NNODE)
       REAL(DOUBLE)                    :: AREA, THICK, GVAL, CDRILL, MASS_NODE
       REAL(DOUBLE)                    :: KFULL(NALL,NALL), KCOND(NDOF,NDOF), KBB(2,2), KBBI(2,2), KBC(2,NDOF), BMAP(2,NDOF)
       REAL(DOUBLE)                    :: BM(3,NALL), BB(3,NALL), BS(2,NALL), BD(1,NALL)
       REAL(DOUBLE)                    :: BM18(3,NDOF), BB18(3,NDOF), BS18(2,NDOF), T18(NDOF,NDOF)
-      REAL(DOUBLE)                    :: RGP(3), SGP(3), WT, UNIT_PPE(NDOF)
+      REAL(DOUBLE)                    :: RGP(3), SGP(3), WT, UNIT_PPE(NDOF), UNIT_PTE(NDOF)
+      REAL(DOUBLE)                    :: CTE3(3), NTH(3), TBAR, EPSM(3), NRES(3), KGVAL
 
       IF (ELGP /= 3) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -97,9 +96,13 @@
          ENDIF
 
          IF (OPT(3) == 'Y') THEN
-            REC_OPT = 'N'
-            REC_OPT(3) = 'Y'
-            CALL CTRIAR_DKMT18 ( REC_OPT, INT_ELEM_ID )
+            CALL MITC3PHB_BM ( DNX, DNY, BM )
+            CALL MITC3PHB_BCURV ( ONE/THREE, ONE/THREE, DNX, DNY, BB )
+            CALL MITC3PHB_BSHEAR ( ONE/THREE, ONE/THREE, XY, AREA, BS )
+            BM18 = BM(:,1:NDOF)
+            BB18 = BB(:,1:NDOF)
+            BS18 = BS(:,1:NDOF)
+            CALL MITC3PHB_BUILD_RECOVERY ( BM18, BB18, BS18, T18 )
          ENDIF
 
          IF ((DEBUG(233) > 0) .AND. (OPT(4) == 'Y')) THEN
@@ -144,8 +147,39 @@
          ENDDO
       ENDIF
 
+      IF (OPT(2) == 'Y') THEN
+         CALL MITC3PHB_BM ( DNX, DNY, BM )
+         BM18 = BM(:,1:NDOF)
+         CTE3(1) = ALPVEC(1,1)
+         CTE3(2) = ALPVEC(2,1)
+         CTE3(3) = ALPVEC(4,1)
+         NTH = MATMUL(SHELL_A, CTE3)
+!        BM18 is built in the element local frame, so the equivalent
+!        thermal load must be rotated to the assembled/basic DOF basis
+!        just like KE and recovery do.
+         UNIT_PTE = MATMUL(TRANSPOSE(T18), MATMUL(TRANSPOSE(BM18), NTH)) * AREA
+         DO JSUB=1,NSUB
+            TBAR = (DT(1,JSUB) + DT(2,JSUB) + DT(3,JSUB))/THREE - TREF(1)
+            PTE(1:NDOF,JSUB) = UNIT_PTE(1:NDOF) * TBAR
+         ENDDO
+      ENDIF
+
       IF (OPT(6) == 'Y') THEN
+         CALL MITC3PHB_BM ( DNX, DNY, BM )
+         BM18 = BM(:,1:NDOF)
+         CALL ELMDIS
+         EPSM = MATMUL(MATMUL(BM18, T18), UEL(1:NDOF))
+         NRES = MATMUL(SHELL_A, EPSM)
          KED(1:NDOF,1:NDOF) = ZERO
+         DO IA=1,NNODE
+            DO IB=1,NNODE
+               KGVAL = AREA*( NRES(1)*DNX(IA)*DNX(IB) + NRES(2)*DNY(IA)*DNY(IB) +                                      &
+                              NRES(3)*(DNX(IA)*DNY(IB) + DNY(IA)*DNX(IB)) )
+               DO RR=1,3
+                  KED(6*(IA-1)+RR,6*(IB-1)+RR) = KED(6*(IA-1)+RR,6*(IB-1)+RR) + KGVAL
+               ENDDO
+            ENDDO
+         ENDDO
       ENDIF
 
       RETURN
