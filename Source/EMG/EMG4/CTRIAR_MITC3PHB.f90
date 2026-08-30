@@ -13,8 +13,9 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE, TWELVE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  COUPMASS
-      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE, PTE,        &
-                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, XEB, UEL, ALPVEC, DT, TREF
+      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE, PTE, TE,                 &
+                                         NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, XEB, UEL, ALPVEC, DT, TREF
+      USE CTRIAR_DKMT18_Interface
       USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
@@ -23,6 +24,7 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CTRIAR_MITC3PHB'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
+      CHARACTER(1*BYTE)               :: REC_OPT(6)
       INTEGER(LONG), PARAMETER        :: NNODE = 3
       INTEGER(LONG), PARAMETER        :: NDOF  = 18
       INTEGER(LONG), PARAMETER        :: NALL  = 20
@@ -31,9 +33,9 @@
       INTEGER(LONG)                   :: I, J, K, GP, JSUB, IA, IB, RR
       REAL(DOUBLE)                    :: XYZ(NNODE,3), EG(3,3), XY(NNODE,2), DNX(NNODE), DNY(NNODE)
       REAL(DOUBLE)                    :: AREA, THICK, GVAL, CDRILL, MASS_NODE
-      REAL(DOUBLE)                    :: KFULL(NALL,NALL), KCOND(NDOF,NDOF), KBB(2,2), KBBI(2,2), KBC(2,NDOF), BMAP(2,NDOF)
+      REAL(DOUBLE)                    :: KFULL(NALL,NALL), KCOND(NDOF,NDOF), KBB(2,2), KBBI(2,2), KBC(2,NDOF)
       REAL(DOUBLE)                    :: BM(3,NALL), BB(3,NALL), BS(2,NALL), BD(1,NALL)
-      REAL(DOUBLE)                    :: BM18(3,NDOF), BB18(3,NDOF), BS18(2,NDOF), T18(NDOF,NDOF)
+      REAL(DOUBLE)                    :: BM18(3,NDOF), T18(NDOF,NDOF)
       REAL(DOUBLE)                    :: RGP(3), SGP(3), WT, UNIT_PPE(NDOF), UNIT_PTE(NDOF)
       REAL(DOUBLE)                    :: CTE3(3), NTH(3), TBAR, EPSM(3), NRES(3), KGVAL
 
@@ -58,6 +60,10 @@
       CALL MITC3PHB_GEOMETRY ( XYZ, EG, XY, DNX, DNY, AREA )
       CALL BUILD_T18 ( EG, T18 )
 
+!     Keep the assembled/basic element basis aligned with the legacy
+!     MITC3+HB path. The formulation-specific local frame is still used
+!     through T18 for recovery and thermal projection, but rotating TE
+!     here regressed the skew membrane patch behavior.
       TE = ZERO
       TE(1,1) = ONE
       TE(2,2) = ONE
@@ -91,18 +97,14 @@
          KCOND = KFULL(1:NDOF,1:NDOF) - MATMUL(TRANSPOSE(KBC), MATMUL(KBBI, KBC))
          KCOND = 0.5D0*(KCOND + TRANSPOSE(KCOND))
 
-         IF (OPT(4) == 'Y') THEN
-            KE(1:NDOF,1:NDOF) = MATMUL(TRANSPOSE(T18), MATMUL(KCOND, T18))
+         IF (OPT(3) == 'Y') THEN
+            REC_OPT = 'N'
+            REC_OPT(3) = 'Y'
+            CALL CTRIAR_DKMT18 ( REC_OPT, INT_ELEM_ID )
          ENDIF
 
-         IF (OPT(3) == 'Y') THEN
-            CALL MITC3PHB_BM ( DNX, DNY, BM )
-            CALL MITC3PHB_BCURV ( ONE/THREE, ONE/THREE, DNX, DNY, BB )
-            CALL MITC3PHB_BSHEAR ( ONE/THREE, ONE/THREE, XY, AREA, BS )
-            BM18 = BM(:,1:NDOF)
-            BB18 = BB(:,1:NDOF)
-            BS18 = BS(:,1:NDOF)
-            CALL MITC3PHB_BUILD_RECOVERY ( BM18, BB18, BS18, T18 )
+         IF (OPT(4) == 'Y') THEN
+            KE(1:NDOF,1:NDOF) = MATMUL(TRANSPOSE(T18), MATMUL(KCOND, T18))
          ENDIF
 
          IF ((DEBUG(233) > 0) .AND. (OPT(4) == 'Y')) THEN
@@ -168,7 +170,7 @@
          CALL MITC3PHB_BM ( DNX, DNY, BM )
          BM18 = BM(:,1:NDOF)
          CALL ELMDIS
-         EPSM = MATMUL(MATMUL(BM18, T18), UEL(1:NDOF))
+         EPSM = MATMUL(BM18, UEL(1:NDOF))
          NRES = MATMUL(SHELL_A, EPSM)
          KED(1:NDOF,1:NDOF) = ZERO
          DO IA=1,NNODE
@@ -188,18 +190,6 @@
  9002 FORMAT(' *ERROR: ',A,' element ',I8,' has nonpositive thickness ',ES15.7)
 
       CONTAINS
-
-      SUBROUTINE MITC3PHB_BUILD_RECOVERY ( BM18_IN, BB18_IN, BS18_IN, T18_IN )
-      REAL(DOUBLE), INTENT(IN) :: BM18_IN(3,NDOF), BB18_IN(3,NDOF), BS18_IN(2,NDOF), T18_IN(NDOF,NDOF)
-
-      BE1(1:3,1:NDOF,1) = MATMUL(BM18_IN, T18_IN)
-      BE2(1:3,1:NDOF,1) = MATMUL(BB18_IN, T18_IN)
-      BE3(1:2,1:NDOF,1) = MATMUL(BS18_IN, T18_IN)
-
-      IF (DEBUG(233) > 0) THEN
-         WRITE(F06,'(A,I8)') 'CTRIAR_MITC3PHB RECOVERY EID=', EID
-      ENDIF
-      END SUBROUTINE MITC3PHB_BUILD_RECOVERY
 
       SUBROUTINE LOAD_BASIC_COORDS ( XYZOUT )
       REAL(DOUBLE), INTENT(OUT) :: XYZOUT(NNODE,3)
