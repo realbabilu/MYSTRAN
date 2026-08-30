@@ -15,9 +15,9 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  COUPMASS
-      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,                 &
+      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE, PTE,            &
                                          TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, BGRID, GRID_SNORM, XEB,                &
-                                         KED, UEL
+                                         KED, UEL, ALPVEC, DT, TREF
       USE CQUADR_DKMQ24R_Interface
       USE ELMDIS_Interface
       USE ORDER_GAUSS_Interface
@@ -40,7 +40,8 @@
       REAL(DOUBLE)                    :: KGLOCAL(24,24), KGVAL, EPSM(3), NRES(3), UE_BASIC(24)
       REAL(DOUBLE)                    :: JAC, STAB, THICK, DIAM, NVG(4), MASS_DIAG(4), M1(4,4)
       REAL(DOUBLE)                    :: GRADN(4,2), ECOORDS(4,2)
-      REAL(DOUBLE)                    :: EG(3,3), UNIT_PPE_B(24), UNIT_PPE_L(24)
+      REAL(DOUBLE)                    :: EG(3,3), UNIT_PPE_B(24), UNIT_PPE_L(24), UNIT_PTE_B(24)
+      REAL(DOUBLE)                    :: CTE3(3), NTH(3), TBAR
 
       IF (ELGP /= 4) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -60,7 +61,7 @@
       DIAM = QUAD_DIAMETER(XYZ)
       STAB = (THICK*THICK)/(THICK*THICK + 0.2D0*DIAM*DIAM)
 
-      IF ((OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(1) == 'Y') .OR. (OPT(5) == 'Y') .OR. (OPT(6) == 'Y')) THEN
+      IF ((OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(1) == 'Y') .OR. (OPT(2) == 'Y') .OR. (OPT(5) == 'Y') .OR. (OPT(6) == 'Y')) THEN
          CALL ORDER_GAUSS(2, SS, HH)
       ENDIF
 
@@ -156,6 +157,27 @@
          UNIT_PPE_L = MATMUL(T24, UNIT_PPE_B)
          DO JSUB=1,NSUB
             PPE(1:24,JSUB) = UNIT_PPE_L(1:24) * PRESS(3,JSUB)
+         ENDDO
+      ENDIF
+
+      IF (OPT(2) == 'Y') THEN
+         UNIT_PTE_B = ZERO
+         CTE3(1) = ALPVEC(1,1)
+         CTE3(2) = ALPVEC(2,1)
+         CTE3(3) = ALPVEC(4,1)
+         NTH = MATMUL(SHELL_A, CTE3)
+         DO I=1,2
+            DO J=1,2
+               XI = SS(I)
+               ETA = SS(J)
+               WT = HH(I)*HH(J)
+               CALL Q4RS_B_MATRICES ( XYZ, NORMALS, XI, ETA, BMB, BBB, BSB, EG, JAC )
+               UNIT_PTE_B = UNIT_PTE_B + WT*JAC*MATMUL(TRANSPOSE(BMB), NTH)
+            ENDDO
+         ENDDO
+         DO JSUB=1,NSUB
+            TBAR = (DT(1,JSUB) + DT(2,JSUB) + DT(3,JSUB) + DT(4,JSUB))/FOUR - TREF(1)
+            PTE(1:24,JSUB) = MATMUL(T24, UNIT_PTE_B) * TBAR
          ENDDO
       ENDIF
 

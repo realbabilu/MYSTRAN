@@ -37,10 +37,9 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  COUPMASS
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA,                       &
-                                         NUM_EMG_FATAL_ERRS, SHELL_A, TE, XEB, FCONV, STRESS, BGRID, GRID_SNORM, PRESS, PPE
-
+                                         NUM_EMG_FATAL_ERRS, SHELL_A, TE, XEB, BGRID, GRID_SNORM, PRESS, PPE,                     &
+                                         PTE, ALPVEC, DT, TREF, UEL
       USE ELMDIS_Interface
-      USE ELEM_STRE_STRN_ARRAYS_Interface
       USE OUTA_HERE_Interface
 
       IMPLICIT NONE
@@ -63,8 +62,8 @@
       REAL(DOUBLE)                    :: BM(3,18), BB(3,18), BS(2,18), KTMP(18,18)
       REAL(DOUBLE)                    :: T1(3), T2(3), NVEC(3), A1(3), A2(3), A1C(3), A2C(3), NORMALS(3,3)
       REAL(DOUBLE)                    :: JAC, CO(2,2), BC(2,2), ADINV_AU(3,18)
-      REAL(DOUBLE)                    :: Hm(3,3), Hb(3,3), Hs(2,2)
-      REAL(DOUBLE)                    :: MASS_NODE
+      REAL(DOUBLE)                    :: Hm(3,3), Hb(3,3), Hs(2,2), EPSM(3), NRES(3)
+      REAL(DOUBLE)                    :: MASS_NODE, UNIT_PTE(18), CTE3(3), NTH(3), TBAR
 
       IF (ELGP /= 3) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -160,6 +159,19 @@
          ENDDO
       ENDIF
 
+      IF (OPT(2) == 'Y') THEN
+         CALL BUILD_STAGE_B_MAKNUN ( T1, T2, CO, BM )
+         CTE3(1) = ALPVEC(1,1)
+         CTE3(2) = ALPVEC(2,1)
+         CTE3(3) = ALPVEC(4,1)
+         NTH = MATMUL(SHELL_A, CTE3)
+         UNIT_PTE = MATMUL(TRANSPOSE(BM), NTH) * AREA
+         DO JSUB=1,SIZE(PTE,2)
+            TBAR = (DT(1,JSUB) + DT(2,JSUB) + DT(3,JSUB))/THREE - TREF(1)
+            PTE(1:18,JSUB) = UNIT_PTE * TBAR
+         ENDDO
+      ENDIF
+
       IF (OPT(5) == 'Y') THEN
          DO JSUB=1,SIZE(PPE,2)
             DO I=1,3
@@ -179,16 +191,21 @@
          CALL BUILD_STAGE_B_MAKNUN ( T1, T2, CO, BM )
          BE1(1:3,1:18,1) = BM
          CALL ELMDIS
-         CALL ELEM_STRE_STRN_ARRAYS ( 1 )
-
-         SIG0(1,1) = FCONV(1)*STRESS(1)
-         SIG0(2,2) = FCONV(1)*STRESS(2)
-         SIG0(1,2) = FCONV(1)*STRESS(3)
+         EPSM = MATMUL(BM, UEL(1:NDOF))
+         NRES = MATMUL(Hm, EPSM)
+         SIG0(1,1) = NRES(1)
+         SIG0(2,2) = NRES(2)
+         SIG0(1,2) = NRES(3)
          SIG0(2,1) = SIG0(1,2)
 
          IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
-            WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CTRIAR KGGD EID=', EID, ' SIG0=', SIG0(1,1), SIG0(2,2), SIG0(1,2)
+            WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CTRIAR KGGD EID=', EID, ' EPSM=', EPSM(1), EPSM(2), EPSM(3)
+            WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CTRIAR KGGD EID=', EID, ' NRES=', NRES(1), NRES(2), NRES(3)
             WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CTRIAR KGGD EID=', EID, ' NORMAL=', NVEC(1), NVEC(2), NVEC(3)
+         ENDIF
+         IF (EID == 1) THEN
+            WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CTRIAR DKMT18 PROBE EID=', EID, ' EPSM=', EPSM(1), EPSM(2), EPSM(3)
+            WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CTRIAR DKMT18 PROBE EID=', EID, ' NRES=', NRES(1), NRES(2), NRES(3)
          ENDIF
 
          DNP3 = ZERO
@@ -202,7 +219,6 @@
          ENDDO
 
          KG18 = ZERO
-         ROT_KG_FAC = H*H/TWELVE
          DO IA=1,3
             DO IB=1,3
                KGVAL = AREA*( DNDX3(IA)*(SIG0(1,1)*DNDX3(IB) + SIG0(1,2)*DNDY3(IB)) +                         &
@@ -210,13 +226,14 @@
                DO RR=1,3
                   KG18(6*(IA-1)+RR,6*(IB-1)+RR) = KG18(6*(IA-1)+RR,6*(IB-1)+RR) + KGVAL
                ENDDO
-               KG18(6*(IA-1)+4,6*(IB-1)+4) = KG18(6*(IA-1)+4,6*(IB-1)+4) + ROT_KG_FAC*KGVAL
-               KG18(6*(IA-1)+5,6*(IB-1)+5) = KG18(6*(IA-1)+5,6*(IB-1)+5) + ROT_KG_FAC*KGVAL
             ENDDO
          ENDDO
          KED(1:18,1:18) = KG18
          IF ((DEBUG(233) > 0) .AND. (EID <= 8)) THEN
             WRITE(F06,'(A,I8,A,ES15.7)') 'CTRIAR KGGD EID=', EID, ' KED_NORM=', DSQRT(SUM(KED(1:18,1:18)*KED(1:18,1:18)))
+         ENDIF
+         IF (EID == 1) THEN
+            WRITE(F06,'(A,I8,A,ES15.7)') 'CTRIAR DKMT18 PROBE EID=', EID, ' KED_NORM=', DSQRT(SUM(KED(1:18,1:18)*KED(1:18,1:18)))
          ENDIF
       ENDIF
 

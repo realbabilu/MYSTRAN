@@ -13,8 +13,9 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE, TWELVE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  COUPMASS, TRIARTYP
-      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,             &
-                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, BGRID, GRID_SNORM, XEB, UEL
+      USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE, PTE,        &
+                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, BGRID, GRID_SNORM, XEB, UEL,           &
+                                         ALPVEC, DT, TREF
       USE CTRIAR_DKMT18_Interface
       USE ELMDIS_Interface
       USE OUTA_HERE_Interface
@@ -38,6 +39,7 @@
       REAL(DOUBLE)                    :: KE_E(NDOF,NDOF), KE_A(NDOF,NDOF), KGLOBAL(NDOF,NDOF)
       REAL(DOUBLE)                    :: KAVG, MASS_NODE, UNIT_PPE(NDOF), NVEC(3)
       REAL(DOUBLE)                    :: BMG(3,NDOF), EPSM(3), NRES(3), KGVAL
+      REAL(DOUBLE)                    :: UNIT_PTE(NDOF), CTE3(3), NTH(3), TBAR
       LOGICAL                         :: T3FFD_RECOVERY
 
       IF (ELGP /= 3) THEN
@@ -147,6 +149,20 @@
          ENDDO
          DO JSUB=1,NSUB
             PPE(1:NDOF,JSUB) = PPE(1:NDOF,JSUB) + UNIT_PPE(1:NDOF) * PRESS(3,JSUB)
+         ENDDO
+      ENDIF
+
+      IF (OPT(2) == 'Y') THEN
+         CALL T3FF_BM_BB_E ( GRADN, BME, BBE )
+         BMG = MATMUL(BME, TALL)
+         CTE3(1) = ALPVEC(1,1)
+         CTE3(2) = ALPVEC(2,1)
+         CTE3(3) = ALPVEC(4,1)
+         NTH = MATMUL(SHELL_A, CTE3)
+         UNIT_PTE = MATMUL(TRANSPOSE(BMG), NTH) * AREA
+         DO JSUB=1,NSUB
+            TBAR = (DT(1,JSUB) + DT(2,JSUB) + DT(3,JSUB))/THREE - TREF(1)
+            PTE(1:NDOF,JSUB) = UNIT_PTE(1:NDOF) * TBAR
          ENDDO
       ENDIF
 

@@ -51,7 +51,8 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  COUPMASS, QUADRTYP
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,&
-                                         TE, TYPE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS
+                                         PTE, TE, TYPE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, ALPVEC, DT, &
+                                         TREF
 
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
@@ -84,7 +85,8 @@
       REAL(DOUBLE)                    :: KGBASIC(24,24), KGLOCAL(24,24)
       REAL(DOUBLE)                    :: M1(4,4), MBASIC(24,24), MLOCAL(24,24), NVG(4), MDIAG(4), DENS_A
       REAL(DOUBLE)                    :: MASS_AREA_INT, MASS_ELEM_SUM
-      REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24)
+      REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24), UNIT_PTE_B(24)
+      REAL(DOUBLE)                    :: CTE3(3), NTH(3), TBAR
       REAL(DOUBLE)                    :: GBE1(3,24,4), GBE2(3,24,4), GBE3(2,24,4)
       LOGICAL                         :: Q4EASANS_MODE
 
@@ -121,7 +123,7 @@
       GBE2 = ZERO
       GBE3 = ZERO
 
-      IF ((OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(5) == 'Y') .OR. (OPT(1) == 'Y') .OR. (OPT(6) == 'Y')) THEN
+      IF ((OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(5) == 'Y') .OR. (OPT(2) == 'Y') .OR. (OPT(1) == 'Y') .OR. (OPT(6) == 'Y')) THEN
          CALL ORDER_GAUSS(2, SS, HH)
       ENDIF
 
@@ -277,6 +279,28 @@
          ENDDO
       ENDIF
 
+      IF (OPT(2) == 'Y') THEN
+         UNIT_PTE_B = ZERO
+         CTE3(1) = ALPVEC(1,1)
+         CTE3(2) = ALPVEC(2,1)
+         CTE3(3) = ALPVEC(4,1)
+         NTH = MATMUL(SHELL_A, CTE3)
+         DO I=1,2
+            DO J=1,2
+               XI  = SS(I)
+               ETA = SS(J)
+               WT  = HH(I)*HH(J)
+               CALL GEOMETRY_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, NVEC, JDET, CO, BCMAT)
+               BMB = BM_Q4EASANS_AT(XYZ, XI, ETA)
+               UNIT_PTE_B = UNIT_PTE_B + WT*JDET*MATMUL(TRANSPOSE(BMB), NTH)
+            ENDDO
+         ENDDO
+         DO JSUB=1,SIZE(PTE,2)
+            TBAR = (DT(1,JSUB) + DT(2,JSUB) + DT(3,JSUB) + DT(4,JSUB))/FOUR - TREF(1)
+            PTE(1:24,JSUB) = MATMUL(T24, UNIT_PTE_B) * TBAR
+         ENDDO
+      ENDIF
+
       IF (OPT(6) == 'Y') THEN
          CALL ELMDIS
 
@@ -325,38 +349,7 @@
                   WRITE(F06,'(A,I8,A,3(1X,ES15.7))') 'CQUADR KGGD EID=', EID, ' NORMAL=', NVEC(1), NVEC(2), NVEC(3)
                ENDIF
 
-               DO IA=1,4
-                  DNDX(IA) = DN_G(1,IA)*CO(1,1) + DN_G(2,IA)*CO(2,1)
-                  DNDY(IA) = DN_G(1,IA)*CO(1,2) + DN_G(2,IA)*CO(2,2)
-               ENDDO
-
-               DO IA=1,4
-                  DO IB=1,4
-                     KGVAL = WT*JDET*( DNDX(IA)*(SIG0(1,1)*DNDX(IB) + SIG0(1,2)*DNDY(IB)) +                         &
-                                      DNDY(IA)*(SIG0(2,1)*DNDX(IB) + SIG0(2,2)*DNDY(IB)) )
-! --- shell_renovation begin --- !
-! DEBUG(237) is a Buckling-06 calibration probe.  Since lambda scales
-! inversely with KGGD, this factor maps the current first root
-! toward the MITC4+ reference without changing the elastic KGG.
-                     IF (DEBUG(237) > 0) THEN
-                        KGVAL = KGVAL * 7.147442330726D-01
-                     ENDIF
-
-! Buckling probe: use the scalar plate geometric stiffness only on local
-! transverse displacement w.  Python tests showed that copying the same KGVAL
-! directly into shell rotations RX/RY behaves like the bad sac_w_beta variant.
-! DEBUG(236) tests the MITC4/MITC4+ KGGD convention for column buckling:
-! copy the scalar stress stiffness to all translational DOFs, but not rotations.
-                     IF (DEBUG(236) > 0) THEN
-                        DO RR=1,3
-                           KGLOCAL(6*(IA-1)+RR,6*(IB-1)+RR) = KGLOCAL(6*(IA-1)+RR,6*(IB-1)+RR) + KGVAL
-                        ENDDO
-                     ELSE
-                        KGLOCAL(6*(IA-1)+3,6*(IB-1)+3) = KGLOCAL(6*(IA-1)+3,6*(IB-1)+3) + KGVAL
-                     ENDIF
-! --- shell_renovation end --- !
-                  ENDDO
-               ENDDO
+               CALL BUILD_SPECIAL_KGLOCAL_Q4EASANS(DN_G, CO, SIG0, WT, JDET, KGLOCAL)
             ENDDO
          ENDDO
 
@@ -950,6 +943,31 @@
          AINV(2,2) =  A(1,1)/DET
       ENDIF
       END SUBROUTINE INV2
+
+      SUBROUTINE BUILD_SPECIAL_KGLOCAL_Q4EASANS ( DN_G, CO, SIG0, WT, JDET, KGOUT )
+      REAL(DOUBLE), INTENT(IN) :: DN_G(2,4), CO(2,2), SIG0(2,2), WT, JDET
+      REAL(DOUBLE), INTENT(INOUT) :: KGOUT(24,24)
+      REAL(DOUBLE) :: DNDX(4), DNDY(4), KGVAL
+      INTEGER(LONG) :: IA, IB, RR
+
+      DO IA=1,4
+         DNDX(IA) = DN_G(1,IA)*CO(1,1) + DN_G(2,IA)*CO(2,1)
+         DNDY(IA) = DN_G(1,IA)*CO(1,2) + DN_G(2,IA)*CO(2,2)
+      ENDDO
+
+      DO IA=1,4
+         DO IB=1,4
+            KGVAL = WT*JDET*( DNDX(IA)*(SIG0(1,1)*DNDX(IB) + SIG0(1,2)*DNDY(IB)) + &
+                             DNDY(IA)*(SIG0(2,1)*DNDX(IB) + SIG0(2,2)*DNDY(IB)) )
+            IF (DEBUG(237) > 0) THEN
+               KGVAL = KGVAL * 7.147442330726D-01
+            ENDIF
+            DO RR=1,3
+               KGOUT(6*(IA-1)+RR,6*(IB-1)+RR) = KGOUT(6*(IA-1)+RR,6*(IB-1)+RR) + KGVAL
+            ENDDO
+         ENDDO
+      ENDDO
+      END SUBROUTINE BUILD_SPECIAL_KGLOCAL_Q4EASANS
 
       SUBROUTINE DEBUG_PRINT_MATRIX ( TITLE, MAT )
       CHARACTER(LEN=*), INTENT(IN) :: TITLE
