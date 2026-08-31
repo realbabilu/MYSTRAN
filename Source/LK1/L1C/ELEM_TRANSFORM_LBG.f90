@@ -1,4 +1,4 @@
-! ##################################################################################################################################
+﻿! ##################################################################################################################################
 ! Begin MIT license text.
 ! _______________________________________________________________________________________________________
 
@@ -116,7 +116,8 @@
 !-----------------------------------------------------------------------------------------------------------------------------------
 ! Transform from local to basic coords (TE_IDENT = 'Y': TE is ident matrix). Note that ELAS elem is already in global coords
 
-      IF ((TE_IDENT /= 'Y') .AND. .NOT. ((WHICH == 'KE') .AND. (TYPE == 'QUAD8   ') .AND. (QUAD8TYP == 'SIMOQ8  ')) .AND.       &
+      IF ((TE_IDENT /= 'Y') .AND. .NOT. ((WHICH == 'KE') .AND. (TYPE == 'QUAD8   ') .AND.                                      &
+                                         ((QUAD8TYP == 'SIMOQ8  ') .OR. (QUAD8TYP == 'MACQ8D  '))) .AND.                     &
                                   .NOT. ((WHICH == 'KE') .AND. (TYPE(1:5) == 'TRIA6') .AND.                                    &
                                          ((TRIA6TYP == 'SIMOT6  ') .OR. (TRIA6TYP == 'MITC6   ')))) THEN
          CALL ELMTLB ( OPT )
@@ -355,3 +356,4 @@ k_cord2:       DO K=1,NCORD
 
 
       END SUBROUTINE ELEM_TRANSFORM_LBG
+

@@ -1,4 +1,4 @@
-! #################################################################################################################################
+﻿! #################################################################################################################################
 ! CQUAD8 MacNeal Q8 + drilling penalty shell for PARAM,QUAD8TYP,MACQ8D.
 
       SUBROUTINE CQUAD8_MACQ8D ( OPT, INT_ELEM_ID )
@@ -439,7 +439,7 @@
       BDOUT = ZERO
       DO II=1,8
          COL = 6*(II-1)
-         BDOUT(1,COL+6) = NVAL(II)
+         BDOUT(1,COL+4:COL+6) = NVAL(II)*E3F
       ENDDO
       END SUBROUTINE BDRILL_Q8_AT
 
@@ -521,3 +521,6 @@
       END FUNCTION PARAM_S
 
       END SUBROUTINE CQUAD8_MACQ8D
+
+
+
