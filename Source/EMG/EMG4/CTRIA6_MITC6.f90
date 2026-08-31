@@ -59,17 +59,6 @@
 
       CALL LOAD_BASIC_COORDS_T6 ( XYZ )
       CALL CALC_NODAL_NORMALS_T6 ( XYZ, NORMALS )
-      IF (EID == 1) THEN
-         OPEN(UNIT=246, FILE='D:\18a\MYSTRAN_Validation-main\working\ctria6_mitc6_debug.txt', STATUS='UNKNOWN', POSITION='APPEND')
-         WRITE(246,'(A,I8)') 'CTRIA6_MITC6 EID=', EID
-         DO I=1,6
-            WRITE(246,'(A,I3,A,1P,3E16.8)') '  XYZ ', I, ' =', XYZ(I,1), XYZ(I,2), XYZ(I,3)
-         ENDDO
-         DO I=1,6
-            WRITE(246,'(A,I3,A,1P,3E16.8)') '  NODE', I, ' N =', NORMALS(I,1), NORMALS(I,2), NORMALS(I,3)
-         ENDDO
-         CLOSE(246)
-      ENDIF
       SQRT2 = DSQRT(TWO)
       SQRT3 = DSQRT(3.0D0)
       R1MITC = 0.5D0 - 0.5D0/SQRT3
@@ -184,10 +173,6 @@
             CALL BS_MITC6_AT ( XYZ, NORMALS, R, S, BS, JAC, R1MITC, R2MITC, RCMITC, SQRT2 )
             IF (EID == 1) THEN
                CALL BDRILL_T6_AT ( XYZ, NORMALS, R, S, BD, BDNORM )
-               OPEN(UNIT=246, FILE='D:\18a\MYSTRAN_Validation-main\working\ctria6_mitc6_debug.txt', STATUS='UNKNOWN', POSITION='APPEND')
-               WRITE(246,'(A,I8,A,I3,A,1P,E14.6,A,4E14.6)') 'CTRIA6_MITC6 EID=', EID, ' GP=', I, ' JAC=', JAC, &
-                     ' ||Bm||,||Bb||,||Bs||,||Bd|| =', DSQRT(SUM(BM*BM)), DSQRT(SUM(BB*BB)), DSQRT(SUM(BS*BS)), DSQRT(SUM(BD*BD))
-               CLOSE(246)
             ENDIF
             KOUT = KOUT + WT*JAC*MATMUL(TRANSPOSE(BM), MATMUL(SHELL_A, BM))
             KOUT = KOUT + WT*JAC*MATMUL(TRANSPOSE(BB), MATMUL(SHELL_D, BB))
@@ -208,15 +193,6 @@
                KE(IA,IB) = FAC
             ENDDO
          ENDDO
-         IF (EID == 1) THEN
-            OPEN(UNIT=247, FILE='D:\18a\MYSTRAN_Validation-main\working\ctria6_mitc6_ke.txt', STATUS='UNKNOWN', POSITION='APPEND')
-            WRITE(247,'(A,I8)') 'CTRIA6_MITC6 KE EID=', EID
-            WRITE(247,'(A,1P,E16.8)') '  FROB =', DSQRT(SUM(KE*KE))
-            DO IA=1,36
-               WRITE(247,'(36(1X,1PE16.8))') (KE(IA,IB), IB=1,36)
-            ENDDO
-            CLOSE(247)
-         ENDIF
       ENDIF
 
       IF (OPT(5) == 'Y') THEN
