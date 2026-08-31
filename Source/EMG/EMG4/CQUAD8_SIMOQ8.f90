@@ -157,6 +157,8 @@
          KDA = ZERO
          KAA = ZERO
 
+         IF (EID == 1) CALL DEBUG_CLEAR_SIMOQ8_Q8()
+
          CDRILL = 2.0D-2*SHELL_T(1,1)/(5.0D0/6.0D0)
 
          DO I=1,3
@@ -170,6 +172,10 @@
                CALL BS_Q8_AT ( XYZ, NORMALS, R, S, BS, JAC )
                CALL BDRILL_Q8_AT ( XYZ, NORMALS, R, S, BD, JAC )
                CALL EAS1_SHEAR_Q8_AT ( XYZ, R, S, BSE )
+
+               IF ((EID == 1) .AND. (I == 1) .AND. (J == 1)) THEN
+                  CALL DEBUG_GP_SIMOQ8_Q8(R, S, JAC, XYZ, NORMALS, BM, BB, BS, BD, BSE)
+               ENDIF
 
                KDD = KDD + WT*JAC*MATMUL(TRANSPOSE(BM), MATMUL(SHELL_A, BM))
                KDD = KDD + WT*JAC*MATMUL(TRANSPOSE(BB), MATMUL(SHELL_D, BB))
@@ -189,6 +195,8 @@
                ENDDO
             ENDDO
          ENDIF
+
+         IF (EID == 1) CALL DEBUG_K_SIMOQ8_Q8(KDD, KDA, KAA, KOUT)
 
          DO IA=1,48
             DO IB=1,48
@@ -417,10 +425,72 @@
       ENDIF
       END SUBROUTINE FIXED_FRAME_Q8
 
-      SUBROUTINE COV_MAP_Q8 ( XYZN, XI, ETA, E1F, E2F, G1, G2, C, JAC )
+      SUBROUTINE LOCAL_BASIS_AT_Q8 ( XYZN, XI, ETA, E1, E2, E3, JAC )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: E1(3), E2(3), E3(3), JAC
+      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), G3(3), NM
+      CALL SHAPE_Q8(XI, ETA, NVAL, DN)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      CALL CROSS3(G1, G2, G3)
+      JAC = VNORM(G3)
+      IF (JAC > 1.0D-15) THEN
+         E3 = G3/JAC
+      ELSE
+         E3 = (/ZERO, ZERO, ONE/)
+      ENDIF
+      NM = VNORM(G1)
+      IF (NM > 1.0D-15) THEN
+         E1 = G1/NM
+      ELSE
+         E1 = (/ONE, ZERO, ZERO/)
+      ENDIF
+      CALL CROSS3(E3, E1, E2)
+      NM = VNORM(E2)
+      IF (NM > 1.0D-15) THEN
+         E2 = E2/NM
+      ELSE
+         E2 = (/ZERO, ONE, ZERO/)
+      ENDIF
+      END SUBROUTINE LOCAL_BASIS_AT_Q8
+
+      SUBROUTINE COV_MAP_Q8 ( XYZN, XI, ETA, G1, G2, C, JAC )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: G1(3), G2(3), C(4), JAC
+      REAL(DOUBLE) :: E1(3), E2(3), E3(3), NVAL(8), DN(2,8)
+      REAL(DOUBLE) :: A11, A22, A12, DET, AI11, AI22, AI12, GC1(3), GC2(3)
+      CALL SHAPE_Q8(XI, ETA, NVAL, DN)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      CALL LOCAL_BASIS_AT_Q8(XYZN, XI, ETA, E1, E2, E3, JAC)
+      A11 = DOT_PRODUCT(G1,G1)
+      A22 = DOT_PRODUCT(G2,G2)
+      A12 = DOT_PRODUCT(G1,G2)
+      DET = A11*A22 - A12*A12
+      IF (DABS(DET) <= 1.0D-30) THEN
+         C = ZERO
+         RETURN
+      ENDIF
+      AI11 =  A22/DET
+      AI22 =  A11/DET
+      AI12 = -A12/DET
+      GC1 = AI11*G1 + AI12*G2
+      GC2 = AI12*G1 + AI22*G2
+      ! Python _covariant_maps order:
+      !   C = (c1_1, c1_2, c2_1, c2_2)
+      ! where c1_* maps the first physical in-plane basis direction and
+      ! c2_* maps the second physical in-plane basis direction.
+      C(1) = DOT_PRODUCT(E1, GC1)
+      C(2) = DOT_PRODUCT(E2, GC1)
+      C(3) = DOT_PRODUCT(E1, GC2)
+      C(4) = DOT_PRODUCT(E2, GC2)
+      END SUBROUTINE COV_MAP_Q8
+
+      SUBROUTINE COV_MAP_CENTER_Q8 ( XYZN, XI, ETA, E1F, E2F, G1, G2, C, JAC )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), XI, ETA, E1F(3), E2F(3)
       REAL(DOUBLE), INTENT(OUT) :: G1(3), G2(3), C(4), JAC
-      REAL(DOUBLE) :: E1(3), E2(3), E3(3), A11, A22, A12, DET, AI11, AI22, AI12, GC1(3), GC2(3)
+      REAL(DOUBLE) :: E1(3), E2(3), E3(3)
+      REAL(DOUBLE) :: A11, A22, A12, DET, AI11, AI22, AI12, GC1(3), GC2(3)
       CALL SURFACE_BASIS_Q8(XYZN, XI, ETA, G1, G2, E1, E2, E3, JAC)
       A11 = DOT_PRODUCT(G1,G1)
       A22 = DOT_PRODUCT(G2,G2)
@@ -435,11 +505,13 @@
       AI12 = -A12/DET
       GC1 = AI11*G1 + AI12*G2
       GC2 = AI12*G1 + AI22*G2
+      ! Same C order as COV_MAP_Q8 / Python _covariant_maps:
+      !   C = (c1_1, c1_2, c2_1, c2_2)
       C(1) = DOT_PRODUCT(E1F, GC1)
-      C(2) = DOT_PRODUCT(E1F, GC2)
-      C(3) = DOT_PRODUCT(E2F, GC1)
+      C(2) = DOT_PRODUCT(E2F, GC1)
+      C(3) = DOT_PRODUCT(E1F, GC2)
       C(4) = DOT_PRODUCT(E2F, GC2)
-      END SUBROUTINE COV_MAP_Q8
+      END SUBROUTINE COV_MAP_CENTER_Q8
 
       SUBROUTINE TENSOR_PHYS_Q8 ( V11, V22, V12, C, VOUT )
       REAL(DOUBLE), INTENT(IN)  :: V11(3), V22(3), V12(3), C(4)
@@ -452,11 +524,10 @@
       SUBROUTINE BM_Q8_AT ( XYZN, XI, ETA, BMOUT, JAC )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), XI, ETA
       REAL(DOUBLE), INTENT(OUT) :: BMOUT(3,48), JAC
-      REAL(DOUBLE) :: NVAL(8), DN(2,8), E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), VP(3,3)
+      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), C(4), VP(3,3)
       INTEGER(LONG) :: II, COL
       CALL SHAPE_Q8(XI, ETA, NVAL, DN)
-      CALL FIXED_FRAME_Q8(XYZN, E1F, E2F, E3F)
-      CALL COV_MAP_Q8(XYZN, XI, ETA, E1F, E2F, G1, G2, C, JAC)
+      CALL COV_MAP_Q8(XYZN, XI, ETA, G1, G2, C, JAC)
       BMOUT = ZERO
       DO II=1,8
          COL = (II-1)*6
@@ -469,15 +540,14 @@
       REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), NORMS(8,3), XI, ETA
       REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(8,3)
       REAL(DOUBLE), INTENT(OUT) :: BBOUT(3,48), JAC
-      REAL(DOUBLE) :: NVAL(8), DN(2,8), E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), VP(3,3)
+      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), C(4), VP(3,3)
       REAL(DOUBLE) :: T1(3), T2(3), T0(3), CG1(3), CG2(3)
       REAL(DOUBLE) :: NORMS_LOC(8,3)
       INTEGER(LONG) :: II, COL
       NORMS_LOC = NORMS
       IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
       CALL SHAPE_Q8(XI, ETA, NVAL, DN)
-      CALL FIXED_FRAME_Q8(XYZN, E1F, E2F, E3F)
-      CALL COV_MAP_Q8(XYZN, XI, ETA, E1F, E2F, G1, G2, C, JAC)
+      CALL COV_MAP_Q8(XYZN, XI, ETA, G1, G2, C, JAC)
       T1 = MATMUL(DN(1,:), NORMS_LOC)
       T2 = MATMUL(DN(2,:), NORMS_LOC)
       BBOUT = ZERO
@@ -497,14 +567,13 @@
       REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), NORMS(8,3), XI, ETA
       REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(8,3)
       REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,48), JAC
-      REAL(DOUBLE) :: NVAL(8), DN(2,8), E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), BSN(2,48), T0(3), T0I(3), C1(3), C2(3), NM
+      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), C(4), BSN(2,48), T0(3), T0I(3), C1(3), C2(3), NM
       REAL(DOUBLE) :: NORMS_LOC(8,3)
       INTEGER(LONG) :: II, COL
       NORMS_LOC = NORMS
       IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
       CALL SHAPE_Q8(XI, ETA, NVAL, DN)
-      CALL FIXED_FRAME_Q8(XYZN, E1F, E2F, E3F)
-      CALL COV_MAP_Q8(XYZN, XI, ETA, E1F, E2F, G1, G2, C, JAC)
+      CALL COV_MAP_Q8(XYZN, XI, ETA, G1, G2, C, JAC)
       T0 = MATMUL(NVAL, NORMS_LOC)
       NM = VNORM(T0)
       IF (NM > 1.0D-15) T0 = T0/NM
@@ -527,17 +596,20 @@
       REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), NORMS(8,3), XI, ETA
       REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(8,3)
       REAL(DOUBLE), INTENT(OUT) :: BDOUT(1,48), JAC
-      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), E1(3), E2(3), E3(3), A(2,2), AINV(2,2), DLOC(2,8)
+      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), E1(3), E2(3), E3(3)
+      REAL(DOUBLE) :: A(2,2), AINV(2,2), DLOC(2,8)
       REAL(DOUBLE) :: NORMS_LOC(8,3)
       INTEGER(LONG) :: II, COL
       NORMS_LOC = NORMS
       IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
       CALL SHAPE_Q8(XI, ETA, NVAL, DN)
-      CALL SURFACE_BASIS_Q8(XYZN, XI, ETA, G1, G2, E1, E2, E3, JAC)
-      A(1,1) = DOT_PRODUCT(G1,E1)
-      A(1,2) = DOT_PRODUCT(G1,E2)
-      A(2,1) = DOT_PRODUCT(G2,E1)
-      A(2,2) = DOT_PRODUCT(G2,E2)
+      CALL LOCAL_BASIS_AT_Q8(XYZN, XI, ETA, E1, E2, E3, JAC)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      A(1,1) = DOT_PRODUCT(G1,G1)
+      A(1,2) = DOT_PRODUCT(G1,G2)
+      A(2,1) = DOT_PRODUCT(G1,G2)
+      A(2,2) = DOT_PRODUCT(G2,G2)
       CALL INV2(A, AINV)
       DLOC = MATMUL(AINV, DN)
       BDOUT = ZERO
@@ -553,11 +625,11 @@
       REAL(DOUBLE), INTENT(OUT) :: BSE(2)
       REAL(DOUBLE) :: E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), JAC, DPHIR, DPHIS
       CALL FIXED_FRAME_Q8(XYZN, E1F, E2F, E3F)
-      CALL COV_MAP_Q8(XYZN, XI, ETA, E1F, E2F, G1, G2, C, JAC)
+      CALL COV_MAP_CENTER_Q8(XYZN, XI, ETA, E1F, E2F, G1, G2, C, JAC)
       DPHIR = -TWO*XI*(ONE-ETA*ETA)
       DPHIS = -TWO*ETA*(ONE-XI*XI)
-      BSE(1) = DPHIR*C(1) + DPHIS*C(2)
-      BSE(2) = DPHIR*C(3) + DPHIS*C(4)
+      BSE(1) = DPHIR*C(1) + DPHIS*C(3)
+      BSE(2) = DPHIR*C(2) + DPHIS*C(4)
       END SUBROUTINE EAS1_SHEAR_Q8_AT
 
       SUBROUTINE CROSS3 ( A, B, C )
@@ -567,6 +639,59 @@
       C(2) = A(3)*B(1) - A(1)*B(3)
       C(3) = A(1)*B(2) - A(2)*B(1)
       END SUBROUTINE CROSS3
+
+      SUBROUTINE DEBUG_CLEAR_SIMOQ8_Q8 ()
+      INTEGER(LONG) :: U
+      OPEN(NEWUNIT=U, FILE='D:\18a_Sept\python\quadratic\debug_simoq8_fortran.txt', STATUS='REPLACE', ACTION='WRITE')
+      WRITE(U,'(A)') 'FORTRAN CQUAD8_SIMOQ8 DEBUG EID=1'
+      CLOSE(U)
+      END SUBROUTINE DEBUG_CLEAR_SIMOQ8_Q8
+
+      SUBROUTINE DEBUG_GP_SIMOQ8_Q8 ( R, S, JAC, XYZ, NORMALS, BM, BB, BS, BD, BSE )
+      REAL(DOUBLE), INTENT(IN) :: R, S, JAC, XYZ(8,3), NORMALS(8,3), BM(3,48), BB(3,48), BS(2,48), BD(1,48), BSE(2)
+      INTEGER(LONG) :: U
+      OPEN(NEWUNIT=U, FILE='D:\18a_Sept\python\quadratic\debug_simoq8_fortran.txt', STATUS='UNKNOWN', POSITION='APPEND', ACTION='WRITE')
+      WRITE(U,'(A,1X,ES24.16,1X,ES24.16,1X,A,1X,ES24.16)') 'GP', R, S, 'JAC', JAC
+      CALL DEBUG_WRITE_MAT_Q8(U, 'XYZ', XYZ, 8, 3)
+      CALL DEBUG_WRITE_MAT_Q8(U, 'NORMALS', NORMALS, 8, 3)
+      CALL DEBUG_WRITE_MAT_Q8(U, 'BM', BM, 3, 48)
+      CALL DEBUG_WRITE_MAT_Q8(U, 'BB', BB, 3, 48)
+      CALL DEBUG_WRITE_MAT_Q8(U, 'BS', BS, 2, 48)
+      CALL DEBUG_WRITE_MAT_Q8(U, 'BD', BD, 1, 48)
+      CALL DEBUG_WRITE_VEC_Q8(U, 'BSE', BSE, 2)
+      CLOSE(U)
+      END SUBROUTINE DEBUG_GP_SIMOQ8_Q8
+
+      SUBROUTINE DEBUG_K_SIMOQ8_Q8 ( KDD, KDA, KAA, KOUT )
+      REAL(DOUBLE), INTENT(IN) :: KDD(48,48), KDA(48), KAA, KOUT(48,48)
+      INTEGER(LONG) :: U
+      OPEN(NEWUNIT=U, FILE='D:\18a_Sept\python\quadratic\debug_simoq8_fortran.txt', STATUS='UNKNOWN', POSITION='APPEND', ACTION='WRITE')
+      CALL DEBUG_WRITE_MAT_Q8(U, 'KDD', KDD, 48, 48)
+      CALL DEBUG_WRITE_VEC_Q8(U, 'KDA', KDA, 48)
+      WRITE(U,'(A,1X,ES24.16)') 'KAA', KAA
+      CALL DEBUG_WRITE_MAT_Q8(U, 'KOUT', KOUT, 48, 48)
+      CLOSE(U)
+      END SUBROUTINE DEBUG_K_SIMOQ8_Q8
+
+      SUBROUTINE DEBUG_WRITE_MAT_Q8 ( U, NAME, A, NR, NC )
+      INTEGER(LONG), INTENT(IN) :: U, NR, NC
+      CHARACTER(LEN=*), INTENT(IN) :: NAME
+      REAL(DOUBLE), INTENT(IN) :: A(NR,NC)
+      INTEGER(LONG) :: IR, IC
+      WRITE(U,'(A,1X,A,1X,I0,1X,I0)') 'MATRIX', NAME, NR, NC
+      DO IR=1,NR
+         WRITE(U,'(I0,*(1X,ES24.16))') IR, (A(IR,IC), IC=1,NC)
+      ENDDO
+      END SUBROUTINE DEBUG_WRITE_MAT_Q8
+
+      SUBROUTINE DEBUG_WRITE_VEC_Q8 ( U, NAME, A, N )
+      INTEGER(LONG), INTENT(IN) :: U, N
+      CHARACTER(LEN=*), INTENT(IN) :: NAME
+      REAL(DOUBLE), INTENT(IN) :: A(N)
+      INTEGER(LONG) :: I1
+      WRITE(U,'(A,1X,A,1X,I0)') 'VECTOR', NAME, N
+      WRITE(U,'(*(1X,ES24.16))') (A(I1), I1=1,N)
+      END SUBROUTINE DEBUG_WRITE_VEC_Q8
 
       FUNCTION VNORM ( V ) RESULT(NM)
       REAL(DOUBLE), INTENT(IN) :: V(3)

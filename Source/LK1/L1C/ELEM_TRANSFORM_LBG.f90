@@ -38,6 +38,7 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MELDOF, NCORD, NGRID, NSUB, NTSUB
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
+      USE PARAMS, ONLY                :  QUAD8TYP
       USE MODEL_STUF, ONLY            :  AGRID, CORD, ELDOF, GRID, GRID_ID, KEG, TE_IDENT, TYPE
       USE MODEL_STUF, ONLY            :  ELGP
 
@@ -115,7 +116,7 @@
 !-----------------------------------------------------------------------------------------------------------------------------------
 ! Transform from local to basic coords (TE_IDENT = 'Y': TE is ident matrix). Note that ELAS elem is already in global coords
 
-      IF (TE_IDENT /= 'Y') THEN
+      IF ((TE_IDENT /= 'Y') .AND. .NOT. ((WHICH == 'KE') .AND. (TYPE == 'QUAD8   ') .AND. (QUAD8TYP == 'SIMOQ8  '))) THEN
          CALL ELMTLB ( OPT )
       ENDIF
 
