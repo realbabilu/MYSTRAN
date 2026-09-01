@@ -119,7 +119,8 @@
       IF ((TE_IDENT /= 'Y') .AND. .NOT. ((WHICH == 'KE') .AND. (TYPE == 'QUAD8   ') .AND.                                      &
                                          ((QUAD8TYP == 'SIMOQ8  ') .OR. (QUAD8TYP == 'MACQ8D  '))) .AND.                     &
                                   .NOT. ((WHICH == 'KE') .AND. (TYPE(1:5) == 'TRIA6') .AND.                                    &
-                                         ((TRIA6TYP == 'SIMOT6  ') .OR. (TRIA6TYP == 'MITC6   ')))) THEN
+                                         ((TRIA6TYP == 'SIMOT6  ') .OR. (TRIA6TYP == 'MITC6   ') .OR. (TRIA6TYP == 'MH6T    ') .OR.              &
+                                          (TRIA6TYP == 'REZAIEE ')))) THEN
          CALL ELMTLB ( OPT )
       ENDIF
 
@@ -356,4 +357,5 @@ k_cord2:       DO K=1,NCORD
 
 
       END SUBROUTINE ELEM_TRANSFORM_LBG
+
 

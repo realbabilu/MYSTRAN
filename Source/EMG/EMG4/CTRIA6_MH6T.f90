@@ -1,4 +1,4 @@
-! #################################################################################################################################
+﻿! #################################################################################################################################
 ! CTRIA6 MH6T quadratic triangular shell.
 
       SUBROUTINE CTRIA6_MH6T ( OPT, INT_ELEM_ID )
@@ -395,11 +395,39 @@
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), NORMS(6,3)
       REAL(DOUBLE), INTENT(OUT) :: MEM_ALPHA(9,36), SHEAR_BETA(6,36)
       REAL(DOUBLE) :: E1F(3), E2F(3), E3F(3), XYL(6,2), ORIG(3), DXYZ(3), A3(3), CROSS_TMP(3), NORMI(3), NORMJ(3)
+      REAL(DOUBLE) :: GL1(3), GL2(3), GL3(3), GL(3), VA(3), VB(3), NM
       REAL(DOUBLE) :: BK(9,36), GAMMA(9,9), GKI(6,36), OMEGA(6,6), A(2), L2, L1D, CK, SK, XI, ETA
       REAL(DOUBLE) :: INV9(9,9), INV6(6,6)
       REAL(DOUBLE) :: PTS_XI(9), PTS_ETA(9)
       INTEGER(LONG) :: MEM_I(9), MEM_J(9), SHR_I(6), SHR_J(6), IROW, ICOL, II
       CALL FIXED_FRAME_T6(XYZN, E1F, E2F, E3F)
+      VA = XYZN(4,:) - XYZN(1,:)
+      VB = XYZN(6,:) - XYZN(1,:)
+      CALL CROSS3(VA, VB, GL1)
+      NM = VNORM(GL1)
+      IF (NM > 1.0D-15) THEN
+         GL1 = GL1/NM
+      ELSE
+         GL1 = E3F
+      ENDIF
+      VA = XYZN(2,:) - XYZN(4,:)
+      VB = XYZN(5,:) - XYZN(4,:)
+      CALL CROSS3(VA, VB, GL2)
+      NM = VNORM(GL2)
+      IF (NM > 1.0D-15) THEN
+         GL2 = GL2/NM
+      ELSE
+         GL2 = E3F
+      ENDIF
+      VA = XYZN(3,:) - XYZN(5,:)
+      VB = XYZN(6,:) - XYZN(5,:)
+      CALL CROSS3(VA, VB, GL3)
+      NM = VNORM(GL3)
+      IF (NM > 1.0D-15) THEN
+         GL3 = GL3/NM
+      ELSE
+         GL3 = E3F
+      ENDIF
       ORIG = XYZN(1,:)
       DO II=1,6
          DXYZ = XYZN(II,:) - ORIG
@@ -434,8 +462,15 @@
          A3 = XYZN(SHR_J(IROW),:) - XYZN(SHR_I(IROW),:)
          L1D = VNORM(A3)
          IF (L1D < 1.0D-20) L1D = 1.0D-20
-         GKI(IROW,6*(SHR_I(IROW)-1)+1:6*(SHR_I(IROW)-1)+3) = GKI(IROW,6*(SHR_I(IROW)-1)+1:6*(SHR_I(IROW)-1)+3) - E3F/L1D
-         GKI(IROW,6*(SHR_J(IROW)-1)+1:6*(SHR_J(IROW)-1)+3) = GKI(IROW,6*(SHR_J(IROW)-1)+1:6*(SHR_J(IROW)-1)+3) + E3F/L1D
+         IF ((IROW == 1) .OR. (IROW == 6)) THEN
+            GL = GL1
+         ELSE IF ((IROW == 2) .OR. (IROW == 3)) THEN
+            GL = GL2
+         ELSE
+            GL = GL3
+         ENDIF
+         GKI(IROW,6*(SHR_I(IROW)-1)+1:6*(SHR_I(IROW)-1)+3) = GKI(IROW,6*(SHR_I(IROW)-1)+1:6*(SHR_I(IROW)-1)+3) - GL/L1D
+         GKI(IROW,6*(SHR_J(IROW)-1)+1:6*(SHR_J(IROW)-1)+3) = GKI(IROW,6*(SHR_J(IROW)-1)+1:6*(SHR_J(IROW)-1)+3) + GL/L1D
          NORMI = NORMS(SHR_I(IROW),:)
          NORMJ = NORMS(SHR_J(IROW),:)
          CALL CROSS3 ( NORMI, A3, CROSS_TMP )
@@ -660,3 +695,4 @@
       END SUBROUTINE INV2
 
       END SUBROUTINE CTRIA6_MH6T
+
