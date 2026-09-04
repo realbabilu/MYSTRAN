@@ -76,6 +76,7 @@
       REAL(DOUBLE)                    :: KV(9,9)           ! KB + PHISQ*KS (the 9x9 virgin stiffness matrix for MIN3)
       REAL(DOUBLE)                    :: M0                ! An intermediate variable used in calc elem mass, ME
       CHARACTER(1*BYTE)               :: OPT_REC(6)        ! Recovery-only option vector for MITC3+ membrane results
+      CHARACTER(1*BYTE)               :: OPT_THERM(6)      ! Thermal-only option vector for MITC3+ membrane thermal loads
       REAL(DOUBLE)                    :: PPV(9,NSUB)       ! The 9xNSUB  virgin thermal  load     matrix for MIN3
       REAL(DOUBLE)                    :: PTV(9,NTSUB)      ! The 9xNTSUB virgin pressure load     matrix for MIN3
       REAL(DOUBLE)                    :: S2V(3,9)          ! The 3x9     virgin stress   recovery matrix for MIN3 for bending
@@ -197,6 +198,12 @@
                OPT_REC(5) = 'N'
                OPT_REC(6) = OPT(6)
                CALL TMEM1 ( OPT_REC, AREA, X2E, X3E, Y3E, 'N', BIG_BM )
+            ENDIF
+
+            IF ((TRIA3TYP == 'MITC3+') .AND. (INTL_MID(1) /= 0) .AND. (OPT(2) == 'Y')) THEN
+               OPT_THERM = 'N'
+               OPT_THERM(2) = 'Y'
+               CALL TMEM1 ( OPT_THERM, AREA, X2E, X3E, Y3E, 'N', BIG_BM )
             ENDIF
          ENDIF
 
