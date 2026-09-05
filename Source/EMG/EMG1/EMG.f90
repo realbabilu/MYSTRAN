@@ -448,9 +448,19 @@
          IF (QUADRTYP == 'DKM24AU ') THEN
             CALL CQUADR_DKM24AU ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'DKM24EA ') THEN
-            CALL CQUADR_DKM24EA ( OPT, INT_ELEM_ID )
+            IF ((OPT(3) == 'Y') .AND. (OPT(1) == 'N') .AND. (OPT(4) == 'N') .AND.                                              &
+                (OPT(5) == 'N') .AND. (OPT(6) == 'N')) THEN
+               CALL CQUADR_DKMQ24R ( OPT, INT_ELEM_ID )
+            ELSE
+               CALL CQUADR_DKM24EA ( OPT, INT_ELEM_ID )
+            ENDIF
          ELSE IF (QUADRTYP == 'DKMQ24  ') THEN
-            CALL CQUADR_DKMQ24R ( OPT, INT_ELEM_ID )
+            IF ((OPT(3) == 'Y') .AND. (OPT(1) == 'N') .AND. (OPT(4) == 'N') .AND.                                              &
+                (OPT(5) == 'N') .AND. (OPT(6) == 'N')) THEN
+               CALL CQUADR_DKMQ24R ( OPT, INT_ELEM_ID )
+            ELSE
+               CALL CQUADR_DKMQ24 ( OPT, INT_ELEM_ID )
+            ENDIF
          ELSE IF (QUADRTYP == 'SIMO    ') THEN
             CALL CQUADR_SIMO1993 ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'Q4EASANS') THEN

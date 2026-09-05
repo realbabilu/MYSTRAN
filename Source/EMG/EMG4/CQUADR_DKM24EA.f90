@@ -57,6 +57,7 @@
                                          PTE, TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM,&
                                          ALPVEC, DT, TREF
 
+      USE CQUADR_DKMQ24R_Interface
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
       USE ORDER_GAUSS_Interface
@@ -67,6 +68,7 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUADR_DKM24EA'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
+      CHARACTER(1*BYTE)               :: REC_OPT(6)
 
       INTEGER(LONG), PARAMETER        :: NNODE = 4
       INTEGER(LONG), PARAMETER        :: NDOFN = 6
@@ -84,7 +86,7 @@
       REAL(DOUBLE)                    :: DN_G(2,4), DNDX(4), DNDY(4), SIG0(2,2), KGVAL
       REAL(DOUBLE)                    :: AU(4,24), ADELTA(4,4), AINV_AU(4,24)
       REAL(DOUBLE)                    :: BMB(3,24), BMB_NAT(3,24), BMB_DIF(3,24), BBB(3,24), BSB(2,24)
-      REAL(DOUBLE)                    :: BML(3,24), BBL(3,24), BSL(2,24)
+      REAL(DOUBLE)                    :: BML(3,24), BML_REC(3,24), BBL(3,24), BSL(2,24)
       REAL(DOUBLE)                    :: KLOCAL(24,24), KBASIC(24,24), KMEM(24,24), KBEND(24,24), KSHEAR(24,24), KDRILL(24,24)
       REAL(DOUBLE)                    :: KUA(24,4), KAA(4,4), KAAINV(4,4), MEAS(3,4)
       REAL(DOUBLE)                    :: KGBASIC(24,24), KGLOCAL(24,24)
@@ -181,6 +183,11 @@
                 ENDIF
 
                 BML = MATMUL(BMB, T24T)
+                IF (EAS4_ACTIVE) THEN
+                   BML_REC = MATMUL(BMB_NAT, T24T)
+                ELSE
+                   BML_REC = BML
+                ENDIF
                 BBL = MATMUL(BBB, T24T)
                 BSL = MATMUL(BSB, T24T)
 
@@ -195,7 +202,7 @@
                KBASIC = KMEM + KBEND + KSHEAR
 
                GP = GP_INDEX(I, J)
-               GBE1(1:3,1:24,GP) = BML
+               GBE1(1:3,1:24,GP) = BML_REC
                GBE2(1:3,1:24,GP) = BBL
                GBE3(1:2,1:24,GP) = BSL
             ENDDO
@@ -417,6 +424,12 @@
             WRITE(F06,'(A,1X,ES15.7)') 'CQUADR MBASIC_NORM', DSQRT(SUM(MBASIC*MBASIC))
             WRITE(F06,'(A,1X,ES15.7)') 'CQUADR MLOCAL_NORM', DSQRT(SUM(MLOCAL*MLOCAL))
          ENDIF
+      ENDIF
+
+      IF (OPT(3) == 'Y') THEN
+         REC_OPT = 'N'
+         REC_OPT(3) = 'Y'
+         CALL CQUADR_DKMQ24R ( REC_OPT, INT_ELEM_ID )
       ENDIF
 
       RETURN
