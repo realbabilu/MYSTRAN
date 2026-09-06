@@ -1,0 +1,18 @@
+      MODULE CTRIA3_DSG3_Interface
+
+      INTERFACE
+
+         SUBROUTINE CTRIA3_DSG3 ( OPT, INT_ELEM_ID )
+
+         USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG
+
+         IMPLICIT NONE
+
+         CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
+         INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
+
+         END SUBROUTINE CTRIA3_DSG3
+
+      END INTERFACE
+
+      END MODULE CTRIA3_DSG3_Interface

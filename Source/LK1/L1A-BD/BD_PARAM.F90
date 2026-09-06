@@ -2956,15 +2956,17 @@
                TRIA3TYP = 'MITC3+'
             ELSE IF (CHRPARM == 'T3FF    ') THEN
                TRIA3TYP = 'T3FF  '
+            ELSE IF (CHRPARM == 'DSG3    ') THEN
+               TRIA3TYP = 'DSG3  '
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'MIN3, MITC3+ or T3FF',CHRPARM,TRIA3TYP
+               WRITE(ERR,1189) PARNAM,'MIN3, MITC3+, T3FF or DSG3',CHRPARM,TRIA3TYP
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'MIN3, MITC3+ or T3FF',CHRPARM,TRIA3TYP
+                  WRITE(F06,1189) PARNAM,'MIN3, MITC3+, T3FF or DSG3',CHRPARM,TRIA3TYP
                ENDIF
             ENDIF
          ENDIF

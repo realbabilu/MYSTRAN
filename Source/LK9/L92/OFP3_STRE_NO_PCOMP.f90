@@ -1173,9 +1173,17 @@ elems_5: DO J = 1,NELE
       IF (ROW_NUM <= 0) RETURN
 
       IF (TYPE(1:5) == 'TRIA3') THEN
-! T3FF, T3FFD, MITC3+, and MITC3+HB follow the DKMT18 GPSTRESS convention:
-! keep the element TE frame selected above rather than applying a special
-! output-frame override here.
+         IF (TRIA3TYP == 'DSG3  ') THEN
+            SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
+         ENDIF
+! T3FF and MITC3+ on CTRIA3 keep the element TE frame selected above rather
+! than applying a special output-frame override here.
+         RETURN
+      ELSE IF (TYPE(1:5) == 'TRIAR') THEN
+! T3FFD and MITC3+HB on CTRIAR also keep the recovered element TE frame.
+! Falling through to the generic output-basis override corrupts the skewed
+! patch-test recovery even when the element BE/SE operators themselves are
+! correct.
          RETURN
       ELSE IF ((TYPE(1:5) == 'QUAD4') .AND. ((QUAD4TYP == 'MITC4 ') .OR. (QUAD4TYP == 'MITC4R ') .OR.                           &
                                              (QUAD4TYP == 'MITC4+') .OR. (QUAD4TYP == 'MITC4P '))) THEN
@@ -1185,13 +1193,15 @@ elems_5: DO J = 1,NELE
       ELSE IF ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  ')) THEN
          SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
       ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24EA ')) THEN
-         CALL BUILD_DKM24EA_STRESS_BASIS ( POINT_NUM, BASIS, OK )
-         IF (OK) SHELL_OUT_TE(1:3,1:3,ROW_NUM) = BASIS(1:3,1:3)
-         SHELL_STRESS_IN_LOCAL(ROW_NUM) = OK
+! DKMQ24EAS stress recovery now follows the same recovered TE-frame convention
+! as DKMQ24R/AU for GPSTRESS output; do not apply a second point-local basis
+! transform here.
+         RETURN
       ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKMQ24  ')) THEN
-         CALL BUILD_QUAD_STRESS_BASIS ( POINT_NUM, BASIS, OK )
-         IF (OK) SHELL_OUT_TE(1:3,1:3,ROW_NUM) = BASIS(1:3,1:3)
-         SHELL_STRESS_IN_LOCAL(ROW_NUM) = OK
+! Original DKMQ24 stress recovery is also written in the recovered element TE
+! frame for GPSTRESS output; a second point-local basis transform corrupts the
+! LC1 membrane patch shear field on skewed meshes.
+         RETURN
       ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'DKM24AU ')) THEN
 ! DKM24AU delegates stress recovery to DKMQ24R, so keep the recovered
 ! element TE frame instead of applying the AU point-local output override.
@@ -1503,4 +1513,3 @@ elems_5: DO J = 1,NELE
 !====================================================================================================
 
       END SUBROUTINE OFP3_STRE_NO_PCOMP
-

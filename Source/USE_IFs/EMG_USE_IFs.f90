@@ -46,6 +46,7 @@
       USE BUSH_Interface
       USE TREL1_Interface
       USE CTRIA3_T3FF_Interface
+      USE CTRIA3_DSG3_Interface
       USE CTRIA6_MITC6_Interface
       USE CTRIA6_MH6T_Interface
       USE CTRIA6_REZAIEE_Interface

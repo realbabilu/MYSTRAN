@@ -34,7 +34,7 @@
                                          NVEC, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
-      USE PARAMS, ONLY                :  STR_CID
+      USE PARAMS, ONLY                :  STR_CID, TRIA3TYP
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL
@@ -1770,6 +1770,8 @@
 !----------------------------------------------------------------------------------------------------------------------------------
       SUBROUTINE GET_SURFACE_STRESS3 ( SURF_INDEX, POINT_INDEX, STRESS_IN_LOCAL, TE_LOCAL, LOCAL_STRESS3, SURF_STRESS3 )
 
+      USE PARAMS, ONLY                :  TRIA3TYP
+
       INTEGER(LONG), INTENT(IN)       :: SURF_INDEX
       INTEGER(LONG), INTENT(IN)       :: POINT_INDEX
       LOGICAL, INTENT(IN)             :: STRESS_IN_LOCAL
@@ -1779,9 +1781,11 @@
 
       REAL(DOUBLE)                    :: SURF_BASIS(3,3)
       REAL(DOUBLE)                    :: TBL(3,3)
+      REAL(DOUBLE)                    :: DSG3_TE(3,3)
       REAL(DOUBLE)                    :: LOCAL_TENSOR(3,3)
       REAL(DOUBLE)                    :: BASIC_TENSOR(3,3)
       REAL(DOUBLE)                    :: SURF_TENSOR(3,3)
+      LOGICAL                         :: DSG3_OK
 
       SURF_STRESS3 = LOCAL_STRESS3
       IF (POINT_INDEX < 1) RETURN
@@ -1793,7 +1797,15 @@
       LOCAL_TENSOR(1,2) = LOCAL_STRESS3(3)
       LOCAL_TENSOR(2,1) = LOCAL_STRESS3(3)
 
-      IF (STRESS_IN_LOCAL .AND. (MAXVAL(DABS(TE_LOCAL)) > ZERO)) THEN
+      IF ((FAMILY(1:4) == 'TRIA') .AND. (TRIA3TYP == 'DSG3  ')) THEN
+         CALL GET_TRIA_DSG3_TE ( POINT_INDEX, DSG3_TE, DSG3_OK )
+         IF (DSG3_OK) THEN
+            TBL = TRANSPOSE(DSG3_TE)
+            BASIC_TENSOR = MATMUL( TBL, MATMUL(LOCAL_TENSOR, TRANSPOSE(TBL)) )
+         ELSE
+            BASIC_TENSOR = LOCAL_TENSOR
+         ENDIF
+      ELSE IF (STRESS_IN_LOCAL .AND. (MAXVAL(DABS(TE_LOCAL)) > ZERO)) THEN
          TBL = TRANSPOSE(TE_LOCAL)
          BASIC_TENSOR = MATMUL( TBL, MATMUL(LOCAL_TENSOR, TRANSPOSE(TBL)) )
       ELSE
@@ -1808,6 +1820,54 @@
       SURF_STRESS3(3) = SURF_TENSOR(1,2)
 
       END SUBROUTINE GET_SURFACE_STRESS3
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE GET_TRIA_DSG3_TE ( POINT_INDEX, TE_DSG3, OK )
+
+      USE PARAMS, ONLY                :  TRIA3TYP
+
+      INTEGER(LONG), INTENT(IN)       :: POINT_INDEX
+      REAL(DOUBLE), INTENT(OUT)       :: TE_DSG3(3,3)
+      LOGICAL, INTENT(OUT)            :: OK
+
+      REAL(DOUBLE)                    :: X1(3), X2(3), X3(3)
+      REAL(DOUBLE)                    :: E1(3), E2(3), E3(3)
+      REAL(DOUBLE)                    :: V12(3), V13(3), VPERP(3)
+      REAL(DOUBLE)                    :: X2LEN, Y3LEN, NORM3
+
+      TE_DSG3 = ZERO
+      OK = .FALSE.
+      IF (POINT_INDEX < 1) RETURN
+      IF (POINT_INDEX > SIZE(GID_OUT_ARRAY,1)) RETURN
+
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(POINT_INDEX,2), X1 )
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(POINT_INDEX,3), X2 )
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(POINT_INDEX,4), X3 )
+
+      V12 = X2 - X1
+      V13 = X3 - X1
+      X2LEN = DSQRT(DOT_PRODUCT(V12,V12))
+      IF (X2LEN <= 1.0D-14) RETURN
+      E1 = V12 / X2LEN
+
+      VPERP = V13 - DOT_PRODUCT(V13,E1)*E1
+      Y3LEN = DSQRT(DOT_PRODUCT(VPERP,VPERP))
+      IF (Y3LEN <= 1.0D-14) RETURN
+      E2 = VPERP / Y3LEN
+
+      E3(1) = E1(2)*E2(3) - E1(3)*E2(2)
+      E3(2) = E1(3)*E2(1) - E1(1)*E2(3)
+      E3(3) = E1(1)*E2(2) - E1(2)*E2(1)
+      NORM3 = DSQRT(DOT_PRODUCT(E3,E3))
+      IF (NORM3 <= 1.0D-14) RETURN
+      E3 = E3 / NORM3
+
+      TE_DSG3(1,1:3) = E1
+      TE_DSG3(2,1:3) = E2
+      TE_DSG3(3,1:3) = E3
+      OK = .TRUE.
+
+      END SUBROUTINE GET_TRIA_DSG3_TE
 
 !----------------------------------------------------------------------------------------------------------------------------------
       SUBROUTINE GET_SURFACE_BASIS ( SURF_INDEX, SURF_BASIS )

@@ -37,7 +37,7 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, FOUR
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP
+      USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP, TRIA3TYP
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_ELFO
       use model_stuf, only            :  pcomp_props
       USE MODEL_STUF, ONLY            :  ANY_ELFE_OUTPUT, EDAT, EPNT, ETYPE, FCONV, EID, ELMTYP, ELOUT, METYPE, NUM_EMG_FATAL_ERRS,&
@@ -278,6 +278,9 @@ elems_3: DO J = 1,NELE
                            DO K=1,ELGP
                               GID_OUT_ARRAY(NUM_OGEL_ROWS,K+1) = AGRID(K)
                            ENDDO
+                           IF ((ETYPE(J)(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'DSG3  ')) THEN
+                              CALL ROTATE_DSG3_FORCE_ROW_TO_BASIC ( NUM_OGEL )
+                           ENDIF
 
                         ENDDO
 
@@ -753,6 +756,106 @@ elems_3: DO J = 1,NELE
       FORCE_SURF(8) = SURF_VEC(2)
 
       END SUBROUTINE TRANSFORM_SURFACE_FORCE8
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE ROTATE_DSG3_FORCE_ROW_TO_BASIC ( IROW )
+
+      INTEGER(LONG), INTENT(IN)       :: IROW
+
+      REAL(DOUBLE)                    :: TE_DSG3(3,3)
+      REAL(DOUBLE)                    :: TBL(3,3)
+      REAL(DOUBLE)                    :: LOCAL_TENSOR(3,3)
+      REAL(DOUBLE)                    :: BASIC_TENSOR(3,3)
+      REAL(DOUBLE)                    :: LOCAL_VEC(3)
+      REAL(DOUBLE)                    :: BASIC_VEC(3)
+      REAL(DOUBLE)                    :: FORCE_LOCAL(8)
+      LOGICAL                         :: OK
+
+      IF (IROW < 1) RETURN
+
+      CALL GET_TRIA_DSG3_TE ( IROW, TE_DSG3, OK )
+      IF (.NOT. OK) RETURN
+
+      FORCE_LOCAL(1:8) = OGEL(IROW,1:8)
+      TBL = TRANSPOSE(TE_DSG3)
+
+      LOCAL_TENSOR = ZERO
+      LOCAL_TENSOR(1,1) = FORCE_LOCAL(1)
+      LOCAL_TENSOR(2,2) = FORCE_LOCAL(2)
+      LOCAL_TENSOR(1,2) = FORCE_LOCAL(3)
+      LOCAL_TENSOR(2,1) = FORCE_LOCAL(3)
+      BASIC_TENSOR = MATMUL( TBL, MATMUL(LOCAL_TENSOR, TRANSPOSE(TBL)) )
+      OGEL(IROW,1) = BASIC_TENSOR(1,1)
+      OGEL(IROW,2) = BASIC_TENSOR(2,2)
+      OGEL(IROW,3) = BASIC_TENSOR(1,2)
+
+      LOCAL_TENSOR = ZERO
+      LOCAL_TENSOR(1,1) = FORCE_LOCAL(4)
+      LOCAL_TENSOR(2,2) = FORCE_LOCAL(5)
+      LOCAL_TENSOR(1,2) = FORCE_LOCAL(6)
+      LOCAL_TENSOR(2,1) = FORCE_LOCAL(6)
+      BASIC_TENSOR = MATMUL( TBL, MATMUL(LOCAL_TENSOR, TRANSPOSE(TBL)) )
+!     MYSTRAN's shell stress-to-engineering-force conversion stores bending
+!     moments with the opposite sign to the Python DSG3 reference recovery.
+!     Flip only DSG3 moment resultants after local-to-basic rotation.
+      OGEL(IROW,4) = -BASIC_TENSOR(1,1)
+      OGEL(IROW,5) = -BASIC_TENSOR(2,2)
+      OGEL(IROW,6) = -BASIC_TENSOR(1,2)
+
+      LOCAL_VEC = ZERO
+      LOCAL_VEC(1) = FORCE_LOCAL(7)
+      LOCAL_VEC(2) = FORCE_LOCAL(8)
+      BASIC_VEC = MATMUL( TBL, LOCAL_VEC )
+      OGEL(IROW,7) = BASIC_VEC(1)
+      OGEL(IROW,8) = BASIC_VEC(2)
+
+      END SUBROUTINE ROTATE_DSG3_FORCE_ROW_TO_BASIC
+
+!----------------------------------------------------------------------------------------------------------------------------------
+      SUBROUTINE GET_TRIA_DSG3_TE ( IROW, TE_DSG3, OK )
+
+      INTEGER(LONG), INTENT(IN)       :: IROW
+      REAL(DOUBLE), INTENT(OUT)       :: TE_DSG3(3,3)
+      LOGICAL, INTENT(OUT)            :: OK
+
+      REAL(DOUBLE)                    :: X1(3), X2(3), X3(3)
+      REAL(DOUBLE)                    :: E1(3), E2(3), E3(3)
+      REAL(DOUBLE)                    :: V12(3), V13(3), VPERP(3)
+      REAL(DOUBLE)                    :: X2LEN, Y3LEN, NORM3
+
+      TE_DSG3 = ZERO
+      OK = .FALSE.
+      IF (IROW < 1) RETURN
+      IF ((GID_OUT_ARRAY(IROW,2) <= 0) .OR. (GID_OUT_ARRAY(IROW,3) <= 0) .OR. (GID_OUT_ARRAY(IROW,4) <= 0)) RETURN
+
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(IROW,2), X1 )
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(IROW,3), X2 )
+      CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(IROW,4), X3 )
+
+      V12 = X2 - X1
+      X2LEN = DSQRT(SUM(V12*V12))
+      IF (X2LEN <= ZERO) RETURN
+      E1 = V12 / X2LEN
+
+      V13 = X3 - X1
+      VPERP = V13 - SUM(V13*E1)*E1
+      Y3LEN = DSQRT(SUM(VPERP*VPERP))
+      IF (Y3LEN <= ZERO) RETURN
+      E2 = VPERP / Y3LEN
+
+      E3(1) = E1(2)*E2(3) - E1(3)*E2(2)
+      E3(2) = E1(3)*E2(1) - E1(1)*E2(3)
+      E3(3) = E1(1)*E2(2) - E1(2)*E2(1)
+      NORM3 = DSQRT(SUM(E3*E3))
+      IF (NORM3 <= ZERO) RETURN
+      E3 = E3 / NORM3
+
+      TE_DSG3(1,1:3) = E1
+      TE_DSG3(2,1:3) = E2
+      TE_DSG3(3,1:3) = E3
+      OK = .TRUE.
+
+      END SUBROUTINE GET_TRIA_DSG3_TE
 
 !----------------------------------------------------------------------------------------------------------------------------------
       SUBROUTINE GET_SURFACE_BASIS ( SURF_INDEX, SURF_BASIS )

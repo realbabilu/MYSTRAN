@@ -531,6 +531,7 @@
 !                                                              'MIN3  ': Use Tessler's MIN3 element
 !                                                              'MITC3+': Use MITC3+ triangular shell plate branch
 !                                                              'T3FF  ': Krysl T3FF triangular shell branch (experimental)
+!                                                              'DSG3  ': standalone 6-DOF/node DSG3 triangular shell branch
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  1*BYTE)      :: RELINK3        =    'N'    ! 'Y', 'N' indicator to redo LINK3,5 on a restart

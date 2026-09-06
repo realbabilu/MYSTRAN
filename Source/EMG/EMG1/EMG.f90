@@ -394,6 +394,8 @@
             ENDIF
          ELSE IF (TRIA3TYP == 'T3FF  ') THEN
             CALL CTRIA3_T3FF ( OPT, INT_ELEM_ID )
+         ELSE IF (TRIA3TYP == 'DSG3  ') THEN
+            CALL CTRIA3_DSG3 ( OPT, INT_ELEM_ID )
          ELSE
             CALL TREL1 ( OPT, WRITE_WARN )
             IF ((TRIA3TYP == 'MITC3+') .AND. (OPT(3) == 'Y')) THEN
@@ -448,7 +450,12 @@
          IF (QUADRTYP == 'DKM24AU ') THEN
             CALL CQUADR_DKM24AU ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'DKM24EA ') THEN
-            CALL CQUADR_DKM24EA ( OPT, INT_ELEM_ID )
+            IF ((OPT(3) == 'Y') .AND. (OPT(1) == 'N') .AND. (OPT(4) == 'N') .AND.                                              &
+                (OPT(5) == 'N') .AND. (OPT(6) == 'N')) THEN
+               CALL CQUADR_DKMQ24R ( OPT, INT_ELEM_ID )
+            ELSE
+               CALL CQUADR_DKM24EA ( OPT, INT_ELEM_ID )
+            ENDIF
          ELSE IF (QUADRTYP == 'DKMQ24  ') THEN
             CALL CQUADR_DKMQ24R ( OPT, INT_ELEM_ID )
          ELSE IF (QUADRTYP == 'SIMO    ') THEN
@@ -548,6 +555,8 @@
          IF ((TYPE(1:5) == 'TRIA3') .AND. (EDAT(EPNTK+DEDAT_T3_THICK_KEY) == -18)) THEN
             SKIP_K6ROT = 'Y'
          ELSE IF ((TYPE(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'MITC3+')) THEN
+            SKIP_K6ROT = 'Y'
+         ELSE IF ((TYPE(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'DSG3  ')) THEN
             SKIP_K6ROT = 'Y'
          ELSE IF ((TYPE == 'QUAD4   ') .AND. ((QUAD4TYP == 'DSQK    ') .OR. (QUAD4TYP == 'DKMQ20  '))) THEN
             SKIP_K6ROT = 'Y'

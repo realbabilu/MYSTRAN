@@ -56,6 +56,7 @@
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,&
                                          TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM
 
+      USE CQUADR_DKMQ24R_Interface
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
       USE ORDER_GAUSS_Interface
@@ -66,6 +67,7 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUADR_DKMQ24'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
       INTEGER(LONG), INTENT(IN)       :: INT_ELEM_ID
+      CHARACTER(1*BYTE)               :: REC_OPT(6)
 
       INTEGER(LONG), PARAMETER        :: NNODE = 4
       INTEGER(LONG), PARAMETER        :: NDOFN = 6
@@ -390,6 +392,12 @@
             WRITE(F06,'(A,1X,ES15.7)') 'CQUADR MBASIC_NORM', DSQRT(SUM(MBASIC*MBASIC))
             WRITE(F06,'(A,1X,ES15.7)') 'CQUADR MLOCAL_NORM', DSQRT(SUM(MLOCAL*MLOCAL))
          ENDIF
+      ENDIF
+
+      IF (OPT(3) == 'Y') THEN
+         REC_OPT = 'N'
+         REC_OPT(3) = 'Y'
+         CALL CQUADR_DKMQ24R ( REC_OPT, INT_ELEM_ID )
       ENDIF
 
       RETURN
