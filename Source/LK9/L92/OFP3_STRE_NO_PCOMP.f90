@@ -46,7 +46,7 @@
       USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP, QUAD8TYP, TRIA3TYP, TRIA6TYP, TRIARTYP
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRE
       USE MODEL_STUF, ONLY            :  AGRID, BGRID, RGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
-                                         ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, OGROUT, PCOMP_PROPS, PLY_NUM,   &
+                                         Q8_POINT_BASIS, ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, OGROUT, PCOMP_PROPS, PLY_NUM,   &
                                          STRESS, PBEAM_NSTATIONS, TE, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID, XEB
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, GPSTRESS_REQ, STRE_CORNER_REQ
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, SHELL_OUT_TE,                 &
@@ -162,7 +162,9 @@
                          (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'QUAD8') .OR. (ETYPE(J)(1:5) == 'TRIA6')) THEN
-                        IF (ETYPE(J)(1:5) == 'TRIA6') THEN
+                        IF ((ETYPE(J)(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+                           NUM_PTS_ELEM = 9
+                        ELSE IF (ETYPE(J)(1:5) == 'TRIA6') THEN
 ! F06 selectors control printing; OP2 CTRIA6 requires center/corner samples.
                            NUM_PTS_ELEM = 7
                         ELSE
@@ -275,6 +277,8 @@ elems_5: DO J = 1,NELE
                          CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS_CUR, STRESS_OUT, STRESS_OUT_PCT_ERR,                  &
                                                       STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
 
+                     ELSE IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+                         STRESS_OUT(:,:) = STRESS_RAW(:,:)
                      ELSE IF (TYPE(1:5) == 'QUAD8') THEN
                          CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS_CUR, STRESS_OUT, STRESS_OUT_PCT_ERR,                  &
                                                       STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
@@ -368,6 +372,7 @@ elems_5: DO J = 1,NELE
 
 ! --- Store EID/GID once per element (not per stress point) ---
                   NUM_ELEM = NUM_ELEM + 1
+                  IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) .AND. NUM_ELEM > 1) NUM_ELEM = NUM_ELEM+8
                   EID_OUT_ARRAY(NUM_ELEM,1) = EID
                   IF (TYPE == 'BEAM    ') THEN
                      CBEAM_XL_OUT(NUM_ELEM) = CBEAM_ACTIVE_XL(1)
@@ -393,11 +398,22 @@ elems_5: DO J = 1,NELE
                      GID_OUT_ARRAY(NUM_ELEM,K+1) = AGRID(K)
                   ENDDO
 
+                  IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+                     DO K=1,9
+                        SHELL_OUT_TE(:,:,NUM_ELEM+K-1)=Q8_POINT_BASIS(:,:,K)
+                        SHELL_STRESS_IN_LOCAL(NUM_ELEM+K-1)=.TRUE.
+                     ENDDO
+                  ENDIF
+
                   IF (ETYPE(J)(1:5) /='USER1') THEN
                      IF (NUM_OGEL_ROWS == NELREQ(I)) THEN
                         CALL CHK_OGEL_ZEROS ( NUM_OGEL )
                         CALL SET_OES_TABLE_NAME(TYPE, TABLE_NAME, ITABLE)
-                        CALL WRITE_ELEM_STRESSES ( JVEC, NUM_ELEM, IHDR, NUM_PTS_CUR, ITABLE )
+                        IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+                           CALL WRITE_ELEM_STRESSES(JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS_CUR, ITABLE)
+                        ELSE
+                           CALL WRITE_ELEM_STRESSES ( JVEC, NUM_ELEM, IHDR, NUM_PTS_CUR, ITABLE )
+                        ENDIF
                         EXIT
                      ENDIF
                   ENDIF
@@ -1245,7 +1261,7 @@ elems_5: DO J = 1,NELE
          ENDIF
          SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
          RETURN
-      ELSE IF ((TYPE(1:5) == 'QUAD8') .AND. (QUAD8TYP == 'SIMOQ8 ')) THEN
+      ELSE IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
 ! SIMOQ8 stress recovery produces stress in the element local frame; mark it
 ! so GET_SURFACE_STRESS3 applies the TE rotation to global.
          SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.

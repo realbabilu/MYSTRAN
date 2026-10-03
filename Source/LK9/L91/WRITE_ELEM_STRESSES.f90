@@ -34,7 +34,7 @@
                                          NVEC, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
-      USE PARAMS, ONLY                :  STR_CID, TRIA3TYP
+      USE PARAMS, ONLY                :  STR_CID, TRIA3TYP, QUAD8TYP
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, SHELL_OUT_TE, POLY_FIT_ERR,          &
@@ -52,6 +52,7 @@
 
       IMPLICIT NONE
 
+      REAL(DOUBLE), EXTERNAL :: Q8_OES_VALUE
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'WRITE_ELEM_STRESSES'
       CHARACTER(LEN=*), INTENT(IN)    :: IHEADER           ! Indicator of whether to write an output header
 
@@ -741,12 +742,12 @@
               ! basically a one-liner version of the F06 writing
               ! we broke out the L=1,NUM_PTS-1 loop to 4 lines (the GID_OUT_ARRAY lines)
               ! to avoid an additional hard to write loop
-              WRITE(OP2) (EID_OUT_ARRAY(5*I+1,1)*10+DEVICE_CODE, "CEN/", 4,                                           &
-                                                  (REAL(OGEL(10*I+1,J),4), J=1,8), (REAL(OGEL(10*I+2,  J),4), J=1,8), &
-                          GID_OUT_ARRAY(5*I+1,2), (REAL(OGEL(10*I+3,J),4), J=1,8), (REAL(OGEL(10*I+4,  J),4), J=1,8), &
-                          GID_OUT_ARRAY(5*I+1,3), (REAL(OGEL(10*I+5,J),4), J=1,8), (REAL(OGEL(10*I+6,  J),4), J=1,8), &
-                          GID_OUT_ARRAY(5*I+1,4), (REAL(OGEL(10*I+7,J),4), J=1,8), (REAL(OGEL(10*I+8,  J),4), J=1,8), &
-                          GID_OUT_ARRAY(5*I+1,5), (REAL(OGEL(10*I+9,J),4), J=1,8), (REAL(OGEL(10*(I+1),J),4), J=1,8), &
+              WRITE(OP2) (EID_OUT_ARRAY(NUM_PTS*I+1,1)*10+DEVICE_CODE, "CEN/", 4,                                           &
+                                                  (REAL(Q8_OES_VALUE(2*NUM_PTS*I+1,NUM_PTS*I+1,J),4), J=1,8), (REAL(Q8_OES_VALUE(2*NUM_PTS*I+2,NUM_PTS*I+1,J),4), J=1,8), &
+                          GID_OUT_ARRAY(NUM_PTS*I+1,2), (REAL(Q8_OES_VALUE(2*NUM_PTS*I+3,NUM_PTS*I+1,J),4), J=1,8), (REAL(Q8_OES_VALUE(2*NUM_PTS*I+4,NUM_PTS*I+1,J),4), J=1,8), &
+                          GID_OUT_ARRAY(NUM_PTS*I+1,3), (REAL(Q8_OES_VALUE(2*NUM_PTS*I+5,NUM_PTS*I+1,J),4), J=1,8), (REAL(Q8_OES_VALUE(2*NUM_PTS*I+6,NUM_PTS*I+1,J),4), J=1,8), &
+                          GID_OUT_ARRAY(NUM_PTS*I+1,4), (REAL(Q8_OES_VALUE(2*NUM_PTS*I+7,NUM_PTS*I+1,J),4), J=1,8), (REAL(Q8_OES_VALUE(2*NUM_PTS*I+8,NUM_PTS*I+1,J),4), J=1,8), &
+                          GID_OUT_ARRAY(NUM_PTS*I+1,5), (REAL(Q8_OES_VALUE(2*NUM_PTS*I+9,NUM_PTS*I+1,J),4), J=1,8), (REAL(Q8_OES_VALUE(2*NUM_PTS*I+10,NUM_PTS*I+1,J),4), J=1,8), &
                           I=0,NELEMENTS-1)
            ENDIF
          ENDIF  ! end of op2
@@ -754,17 +755,17 @@
          K = 0
          DO I=1,NUM,NUM_PTS
             K = K + 1
-            IF (WRITE_F06) WRITE(F06,*)
-            IF (WRITE_F06) THEN
+            IF (WRITE_F06 .AND. (TYPE(1:5) /= 'QUAD8' .OR. (QUAD8TYP /= 'SIMOQ8 ' .AND. QUAD8TYP /= 'ANS8BDG6' .AND. QUAD8TYP /= 'MITC8   ' .AND. QUAD8TYP /= 'HBQ8    ') .OR. STRE_CENTER_REQ)) WRITE(F06,*)
+            IF (WRITE_F06 .AND. (TYPE(1:5) /= 'QUAD8' .OR. (QUAD8TYP /= 'SIMOQ8 ' .AND. QUAD8TYP /= 'ANS8BDG6' .AND. QUAD8TYP /= 'MITC8   ' .AND. QUAD8TYP /= 'HBQ8    ') .OR. STRE_CENTER_REQ)) THEN
                QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-               CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+               CALL QUAD_STRESS_OUTPUT_FRAME(K,I,QUAD_VALUES_10)
                CALL FAST_BUILD_QUAD_1403_LINE ( EID_OUT_ARRAY(I,1), QUAD_VALUES_10, QUAD_CENTER_LINE )
                WRITE(F06,'(A)') QUAD_CENTER_LINE
             ENDIF
             K = K + 1
-            IF (WRITE_F06) THEN
+            IF (WRITE_F06 .AND. (TYPE(1:5) /= 'QUAD8' .OR. (QUAD8TYP /= 'SIMOQ8 ' .AND. QUAD8TYP /= 'ANS8BDG6' .AND. QUAD8TYP /= 'MITC8   ' .AND. QUAD8TYP /= 'HBQ8    ') .OR. STRE_CENTER_REQ)) THEN
                QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-               CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+               CALL QUAD_STRESS_OUTPUT_FRAME(K,I,QUAD_VALUES_10)
                QUAD_VALUES_8(1:8) = QUAD_VALUES_10(1:8)
                CALL FAST_BUILD_QUAD_1404_LINE ( QUAD_VALUES_8, QUAD_LOWER_LINE )
                WRITE(F06,'(A)') QUAD_LOWER_LINE
@@ -773,30 +774,32 @@
             IF ((STRE_LOC == 'CORNER  ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
                DO L=1,NUM_PTS-1
                   K = K + 1
-                  IF (WRITE_F06) WRITE(F06,*)
+                  IF (WRITE_F06 .AND. (TYPE(1:5) /= 'QUAD8' .OR. (QUAD8TYP /= 'SIMOQ8 ' .AND. QUAD8TYP /= 'ANS8BDG6' .AND. QUAD8TYP /= 'MITC8   ' .AND. QUAD8TYP /= 'HBQ8    ') .OR. STRE_CORNER_REQ)) WRITE(F06,*)
                   IF (DABS(POLY_FIT_ERR(I+L)) >= 0.01D0) THEN
-                     IF (WRITE_F06) THEN
+                     IF (WRITE_F06 .AND. (TYPE(1:5) /= 'QUAD8' .OR. (QUAD8TYP /= 'SIMOQ8 ' .AND. QUAD8TYP /= 'ANS8BDG6' .AND. QUAD8TYP /= 'MITC8   ' .AND. QUAD8TYP /= 'HBQ8    ') .OR. STRE_CORNER_REQ)) THEN
                         QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-                        CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+                        CALL QUAD_STRESS_OUTPUT_FRAME(K,I,QUAD_VALUES_10)
                         CALL FAST_BUILD_QUAD_1405_LINE ( GID_OUT_ARRAY(I,L+1), QUAD_VALUES_10, POLY_FIT_ERR(I+L),       &
                                                          POLY_FIT_ERR_INDEX(I+L), QUAD_GRID_NOTE_LINE )
                         WRITE(F06,'(A)') QUAD_GRID_NOTE_LINE
                      ENDIF
                      WRT_ERR_INDEX_NOTE(POLY_FIT_ERR_INDEX(I+L)) = 'Y'
                   ELSE
-                     IF (WRITE_F06) THEN
+                     IF (WRITE_F06 .AND. (TYPE(1:5) /= 'QUAD8' .OR. (QUAD8TYP /= 'SIMOQ8 ' .AND. QUAD8TYP /= 'ANS8BDG6' .AND. QUAD8TYP /= 'MITC8   ' .AND. QUAD8TYP /= 'HBQ8    ') .OR. STRE_CORNER_REQ)) THEN
                         QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-                        CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+                        CALL QUAD_STRESS_OUTPUT_FRAME(K,I,QUAD_VALUES_10)
                         CALL FAST_BUILD_QUAD_1406_LINE ( GID_OUT_ARRAY(I,L+1), QUAD_VALUES_10, POLY_FIT_ERR(I+L),       &
                                                          QUAD_GRID_LINE )
+                        IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ') .AND. .NOT.STRE_CENTER_REQ .AND. L == 1) &
+                           CALL FAST_FMT_I8_RJ(EID_OUT_ARRAY(I,1),QUAD_GRID_LINE(2:9))
                         WRITE(F06,'(A)') QUAD_GRID_LINE
                      ENDIF
                   ENDIF
 
                   K = K + 1
-                  IF (WRITE_F06) THEN
+                  IF (WRITE_F06 .AND. (TYPE(1:5) /= 'QUAD8' .OR. (QUAD8TYP /= 'SIMOQ8 ' .AND. QUAD8TYP /= 'ANS8BDG6' .AND. QUAD8TYP /= 'MITC8   ' .AND. QUAD8TYP /= 'HBQ8    ') .OR. STRE_CORNER_REQ)) THEN
                      QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-                     CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+                     CALL QUAD_STRESS_OUTPUT_FRAME(K,I,QUAD_VALUES_10)
                      QUAD_VALUES_8(1:8) = QUAD_VALUES_10(1:8)
                      CALL FAST_BUILD_QUAD_1404_LINE ( QUAD_VALUES_8, QUAD_LOWER_LINE )
                      WRITE(F06,'(A)') QUAD_LOWER_LINE
@@ -814,7 +817,7 @@
          IF ((STRE_LOC == 'CORNER  ') .OR. (TYPE(1:5) == 'QUAD8')) THEN
             DO K=1,2*NUM
                QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-               CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+               CALL QUAD_STRESS_OUTPUT_FRAME(K,I,QUAD_VALUES_10)
                DO J=2,10
                   IF (QUAD_VALUES_10(J) > MAX_ANS(J)) MAX_ANS(J) = QUAD_VALUES_10(J)
                   IF (QUAD_VALUES_10(J) < MIN_ANS(J)) MIN_ANS(J) = QUAD_VALUES_10(J)
@@ -826,7 +829,7 @@
                DO L=0,1
                   K = 2*I + L - 1
                   QUAD_VALUES_10(1:10) = OGEL(K,1:10)
-                  CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( SHELL_OUT_TE(1:3,1:3,K), QUAD_VALUES_10 )
+                  CALL QUAD_STRESS_OUTPUT_FRAME(K,I,QUAD_VALUES_10)
                   DO J=2,10
                      IF (QUAD_VALUES_10(J) > MAX_ANS(J)) MAX_ANS(J) = QUAD_VALUES_10(J)
                      IF (QUAD_VALUES_10(J) < MIN_ANS(J)) MIN_ANS(J) = QUAD_VALUES_10(J)
@@ -2277,6 +2280,43 @@
       END SUBROUTINE GET_SPRING_OP2_ELEMENT_TYPE
 
 !==============================================================================
+      FUNCTION Q8_OES_VALUE(FIBER_ROW,CENTER_POINT,COLUMN) RESULT(VALUE)
+      USE PENTIUM_II_KIND, ONLY: LONG, DOUBLE
+      USE LINK9_STUFF, ONLY: OGEL
+      USE MODEL_STUF, ONLY: TYPE
+      USE PARAMS, ONLY: QUAD8TYP
+      IMPLICIT NONE
+      REAL(DOUBLE) :: VALUE
+      INTEGER(LONG),INTENT(IN) :: FIBER_ROW,CENTER_POINT,COLUMN
+      REAL(DOUBLE) :: VALUES(10)
+      VALUES=OGEL(FIBER_ROW,1:10)
+      IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) CALL QUAD_STRESS_OUTPUT_FRAME(FIBER_ROW,CENTER_POINT,VALUES)
+      VALUE=VALUES(COLUMN)
+      END FUNCTION
+
+      SUBROUTINE QUAD_STRESS_OUTPUT_FRAME(FIBER_ROW,CENTER_POINT,VALUES)
+      USE PENTIUM_II_KIND, ONLY: LONG, DOUBLE
+      USE LINK9_STUFF, ONLY: SHELL_OUT_TE
+      USE MODEL_STUF, ONLY: TYPE
+      USE PARAMS, ONLY: QUAD8TYP
+      IMPLICIT NONE
+      INTEGER(LONG),INTENT(IN) :: FIBER_ROW,CENTER_POINT
+      REAL(DOUBLE),INTENT(INOUT) :: VALUES(10)
+      REAL(DOUBLE) :: MAP(3,3),SHEAR_POINT(3),SHEAR_CENTER(3)
+      IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) THEN
+         MAP=MATMUL(SHELL_OUT_TE(:,:,(FIBER_ROW+1)/2),TRANSPOSE(SHELL_OUT_TE(:,:,9*((FIBER_ROW-1)/18)+1)))
+! Recover membrane/bending as an in-plane tensor, shear as a separate vector.
+! This matches the Python shell resultants rather than mixing Q into fiber stress.
+         SHEAR_POINT=(/VALUES(9),VALUES(10),0.0D0/)
+         VALUES(9:10)=0.0D0
+         CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC(MAP,VALUES)
+         SHEAR_CENTER=MATMUL(TRANSPOSE(MAP),SHEAR_POINT)
+         VALUES(9:10)=SHEAR_CENTER(1:2)
+      ELSE
+         CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC(SHELL_OUT_TE(:,:,FIBER_ROW),VALUES)
+      ENDIF
+      END SUBROUTINE
+
       SUBROUTINE TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC ( TE_LOCAL, VALUES )
 
       USE PENTIUM_II_KIND, ONLY       :  DOUBLE

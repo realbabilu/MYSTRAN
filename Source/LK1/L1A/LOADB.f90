@@ -1154,6 +1154,7 @@ j_do2:            DO J=2,LMPCADDC
          ENDIF
       ENDDO
       IF (NCTRIA6 > 0) MAX_STRESS_POINTS = MAX(MAX_STRESS_POINTS,6_LONG)
+      IF (NCQUAD8 > 0) MAX_STRESS_POINTS = MAX(MAX_STRESS_POINTS,8_LONG)
 
 ! **********************************************************************************************************************************
 

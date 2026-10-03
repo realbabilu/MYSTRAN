@@ -499,12 +499,15 @@
 !                                                              'MITC4PD ': MITC4+/D Hughes-Brezzi branch (experimental)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
+! ANS8 v3: modified Kikuchi field metric, tensor6 shear, adaptive membrane tying.
+      CHARACTER(8*BYTE) :: ANSFIELD='KIKUCHI ', ANSSHEAR='TENSOR6 ', ANSMEM='AUTO    '
+      REAL(DOUBLE) :: ANSANG=0.01D0, ANSDEV=0.001D0
       CHARACTER(  8*BYTE)      :: QUAD8TYP       = 'SIMOQ8  ' ! Which element to use in MYSTRAN as the CQUAD8 element
 !                                                              'MITC8   ': existing Dvorkin-Bathe MITC8 CQUAD8 branch
 !                                                              'MITC8D  ': MITC8 with pure Wilson drilling penalty branch
 !                                                              'SIMOQ8  ': Python-aligned Simo1993 Q8 branch (default)
 !                                                              'HBQ8    ': Darilmaz-Kumbasar hybrid-style Q8 shell branch
-!                                                              'ANS8BDG6': Jung-Han ANS beta-delta-gamma Q8 shell branch
+!                                                              'ANS8BDG6': Kikuchi ANS8 v3 adaptation; configurable tying
 !                                                              'MACQ8D  ': MacNeal Q8 modified field interpolation + drill penalty
 
 ! ----------------------------------------------------------------------------------------------------------------------------------

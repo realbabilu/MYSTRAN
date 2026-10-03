@@ -37,11 +37,11 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, FOUR
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP, TRIA3TYP
+      USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP, TRIA3TYP, QUAD8TYP
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_ELFO
       use model_stuf, only            :  pcomp_props
       USE MODEL_STUF, ONLY            :  ANY_ELFE_OUTPUT, EDAT, EPNT, ETYPE, FCONV, EID, ELMTYP, ELOUT, METYPE, NUM_EMG_FATAL_ERRS,&
-                                         PLY_NUM, TYPE, STRESS, SHELL_STR_ANGLE, NUM_SEi, ELGP, AGRID, GRID_ID, RGRID
+                                         BGRID, Q8_POINT_BASIS, PLY_NUM, TYPE, STRESS, SHELL_STR_ANGLE, NUM_SEi, ELGP, AGRID, GRID_ID, RGRID
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  FORC_LOC, GPSTRESS_REQ, NUM_GP_SURFACE, MAX_GP_SURFACES, GP_SURFACE_IDS,                 &
                                          GP_SURFACE_NORMAL_MODE
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL
@@ -101,6 +101,7 @@
       CHARACTER(8*BYTE)               :: TABLE_NAME        ! the op2 table name
 
       LOGICAL                         :: WRITE_NEU
+      REAL(DOUBLE), ALLOCATABLE :: SURFACE_FORCE_RAW(:,:), SURFACE_FORCE_TE(:,:,:)
       LOGICAL                         :: DIRECT_SHELL_RECOVERY
       INTRINSIC IAND
 
@@ -110,6 +111,10 @@
       ITABLE = 0
 
       WRITE_NEU = WRITE_NEU_ELFO
+! Preserve pointwise force/basis pairs independently of local F06/OP2 projection.
+      ALLOCATE(SURFACE_FORCE_RAW(8,MAX(1_LONG,MAXREQ)),SURFACE_FORCE_TE(3,3,MAX(1_LONG,MAXREQ)))
+      SURFACE_FORCE_RAW=ZERO
+      SURFACE_FORCE_TE=ZERO
 
 ! **********************************************************************************************************************************
 ! Process element engineering force requests for plate and USERIN elements.
@@ -147,7 +152,9 @@
                IF (ETYPE(J) == ELMTYP(I)) THEN
                   call is_elem_pcomp_props ( j )
                   if (pcomp_props == 'N') then
-                     IF (ETYPE(J)(1:5) == 'TRIA6') THEN
+                     IF ((ETYPE(J)(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+                        NUM_PTS(I) = 9
+                     ELSE IF (ETYPE(J)(1:5) == 'TRIA6') THEN
 ! Retain nodal recovery internally for the native quadratic OP2 payload.
                         NUM_PTS(I) = 7
                      ELSE IF ((FORC_LOC == 'CORNER  ') .OR.                                                                             &
@@ -254,6 +261,8 @@ elems_3: DO J = 1,NELE
                                        STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
                               ENDIF
 
+                           ELSEIF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+                              STRESS_OUT(:,:) = STRESS_RAW(:,:)
                            ELSEIF (ETYPE(J)(1:5) == 'QUAD8') THEN
 
                                                            ! Extrapolate stress to corners
@@ -281,12 +290,19 @@ elems_3: DO J = 1,NELE
                            EID_OUT_ARRAY(NUM_OGEL_ROWS,1) = EID
                            STRESS(:) = STRESS_OUT(:,M)
                            CALL SHELL_ENGR_FORCE_OGEL ( NUM_OGEL )
+                           CALL CACHE_SURFACE_FORCE_ROW(NUM_OGEL,M)
+                           IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) CALL Q8_FORCE_CENTER(NUM_OGEL,M)
                            GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                            DO K=1,ELGP
                               GID_OUT_ARRAY(NUM_OGEL_ROWS,K+1) = AGRID(K)
                            ENDDO
                            IF (((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'TRIA6')) .AND. (TRIA3TYP == 'DSG3  ')) THEN
                               CALL ROTATE_DSG3_FORCE_ROW_TO_BASIC ( NUM_OGEL )
+                              SURFACE_FORCE_RAW(:,NUM_OGEL)=OGEL(NUM_OGEL,1:8)
+                              SURFACE_FORCE_TE(:,:,NUM_OGEL)=ZERO
+                              DO K=1,3
+                                 SURFACE_FORCE_TE(K,K,NUM_OGEL)=ONE
+                              ENDDO
                            ENDIF
 
                         ENDDO
@@ -525,6 +541,7 @@ elems_3: DO J = 1,NELE
 
 
 
+      DEALLOCATE(SURFACE_FORCE_RAW,SURFACE_FORCE_TE)
       RETURN
 
 ! **********************************************************************************************************************************
@@ -541,6 +558,55 @@ elems_3: DO J = 1,NELE
 ! **********************************************************************************************************************************
 
       CONTAINS
+
+      SUBROUTINE CACHE_SURFACE_FORCE_ROW(ROW,POINT)
+      INTEGER(LONG),INTENT(IN) :: ROW,POINT
+      REAL(DOUBLE) :: XYZ6(6,3),G1(3),G2(3),G3(3),NM
+      INTEGER(LONG) :: II
+      SURFACE_FORCE_RAW(:,ROW)=OGEL(ROW,1:8)
+      SURFACE_FORCE_TE(:,:,ROW)=ZERO
+      DO II=1,3
+         SURFACE_FORCE_TE(II,II,ROW)=ONE
+      ENDDO
+      IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) THEN
+         SURFACE_FORCE_TE(:,:,ROW)=Q8_POINT_BASIS(:,:,POINT)
+      ELSE IF (TYPE(1:5) == 'TRIA6') THEN
+! Native T6 operators use the signed centroid frame, as in stress recovery.
+         DO II=1,6
+            XYZ6(II,:)=RGRID(BGRID(II),1:3)
+         ENDDO
+         G1=MATMUL((/-ONE,ONE,ZERO,ZERO,4.0D0,-4.0D0/)/3.0D0,XYZ6)
+         G2=MATMUL((/-ONE,ZERO,ONE,-4.0D0,4.0D0,ZERO/)/3.0D0,XYZ6)
+         G3=(/G1(2)*G2(3)-G1(3)*G2(2),G1(3)*G2(1)-G1(1)*G2(3),G1(1)*G2(2)-G1(2)*G2(1)/)
+         NM=SQRT(SUM(G3*G3))
+         IF (NM > 1.0D-15) THEN
+            G3=G3/NM
+            IF (ABS(G3(3)) > 1.0D-6 .AND. G3(3) < ZERO) G3=-G3
+            G1=G1/SQRT(SUM(G1*G1))
+            G2=(/G3(2)*G1(3)-G3(3)*G1(2),G3(3)*G1(1)-G3(1)*G1(3),G3(1)*G1(2)-G3(2)*G1(1)/)
+            SURFACE_FORCE_TE(1,:,ROW)=G1
+            SURFACE_FORCE_TE(2,:,ROW)=G2
+            SURFACE_FORCE_TE(3,:,ROW)=G3
+         ENDIF
+      ENDIF
+      END SUBROUTINE CACHE_SURFACE_FORCE_ROW
+
+      SUBROUTINE Q8_FORCE_CENTER(ROW,POINT)
+      INTEGER(LONG),INTENT(IN) :: ROW,POINT
+      REAL(DOUBLE) :: Q(3,3),T(3,3),V(3,3),UV(3),R(3,3)
+      INTEGER(LONG) :: II
+      R=MATMUL(Q8_POINT_BASIS(:,:,1),TRANSPOSE(Q8_POINT_BASIS(:,:,POINT)))
+      DO II=1,4,3
+         UV=OGEL(ROW,II:II+2)
+         T=ZERO
+         T(1,1)=UV(1); T(2,2)=UV(2); T(1,2)=UV(3); T(2,1)=UV(3)
+         V=MATMUL(R,MATMUL(T,TRANSPOSE(R)))
+         OGEL(ROW,II:II+2)=(/V(1,1),V(2,2),V(1,2)/)
+      ENDDO
+      UV(1:2)=OGEL(ROW,7:8)
+      OGEL(ROW,7:8)=MATMUL(R(1:2,1:2),UV(1:2))
+      END SUBROUTINE
+
 
 !----------------------------------------------------------------------------------------------------------------------------------
       SUBROUTINE WRITE_SURFACE_AVERAGED_FORCES_F06 ( NUM, NUM_PTS_PER_ELEM, FAMILY )
@@ -589,7 +655,7 @@ elems_3: DO J = 1,NELE
          DO ISTART=1,NUM,MAX(1_LONG,NUM_PTS_PER_ELEM)
             IF (FIND_INT(EID_OUT_ARRAY(ISTART,1), PATCH_ELEMS, NUM_ELEMS) == 0) CYCLE
 
-            NELGP = GET_ELEM_NUM_CORNERS ( ISTART, FAMILY )
+            NELGP = GET_ELEM_NUM_CORNERS ( ISTART, FAMILY, NUM_PTS_PER_ELEM )
             IF (NELGP <= 0) CYCLE
             WT = GET_ELEM_AREA ( ISTART, NELGP ) / REAL(NELGP,DOUBLE)
             IF (WT <= ZERO) WT = ONE / REAL(NELGP,DOUBLE)
@@ -606,7 +672,7 @@ elems_3: DO J = 1,NELE
                   POINT_ROW = ISTART
                ENDIF
 
-               FORCE_LOCAL(1:8) = OGEL(POINT_ROW,1:8)
+               FORCE_LOCAL(1:8) = SURFACE_FORCE_RAW(:,POINT_ROW)
                CALL TRANSFORM_SURFACE_FORCE8 ( SURF, POINT_ROW, FORCE_LOCAL, FORCE_SURF )
                SUM_FORCE(1:8,GPOS) = SUM_FORCE(1:8,GPOS) + WT * FORCE_SURF(1:8)
                SUM_WT(GPOS) = SUM_WT(GPOS) + WT
@@ -641,9 +707,9 @@ elems_3: DO J = 1,NELE
       END SUBROUTINE WRITE_SURFACE_AVERAGED_FORCES_F06
 
 !----------------------------------------------------------------------------------------------------------------------------------
-      INTEGER(LONG) FUNCTION GET_ELEM_NUM_CORNERS ( ISTART, FAMILY )
+      INTEGER(LONG) FUNCTION GET_ELEM_NUM_CORNERS ( ISTART, FAMILY, NUM_PTS_PER_ELEM )
 
-      INTEGER(LONG), INTENT(IN)       :: ISTART
+      INTEGER(LONG), INTENT(IN)       :: ISTART, NUM_PTS_PER_ELEM
       CHARACTER(LEN=*), INTENT(IN)    :: FAMILY
 
       INTEGER(LONG)                   :: K
@@ -655,6 +721,8 @@ elems_3: DO J = 1,NELE
          GET_ELEM_NUM_CORNERS = 4
       ENDIF
 
+      IF (FAMILY(1:5) == 'QUAD8' .AND. NUM_PTS_PER_ELEM == 9) GET_ELEM_NUM_CORNERS=8
+      IF (FAMILY(1:5) == 'TRIA6' .AND. NUM_PTS_PER_ELEM == 7) GET_ELEM_NUM_CORNERS=6
       DO K=GET_ELEM_NUM_CORNERS,1,-1
          IF (GID_OUT_ARRAY(ISTART,K+1) > 0) RETURN
       ENDDO
@@ -670,12 +738,12 @@ elems_3: DO J = 1,NELE
 
       REAL(DOUBLE)                    :: X1(3), X2(3), X3(3), X4(3)
 
-      IF (NELGP == 3) THEN
+      IF (NELGP == 3 .OR. NELGP == 6) THEN
          CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,2), X1 )
          CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,3), X2 )
          CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,4), X3 )
          GET_ELEM_AREA = TRI_AREA_FROM_XYZ ( X1, X2, X3 )
-      ELSE IF (NELGP == 4) THEN
+      ELSE IF (NELGP == 4 .OR. NELGP == 8) THEN
          CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,2), X1 )
          CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,3), X2 )
          CALL GET_GRID_BASIC_COORDS ( GID_OUT_ARRAY(ISTART,4), X3 )
@@ -728,7 +796,7 @@ elems_3: DO J = 1,NELE
       REAL(DOUBLE), INTENT(IN)        :: FORCE_LOCAL(8)
       REAL(DOUBLE), INTENT(OUT)       :: FORCE_SURF(8)
 
-      REAL(DOUBLE)                    :: SURF_BASIS(3,3)
+      REAL(DOUBLE)                    :: SURF_BASIS(3,3),LOCAL_TO_SURF(3,3)
       REAL(DOUBLE)                    :: LOCAL_TENSOR(3,3)
       REAL(DOUBLE)                    :: SURF_TENSOR(3,3)
       REAL(DOUBLE)                    :: LOCAL_VEC(3)
@@ -737,13 +805,14 @@ elems_3: DO J = 1,NELE
       FORCE_SURF = FORCE_LOCAL
 
       CALL GET_SURFACE_BASIS ( SURF_INDEX, SURF_BASIS )
+      LOCAL_TO_SURF=MATMUL(SURF_BASIS,TRANSPOSE(SURFACE_FORCE_TE(:,:,POINT_INDEX)))
 
       LOCAL_TENSOR = ZERO
       LOCAL_TENSOR(1,1) = FORCE_LOCAL(1)
       LOCAL_TENSOR(2,2) = FORCE_LOCAL(2)
       LOCAL_TENSOR(1,2) = FORCE_LOCAL(3)
       LOCAL_TENSOR(2,1) = FORCE_LOCAL(3)
-      SURF_TENSOR = MATMUL(SURF_BASIS, MATMUL(LOCAL_TENSOR, TRANSPOSE(SURF_BASIS)))
+      SURF_TENSOR = MATMUL(LOCAL_TO_SURF, MATMUL(LOCAL_TENSOR, TRANSPOSE(LOCAL_TO_SURF)))
       FORCE_SURF(1) = SURF_TENSOR(1,1)
       FORCE_SURF(2) = SURF_TENSOR(2,2)
       FORCE_SURF(3) = SURF_TENSOR(1,2)
@@ -753,7 +822,7 @@ elems_3: DO J = 1,NELE
       LOCAL_TENSOR(2,2) = FORCE_LOCAL(5)
       LOCAL_TENSOR(1,2) = FORCE_LOCAL(6)
       LOCAL_TENSOR(2,1) = FORCE_LOCAL(6)
-      SURF_TENSOR = MATMUL(SURF_BASIS, MATMUL(LOCAL_TENSOR, TRANSPOSE(SURF_BASIS)))
+      SURF_TENSOR = MATMUL(LOCAL_TO_SURF, MATMUL(LOCAL_TENSOR, TRANSPOSE(LOCAL_TO_SURF)))
       FORCE_SURF(4) = SURF_TENSOR(1,1)
       FORCE_SURF(5) = SURF_TENSOR(2,2)
       FORCE_SURF(6) = SURF_TENSOR(1,2)
@@ -761,7 +830,7 @@ elems_3: DO J = 1,NELE
       LOCAL_VEC = ZERO
       LOCAL_VEC(1) = FORCE_LOCAL(7)
       LOCAL_VEC(2) = FORCE_LOCAL(8)
-      SURF_VEC = MATMUL(SURF_BASIS, LOCAL_VEC)
+      SURF_VEC = MATMUL(LOCAL_TO_SURF, LOCAL_VEC)
       FORCE_SURF(7) = SURF_VEC(1)
       FORCE_SURF(8) = SURF_VEC(2)
 

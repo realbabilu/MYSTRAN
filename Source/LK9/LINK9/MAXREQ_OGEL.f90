@@ -245,6 +245,7 @@
       SUBROUTINE GET_NUM_ROWS_OUTPUT ( LETYPE )
 
       USE MODEL_STUF, ONLY            :  NUM_SEi
+      USE PARAMS, ONLY : QUAD8TYP
 
       IMPLICIT NONE
 
@@ -273,6 +274,8 @@
             ENDIF
             IF (TYPE(1:5) == 'TRIA6') NUMBER_ROWS(K) = 7
          ENDIF
+
+      IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) NUMBER_ROWS(K)=9
 
       ELSE IF (K == 2) THEN                                ! K = 2 is elem stress output requests
 !                                                            -----
@@ -311,6 +314,7 @@
                NUMBER_ROWS(K) = NUM_PLIES                  !    PCOMP requires NUM_PLIES rows of output/elem
             ELSE
                NUMBER_ROWS(K) = 2*NUM_SEi(LETYPE)          !    CQUAD8 stress output is CORNER even if CENTER is specified.
+               IF ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) NUMBER_ROWS(K)=18
             ENDIF
          ELSE IF ((TYPE(1:4) == 'HEXA' ) .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR.                            &
                   (TYPE(1:5) == 'TETRA')) THEN

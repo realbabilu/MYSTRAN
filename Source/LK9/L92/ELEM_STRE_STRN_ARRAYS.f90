@@ -47,7 +47,7 @@
                                          CBEAM_FORCE_B2, DT, EM, EB, ES, ET, ELDOF, PEL, PHI_SQ, STRAIN, STRESS, SUBLOD, TREF, TYPE,&
                                          UEL, UEB, SE1, SE2, SE3, STE1, STE2, STE3, ELGP, ISOLID, EID, SHELL_T
       USE DEBUG_PARAMETERS
-      USE PARAMS, ONLY                :  STR_CID, QUAD4TYP
+      USE PARAMS, ONLY                :  STR_CID, QUAD4TYP, QUAD8TYP
 
 
       USE ELEM_STRE_STRN_ARRAYS_USE_IFs
@@ -221,7 +221,7 @@
             STRAIN(I) = ZERO
             STRAIN(I+3) = ZERO
             DO J=1,ELDOF
-               IF (TYPE(1:5) == 'TRIA6') THEN
+               IF ((TYPE(1:5) == 'TRIA6') .OR. ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')))) THEN
                   STRAIN(I)   = STRAIN(I)   + BE1(I,J,STR_PT_NUM)*UEB(J)
                   STRAIN(I+3) = STRAIN(I+3) + BE2(I,J,STR_PT_NUM)*UEB(J)
                ELSE
@@ -234,7 +234,7 @@
          DO I=1,2
             STRAIN(I+6) = ZERO
             DO J=1,ELDOF
-               IF (TYPE(1:5) == 'TRIA6') THEN
+               IF ((TYPE(1:5) == 'TRIA6') .OR. ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')))) THEN
                   STRAIN(I+6) = STRAIN(I+6) + BE3(I,J,STR_PT_NUM)*UEB(J)
                ELSE
                   STRAIN(I+6) = STRAIN(I+6) + BE3(I,J,STR_PT_NUM)*UEL(J)
@@ -298,6 +298,11 @@
          STRESS3_MECH = PHI_SQ*DUM33                       ! Need PHI_SQ on transv shear stress since this calc is from strains and
                                                            ! BE3, not SE3. If DEBUG(176) > 0 then stresses are calc'd from the SE3
                                                            ! below and SE3 has PHI_SQ incorporated in subrs QPLT1, QPLT3, TPLT2.
+! Direct Q8 surface operators contain their shear interpolation already.
+! PHI_SQ belongs to the legacy plate formulation and can be zero here.
+         IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) THEN
+            STRESS3_MECH=DUM33
+         ENDIF
          IF (TYPE == 'QUADR   ') THEN
             STRESS3_MECH(1) = SHELL_T(1,1)*STRAIN3(1) + SHELL_T(1,2)*STRAIN3(2)
             STRESS3_MECH(2) = SHELL_T(2,1)*STRAIN3(1) + SHELL_T(2,2)*STRAIN3(2)

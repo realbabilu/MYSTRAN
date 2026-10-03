@@ -4,17 +4,19 @@
       SUBROUTINE CQUAD8_ANS8BDG6 ( OPT, INT_ELEM_ID )
 
 ! Ported from:
-!   D:\18a\python\quadratic\ANS8_BDG6_ShellElement.py
+!   ANS8_BDG6_v3.py / KikuchiMacNeal_ANS8_v3 (static stiffness and recovery).
+! Adaptation: modified field metric, standard geometry area; not a paper reproduction.
+! Mass, pressure, thermal and geometric stiffness retain legacy, unverified paths.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_STRESS_POINTS, SOL_NAME
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_STRESS_POINTS, SOL_NAME, NSNORM
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  ALPVEC, DT, EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PPE,   &
+      USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, GRID_ID, GRID_SNORM, SNORM, Q8_POINT_BASIS, DT, EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA, PPE,   &
                                          PRESS, PTE, SHELL_A, SHELL_D, SHELL_T, TREF, UEL, XEB, NUM_EMG_FATAL_ERRS,           &
                                          PCOMP_PROPS
-      USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE PARAMS, ONLY                :  COUPMASS
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
+      USE PARAMS, ONLY                :  COUPMASS, ANSMEM, ANSFIELD, ANSSHEAR, ANSANG, ANSDEV
       USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
@@ -35,6 +37,8 @@
       REAL(DOUBLE)                    :: UNIT_PPE(NDOF), UNIT_PTE(NDOF), DXDR(3), DXDS(3), SURF_VEC(3)
       REAL(DOUBLE)                    :: CTE(3), THERMAL_RESULTANT(3), CDRILL
       REAL(DOUBLE)                    :: SIG0(2,2), KG8(8,8), STRAIN0(3), N0V(3)
+      REAL(DOUBLE) :: NORMALS(8,3),NORMAL_SIGN,FIELD_COEFF(8),RR(9),SS(9),E1OUT(3),E2OUT(3),E3OUT(3),DN8(2,8)
+      LOGICAL :: USE_ANS
       INTEGER(LONG)                   :: KI, KJ
 
       IF (ELGP /= NNODE) THEN
@@ -56,6 +60,11 @@
       CALL LOAD_BASIC_COORDS_Q8(XYZ)
       CALL FIXED_FRAME_Q8(XYZ, E1F, E2F, E3F)
       CALL BUILD_LOCAL_XY_Q8(XYZ, E1F, E2F, XY8)
+
+      CALL AS_FIELD_COEFF_Q8(XY8)
+      CALL AS_SET_NORMAL_SIGN_Q8(XYZ)
+      CALL AS_CALC_NODAL_NORMALS_Q8(XYZ,NORMALS)
+      CALL AS_SELECT_ANS_Q8(XYZ,NORMALS)
 
       GP3 = (/-DSQRT(3.0D0/5.0D0), ZERO, DSQRT(3.0D0/5.0D0)/)
       W3  = (/5.0D0/9.0D0, 8.0D0/9.0D0, 5.0D0/9.0D0/)
@@ -125,41 +134,47 @@
       ENDIF
 
       IF (OPT(3) == 'Y') THEN
-         GP = 1
-         DO I=1,2
-            DO J=1,2
-               GP = GP + 1
-               R = 0.577350269189626D0
-               S = 0.577350269189626D0
-               IF (I == 1) R = -R
-               IF (J == 1) S = -S
-               CALL BM_ANS_Q8_AT(XY8, R, S, BM, DETJ)
-               CALL BB_Q8_AT(XY8, R, S, BB, DETJ)
-               CALL BS_ANS_Q8_AT(XY8, R, S, BS, DETJ)
-               IF (GP <= MAX_STRESS_POINTS) THEN
-                  BE1(1:3,1:NDOF,GP) = BM
-                  BE2(1:3,1:NDOF,GP) = BB
-                  BE3(1:2,1:NDOF,GP) = BS
-               ENDIF
-            ENDDO
+         RR=(/ZERO,-ONE,ONE,ONE,-ONE,ZERO,ONE,ZERO,-ONE/)
+         SS=(/ZERO,-ONE,-ONE,ONE,ONE,-ONE,ZERO,ONE,ZERO/)
+         DO GP=1,9
+            R=RR(GP)
+            S=SS(GP)
+            CALL AS_BM_Q8_AT(XYZ,R,S,BM,DETJ)
+            CALL AS_BB_Q8_AT(XYZ,NORMALS,R,S,BB,DETJ)
+            CALL AS_BS_Q8_AT(XYZ,NORMALS,R,S,BS,DETJ)
+            BE1(1:3,1:48,GP)=BM
+! MYSTRAN fiber stress uses membrane-z*bending; Python uses membrane+z*BB*u.
+            BE2(1:3,1:48,GP)=-BB
+            BE3(1:2,1:48,GP)=BS
+            CALL AS_LOCAL_BASIS_AT_Q8(XYZ,R,S,E1OUT,E2OUT,E3OUT,DETJ)
+            Q8_POINT_BASIS(1,:,GP)=E1OUT
+            Q8_POINT_BASIS(2,:,GP)=E2OUT
+            Q8_POINT_BASIS(3,:,GP)=E3OUT
          ENDDO
       ENDIF
 
       IF (OPT(4) == 'Y') THEN
-         KE = ZERO
+         KE=ZERO
+! beta_drill=kt*h; remove PSHELL shear correction from G*h.
+         CDRILL=KT_DRILL*THICK*SHELL_T(1,1)/(5.0D0/6.0D0)
          DO I=1,3
             DO J=1,3
-               R = GP3(I)
-               S = GP3(J)
-               WT = W3(I)*W3(J)
-               CALL BM_ANS_Q8_AT(XY8, R, S, BM, DETJ)
-               CALL BB_Q8_AT(XY8, R, S, BB, DETJ)
-               CALL BS_ANS_Q8_AT(XY8, R, S, BS, DETJ)
-               CALL BDRILL_Q8_AT(XY8, R, S, BD, DETJ)
-               KE = KE + WT*DABS(DETJ)*MATMUL(TRANSPOSE(BM), MATMUL(SHELL_A, BM))
-               KE = KE + WT*DABS(DETJ)*MATMUL(TRANSPOSE(BB), MATMUL(SHELL_D, BB))
-               KE = KE + WT*DABS(DETJ)*MATMUL(TRANSPOSE(BS), MATMUL(SHELL_T, BS))
-               KE = KE + WT*DABS(DETJ)*THICK*CDRILL*MATMUL(TRANSPOSE(BD), BD)
+               R=GP3(I)
+               S=GP3(J)
+               CALL AS_BM_Q8_AT(XYZ,R,S,BM,DETJ)
+               CALL AS_BB_Q8_AT(XYZ,NORMALS,R,S,BB,DETJ)
+               CALL AS_BS_Q8_AT(XYZ,NORMALS,R,S,BS,DETJ)
+               CALL AS_BDRILL_Q8_AT(XYZ,NORMALS,R,S,BD,DETJ)
+! Area is always standard Q8 geometry, independently of modified field metric.
+               CALL AS_GEOM_SHAPE_Q8(R,S,N8,DN8)
+               DXDR=MATMUL(DN8(1,:),XYZ)
+               DXDS=MATMUL(DN8(2,:),XYZ)
+               CALL AS_CROSS3(DXDR,DXDS,SURF_VEC)
+               WT=W3(I)*W3(J)*AS_VNORM(SURF_VEC)
+               KE=KE+WT*(MATMUL(TRANSPOSE(BM),MATMUL(SHELL_A,BM)) &
+                       +MATMUL(TRANSPOSE(BB),MATMUL(SHELL_D,BB)) &
+                       +MATMUL(TRANSPOSE(BS),MATMUL(SHELL_T,BS)) &
+                       +CDRILL*MATMUL(TRANSPOSE(BD),BD))
             ENDDO
          ENDDO
       ENDIF
@@ -553,5 +568,441 @@
       REAL(DOUBLE) :: NM
       NM = DSQRT(MAX(ZERO, DOT_PRODUCT(V,V)))
       END FUNCTION VNORM
+
+      SUBROUTINE AS_GEOM_SHAPE_Q8 ( XI, ETA, NVAL, DN )
+      REAL(DOUBLE), INTENT(IN)  :: XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: NVAL(8), DN(2,8)
+      NVAL(1) = 0.25D0*(ONE-XI)*(ONE-ETA)*(-XI-ETA-ONE)
+      NVAL(2) = 0.25D0*(ONE+XI)*(ONE-ETA)*( XI-ETA-ONE)
+      NVAL(3) = 0.25D0*(ONE+XI)*(ONE+ETA)*( XI+ETA-ONE)
+      NVAL(4) = 0.25D0*(ONE-XI)*(ONE+ETA)*(-XI+ETA-ONE)
+      NVAL(5) = 0.5D0*(ONE-XI*XI)*(ONE-ETA)
+      NVAL(6) = 0.5D0*(ONE+XI)*(ONE-ETA*ETA)
+      NVAL(7) = 0.5D0*(ONE-XI*XI)*(ONE+ETA)
+      NVAL(8) = 0.5D0*(ONE-XI)*(ONE-ETA*ETA)
+
+      DN(1,1) = 0.25D0*(ONE-ETA)*(TWO*XI+ETA)
+      DN(1,2) = 0.25D0*(ONE-ETA)*(TWO*XI-ETA)
+      DN(1,3) = 0.25D0*(ONE+ETA)*(TWO*XI+ETA)
+      DN(1,4) = 0.25D0*(ONE+ETA)*(TWO*XI-ETA)
+      DN(1,5) = -XI*(ONE-ETA)
+      DN(1,6) = 0.5D0*(ONE-ETA*ETA)
+      DN(1,7) = -XI*(ONE+ETA)
+      DN(1,8) = -0.5D0*(ONE-ETA*ETA)
+
+      DN(2,1) = 0.25D0*(ONE-XI)*(TWO*ETA+XI)
+      DN(2,2) = 0.25D0*(ONE+XI)*(TWO*ETA-XI)
+      DN(2,3) = 0.25D0*(ONE+XI)*(TWO*ETA+XI)
+      DN(2,4) = 0.25D0*(ONE-XI)*(TWO*ETA-XI)
+      DN(2,5) = -0.5D0*(ONE-XI*XI)
+      DN(2,6) = -(ONE+XI)*ETA
+      DN(2,7) = 0.5D0*(ONE-XI*XI)
+      DN(2,8) = -(ONE-XI)*ETA
+      END SUBROUTINE AS_GEOM_SHAPE_Q8
+
+      SUBROUTINE AS_CALC_NODAL_NORMALS_Q8 ( XYZN, NORMS )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3)
+      REAL(DOUBLE), INTENT(OUT) :: NORMS(8,3)
+      REAL(DOUBLE) :: RS(8,2), NVAL(8), DN(2,8), G1(3), G2(3), N(3), NM, SN(3)
+      INTEGER(LONG) :: II, BIDX, ISN
+      RS(1,:) = (/-ONE, -ONE/)
+      RS(2,:) = (/ ONE, -ONE/)
+      RS(3,:) = (/ ONE,  ONE/)
+      RS(4,:) = (/-ONE,  ONE/)
+      RS(5,:) = (/ZERO, -ONE/)
+      RS(6,:) = (/ ONE, ZERO/)
+      RS(7,:) = (/ZERO,  ONE/)
+      RS(8,:) = (/-ONE, ZERO/)
+      DO II=1,8
+         CALL AS_GEOM_SHAPE_Q8(RS(II,1), RS(II,2), NVAL, DN)
+         G1 = MATMUL(DN(1,:), XYZN)
+         G2 = MATMUL(DN(2,:), XYZN)
+         CALL AS_CROSS3(G1, G2, N)
+         NM = AS_VNORM(N)
+         IF (NM <= 1.0D-12) THEN
+            CALL AS_GEOM_SHAPE_Q8(ZERO, ZERO, NVAL, DN)
+            G1 = MATMUL(DN(1,:), XYZN)
+            G2 = MATMUL(DN(2,:), XYZN)
+            CALL AS_CROSS3(G1, G2, N)
+            NM = AS_VNORM(N)
+         ENDIF
+         IF (NM > 1.0D-15) THEN
+            NORMS(II,:) = NORMAL_SIGN*N/NM
+         ELSE
+            NORMS(II,:) = (/ZERO, ZERO, ONE/)
+         ENDIF
+         IF (NSNORM > 0 .AND. ALLOCATED(GRID_SNORM) .AND. ALLOCATED(SNORM)) THEN
+            DO ISN=1,NSNORM
+            IF (SNORM(ISN,1) /= GRID_ID(BGRID(II))) CYCLE
+            BIDX = 0
+            IF (II <= SIZE(BGRID)) BIDX = BGRID(II)
+            IF ((BIDX > 0) .AND. (BIDX <= SIZE(GRID_SNORM,1))) THEN
+               SN = GRID_SNORM(BIDX,:)
+               NM = AS_VNORM(SN)
+               IF (NM > 1.0D-15) THEN
+                  SN = SN/NM
+                  IF (DOT_PRODUCT(SN, NORMS(II,:)) < ZERO) SN = -SN
+                  NORMS(II,:) = SN
+               ENDIF
+            ENDIF
+            ENDDO
+         ENDIF
+      ENDDO
+      END SUBROUTINE AS_CALC_NODAL_NORMALS_Q8
+
+      SUBROUTINE AS_LOCAL_BASIS_AT_Q8 ( XYZN, XI, ETA, E1, E2, E3, JAC )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: E1(3), E2(3), E3(3), JAC
+      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), G3(3), NM
+      CALL AS_SHAPE_Q8(XI, ETA, NVAL, DN)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      CALL AS_CROSS3(G1, G2, G3)
+      JAC = AS_VNORM(G3)
+      IF (JAC > 1.0D-15) THEN
+         E3 = NORMAL_SIGN*G3/JAC
+      ELSE
+         E3 = (/ZERO, ZERO, ONE/)
+      ENDIF
+      NM = AS_VNORM(G1)
+      IF (NM > 1.0D-15) THEN
+         E1 = G1/NM
+      ELSE
+         E1 = (/ONE, ZERO, ZERO/)
+      ENDIF
+      CALL AS_CROSS3(E3, E1, E2)
+      NM = AS_VNORM(E2)
+      IF (NM > 1.0D-15) THEN
+         E2 = E2/NM
+      ELSE
+         E2 = (/ZERO, ONE, ZERO/)
+      ENDIF
+      END SUBROUTINE AS_LOCAL_BASIS_AT_Q8
+
+      SUBROUTINE AS_COV_MAP_Q8 ( XYZN, XI, ETA, G1, G2, C, JAC )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: G1(3), G2(3), C(4), JAC
+      REAL(DOUBLE) :: E1(3), E2(3), E3(3), NVAL(8), DN(2,8)
+      REAL(DOUBLE) :: A11, A22, A12, DET, AI11, AI22, AI12, GC1(3), GC2(3)
+      CALL AS_SHAPE_Q8(XI, ETA, NVAL, DN)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      CALL AS_LOCAL_BASIS_AT_Q8(XYZN, XI, ETA, E1, E2, E3, JAC)
+      A11 = DOT_PRODUCT(G1,G1)
+      A22 = DOT_PRODUCT(G2,G2)
+      A12 = DOT_PRODUCT(G1,G2)
+      DET = A11*A22 - A12*A12
+      IF (DABS(DET) <= 1.0D-30) THEN
+         C = ZERO
+         RETURN
+      ENDIF
+      AI11 =  A22/DET
+      AI22 =  A11/DET
+      AI12 = -A12/DET
+      GC1 = AI11*G1 + AI12*G2
+      GC2 = AI12*G1 + AI22*G2
+      ! Python _covariant_maps order:
+      !   C = (c1_1, c1_2, c2_1, c2_2)
+      ! where c1_* maps the first physical in-plane basis direction and
+      ! c2_* maps the second physical in-plane basis direction.
+      C(1) = DOT_PRODUCT(E1, GC1)
+      C(2) = DOT_PRODUCT(E2, GC1)
+      C(3) = DOT_PRODUCT(E1, GC2)
+      C(4) = DOT_PRODUCT(E2, GC2)
+      END SUBROUTINE AS_COV_MAP_Q8
+
+      SUBROUTINE AS_TENSOR_PHYS_Q8 ( V11, V22, V12, C, VOUT )
+      REAL(DOUBLE), INTENT(IN)  :: V11(3), V22(3), V12(3), C(4)
+      REAL(DOUBLE), INTENT(OUT) :: VOUT(3,3)
+      VOUT(1,:) = C(1)*C(1)*V11 + C(3)*C(3)*V22 + TWO*C(1)*C(3)*V12
+      VOUT(2,:) = C(2)*C(2)*V11 + C(4)*C(4)*V22 + TWO*C(2)*C(4)*V12
+      VOUT(3,:) = TWO*(C(1)*C(2)*V11 + C(3)*C(4)*V22 + (C(1)*C(4)+C(2)*C(3))*V12)
+      END SUBROUTINE AS_TENSOR_PHYS_Q8
+
+      SUBROUTINE AS_BM_Q8_AT ( XYZN, XI, ETA, BMOUT, JAC )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), XI, ETA
+      REAL(DOUBLE), INTENT(OUT) :: BMOUT(3,48), JAC
+      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), C(4), VP(3,3)
+      INTEGER(LONG) :: II, COL
+      CALL AS_SHAPE_Q8(XI, ETA, NVAL, DN)
+      CALL AS_COV_MAP_Q8(XYZN, XI, ETA, G1, G2, C, JAC)
+      IF (USE_ANS) THEN
+         CALL AS_ANS_BM_Q8(XYZN,XI,ETA,C,BMOUT)
+         RETURN
+      ENDIF
+      BMOUT = ZERO
+      DO II=1,8
+         COL = (II-1)*6
+         CALL AS_TENSOR_PHYS_Q8(DN(1,II)*G1, DN(2,II)*G2, 0.5D0*(DN(1,II)*G2 + DN(2,II)*G1), C, VP)
+         BMOUT(1:3,COL+1:COL+3) = VP
+      ENDDO
+      END SUBROUTINE AS_BM_Q8_AT
+
+      SUBROUTINE AS_BB_Q8_AT ( XYZN, NORMS, XI, ETA, BBOUT, JAC, NORMS_EXT )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), NORMS(8,3), XI, ETA
+      REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(8,3)
+      REAL(DOUBLE), INTENT(OUT) :: BBOUT(3,48), JAC
+      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), C(4), VP(3,3)
+      REAL(DOUBLE) :: T1(3), T2(3), T0(3), CG1(3), CG2(3)
+      REAL(DOUBLE) :: NORMS_LOC(8,3)
+      INTEGER(LONG) :: II, COL
+      NORMS_LOC = NORMS
+      IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
+      CALL AS_SHAPE_Q8(XI, ETA, NVAL, DN)
+      CALL AS_COV_MAP_Q8(XYZN, XI, ETA, G1, G2, C, JAC)
+      T1 = MATMUL(DN(1,:), NORMS_LOC)
+      T2 = MATMUL(DN(2,:), NORMS_LOC)
+      BBOUT = ZERO
+      DO II=1,8
+         COL = (II-1)*6
+         T0 = NORMS_LOC(II,:)
+         CALL AS_TENSOR_PHYS_Q8(DN(1,II)*T1, DN(2,II)*T2, 0.5D0*(DN(1,II)*T2 + DN(2,II)*T1), C, VP)
+         BBOUT(1:3,COL+1:COL+3) = -VP
+         CALL AS_CROSS3(G1, T0, CG1)
+         CALL AS_CROSS3(G2, T0, CG2)
+         CALL AS_TENSOR_PHYS_Q8(DN(1,II)*CG1, DN(2,II)*CG2, 0.5D0*(DN(1,II)*CG2 + DN(2,II)*CG1), C, VP)
+         BBOUT(1:3,COL+4:COL+6) = VP
+      ENDDO
+      END SUBROUTINE AS_BB_Q8_AT
+
+      SUBROUTINE AS_BS_Q8_AT(XYZN,NORMS,XI,ETA,BSOUT,JAC)
+      REAL(DOUBLE),INTENT(IN) :: XYZN(8,3),NORMS(8,3),XI,ETA
+      REAL(DOUBLE),INTENT(OUT) :: BSOUT(2,48),JAC
+      REAL(DOUBLE) :: G1(3),G2(3),C(4)
+      CALL AS_COV_MAP_Q8(XYZN,XI,ETA,G1,G2,C,JAC)
+      CALL AS_ANS_BS_Q8(XYZN,NORMS,XI,ETA,C,BSOUT)
+      END SUBROUTINE AS_BS_Q8_AT
+
+      SUBROUTINE AS_BDRILL_Q8_AT ( XYZN, NORMS, XI, ETA, BDOUT, JAC, NORMS_EXT )
+      REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), NORMS(8,3), XI, ETA
+      REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(8,3)
+      REAL(DOUBLE), INTENT(OUT) :: BDOUT(1,48), JAC
+      REAL(DOUBLE) :: NVAL(8), DN(2,8), G1(3), G2(3), E1(3), E2(3), E3(3)
+      REAL(DOUBLE) :: A(2,2), AINV(2,2), DLOC(2,8), DX(8), DY(8)
+      REAL(DOUBLE) :: NORMS_LOC(8,3)
+      INTEGER(LONG) :: II, COL
+      NORMS_LOC = NORMS
+      IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
+      CALL AS_SHAPE_Q8(XI, ETA, NVAL, DN)
+      CALL AS_LOCAL_BASIS_AT_Q8(XYZN, XI, ETA, E1, E2, E3, JAC)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      A(1,1) = DOT_PRODUCT(G1,G1)
+      A(1,2) = DOT_PRODUCT(G1,G2)
+      A(2,1) = DOT_PRODUCT(G1,G2)
+      A(2,2) = DOT_PRODUCT(G2,G2)
+      CALL AS_INV2(A, AINV)
+      DLOC = MATMUL(AINV, DN)
+      DX=DLOC(1,:)*DOT_PRODUCT(G1,E1)+DLOC(2,:)*DOT_PRODUCT(G2,E1)
+      DY=DLOC(1,:)*DOT_PRODUCT(G1,E2)+DLOC(2,:)*DOT_PRODUCT(G2,E2)
+      BDOUT = ZERO
+      DO II=1,8
+         COL = (II-1)*6
+         BDOUT(1,COL+1:COL+3) = 0.5D0*(DX(II)*E2 - DY(II)*E1)
+         BDOUT(1,COL+4:COL+6) = BDOUT(1,COL+4:COL+6) - NVAL(II)*E3
+      ENDDO
+      END SUBROUTINE AS_BDRILL_Q8_AT
+
+      SUBROUTINE AS_SET_NORMAL_SIGN_Q8(XYZN)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(8,3)
+      REAL(DOUBLE) :: N(8),DN(2,8),NC(3),G1(3),G2(3)
+      CALL AS_GEOM_SHAPE_Q8(ZERO,ZERO,N,DN)
+      G1=MATMUL(DN(1,:),XYZN)
+      G2=MATMUL(DN(2,:),XYZN)
+      CALL AS_CROSS3(G1,G2,NC)
+      NORMAL_SIGN=ONE
+      IF (NC(3) < -1.0D-6*AS_VNORM(NC)) NORMAL_SIGN=-ONE
+      END SUBROUTINE
+
+      SUBROUTINE AS_SELECT_ANS_Q8(XYZN,NORMS)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(8,3),NORMS(8,3)
+      REAL(DOUBLE) :: NC(3),ANG,DEV,LENGTH
+      INTEGER(LONG) :: II,JJ
+      NC=SUM(NORMS,DIM=1)/8.0D0
+      NC=NC/MAX(AS_VNORM(NC),1.0D-30)
+      ANG=ZERO
+      DEV=ZERO
+      DO II=1,8
+         ANG=MAX(ANG,DACOS(MAX(-ONE,MIN(ONE,DOT_PRODUCT(NORMS(II,:),NC)))))
+      ENDDO
+      DO II=1,4
+         JJ=MOD(II,4)+1
+         LENGTH=AS_VNORM(XYZN(JJ,:)-XYZN(II,:))
+         DEV=MAX(DEV,AS_VNORM(XYZN(II+4,:)-0.5D0*(XYZN(II,:)+XYZN(JJ,:)))/MAX(LENGTH,1.0D-30))
+      ENDDO
+      USE_ANS=(ANG > ANSANG .OR. DEV > ANSDEV)
+      IF (ANSMEM == 'OFF') USE_ANS=.FALSE.
+      IF (ANSMEM == 'ON') USE_ANS=.TRUE.
+      END SUBROUTINE
+
+      SUBROUTINE AS_ANS_ROWS_Q8(XYZN,NORMS,R,S,EM,ES)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(8,3),NORMS(8,3),R,S
+      REAL(DOUBLE), INTENT(OUT) :: EM(3,48),ES(2,48)
+      REAL(DOUBLE) :: N(8),DN(2,8),G1(3),G2(3),T0(3),CV(3)
+      INTEGER(LONG) :: II,COL
+      CALL AS_SHAPE_Q8(R,S,N,DN)
+      G1=MATMUL(DN(1,:),XYZN)
+      G2=MATMUL(DN(2,:),XYZN)
+      T0=MATMUL(N,NORMS)
+      EM=ZERO
+      ES=ZERO
+      DO II=1,8
+         COL=6*(II-1)
+         EM(1,COL+1:COL+3)=DN(1,II)*G1
+         EM(2,COL+1:COL+3)=DN(2,II)*G2
+         EM(3,COL+1:COL+3)=0.5D0*(DN(1,II)*G2+DN(2,II)*G1)
+         ES(1,COL+1:COL+3)=DN(1,II)*T0
+         ES(2,COL+1:COL+3)=DN(2,II)*T0
+         CALL AS_CROSS3(NORMS(II,:),G1,CV)
+         ES(1,COL+4:COL+6)=N(II)*CV
+         CALL AS_CROSS3(NORMS(II,:),G2,CV)
+         ES(2,COL+4:COL+6)=N(II)*CV
+      ENDDO
+      END SUBROUTINE
+
+      SUBROUTINE AS_ANS_INTERP_Q8(XYZN,NORMS,R,S,COMP,ISMEM,ROW)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(8,3),NORMS(8,3),R,S
+      INTEGER(LONG), INTENT(IN) :: COMP
+      LOGICAL, INTENT(IN) :: ISMEM
+      REAL(DOUBLE), INTENT(OUT) :: ROW(48)
+      REAL(DOUBLE) :: A,B,H,PA(2),PB(3),LR(2),LS(2),QR(3),QS(3),EM(3,48),ES(2,48),P,Q,W
+      INTEGER(LONG) :: II,JJ,NJ
+      A=ONE/DSQRT(3.0D0)
+      B=DSQRT(0.6D0)
+      H=A
+      IF (ISMEM .AND. COMP /= 3) H=ONE
+      PA=(/-H,H/)
+      PB=(/-B,ZERO,B/)
+      LR=(/0.5D0*(ONE-R/H),0.5D0*(ONE+R/H)/)
+      LS=(/0.5D0*(ONE-S/H),0.5D0*(ONE+S/H)/)
+      QR=(/R*(R-B)/(TWO*B*B),ONE-R*R/(B*B),R*(R+B)/(TWO*B*B)/)
+      QS=(/S*(S-B)/(TWO*B*B),ONE-S*S/(B*B),S*(S+B)/(TWO*B*B)/)
+      IF (.NOT.ISMEM .AND. ANSSHEAR == 'BDG4') THEN
+         PB(1:2)=(/-ONE,ONE/)
+         QR(1:2)=(/0.5D0*(ONE-R),0.5D0*(ONE+R)/)
+         QS(1:2)=(/0.5D0*(ONE-S),0.5D0*(ONE+S)/)
+      ENDIF
+      ROW=ZERO
+      NJ=3
+      IF (COMP == 3 .OR. (.NOT.ISMEM .AND. ANSSHEAR == 'BDG4')) NJ=2
+      DO II=1,2
+         DO JJ=1,NJ
+            IF (COMP == 1) THEN
+               P=PA(II); Q=PB(JJ); W=LR(II)*QS(JJ)
+            ELSE IF (COMP == 2) THEN
+               P=PB(JJ); Q=PA(II); W=LS(II)*QR(JJ)
+            ELSE
+               P=PA(II); Q=PA(JJ); W=LR(II)*LS(JJ)
+            ENDIF
+            CALL AS_ANS_ROWS_Q8(XYZN,NORMS,P,Q,EM,ES)
+            IF (ISMEM) THEN
+               ROW=ROW+W*EM(COMP,:)
+            ELSE
+               ROW=ROW+W*ES(COMP,:)
+            ENDIF
+         ENDDO
+      ENDDO
+      END SUBROUTINE
+
+      SUBROUTINE AS_ANS_BM_Q8(XYZN,R,S,C,BMOUT)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(8,3),R,S,C(4)
+      REAL(DOUBLE), INTENT(OUT) :: BMOUT(3,48)
+      REAL(DOUBLE) :: ROWS(3,48),NORMS(8,3)
+      INTEGER(LONG) :: II
+      NORMS=ZERO
+      DO II=1,3
+         CALL AS_ANS_INTERP_Q8(XYZN,NORMS,R,S,II,.TRUE.,ROWS(II,:))
+      ENDDO
+      BMOUT(1,:)=C(1)**2*ROWS(1,:)+C(3)**2*ROWS(2,:)+TWO*C(1)*C(3)*ROWS(3,:)
+      BMOUT(2,:)=C(2)**2*ROWS(1,:)+C(4)**2*ROWS(2,:)+TWO*C(2)*C(4)*ROWS(3,:)
+      BMOUT(3,:)=TWO*(C(1)*C(2)*ROWS(1,:)+C(3)*C(4)*ROWS(2,:)+(C(1)*C(4)+C(3)*C(2))*ROWS(3,:))
+      END SUBROUTINE
+
+      SUBROUTINE AS_ANS_BS_Q8(XYZN,NORMS,R,S,C,BSOUT)
+      REAL(DOUBLE), INTENT(IN) :: XYZN(8,3),NORMS(8,3),R,S,C(4)
+      REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,48)
+      REAL(DOUBLE) :: ROWS(2,48)
+      INTEGER(LONG) :: II
+      DO II=1,2
+         CALL AS_ANS_INTERP_Q8(XYZN,NORMS,R,S,II,.FALSE.,ROWS(II,:))
+      ENDDO
+      BSOUT(1,:)=C(1)*ROWS(1,:)+C(3)*ROWS(2,:)
+      BSOUT(2,:)=C(2)*ROWS(1,:)+C(4)*ROWS(2,:)
+      END SUBROUTINE
+
+      SUBROUTINE AS_CROSS3 ( A, B, C )
+      REAL(DOUBLE), INTENT(IN)  :: A(3), B(3)
+      REAL(DOUBLE), INTENT(OUT) :: C(3)
+      C(1) = A(2)*B(3) - A(3)*B(2)
+      C(2) = A(3)*B(1) - A(1)*B(3)
+      C(3) = A(1)*B(2) - A(2)*B(1)
+      END SUBROUTINE AS_CROSS3
+
+      FUNCTION AS_VNORM ( V ) RESULT(NM)
+      REAL(DOUBLE), INTENT(IN) :: V(3)
+      REAL(DOUBLE) :: NM
+      NM = DSQRT(MAX(ZERO, DOT_PRODUCT(V,V)))
+      END FUNCTION AS_VNORM
+
+      SUBROUTINE AS_INV2 ( A, AINV )
+      REAL(DOUBLE), INTENT(IN)  :: A(2,2)
+      REAL(DOUBLE), INTENT(OUT) :: AINV(2,2)
+      REAL(DOUBLE) :: DET
+      DET = A(1,1)*A(2,2) - A(1,2)*A(2,1)
+      IF (DABS(DET) < 1.0D-20) THEN
+         AINV = ZERO
+         AINV(1,1) = ONE
+         AINV(2,2) = ONE
+      ELSE
+         AINV(1,1) =  A(2,2)/DET
+         AINV(1,2) = -A(1,2)/DET
+         AINV(2,1) = -A(2,1)/DET
+         AINV(2,2) =  A(1,1)/DET
+      ENDIF
+      END SUBROUTINE AS_INV2
+
+
+      SUBROUTINE AS_FIELD_COEFF_Q8(XY)
+      REAL(DOUBLE),INTENT(IN) :: XY(8,2)
+      REAL(DOUBLE) :: D(4),V(2),W(2),DEN
+      INTEGER(LONG) :: II,JJ,KK,MM
+      DO II=1,4
+         JJ=MOD(II,4)+1
+         MM=MOD(II+2,4)+1
+         V=XY(JJ,:)-XY(II,:)
+         W=XY(MM,:)-XY(II,:)
+         D(II)=V(1)*W(2)-V(2)*W(1)
+      ENDDO
+      DO II=1,4
+         KK=MOD(II+1,4)+1
+         MM=MOD(II+2,4)+1
+         DEN=D(II)+D(KK)
+         FIELD_COEFF(II)=-0.25D0+(D(II)-D(KK))/(8.0D0*DEN)
+         FIELD_COEFF(II+4)=0.5D0+(D(MM)-D(II))/(4.0D0*DEN)
+      ENDDO
+      END SUBROUTINE
+
+      SUBROUTINE AS_SHAPE_Q8(R,S,N,DN)
+      REAL(DOUBLE),INTENT(IN) :: R,S
+      REAL(DOUBLE),INTENT(OUT) :: N(8),DN(2,8)
+      REAL(DOUBLE) :: LR(3),LS(3),DR(3),DS(3),N9
+      INTEGER(LONG) :: II,IR(8),IS(8)
+      IF (ANSFIELD == 'STANDARD') THEN
+         CALL AS_GEOM_SHAPE_Q8(R,S,N,DN)
+         RETURN
+      ENDIF
+      LR=(/0.5D0*R*(R-ONE),ONE-R*R,0.5D0*R*(R+ONE)/)
+      LS=(/0.5D0*S*(S-ONE),ONE-S*S,0.5D0*S*(S+ONE)/)
+      DR=(/R-0.5D0,-TWO*R,R+0.5D0/)
+      DS=(/S-0.5D0,-TWO*S,S+0.5D0/)
+      IR=(/1,3,3,1,2,3,2,1/)
+      IS=(/1,1,3,3,1,2,3,2/)
+      N9=(ONE-R*R)*(ONE-S*S)
+      DO II=1,8
+         N(II)=LR(IR(II))*LS(IS(II))+N9*FIELD_COEFF(II)
+         DN(1,II)=DR(IR(II))*LS(IS(II))-TWO*R*(ONE-S*S)*FIELD_COEFF(II)
+         DN(2,II)=LR(IR(II))*DS(IS(II))-TWO*S*(ONE-R*R)*FIELD_COEFF(II)
+      ENDDO
+      END SUBROUTINE
 
       END SUBROUTINE CQUAD8_ANS8BDG6

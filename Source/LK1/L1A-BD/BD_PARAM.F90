@@ -60,7 +60,7 @@
                          PRTCORD, PRTDISP, PRTDLR, PRTDOF, PRTFOR, PRTHMN, PRTGMN, PRTGOA, PRTCGLTM, PRTPHIZL,      &
                          PRTIFLTM, PRTKXX, PRTMXX, PRTOU4, PRTPHIXA, PRTMASS, PRTMASSD, PRTRMG, PRTSCP, PRTPSET,    &
                          PRTTSET, PRTUSET, PRTSTIFD, PRTSTIFF, PRTUO0, PRTYS, PRTQSYS, Q4SURFIT, QUADAXIS,          &
-                          QUAD4TYP, QUAD8TYP, QUADRTYP, SOLIDTYP, TRIA3TYP, TRIA6TYP, TRIARTYP, RCONDK, RELINK3, RSPECTRA, SCRSPEC, RSCOMB, &
+                          ANSFIELD, ANSSHEAR, ANSMEM, ANSANG, ANSDEV, QUAD4TYP, QUAD8TYP, QUADRTYP, SOLIDTYP, TRIA3TYP, TRIA6TYP, TRIARTYP, RCONDK, RELINK3, RSPECTRA, SCRSPEC, RSCOMB, &
                           RSTYPE, SEQPRT, SEQQUIT,   &
                          SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, SNORM_ANG, &
                          SOLLIB,                                                                                      &
@@ -2878,6 +2878,87 @@
          CALL CRDERR ( CARD )
 
 ! QUAD8TYP tells which element to use for the MYSTRAN CQUAD8 element
+
+      ELSE IF (JCARD(2)(1:8) == 'ANSFIELD') THEN
+         PARNAM='ANSFIELD'
+         CALL CHAR_FLD(JCARD(3),JF(3),CHRPARM)
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD(CHRPARM)
+            IF (CHRPARM == 'KIKUCHI ' .OR. CHRPARM == 'STANDARD') THEN
+               ANSFIELD=CHRPARM
+            ELSE
+               FATAL_ERR=FATAL_ERR+1
+               WRITE(ERR,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires KIKUCHI/STANDARD; received ',TRIM(CHRPARM),'.'
+               WRITE(F06,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires KIKUCHI/STANDARD; received ',TRIM(CHRPARM),'.'
+            ENDIF
+         ENDIF
+         CALL BD_IMBEDDED_BLANK(JCARD,0,3,0,0,0,0,0,0)
+         CALL CARD_FLDS_NOT_BLANK(JCARD,0,0,4,5,6,7,8,9)
+         CALL CRDERR(CARD)
+
+      ELSE IF (JCARD(2)(1:8) == 'ANSSHEAR') THEN
+         PARNAM='ANSSHEAR'
+         CALL CHAR_FLD(JCARD(3),JF(3),CHRPARM)
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD(CHRPARM)
+            IF (CHRPARM == 'TENSOR6 ' .OR. CHRPARM == 'BDG4    ') THEN
+               ANSSHEAR=CHRPARM
+            ELSE
+               FATAL_ERR=FATAL_ERR+1
+               WRITE(ERR,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires TENSOR6/BDG4; received ',TRIM(CHRPARM),'.'
+               WRITE(F06,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires TENSOR6/BDG4; received ',TRIM(CHRPARM),'.'
+            ENDIF
+         ENDIF
+         CALL BD_IMBEDDED_BLANK(JCARD,0,3,0,0,0,0,0,0)
+         CALL CARD_FLDS_NOT_BLANK(JCARD,0,0,4,5,6,7,8,9)
+         CALL CRDERR(CARD)
+
+      ELSE IF (JCARD(2)(1:8) == 'ANSMEM  ') THEN
+         PARNAM='ANSMEM  '
+         CALL CHAR_FLD(JCARD(3),JF(3),CHRPARM)
+         IF (IERRFL(3) == 'N') THEN
+            CALL LEFT_ADJ_BDFLD(CHRPARM)
+            IF (CHRPARM == 'OFF     ' .OR. CHRPARM == 'ON      ' .OR. CHRPARM == 'AUTO    ') THEN
+               ANSMEM=CHRPARM
+            ELSE
+               FATAL_ERR=FATAL_ERR+1
+               WRITE(ERR,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires OFF/ON/AUTO; received ',TRIM(CHRPARM),'.'
+               WRITE(F06,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires OFF/ON/AUTO; received ',TRIM(CHRPARM),'.'
+            ENDIF
+         ENDIF
+         CALL BD_IMBEDDED_BLANK(JCARD,0,3,0,0,0,0,0,0)
+         CALL CARD_FLDS_NOT_BLANK(JCARD,0,0,4,5,6,7,8,9)
+         CALL CRDERR(CARD)
+
+      ELSE IF (JCARD(2)(1:8) == 'ANSANG  ') THEN
+         PARNAM='ANSANG  '
+         CALL R8FLD(JCARD(3),JF(3),R8PARM)
+         IF (IERRFL(3) == 'N') THEN
+            IF (R8PARM >= ZERO) THEN
+               ANSANG=R8PARM
+            ELSE
+               FATAL_ERR=FATAL_ERR+1
+               WRITE(ERR,'(A,A,A,ES16.8)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires a nonnegative value; received ',R8PARM
+               WRITE(F06,'(A,A,A,ES16.8)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires a nonnegative value; received ',R8PARM
+            ENDIF
+         ENDIF
+         CALL CARD_FLDS_NOT_BLANK(JCARD,0,0,4,5,6,7,8,9)
+         CALL CRDERR(CARD)
+
+      ELSE IF (JCARD(2)(1:8) == 'ANSDEV  ') THEN
+         PARNAM='ANSDEV  '
+         CALL R8FLD(JCARD(3),JF(3),R8PARM)
+         IF (IERRFL(3) == 'N') THEN
+            IF (R8PARM >= ZERO) THEN
+               ANSDEV=R8PARM
+            ELSE
+               FATAL_ERR=FATAL_ERR+1
+               WRITE(ERR,'(A,A,A,ES16.8)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires a nonnegative value; received ',R8PARM
+               WRITE(F06,'(A,A,A,ES16.8)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires a nonnegative value; received ',R8PARM
+            ENDIF
+         ENDIF
+         CALL CARD_FLDS_NOT_BLANK(JCARD,0,0,4,5,6,7,8,9)
+         CALL CRDERR(CARD)
 
       ELSE IF (JCARD(2)(1:8) == 'QUAD8TYP') THEN
          PARNAM = 'QUAD8TYP'
