@@ -35,13 +35,13 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
       USE PARAMS, ONLY                :  STR_CID, TRIA3TYP
-      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, SHELL_OUT_TE, POLY_FIT_ERR,          &
                                          POLY_FIT_ERR_INDEX
       USE MODEL_STUF, ONLY            :  ELEM_ONAME, ELMTYP, LABEL, SCNUM, STITLE, TITLE, TYPE
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, STRE_OUT, GPSTRESS_OUT, GPSTRESS_REQ, STRESS_USER_REQ
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, STRE_OUT, GPSTRESS_OUT, GPSTRESS_REQ, STRESS_USER_REQ,  &
+                                          STRE_CENTER_REQ, STRE_CORNER_REQ
       USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_I8_RJ,                                            &
                                          FAST_BUILD_QUAD_1403_LINE, FAST_BUILD_QUAD_1404_LINE,                            &
                                          FAST_BUILD_QUAD_1405_LINE, FAST_BUILD_QUAD_1406_LINE,                            &
@@ -1245,8 +1245,8 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06, OP2
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, SHELL_OUT_TE, SHELL_STRESS_IN_LOCAL
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, GPSTRESS_REQ
-      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
+      USE MODEL_STUF, ONLY            :  TYPE
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, GPSTRESS_REQ, STRE_CENTER_REQ, STRE_CORNER_REQ
       USE GET_MAX_MIN_ABS_STR_Interface
       USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_BUILD_TRIA_1703_LINE, FAST_BUILD_TRIA_1704_LINE, FAST_BUILD_TRIA_1706_LINE
       IMPLICIT NONE
@@ -1287,6 +1287,7 @@
       REAL(DOUBLE)                :: VONMISES
       REAL(DOUBLE)                :: Z1, Z2, Z_DEN
       INTEGER(LONG)               :: I, J, K, L, IP       ! DO loop indices
+      INTEGER(LONG)               :: NUM_GRID_PTS          ! Number of grid points per element
       CHARACTER(159*BYTE)         :: TRIA_CENTER_LINE
       CHARACTER(159*BYTE)         :: TRIA_LOWER_LINE
       CHARACTER(159*BYTE)         :: TRIA_GRID_LINE
@@ -1306,12 +1307,24 @@
 
       IF (WRITE_OP2) THEN
           !CALL GET_STRESS_CODE(STRESS_CODE, IS_VON_MISES, IS_STRAIN, IS_FIBER_DISTANCE)
+          IF (TYPE(1:5) == 'TRIA6') THEN
+             ELEMENT_TYPE = 75
+             NUM_WIDE = 70  ! eid, CEN/, four grid/fiber pairs (17 words each)
+             NVALUES = NUM * NUM_WIDE
+          ENDIF
           CALL GET_STRESS_CODE( STRESS_CODE, 1,            0,         1)
           CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
                                  TITLE, SUBTITLE, LABEL, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
           WRITE(OP2) NVALUES
-          WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8),                                 &
-                     (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
+          IF (TYPE(1:5) == 'TRIA6') THEN
+             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, 'CEN/', &
+                (MERGE(3_LONG,GID_OUT_ARRAY(I,L+1),L==0), &
+                 (REAL(OGEL(2*NUM_PTS*(I-1)+2*L+1,J),4),J=1,8), &
+                 (REAL(OGEL(2*NUM_PTS*(I-1)+2*L+2,J),4),J=1,8),L=0,3),I=1,NUM)
+          ELSE
+             WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), &
+                        (REAL(OGEL(2*I,J),4), J=1,8), I=1,NUM)
+          ENDIF
       ENDIF  ! write op2
 
  1703 FORMAT(1X,I8,4X,'CENTER  ',4X,4(1ES13.5),0PF9.3,5(1ES13.5))
@@ -1326,9 +1339,22 @@
              1X,'ABS* : ',28x,3(ES13.5),9X,5(ES13.5),/,                                                                            &
              1X,'*for output set')
 
-      IF (STRE_LOC == 'CENTER  ') THEN
-         DO I=1,NUM,MAX(1_LONG,NUM_PTS)
-            K = 2*I - 1
+      ! Determine number of grid points per element
+      ! TRIA3: 3 corners, TRIA6: 3 corners + 2 midside = 5 grid points
+      ! But for CORNER request, we only output corner points (3 for both T3 and T6)
+      IF (TYPE(1:5) == 'TRIA6') THEN
+         NUM_GRID_PTS = MIN(6_LONG,NUM_PTS-1)  ! All six T6 nodes
+      ELSE
+         NUM_GRID_PTS = 3  ! 3 corner nodes for TRIA3
+      ENDIF
+
+      ! Output per-element: CENTER first, then GRID points
+      ! NUM = number of elements, NUM_PTS = stress points per element
+      ! OGEL layout per element: CENTER(2 rows) + GRID(2 rows each)
+      DO I=1,NUM
+         ! CENTER output
+         IF (STRE_CENTER_REQ .OR. (STRE_LOC == 'CENTER  ')) THEN
+            K = 2*(I-1)*NUM_PTS + 1
             IF (WRITE_F06) WRITE(F06,*)
             DO J=1,10
                ROW_TMP(J) = OGEL(K,J)
@@ -1344,12 +1370,12 @@
                CALL FAST_BUILD_TRIA_1704_LINE ( ROW_TMP, TRIA_LOWER_LINE )
                WRITE(F06,'(A)') TRIA_LOWER_LINE(1:159)
             ENDIF
-         ENDDO
-      ELSE
-         DO I=1,NUM,NUM_PTS
-            DO L=1,NUM_PTS-1
-               IP = I + L
-               K = 2*IP - 1
+         ENDIF
+
+         ! GRID output
+         IF (STRE_CORNER_REQ .OR. (STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ')) THEN
+            DO L=1,NUM_GRID_PTS
+               K = 2*(I-1)*NUM_PTS + 2*L + 1
                IF (WRITE_F06) WRITE(F06,*)
                DO J=1,10
                   ROW_TMP(J) = OGEL(K,J)
@@ -1366,8 +1392,8 @@
                   WRITE(F06,'(A)') TRIA_LOWER_LINE(1:159)
                ENDIF
             ENDDO
-         ENDDO
-      ENDIF
+         ENDIF
+      ENDDO
 
       CALL GET_MAX_MIN_ABS_STR ( NUM, 10, 'Y', MAX_ANS, MIN_ANS, ABS_ANS )
 
@@ -1392,7 +1418,7 @@
       USE IOUNT1, ONLY                :  OP2, F06
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL, SHELL_OUT_TE, SHELL_STRESS_IN_LOCAL
-      USE MODEL_STUF, ONLY            :  GRID_ID, RGRID
+      USE MODEL_STUF, ONLY            :  GRID_ID, RGRID, TYPE
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  GPSTRESS_REQ, NUM_GP_SURFACE, MAX_GP_SURFACES, GP_SURFACE_IDS,                 &
                                          GP_SURFACE_NORMAL_MODE
       USE GPSTRESS_SURFACE_UTILS, ONLY:  GPSTRESS_COLLECT_SURFACE_PATCH
@@ -1450,7 +1476,7 @@
       REAL(DOUBLE)                    :: FIELD7
       REAL(DOUBLE)                    :: MID_ROW(8)
       REAL(DOUBLE)                    :: MID_STRESS3(3)
-      LOGICAL                         :: USED_RECOVERY
+      LOGICAL                         :: USED_RECOVERY, LEGACY_OP2
 
       IF (NUM <= 0) RETURN
 
@@ -1462,10 +1488,6 @@
             ITABLE = -1
          ENDIF
 
-         TABLE_NAME = 'OGS1    '
-         CALL WRITE_TABLE_HEADER(TABLE_NAME)
-         OGS_ITABLE = -3
-         CALL WRITE_ITABLE(OGS_ITABLE)
       ENDIF
 
       IF ((ANALYSIS_CODE == 1) .OR. (ANALYSIS_CODE == 10)) THEN
@@ -1488,20 +1510,6 @@
       SUBTITLE2 = SUBTITLE(1:67)
       LABEL2 = LABEL(1:100)
 
-      IF (WRITE_OP2) THEN
-         WRITE(OP2) 146
-         WRITE(OP2) APPROACH_CODE, TABLE_CODE, OGS_ID, ISUBCASE, FIELD5_INT_MODE,                                        &
-               REAL(FIELD6_EIGENVALUE, 4), REAL(FIELD7, 4), REFID, FORMAT_CODE, NUM_WIDE, S_CODE, OCOORD, AXIS, 0, 0,    &
-               0, 0, 0, 0, 0,                                                                                            &
-               0, 0, THERMAL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                                              &
-               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                                                    &
-               0, 0, 0, 0,                                                                                               &
-               TITLE2, SUBTITLE2, LABEL2
-
-         OGS_ITABLE = OGS_ITABLE - 1
-         CALL WRITE_ITABLE(OGS_ITABLE)
-         OGS_ITABLE = OGS_ITABLE - 1
-      ENDIF
 
       USED_RECOVERY = .FALSE.
       NOUT = 0
@@ -1526,6 +1534,31 @@
          ENDDO
       ENDIF
 
+      LEGACY_OP2 = WRITE_OP2 .AND. .NOT.(USED_RECOVERY .AND. NOUT > 0)
+      IF (WRITE_OP2 .AND. .NOT.LEGACY_OP2) THEN
+         DO SURF=1,NUM_GP_SURFACE
+            IF (SURF_END(SURF) < SURF_START(SURF)) CYCLE
+            IF (SURF_START(SURF) <= 0) CYCLE
+            CALL WRITE_RECOVERED_SURFACE_OP2(SURF)
+         ENDDO
+      ELSE IF (LEGACY_OP2) THEN
+         CALL WRITE_TABLE_HEADER('OGS1    ')
+         OGS_ITABLE = -3
+         CALL WRITE_ITABLE(OGS_ITABLE)
+         WRITE(OP2) 146
+         WRITE(OP2) APPROACH_CODE, TABLE_CODE, OGS_ID, ISUBCASE, FIELD5_INT_MODE,                                        &
+               REAL(FIELD6_EIGENVALUE, 4), REAL(FIELD7, 4), REFID, FORMAT_CODE, NUM_WIDE, S_CODE, OCOORD, AXIS, 0, 0,    &
+               0, 0, 0, 0, 0,                                                                                            &
+               0, 0, THERMAL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                                              &
+               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                                                    &
+               0, 0, 0, 0,                                                                                               &
+               TITLE2, SUBTITLE2, LABEL2
+
+         OGS_ITABLE = OGS_ITABLE - 1
+         CALL WRITE_ITABLE(OGS_ITABLE)
+         OGS_ITABLE = OGS_ITABLE - 1
+      ENDIF
+
       IF (USED_RECOVERY .AND. (NOUT > 0)) THEN
          NROWS = 2 * NOUT
       ELSE
@@ -1536,16 +1569,9 @@
          ENDIF
       ENDIF
       NVALUES = NUM_WIDE * NROWS
-      IF (WRITE_OP2) WRITE(OP2) NVALUES
+      IF (LEGACY_OP2) WRITE(OP2) NVALUES
 
-      IF (WRITE_OP2 .AND. USED_RECOVERY .AND. (NOUT > 0)) THEN
-         WRITE(OP2) (OUT_GRIDS(I)*10+DEVICE_CODE, OUT_EIDS(I), 'Z1  ',                                                   &
-                     REAL(OUT_Z1(1,I),4), REAL(OUT_Z1(2,I),4), REAL(OUT_Z1(3,I),4), REAL(OUT_Z1(4,I),4),                &
-                     REAL(OUT_Z1(5,I),4), REAL(OUT_Z1(6,I),4), REAL(OUT_Z1(7,I),4), REAL(OUT_Z1(8,I),4),                &
-                     OUT_GRIDS(I)*10+DEVICE_CODE, OUT_EIDS(I), 'Z2  ',                                                   &
-                     REAL(OUT_Z2(1,I),4), REAL(OUT_Z2(2,I),4), REAL(OUT_Z2(3,I),4), REAL(OUT_Z2(4,I),4),                &
-                     REAL(OUT_Z2(5,I),4), REAL(OUT_Z2(6,I),4), REAL(OUT_Z2(7,I),4), REAL(OUT_Z2(8,I),4), I=1,NOUT)
-      ELSE IF (WRITE_OP2 .AND. (FAMILY(1:4) == 'TRIA')) THEN
+      IF (LEGACY_OP2 .AND. (FAMILY(1:4) == 'TRIA')) THEN
          WRITE(OP2) ((GID_OUT_ARRAY(I,L+1)*10+DEVICE_CODE, EID_OUT_ARRAY(I,1), 'Z1  ',                                  &
                       REAL(OGEL(2*I-1,2),4), REAL(OGEL(2*I-1,3),4), REAL(OGEL(2*I-1,4),4),                              &
                       REAL(OGEL(2*I-1,6),4), REAL(OGEL(2*I-1,7),4), REAL(OGEL(2*I-1,8),4),                              &
@@ -1554,7 +1580,7 @@
                       REAL(OGEL(2*I,2),4), REAL(OGEL(2*I,3),4), REAL(OGEL(2*I,4),4), REAL(OGEL(2*I,6),4),               &
                       REAL(OGEL(2*I,7),4), REAL(OGEL(2*I,8),4), REAL(0.5D0*ABS(OGEL(2*I,7)-OGEL(2*I,8)),4),             &
                       REAL(OGEL(2*I,9),4), L=1,3), I=1,NUM)
-      ELSE IF (WRITE_OP2) THEN
+      ELSE IF (LEGACY_OP2) THEN
          WRITE(OP2) ((GID_OUT_ARRAY(I,L+1)*10+DEVICE_CODE, EID_OUT_ARRAY(I,1), 'Z1  ',                                 &
                       REAL(OGEL(I+2*L,2),4), REAL(OGEL(I+2*L,3),4), REAL(OGEL(I+2*L,4),4),                              &
                       REAL(OGEL(I+2*L,6),4), REAL(OGEL(I+2*L,7),4), REAL(OGEL(I+2*L,8),4),                              &
@@ -1587,7 +1613,7 @@
          ENDDO
       ENDIF
 
-      IF (WRITE_OP2) THEN
+      IF (LEGACY_OP2) THEN
          CALL END_OP2_TABLE(OGS_ITABLE)
          ITABLE = 0
       ENDIF
@@ -1601,7 +1627,41 @@
 
       CONTAINS
 
+      SUBROUTINE WRITE_RECOVERED_SURFACE_OP2(SURFACE_INDEX)
+      INTEGER(LONG), INTENT(IN) :: SURFACE_INDEX
+      OGS_ID = GP_SURFACE_IDS(SURFACE_INDEX)
+      CALL WRITE_TABLE_HEADER('OGS1    ')
+      OGS_ITABLE = -3
+      CALL WRITE_ITABLE(OGS_ITABLE)
+         WRITE(OP2) 146
+         WRITE(OP2) APPROACH_CODE, TABLE_CODE, OGS_ID, ISUBCASE, FIELD5_INT_MODE,                                        &
+               REAL(FIELD6_EIGENVALUE, 4), REAL(FIELD7, 4), REFID, FORMAT_CODE, NUM_WIDE, S_CODE, OCOORD, AXIS, 0, 0,    &
+               0, 0, 0, 0, 0,                                                                                            &
+               0, 0, THERMAL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                                              &
+               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                                                    &
+               0, 0, 0, 0,                                                                                               &
+               TITLE2, SUBTITLE2, LABEL2
+
+         OGS_ITABLE = OGS_ITABLE - 1
+         CALL WRITE_ITABLE(OGS_ITABLE)
+         OGS_ITABLE = OGS_ITABLE - 1
+
+      NVALUES = NUM_WIDE*2*(SURF_END(SURFACE_INDEX)-SURF_START(SURFACE_INDEX)+1)
+      WRITE(OP2) NVALUES
+         WRITE(OP2) (OUT_GRIDS(I)*10+DEVICE_CODE, OUT_EIDS(I), 'Z1  ',                                                   &
+                     REAL(OUT_Z1(1,I),4), REAL(OUT_Z1(2,I),4), REAL(OUT_Z1(3,I),4), REAL(OUT_Z1(4,I),4),                &
+                     REAL(OUT_Z1(5,I),4), REAL(OUT_Z1(6,I),4), REAL(OUT_Z1(7,I),4), REAL(OUT_Z1(8,I),4),                &
+                     OUT_GRIDS(I)*10+DEVICE_CODE, OUT_EIDS(I), 'Z2  ',                                                   &
+                     REAL(OUT_Z2(1,I),4), REAL(OUT_Z2(2,I),4), REAL(OUT_Z2(3,I),4), REAL(OUT_Z2(4,I),4),                &
+                     REAL(OUT_Z2(5,I),4), REAL(OUT_Z2(6,I),4), REAL(OUT_Z2(7,I),4), REAL(OUT_Z2(8,I),4), I=SURF_START(SURFACE_INDEX),SURF_END(SURFACE_INDEX))
+
+      CALL END_OP2_TABLE(OGS_ITABLE)
+      ITABLE = 0
+      END SUBROUTINE WRITE_RECOVERED_SURFACE_OP2
+
+
       SUBROUTINE BUILD_SURFACE_PATCH_OUTPUT ( SURF_INDEX, PATCH_ELEMS, PATCH_GRIDS, OUT_EIDS, OUT_GRIDS, OUT_Z1, OUT_Z2, NOUT, IERR )
+      USE IOUNT1, ONLY                :  F06
 
       INTEGER(LONG), INTENT(IN)       :: SURF_INDEX
       INTEGER(LONG), INTENT(INOUT)    :: PATCH_ELEMS(:)
@@ -1650,10 +1710,13 @@
                IF (FIND_INT(IELEM, PATCH_ELEMS, NPATCH_ELEMS) == 0) CYCLE
                AREA = GET_TRIA_AREA(I)
                IF (AREA <= ZERO) CYCLE
-               DO J=1,3
+               DO J=1,MERGE(6,3,TYPE(1:5) == 'TRIA6')
                   IF (GID_OUT_ARRAY(I,J+1) /= GID) CYCLE
-                  ROW1 = 2*I - 1
-                  ROW2 = 2*I
+                  ! OGEL holds 2*NUM_PTS rows per element (2 fibers x NUM_PTS recovery points),
+                  ! points ordered CENTER(1) then corners AGRID(1..3) = recovery points 2..4.
+                  ! Row 1 of element I is 2*NUM_PTS*(I-1)+1 (NOT 2*I-1).
+                  ROW1 = 2*NUM_PTS*(I-1) + 2*J + 1
+                  ROW2 = ROW1 + 1
                   CALL GET_SURFACE_STRESS3 ( SURF_INDEX, I, SHELL_STRESS_IN_LOCAL(I), SHELL_OUT_TE(1:3,1:3,I),                    &
                                              (/ OGEL(ROW1,2), OGEL(ROW1,3), OGEL(ROW1,4) /), OUTVAL(1:3) )
                   VALS1 = VALS1 + (AREA/3.0D0) * OUTVAL(1:3)
@@ -1716,7 +1779,7 @@
          DO I=1,NUM
             IELEM = EID_OUT_ARRAY(I,1)
             IF (FIND_INT(IELEM, PATCH_ELEMS, NPATCH_ELEMS) == 0) CYCLE
-            DO J=1,3
+            DO J=1,MERGE(6,3,TYPE(1:5) == 'TRIA6')
                IF (GID_OUT_ARRAY(I,J+1) == GID) THEN
                   GET_FIRST_PATCH_ELEM_FOR_GRID = IELEM
                   RETURN

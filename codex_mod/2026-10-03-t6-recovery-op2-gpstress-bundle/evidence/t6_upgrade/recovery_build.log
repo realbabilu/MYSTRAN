@@ -1,0 +1,21 @@
+[  0%] Built target mystran_feast_build
+CMakeFiles/mystran.dir/depend.make:13044: warning: overriding recipe for target 'CMakeFiles/mystran.dir/lapack_lin_eqn_dge.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13037: warning: ignoring old recipe for target 'CMakeFiles/mystran.dir/lapack_lin_eqn_dge.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13080: warning: overriding recipe for target 'CMakeFiles/mystran.dir/lapack_miscel.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13073: warning: ignoring old recipe for target 'CMakeFiles/mystran.dir/lapack_miscel.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13113: warning: overriding recipe for target 'CMakeFiles/mystran.dir/lapack_std_eig_1.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13097: warning: ignoring old recipe for target 'CMakeFiles/mystran.dir/lapack_std_eig_1.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13044: warning: overriding recipe for target 'CMakeFiles/mystran.dir/lapack_lin_eqn_dge.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13037: warning: ignoring old recipe for target 'CMakeFiles/mystran.dir/lapack_lin_eqn_dge.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13080: warning: overriding recipe for target 'CMakeFiles/mystran.dir/lapack_miscel.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13073: warning: ignoring old recipe for target 'CMakeFiles/mystran.dir/lapack_miscel.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13113: warning: overriding recipe for target 'CMakeFiles/mystran.dir/lapack_std_eig_1.mod.stamp'
+CMakeFiles/mystran.dir/depend.make:13097: warning: ignoring old recipe for target 'CMakeFiles/mystran.dir/lapack_std_eig_1.mod.stamp'
+[  0%] Building Fortran object CMakeFiles/mystran.dir/Source/EMG/EMG4/CTRIA6_SIMO1993.f90.obj
+C:\PROJECTAI\18a\MYSTRAN\Source\EMG\EMG4\CTRIA6_SIMO1993.f90:618:21:
+
+  618 |       SUBROUTINE INV2 ( A, AINV )
+      |                     ^
+Warning: 'inv2' defined but not used [-Wunused-function]
+[  1%] Linking Fortran executable C:\PROJECTAI\18a\MYSTRAN\Binaries\mystran.exe
+[100%] Built target mystran

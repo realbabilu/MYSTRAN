@@ -1,0 +1,564 @@
+! ##################################################################################################################################
+! Begin MIT license text.
+! _______________________________________________________________________________________________________
+
+! Copyright 2022 Dr William R Case, Jr (mystransolver@gmail.com)
+
+! Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+! associated documentation files (the "Software"), to deal in the Software without restriction, including
+! without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to
+! the following conditions:
+
+! The above copyright notice and this permission notice shall be included in all copies or substantial
+! portions of the Software and documentation.
+
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+! OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+! THE SOFTWARE.
+! _______________________________________________________________________________________________________
+
+! End MIT license text.
+
+      SUBROUTINE ELEM_STRE_STRN_ARRAYS ( STR_PT_NUM )
+
+! Calculates element stress and strain arrays (arrays STRESS and STRAIN). Stresses are calculated for all engineering elements
+! (1-D, 2-D, 3-D elements). Strains are calculated for the BUSH element, all 2-D and 3-D elements. The default method for
+! calculating stresses (for 2D and 3D elements) is to first calculate strains by multiplying the element strain-displ matrices
+! (BEi) times the elem displ's (in local elem coords) and then calc stresses from those strains using material props.
+
+! For the TRIA3 and QUAD4 there is a DEBUG option to calculate stresses directly by multiplying the stress-displ matrices (SEi)
+! times the elem displ's
+
+! The arrays STRESS and STRAIN are calculated at the mid plane of 2-D elements and have to be processed later to get element
+! specific outputs (e.g. stresses at the top and bottom of the 2-D element). The same is true for some of the 1-D elements (e.g.
+! the BAR element stresses at the 4 points on the cross-section have to be processed from the STRESS array generated here)
+
+      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
+      USE IOUNT1, ONLY                :  ERR, F06
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, INT_SC_NUM, JTSUB
+      USE TIMDAT, ONLY                :  TSEC
+      USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
+      USE MODEL_STUF, ONLY            :  ALPVEC, BE1, BE2, BE3, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_NSTATIONS, CBEAM_FORCE_B1,           &
+                                         CBEAM_FORCE_B2, DT, EM, EB, ES, ET, ELDOF, PEL, PHI_SQ, STRAIN, STRESS, SUBLOD, TREF, TYPE,&
+                                         UEL, UEB, SE1, SE2, SE3, STE1, STE2, STE3, ELGP, ISOLID, EID, SHELL_T
+      USE DEBUG_PARAMETERS
+      USE PARAMS, ONLY                :  STR_CID, QUAD4TYP
+
+
+      USE ELEM_STRE_STRN_ARRAYS_USE_IFs
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'ELEM_STRE_STRN_ARRAYS'
+
+      INTEGER(LONG), INTENT(IN)       :: STR_PT_NUM        ! Which point (3rd index in SEi matrices) this call is for
+      INTEGER(LONG)                   :: I,J               ! DO loop indices
+      INTEGER(LONG)                   :: K                 ! Counter
+
+      INTEGER(LONG)                   :: STR_CID_SOLID
+
+      REAL(DOUBLE)                    :: ALPT(6)           ! Col of ALPVEC times temperatures
+      REAL(DOUBLE)                    :: ALPTM(3)          ! Col of ALPVEC times temperatures
+      REAL(DOUBLE)                    :: ALPTB(3)          ! Col of ALPVEC times temperatures
+      REAL(DOUBLE)                    :: ALPTT(3)          ! Col oF ALPVEC times temperatures
+      REAL(DOUBLE)                    :: DUM31(3)          ! Array used in an intermediate calc
+      REAL(DOUBLE)                    :: DUM32(3)          ! Array used in an intermediate calc
+      REAL(DOUBLE)                    :: DUM33(3)          ! Array used in an intermediate calc
+      REAL(DOUBLE)                    :: ET3(3,3)          ! Material matrix ET expanded TO 3x3
+      REAL(DOUBLE)                    :: STRAIN1(3)        ! 1st 3 rows of array STRAIN
+      REAL(DOUBLE)                    :: STRAIN2(3)        ! 2nd 3 rows of array STRAIN
+      REAL(DOUBLE)                    :: STRAIN3(3)        ! 3rd 3 rows of array STRAIN
+      REAL(DOUBLE)                    :: STRESS1(3)        ! 1st 3 rows of array STRESS
+      REAL(DOUBLE)                    :: STRESS2(3)        ! 2nd 3 rows of array STRESS
+      REAL(DOUBLE)                    :: STRESS3(3)        ! 3rd 3 rows of array STRESS
+      REAL(DOUBLE)                    :: STRESS_THERM(6)   ! Part of array STRESS
+      REAL(DOUBLE)                    :: STRESS1_THERM(3)  ! Part of array STRESS1
+      REAL(DOUBLE)                    :: STRESS2_THERM(3)  ! Part of array STRESS2
+      REAL(DOUBLE)                    :: STRESS3_THERM(3)  ! Part of array STRESS3
+      REAL(DOUBLE)                    :: STRESS_MECH(6)    ! Part of array STRESS
+      REAL(DOUBLE)                    :: STRESS1_MECH(3)   ! Part of array STRESS1
+      REAL(DOUBLE)                    :: STRESS2_MECH(3)   ! Part of array STRESS2
+      REAL(DOUBLE)                    :: STRESS3_MECH(3)   ! Part of array STRESS3
+      REAL(DOUBLE)                    :: TBAR              ! Average elem temperature
+      REAL(DOUBLE)                    :: XI_STA            ! Active beam station coordinate x/L
+      REAL(DOUBLE)                    :: STR_TENSOR(3,3)   ! 2D stress or strain tensor
+
+
+
+! **********************************************************************************************************************************
+! Initialize
+
+      DO I=1,9
+         STRAIN(I) = ZERO
+         STRESS(I) = ZERO
+      ENDDO
+
+! **********************************************************************************************************************************
+! Calc stresses for 1D elements
+
+      IF (TYPE == 'BEAM    ') THEN
+
+         DUM31(:) = ZERO
+         DUM32(:) = ZERO
+         DO I=1,3
+            DO J=1,6
+               DUM31(I) = DUM31(I) + CBEAM_FORCE_B1(I,J)*PEL(J)
+               DUM32(I) = DUM32(I) + CBEAM_FORCE_B2(I,J)*PEL(J)
+            ENDDO
+         ENDDO
+
+         XI_STA = ZERO
+         IF (CBEAM_ACTIVE_NSTATIONS > 1) XI_STA = CBEAM_ACTIVE_XL(STR_PT_NUM)
+
+         STRESS(1) = DUM31(1)
+         STRESS(2) = (ONE - XI_STA)*DUM31(2) + XI_STA*DUM32(1)
+         STRESS(3) = (ONE - XI_STA)*DUM31(3) + XI_STA*DUM32(2)
+         STRESS(4) = STRESS(2)
+         STRESS(5) = STRESS(3)
+         STRESS(6) = DUM32(3)
+
+         IF (DEBUG(233) > 0) THEN
+            WRITE(F06,9101) EID, STR_PT_NUM, XI_STA
+            WRITE(ERR,9101) EID, STR_PT_NUM, XI_STA
+            WRITE(F06,9102) PEL(1), PEL(2), PEL(3), PEL(4), PEL(5), PEL(6)
+            WRITE(ERR,9102) PEL(1), PEL(2), PEL(3), PEL(4), PEL(5), PEL(6)
+            WRITE(F06,9103) CBEAM_FORCE_B1(1,1), CBEAM_FORCE_B1(1,2), CBEAM_FORCE_B1(1,3), CBEAM_FORCE_B1(1,4),                &
+                            CBEAM_FORCE_B1(1,5), CBEAM_FORCE_B1(1,6)
+            WRITE(ERR,9103) CBEAM_FORCE_B1(1,1), CBEAM_FORCE_B1(1,2), CBEAM_FORCE_B1(1,3), CBEAM_FORCE_B1(1,4),                &
+                            CBEAM_FORCE_B1(1,5), CBEAM_FORCE_B1(1,6)
+            WRITE(F06,9103) CBEAM_FORCE_B1(2,1), CBEAM_FORCE_B1(2,2), CBEAM_FORCE_B1(2,3), CBEAM_FORCE_B1(2,4),                &
+                            CBEAM_FORCE_B1(2,5), CBEAM_FORCE_B1(2,6)
+            WRITE(ERR,9103) CBEAM_FORCE_B1(2,1), CBEAM_FORCE_B1(2,2), CBEAM_FORCE_B1(2,3), CBEAM_FORCE_B1(2,4),                &
+                            CBEAM_FORCE_B1(2,5), CBEAM_FORCE_B1(2,6)
+            WRITE(F06,9103) CBEAM_FORCE_B1(3,1), CBEAM_FORCE_B1(3,2), CBEAM_FORCE_B1(3,3), CBEAM_FORCE_B1(3,4),                &
+                            CBEAM_FORCE_B1(3,5), CBEAM_FORCE_B1(3,6)
+            WRITE(ERR,9103) CBEAM_FORCE_B1(3,1), CBEAM_FORCE_B1(3,2), CBEAM_FORCE_B1(3,3), CBEAM_FORCE_B1(3,4),                &
+                            CBEAM_FORCE_B1(3,5), CBEAM_FORCE_B1(3,6)
+            WRITE(F06,9104) CBEAM_FORCE_B2(1,1), CBEAM_FORCE_B2(1,2), CBEAM_FORCE_B2(1,3), CBEAM_FORCE_B2(1,4),                &
+                            CBEAM_FORCE_B2(1,5), CBEAM_FORCE_B2(1,6)
+            WRITE(ERR,9104) CBEAM_FORCE_B2(1,1), CBEAM_FORCE_B2(1,2), CBEAM_FORCE_B2(1,3), CBEAM_FORCE_B2(1,4),                &
+                            CBEAM_FORCE_B2(1,5), CBEAM_FORCE_B2(1,6)
+            WRITE(F06,9104) CBEAM_FORCE_B2(2,1), CBEAM_FORCE_B2(2,2), CBEAM_FORCE_B2(2,3), CBEAM_FORCE_B2(2,4),                &
+                            CBEAM_FORCE_B2(2,5), CBEAM_FORCE_B2(2,6)
+            WRITE(ERR,9104) CBEAM_FORCE_B2(2,1), CBEAM_FORCE_B2(2,2), CBEAM_FORCE_B2(2,3), CBEAM_FORCE_B2(2,4),                &
+                            CBEAM_FORCE_B2(2,5), CBEAM_FORCE_B2(2,6)
+            WRITE(F06,9104) CBEAM_FORCE_B2(3,1), CBEAM_FORCE_B2(3,2), CBEAM_FORCE_B2(3,3), CBEAM_FORCE_B2(3,4),                &
+                            CBEAM_FORCE_B2(3,5), CBEAM_FORCE_B2(3,6)
+            WRITE(ERR,9104) CBEAM_FORCE_B2(3,1), CBEAM_FORCE_B2(3,2), CBEAM_FORCE_B2(3,3), CBEAM_FORCE_B2(3,4),                &
+                            CBEAM_FORCE_B2(3,5), CBEAM_FORCE_B2(3,6)
+            WRITE(F06,9105) DUM31(1), DUM31(2), DUM31(3), DUM32(1), DUM32(2), DUM32(3)
+            WRITE(ERR,9105) DUM31(1), DUM31(2), DUM31(3), DUM32(1), DUM32(2), DUM32(3)
+            WRITE(F06,9106) STRESS(1), STRESS(2), STRESS(3), STRESS(4), STRESS(5), STRESS(6)
+            WRITE(ERR,9106) STRESS(1), STRESS(2), STRESS(3), STRESS(4), STRESS(5), STRESS(6)
+         ENDIF
+
+      ELSE IF ((TYPE(1:3) == 'BAR') .OR. (TYPE(1:4) == 'BUSH') .OR. (TYPE(1:4) == 'ELAS') .OR.                                     &
+                (TYPE(1:3) == 'ROD') .OR. (TYPE(1:5) == 'USER1')) THEN
+
+         DO I=1,3
+            STRESS(I) = ZERO
+            DO J=1,ELDOF
+               STRESS(I) = STRESS(I) + SE1(I,J,STR_PT_NUM)*UEL(J)
+            ENDDO
+            IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
+               STRESS(I) = STRESS(I) - STE1(I,JTSUB,STR_PT_NUM)
+            ENDIF
+         ENDDO
+
+         IF ((TYPE(1:3) == 'BAR') .OR. (TYPE(1:4) == 'BUSH')) THEN
+            K = 0
+            DO I=4,6
+               STRESS(I) = ZERO
+               K = K + 1
+               IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
+                  STRESS(I) = -STE2(K,JTSUB,STR_PT_NUM)
+               ENDIF
+               DO J=1,ELDOF
+                  STRESS(I) = STRESS(I) + SE2(K,J,STR_PT_NUM)*UEL(J)
+               ENDDO
+            ENDDO
+         ENDIF
+
+      ENDIF
+
+! **********************************************************************************************************************************
+! Calc strains for 1D BUSH element
+
+      IF (TYPE(1:4) == 'BUSH') THEN
+
+         DO I=1,3
+            STRAIN(I) = ZERO
+            DO J=1,ELDOF
+               STRAIN(I) = STRAIN(I) + BE1(I,J,STR_PT_NUM)*UEL(J)
+            ENDDO
+         ENDDO
+
+         K = 0
+         DO I=4,6
+            STRAIN(I) = ZERO
+            K = K + 1
+            DO J=1,ELDOF
+               STRAIN(I) = STRAIN(I) + BE2(K,J,STR_PT_NUM)*UEL(J)
+            ENDDO
+         ENDDO
+
+
+! **********************************************************************************************************************************
+! Calc strains, then stresses for 2D elements
+
+! --- CQUADR_DKMQ24 begin --- !
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR.      &
+               (TYPE(1:5) == 'QUAD8') .OR.                                                                                                  &
+               (TYPE(1:5) == 'SHEAR') .OR. (TYPE(1:5) == 'USER1')) THEN
+! --- CQUADR_DKMQ24 end --- !
+
+         DO I=1,3
+            STRAIN(I) = ZERO
+            STRAIN(I+3) = ZERO
+            DO J=1,ELDOF
+               IF (TYPE(1:5) == 'TRIA6') THEN
+                  STRAIN(I)   = STRAIN(I)   + BE1(I,J,STR_PT_NUM)*UEB(J)
+                  STRAIN(I+3) = STRAIN(I+3) + BE2(I,J,STR_PT_NUM)*UEB(J)
+               ELSE
+                  STRAIN(I)   = STRAIN(I)   + BE1(I,J,STR_PT_NUM)*UEL(J)
+                  STRAIN(I+3) = STRAIN(I+3) + BE2(I,J,STR_PT_NUM)*UEL(J)
+               ENDIF
+            ENDDO
+         ENDDO
+
+         DO I=1,2
+            STRAIN(I+6) = ZERO
+            DO J=1,ELDOF
+               IF (TYPE(1:5) == 'TRIA6') THEN
+                  STRAIN(I+6) = STRAIN(I+6) + BE3(I,J,STR_PT_NUM)*UEB(J)
+               ELSE
+                  STRAIN(I+6) = STRAIN(I+6) + BE3(I,J,STR_PT_NUM)*UEL(J)
+               ENDIF
+            ENDDO
+         ENDDO
+
+                                                           ! Calc stresses from strains
+
+         STRESS1(:)       = ZERO
+         STRESS2(:)       = ZERO
+         STRESS3(:)       = ZERO
+
+         STRESS1_MECH(:)  = ZERO
+         STRESS2_MECH(:)  = ZERO
+         STRESS3_MECH(:)  = ZERO
+
+         STRESS1_THERM(:) = ZERO
+         STRESS2_THERM(:) = ZERO
+         STRESS3_THERM(:) = ZERO
+
+         DO I=1,3
+            STRAIN1(I) = STRAIN(I)
+            STRAIN2(I) = STRAIN(I+3)
+            STRAIN3(I) = STRAIN(I+6)
+         ENDDO
+
+         IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
+           TBAR = 0
+           DO J=1,ELGP
+             TBAR = TBAR + DT(J,JTSUB)
+           ENDDO
+           TBAR = TBAR / ELGP
+           ALPTM(1) = ALPVEC(1  ,1)*(TBAR - TREF(1))
+           ALPTM(2) = ALPVEC(2  ,1)*(TBAR - TREF(1))
+           ALPTM(3) = ALPVEC(4  ,1)*(TBAR - TREF(1))
+           DO I=1,3
+             ALPTB(I) = ALPVEC(I  ,2)*DT(5,JTSUB)
+             ALPTT(I) = ALPVEC(I+3,3)*(TBAR - TREF(1))
+           ENDDO
+         ELSE
+            ALPTM(:) = ZERO
+            ALPTB(:) = ZERO
+            ALPTT(:) = ZERO
+         ENDIF
+
+
+         ET3(:,:) = ZERO
+         DO I=1,2
+            DO J=1,2
+               ET3(I,J) = ET(I,J)
+            ENDDO
+         ENDDO
+
+         CALL MATMULT_FFF ( EM , STRAIN1, 3, 3, 1, DUM31 )
+         CALL MATMULT_FFF ( EB , STRAIN2, 3, 3, 1, DUM32 )
+         CALL MATMULT_FFF ( ET3, STRAIN3, 3, 3, 1, DUM33 )
+
+         STRESS1_MECH =        DUM31
+         STRESS2_MECH =        DUM32
+         STRESS3_MECH = PHI_SQ*DUM33                       ! Need PHI_SQ on transv shear stress since this calc is from strains and
+                                                           ! BE3, not SE3. If DEBUG(176) > 0 then stresses are calc'd from the SE3
+                                                           ! below and SE3 has PHI_SQ incorporated in subrs QPLT1, QPLT3, TPLT2.
+         IF (TYPE == 'QUADR   ') THEN
+            STRESS3_MECH(1) = SHELL_T(1,1)*STRAIN3(1) + SHELL_T(1,2)*STRAIN3(2)
+            STRESS3_MECH(2) = SHELL_T(2,1)*STRAIN3(1) + SHELL_T(2,2)*STRAIN3(2)
+            STRESS3_MECH(3) = ZERO
+         ENDIF
+
+
+         IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
+            CALL MATMULT_FFF ( EM , ALPTM  , 3, 3, 1, STRESS1_THERM )
+            CALL MATMULT_FFF ( EB , ALPTB  , 3, 3, 1, STRESS2_THERM )
+            CALL MATMULT_FFF ( ET3, ALPTT  , 3, 3, 1, STRESS3_THERM )
+            IF (TYPE == 'QUADR   ') THEN
+               STRESS3_THERM(1) = SHELL_T(1,1)*ALPTT(1) + SHELL_T(1,2)*ALPTT(2)
+               STRESS3_THERM(2) = SHELL_T(2,1)*ALPTT(1) + SHELL_T(2,2)*ALPTT(2)
+               STRESS3_THERM(3) = ZERO
+            ENDIF
+         ENDIF
+
+         CALL MATADD_FFF  ( STRESS1_MECH, STRESS1_THERM, 3, 1, ONE, -ONE, 0, STRESS1 )
+         CALL MATADD_FFF  ( STRESS2_MECH, STRESS2_THERM, 3, 1, ONE, -ONE, 0, STRESS2 )
+         CALL MATADD_FFF  ( STRESS3_MECH, STRESS3_THERM, 3, 1, ONE, -ONE, 0, STRESS3 )
+
+         DO I=1,3
+            STRESS(I)   = STRESS1(I)
+            STRESS(I+3) = STRESS2(I)
+            STRESS(I+6) = STRESS3(I)
+         ENDDO
+
+         IF ((((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .AND. (DEBUG(238) > 0)) .AND. (EID <= 8)) THEN
+            WRITE(F06,'(A,1X,I8,1X,A,1X,I3,1X,A)') 'RECOV238 EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM, 'TYPE='//TYPE
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN1', STRAIN1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN2', STRAIN2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN3', STRAIN3
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS1', STRESS1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS2', STRESS2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS3', STRESS3
+            WRITE(F06,'(A,9(1X,ES15.7))') '  STRESS ', STRESS
+         ENDIF
+
+
+         IF ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  ') .AND. (DEBUG(239) > 0) .AND. (EID <= 8)) THEN
+            WRITE(F06,'(A,1X,I8,1X,A,1X,I3,1X,A)') 'DSQK239 EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM, 'TYPE='//TYPE
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEB( 1: 6)', (UEB(I),I=1,6)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEB( 7:12)', (UEB(I),I=7,12)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEB(13:18)', (UEB(I),I=13,18)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEB(19:24)', (UEB(I),I=19,24)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEL( 1: 6)', (UEL(I),I=1,6)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEL( 7:12)', (UEL(I),I=7,12)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEL(13:18)', (UEL(I),I=13,18)
+            WRITE(F06,'(A,6(1X,ES15.7))') '  UEL(19:24)', (UEL(I),I=19,24)
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN1', STRAIN1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN2', STRAIN2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN3', STRAIN3
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS1', STRESS1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS2', STRESS2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS3', STRESS3
+            WRITE(F06,'(A,9(1X,ES15.7))') '  STRESS ', STRESS
+         ENDIF
+
+         IF ((TYPE == 'QUADR   ') .AND. (DEBUG(233) > 0)) THEN
+            WRITE(F06,'(A,1X,I8,1X,A,1X,I3)') 'CQUADR RECOVERY EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN1', STRAIN1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN2', STRAIN2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN3', STRAIN3
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS1', STRESS1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS2', STRESS2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS3', STRESS3
+         ENDIF
+
+         IF ((((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIAR')) .AND. (DEBUG(233) > 0)) .AND. (EID <= 8)) THEN
+            WRITE(F06,'(A,1X,I8,1X,A,1X,I3,1X,A)') 'CTRIA RECOVERY EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM, 'TYPE='//TYPE
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN1', STRAIN1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN2', STRAIN2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRAIN3', STRAIN3
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS1', STRESS1
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS2', STRESS2
+            WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS3', STRESS3
+         ENDIF
+
+
+
+
+
+         IF (DEBUG(176) > 0) THEN                          ! If DEBUG(176) > 0, calc stresses using SEi instead of above from STRAIN
+            DO I=1,3                                       ! NOTE: PHI_SQ is incorporated into SE3
+               STRESS(I  ) = ZERO
+               STRESS(I+3) = ZERO
+               DO J=1,ELDOF
+                  STRESS(I)   = STRESS(I)   + SE1(I,J,STR_PT_NUM)*UEL(J)
+                  STRESS(I+3) = STRESS(I+3) + SE2(I,J,STR_PT_NUM)*UEL(J)
+               ENDDO
+               IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
+                  STRESS(I)   = STRESS(I)   - STE1(I,JTSUB,STR_PT_NUM)
+                  STRESS(I+3) = STRESS(I+3) - STE2(I,JTSUB,STR_PT_NUM)
+               ENDIF
+            ENDDO
+            DO I=1,2
+               STRESS(I+6) = ZERO
+               DO J=1,ELDOF
+                  STRESS(I+6) = STRESS(I+6) + SE3(I,J,STR_PT_NUM)*UEL(J)
+               ENDDO
+               IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
+                  STRESS(I+6) = STRESS(I+6) - STE3(I,JTSUB,STR_PT_NUM)
+               ENDIF
+            ENDDO
+         ENDIF
+
+
+
+
+
+! **********************************************************************************************************************************
+! Calc strains, then stresses for 3D elements
+
+      ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+
+         DO I=1,6
+            STRESS_MECH(I)  = ZERO
+            STRESS_THERM(I) = ZERO
+         ENDDO
+
+         DO I=1,3
+            DO J=1,ELDOF
+               STRAIN(I)   = STRAIN(I  ) + BE1(I,J,STR_PT_NUM)*UEL(J)
+               STRAIN(I+3) = STRAIN(I+3) + BE2(I,J,STR_PT_NUM)*UEL(J)
+            ENDDO
+         ENDDO
+
+         DO I=1,6
+            IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
+               TBAR = (DT(1,JTSUB) + DT(2,JTSUB) + DT(3,JTSUB) + DT(4,JTSUB))/FOUR
+               ALPT(I) = ALPVEC(I,1)*(TBAR - TREF(1))
+            ELSE
+               ALPT(I) = ZERO
+            ENDIF
+         ENDDO
+
+         CALL MATMULT_FFF ( ES, STRAIN, 6, 6, 1, STRESS_MECH )
+
+         IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
+            CALL MATMULT_FFF ( ES, ALPT, 6, 6, 1, STRESS_THERM )
+         ENDIF
+
+         CALL MATADD_FFF  ( STRESS_MECH, STRESS_THERM, 6, 1, ONE, -ONE, 0, STRESS )
+
+
+      ENDIF
+
+! **********************************************************************************************************************************
+! Transform coord for STRESS/STRAIN arrays, if requested.
+!
+! Important shell note:
+! Raw shell stress/strain recovery for TRIA/QUAD families is still consumed later by
+! shell-specific corner/GPSTRESS output paths that assume the unreoriented recovery basis.
+! Applying STR_CID here rotates that raw data too early and breaks patch-test style shell
+! output (notably QUAD4/CQUADR GPSTRESS/basic output). Keep the historical shell recovery
+! basis here and leave shell-family output-space handling to the later shell output path.
+
+      IF (STR_CID /= -1) THEN                         ! User req diff stress/strain/engr force output coord sys than elem local
+
+! STR_CID selects the requested stress/strain output coordinate system.
+! Shell titles are written in the LK9/L91 output routines according to the same
+! setting, so transformed shell output is no longer labelled as local output.
+! For solids, STR_CID == -2 means use CORDM from the PSOLID card.
+
+         IF      ((TYPE (1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE == 'QUADR   ') .OR.                         &
+                  (TYPE (1:5) == 'QUAD8') .OR. (TYPE(1:5) == 'TRIA6')) THEN
+
+            ! Shell 2D families: do not apply STR_CID rotation at raw recovery stage.
+            ! See note above.
+
+         ELSE IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
+
+            IF (STR_CID == -2) THEN
+               STR_CID_SOLID = ISOLID(3)                   ! CORDM from PSOLID card.
+            ELSE
+               STR_CID_SOLID = STR_CID
+            ENDIF
+
+            IF(STR_CID_SOLID == -1) then
+                                                           ! STR_CID_SOLID is -1 if ISOLID(3) is -1 which means
+                                                           ! material coordinates = element coordinates so don't
+                                                           ! transform it.
+
+            ELSE IF(STR_CID_SOLID >= 0) THEN
+
+                                                           ! Transform 3D stresses
+               STR_TENSOR(1,1) = STRESS(1)   ;   STR_TENSOR(1,2) = STRESS(4)   ;   STR_TENSOR(1,3) = STRESS(6)
+               STR_TENSOR(2,1) = STRESS(4)   ;   STR_TENSOR(2,2) = STRESS(2)   ;   STR_TENSOR(2,3) = STRESS(5)
+               STR_TENSOR(3,1) = STRESS(6)   ;   STR_TENSOR(3,2) = STRESS(5)   ;   STR_TENSOR(3,3) = STRESS(3)
+
+               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID_SOLID )
+
+               STRESS(1) = STR_TENSOR(1,1)
+               STRESS(2) = STR_TENSOR(2,2)
+               STRESS(3) = STR_TENSOR(3,3)
+               STRESS(4) = STR_TENSOR(1,2)
+               STRESS(5) = STR_TENSOR(2,3)
+               STRESS(6) = STR_TENSOR(1,3)
+
+                                                           ! Transform 3D strains
+               STR_TENSOR(1,1) = STRAIN(1)   ;   STR_TENSOR(1,2) = STRAIN(4)/2 ;   STR_TENSOR(1,3) = STRAIN(6)/2
+               STR_TENSOR(2,1) = STRAIN(4)/2 ;   STR_TENSOR(2,2) = STRAIN(2)   ;   STR_TENSOR(2,3) = STRAIN(5)/2
+               STR_TENSOR(3,1) = STRAIN(6)/2 ;   STR_TENSOR(3,2) = STRAIN(5)/2 ;   STR_TENSOR(3,3) = STRAIN(3)
+
+               CALL STR_TENSOR_TRANSFORM ( STR_TENSOR, STR_CID_SOLID )
+
+               STRAIN(1) = STR_TENSOR(1,1)
+               STRAIN(2) = STR_TENSOR(2,2)
+               STRAIN(3) = STR_TENSOR(3,3)
+               STRAIN(4) = STR_TENSOR(1,2)*2
+               STRAIN(5) = STR_TENSOR(2,3)*2
+               STRAIN(6) = STR_TENSOR(1,3)*2
+
+            ELSE
+
+               ! We don't know what to do for CORDM <= -2 because it's not defined in Mystran.
+               WRITE(ERR,9304)
+               WRITE(F06,9304)
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+
+            ENDIF
+
+         ELSE
+
+                                                           ! Other element types are not an error for STR_CID = -2 or -1,
+                                                           ! both of which mean leave them as they are.
+            IF (STR_CID /= -2) THEN
+               WRITE(ERR,9203) TYPE
+               WRITE(F06,9203) TYPE
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+
+         ENDIF
+
+      ENDIF
+
+
+
+      RETURN
+
+! **********************************************************************************************************************************
+ 9101 FORMAT('*** CBEAM STRESS RECOVERY DEBUG *******************************************',/, &
+             '  Element ID       : ',I8,/, &
+             '  Station index    : ',I4,/, &
+             '  x/L              : ',1ES14.6)
+ 9102 FORMAT('  PEL(1:6)         :',6(1X,1ES14.6))
+ 9103 FORMAT('  B1 row           :',6(1X,1ES14.6))
+ 9104 FORMAT('  B2 row           :',6(1X,1ES14.6))
+ 9105 FORMAT('  End forces       :',6(1X,1ES14.6))
+ 9106 FORMAT('  Recovered stress :',6(1X,1ES14.6),/, &
+             '***************************************************************************')
+
+  9203 FORMAT(' *ERROR  9203: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
+                    ,/,14X,' INCORRECT ELEMENT TYPE = "',A,'"')
+
+ 9304 FORMAT(' *ERROR  9304: PSOLID field 4, CORDM <= -2 not allowed for solid elements.' )
+
+
+! ##################################################################################################################################
+
+      END SUBROUTINE ELEM_STRE_STRN_ARRAYS

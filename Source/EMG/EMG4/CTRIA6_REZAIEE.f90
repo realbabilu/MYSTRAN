@@ -15,9 +15,9 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_STRESS_POINTS, SOL_NAME
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_STRESS_POINTS, SOL_NAME, NSNORM
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, DT, EID, ELGP, GRID_SNORM, KE, ME, BE1, BE2, BE3, MASS_PER_UNIT_AREA,    &
+      USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, DT, EID, ELGP, GRID_SNORM, GRID_ID, SNORM, KE, ME, BE1, BE2, BE3, MASS_PER_UNIT_AREA,    &
                                          NUM_EMG_FATAL_ERRS, PCOMP_PROPS, PPE, PRESS, PTE, RGRID, SHELL_A, SHELL_D, SHELL_T,     &
                                          TREF, XEB
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
@@ -34,7 +34,7 @@
       REAL(DOUBLE)                    :: XYZ(6,3), NORMALS(6,3)
       REAL(DOUBLE)                    :: KOUT(36,36)
       REAL(DOUBLE)                    :: BM(3,36), BB(3,36), BS(2,36), BD(1,36)
-      REAL(DOUBLE)                    :: R3(3), S3(3), W3(3), R6(6), S6(6), W6(6)
+      REAL(DOUBLE)                    :: R3(3), S3(3), W3(3), R6(6), S6(6), W6(6), RN7(7), SN7(7)
       REAL(DOUBLE)                    :: R, S, WT, JAC, CDRILL, FAC, SQRT2, SQRT3, R1MITC, R2MITC, RCMITC, RCSHEAR
       REAL(DOUBLE)                    :: M1(6,6), N6(6), DN6(2,6), MASS_ELEM, MASS_NODE
       REAL(DOUBLE)                    :: UNIT_PPE(36), UNIT_PTE(36), DXDR(3), DXDS(3), SURF_VEC(3), TBAR
@@ -63,11 +63,13 @@
       R1MITC = 0.5D0 - 0.5D0/SQRT3
       R2MITC = 0.5D0 + 0.5D0/SQRT3
       RCMITC = ONE/3.0D0
-      RCSHEAR = ONE/SQRT3
+      RCSHEAR = ONE/3.0D0
 
       R3 = (/ONE/6.0D0, TWO/3.0D0, ONE/6.0D0/)
       S3 = (/ONE/6.0D0, ONE/6.0D0, TWO/3.0D0/)
       W3 = (/ONE/6.0D0, ONE/6.0D0, ONE/6.0D0/)
+
+      ! Nodal coordinates for T6: center, 3 corners, 2 midside
 
       R6 = (/0.445948490144588D0, 0.108103018168070D0, 0.445948490144588D0,                                      &
              0.091576213509771D0, 0.816847572980459D0, 0.091576213509771D0/)
@@ -75,6 +77,9 @@
              0.091576213509771D0, 0.091576213509771D0, 0.816847572980459D0/)
       W6 = (/0.111690794839050D0, 0.111690794839050D0, 0.111690794839050D0,                                      &
              0.054975871827661D0, 0.054975871827661D0, 0.054975871827661D0/)
+
+      RN7 = (/ONE/3.0D0, 0.0D0, 1.0D0, 0.0D0, 0.5D0, 0.5D0, 0.0D0/)
+      SN7 = (/ONE/3.0D0, 0.0D0, 0.0D0, 1.0D0, 0.0D0, 0.5D0, 0.5D0/)
 
       IF (OPT(1) == 'Y') THEN
          M1 = ZERO
@@ -136,13 +141,15 @@
       ENDIF
 
       IF (OPT(3) == 'Y') THEN
-         DO I=1,3
-            CALL BM_REZAIEE_AT ( XYZ, R3(I), S3(I), BM, JAC, R1MITC, R2MITC, RCMITC )
-            CALL BB_T6_AT ( XYZ, NORMALS, R3(I), S3(I), BB, JAC )
-            CALL BS_REZAIEE_AT ( XYZ, NORMALS, R3(I), S3(I), BS, JAC, R1MITC, R2MITC, RCSHEAR, SQRT2 )
-            IF (I <= MAX_STRESS_POINTS) THEN
+         DO I=1,7
+            CALL BM_REZAIEE_AT ( XYZ, RN7(I), SN7(I), BM, JAC, R1MITC, R2MITC, RCMITC )
+            CALL BB_T6_AT ( XYZ, NORMALS, RN7(I), SN7(I), BB, JAC )
+            CALL BS_REZAIEE_AT ( XYZ, NORMALS, RN7(I), SN7(I), BS, JAC, R1MITC, R2MITC, RCSHEAR, SQRT2 )
+            IF (I <= MAX_STRESS_POINTS+1) THEN
                BE1(1:3,1:36,I) = BM
-               BE2(1:3,1:36,I) = BB
+! MYSTRAN forms fiber stress as membrane - z*BE2*u and uses a negative
+! bending force conversion; Python curvature/moment has the opposite sign.
+               BE2(1:3,1:36,I) = -BB
                BE3(1:2,1:36,I) = BS
             ENDIF
          ENDDO
@@ -267,14 +274,28 @@
       SUBROUTINE CALC_NODAL_NORMALS_T6 ( XYZN, NORMS )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3)
       REAL(DOUBLE), INTENT(OUT) :: NORMS(6,3)
-      REAL(DOUBLE) :: RS(6,2), NVAL(6), DN(2,6), G1(3), G2(3), N(3), NM, SN(3), SDOT
-      INTEGER(LONG) :: II, BIDX
+      REAL(DOUBLE) :: RS(6,2), NVAL(6), DN(2,6), G1(3), G2(3), N(3), NC(3), NM, SN(3), SDOT, NORMAL_SIGN
+      INTEGER(LONG) :: II, BIDX, ISN
       RS(1,:) = (/ZERO, ZERO/)
       RS(2,:) = (/ONE, ZERO/)
       RS(3,:) = (/ZERO, ONE/)
       RS(4,:) = (/0.5D0, ZERO/)
       RS(5,:) = (/0.5D0, 0.5D0/)
       RS(6,:) = (/ZERO, 0.5D0/)
+!     v2 (Simo1993_Tri6_ShellElement_v2.py): coherent director sign.
+!     Compute the centroid normal once; apply its Z sign to every nodal
+!     normal so the directors agree across the element. This replaces the
+!     v1p8 "tie-break +Z per node" which forced every warped midside
+!     director to +Z and broke downstream cross(g, t) vs cross(t, g) signs.
+      CALL SHAPE_T6(ONE/3.0D0, ONE/3.0D0, NVAL, DN)
+      G1 = MATMUL(DN(1,:), XYZN)
+      G2 = MATMUL(DN(2,:), XYZN)
+      CALL CROSS3(G1, G2, NC)
+      NM = VNORM(NC)
+      NORMAL_SIGN = -ONE
+      IF (NM > 1.0D-15) THEN
+         IF (NC(3) >= -1.0D-06*NM) NORMAL_SIGN = ONE
+      ENDIF
       DO II=1,6
          CALL SHAPE_T6(RS(II,1), RS(II,2), NVAL, DN)
          G1 = MATMUL(DN(1,:), XYZN)
@@ -282,34 +303,30 @@
          CALL CROSS3(G1, G2, N)
          NM = VNORM(N)
          IF (NM <= 1.0D-12) THEN
-            CALL SHAPE_T6(ONE/3.0D0, ONE/3.0D0, NVAL, DN)
-            G1 = MATMUL(DN(1,:), XYZN)
-            G2 = MATMUL(DN(2,:), XYZN)
-            CALL CROSS3(G1, G2, N)
-            NM = VNORM(N)
+            N = NC
+            NM = VNORM(NC)
          ENDIF
          IF (NM > 1.0D-15) THEN
-            NORMS(II,:) = N/NM
+            NORMS(II,:) = NORMAL_SIGN*N/NM
          ELSE
-            NORMS(II,:) = (/ZERO, ZERO, ONE/)
+            NORMS(II,:) = (/ZERO, ZERO, NORMAL_SIGN/)
          ENDIF
-         IF (ALLOCATED(GRID_SNORM)) THEN
-            BIDX = 0
-            IF (II <= SIZE(BGRID)) BIDX = BGRID(II)
-            IF ((BIDX > 0) .AND. (BIDX <= SIZE(GRID_SNORM,1))) THEN
-               SN = GRID_SNORM(BIDX,:)
-               NM = VNORM(SN)
-               IF (NM > 1.0D-15) THEN
-                  SN = SN/NM
-                  SDOT = DOT_PRODUCT(SN, NORMS(II,:))
-                  IF (SDOT < ZERO) THEN
-                     SN = -SN
-                     SDOT = -SDOT
-                  ENDIF
-                  IF (SDOT >= 0.85D0) THEN
+! Explicit SNORM overrides geometric directors; automatically averaged
+! GRID_SNORM values do not replace the final Python geometric defaults.
+         IF (NSNORM > 0 .AND. ALLOCATED(GRID_SNORM) .AND. ALLOCATED(SNORM)) THEN
+            BIDX = BGRID(II)
+            IF (BIDX > 0) THEN
+               DO ISN=1,NSNORM
+                  IF (SNORM(ISN,1) /= GRID_ID(BIDX)) CYCLE
+                  SN = GRID_SNORM(BIDX,:)
+                  NM = VNORM(SN)
+                  IF (NM > 1.0D-15) THEN
+                     SN = SN/NM
+                     IF (DOT_PRODUCT(SN,NORMS(II,:)) < ZERO) SN = -SN
                      NORMS(II,:) = SN
                   ENDIF
-               ENDIF
+                  EXIT
+               ENDDO
             ENDIF
          ENDIF
       ENDDO
@@ -318,7 +335,7 @@
       SUBROUTINE SURFACE_BASIS_T6 ( XYZN, R, S, G1, G2, E1, E2, E3, JAC )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), R, S
       REAL(DOUBLE), INTENT(OUT) :: G1(3), G2(3), E1(3), E2(3), E3(3), JAC
-      REAL(DOUBLE) :: NVAL(6), DN(2,6), G3(3), TMP(3), NM
+      REAL(DOUBLE) :: NVAL(6), DN(2,6), G3(3), TMP(3), NC(3), NM, SGN
       CALL SHAPE_T6(R, S, NVAL, DN)
       G1 = MATMUL(DN(1,:), XYZN)
       G2 = MATMUL(DN(2,:), XYZN)
@@ -329,6 +346,13 @@
       ELSE
          E3 = (/ZERO, ZERO, ONE/)
       ENDIF
+      CALL SHAPE_T6(ONE/3.0D0, ONE/3.0D0, NVAL, DN)
+      NC = MATMUL(DN(1,:), XYZN)
+      TMP = MATMUL(DN(2,:), XYZN)
+      CALL CROSS3(NC, TMP, G3)
+      SGN = ONE
+      IF (G3(3) < -1.0D-6*VNORM(G3)) SGN = -ONE
+      E3 = SGN*E3
       NM = VNORM(G1)
       IF (NM > 1.0D-15) THEN
          E1 = G1/NM
@@ -353,15 +377,13 @@
       SUBROUTINE FIXED_FRAME_T6 ( XYZN, E1F, E2F, E3F )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3)
       REAL(DOUBLE), INTENT(OUT) :: E1F(3), E2F(3), E3F(3)
-      REAL(DOUBLE) :: G1(3), G2(3), JAC, ZSGN
+      REAL(DOUBLE) :: G1(3), G2(3), JAC
       CALL SURFACE_BASIS_T6(XYZN, ONE/3.0D0, ONE/3.0D0, G1, G2, E1F, E2F, E3F, JAC)
-      IF ((DABS(E3F(1)) + DABS(E3F(2))) <= 1.0D-12) THEN
-         ZSGN = ONE
-         IF (E3F(3) < ZERO) ZSGN = -ONE
-         E1F = (/ONE, ZERO, ZERO/)
-         E2F = (/ZERO, ZSGN, ZERO/)
-         E3F = (/ZERO, ZERO, ZSGN/)
-      ENDIF
+! No planar/global-frame override here: Rezaiee2017_Tri6_Final.py always uses
+! the geometric basis at the centroid (_local_basis_at_point(1/3,1/3):
+! e1 = g1/|g1|, e3 = cross(g1,g2), e2 = cross(e3,e1)) with no special case for
+! elements lying in a global XY plane. The MH6T-style forced global frame
+! (E1=x, E2=+-y, E3=+-z) has no counterpart in the reference.
       END SUBROUTINE FIXED_FRAME_T6
 
       SUBROUTINE COV_MAP_T6 ( XYZN, R, S, E1F, E2F, G1, G2, C, JAC )
@@ -405,43 +427,40 @@
       REAL(DOUBLE) :: E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), VP(3,3)
       REAL(DOUBLE) :: VALS3(3,36), PTS3(3,2)
       CALL FIXED_FRAME_T6(XYZN, E1F, E2F, E3F)
-      CALL NAT_MEM_ROWS_T6(XYZN, R1MITC, R1MITC, RR11, SS11, RS11)
-      CALL NAT_MEM_ROWS_T6(XYZN, R2MITC, R1MITC, RR21, SS21, RS21)
-      CALL NAT_MEM_ROWS_T6(XYZN, R1MITC, R2MITC, RR12, SS12, RS12)
-      CALL NAT_MEM_ROWS_T6(XYZN, RCMITC, RCMITC, RRC, SSC, RSC)
-      QQ21 = 0.5D0*(RR21 + SS21) - RS21
-      QQ12 = 0.5D0*(RR12 + SS12) - RS12
-      QQC  = 0.5D0*(RRC  + SSC ) - RSC
-
+      CALL NAT_MEM_ROWS_T6(XYZN, R1MITC, ZERO, RR11, SS11, RS11)
+      CALL NAT_MEM_ROWS_T6(XYZN, R2MITC, ZERO, RR21, SS21, RS21)
+      CALL NAT_MEM_ROWS_T6(XYZN, R1MITC, 1.0D0/DSQRT(3.0D0), RRC, SSC, RSC)
       VALS3(1,:) = RR11
       VALS3(2,:) = RR21
       VALS3(3,:) = RRC
-      PTS3(1,:) = (/R1MITC, R1MITC/)
-      PTS3(2,:) = (/R2MITC, R1MITC/)
-      PTS3(3,:) = (/RCMITC, RCMITC/)
+      PTS3(1,:) = (/R1MITC, ZERO/)
+      PTS3(2,:) = (/R2MITC, ZERO/)
+      PTS3(3,:) = (/R1MITC, 1.0D0/DSQRT(3.0D0)/)
       CALL FIT_AFFINE36_T6(VALS3, PTS3, 1, A1, B1, C1V)
-
+      CALL NAT_MEM_ROWS_T6(XYZN, ZERO, R1MITC, RR11, SS11, RS11)
+      CALL NAT_MEM_ROWS_T6(XYZN, ZERO, R2MITC, RR12, SS12, RS12)
+      CALL NAT_MEM_ROWS_T6(XYZN, 1.0D0/DSQRT(3.0D0), R1MITC, RRC, SSC, RSC)
       VALS3(1,:) = SS11
       VALS3(2,:) = SS12
       VALS3(3,:) = SSC
-      PTS3(1,:) = (/R1MITC, R1MITC/)
-      PTS3(2,:) = (/R1MITC, R2MITC/)
-      PTS3(3,:) = (/RCMITC, RCMITC/)
+      PTS3(1,:) = (/ZERO, R1MITC/)
+      PTS3(2,:) = (/ZERO, R2MITC/)
+      PTS3(3,:) = (/1.0D0/DSQRT(3.0D0), R1MITC/)
       CALL FIT_AFFINE36_T6(VALS3, PTS3, 1, A2, B2, C2V)
-
-      VALS3(1,:) = QQ21
-      VALS3(2,:) = QQ12
-      VALS3(3,:) = QQC
+      CALL NAT_MEM_ROWS_T6(XYZN, R2MITC, R1MITC, RR21, SS21, RS21)
+      CALL NAT_MEM_ROWS_T6(XYZN, R1MITC, R2MITC, RR12, SS12, RS12)
+      CALL NAT_MEM_ROWS_T6(XYZN, R1MITC, R1MITC, RR11, SS11, RS11)
+      VALS3(1,:) = RR21 + SS21 - TWO*RS21
+      VALS3(2,:) = RR12 + SS12 - TWO*RS12
+      VALS3(3,:) = RR11 + SS11 - TWO*RS11
       PTS3(1,:) = (/R2MITC, R1MITC/)
       PTS3(2,:) = (/R1MITC, R2MITC/)
-      PTS3(3,:) = (/RCMITC, RCMITC/)
+      PTS3(3,:) = (/R1MITC, R1MITC/)
       CALL FIT_AFFINE36_T6(VALS3, PTS3, 2, A3, B3, C3V)
-
       BERR = A1 + B1*R + C1V*S
       BESS = A2 + B2*R + C2V*S
       BEQQ = A3 + B3*R + C3V*(ONE - R - S)
-      BERS = 0.5D0*(BERR + BESS) - BEQQ
-
+      BERS = 0.5D0*(BERR + BESS - BEQQ)
       CALL COV_MAP_T6(XYZN, R, S, E1F, E2F, G1, G2, C, JAC)
       CALL TENSOR_PHYS_T6(BERR(1:3), BESS(1:3), BERS(1:3), C, VP)
       BMOUT = ZERO
@@ -489,12 +508,14 @@
       DO II=1,6
          COL = (II-1)*6
          T0 = NORMS_LOC(II,:)
-         CALL TENSOR_PHYS_T6(DN(1,II)*T1, DN(2,II)*T2, 0.5D0*(DN(1,II)*T2 + DN(2,II)*T1), C, VP)
-         BBOUT(1:3,COL+1:COL+3) = VP
-         CALL CROSS3(T0, G1, CG1)
-         CALL CROSS3(T0, G2, CG2)
+!        v3: rotational block uses cross(g, t0_I); translational block is
+!        -a*t0_xi (sign-flipped vs v1) to pair with the coherent director sign.
+         CALL CROSS3(G1, T0, CG1)
+         CALL CROSS3(G2, T0, CG2)
          CALL TENSOR_PHYS_T6(DN(1,II)*CG1, DN(2,II)*CG2, 0.5D0*(DN(1,II)*CG2 + DN(2,II)*CG1), C, VP)
          BBOUT(1:3,COL+4:COL+6) = VP
+         CALL TENSOR_PHYS_T6(-DN(1,II)*T1, -DN(2,II)*T2, -0.5D0*(DN(1,II)*T2 + DN(2,II)*T1), C, VP)
+         BBOUT(1:3,COL+1:COL+3) = VP
       ENDDO
       END SUBROUTINE BB_T6_AT
 
@@ -511,9 +532,9 @@
       RHS(1,:) = BRT
       CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, R2MITC, ZERO,   BRT, BST, JAC)
       RHS(2,:) = BRT
-      CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, R1MITC, R1MITC, BRT, BST, JAC)
+      CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, ZERO, R1MITC, BRT, BST, JAC)
       RHS(3,:) = BST
-      CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, R1MITC, R2MITC, BRT, BST, JAC)
+      CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, ZERO, R2MITC, BRT, BST, JAC)
       RHS(4,:) = BST
       CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, RCSHEAR, RCSHEAR, BRT, BST, JAC)
       RHS(5,:) = BRT
@@ -526,8 +547,8 @@
       MAT8 = ZERO
       MAT8(1,:) = (/ONE, R1MITC, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO/)
       MAT8(2,:) = (/ONE, R2MITC, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO/)
-      MAT8(3,:) = (/ZERO, ZERO, ZERO, ONE, R1MITC, R1MITC, -(R1MITC*R1MITC), -(R1MITC*R1MITC)/)
-      MAT8(4,:) = (/ZERO, ZERO, ZERO, ONE, R1MITC, R2MITC, -(R1MITC*R1MITC), -(R1MITC*R2MITC)/)
+      MAT8(3,:) = (/ZERO, ZERO, ZERO, ONE, ZERO, R1MITC, ZERO, ZERO/)
+      MAT8(4,:) = (/ZERO, ZERO, ZERO, ONE, ZERO, R2MITC, ZERO, ZERO/)
       MAT8(5,:) = (/ONE, RCSHEAR, RCSHEAR, ZERO, ZERO, ZERO, RCSHEAR*RCSHEAR, RCSHEAR*RCSHEAR/)
       MAT8(6,:) = (/ZERO, ZERO, ZERO, ONE, RCSHEAR, RCSHEAR, -(RCSHEAR*RCSHEAR), -(RCSHEAR*RCSHEAR)/)
       MAT8(7,:) = (/ -ONE/SQRT2, -R2MITC/SQRT2, -R1MITC/SQRT2, ONE/SQRT2, R2MITC/SQRT2, R1MITC/SQRT2, &
@@ -582,8 +603,6 @@
       CALL SHAPE_T6(R, S, NVAL, DN)
       CALL SURFACE_BASIS_T6(XYZN, R, S, G1, G2, E1, E2, E3, JAC)
       T0 = MATMUL(NVAL, NORMS)
-      NM = VNORM(T0)
-      IF (NM > 1.0D-15) T0 = T0/NM
       BRT = ZERO
       BST = ZERO
       DO II=1,6
@@ -678,26 +697,40 @@
       REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), NORMS(6,3), R, S
       REAL(DOUBLE), INTENT(IN), OPTIONAL :: NORMS_EXT(6,3)
       REAL(DOUBLE), INTENT(OUT) :: BDOUT(1,36), JAC
-      REAL(DOUBLE) :: NVAL(6), DN(2,6), G1(3), G2(3), E1(3), E2(3), E3(3), A(2,2), AINV(2,2), DLOC(2,6)
-      REAL(DOUBLE) :: NORMS_LOC(6,3)
-      INTEGER(LONG) :: II, COL
+      REAL(DOUBLE) :: NVAL(6), DN(2,6), G1(3), G2(3), E1(3), E2(3), E3(3)
+            REAL(DOUBLE) :: DR(6), DS(6), A11, A22, A12, DET, AI11, AI22, AI12
+            REAL(DOUBLE) :: DXII, DYII
+            REAL(DOUBLE) :: NORMS_LOC(6,3)
+            INTEGER(LONG) :: II, COL
       NORMS_LOC = NORMS
       IF (PRESENT(NORMS_EXT)) NORMS_LOC = NORMS_EXT
       CALL SHAPE_T6(R, S, NVAL, DN)
       CALL SURFACE_BASIS_T6(XYZN, R, S, G1, G2, E1, E2, E3, JAC)
-      A(1,1) = DOT_PRODUCT(G1,E1)
-      A(1,2) = DOT_PRODUCT(G1,E2)
-      A(2,1) = DOT_PRODUCT(G2,E1)
-      A(2,2) = DOT_PRODUCT(G2,E2)
-      CALL INV2(A, AINV)
-      DLOC = MATMUL(AINV, DN)
-      BDOUT = ZERO
-      DO II=1,6
-         COL = (II-1)*6
-         BDOUT(1,COL+1:COL+3) = 0.5D0*(DLOC(1,II)*E2 - DLOC(2,II)*E1)
-         BDOUT(1,COL+4:COL+6) = BDOUT(1,COL+4:COL+6) - NVAL(II)*NORMS_LOC(II,:)
-      ENDDO
-      END SUBROUTINE BDRILL_T6_AT
+      !     MITC6_Tri_v4.py _compute_Bdrill (pointwise drilling)
+            A11 = DOT_PRODUCT(G1,G1); A22 = DOT_PRODUCT(G2,G2)
+            A12 = DOT_PRODUCT(G1,G2); DET = A11*A22 - A12*A12
+            IF (DABS(DET) <= 1.0D-30) THEN
+               DR = ZERO; DS = ZERO
+            ELSE
+               AI11 =  A22/DET; AI22 =  A11/DET; AI12 = -A12/DET
+               DO II=1,6
+                  DR(II) = AI11*DN(1,II) + AI12*DN(2,II)
+                  DS(II) = AI12*DN(1,II) + AI22*DN(2,II)
+               ENDDO
+            ENDIF
+            BDOUT = ZERO
+            DO II=1,6
+               DXII = DR(II)*DOT_PRODUCT(G1,E1) + DS(II)*DOT_PRODUCT(G2,E1)
+               DYII = DR(II)*DOT_PRODUCT(G1,E2) + DS(II)*DOT_PRODUCT(G2,E2)
+               COL = (II-1)*6
+               BDOUT(1,COL+1) = 0.5D0*(DXII*E2(1) - DYII*E1(1))
+               BDOUT(1,COL+2) = 0.5D0*(DXII*E2(2) - DYII*E1(2))
+               BDOUT(1,COL+3) = 0.5D0*(DXII*E2(3) - DYII*E1(3))
+               BDOUT(1,COL+4) = -NVAL(II)*E3(1)
+               BDOUT(1,COL+5) = -NVAL(II)*E3(2)
+               BDOUT(1,COL+6) = -NVAL(II)*E3(3)
+            ENDDO
+            END SUBROUTINE BDRILL_T6_AT
 
       SUBROUTINE CROSS3 ( A, B, C )
       REAL(DOUBLE), INTENT(IN)  :: A(3), B(3)

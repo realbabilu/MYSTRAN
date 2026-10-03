@@ -141,14 +141,18 @@
       num_pcomp_elems = 0                                  ! Remove lower case code when I fix engr force output for PCOMP's
       DO I=1,METYPE
          DO J=1,NELE
-            IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J) == 'QUADR   ') .OR.                      &
-               (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                                                      &
+            IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'TRIA6') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR.                &
+               (ETYPE(J) == 'QUADR   ') .OR. (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                   &
                (ETYPE(J)(1:5) == 'SHEAR') .OR. (ETYPE(J)(1:6) == 'USERIN')) THEN
                IF (ETYPE(J) == ELMTYP(I)) THEN
                   call is_elem_pcomp_props ( j )
                   if (pcomp_props == 'N') then
-                     IF ((FORC_LOC == 'CORNER  ') .OR.                                                                             &
-                         (ETYPE(J)(1:5) == 'QUAD8')) THEN
+                     IF (ETYPE(J)(1:5) == 'TRIA6') THEN
+! Retain nodal recovery internally for the native quadratic OP2 payload.
+                        NUM_PTS(I) = 7
+                     ELSE IF ((FORC_LOC == 'CORNER  ') .OR.                                                                             &
+                         (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                                          &
+                         (ETYPE(J)(1:5) == 'TRIA6')) THEN
                         NUM_PTS(I) = NUM_SEi(I)
                      ELSE
                         NUM_PTS(I) = 1
@@ -175,7 +179,7 @@
 !xx      ENDIF
 !xx   ENDDO
 
-      DO I=1,MAXREQ
+      DO I=1,MAXREQ*5
          DO J=1,MOGEL
             OGEL(I,J) = ZERO
          ENDDO
@@ -194,14 +198,14 @@ elems_3: DO J = 1,NELE
             if (pcomp_props == 'N') then
                EID   = EDAT(EPNT(J))
                TYPE  = ETYPE(J)
-               IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J) == 'QUADR   ') .OR.                   &
-                  (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                                                   &
+               IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'TRIA6') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR.          &
+                  (ETYPE(J) == 'QUADR   ') .OR. (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                 &
                   (ETYPE(J)(1:5) == 'SHEAR') .OR. (ETYPE(J)(1:6) == 'USERIN')) THEN
                   IF (ETYPE(J) == ELMTYP(I)) THEN
                      ELOUT_ELFE = IAND(ELOUT(J,INT_SC_NUM),IBIT(ELOUT_ELFE_BIT))
                      IF (ELOUT_ELFE > 0) THEN
-                        IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR. (ETYPE(J) == 'QUADR   ') .OR.          &
-                           (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                                          &
+                        IF((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'TRIA6') .OR. (ETYPE(J)(1:5) == 'QUAD4') .OR.  &
+                           (ETYPE(J) == 'QUADR   ') .OR. (ETYPE(J)(1:5) == 'QUAD8') .OR.                                       &
                            (ETYPE(J)(1:5) == 'SHEAR')) THEN
                            OPT(4) = 'Y'
                         ENDIF
@@ -224,6 +228,7 @@ elems_3: DO J = 1,NELE
                         ENDDO
 
                         STRESS_OUT(:,1) = STRESS_RAW(:,1)  ! Set STRAIN_OUT for NUM_PTS(I) = 1
+                        IF (TYPE(1:5) == 'TRIA6') STRESS_OUT(:,:) = STRESS_RAW(:,:)
                         DIRECT_SHELL_RECOVERY = ((TYPE == 'QUADR   ') .AND. ((QUADRTYP == 'DKM24EA ') .OR.                       &
                                                                               (QUADRTYP == 'DKM24AU ') .OR.                       &
                                                                               (QUADRTYP == 'SIMO    ') .OR.                       &
@@ -232,7 +237,8 @@ elems_3: DO J = 1,NELE
                                                ((TYPE == 'QUAD4   ') .AND. (QUAD4TYP == 'DKMQ20  '))
 
                         IF ((FORC_LOC == 'CORNER  ') .OR.                                                                          &
-                            (ETYPE(J)(1:5) == 'QUAD8')) THEN
+                            (ETYPE(J)(1:5) == 'QUAD8') .OR.                                                                         &
+                            (ETYPE(J)(1:5) == 'TRIA6')) THEN
 
                            IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
 
@@ -253,6 +259,7 @@ elems_3: DO J = 1,NELE
                                                            ! Extrapolate stress to corners
                               CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS(I), STRESS_OUT, STRESS_OUT_PCT_ERR,              &
                                 STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
+
 
                                                            ! Transfrom stress to element coordinate system
                               DO M=2,NUM_PTS(I)
@@ -278,7 +285,7 @@ elems_3: DO J = 1,NELE
                            DO K=1,ELGP
                               GID_OUT_ARRAY(NUM_OGEL_ROWS,K+1) = AGRID(K)
                            ENDDO
-                           IF ((ETYPE(J)(1:5) == 'TRIA3') .AND. (TRIA3TYP == 'DSG3  ')) THEN
+                           IF (((ETYPE(J)(1:5) == 'TRIA3') .OR. (ETYPE(J)(1:5) == 'TRIA6')) .AND. (TRIA3TYP == 'DSG3  ')) THEN
                               CALL ROTATE_DSG3_FORCE_ROW_TO_BASIC ( NUM_OGEL )
                            ENDIF
 
@@ -607,6 +614,8 @@ elems_3: DO J = 1,NELE
             ENDDO
          ENDDO
 
+! Print a surface block only when the current element family contributed rows.
+         IF (ANY(SUM_WT > ZERO)) THEN
          WRITE(F06,'(//,33X,A,I8)') 'F O R C E S   A T   G R I D   P O I N T S   - -   S U R F A C E', GP_SURFACE_IDS(SURF)
          WRITE(F06,'(A,22X,A,A1,8X,A)') '0', 'SURFACE X-AXIS X  NORMAL(Z-AXIS)  ', GP_SURFACE_NORMAL_MODE(SURF)(1:1),              &
                                         'REFERENCE COORDINATE SYSTEM FOR SURFACE DEFINITION CID        0'
@@ -620,6 +629,7 @@ elems_3: DO J = 1,NELE
          ENDDO
          WRITE(F06,*)
 
+         ENDIF
          DEALLOCATE(SUM_FORCE)
          DEALLOCATE(SUM_WT)
          DEALLOCATE(OUT_EIDS)

@@ -1,0 +1,51 @@
+--- before/python/test_patch2001_q8_t6_v4c.py
++++ after/python/test_patch2001_q8_t6_v4c.py
+@@ -302,41 +302,22 @@
+         MacNealQ8_1992_native_v3_drill, stress_q8, 'Q8',
+         NODE_Q8, CONN_Q8, BND_Q8, X0_Q8, Y0_Q8),
+ 
++    'SIMOT6': (
++        Simo1993_Tri6_ShellElement_v2, stress_t6, 'T6',
++        NODE_T6, CONN_T6, BND_T6, X0_T6, Y0_T6),
++
+     'MITC6': (
+-        MITC6_Tri_v1, stress_t6, 'T6',
+-        NODE_T6, CONN_T6, BND_T6, X0_T6, Y0_T6),
+-
+-    'MITC6v4': (
+         MITC6_Tri_v4, stress_t6, 'T6',
+         NODE_T6, CONN_T6, BND_T6, X0_T6, Y0_T6),
+ 
+-    'MacNeal_MH6T': (
+-        MacNeal_MH6T_Tri_v1, stress_t6, 'T6',
++    'MH6T': (
++        MacNeal_MH6T_Tri_v3, stress_t6, 'T6',
+         NODE_T6, CONN_T6, BND_T6, X0_T6, Y0_T6),
+ 
+-    'Rezaiee_v1': (
+-        Rezaiee2017_Tri6_ShellElement, stress_t6, 'T6',
+-        NODE_T6, CONN_T6, BND_T6, X0_T6, Y0_T6),
+-
+-    'Rezaiee_v3': (
++    'REZAIEE': (
+         Rezaiee2017_Tri6_ShellElement_v3, stress_t6, 'T6',
+         NODE_T6, CONN_T6, BND_T6, X0_T6, Y0_T6),
+-
+-    'MacNeal_MH6Tv3': (
+-        MacNeal_MH6T_Tri_v3, stress_t6, 'T6',
+-        NODE_T6, CONN_T6, BND_T6, X0_T6, Y0_T6),
+-
+-    'SimoT6v2': (
+-        Simo1993_Tri6_ShellElement_v2, stress_t6, 'T6',
+-        NODE_T6, CONN_T6, BND_T6, X0_T6, Y0_T6)
+-
+-
+-
+ }
+-if HAS_SIMO:
+-    REGISTRY['SimoT6'] = (
+-        Simo1993_Tri6_ShellElement_v1p8, stress_t6, 'T6',
+-        NODE_T6, CONN_T6, BND_T6, X0_T6, Y0_T6)
+ 
+ # ═══════════════════════════════════════════════════════════════════
+ # MAIN

@@ -1,0 +1,98 @@
+READ OP2 + CTRIA6 CHECKS PASS: C:\PROJECTAI\18a\test\t6_upgrade\stress_recovery\MH6T.OP2
+op2_results.force.ctria6_force[(2, 1, 1, 0, 0, '', '')]
+op2_results.stress.ctria6_stress[(1, 1, 1, 0, 0, '', '')]
+op2_results.stress.ctria6_stress[(2, 1, 1, 0, 0, '', '')]
+displacements[(1, 1, 1, 0, 0, '', '')]
+displacements[(2, 1, 1, 0, 0, '', '')]
+grid_point_surface_stresses[(1, 1, 1, 0, 600, '', '')]
+grid_point_surface_stresses[(2, 1, 1, 0, 600, '', '')]
+
+{
+  "stress_SC1": {
+    "element_type": 75,
+    "num_wide": 70,
+    "shape": [
+      1,
+      80,
+      8
+    ],
+    "elements": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "f06_samples": 80,
+    "max_f06_abs_error": 0.004565429687545475
+  },
+  "stress_SC2": {
+    "element_type": 75,
+    "num_wide": 70,
+    "shape": [
+      1,
+      80,
+      8
+    ],
+    "elements": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "f06_samples": 80,
+    "max_f06_abs_error": 4.590463638376452e-07
+  },
+  "force_SC2": {
+    "element_type": 75,
+    "num_wide": 38,
+    "shape": [
+      1,
+      40,
+      8
+    ],
+    "elements": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "f06_samples": 40,
+    "max_f06_abs_error": 4.163085007816552e-14
+  },
+  "GPSTRESS_600_SC1": {
+    "shape": [
+      1,
+      50,
+      8
+    ],
+    "f06_samples": 50,
+    "max_f06_abs_error": 0.0003740234374163265
+  },
+  "GPSTRESS_600_SC2": {
+    "shape": [
+      1,
+      50,
+      8
+    ],
+    "f06_samples": 50,
+    "max_f06_abs_error": 1.3465118353650496e-08
+  }
+}

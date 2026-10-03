@@ -1,0 +1,5 @@
+SIMOT6 native OES/OEF/OGS + F06 values PASS
+MITC6 native OES/OEF/OGS + F06 values PASS
+MH6T native OES/OEF/OGS + F06 values PASS
+REZAIEE native OES/OEF/OGS + F06 values PASS
+Siemens Nastran CTRIA6 table layout and element IDs MATCH

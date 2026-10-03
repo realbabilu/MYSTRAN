@@ -43,12 +43,12 @@
       USE CONSTANTS_1, ONLY           :  ZERO, HALF, ONE, THREE, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP, TRIA3TYP, TRIARTYP
+      USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP, QUAD8TYP, TRIA3TYP, TRIA6TYP, TRIARTYP
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRE
-      USE MODEL_STUF, ONLY            :  AGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
+      USE MODEL_STUF, ONLY            :  AGRID, BGRID, RGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
                                          ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, OGROUT, PCOMP_PROPS, PLY_NUM,   &
                                          STRESS, PBEAM_NSTATIONS, TE, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID, XEB
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, GPSTRESS_REQ
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, GPSTRESS_REQ, STRE_CORNER_REQ
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, SHELL_OUT_TE,                 &
                                          SHELL_STRESS_IN_LOCAL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRE, TXT_STRE
@@ -80,6 +80,7 @@
       INTEGER(LONG)                   :: NUM_OGEL_ROWS     ! No. elems processed prior to writing results to F06 file
       INTEGER(LONG)                   :: NUM_FROWS         ! No. elems processed for FEMAP
       INTEGER(LONG)                   :: NUM_OGEL          ! No. rows written to array OGEL prior to writing results to F06 file
+      INTEGER(LONG)                   :: NUM_ELEM          ! No. elements processed (for EID/GID storage)
 !                                                            (this can be > NUM_OGEL_ROWS since more than 1 row is written to OGEL
 !                                                            for ELFORCE(NODE) - elem nodal forces)
 
@@ -161,7 +162,12 @@
                          (ETYPE(J)(1:5) == 'PENTA') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'TETRA') .OR.                                                                          &
                          (ETYPE(J)(1:5) == 'QUAD8') .OR. (ETYPE(J)(1:5) == 'TRIA6')) THEN
-                        NUM_PTS_ELEM = NUM_SEi(I)
+                        IF (ETYPE(J)(1:5) == 'TRIA6') THEN
+! F06 selectors control printing; OP2 CTRIA6 requires center/corner samples.
+                           NUM_PTS_ELEM = 7
+                        ELSE
+                           NUM_PTS_ELEM = NUM_SEi(I)
+                        ENDIF
                      ELSE
                         NUM_PTS_ELEM = 1
                      ENDIF
@@ -177,7 +183,7 @@
          ENDDO
       ENDDO
 
-      DO I=1,MAXREQ
+      DO I=1,MAXREQ*5
          DO J=1,MOGEL
             OGEL(I,J) = ZERO
          ENDDO
@@ -196,6 +202,7 @@ reqs5:DO I=1,METYPE
          IF (NELREQ(I) == 0) CYCLE reqs5
          NUM_OGEL_ROWS = 0
          NUM_OGEL      = 0
+         NUM_ELEM      = 0
 
 elems_5: DO J = 1,NELE
 
@@ -230,7 +237,8 @@ elems_5: DO J = 1,NELE
                    ENDIF
 ! --- CBEAM_standard end --- !
                   SHELL_GPSTRESS_RECOVERY = GPSTRESS_REQ .AND.                                                                    &
-                     ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))
+                     ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR.                                                     &
+                      (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   '))
                    DO M=1,NUM_PTS_CUR
                       RECOVERY_POINT = M
                       IF (SHELL_GPSTRESS_RECOVERY .AND. (TYPE(1:5) == 'TRIA3') .AND. (NUM_SEi(I) == 1)) THEN
@@ -241,7 +249,7 @@ elems_5: DO J = 1,NELE
                    ENDDO
 
 ! --- cbeam_stations begin --- !
-                  IF (TYPE == 'BEAM    ') THEN
+                  IF ((TYPE == 'BEAM    ') .OR. (TYPE(1:5) == 'TRIA6')) THEN
                      STRESS_OUT(:,:) = STRESS_RAW(:,:)
                   ELSE
                      STRESS_OUT(:,1) = STRESS(:)         ! Set STRESS_OUT for NUM_PTS(I) = 1
@@ -303,7 +311,7 @@ elems_5: DO J = 1,NELE
                         STRESS(K) = STRESS_OUT(K,M)
                      ENDDO
 
-                     CALL CALC_ELEM_STRESSES ( MAXREQ, NUM_OGEL, J, 'Y', 'N' )
+                     CALL CALC_ELEM_STRESSES ( MAXREQ*5, NUM_OGEL, J, 'Y', 'N' )
                                                            ! If CB soln, write rows of OGEL, from CALC_ELEM_STRESSES, to OTM_STRE
                      IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
 
@@ -355,40 +363,41 @@ elems_5: DO J = 1,NELE
                      ENDIF
 
                      NUM_OGEL_ROWS = NUM_OGEL_ROWS + 1
-                     EID_OUT_ARRAY(NUM_OGEL_ROWS,1) = EID
-! --- cbeam_stations begin --- !
-                     IF (TYPE == 'BEAM    ') THEN
-                        CBEAM_XL_OUT(NUM_OGEL_ROWS) = CBEAM_ACTIVE_XL(M)
-                     ELSE
-                        CBEAM_XL_OUT(NUM_OGEL_ROWS) = ZERO
-                     ENDIF
-! --- cbeam_stations end --- !
-                     SHELL_OUT_TE(1:3,1:3,NUM_OGEL_ROWS) = ZERO
-                     SHELL_STRESS_IN_LOCAL(NUM_OGEL_ROWS) = .FALSE.
-                     IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR.                     &
-                         (TYPE == 'QUADR   ') .OR.                                                                                 &
-                         (TYPE(1:5) == 'QUAD8')) THEN
-                        SHELL_OUT_TE(1:3,1:3,NUM_OGEL_ROWS) = TE(1:3,1:3)
-                        CALL SET_SHELL_STRESS_BASIS_FOR_OUTPUT ( NUM_OGEL_ROWS, M )
-                     ENDIF
-                     GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
-                     IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ') .OR. SHELL_GPSTRESS_RECOVERY) THEN
-                        IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
-                           POLY_FIT_ERR(NUM_OGEL_ROWS)       = STRESS_OUT_PCT_ERR(M)
-                           POLY_FIT_ERR_INDEX(NUM_OGEL_ROWS) = STRESS_OUT_ERR_INDEX(M)
-                        ENDIF
-                     ENDIF
-                     DO K=1,ELGP
-                        GID_OUT_ARRAY(NUM_OGEL_ROWS,K+1) = AGRID(K)
-                     ENDDO
 
                   ENDDO do_stress_pts
+
+! --- Store EID/GID once per element (not per stress point) ---
+                  NUM_ELEM = NUM_ELEM + 1
+                  EID_OUT_ARRAY(NUM_ELEM,1) = EID
+                  IF (TYPE == 'BEAM    ') THEN
+                     CBEAM_XL_OUT(NUM_ELEM) = CBEAM_ACTIVE_XL(1)
+                  ELSE
+                     CBEAM_XL_OUT(NUM_ELEM) = ZERO
+                  ENDIF
+                  SHELL_OUT_TE(1:3,1:3,NUM_ELEM) = ZERO
+                  SHELL_STRESS_IN_LOCAL(NUM_ELEM) = .FALSE.
+                  IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR.                     &
+                      (TYPE == 'QUADR   ') .OR.                                                                                 &
+                      (TYPE(1:5) == 'QUAD8')) THEN
+                     SHELL_OUT_TE(1:3,1:3,NUM_ELEM) = TE(1:3,1:3)
+                     CALL SET_SHELL_STRESS_BASIS_FOR_OUTPUT ( NUM_ELEM, 1 )
+                  ENDIF
+                  GID_OUT_ARRAY(NUM_ELEM,1) = 0
+                  IF ((STRE_LOC == 'CORNER  ') .OR. (STRE_LOC == 'GAUSS   ') .OR. SHELL_GPSTRESS_RECOVERY) THEN
+                     IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+                        POLY_FIT_ERR(NUM_ELEM)       = STRESS_OUT_PCT_ERR(1)
+                        POLY_FIT_ERR_INDEX(NUM_ELEM) = STRESS_OUT_ERR_INDEX(1)
+                     ENDIF
+                  ENDIF
+                  DO K=1,ELGP
+                     GID_OUT_ARRAY(NUM_ELEM,K+1) = AGRID(K)
+                  ENDDO
 
                   IF (ETYPE(J)(1:5) /='USER1') THEN
                      IF (NUM_OGEL_ROWS == NELREQ(I)) THEN
                         CALL CHK_OGEL_ZEROS ( NUM_OGEL )
                         CALL SET_OES_TABLE_NAME(TYPE, TABLE_NAME, ITABLE)
-                        CALL WRITE_ELEM_STRESSES ( JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS_CUR, ITABLE )
+                        CALL WRITE_ELEM_STRESSES ( JVEC, NUM_ELEM, IHDR, NUM_PTS_CUR, ITABLE )
                         EXIT
                      ENDIF
                   ENDIF
@@ -1169,6 +1178,8 @@ elems_5: DO J = 1,NELE
 
       LOGICAL                         :: OK
       REAL(DOUBLE)                    :: BASIS(3,3)
+      REAL(DOUBLE)                    :: XYZ6(6,3), G1(3), G2(3), G3(3), NM
+      INTEGER(LONG)                   :: N
 
       IF (ROW_NUM <= 0) RETURN
 
@@ -1213,6 +1224,31 @@ elems_5: DO J = 1,NELE
       ELSE IF ((TYPE == 'QUADR   ') .AND. (QUADRTYP == 'Q4RS    ')) THEN
 ! Q4RS uses DKMQ24R recovery for stress output, so keep the element TE frame
 ! selected above instead of applying a second point-local frame transform.
+         RETURN
+      ELSE IF (TYPE(1:5) == 'TRIA6') THEN
+! T6 recovery uses the signed native centroid basis of the Python references.
+         DO N=1,6
+            XYZ6(N,:) = RGRID(BGRID(N),1:3)
+         ENDDO
+         G1 = MATMUL((/-ONE,ONE,ZERO,ZERO,4.0D0,-4.0D0/)/3.0D0,XYZ6)
+         G2 = MATMUL((/-ONE,ZERO,ONE,-4.0D0,4.0D0,ZERO/)/3.0D0,XYZ6)
+         G3 = (/G1(2)*G2(3)-G1(3)*G2(2), G1(3)*G2(1)-G1(1)*G2(3), G1(1)*G2(2)-G1(2)*G2(1)/)
+         NM = SQRT(SUM(G3*G3))
+         IF (NM > 1.0D-15) THEN
+            BASIS(3,:) = G3/NM
+            IF (ABS(BASIS(3,3)) > 1.0D-6 .AND. BASIS(3,3) < ZERO) BASIS(3,:) = -BASIS(3,:)
+            BASIS(1,:) = G1/SQRT(SUM(G1*G1))
+            BASIS(2,1) = BASIS(3,2)*BASIS(1,3)-BASIS(3,3)*BASIS(1,2)
+            BASIS(2,2) = BASIS(3,3)*BASIS(1,1)-BASIS(3,1)*BASIS(1,3)
+            BASIS(2,3) = BASIS(3,1)*BASIS(1,2)-BASIS(3,2)*BASIS(1,1)
+            SHELL_OUT_TE(:,:,ROW_NUM) = BASIS
+         ENDIF
+         SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
+         RETURN
+      ELSE IF ((TYPE(1:5) == 'QUAD8') .AND. (QUAD8TYP == 'SIMOQ8 ')) THEN
+! SIMOQ8 stress recovery produces stress in the element local frame; mark it
+! so GET_SURFACE_STRESS3 applies the TE rotation to global.
+         SHELL_STRESS_IN_LOCAL(ROW_NUM) = .TRUE.
          RETURN
       ENDIF
 

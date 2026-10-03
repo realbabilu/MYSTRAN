@@ -1153,6 +1153,7 @@ j_do2:            DO J=2,LMPCADDC
             MAX_STRESS_POINTS = NUM_SEi(I)
          ENDIF
       ENDDO
+      IF (NCTRIA6 > 0) MAX_STRESS_POINTS = MAX(MAX_STRESS_POINTS,6_LONG)
 
 ! **********************************************************************************************************************************
 

@@ -1,0 +1,1161 @@
+{
+  "date": "2026-10-03",
+  "timezone": "Asia/Jakarta",
+  "baseline": "931dde4df56d9c39b43d884bda941f7fd27c6036",
+  "head": "931dde4df56d9c39b43d884bda941f7fd27c6036",
+  "branch": "v18.00.a",
+  "remote": "https://github.com/realbabilu/MYSTRAN.git",
+  "tracked_modified_count": 38,
+  "tracked_modified": [
+    "Source/EMG/EMG4/CQUAD4_DKMQ20_RHR.f90",
+    "Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90",
+    "Source/EMG/EMG4/CQUAD4_SIMO1989.f90",
+    "Source/EMG/EMG4/CQUAD8_MACQ8D.f90",
+    "Source/EMG/EMG4/CQUADR_DKM24EA.f90",
+    "Source/EMG/EMG4/CQUADR_DKMQ24.f90",
+    "Source/EMG/EMG4/CQUADR_DKMQ24R.f90",
+    "Source/EMG/EMG4/CQUADR_MBP1C0.f90",
+    "Source/EMG/EMG4/CQUADR_Q4EASANS.f90",
+    "Source/EMG/EMG4/CQUADR_Q4RS.f90",
+    "Source/EMG/EMG4/CQUADR_SIMO1993.f90",
+    "Source/EMG/EMG4/CTRIA6_MH6T.f90",
+    "Source/EMG/EMG4/CTRIA6_MITC6.f90",
+    "Source/EMG/EMG4/CTRIA6_REZAIEE.f90",
+    "Source/EMG/EMG4/CTRIA6_SIMO1993.f90",
+    "Source/LK1/L1A-CC/CHK_CC_CMD_DESCRIBERS.f90",
+    "Source/LK1/L1A/LOADB.f90",
+    "Source/LK9/L91/WRITE_ELEM_ENGR_FORCE.f90",
+    "Source/LK9/L91/WRITE_ELEM_STRESSES.f90",
+    "Source/LK9/L92/ELEM_STRE_STRN_ARRAYS.f90",
+    "Source/LK9/L92/OFP1.f90",
+    "Source/LK9/L92/OFP2.f90",
+    "Source/LK9/L92/OFP3.f90",
+    "Source/LK9/L92/OFP3_ELFE_1D.f90",
+    "Source/LK9/L92/OFP3_ELFE_2D.f90",
+    "Source/LK9/L92/OFP3_STRE_NO_PCOMP.f90",
+    "Source/LK9/L92/OFP3_STRE_PCOMP.f90",
+    "Source/LK9/L92/OFP3_STRN_NO_PCOMP.f90",
+    "Source/LK9/L92/OFP3_STRN_PCOMP.f90",
+    "Source/LK9/L92/POLYNOM_FIT_STRE_STRN.f90",
+    "Source/LK9/L92/SHELL_STRESS_OUTPUTS.f90",
+    "Source/LK9/LINK9/ALLOCATE_LINK9_STUF.f90",
+    "Source/LK9/LINK9/MAXREQ_OGEL.f90",
+    "Source/Modules/CC_OUTPUT_DESCRIBERS.f90",
+    "Source/Modules/GPSTRESS_SURFACE_UTILS.f90",
+    "Source/Modules/MODEL_STUF.f90",
+    "Source/UTIL/OUTPUT2_WRITE_ELFORCE.f90",
+    "Source/UTIL/OUTPUT2_WRITE_STRESS.f90"
+  ],
+  "python_local_backup_verified": [
+    "battle_2_002_quadratic_clamped.py",
+    "battle_2_003_quadratic_curved.py",
+    "battle_2_004_twistedv2.py",
+    "battle_2_006_scordelisv2.py",
+    "compare_disp_v4c.py",
+    "compare_f06_vs_python.py",
+    "test_patch2001_q8_t6_v4c.py",
+    "test_quadraticv2a.py",
+    "test_result_2_001_t6_disp.py"
+  ],
+  "missing_historical_imports": [
+    "Simo1993_Q8_ShellElement_V2_MacNealPatched",
+    "Simo1993_Q8_ShellElement_v3",
+    "solver_f06_convergence"
+  ],
+  "tested_python_packages": {
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "matplotlib": "3.10.9",
+    "pyNastran": "1.4.1"
+  },
+  "files": [
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUAD4_DKMQ20_RHR.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUAD4_DKMQ20_RHR.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 32908,
+      "sha256": "83078d0fe012afc9c8de02b0680f1592b5793dac75b6196d86b3bed9d1a519ac"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 31134,
+      "sha256": "191c9f7c1a51f6555aafe0a7357e94ff02c35468e7089587f40eb133c82ae018"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUAD4_SIMO1989.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUAD4_SIMO1989.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 34899,
+      "sha256": "fc8fcd730d96d9cce192b6f81be7666784086961ae2f5a25a24a54c602f70133"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUAD8_MACQ8D.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUAD8_MACQ8D.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 18450,
+      "sha256": "7f1f58c71055baf3fe5a17d0e51791c9ad239ad8efa4d7a5c5ba85d2ab4f4375"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUADR_DKM24EA.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUADR_DKM24EA.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 42709,
+      "sha256": "64fafe15a01b2c17fb70000651feab11110e5ef8cefce7ce53100354be2199ca"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUADR_DKMQ24.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUADR_DKMQ24.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 33131,
+      "sha256": "9868f5bdbb229a1ea8932a0ce9698466b71a1e7cec1831f3438fdf98db9332c7"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUADR_DKMQ24R.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUADR_DKMQ24R.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 31773,
+      "sha256": "21317dfd6e21523806ecd5e8930e9c339011301136a70ab68593b58a41ad8f5e"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUADR_MBP1C0.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUADR_MBP1C0.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 38827,
+      "sha256": "da344750179c5205925852705a54c9e85de506ac7e96477b4b3721112f3df07b"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUADR_Q4EASANS.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUADR_Q4EASANS.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 35853,
+      "sha256": "c257a60587a82e235038308d34b0c7464df92d1f5eab338fdbb0c6843db66619"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUADR_Q4RS.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUADR_Q4RS.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 23283,
+      "sha256": "1a89774aa4a408fa6724346da04ad5d9ef2cc883986247c2dfe3d3e0d9f3aebb"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CQUADR_SIMO1993.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CQUADR_SIMO1993.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 35862,
+      "sha256": "c984861b824cd7fed6db1c9e108c7ed99832c674f81fd6c594f3a824fd06cf0b"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CTRIA6_MH6T.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CTRIA6_MH6T.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 27024,
+      "sha256": "528212a8afd39c222a49d85e807543bc4adf89e34aa24fe981ffa1c0400ee973"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CTRIA6_MITC6.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CTRIA6_MITC6.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 30762,
+      "sha256": "31c498e1f47f77853bfc13a6bee03addbffa88871b457409283995886e684668"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CTRIA6_REZAIEE.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CTRIA6_REZAIEE.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 31075,
+      "sha256": "a040a0a618c8c2980282f27b750a9425e937cac1dd84bac93064c51d0c900310"
+    },
+    {
+      "original": "MYSTRAN/Source/EMG/EMG4/CTRIA6_SIMO1993.f90",
+      "bundle_path": "files/Source/EMG/EMG4/CTRIA6_SIMO1993.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 24348,
+      "sha256": "2850abbf6bbcf0942ae9b793c3a26523c727979e48bf12d2e6cc7fcd4aadb240"
+    },
+    {
+      "original": "MYSTRAN/Source/LK1/L1A-CC/CHK_CC_CMD_DESCRIBERS.f90",
+      "bundle_path": "files/Source/LK1/L1A-CC/CHK_CC_CMD_DESCRIBERS.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 25110,
+      "sha256": "2fa7d3c8ab610dd8e1df92b4a53bed5c3389aa5bcedbd2bf293e3bf2e154e503"
+    },
+    {
+      "original": "MYSTRAN/Source/LK1/L1A/LOADB.f90",
+      "bundle_path": "files/Source/LK1/L1A/LOADB.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 57665,
+      "sha256": "794e8d48043362f4910d300f4df8993fcbe02226dcb43f777236502cb35ba527"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L91/WRITE_ELEM_ENGR_FORCE.f90",
+      "bundle_path": "files/Source/LK9/L91/WRITE_ELEM_ENGR_FORCE.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 49568,
+      "sha256": "5b8840dc48991b2852121e98e3ffa721c2884117bb01b810255bcfb723c611e4"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L91/WRITE_ELEM_STRESSES.f90",
+      "bundle_path": "files/Source/LK9/L91/WRITE_ELEM_STRESSES.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 114999,
+      "sha256": "db50a4a45812d8ccc4d757d522a70c156542bd7b33f153c651bd22bbb86e2e9f"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/ELEM_STRE_STRN_ARRAYS.f90",
+      "bundle_path": "files/Source/LK9/L92/ELEM_STRE_STRN_ARRAYS.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 27797,
+      "sha256": "b8939369c1db6b03b69b7d6dcdb327fa8c90ec45640479330934bf75dae5cf13"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/OFP1.f90",
+      "bundle_path": "files/Source/LK9/L92/OFP1.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 17536,
+      "sha256": "cf0f91b5d369ef59ee927c1a7e9bbbab89cd84c712a106f5a815723f54fa1ef4"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/OFP2.f90",
+      "bundle_path": "files/Source/LK9/L92/OFP2.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 37813,
+      "sha256": "edb855933e64761dabeb54625502f94b738ac8f59f9e1a2c78a9068c89902399"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/OFP3.f90",
+      "bundle_path": "files/Source/LK9/L92/OFP3.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 5127,
+      "sha256": "012f18af4cedce7db204cf0bba3b86bbb01debff9c8fd188f9c71399934c3f73"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/OFP3_ELFE_1D.f90",
+      "bundle_path": "files/Source/LK9/L92/OFP3_ELFE_1D.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 59607,
+      "sha256": "8fdf4c86ac4b9e466d73d9c7911743b4230a30f367cffe322870d0d20286e1dd"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/OFP3_ELFE_2D.f90",
+      "bundle_path": "files/Source/LK9/L92/OFP3_ELFE_2D.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 45755,
+      "sha256": "ccda298df1da9f96411c8b4b02574bb7d2bbd6d0a4a365c68c9dcdab0775d06f"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/OFP3_STRE_NO_PCOMP.f90",
+      "bundle_path": "files/Source/LK9/L92/OFP3_STRE_NO_PCOMP.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 73272,
+      "sha256": "b80a134fef12356372d6ac66ec728b3b94c7a60fcbc96f5b3c57c9bfaf03bf45"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/OFP3_STRE_PCOMP.f90",
+      "bundle_path": "files/Source/LK9/L92/OFP3_STRE_PCOMP.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 20755,
+      "sha256": "a268a26e9f24aa3d69c4f3248c6df486ed57157262a7ae004d916d4721ec5891"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/OFP3_STRN_NO_PCOMP.f90",
+      "bundle_path": "files/Source/LK9/L92/OFP3_STRN_NO_PCOMP.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 48027,
+      "sha256": "96e4d1b1cd8df6e69f27dfc783b1579e7d17a8c762861171b406a8878b11bfce"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/OFP3_STRN_PCOMP.f90",
+      "bundle_path": "files/Source/LK9/L92/OFP3_STRN_PCOMP.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 20807,
+      "sha256": "90d04607ca09b50f2031fb7ed2a0d5037f2ebdec25c1bd787b9cb437d985fe21"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/POLYNOM_FIT_STRE_STRN.f90",
+      "bundle_path": "files/Source/LK9/L92/POLYNOM_FIT_STRE_STRN.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 13190,
+      "sha256": "71dc77d03a1ef3892ffe0da5eb06e52403d6829516c09f96610dd9106d628d76"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/L92/SHELL_STRESS_OUTPUTS.f90",
+      "bundle_path": "files/Source/LK9/L92/SHELL_STRESS_OUTPUTS.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 14318,
+      "sha256": "85d61fc4fcb2361a842cb2b53fd042c9108d61df96c4d6ccd3c50ca7f597b346"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/LINK9/ALLOCATE_LINK9_STUF.f90",
+      "bundle_path": "files/Source/LK9/LINK9/ALLOCATE_LINK9_STUF.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 13853,
+      "sha256": "89c2891562f8ead28511b24f0e8cb946e0c50973db44396b0c18726287c62541"
+    },
+    {
+      "original": "MYSTRAN/Source/LK9/LINK9/MAXREQ_OGEL.f90",
+      "bundle_path": "files/Source/LK9/LINK9/MAXREQ_OGEL.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 22039,
+      "sha256": "0506e33c69d9d22bbf2cbf762ddf2a4ae6695ea6ef9a53d5340702254dcf0677"
+    },
+    {
+      "original": "MYSTRAN/Source/Modules/CC_OUTPUT_DESCRIBERS.f90",
+      "bundle_path": "files/Source/Modules/CC_OUTPUT_DESCRIBERS.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 8806,
+      "sha256": "6cada844caa91bd419628495b41acf25cbe009d7b82fccf79717bc5f6adb841c"
+    },
+    {
+      "original": "MYSTRAN/Source/Modules/GPSTRESS_SURFACE_UTILS.f90",
+      "bundle_path": "files/Source/Modules/GPSTRESS_SURFACE_UTILS.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 18814,
+      "sha256": "fb39bf68e877cdbe82ce8cb3f6ca51187f356e4e1fd4cba45674aea11ca286b3"
+    },
+    {
+      "original": "MYSTRAN/Source/Modules/MODEL_STUF.f90",
+      "bundle_path": "files/Source/Modules/MODEL_STUF.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 139270,
+      "sha256": "3af287fe48caa912131e6d4440b028acf0da9da3d491249bbb684cddb06eeea2"
+    },
+    {
+      "original": "MYSTRAN/Source/UTIL/OUTPUT2_WRITE_ELFORCE.f90",
+      "bundle_path": "files/Source/UTIL/OUTPUT2_WRITE_ELFORCE.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 9643,
+      "sha256": "922872ae996df1fc5c350a77b718c68a001acb37c52f440ead94247219e374c5"
+    },
+    {
+      "original": "MYSTRAN/Source/UTIL/OUTPUT2_WRITE_STRESS.f90",
+      "bundle_path": "files/Source/UTIL/OUTPUT2_WRITE_STRESS.f90",
+      "kind": "github-tracked-modified",
+      "provenance": "diff from 931dde4df56d9c39b43d884bda941f7fd27c6036",
+      "bytes": 15830,
+      "sha256": "67d201d7c53703cc92c7da567fbbdcef3fad73851986f0384e606a602dc3ceda"
+    },
+    {
+      "original": "python/Rezaiee2017_Tri6_v3.py",
+      "bundle_path": "validation/python/Rezaiee2017_Tri6_v3.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 15880,
+      "sha256": "537f955b75f420cf11fefc0bcf9a2b9c4e8d85925bf15db74c40df3b85611016"
+    },
+    {
+      "original": "python/core.py",
+      "bundle_path": "validation/python/core.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 28763,
+      "sha256": "e764392fa7ba5027abc5d5a91d970e70edc58c8e6900b165b1869283c9104d48"
+    },
+    {
+      "original": "python/MacNeal_MH6T_Tri_v3.py",
+      "bundle_path": "validation/python/MacNeal_MH6T_Tri_v3.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 14843,
+      "sha256": "b71756bdad08b41baf16942f6bef496c7de15444915aafe13de9705bffa8295f"
+    },
+    {
+      "original": "python/MITC6_Tri_v4.py",
+      "bundle_path": "validation/python/MITC6_Tri_v4.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 19919,
+      "sha256": "0fe54f66886c5c9eb9858a1ecbe22788f649524e79018da8d715833d82f0221f"
+    },
+    {
+      "original": "python/Simo1993_Tri6_ShellElement_v2.py",
+      "bundle_path": "validation/python/Simo1993_Tri6_ShellElement_v2.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 15800,
+      "sha256": "4acd2f57bba495bc6c709c5b9381bcfa4e5ea7d7631633d2a12db095babd86fa"
+    },
+    {
+      "original": "python/dump_python_debug.py",
+      "bundle_path": "validation/python/dump_python_debug.py",
+      "kind": "python-support",
+      "provenance": "updated during this session; no saved pre-edit baseline",
+      "bytes": 10337,
+      "sha256": "4ff52367660f817e307fef3d7a506aad2219fd02c073ef977d27abfccc9b02f3"
+    },
+    {
+      "original": "python/print_pernode_stress_2001_v3.py",
+      "bundle_path": "validation/python/print_pernode_stress_2001_v3.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 21578,
+      "sha256": "3f6dd2cbf19d823999542355196fe2928b116b0a2389d8cc8aae58a994468c82"
+    },
+    {
+      "original": "python/Simo1993_Tri6_ShellElement_v1p8.py",
+      "bundle_path": "validation/python/Simo1993_Tri6_ShellElement_v1p8.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 19100,
+      "sha256": "55f72993d14cb5b909c3347b3d986abd0533de31fe2569c53a0d559559abc9d1"
+    },
+    {
+      "original": "python/Rezaiee2017_Tri6_Final.py",
+      "bundle_path": "validation/python/Rezaiee2017_Tri6_Final.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 22081,
+      "sha256": "36b37a7c82edd65ac969679eb93c0dcb2ad289d98ca32b3c0aab8b7740c10b9c"
+    },
+    {
+      "original": "python/MITC6_Tri_v1.py",
+      "bundle_path": "validation/python/MITC6_Tri_v1.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 22496,
+      "sha256": "1e287e8779db430fe9f6c15ecc611768181a0b4bc7d89ecd58fa9a913d33a073"
+    },
+    {
+      "original": "python/KikuchiMacNeal_ANS8_v1.py",
+      "bundle_path": "validation/python/KikuchiMacNeal_ANS8_v1.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 11027,
+      "sha256": "63ea9f6bd44164514cd9cb9f21be24a7c55bb6d8e724d6951ea10752f9b56370"
+    },
+    {
+      "original": "python/macneal_kikuchi_shapefun.py",
+      "bundle_path": "validation/python/macneal_kikuchi_shapefun.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 6265,
+      "sha256": "fe85057d9fda6f6ad804f192560c11f37af1e629403044974d82653a992fee91"
+    },
+    {
+      "original": "python/ANS8_BDG6_ShellElement.py",
+      "bundle_path": "validation/python/ANS8_BDG6_ShellElement.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 14317,
+      "sha256": "3f80d21ea38d75c05f090f48bf562a0afc122db4a0fe2089b1beb20d5ed0cfe6"
+    },
+    {
+      "original": "python/KikuchiMacNeal_MITC8_v1.py",
+      "bundle_path": "validation/python/KikuchiMacNeal_MITC8_v1.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 9587,
+      "sha256": "d6c4b3c538048542557b3466109e252fd46ad127b5db92b2ad5904171452fa38"
+    },
+    {
+      "original": "python/MITC8_ShellElement_v1p2.py",
+      "bundle_path": "validation/python/MITC8_ShellElement_v1p2.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 18148,
+      "sha256": "0a84ba4d0eab999ccabee2296b17d2572bc78d3dc16cfcc1f1e658b7eae7d5cd"
+    },
+    {
+      "original": "python/Simo1993_Q8_ShellElement_v1p8_standalone.py",
+      "bundle_path": "validation/python/Simo1993_Q8_ShellElement_v1p8_standalone.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 25393,
+      "sha256": "cb9f56c36f17d6496c0c42a0e5015481ec94892a3a7a6816449110238463d9fa"
+    },
+    {
+      "original": "python/KikuchiMacNeal_Q8_ShellElement_v1.py",
+      "bundle_path": "validation/python/KikuchiMacNeal_Q8_ShellElement_v1.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 9832,
+      "sha256": "33f8fed3cdef3ffc238031ddb6bb883035b906d1c24ebefbfc40d5f755e9cdbe"
+    },
+    {
+      "original": "python/MacNealQ8_1992_native_v3_drill.py",
+      "bundle_path": "validation/python/MacNealQ8_1992_native_v3_drill.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 3008,
+      "sha256": "98bf6cfd8eb222055709d80ac794daba3888a4a5a7418c81251bb25fa8217d47"
+    },
+    {
+      "original": "python/MacNealQ8_1992_native_v2.py",
+      "bundle_path": "validation/python/MacNealQ8_1992_native_v2.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 8472,
+      "sha256": "3fbc2b6aa087044730de3aac7de4968435f21716d8868a252c038a2567c9b267"
+    },
+    {
+      "original": "python/MacNealQ8_1992_native.py",
+      "bundle_path": "validation/python/MacNealQ8_1992_native.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 13623,
+      "sha256": "5fe2db3276b7fc3abe10e4ef0525253dac465086549e933a2e0347abefeb0b6f"
+    },
+    {
+      "original": "python/test_result_2_001_t6_disp.py",
+      "bundle_path": "validation/python/test_result_2_001_t6_disp.py",
+      "kind": "python-support",
+      "provenance": "changed against saved pre-alignment local backup (not GitHub history)",
+      "bytes": 12943,
+      "sha256": "34c188d6d39f1288c24cae9969ee8504114b28e72c503d7ff5dfc72ba9df3f39"
+    },
+    {
+      "original": "python/compare_f06_vs_python.py",
+      "bundle_path": "validation/python/compare_f06_vs_python.py",
+      "kind": "python-support",
+      "provenance": "changed against saved pre-alignment local backup (not GitHub history)",
+      "bytes": 27715,
+      "sha256": "45d69b1a5af2c852df6c8bf3f5f290c313b372f128ea8bed4a09c0b16ae2263e"
+    },
+    {
+      "original": "python/compare_disp_v4c.py",
+      "bundle_path": "validation/python/compare_disp_v4c.py",
+      "kind": "python-support",
+      "provenance": "changed against saved pre-alignment local backup (not GitHub history)",
+      "bytes": 5764,
+      "sha256": "8e2673801048ac3df31e57e6c3ac019ce049e01b8e72cb228106b84a41883681"
+    },
+    {
+      "original": "python/test_patch2001_q8_t6_v4c.py",
+      "bundle_path": "validation/python/test_patch2001_q8_t6_v4c.py",
+      "kind": "python-support",
+      "provenance": "changed against saved pre-alignment local backup (not GitHub history)",
+      "bytes": 22906,
+      "sha256": "a34aa4d6fdabe8d2217fca29b930cf7efa6df672743e33366798a05e1e9c5dab"
+    },
+    {
+      "original": "python/MacNeal_MH6T_Tri_v1.py",
+      "bundle_path": "validation/python/MacNeal_MH6T_Tri_v1.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 23286,
+      "sha256": "bb6dee69ff490dfdbdb40b86e69d3aa256f52815afbdee5846b8822527611976"
+    },
+    {
+      "original": "python/test_quadraticv2a.py",
+      "bundle_path": "validation/python/test_quadraticv2a.py",
+      "kind": "python-support",
+      "provenance": "changed against saved pre-alignment local backup (not GitHub history)",
+      "bytes": 47139,
+      "sha256": "94f0c173df018ba3d99f47e6609e84808e062af08c096a92a0a7bbd63b4441db"
+    },
+    {
+      "original": "python/MITC6_Tri_v0.py",
+      "bundle_path": "validation/python/MITC6_Tri_v0.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 19787,
+      "sha256": "7e493f23062696327bbc37f7cc553a73a8fc5be35680c820635de49126f86c41"
+    },
+    {
+      "original": "python/Simo1993_Q8_ShellElement_v11_standalone.py",
+      "bundle_path": "validation/python/Simo1993_Q8_ShellElement_v11_standalone.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 31690,
+      "sha256": "2da0431283ae2570efdeb19977844251552fcb5860784593d0ce7a0f3ad4672e"
+    },
+    {
+      "original": "python/Simo1993_Q8_ShellElement_v10_standalone.py",
+      "bundle_path": "validation/python/Simo1993_Q8_ShellElement_v10_standalone.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 25774,
+      "sha256": "3fdc392008b04231c3f83c4c51f45098e061e8194d0bddc5ced595c69bbaf723"
+    },
+    {
+      "original": "python/HBQ8_ShellElement.py",
+      "bundle_path": "validation/python/HBQ8_ShellElement.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 8336,
+      "sha256": "2190eee27af0d53c03a1b772a04123917580fae3817d16d36d842a52c0d1a252"
+    },
+    {
+      "original": "python/battle_2_006_scordelisv2.py",
+      "bundle_path": "validation/python/battle_2_006_scordelisv2.py",
+      "kind": "python-support",
+      "provenance": "changed against saved pre-alignment local backup (not GitHub history)",
+      "bytes": 14504,
+      "sha256": "4d3726b8dfd6b3b5bb4fb6dd7d79e5cb45c51a9e785c3b32abedca561a22db4b"
+    },
+    {
+      "original": "python/element_adapters.py",
+      "bundle_path": "validation/python/element_adapters.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 12750,
+      "sha256": "8514146a134775d1b0ebb58d6670636dee3efa70a4268254b1ab71de87ddf806"
+    },
+    {
+      "original": "python/MITC8D_ShellElement.py",
+      "bundle_path": "validation/python/MITC8D_ShellElement.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 2321,
+      "sha256": "0211c5c88a175c60c0e91fca9d7fe1d5cb7bdcbf5ee0f1f6c1e391cd80a2d94a"
+    },
+    {
+      "original": "python/battle_2_004_twistedv2.py",
+      "bundle_path": "validation/python/battle_2_004_twistedv2.py",
+      "kind": "python-support",
+      "provenance": "changed against saved pre-alignment local backup (not GitHub history)",
+      "bytes": 11455,
+      "sha256": "a21052d7749d2d28b8754b013154f33d26a344b2a1f1190ee2d126d9304e7237"
+    },
+    {
+      "original": "python/KikuchiMacNeal_HBQ8_v1.py",
+      "bundle_path": "validation/python/KikuchiMacNeal_HBQ8_v1.py",
+      "kind": "python-support",
+      "provenance": "workspace reference/dependency snapshot; no GitHub baseline for this sibling file",
+      "bytes": 5102,
+      "sha256": "45be2aef53bb3e201a1870d9bd55a354b92d53341e73f2abf13bdc5ba0cc72af"
+    },
+    {
+      "original": "python/battle_2_003_quadratic_curved.py",
+      "bundle_path": "validation/python/battle_2_003_quadratic_curved.py",
+      "kind": "python-support",
+      "provenance": "changed against saved pre-alignment local backup (not GitHub history)",
+      "bytes": 22994,
+      "sha256": "90373f3786c2d3f9cd9f32d233eaad637310e6d6e14cd792fb8b1c96b275210d"
+    },
+    {
+      "original": "python/battle_2_002_quadratic_clamped.py",
+      "bundle_path": "validation/python/battle_2_002_quadratic_clamped.py",
+      "kind": "python-support",
+      "provenance": "changed against saved pre-alignment local backup (not GitHub history)",
+      "bytes": 31470,
+      "sha256": "23fb6f253de42f1468ba2525498022dc5ec900ab4879a628c4c048ea062c8d84"
+    },
+    {
+      "original": "test/t6_displacement_gate.py",
+      "bundle_path": "validation/test/t6_displacement_gate.py",
+      "kind": "validation-runner",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 5329,
+      "sha256": "46ac62233c7613ad8f3f99c2c5cdcc5721326a5fbcee4b77c33a38dc8184250a"
+    },
+    {
+      "original": "test/t6_stress_gate.py",
+      "bundle_path": "validation/test/t6_stress_gate.py",
+      "kind": "validation-runner",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 3626,
+      "sha256": "58dce47ae0cfc464baa5d9c5f710ea2cac5b344ed6508473fcc433a9fb823acf"
+    },
+    {
+      "original": "test/t6_output_selection_gate.py",
+      "bundle_path": "validation/test/t6_output_selection_gate.py",
+      "kind": "validation-runner",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 2094,
+      "sha256": "9af07059148b505ce4941b409e7996300b869b7f935146a3c8b48f691c33e36a"
+    },
+    {
+      "original": "test/verify_final_t6_debug.py",
+      "bundle_path": "validation/test/verify_final_t6_debug.py",
+      "kind": "validation-runner",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 1564,
+      "sha256": "ec8acd57b1585336bc25f1d71e635e544cfc465468695dd9abdceb9059e07c37"
+    },
+    {
+      "original": "test/read_t6_op2.py",
+      "bundle_path": "validation/test/read_t6_op2.py",
+      "kind": "validation-runner",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 3166,
+      "sha256": "b47edc0af4e5c8d1ac842bc42d7c7b3293ea76ef775040b56500b9638280c227"
+    },
+    {
+      "original": "test/check_t6_op2_reference.py",
+      "bundle_path": "validation/test/check_t6_op2_reference.py",
+      "kind": "validation-runner",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 1581,
+      "sha256": "e84eb288242c8e8b3155c7122180f27830d0805af7fedc9a21069652ead29583"
+    },
+    {
+      "original": "test/check_duel3a_mixed_t6.py",
+      "bundle_path": "validation/test/check_duel3a_mixed_t6.py",
+      "kind": "validation-runner",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 2314,
+      "sha256": "d1e5f4e4fc702db2d4da12496d08f8f59e25691f3791ccfc40da95988c9fcf4a"
+    },
+    {
+      "original": "test/prepare_op2_reference.py",
+      "bundle_path": "validation/test/prepare_op2_reference.py",
+      "kind": "validation-runner",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 874,
+      "sha256": "55d06241b6353a1f946be2217eaeb93687d5665d62967e9e427ecf3c48fc530b"
+    },
+    {
+      "original": "test/duel3a.dat",
+      "bundle_path": "validation/test/duel3a.dat",
+      "kind": "input-deck",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 8625,
+      "sha256": "aab9f13f6cb491efccbf1e97861ddd353960644303f8c454a26539a73264176a"
+    },
+    {
+      "original": "test/duel3a_simo_1.dat",
+      "bundle_path": "validation/test/duel3a_simo_1.dat",
+      "kind": "input-deck",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 2364,
+      "sha256": "7174f009fcf8688a75d1d7accb8cbe24376383ca501e9fb94a5ed1131ff4ff4b"
+    },
+    {
+      "original": "test/duel3a_mitc6_1.dat",
+      "bundle_path": "validation/test/duel3a_mitc6_1.dat",
+      "kind": "input-deck",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 2482,
+      "sha256": "624ea6a6b7e340d9532f041af1e2f3f33ec07b81648678b7f9d2d7a0e61f00c8"
+    },
+    {
+      "original": "test/duel3a_mh6t_1.dat",
+      "bundle_path": "validation/test/duel3a_mh6t_1.dat",
+      "kind": "input-deck",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 2481,
+      "sha256": "739aac0e3b03cabbefbb6f75560ea7faeded9504b481e28ab781742d8f3642e6"
+    },
+    {
+      "original": "test/duel3a_rezaiee.dat",
+      "bundle_path": "validation/test/duel3a_rezaiee.dat",
+      "kind": "input-deck",
+      "provenance": "sibling test directory outside the GitHub working tree",
+      "bytes": 2360,
+      "sha256": "a4d1b0665e076174239e6a2fb510c6fd6fdb840bfe82501177b29c10ad12dbda"
+    },
+    {
+      "original": "test/compare_f06_vs_python.py",
+      "bundle_path": "validation/test/compare_f06_vs_python.py",
+      "kind": "historical-helper",
+      "provenance": "legacy sibling copy; active comparator is validation/python/compare_f06_vs_python.py",
+      "bytes": 9069,
+      "sha256": "beec66d63f06247e46708a1d4ae72a5784e59921989782f5b924e6c2fa4b0ec3"
+    },
+    {
+      "original": "test/T6_UPGRADE_VALIDATION_2026-10-03.md",
+      "bundle_path": "evidence/T6_UPGRADE_VALIDATION_2026-10-03.md",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 4717,
+      "sha256": "f8c83dae67c20df64d50c474cb9ec1fbe50ad34b8bb62a3bd0e98d31c11b8da7"
+    },
+    {
+      "original": "test/T6_OP2_VALIDATION_2026-10-03.md",
+      "bundle_path": "evidence/T6_OP2_VALIDATION_2026-10-03.md",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 4167,
+      "sha256": "8390bf49a5e1f5a5bb0209099ef5f2fcaa053c73a58a530c7678e8dc673dc3c3"
+    },
+    {
+      "original": "test/CTRIA6_SIMO_MITC_RESUME.md",
+      "bundle_path": "evidence/CTRIA6_SIMO_MITC_RESUME.md",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 8484,
+      "sha256": "29b80ffce2745b38ae6a3ae1f9137e190bbb61571e878ffbc99d7a8e69b2b8b4"
+    },
+    {
+      "original": "test/t6_upgrade/displacement_refined/results.json",
+      "bundle_path": "evidence/t6_upgrade/displacement_refined/results.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 45656,
+      "sha256": "49bf8491861f0614a67a7347080f479403fe193cb383a95be01eed8fe1dd6c5e"
+    },
+    {
+      "original": "test/t6_upgrade/recovery_final/results.json",
+      "bundle_path": "evidence/t6_upgrade/recovery_final/results.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 45612,
+      "sha256": "c5def2109ec271d8d848b08e76f952eecfd7e4b2d1cb66d26e8ff2e7a23aabb4"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/results.json",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/results.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 3002,
+      "sha256": "fb89f9392ed5f502ad411e1fa7937bda3c5fbbe90977228608f2324b92a84691"
+    },
+    {
+      "original": "test/t6_upgrade/output_selection/results.json",
+      "bundle_path": "evidence/t6_upgrade/output_selection/results.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 7251,
+      "sha256": "80f118bdb2e810234dc5771f8355544cc7c885fabe2564ef00c01cc3caf98c9d"
+    },
+    {
+      "original": "test/t6_upgrade/op2_validation.txt",
+      "bundle_path": "evidence/t6_upgrade/op2_validation.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 237,
+      "sha256": "8a89f8215cca57787bbf16f090464efcdbf394172bf64f5a4033f09d345fd6fd"
+    },
+    {
+      "original": "test/t6_upgrade/debug_validation.txt",
+      "bundle_path": "evidence/t6_upgrade/debug_validation.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 479,
+      "sha256": "437e0d21174765198fe009a6271aef9b2c61adcf21e2e883ea1d3087c0c2423f"
+    },
+    {
+      "original": "test/t6_upgrade/recovery_build.log",
+      "bundle_path": "evidence/t6_upgrade/recovery_build.log",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2054,
+      "sha256": "4dcaec665ef81e0cd4e808300eb181b40d56c6612a72fb5ae5112cc4389652b7"
+    },
+    {
+      "original": "test/t6_upgrade/op2_build.log",
+      "bundle_path": "evidence/t6_upgrade/op2_build.log",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2585,
+      "sha256": "82129c310605230ae015811038fc6c82e127ba1fcfb0c724c8b5166809ca2997"
+    },
+    {
+      "original": "test/t6_upgrade/force_header_build.log",
+      "bundle_path": "evidence/t6_upgrade/force_header_build.log",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2578,
+      "sha256": "460985a6cb8c1fe5c5bdc2e6719055184e5672c23d01f2597720611af73941d6"
+    },
+    {
+      "original": "test/duel3a.pynastran.json",
+      "bundle_path": "evidence/duel3a.pynastran.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1315,
+      "sha256": "b1c3db40a0a67d71c999063787c5ff35c1ca41aec244f1275153e63949cf471c"
+    },
+    {
+      "original": "test/duel3a_pynastran.txt",
+      "bundle_path": "evidence/duel3a_pynastran.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2836,
+      "sha256": "482f055694981f5aa51f95c8d12c85ed2d554fde4bbcebdc4877e68eb2150e05"
+    },
+    {
+      "original": "test/duel3a_run_latest.compare.txt",
+      "bundle_path": "evidence/duel3a_run_latest.compare.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 27349,
+      "sha256": "8daacc67ad46a85806491c9a9d09dae218eef350753b88d3a267bba2474e0873"
+    },
+    {
+      "original": "test/duel3a_force_header.stdout.txt",
+      "bundle_path": "evidence/duel3a_force_header.stdout.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 18055,
+      "sha256": "e4b2c0b2555000c1d794bcc1d03ab147de9daca756b9f0afdf0ef52ba1acf203"
+    },
+    {
+      "original": "test/t6_upgrade/op2_reference/nastran_t6.dat",
+      "bundle_path": "evidence/t6_upgrade/op2_reference/nastran_t6.dat",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2515,
+      "sha256": "23e1eae4bdfac35d3f75a21440e2cb7217a9c9b7d12f7a72582285d65eafb82a"
+    },
+    {
+      "original": "test/t6_upgrade/op2_reference/mystran_t6.dat",
+      "bundle_path": "evidence/t6_upgrade/op2_reference/mystran_t6.dat",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2586,
+      "sha256": "2011ca146f6158306f5ce21a20bdf7c5327822b4abb5b1ee8e46db66ad3d253f"
+    },
+    {
+      "original": "test/t6_upgrade/op2_reference/nastran_t6.pynastran.json",
+      "bundle_path": "evidence/t6_upgrade/op2_reference/nastran_t6.pynastran.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 938,
+      "sha256": "06c6459406c8c5d2577ae60c20bd442bf480df48271695a3c318da14da06202a"
+    },
+    {
+      "original": "test/t6_upgrade/op2_reference/mystran_t6.pynastran.json",
+      "bundle_path": "evidence/t6_upgrade/op2_reference/mystran_t6.pynastran.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1000,
+      "sha256": "cbd070e5a099c0505b44144d0eaec32eaf69c3c0422e29905b2b2c4d8e3a41a2"
+    },
+    {
+      "original": "test/t6_upgrade/op2_reference/nastran_t6.stdout.txt",
+      "bundle_path": "evidence/t6_upgrade/op2_reference/nastran_t6.stdout.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 310,
+      "sha256": "1a849a2aabccf16960835005c6ace5d5ad6c4bf702f6fbfa976faccce20586a9"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/SIMOT6.dat",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/SIMOT6.dat",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2515,
+      "sha256": "7d3ff2c48760cd13f5e8d47e161c51e64e2f3dc2cc6ebb787d14afd5cb64285a"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/SIMOT6.compare.txt",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/SIMOT6.compare.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 54127,
+      "sha256": "3042a2e3f0a79f7df2e44f2c2279b6eb9127ee7dc5aca03bb3f53c1daa81d72f"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/SIMOT6.pynastran.json",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/SIMOT6.pynastran.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1315,
+      "sha256": "d8d9ac45a1a91983e16f5c576110962d60bf5f3e51d529d2f34f58d0df1149b3"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/SIMOT6.pynastran.txt",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/SIMOT6.pynastran.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1778,
+      "sha256": "3a9e030c028e0542664052e160a74ca3b45d1d6b655039bca5afeae588d6a0f5"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/MITC6.dat",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/MITC6.dat",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2514,
+      "sha256": "cb1fd2e8dde433087c02144db08e3efa096a70f48899da7f9682e4f05b0e30ee"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/MITC6.compare.txt",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/MITC6.compare.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 54109,
+      "sha256": "8bd019f6e160841f6926dd73f1582d01071acdc8d86afe8aa0d22d34d46306eb"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/MITC6.pynastran.json",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/MITC6.pynastran.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1315,
+      "sha256": "d8d9ac45a1a91983e16f5c576110962d60bf5f3e51d529d2f34f58d0df1149b3"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/MITC6.pynastran.txt",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/MITC6.pynastran.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1777,
+      "sha256": "00d757abf85b19a9b5f11bdfd416b3aa9c5337ca358e58f311bd282b6729591a"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/MH6T.dat",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/MH6T.dat",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2513,
+      "sha256": "ec48dc4928f82abcdb4038e88f9b7a21575ae17dea586774bcac74652aafdf5f"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/MH6T.compare.txt",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/MH6T.compare.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 54091,
+      "sha256": "f25edccd7e1f26c171144a5c30cf957e21fb710f7f65bed5421443a93c818d1b"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/MH6T.pynastran.json",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/MH6T.pynastran.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1315,
+      "sha256": "d8d9ac45a1a91983e16f5c576110962d60bf5f3e51d529d2f34f58d0df1149b3"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/MH6T.pynastran.txt",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/MH6T.pynastran.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1776,
+      "sha256": "08304d5ea5ddc56d721a832ee249ed437857e821616285302b161290f44bdd04"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/REZAIEE.dat",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/REZAIEE.dat",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 2516,
+      "sha256": "bb625be183788a0bc1f02b298c584ea3f5b01b0003ff2fb4808b411ad00bb532"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/REZAIEE.compare.txt",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/REZAIEE.compare.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 54145,
+      "sha256": "dd7bdbb94d7d143e59d4a58cae5a2b482c0469bd97a6966ef8d8b6c848b1045d"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/REZAIEE.pynastran.json",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/REZAIEE.pynastran.json",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1315,
+      "sha256": "d8d9ac45a1a91983e16f5c576110962d60bf5f3e51d529d2f34f58d0df1149b3"
+    },
+    {
+      "original": "test/t6_upgrade/stress_recovery/REZAIEE.pynastran.txt",
+      "bundle_path": "evidence/t6_upgrade/stress_recovery/REZAIEE.pynastran.txt",
+      "kind": "validation-evidence",
+      "provenance": "recorded local run; not a new claim of validation",
+      "bytes": 1779,
+      "sha256": "47385ac36ba5c71e9d1051ed94b5ec4ee394c7f24e1e4b612e054f9957edbf4b"
+    },
+    {
+      "original": "test/upgrade_t6_formula.py",
+      "bundle_path": "history/one_time_migrations/upgrade_t6_formula.py",
+      "kind": "one-time-history",
+      "provenance": "migration record; do not rerun",
+      "bytes": 5316,
+      "sha256": "4f003c67a40ecc40a86d23160d774218710ab466071d1d7e25c367942fa88618"
+    },
+    {
+      "original": "test/refine_t6_formula.py",
+      "bundle_path": "history/one_time_migrations/refine_t6_formula.py",
+      "kind": "one-time-history",
+      "provenance": "migration record; do not rerun",
+      "bytes": 771,
+      "sha256": "806a65105f8ba131c9080ec77d93c34a43c8db9534c3e9b7ce2ac5a3c154d709"
+    },
+    {
+      "original": "test/upgrade_t6_recovery.py",
+      "bundle_path": "history/one_time_migrations/upgrade_t6_recovery.py",
+      "kind": "one-time-history",
+      "provenance": "migration record; do not rerun",
+      "bytes": 3455,
+      "sha256": "e26757d2dc3b6a3c6d3ae7ad4de527e1ecf57c29e72b0db84281c9d19803ea4a"
+    },
+    {
+      "original": "test/finalize_t6_recovery.py",
+      "bundle_path": "history/one_time_migrations/finalize_t6_recovery.py",
+      "kind": "one-time-history",
+      "provenance": "migration record; do not rerun",
+      "bytes": 2384,
+      "sha256": "d60f0cc680a7b20dc3ed759127c6d95fdc6d6ddbc98af1589bce7c35a03bf672"
+    },
+    {
+      "original": "test/remove_temporary_solver_debug.py",
+      "bundle_path": "history/one_time_migrations/remove_temporary_solver_debug.py",
+      "kind": "one-time-history",
+      "provenance": "migration record; do not rerun",
+      "bytes": 1781,
+      "sha256": "30026c0eeacab4218fafd9b6471109b8f003b6e98e0e401fb75a9900240c33fa"
+    },
+    {
+      "original": "test/fix_ogs_surface_tables.py",
+      "bundle_path": "history/one_time_migrations/fix_ogs_surface_tables.py",
+      "kind": "one-time-history",
+      "provenance": "migration record; do not rerun",
+      "bytes": 3009,
+      "sha256": "3b52e5a173363c4ab36d4f540d6ccbd5f80f5f023694641f0c9146f7be2b9a2a"
+    },
+    {
+      "original": "test/restore_q8_scope.py",
+      "bundle_path": "history/one_time_migrations/restore_q8_scope.py",
+      "kind": "one-time-history",
+      "provenance": "migration record; do not rerun",
+      "bytes": 855,
+      "sha256": "662f510ffbf69cb74040698ceb6ae9066a653334faee545ae3007c2f5599cbf0"
+    },
+    {
+      "original": "align_t6_tests.py",
+      "bundle_path": "history/one_time_migrations/align_t6_tests.py",
+      "kind": "one-time-history",
+      "provenance": "historical helper, superseded by final gates",
+      "bytes": 4470,
+      "sha256": "a7140c4b89c2157f1675f8178fcf71476c60a1d3d0bb274c6007f80d48e6d3ca"
+    },
+    {
+      "original": "verify_t6_alignment.py",
+      "bundle_path": "history/one_time_migrations/verify_t6_alignment.py",
+      "kind": "one-time-history",
+      "provenance": "historical helper, superseded by final gates",
+      "bytes": 2496,
+      "sha256": "a3e2616cdda6f0b4d731d6fde316e8b4cef9276b59b77f19a31385fca2a985d3"
+    },
+    {
+      "original": "test/package_codex_changes.py",
+      "bundle_path": "tools/build_bundle.py",
+      "kind": "packaging-tool",
+      "provenance": "bundle generator",
+      "bytes": 11356,
+      "sha256": "84417228dacc2c76e6084468717a77a676082dd2f0bf1587c7e3c855355d6987"
+    }
+  ]
+}

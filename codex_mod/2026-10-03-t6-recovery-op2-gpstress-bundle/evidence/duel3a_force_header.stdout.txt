@@ -1,0 +1,470 @@
+ Optional Initialization file: 
+ MYSTRAN.INI
+ does not exist. Internal defaults will be used instead.                        
+ If you want to use the INI file, see the MYSTRAN Installation and Run Manual   
+
+ MYSTRAN Version 18.0.A   JUL 19 2026 MYSTRAN developed by Dr Bill Case
+
+ >> MYSTRAN BEGIN  : 10/ 3/2026 at 15:44: 9.802. The input file is:
+    test\duel3a.dat
+
+ >> LINK  0 BEGIN
+  0/DETERMINE ARRAY SIZES - CASE CONTROL                            15:44: 9.813
+  0/DETERMINE ARRAY SIZES - BULK DATA                               15:44: 9.813
+  0/READ EXEC CONTROL DECK                                          15:44: 9.816
+  0/ALLOCATE MEMORY FOR SOME MODEL DATA ARRAYS                      15:44: 9.816
+  0/READ CASE CONTROL DECK                                          15:44: 9.817
+  0/READ BULK DATA DECK                                             15:44: 9.820
+  0/SORT AND CHECK ELEMENTS                                         15:44: 9.828
+  0/ELEM PROCESSOR                                                  15:44: 9.829
+  0/GRID PROCESSOR                                                  15:44: 9.829
+    Initialize arrays GRID and GRID_SEQ                                     
+    Sort arrays GRID and GRID_SEQ so GRID is in numerical order
+    Sort arrays GRID and RGRID so GRID is in numerical order                
+    Check for duplicate GRID IDs                                            
+    Check GRID_ID array                                                     
+    Check that coord systems in field 3 referenced do exist                 
+    Check that coord systems in field 7 referenced do exist                 
+    Write grid data to file                                                 
+    Write coord data to file                                                
+ 
+
+  0/CHECK THAT ALL GRIDS FOR ELEMS EXIST                            15:44: 9.829
+
+       Process element  0 of 45 (  0%)
+
+       Process element 45 of 45 (100%) -- done in ~ 0s                
+ 
+
+  0/GRID SEQUENCE PROCESSOR                                         15:44: 9.829
+  0/SUBCASE PROCESSOR                                               15:44: 9.830
+  0/DOF PROCESSOR                                                   15:44: 9.830
+      DOF Set Table                                                 15:44: 9.830
+       Initializing           
+       Process MPCs           
+       Process Rigid Elements
+       Process SPCs           
+ 
+
+      DOF Number Table                                              15:44: 9.831
+      TDOF PROC
+
+       Process col 1-4 of TDOF  0 of 81 (  0%)
+
+       Process col 1-4 of TDOF 81 of 81 (100%) -- done in ~ 0s                
+
+       Process G -set           0 of 81 (  0%)
+
+       Process G -set          81 of 81 (100%) -- done in ~ 0s                
+
+       Process SB-set           0 of 81 (  0%)
+
+       Process SB-set          81 of 81 (100%) -- done in ~ 0s                
+
+       Process SE-set           0 of 81 (  0%)
+
+       Process SE-set          81 of 81 (100%) -- done in ~ 0s                
+
+       Process N -set           0 of 81 (  0%)
+
+       Process N -set          81 of 81 (100%) -- done in ~ 0s                
+
+       Process SZ-set           0 of 81 (  0%)
+
+       Process SZ-set          81 of 81 (100%) -- done in ~ 0s                
+
+       Process S -set           0 of 81 (  0%)
+
+       Process S -set          81 of 81 (100%) -- done in ~ 0s                
+
+       Process F -set           0 of 81 (  0%)
+
+       Process F -set          81 of 81 (100%) -- done in ~ 0s                
+
+       Process A -set           0 of 81 (  0%)
+
+       Process A -set          81 of 81 (100%) -- done in ~ 0s                
+
+       Process L -set           0 of 81 (  0%)
+
+       Process L -set          81 of 81 (100%) -- done in ~ 0s                
+       Setting up to get TDOFI
+       Sort TDOF to get TDOFI 
+ 
+
+  0/CONM2 PROCESSOR #1                                              15:44: 9.832
+  0/ALLOCATE MEMORY FOR RBGLOBAL ARRAY                              15:44: 9.832
+  0/CONM2 PROCESSOR #2                                              15:44: 9.832
+  0/ALLOCATE MEM FOR ELEM AND GRID TEMP ARRAYS                      15:44: 9.832
+  0/ALLOCATE MEMORY FOR ELEM PRESSURE DATA ARRAYS                   15:44: 9.832
+  0/ALLOCATE MEMORY FOR Yse ARRAY                                   15:44: 9.832
+  0/CALCULATE YS ENFORCED DISPL ARRAY                               15:44: 9.832
+ >> LINK  0 END
+
+ >> LINK  1 BEGIN
+  1/ALLOCATE DOF TABLES                                             15:44: 9.834
+  1/ALLOCATE MEMORY FOR SYS_LOAD ARRAY                              15:44: 9.834
+  1/ALLOCATE MEMORY FOR THERMAL LOAD ARRAYS                         15:44: 9.834
+  1/CALCULATE ESTIMATE OF MASS MATRIX SIZE                          15:44: 9.834
+  1/ALLOCATE MEM FOR EMSKEY, EMSCOL, EMSPNT, EMS                    15:44: 9.834
+     Initializing EMSKEY with          486 rows
+ 
+
+     Initializing EMSCOL with        36720 rows
+ 
+
+     Initializing EMSPNT with        36720 rows
+ 
+
+     Initializing EMS    with        36720 rows
+ 
+
+ 
+
+  1/ELEMENT MASS MATRIX PROCESSOR                                   15:44: 9.834
+
+     Calculating mass matrix. Process elem     0 of 45 (  0%)
+
+     Calculating mass matrix. Process elem    45 of 45 (100%) -- done in ~ 0s                
+ 
+
+  1/CONCENTRATED MASS MATRIX PROCESSOR                              15:44: 9.842
+  1/ALLOCATE MEMORY FOR ELEM MASS ARRAYS                            15:44: 9.842
+  1/SPARSE MGG PROCESSOR                                            15:44: 9.842
+
+
+     Working on grid   0 of 81 (  0%)
+
+     Working on grid  81 of 81 (100%) -- done in ~ 0s                
+ 
+
+  1/CONVERT LOADS TO SPARSE MATRIX FORM                             15:44: 9.843
+
+
+      Write L1E G-set DOF   0 of 486 (  0%)
+
+      Write L1E G-set DOF 486 of 486 (100%) -- done in ~ 0s                
+  1/CALCULATE ESTIMATE OF KGG MATRIX SIZE                           15:44: 9.844
+  1/ALLOCATE MEM FOR STFKEY, STFCOL, STFPNT, STF                    15:44: 9.844
+     Initializing STFKEY with          486 rows
+ 
+
+     Allocated    1.94E-03 MB of mem to   array: STFKEY                    
+ 
+
+     Initializing STF3 with        36720 terms
+ 
+
+     Allocated    5.88E-01 MB of mem to   array: STF3                    
+ 
+
+  1/G-SET STIFFNESS MATRIX PROCESSOR                                15:44: 9.844
+
+     Calculating stiff matrix. Process elem    0 of 45 (  0%)
+
+     Calculating stiff matrix. Process elem   45 of 45 (100%) -- done in ~ 0s                
+ 
+
+     Deallocated  5.88E-01 MB of mem from array: STF3
+     Initializing STF3 with        36720 terms
+ 
+
+     Allocated    5.88E-01 MB of mem to   array: STF3                    
+ 
+
+  1/SPARSE KGG PROCESSOR                                            15:44: 9.861
+
+     Working on grid   0 of 81 (  0%)
+
+     Working on grid  81 of 81 (100%) -- done in ~ 0s                
+ 
+
+     Deallocated  1.94E-03 MB of mem from array: STFKEY
+     Deallocated  5.88E-01 MB of mem from array: STF3
+ 
+
+  1/WRITE DOF TABLES TO FILE AND DEALLOCATE                         15:44: 9.864
+  1/WRITE ELEMENT DATA TO FILE                                      15:44: 9.867
+ >> LINK  1 END
+
+ >> LINK  2 BEGIN
+  2/REDUCE G-SET TO N, M-SETS                                       15:44: 9.869
+      EQUATING N-SET TO G-SET                                       15:44: 9.869
+       Equate I_KNN with      487 rows 
+       Equate J_KNN with    11046 terms
+       Equate KNN   with    11046 terms
+       Equate I_MNN with      487 rows 
+       Equate J_MNN with        0 terms
+       Equate MNN   with        0 terms
+       Equate I_PN  with      487 rows 
+       Equate J_PN  with        0 terms
+       Equate PN    with        0 terms
+      DEALLOCATE G-SET ARRAYS                                       15:44: 9.869
+       Deallocate KGG          
+       Deallocate MGG          
+       Deallocate PG           
+       Deallocate GMN          
+       Deallocate KNM          
+       Deallocate KMM          
+       Deallocate MMN          
+       Deallocate MNM          
+       Deallocate MMM          
+       Deallocate PM           
+ 
+
+      N SET AUTOSPC PROC #1                                         15:44: 9.869
+
+       Proc N-set DOF    0 of 486 (  0%)
+
+       Proc N-set DOF  486 of 486 (100%) -- done in ~ 0s                
+ 
+
+      AUTOSPC SUMMARY TABLE                                         15:44: 9.870
+  2/REDUCE N-SET TO F, S-SETS                                       15:44: 9.870
+      REDUCE KNN TO KFF (PARTITION, ONLY)                           15:44: 9.870
+
+       Det. part. size of  KFF, row   0 of 486 (  0%)
+
+       Det. part. size of  KFF, row 486 of 486 (100%) -- done in ~ 0s                
+
+       Partition  KFF from  KNN, row   0 of 486 (  0%)
+
+       Partition  KFF from  KNN, row 486 of 486 (100%) -- done in ~ 0s                
+
+       Det. part. size of  KFS, row   0 of 486 (  0%)
+
+       Det. part. size of  KFS, row 486 of 486 (100%) -- done in ~ 0s                
+
+       Partition  KFS from  KNN, row   0 of 486 (  0%)
+
+       Partition  KFS from  KNN, row 486 of 486 (100%) -- done in ~ 0s                
+
+       Det. part. size of KFSe, row   0 of 286 (  0%)
+
+       Det. part. size of KFSe, row 286 of 286 (100%) -- done in ~ 0s                
+
+       Partition KFSe from  KFS, row   0 of 286 (  0%)
+
+       Partition KFSe from  KFS, row 286 of 286 (100%) -- done in ~ 0s                
+
+       KSF: writing row   0 of 200 (  0%)
+
+       KSF: writing row 200 of 200 (100%) -- done in ~ 0s                
+
+       Det. part. size of  KSS, row   0 of 486 (  0%)
+
+       Det. part. size of  KSS, row 486 of 486 (100%) -- done in ~ 0s                
+
+       Partition  KSS from  KNN, row   0 of 486 (  0%)
+
+       Partition  KSS from  KNN, row 486 of 486 (100%) -- done in ~ 0s                
+
+       Det. part. size of KSSe, row   0 of 200 (  0%)
+
+       Det. part. size of KSSe, row 200 of 200 (100%) -- done in ~ 0s                
+
+       Partition KSSe from  KSS, row   0 of 200 (  0%)
+
+       Partition KSSe from  KSS, row 200 of 200 (100%) -- done in ~ 0s                
+      REDUCE PN TO PF (SPARSE MATRIX ROUTINES)                      15:44: 9.872
+
+       Det. part. size of   PF, row   0 of 486 (  0%)
+
+       Det. part. size of   PF, row 486 of 486 (100%) -- done in ~ 0s                
+
+       Det. part. size of   PS, row   0 of 486 (  0%)
+
+       Det. part. size of   PS, row 486 of 486 (100%) -- done in ~ 0s                
+       Deallocate PN           
+     Reallocate PF 
+       Deallocate PF           
+       Allocate   PF           
+      DEALLOCATE SOME ARRAYS
+       Deallocate PFYS          
+       Deallocate KFSe          
+       DEALLOCATE SOME ARRAYS                                       15:44: 9.872
+       Deallocate KNN          
+       Deallocate MNN          
+       Deallocate PN           
+ 
+
+
+       QSYS: writing row   0 of 200 (  0%)
+
+       QSYS: writing row 200 of 200 (100%) -- done in ~ 0s                
+       DEALLOCATE SOME ARRAYS                                       15:44: 9.872
+       Deallocate KSSe          
+       Deallocate QSYS          
+       Deallocate YSe           
+ 
+
+      DEALLOCATE SOME ARRAYS
+       Deallocate KFS          
+       Deallocate KSF          
+       Deallocate KSS          
+ 
+
+      DEALLOCATE SOME ARRAYS
+       Deallocate MFS          
+       Deallocate MSF          
+       Deallocate MSS          
+ 
+
+       Deallocate PS           
+ 
+
+  2/REDUCE F-SET TO A, O-SETS                                       15:44: 9.876
+      EQUATING A-SET TO F-SET                                       15:44: 9.876
+       Equate I_KAA with      287 rows 
+       Equate J_KAA with     5164 terms
+       Equate KAA   with     5164 terms
+       Equate I_MAA with      287 rows 
+       Equate J_MAA with        0 terms
+       Equate MAA   with        0 terms
+       Equate I_PA  with      287 rows 
+       Equate J_PA  with      484 terms
+       Equate PA    with      484 terms
+      DEALLOCATE F-SET ARRAYS                                       15:44: 9.876
+       Deallocate KFF            
+       Deallocate MFF            
+       Deallocate PF             
+ 
+
+      DEALLOCATE GOA, ABAND ARRAYS                                  15:44: 9.876
+       Deallocate GOA            
+       Deallocate ABAND          
+ 
+
+      DEALLOCATE O SET ARRAYS                                       15:44: 9.876
+       Deallocate KAO          
+       Deallocate KOO          
+ 
+
+       Deallocate MAO          
+       Deallocate MOO          
+ 
+
+       Deallocate PO           
+ 
+
+  2/REDUCE A-SET TO L, R-SETS                                       15:44: 9.877
+      EQUATING L-SET TO A-SET                                       15:44: 9.877
+       Equate I_KLL with      287 rows 
+       Equate J_KLL with     5164 terms
+       Equate KLL   with     5164 terms
+       Equate I_MLL with      287 rows 
+       Equate J_MLL with        0 terms
+       Equate MLL   with        0 terms
+       Equate I_PL  with      287 rows 
+       Equate J_PL  with      484 terms
+       Equate PL    with      484 terms
+      DEALLOCATE A-SET ARRAYS                                       15:44: 9.877
+       Deallocate KAA          
+ 
+
+       Deallocate MAA          
+ 
+
+       Deallocate PA           
+ 
+
+      DEALLOCATE R-SET ARRAYS                                       15:44: 9.877
+       Deallocate KRL          
+ 
+
+       Deallocate KRR          
+ 
+
+       Deallocate MRL          
+ 
+
+       Deallocate MRR          
+ 
+
+       Deallocate PR           
+ 
+
+  2/WRITE L SET ARRAYS TO FILE                                      15:44: 9.877
+
+       KLL: writing row   0 of 286 (  0%)
+
+       KLL: writing row 286 of 286 (100%) -- done in ~ 0s                
+
+       PL : writing row   0 of 286 (  0%)
+
+       PL : writing row 286 of 286 (100%) -- done in ~ 0s                
+ >> LINK  2 END
+
+ >> LINK  3 BEGIN
+  3/GET COL OF PL LOADS FOR                        Subcase       1  15:44: 9.881
+  3/FBS - SOLVE FOR RHS ANSWERS FOR                   "          1  15:44: 9.881
+  3/CALC  EPSILON ERROR ESTIMATE                      "          1  15:44: 9.881
+  3/GET COL OF PL LOADS FOR                        Subcase       2  15:44: 9.881
+  3/FBS - SOLVE FOR RHS ANSWERS FOR                   "          2  15:44: 9.881
+  3/CALC  EPSILON ERROR ESTIMATE                      "          2  15:44: 9.882
+  3/DEALLOCATE ARRAYS                                               15:44: 9.882
+       Deallocate KLL            
+       Deallocate ABAND           
+       Deallocate RES             
+ >> LINK  3 END
+
+ >> LINK  5 BEGIN
+  5/ALLOCATE SEVERAL ARRAYS                                         15:44: 9.883
+  5/READ YSe ENFORCED DISPLACEMENTS                                 15:44: 9.883
+  5/READ  L-SET DISPLACEMENTS                      Subcase       1  15:44: 9.883
+  5/BUILD UA DISPLS FROM UL, UR:                      "          1  15:44: 9.883
+  5/BUILD UF DISPLS FROM UA, UO:                      "          1  15:44: 9.883
+  5/BUILD UN DISPLS FROM UF, US:                      "          1  15:44: 9.884
+  5/BUILD UG DISPLS FROM UN, UM:                      "          1  15:44: 9.884
+  5/WRITE UG DISPLS TO FILE,                          "          1  15:44: 9.884
+
+  5/READ  L-SET DISPLACEMENTS                      Subcase       2  15:44: 9.884
+  5/BUILD UA DISPLS FROM UL, UR:                      "          2  15:44: 9.884
+  5/BUILD UF DISPLS FROM UA, UO:                      "          2  15:44: 9.884
+  5/BUILD UN DISPLS FROM UF, US:                      "          2  15:44: 9.884
+  5/BUILD UG DISPLS FROM UN, UM:                      "          2  15:44: 9.884
+  5/WRITE UG DISPLS TO FILE,                          "          2  15:44: 9.884
+
+       Deallocate GMN                
+       Deallocate GOA                
+       Deallocate MODE_NUM           
+       Deallocate GEN_MASS           
+ >> LINK  5 END
+
+ >> LINK  9 BEGIN
+  9/DEALLOCATE ARRAYS BEFORE READING LINK9S                         15:44: 9.885
+  9/ALLOCATE ARRAYS FOR DATA READ IN LINK9S                         15:44: 9.885
+  9/READ MODEL DATA ARRAYS                                          15:44: 9.885
+  9/READ G-SET DISPLACEMENTS,                      Subcase       1  15:44: 9.886
+  9/PROCESS DISPL OUTPUT REQUESTS,                    "          1  15:44: 9.887
+  9/PROCESS SPC FORCE OUTPUT REQUESTS,                "          1  15:44: 9.887
+ 
+
+  9/PROCESS ELEM FORCE/STRESS REQUESTS,               "          1  15:44: 9.887
+  9/READ G-SET DISPLACEMENTS,                      Subcase       2  15:44: 9.902
+  9/PROCESS DISPL OUTPUT REQUESTS,                    "          2  15:44: 9.902
+  9/PROCESS SPC FORCE OUTPUT REQUESTS,                "          2  15:44: 9.903
+ 
+
+  9/PROCESS ELEM FORCE/STRESS REQUESTS,               "          2  15:44: 9.903
+       Deallocate KSF           
+       Deallocate KSFD          
+       Deallocate MGG           
+       Deallocate PG            
+       Deallocate PM            
+       Deallocate PS            
+       Deallocate QSYS          
+       Deallocate GMN           
+       Deallocate GMNt          
+       Deallocate HMN           
+       Deallocate MSF           
+       Deallocate MLL           
+       Deallocate LMN           
+       Deallocate QSYS          
+ >> LINK  9 END
+
+ >> MYSTRAN END    : 10/ 3/2026 at 15:44: 9.934. The output file is:
+    test\duel3a.F06
+ Check ERR output file for       36 warning messages
+ MYSTRAN terminated normally. Total CPU time =  1.25E-01 seconds
+                    ========

@@ -1,0 +1,36 @@
+--- before/python/compare_disp_v4c.py
++++ after/python/compare_disp_v4c.py
+@@ -111,26 +111,26 @@
+ 
+     # MYSTRAN OP2 files
+     op2_files = {
+-        'MH6T':  'C:/PROJECTAI/18a/test/duel3a_mht6_1.OP2',
++        'MH6T':  'C:/PROJECTAI/18a/test/duel3a_mh6t_1.OP2',
+         'MITC6': 'C:/PROJECTAI/18a/test/duel3a_mitc6_1.OP2',
+         'SimoT6': 'C:/PROJECTAI/18a/test/duel3a_simo_1.OP2',
+     }
+ 
+     # Python element classes
+-    from MITC6_Tri_v1 import MITC6_Tri_v1
+-    from MacNeal_MH6T_Tri_v1 import MacNeal_MH6T_Tri_v1
++    from MITC6_Tri_v4 import MITC6_Tri_v4
++    from MacNeal_MH6T_Tri_v3 import MacNeal_MH6T_Tri_v3
+     try:
+-        from Simo1993_Tri6_ShellElement_v1p8 import Simo1993_Tri6_ShellElement_v1p8
++        from Simo1993_Tri6_ShellElement_v2 import Simo1993_Tri6_ShellElement_v2
+         HAS_SIMO = True
+     except ImportError:
+         HAS_SIMO = False
+ 
+     py_classes = {
+-        'MH6T':  MacNeal_MH6T_Tri_v1,
+-        'MITC6': MITC6_Tri_v1,
++        'MH6T':  MacNeal_MH6T_Tri_v3,
++        'MITC6': MITC6_Tri_v4,
+     }
+     if HAS_SIMO:
+-        py_classes['SimoT6'] = Simo1993_Tri6_ShellElement_v1p8
++        py_classes['SimoT6'] = Simo1993_Tri6_ShellElement_v2
+ 
+     for label, op2_file in op2_files.items():
+         if label not in py_classes:

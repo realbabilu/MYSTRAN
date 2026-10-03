@@ -1,0 +1,63 @@
+--- before/python/battle_2_003_quadratic_curved.py
++++ after/python/battle_2_003_quadratic_curved.py
+@@ -30,6 +30,10 @@
+     sys.path.insert(0, str(LINEAR_DIR))
+ 
+ from core import Model
++from Simo1993_Tri6_ShellElement_v2 import Simo1993_Tri6_ShellElement_v2
++from MacNeal_MH6T_Tri_v3 import MacNeal_MH6T_Tri_v3
++from MITC6_Tri_v4 import MITC6_Tri_v4
++from Rezaiee2017_Tri6_v3 import Rezaiee2017_Tri6_ShellElement_v3
+ 
+ from ANS8_BDG6_ShellElement import ANS8_BDG6_ShellElement
+ from HBQ8_ShellElement import HBQ8_ShellElement
+@@ -37,10 +41,6 @@
+ from MITC8D_ShellElement import MITC8D_ShellElement
+ from MacNealQ8_1992_native_v2 import MacNealQ8_1992_native_v2
+ from MacNealQ8_1992_native_v3_drill import MacNealQ8_1992_native_v3_drill
+-from MacNeal_MH6T_Tri_v1 import MacNeal_MH6T_Tri_v1
+-from MacNeal_MH6T_Tri_v0 import MacNeal_MH6T_Tri_v0
+-from Rezaiee2017_Tri6_Final import Rezaiee2017_Tri6_ShellElement
+-from Rezaiee2017_Tri6_v2 import Rezaiee2017_Tri6_ShellElement_v2
+ from KikuchiMacNeal_Q8_ShellElement_v1 import KikuchiMacNeal_Q8_ShellElement_v1 
+ from KikuchiMacNeal_ANS8_v1 import KikuchiMacNeal_ANS8_v1
+ from KikuchiMacNeal_HBQ8_v1 import KikuchiMacNeal_HBQ8_v1
+@@ -49,10 +49,7 @@
+     Simo1993_Q8_ShellElement_v1p8,
+ )
+ 
+-from Simo1993_Tri6_ShellElement_v1p8 import Simo1993_Tri6_ShellElement_v1p8
+ from element_adapters import MITC8v12, MITC8D, SimoT6v18
+-from MITC6_Tri_v1 import MITC6_Tri_v1
+-from MITC6_Tri_v0 import MITC6_Tri_v0
+ 
+ RI = 4.12
+ RO = 4.32
+@@ -95,14 +92,10 @@
+ }
+ 
+ T6_ELEMENTS = {
+-    "SIMOT6": Simo1993_Tri6_ShellElement_v1p8,
+-    "MITC6_v1": MITC6_Tri_v1,
+-    "MITC6_v0": MITC6_Tri_v0,
+-    "Rezaiee_v1": Rezaiee2017_Tri6_ShellElement,
+-    "Rezaiee_v2": Rezaiee2017_Tri6_ShellElement_v2,
+-    "MH6T_v0": MacNeal_MH6T_Tri_v0,
+-    "MH6T_v1": MacNeal_MH6T_Tri_v1,
+-    "SIMOT6v18": SimoT6v18,
++    "SIMOT6": Simo1993_Tri6_ShellElement_v2,
++    "MITC6": MITC6_Tri_v4,
++    "MH6T": MacNeal_MH6T_Tri_v3,
++    "REZAIEE": Rezaiee2017_Tri6_ShellElement_v3,
+ }
+ 
+ MYSTRAN_FORMULATIONS = [
+@@ -275,7 +268,7 @@
+ 
+ def print_mesh_method_check():
+     print("\nMesh/method check at Nx=24")
+-    for label in ("SIMOT6", "MITC6", "MH6T", "Rezaiee"):
++    for label in T6_ELEMENTS:
+         try:
+             fixed = solve_one(label, 24, 2, alternate_diag=False)
+             alt = solve_one(label, 24, 2, alternate_diag=True)

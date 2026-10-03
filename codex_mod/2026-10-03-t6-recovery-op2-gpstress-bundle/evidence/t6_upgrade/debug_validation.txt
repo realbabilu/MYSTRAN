@@ -1,0 +1,13 @@
+ditulis: debug_SIMOT6_membrane.txt
+ditulis: debug_SIMOT6_bending.txt
+ditulis: debug_MITC6_membrane.txt
+ditulis: debug_MITC6_bending.txt
+ditulis: debug_MH6T_membrane.txt
+ditulis: debug_MH6T_bending.txt
+ditulis: debug_REZAIEE_membrane.txt
+ditulis: debug_REZAIEE_bending.txt
+SIMOT6 final reference and both dumps PASS
+MITC6 final reference and both dumps PASS
+MH6T final reference and both dumps PASS
+REZAIEE final reference and both dumps PASS
+All T6 dump checks PASS

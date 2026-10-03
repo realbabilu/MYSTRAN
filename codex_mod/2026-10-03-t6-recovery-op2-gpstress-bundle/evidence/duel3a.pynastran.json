@@ -1,0 +1,89 @@
+{
+  "stress_SC1": {
+    "element_type": 75,
+    "num_wide": 70,
+    "shape": [
+      1,
+      80,
+      8
+    ],
+    "elements": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "f06_samples": 20,
+    "max_f06_abs_error": 0.004565429687545475
+  },
+  "stress_SC2": {
+    "element_type": 75,
+    "num_wide": 70,
+    "shape": [
+      1,
+      80,
+      8
+    ],
+    "elements": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "f06_samples": 20,
+    "max_f06_abs_error": 4.590463638376452e-07
+  },
+  "force_SC2": {
+    "element_type": 75,
+    "num_wide": 38,
+    "shape": [
+      1,
+      40,
+      8
+    ],
+    "elements": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60
+    ],
+    "f06_samples": 10,
+    "max_f06_abs_error": 4.163085007816552e-14
+  },
+  "GPSTRESS_600_SC1": {
+    "shape": [
+      1,
+      50,
+      8
+    ],
+    "f06_samples": 50,
+    "max_f06_abs_error": 0.0003740234374163265
+  },
+  "GPSTRESS_600_SC2": {
+    "shape": [
+      1,
+      50,
+      8
+    ],
+    "f06_samples": 50,
+    "max_f06_abs_error": 1.3465118353650496e-08
+  }
+}

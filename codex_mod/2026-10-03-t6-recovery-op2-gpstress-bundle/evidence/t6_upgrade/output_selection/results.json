@@ -1,0 +1,546 @@
+[
+  {
+    "family": "SIMOT6",
+    "style": "CENTER",
+    "gp": false,
+    "sc": 1,
+    "counts": [
+      10,
+      0,
+      0
+    ],
+    "expected": [
+      10,
+      0,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "SIMOT6",
+    "style": "CENTER",
+    "gp": false,
+    "sc": 2,
+    "counts": [
+      10,
+      0,
+      0
+    ],
+    "expected": [
+      10,
+      0,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "SIMOT6",
+    "style": "CORNER",
+    "gp": false,
+    "sc": 1,
+    "counts": [
+      0,
+      60,
+      0
+    ],
+    "expected": [
+      0,
+      60,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "SIMOT6",
+    "style": "CORNER",
+    "gp": false,
+    "sc": 2,
+    "counts": [
+      0,
+      60,
+      0
+    ],
+    "expected": [
+      0,
+      60,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "SIMOT6",
+    "style": "CENTER",
+    "gp": true,
+    "sc": 1,
+    "counts": [
+      10,
+      0,
+      25
+    ],
+    "expected": [
+      10,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "SIMOT6",
+    "style": "CENTER",
+    "gp": true,
+    "sc": 2,
+    "counts": [
+      10,
+      0,
+      25
+    ],
+    "expected": [
+      10,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "SIMOT6",
+    "style": "GPONLY",
+    "gp": true,
+    "sc": 1,
+    "counts": [
+      0,
+      0,
+      25
+    ],
+    "expected": [
+      0,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "SIMOT6",
+    "style": "GPONLY",
+    "gp": true,
+    "sc": 2,
+    "counts": [
+      0,
+      0,
+      25
+    ],
+    "expected": [
+      0,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MITC6",
+    "style": "CENTER",
+    "gp": false,
+    "sc": 1,
+    "counts": [
+      10,
+      0,
+      0
+    ],
+    "expected": [
+      10,
+      0,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MITC6",
+    "style": "CENTER",
+    "gp": false,
+    "sc": 2,
+    "counts": [
+      10,
+      0,
+      0
+    ],
+    "expected": [
+      10,
+      0,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MITC6",
+    "style": "CORNER",
+    "gp": false,
+    "sc": 1,
+    "counts": [
+      0,
+      60,
+      0
+    ],
+    "expected": [
+      0,
+      60,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MITC6",
+    "style": "CORNER",
+    "gp": false,
+    "sc": 2,
+    "counts": [
+      0,
+      60,
+      0
+    ],
+    "expected": [
+      0,
+      60,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MITC6",
+    "style": "CENTER",
+    "gp": true,
+    "sc": 1,
+    "counts": [
+      10,
+      0,
+      25
+    ],
+    "expected": [
+      10,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MITC6",
+    "style": "CENTER",
+    "gp": true,
+    "sc": 2,
+    "counts": [
+      10,
+      0,
+      25
+    ],
+    "expected": [
+      10,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MITC6",
+    "style": "GPONLY",
+    "gp": true,
+    "sc": 1,
+    "counts": [
+      0,
+      0,
+      25
+    ],
+    "expected": [
+      0,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MITC6",
+    "style": "GPONLY",
+    "gp": true,
+    "sc": 2,
+    "counts": [
+      0,
+      0,
+      25
+    ],
+    "expected": [
+      0,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MH6T",
+    "style": "CENTER",
+    "gp": false,
+    "sc": 1,
+    "counts": [
+      10,
+      0,
+      0
+    ],
+    "expected": [
+      10,
+      0,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MH6T",
+    "style": "CENTER",
+    "gp": false,
+    "sc": 2,
+    "counts": [
+      10,
+      0,
+      0
+    ],
+    "expected": [
+      10,
+      0,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MH6T",
+    "style": "CORNER",
+    "gp": false,
+    "sc": 1,
+    "counts": [
+      0,
+      60,
+      0
+    ],
+    "expected": [
+      0,
+      60,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MH6T",
+    "style": "CORNER",
+    "gp": false,
+    "sc": 2,
+    "counts": [
+      0,
+      60,
+      0
+    ],
+    "expected": [
+      0,
+      60,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MH6T",
+    "style": "CENTER",
+    "gp": true,
+    "sc": 1,
+    "counts": [
+      10,
+      0,
+      25
+    ],
+    "expected": [
+      10,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MH6T",
+    "style": "CENTER",
+    "gp": true,
+    "sc": 2,
+    "counts": [
+      10,
+      0,
+      25
+    ],
+    "expected": [
+      10,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MH6T",
+    "style": "GPONLY",
+    "gp": true,
+    "sc": 1,
+    "counts": [
+      0,
+      0,
+      25
+    ],
+    "expected": [
+      0,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "MH6T",
+    "style": "GPONLY",
+    "gp": true,
+    "sc": 2,
+    "counts": [
+      0,
+      0,
+      25
+    ],
+    "expected": [
+      0,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "REZAIEE",
+    "style": "CENTER",
+    "gp": false,
+    "sc": 1,
+    "counts": [
+      10,
+      0,
+      0
+    ],
+    "expected": [
+      10,
+      0,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "REZAIEE",
+    "style": "CENTER",
+    "gp": false,
+    "sc": 2,
+    "counts": [
+      10,
+      0,
+      0
+    ],
+    "expected": [
+      10,
+      0,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "REZAIEE",
+    "style": "CORNER",
+    "gp": false,
+    "sc": 1,
+    "counts": [
+      0,
+      60,
+      0
+    ],
+    "expected": [
+      0,
+      60,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "REZAIEE",
+    "style": "CORNER",
+    "gp": false,
+    "sc": 2,
+    "counts": [
+      0,
+      60,
+      0
+    ],
+    "expected": [
+      0,
+      60,
+      0
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "REZAIEE",
+    "style": "CENTER",
+    "gp": true,
+    "sc": 1,
+    "counts": [
+      10,
+      0,
+      25
+    ],
+    "expected": [
+      10,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "REZAIEE",
+    "style": "CENTER",
+    "gp": true,
+    "sc": 2,
+    "counts": [
+      10,
+      0,
+      25
+    ],
+    "expected": [
+      10,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "REZAIEE",
+    "style": "GPONLY",
+    "gp": true,
+    "sc": 1,
+    "counts": [
+      0,
+      0,
+      25
+    ],
+    "expected": [
+      0,
+      0,
+      25
+    ],
+    "pass_gate": true
+  },
+  {
+    "family": "REZAIEE",
+    "style": "GPONLY",
+    "gp": true,
+    "sc": 2,
+    "counts": [
+      0,
+      0,
+      25
+    ],
+    "expected": [
+      0,
+      0,
+      25
+    ],
+    "pass_gate": true
+  }
+]

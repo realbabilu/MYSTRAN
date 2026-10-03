@@ -1,0 +1,42 @@
+--- before/python/compare_f06_vs_python.py
++++ after/python/compare_f06_vs_python.py
+@@ -6,7 +6,7 @@
+   (b) hasil Python v3 (opsional)    -> --python NAMA  (mis. MITC6, SimoT6)
+ 
+ Usage:
+-  python compare_f06_vs_python.py duel3a_mitc6_1.F06 duel3a_simo_1.F06 duel3a_mht6_1.F06 \
++  python compare_f06_vs_python.py duel3a_mitc6_1.F06 duel3a_simo_1.F06 duel3a_mh6t_1.F06 \
+          --nastran duel3a_t6_nastran.f06
+   python compare_f06_vs_python.py duel3a_mitc6_1.F06 --python MITC6      # + Python v3
+   python compare_f06_vs_python.py ... > report.txt
+@@ -401,9 +401,28 @@
+         import print_pernode_stress_2001_v3 as v3
+     except Exception as ex:
+         print(f"\n  [python] gagal import v3: {ex}"); return
+-    if pyname not in v3.REGISTRY:
++    from Simo1993_Tri6_ShellElement_v2 import Simo1993_Tri6_ShellElement_v2
++    from MITC6_Tri_v4 import MITC6_Tri_v4
++    from MacNeal_MH6T_Tri_v3 import MacNeal_MH6T_Tri_v3
++    from Rezaiee2017_Tri6_v3 import Rezaiee2017_Tri6_ShellElement_v3
++    final_t6 = {
++        'SIMOT6': Simo1993_Tri6_ShellElement_v2,
++        'MITC6': MITC6_Tri_v4,
++        'MH6T': MacNeal_MH6T_Tri_v3,
++        'REZAIEE': Rezaiee2017_Tri6_ShellElement_v3,
++    }
++    aliases = {'SimoT6': 'SIMOT6', 'SimoT6v2': 'SIMOT6', 'MITC6v4': 'MITC6',
++               'MHT6v3': 'MH6T', 'Rezaiee_v3': 'REZAIEE'}
++    pyname = aliases.get(pyname, pyname)
++    v3.FLIP_SHEAR_IF_NEG_E3 = False
++    if pyname in final_t6:
++        from dump_python_debug import resolve_reference
++        pyname, entry = resolve_reference(v3, pyname)
++    elif pyname in v3.REGISTRY:
++        entry = v3.REGISTRY[pyname]
++    else:
+         print(f"\n  [python] '{pyname}' tidak ada di REGISTRY: {list(v3.REGISTRY)}"); return
+-    cls, nxy, conn, bnd, x0, y0, tag = v3.REGISTRY[pyname]
++    cls, nxy, conn, bnd, x0, y0, tag = entry
+     for sc, mode in ((1,'membrane'), (2,'bending')):
+         Cm = D['elstr'].get(sc) or {}
+         G = D['elgrd'].get(sc, {})

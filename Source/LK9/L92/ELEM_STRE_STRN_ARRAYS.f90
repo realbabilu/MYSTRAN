@@ -212,7 +212,8 @@
 ! Calc strains, then stresses for 2D elements
 
 ! --- CQUADR_DKMQ24 begin --- !
-      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8') .OR.      &
+      ELSE IF ((TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR.      &
+               (TYPE(1:5) == 'QUAD8') .OR.                                                                                                  &
                (TYPE(1:5) == 'SHEAR') .OR. (TYPE(1:5) == 'USER1')) THEN
 ! --- CQUADR_DKMQ24 end --- !
 
@@ -220,15 +221,24 @@
             STRAIN(I) = ZERO
             STRAIN(I+3) = ZERO
             DO J=1,ELDOF
-               STRAIN(I)   = STRAIN(I)   + BE1(I,J,STR_PT_NUM)*UEL(J)
-               STRAIN(I+3) = STRAIN(I+3) + BE2(I,J,STR_PT_NUM)*UEL(J)
+               IF (TYPE(1:5) == 'TRIA6') THEN
+                  STRAIN(I)   = STRAIN(I)   + BE1(I,J,STR_PT_NUM)*UEB(J)
+                  STRAIN(I+3) = STRAIN(I+3) + BE2(I,J,STR_PT_NUM)*UEB(J)
+               ELSE
+                  STRAIN(I)   = STRAIN(I)   + BE1(I,J,STR_PT_NUM)*UEL(J)
+                  STRAIN(I+3) = STRAIN(I+3) + BE2(I,J,STR_PT_NUM)*UEL(J)
+               ENDIF
             ENDDO
          ENDDO
 
          DO I=1,2
             STRAIN(I+6) = ZERO
             DO J=1,ELDOF
-               STRAIN(I+6) = STRAIN(I+6) + BE3(I,J,STR_PT_NUM)*UEL(J)
+               IF (TYPE(1:5) == 'TRIA6') THEN
+                  STRAIN(I+6) = STRAIN(I+6) + BE3(I,J,STR_PT_NUM)*UEB(J)
+               ELSE
+                  STRAIN(I+6) = STRAIN(I+6) + BE3(I,J,STR_PT_NUM)*UEL(J)
+               ENDIF
             ENDDO
          ENDDO
 
@@ -326,6 +336,7 @@
             WRITE(F06,'(A,3(1X,ES15.7))') '  STRESS3', STRESS3
             WRITE(F06,'(A,9(1X,ES15.7))') '  STRESS ', STRESS
          ENDIF
+
 
          IF ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  ') .AND. (DEBUG(239) > 0) .AND. (EID <= 8)) THEN
             WRITE(F06,'(A,1X,I8,1X,A,1X,I3,1X,A)') 'DSQK239 EID/PT', EID, 'STR_PT_NUM', STR_PT_NUM, 'TYPE='//TYPE
@@ -453,7 +464,7 @@
 ! For solids, STR_CID == -2 means use CORDM from the PSOLID card.
 
          IF      ((TYPE (1:5) == 'QUAD4') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE == 'QUADR   ') .OR.                         &
-                  (TYPE (1:5) == 'QUAD8')) THEN
+                  (TYPE (1:5) == 'QUAD8') .OR. (TYPE(1:5) == 'TRIA6')) THEN
 
             ! Shell 2D families: do not apply STR_CID rotation at raw recovery stage.
             ! See note above.
