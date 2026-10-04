@@ -9,12 +9,15 @@
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  ALPVEC, DT, EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, FCONV, MASS_PER_UNIT_AREA,  &
                                          PPE, PRESS, PTE, SHELL_A, SHELL_D, SHELL_T, TREF, UEL, XEB, NUM_EMG_FATAL_ERRS,        &
-                                         PCOMP_PROPS
+                                         PCOMP_PROPS, Q8_POINT_BASIS
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
       USE PARAMS, ONLY                :  COUPMASS
       USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
+      USE QUADRATIC_SURFACE_MASS_Interface
+      USE QUADRATIC_SURFACE_PRESSURE_Interface
+      USE MODEL_STUF, ONLY : UEB, KED
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUAD8_MACQ8D'
@@ -35,6 +38,8 @@
       REAL(DOUBLE)                    :: CTE(3), THERMAL_RESULTANT(3)
       REAL(DOUBLE)                    :: SIG0(2,2), KG8(8,8), STRAIN0(3), N0V(3)
       INTEGER(LONG)                   :: KI, KJ
+
+      REAL(DOUBLE) :: UNIT_PTG(48), TEMP_GRAD_SIGN, TEMP_NORMAL(3), TEMP_G1(3), TEMP_G2(3)
 
       IF (ELGP /= 8) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -61,85 +66,60 @@
       THICK = EPROP(1)
 
       IF (OPT(1) == 'Y') THEN
-         M1 = ZERO
-         MASS_ELEM = ZERO
-         DO I=1,3
-            DO J=1,3
-               R = GP3(I)
-               S = GP3(J)
-               WT = W3(I)*W3(J)
-               CALL MACQ8_DXY(XY8, R, S, N8, DNDX, DNDY, DETJ)
-               MASS_ELEM = MASS_ELEM + MASS_PER_UNIT_AREA*WT*DABS(DETJ)
-               DO K=1,8
-                  DO L=1,8
-                     M1(K,L) = M1(K,L) + N8(K)*N8(L)*MASS_PER_UNIT_AREA*WT*DABS(DETJ)
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-
-         ME = ZERO
-         IF ((SOL_NAME(1:5) == 'MODES') .AND. (COUPMASS > 0)) THEN
-            DO K=1,8
-               DO L=1,8
-                  DO IA=1,3
-                     ME(6*(K-1)+IA,6*(L-1)+IA) = M1(K,L)
-                  ENDDO
-               ENDDO
-            ENDDO
-         ELSE
-            MASS_NODE = MASS_ELEM/8.0D0
-            DO K=1,8
-               DO IA=1,3
-                  ME(6*(K-1)+IA,6*(K-1)+IA) = MASS_NODE
-               ENDDO
-            ENDDO
-         ENDIF
+         CALL MACQ8_DXY(XY8,ZERO,ZERO,N8,DNDX,DNDY,DETJ)
+         N8(1:4)=N8(1:4)+0.25D0
+         N8(5:8)=N8(5:8)-0.5D0
+         CALL QUADRATIC_SURFACE_MASS(8,XYZ,N8)
       ENDIF
 
       IF (OPT(2) == 'Y') THEN
-         UNIT_PTE = ZERO
+! TEMPP1 gradient is along connectivity normal; directors use the normalized frame.
+         TEMP_G1=XYZ(2,:)-XYZ(1,:)
+         TEMP_G2=XYZ(3,:)-XYZ(1,:)
+         TEMP_NORMAL(1)=TEMP_G1(2)*TEMP_G2(3)-TEMP_G1(3)*TEMP_G2(2)
+         TEMP_NORMAL(2)=TEMP_G1(3)*TEMP_G2(1)-TEMP_G1(1)*TEMP_G2(3)
+         TEMP_NORMAL(3)=TEMP_G1(1)*TEMP_G2(2)-TEMP_G1(2)*TEMP_G2(1)
+         TEMP_GRAD_SIGN=SIGN(ONE,DOT_PRODUCT(TEMP_NORMAL,E3F))
+         CTE=(/ALPVEC(1,1),ALPVEC(2,1),ALPVEC(4,1)/)
+         UNIT_PTE=ZERO
+         UNIT_PTG=ZERO
          DO I=1,3
             DO J=1,3
-               R = GP3(I)
-               S = GP3(J)
-               WT = W3(I)*W3(J)
-               CALL BM_Q8_AT(XY8, E1F, E2F, R, S, BM, DETJ)
-               CTE(1) = ALPVEC(1,1)
-               CTE(2) = ALPVEC(2,1)
-               CTE(3) = ALPVEC(4,1)
-               THERMAL_RESULTANT = MATMUL(SHELL_A, CTE)
-               UNIT_PTE = UNIT_PTE + MATMUL(TRANSPOSE(BM), THERMAL_RESULTANT)*WT*DABS(DETJ)
+               R=GP3(I)
+               S=GP3(J)
+               WT=W3(I)*W3(J)
+               CALL BM_Q8_AT(XY8,E1F,E2F,R,S,BM,DETJ)
+               CALL BB_Q8_AT(XY8,E1F,E2F,R,S,BB,DETJ)
+               UNIT_PTE=UNIT_PTE+MATMUL(TRANSPOSE(BM),MATMUL(SHELL_A,CTE))*WT*DABS(DETJ)
+! eps(z)=Bm*u-z*Bb*u: bending thermal force has the physical minus sign.
+               UNIT_PTG=UNIT_PTG-MATMUL(TRANSPOSE(BB),MATMUL(SHELL_D,CTE))*WT*DABS(DETJ)
             ENDDO
          ENDDO
          DO JSUB=1,SIZE(PTE,2)
-            TBAR = ZERO
-            DO J=1,8
-               TBAR = TBAR + DT(J,JSUB)
-            ENDDO
-            TBAR = TBAR / 8.0D0 - TREF(1)
-            PTE(1:NDOF,JSUB) = UNIT_PTE(1:NDOF) * TBAR
+            TBAR=SUM(DT(1:ELGP,JSUB))/REAL(ELGP,DOUBLE)-TREF(1)
+            PTE(1:48,JSUB)=UNIT_PTE*TBAR+UNIT_PTG*TEMP_GRAD_SIGN*DT(ELGP+1,JSUB)
          ENDDO
       ENDIF
 
       IF (OPT(3) == 'Y') THEN
-         GP = 1
-         DO I=1,2
-            DO J=1,2
-               GP = GP + 1
-               R = 0.577350269189626D0
-               S = 0.577350269189626D0
-               IF (I == 1) R = -R
-               IF (J == 1) S = -S
-               CALL BM_Q8_AT(XY8, E1F, E2F, R, S, BM, DETJ)
-               CALL BB_Q8_AT(XY8, E1F, E2F, R, S, BB, DETJ)
-               CALL BS_Q8_AT(XY8, E1F, E2F, E3F, R, S, BS, DETJ)
-               IF (GP <= MAX_STRESS_POINTS) THEN
-                  BE1(1:3,1:NDOF,GP) = BM
-                  BE2(1:3,1:NDOF,GP) = BB
-                  BE3(1:2,1:NDOF,GP) = BS
-               ENDIF
-            ENDDO
+! Direct CENTER plus all eight nodes; operators act on basic UEB.
+! MacNealQ8_1992_native_v3_drill uses one fixed CENTER basis for all points.
+         DO GP=1,9
+            R=ZERO
+            S=ZERO
+            IF (GP > 1) THEN
+               R=RV(GP-1)
+               S=SV(GP-1)
+            ENDIF
+            CALL BM_Q8_AT(XY8, E1F, E2F, R, S, BM, DETJ)
+            CALL BB_Q8_AT(XY8, E1F, E2F, R, S, BB, DETJ)
+            CALL BS_Q8_AT(XY8, E1F, E2F, E3F, R, S, BS, DETJ)
+            BE1(1:3,1:NDOF,GP)=BM
+            BE2(1:3,1:NDOF,GP)=BB
+            BE3(1:2,1:NDOF,GP)=BS
+            Q8_POINT_BASIS(1,:,GP)=E1F
+            Q8_POINT_BASIS(2,:,GP)=E2F
+            Q8_POINT_BASIS(3,:,GP)=E3F
          ENDDO
       ENDIF
 
@@ -166,64 +146,14 @@
       ENDIF
 
       IF (OPT(5) == 'Y') THEN
-         UNIT_PPE = ZERO
-         DO I=1,3
-            DO J=1,3
-               R = GP3(I)
-               S = GP3(J)
-               WT = W3(I)*W3(J)
-               CALL SHAPE_Q8_STD(R, S, N8, DXDR, DXDS, XYZ, DETJ)
-               CALL CROSS3(DXDR, DXDS, SURF_VEC)
-               DO K=1,8
-                  UNIT_PPE(6*(K-1)+1) = UNIT_PPE(6*(K-1)+1) + N8(K)*SURF_VEC(1)*WT
-                  UNIT_PPE(6*(K-1)+2) = UNIT_PPE(6*(K-1)+2) + N8(K)*SURF_VEC(2)*WT
-                  UNIT_PPE(6*(K-1)+3) = UNIT_PPE(6*(K-1)+3) + N8(K)*SURF_VEC(3)*WT
-               ENDDO
-            ENDDO
-         ENDDO
-         DO J=1,SIZE(PPE,2)
-            PPE(1:NDOF,J) = PPE(1:NDOF,J) + UNIT_PPE(1:NDOF)*PRESS(3,J)
-         ENDDO
+         CALL MACQ8_DXY(XY8,ZERO,ZERO,N8,DNDX,DNDY,DETJ)
+         N8(1:4)=N8(1:4)+0.25D0
+         N8(5:8)=N8(5:8)-0.5D0
+         CALL QUADRATIC_SURFACE_PRESSURE(INT_ELEM_ID,8,XYZ,N8)
       ENDIF
 
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
-         CALL ELMDIS
-         CALL BM_Q8_AT(XY8, E1F, E2F, ZERO, ZERO, BM, DETJ)
-         STRAIN0 = MATMUL(BM, UEL(1:NDOF))
-         N0V = MATMUL(SHELL_A, STRAIN0)
-
-         SIG0 = ZERO
-         SIG0(1,1) = N0V(1)
-         SIG0(2,2) = N0V(2)
-         SIG0(1,2) = N0V(3)
-         SIG0(2,1) = N0V(3)
-
-         KG8 = ZERO
-         DO I=1,3
-            DO J=1,3
-               R = GP3(I)
-               S = GP3(J)
-               WT = W3(I)*W3(J)
-               CALL MACQ8_DXY(XY8, R, S, N8, DNDX, DNDY, DETJ)
-               DO K=1,8
-                  DO L=1,8
-                     KG8(K,L) = KG8(K,L) + ( DNDX(K)*(SIG0(1,1)*DNDX(L) + SIG0(1,2)*DNDY(L)) +                     &
-                                             DNDY(K)*(SIG0(2,1)*DNDX(L) + SIG0(2,2)*DNDY(L)) ) * WT * DABS(DETJ)
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-
-         KED(1:NDOF,1:NDOF) = ZERO
-         DO I=1,8
-            DO J=1,8
-               KI = 6*(I-1)
-               KJ = 6*(J-1)
-               KED(KI+1,KJ+1) = KG8(I,J)
-               KED(KI+2,KJ+2) = KG8(I,J)
-               KED(KI+3,KJ+3) = KG8(I,J)
-            ENDDO
-         ENDDO
+         CALL NATIVE_MEMBRANE_KG
       ENDIF
 
       RETURN
@@ -231,6 +161,92 @@
  9001 FORMAT(' *ERROR: ',A,' expects ELGP=8 for element ',I8,' but got ',I8)
 
       CONTAINS
+
+! Flat-shell membrane initial-stress stiffness, tension-positive resultants.
+! Four-point Gauss/Duffy; standard geometry area, active translation field.
+! Mechanical linear reference state only; no director or follower tangent.
+      SUBROUTINE NATIVE_MEMBRANE_KG
+      REAL(DOUBLE) :: GX(4),GW(4),RG,SG,WG,NVAL(8),DG(2,8),DF(2,8)
+      REAL(DOUBLE) :: TG(2,3),TF(2,3),CV(3),AREA,AJ,MT(2,2),INV(2,2),DETMT
+      REAL(DOUBLE) :: E1(3),E2(3),E3(3),GRAD(2,8),BMG(3,48),NV(3),SIG(2,2),BLOCK(8,8)
+      REAL(DOUBLE) :: SCALE_GEOM,NORMAL(3)
+      INTEGER(LONG) :: IG,JG,IN,JN,ID
+      GX=(/-0.8611363115940526D0,-0.3399810435848563D0, &
+            0.3399810435848563D0,0.8611363115940526D0/)
+      GW=(/0.3478548451374538D0,0.6521451548625461D0, &
+           0.6521451548625461D0,0.3478548451374538D0/)
+      TG(1,:)=XYZ(2,:)-XYZ(1,:)
+      TG(2,:)=XYZ(3,:)-XYZ(1,:)
+      NORMAL=(/TG(1,2)*TG(2,3)-TG(1,3)*TG(2,2), &
+                TG(1,3)*TG(2,1)-TG(1,1)*TG(2,3), &
+                TG(1,1)*TG(2,2)-TG(1,2)*TG(2,1)/)
+      AREA=SQRT(SUM(NORMAL*NORMAL))
+      SCALE_GEOM=MAXVAL(ABS(XYZ-SPREAD(XYZ(1,:),1,8)))
+      IF (AREA <= 1.0D-14) THEN
+         CALL KG_GEOMETRY_ERROR
+      ENDIF
+      NORMAL=NORMAL/AREA
+      DO IN=1,8
+         IF (ABS(DOT_PRODUCT(XYZ(IN,:)-XYZ(1,:),NORMAL)) > 1.0D-9*MAX(SCALE_GEOM,ONE)) THEN
+            CALL KG_GEOMETRY_ERROR
+         ENDIF
+      ENDDO
+      CALL ELMDIS
+      BLOCK=ZERO
+      DO IG=1,4
+         DO JG=1,4
+               RG=GX(IG)
+               SG=GX(JG)
+               WG=GW(IG)*GW(JG)
+               CALL SHAPE_Q8_STD_DERIVS(RG,SG,NVAL,DG)
+               TG=MATMUL(DG,XYZ)
+               CV=(/TG(1,2)*TG(2,3)-TG(1,3)*TG(2,2), &
+                     TG(1,3)*TG(2,1)-TG(1,1)*TG(2,3), &
+                     TG(1,1)*TG(2,2)-TG(1,2)*TG(2,1)/)
+               AREA=SQRT(SUM(CV*CV))
+               DF=DG
+               TF=MATMUL(DF,XYZ)
+               MT=MATMUL(TF,TRANSPOSE(TF))
+               DETMT=MT(1,1)*MT(2,2)-MT(1,2)*MT(2,1)
+               IF (AREA <= 1.0D-14 .OR. DETMT <= 1.0D-30) CALL KG_GEOMETRY_ERROR
+               INV(1,1)=MT(2,2)/DETMT
+               INV(2,2)=MT(1,1)/DETMT
+               INV(1,2)=-MT(1,2)/DETMT
+               INV(2,1)=INV(1,2)
+               E1=E1F
+               E2=E2F
+               E3=E3F
+               GRAD(1,:)=MATMUL(MATMUL(INV,MATMUL(TF,E1)),DF)
+               GRAD(2,:)=MATMUL(MATMUL(INV,MATMUL(TF,E2)),DF)
+! MacNeal uses modified field derivatives with the standard geometry metric.
+               CALL MACQ8_DXY(XY8,RG,SG,NVAL,GRAD(1,:),GRAD(2,:),AJ)
+               CALL BM_Q8_AT(XY8,E1F,E2F,RG,SG,BMG,AJ)
+               NV=MATMUL(SHELL_A,MATMUL(BMG,UEB(1:48)))
+               SIG(1,:)=(/NV(1),NV(3)/)
+               SIG(2,:)=(/NV(3),NV(2)/)
+               BLOCK=BLOCK+MATMUL(TRANSPOSE(GRAD),MATMUL(SIG,GRAD))*AREA*WG
+         ENDDO
+      ENDDO
+      BLOCK=(BLOCK+TRANSPOSE(BLOCK))/TWO
+      KED(1:48,1:48)=ZERO
+      DO IN=1,8
+         DO JN=1,8
+            DO ID=1,3
+               KED(6*(IN-1)+ID,6*(JN-1)+ID)=BLOCK(IN,JN)
+            ENDDO
+         ENDDO
+      ENDDO
+      END SUBROUTINE NATIVE_MEMBRANE_KG
+
+      SUBROUTINE KG_GEOMETRY_ERROR
+      WRITE(ERR,*) ' *ERROR: native Q8/T6 membrane buckling requires nondegenerate flat geometry. EID=',EID
+      WRITE(F06,*) ' *ERROR: native Q8/T6 membrane buckling requires nondegenerate flat geometry. EID=',EID
+      FATAL_ERR=FATAL_ERR+1
+      NUM_EMG_FATAL_ERRS=NUM_EMG_FATAL_ERRS+1
+      CALL OUTA_HERE('Y')
+      END SUBROUTINE KG_GEOMETRY_ERROR
+
+
 
       SUBROUTINE LOAD_BASIC_COORDS_Q8 ( XYZOUT )
       REAL(DOUBLE), INTENT(OUT) :: XYZOUT(8,3)

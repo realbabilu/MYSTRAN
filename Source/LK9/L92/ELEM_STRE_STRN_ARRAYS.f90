@@ -45,7 +45,7 @@
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE MODEL_STUF, ONLY            :  ALPVEC, BE1, BE2, BE3, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_NSTATIONS, CBEAM_FORCE_B1,           &
                                          CBEAM_FORCE_B2, DT, EM, EB, ES, ET, ELDOF, PEL, PHI_SQ, STRAIN, STRESS, SUBLOD, TREF, TYPE,&
-                                         UEL, UEB, SE1, SE2, SE3, STE1, STE2, STE3, ELGP, ISOLID, EID, SHELL_T
+                                         UEL, UEB, SE1, SE2, SE3, STE1, STE2, STE3, ELGP, ISOLID, EID, SHELL_T, XEB
       USE DEBUG_PARAMETERS
       USE PARAMS, ONLY                :  STR_CID, QUAD4TYP, QUAD8TYP
 
@@ -62,6 +62,7 @@
 
       INTEGER(LONG)                   :: STR_CID_SOLID
 
+      REAL(DOUBLE) :: THERM_GRAD, THERM_G1(3), THERM_G2(3)
       REAL(DOUBLE)                    :: ALPT(6)           ! Col of ALPVEC times temperatures
       REAL(DOUBLE)                    :: ALPTM(3)          ! Col of ALPVEC times temperatures
       REAL(DOUBLE)                    :: ALPTB(3)          ! Col of ALPVEC times temperatures
@@ -221,7 +222,7 @@
             STRAIN(I) = ZERO
             STRAIN(I+3) = ZERO
             DO J=1,ELDOF
-               IF ((TYPE(1:5) == 'TRIA6') .OR. ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')))) THEN
+               IF ((TYPE(1:5) == 'TRIA6') .OR. ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'MACQ8D ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')))) THEN
                   STRAIN(I)   = STRAIN(I)   + BE1(I,J,STR_PT_NUM)*UEB(J)
                   STRAIN(I+3) = STRAIN(I+3) + BE2(I,J,STR_PT_NUM)*UEB(J)
                ELSE
@@ -234,7 +235,7 @@
          DO I=1,2
             STRAIN(I+6) = ZERO
             DO J=1,ELDOF
-               IF ((TYPE(1:5) == 'TRIA6') .OR. ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')))) THEN
+               IF ((TYPE(1:5) == 'TRIA6') .OR. ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'MACQ8D ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')))) THEN
                   STRAIN(I+6) = STRAIN(I+6) + BE3(I,J,STR_PT_NUM)*UEB(J)
                ELSE
                   STRAIN(I+6) = STRAIN(I+6) + BE3(I,J,STR_PT_NUM)*UEL(J)
@@ -275,6 +276,20 @@
              ALPTB(I) = ALPVEC(I  ,2)*DT(5,JTSUB)
              ALPTT(I) = ALPVEC(I+3,3)*(TBAR - TREF(1))
            ENDDO
+! Quadratic TEMPP1 gradient follows all ELGP mean-temperature entries, not DT(5).
+! Direct operators use +Z-normalized directors; convert connectivity gradient.
+           IF (TYPE(1:5) == 'TRIA6' .OR. (TYPE(1:5) == 'QUAD8' .AND. &
+              (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'MACQ8D ' .OR. &
+               QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+              THERM_G1=XEB(2,:)-XEB(1,:)
+              THERM_G2=XEB(3,:)-XEB(1,:)
+              THERM_GRAD=SIGN(ONE,THERM_G1(1)*THERM_G2(2)-THERM_G1(2)*THERM_G2(1))*DT(ELGP+1,JTSUB)
+! BE2=+Bb: physical curvature thermal term is -alpha*Tprime.
+              THERM_GRAD=-THERM_GRAD
+              DO I=1,3
+                 ALPTB(I)=ALPVEC(I,2)*THERM_GRAD
+              ENDDO
+           ENDIF
          ELSE
             ALPTM(:) = ZERO
             ALPTB(:) = ZERO
@@ -298,9 +313,11 @@
          STRESS3_MECH = PHI_SQ*DUM33                       ! Need PHI_SQ on transv shear stress since this calc is from strains and
                                                            ! BE3, not SE3. If DEBUG(176) > 0 then stresses are calc'd from the SE3
                                                            ! below and SE3 has PHI_SQ incorporated in subrs QPLT1, QPLT3, TPLT2.
-! Direct Q8 surface operators contain their shear interpolation already.
-! PHI_SQ belongs to the legacy plate formulation and can be zero here.
-         IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) THEN
+! Direct native Q8/T6 operators already contain their shear interpolation.
+! PHI_SQ belongs to legacy plate recovery and must not scale these operators.
+         IF (TYPE(1:5) == 'TRIA6' .OR. &
+             (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'MACQ8D ' .OR. &
+              QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
             STRESS3_MECH=DUM33
          ENDIF
          IF (TYPE == 'QUADR   ') THEN

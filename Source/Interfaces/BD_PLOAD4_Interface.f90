@@ -28,7 +28,7 @@
 
    INTERFACE
 
-      SUBROUTINE BD_PLOAD4 ( CARD, CC_LOAD_FND )
+      SUBROUTINE BD_PLOAD4 ( CARD, LARGE_FLD_INP, CC_LOAD_FND )
 
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -40,7 +40,8 @@
 
       IMPLICIT NONE
 
-      CHARACTER(LEN=*),INTENT(IN)     :: CARD               ! A Bulk Data card
+      CHARACTER(LEN=*),INTENT(IN)     :: LARGE_FLD_INP
+      CHARACTER(LEN=*),INTENT(INOUT)  :: CARD               ! A Bulk Data card
       CHARACTER( 1*BYTE),INTENT(INOUT):: CC_LOAD_FND(LSUB,2)! 'Y' if B.D load/temp card w/ same set ID (SID) as C.C. LOAD = SID
 
 

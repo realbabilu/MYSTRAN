@@ -24,7 +24,7 @@
 
 ! End MIT license text.
 
-      SUBROUTINE BD_PLOAD4 ( CARD, CC_LOAD_FND )
+      SUBROUTINE BD_PLOAD4 ( CARD, LARGE_FLD_INP, CC_LOAD_FND )
 
 ! Processes PLOAD4 Bulk Data Cards. Reads and checks data and then writes CARD to file LINK1Q for later processing
 
@@ -35,18 +35,24 @@
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  PRESS_SIDS, SUBLOD
 
+      USE NEXTC2_Interface
+      USE NEXTC_Interface
       USE BD_PLOAD4_USE_IFs
 
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'BD_PLOAD4'
-      CHARACTER(LEN=*),INTENT(IN)     :: CARD               ! A Bulk Data card
+      CHARACTER(LEN=*),INTENT(IN)     :: LARGE_FLD_INP
+      CHARACTER(LEN=*),INTENT(INOUT)  :: CARD               ! A Bulk Data card
       CHARACTER( 1*BYTE),INTENT(INOUT):: CC_LOAD_FND(LSUB,2)! 'Y' if B.D load/temp card w/ same set ID (SID) as C.C. LOAD = SID
       CHARACTER(LEN=JCARD_LEN)        :: JCARD(10)          ! The 10 fields of characters making up CARD
 
       INTEGER(LONG)                   :: ELID1,ELID2        ! Elem ID's on parent card. If "THRU" not in field 8, ELID2 is no present
       INTEGER(LONG)                   :: I4INP              ! A value read from input file that should be an integer value
       INTEGER(LONG)                   :: J                  ! DO loop index
+      INTEGER(LONG)                   :: ICONT, IERR, CID
+      CHARACTER(LEN(CARD))            :: CHILD
+      CHARACTER(LEN=JCARD_LEN)        :: CJCARD(10)
       INTEGER(LONG)                   :: JERR               ! Error count
       INTEGER(LONG)                   :: SETID              ! Load set ID on PLOADi card
 
@@ -188,6 +194,43 @@
       IF (JERR == 0) THEN
          WRITE(L1Q) CARD
       ENDIF
+
+! Store a continuation record for every parent (blank means normal pressure).
+! Only surface traction in basic coordinates is supported here.
+      CHILD = CARD
+      IF (LARGE_FLD_INP == 'N') THEN
+         CALL NEXTC(CHILD, ICONT, IERR)
+      ELSE
+         CALL NEXTC2(CARD, ICONT, IERR, CHILD)
+      ENDIF
+      IF (ICONT == 1) THEN
+         CARD = CHILD
+         CALL MKJCARD(SUBR_NAME, CHILD, CJCARD)
+         CID = 0
+         IF (CJCARD(2) /= ' ') CALL I4FLD(CJCARD(2), JF(2), CID)
+         IF (CID /= 0) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,*) ' *ERROR: PLOAD4 directional traction currently requires CID=0'
+            WRITE(F06,*) ' *ERROR: PLOAD4 directional traction currently requires CID=0'
+         ENDIF
+         DO J=3,5
+            IF (CJCARD(J) /= ' ') CALL R8FLD(CJCARD(J), JF(J), R8INP)
+         ENDDO
+         IF ((CJCARD(6) /= ' ') .AND. (TRIM(ADJUSTL(CJCARD(6))) /= 'SURF')) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,*) ' *ERROR: PLOAD4 supports SURF traction only'
+            WRITE(F06,*) ' *ERROR: PLOAD4 supports SURF traction only'
+         ENDIF
+         IF ((CJCARD(7) /= ' ') .AND. (TRIM(ADJUSTL(CJCARD(7))) /= 'NORM')) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,*) ' *ERROR: PLOAD4 LDIR option is not supported'
+            WRITE(F06,*) ' *ERROR: PLOAD4 LDIR option is not supported'
+         ENDIF
+         CALL CRDERR(CHILD)
+      ELSE
+         CHILD = ' '
+      ENDIF
+      WRITE(L1Q) CHILD
 
       NPCARD = NPCARD + 1
 

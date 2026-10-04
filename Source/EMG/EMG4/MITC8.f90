@@ -61,6 +61,7 @@
       USE MITC8_ELEMENT_CS_BASIS_Interface
       USE MITC_ELASTICITY_Interface
 
+      USE QUADRATIC_SURFACE_PRESSURE_Interface
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'MITC8'
@@ -523,7 +524,7 @@
 ! Ported from:
 !   MITC8_ShellElement_v3.py / MITC8_ShellElement_v3 (static stiffness and recovery).
 ! Adaptation: modified field metric, standard geometry area; not a paper reproduction.
-! Mass, pressure, thermal and geometric stiffness use MITC8_LEGACY;
+! Geometric stiffness uses MITC8_LEGACY;
 ! these auxiliary paths are not validated against the v3 static reference.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -538,6 +539,9 @@
       USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
+      USE QUADRATIC_SURFACE_MASS_Interface
+      USE QUADRATIC_SURFACE_PRESSURE_Interface
+      USE MODEL_STUF, ONLY : UEB, KED
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'MITC8'
@@ -560,6 +564,8 @@
       CHARACTER(1*BYTE) :: LEGACY_OPT(6)
       CHARACTER(8),PARAMETER :: ANSSHEAR="TENSOR6"
       INTEGER(LONG)                   :: KI, KJ
+
+      REAL(DOUBLE) :: UNIT_PTG(48), TEMP_GRAD_SIGN, TEMP_NORMAL(3), TEMP_G1(3), TEMP_G2(3)
 
       IF (ELGP /= NNODE) THEN
          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -592,11 +598,56 @@
       GVAL = SHELL_T(1,1)
       CDRILL = KT_DRILL*GVAL
 
-! Preserve old auxiliary paths; only static stiffness and recovery are ported.
+! All active options, including geometric stiffness, bypass the legacy branch.
       LEGACY_OPT=OPT
+      LEGACY_OPT(1)='N'
+      LEGACY_OPT(2)='N'
       LEGACY_OPT(3)='N'
       LEGACY_OPT(4)='N'
+      LEGACY_OPT(5)='N'
+      LEGACY_OPT(6)='N'
       IF (ANY(LEGACY_OPT == 'Y')) CALL MITC8_LEGACY(LEGACY_OPT,INT_ELEM_ID)
+
+      IF (OPT(1) == 'Y') THEN
+         CALL MI_SHAPE_Q8(ZERO,ZERO,N8,DN8)
+         N8(1:4)=N8(1:4)+0.25D0
+         N8(5:8)=N8(5:8)-0.5D0
+         CALL QUADRATIC_SURFACE_MASS(8,XYZ,N8)
+      ENDIF
+
+      IF (OPT(2) == 'Y') THEN
+! TEMPP1 gradient is along connectivity normal; directors use the normalized frame.
+         TEMP_G1=XYZ(2,:)-XYZ(1,:)
+         TEMP_G2=XYZ(3,:)-XYZ(1,:)
+         TEMP_NORMAL(1)=TEMP_G1(2)*TEMP_G2(3)-TEMP_G1(3)*TEMP_G2(2)
+         TEMP_NORMAL(2)=TEMP_G1(3)*TEMP_G2(1)-TEMP_G1(1)*TEMP_G2(3)
+         TEMP_NORMAL(3)=TEMP_G1(1)*TEMP_G2(2)-TEMP_G1(2)*TEMP_G2(1)
+         TEMP_GRAD_SIGN=SIGN(ONE,DOT_PRODUCT(TEMP_NORMAL,NORMALS(1,:)))
+         CTE=(/ALPVEC(1,1),ALPVEC(2,1),ALPVEC(4,1)/)
+         UNIT_PTE=ZERO
+         UNIT_PTG=ZERO
+         DO I=1,3
+            DO J=1,3
+               R=GP3(I)
+               S=GP3(J)
+               WT=W3(I)*W3(J)
+               CALL MI_BM_Q8_AT(XYZ,R,S,BM,DETJ)
+               CALL MI_BB_Q8_AT(XYZ,NORMALS,R,S,BB,DETJ)
+               CALL MI_GEOM_SHAPE_Q8(R,S,N8,DN8)
+               DXDR=MATMUL(DN8(1,:),XYZ)
+               DXDS=MATMUL(DN8(2,:),XYZ)
+               CALL MI_CROSS3(DXDR,DXDS,SURF_VEC)
+               WT=WT*MI_VNORM(SURF_VEC)
+               UNIT_PTE=UNIT_PTE+MATMUL(TRANSPOSE(BM),MATMUL(SHELL_A,CTE))*WT
+! eps(z)=Bm*u-z*Bb*u: bending thermal force has the physical minus sign.
+               UNIT_PTG=UNIT_PTG-MATMUL(TRANSPOSE(BB),MATMUL(SHELL_D,CTE))*WT
+            ENDDO
+         ENDDO
+         DO JSUB=1,SIZE(PTE,2)
+            TBAR=SUM(DT(1:ELGP,JSUB))/REAL(ELGP,DOUBLE)-TREF(1)
+            PTE(1:48,JSUB)=UNIT_PTE*TBAR+UNIT_PTG*TEMP_GRAD_SIGN*DT(ELGP+1,JSUB)
+         ENDDO
+      ENDIF
 
       IF (OPT(3) == 'Y') THEN
          RR=(/ZERO,-ONE,ONE,ONE,-ONE,ZERO,ONE,ZERO,-ONE/)
@@ -608,8 +659,8 @@
             CALL MI_BB_Q8_AT(XYZ,NORMALS,R,S,BB,DETJ)
             CALL MI_BS_Q8_AT(XYZ,NORMALS,R,S,BS,DETJ)
             BE1(1:3,1:48,GP)=BM
-! MYSTRAN fiber stress uses membrane-z*bending; Python uses membrane+z*BB*u.
-            BE2(1:3,1:48,GP)=-BB
+! Physical fiber strain is membrane-z*Bb*u; Bb is +Hessian(w).
+            BE2(1:3,1:48,GP)=BB
             BE3(1:2,1:48,GP)=BS
             CALL MI_LOCAL_BASIS_AT_Q8(XYZ,R,S,E1OUT,E2OUT,E3OUT,DETJ)
             Q8_POINT_BASIS(1,:,GP)=E1OUT
@@ -644,11 +695,104 @@
          ENDDO
       ENDIF
 
+      IF (OPT(5) == 'Y') THEN
+         CALL MI_SHAPE_Q8(ZERO,ZERO,N8,DN8)
+         N8(1:4)=N8(1:4)+0.25D0
+         N8(5:8)=N8(5:8)-0.5D0
+         CALL QUADRATIC_SURFACE_PRESSURE(INT_ELEM_ID,8,XYZ,N8)
+      ENDIF
+
+      IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
+         CALL NATIVE_MEMBRANE_KG
+      ENDIF
+
       RETURN
 
  9001 FORMAT(' *ERROR: ',A,' expects ELGP=8 for element ',I8,' but got ',I8)
 
       CONTAINS
+
+! Flat-shell membrane initial-stress stiffness, tension-positive resultants.
+! Four-point Gauss/Duffy; standard geometry area, active translation field.
+! Mechanical linear reference state only; no director or follower tangent.
+      SUBROUTINE NATIVE_MEMBRANE_KG
+      REAL(DOUBLE) :: GX(4),GW(4),RG,SG,WG,NVAL(8),DG(2,8),DF(2,8)
+      REAL(DOUBLE) :: TG(2,3),TF(2,3),CV(3),AREA,AJ,MT(2,2),INV(2,2),DETMT
+      REAL(DOUBLE) :: E1(3),E2(3),E3(3),GRAD(2,8),BMG(3,48),NV(3),SIG(2,2),BLOCK(8,8)
+      REAL(DOUBLE) :: SCALE_GEOM,NORMAL(3)
+      INTEGER(LONG) :: IG,JG,IN,JN,ID
+      GX=(/-0.8611363115940526D0,-0.3399810435848563D0, &
+            0.3399810435848563D0,0.8611363115940526D0/)
+      GW=(/0.3478548451374538D0,0.6521451548625461D0, &
+           0.6521451548625461D0,0.3478548451374538D0/)
+      TG(1,:)=XYZ(2,:)-XYZ(1,:)
+      TG(2,:)=XYZ(3,:)-XYZ(1,:)
+      NORMAL=(/TG(1,2)*TG(2,3)-TG(1,3)*TG(2,2), &
+                TG(1,3)*TG(2,1)-TG(1,1)*TG(2,3), &
+                TG(1,1)*TG(2,2)-TG(1,2)*TG(2,1)/)
+      AREA=SQRT(SUM(NORMAL*NORMAL))
+      SCALE_GEOM=MAXVAL(ABS(XYZ-SPREAD(XYZ(1,:),1,8)))
+      IF (AREA <= 1.0D-14) THEN
+         CALL KG_GEOMETRY_ERROR
+      ENDIF
+      NORMAL=NORMAL/AREA
+      DO IN=1,8
+         IF (ABS(DOT_PRODUCT(XYZ(IN,:)-XYZ(1,:),NORMAL)) > 1.0D-9*MAX(SCALE_GEOM,ONE)) THEN
+            CALL KG_GEOMETRY_ERROR
+         ENDIF
+      ENDDO
+      CALL ELMDIS
+      BLOCK=ZERO
+      DO IG=1,4
+         DO JG=1,4
+               RG=GX(IG)
+               SG=GX(JG)
+               WG=GW(IG)*GW(JG)
+               CALL MI_GEOM_SHAPE_Q8(RG,SG,NVAL,DG)
+               TG=MATMUL(DG,XYZ)
+               CV=(/TG(1,2)*TG(2,3)-TG(1,3)*TG(2,2), &
+                     TG(1,3)*TG(2,1)-TG(1,1)*TG(2,3), &
+                     TG(1,1)*TG(2,2)-TG(1,2)*TG(2,1)/)
+               AREA=SQRT(SUM(CV*CV))
+               CALL MI_SHAPE_Q8(RG,SG,NVAL,DF)
+               TF=MATMUL(DF,XYZ)
+               MT=MATMUL(TF,TRANSPOSE(TF))
+               DETMT=MT(1,1)*MT(2,2)-MT(1,2)*MT(2,1)
+               IF (AREA <= 1.0D-14 .OR. DETMT <= 1.0D-30) CALL KG_GEOMETRY_ERROR
+               INV(1,1)=MT(2,2)/DETMT
+               INV(2,2)=MT(1,1)/DETMT
+               INV(1,2)=-MT(1,2)/DETMT
+               INV(2,1)=INV(1,2)
+               CALL MI_LOCAL_BASIS_AT_Q8(XYZ,RG,SG,E1,E2,E3,AJ)
+               GRAD(1,:)=MATMUL(MATMUL(INV,MATMUL(TF,E1)),DF)
+               GRAD(2,:)=MATMUL(MATMUL(INV,MATMUL(TF,E2)),DF)
+               CALL MI_BM_Q8_AT(XYZ,RG,SG,BMG,AJ)
+               NV=MATMUL(SHELL_A,MATMUL(BMG,UEB(1:48)))
+               SIG(1,:)=(/NV(1),NV(3)/)
+               SIG(2,:)=(/NV(3),NV(2)/)
+               BLOCK=BLOCK+MATMUL(TRANSPOSE(GRAD),MATMUL(SIG,GRAD))*AREA*WG
+         ENDDO
+      ENDDO
+      BLOCK=(BLOCK+TRANSPOSE(BLOCK))/TWO
+      KED(1:48,1:48)=ZERO
+      DO IN=1,8
+         DO JN=1,8
+            DO ID=1,3
+               KED(6*(IN-1)+ID,6*(JN-1)+ID)=BLOCK(IN,JN)
+            ENDDO
+         ENDDO
+      ENDDO
+      END SUBROUTINE NATIVE_MEMBRANE_KG
+
+      SUBROUTINE KG_GEOMETRY_ERROR
+      WRITE(ERR,*) ' *ERROR: native Q8/T6 membrane buckling requires nondegenerate flat geometry. EID=',EID
+      WRITE(F06,*) ' *ERROR: native Q8/T6 membrane buckling requires nondegenerate flat geometry. EID=',EID
+      FATAL_ERR=FATAL_ERR+1
+      NUM_EMG_FATAL_ERRS=NUM_EMG_FATAL_ERRS+1
+      CALL OUTA_HERE('Y')
+      END SUBROUTINE KG_GEOMETRY_ERROR
+
+
 
       SUBROUTINE LOAD_BASIC_COORDS_Q8 ( XYZOUT )
       REAL(DOUBLE), INTENT(OUT) :: XYZOUT(8,3)

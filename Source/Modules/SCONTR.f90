@@ -502,7 +502,7 @@
 ! --- cbeam_add begin --- !
       INTEGER(LONG), PARAMETER :: MPDAT_PLOAD1        =  26      ! Beam/bar PLOAD1 data slots (6 comps x [P1,P2,X1,X2]) + 2 legacy dir flags
       INTEGER(LONG), PARAMETER :: MPDAT_PLOAD2        =   1      ! No. pressures on PLOAD2 Bulk Data card
-      INTEGER(LONG), PARAMETER :: MPDAT_PLOAD4        =   4      ! No. pressuresa on PLOAD4 Bulk Data card
+      INTEGER(LONG), PARAMETER :: MPDAT_PLOAD4        =   8      ! P1..P4, CID, N1..N3 in processed pressure data
       INTEGER(LONG), PARAMETER :: MPBAR               =   3      ! No. cols allowed in dimensioning array PBAR
       INTEGER(LONG), PARAMETER :: MPBARLU             =   6      ! Max num of dec places in format for writing PBAR equivs of PBARL
       INTEGER(LONG), PARAMETER :: MPBEAM              =   4      ! No. cols allowed in dimensioning array PBEAM

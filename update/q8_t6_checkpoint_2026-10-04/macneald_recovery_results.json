@@ -1,0 +1,56 @@
+[
+  {
+    "case": "positive",
+    "pass_gate": true,
+    "points": 90,
+    "displacement_unchanged": true,
+    "surface_grids": 20,
+    "max_force_abs_error": 4.5854484054252964e-07,
+    "max_stress_abs_error": 0.004597701161173973
+  },
+  {
+    "case": "negative",
+    "pass_gate": true,
+    "points": 90,
+    "displacement_unchanged": true,
+    "surface_grids": 20,
+    "max_force_abs_error": 4.5854484054252964e-07,
+    "max_stress_abs_error": 0.004597701161173973
+  },
+  {
+    "case": "shear_positive",
+    "pass_gate": true,
+    "points": 45,
+    "displacement_unchanged": true,
+    "surface_grids": 20,
+    "max_force_abs_error": 4.9891187847705964e-08,
+    "max_stress_abs_error": 0.0
+  },
+  {
+    "case": "shear_negative",
+    "pass_gate": true,
+    "points": 45,
+    "displacement_unchanged": true,
+    "surface_grids": 20,
+    "max_force_abs_error": 4.9891187847705964e-08,
+    "max_stress_abs_error": 0.0
+  },
+  {
+    "case": "force_only",
+    "pass_gate": true,
+    "points": 90,
+    "displacement_unchanged": true,
+    "surface_grids": 0,
+    "max_force_abs_error": 4.5854484054252964e-07,
+    "max_stress_abs_error": 0
+  },
+  {
+    "case": "mixed",
+    "pass_gate": true,
+    "points": 45,
+    "displacement_unchanged": true,
+    "surface_grids": 20,
+    "max_force_abs_error": 6.27095787564258e-06,
+    "max_stress_abs_error": 0.048892085082115955
+  }
+]

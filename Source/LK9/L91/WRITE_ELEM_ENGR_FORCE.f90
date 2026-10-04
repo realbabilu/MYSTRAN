@@ -39,7 +39,7 @@
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, OGEL
       USE MODEL_STUF, ONLY            :  ELEM_ONAME, LABEL, SCNUM, STITLE, TITLE, TYPE
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  FORC_LOC, FORC_OUT
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  FORC_LOC, FORC_OUT, FORC_CENTER_REQ, FORC_CORNER_REQ
       USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_F06_E14_6, FAST_FMT_I8_RJ
       USE WRITE_ELEM_ENGR_FORCE_USE_IFs
 
@@ -65,6 +65,7 @@
       INTEGER(LONG)                   :: NUM_TERMS         ! Number of terms to write out for shell elems
 
       LOGICAL                         :: WRITE_F06, WRITE_OP2   ! flag
+      LOGICAL                         :: FILTER_SHELL_POINTS, PRINT_CENTER, PRINT_CORNER
 
       REAL(DOUBLE)                    :: ABS_ANS(8)       ! Max ABS for all element output
       REAL(DOUBLE)                    :: FORCE_VALUES_6(6)! Local contiguous copy to avoid strided slice temporaries
@@ -98,6 +99,18 @@
       INTEGER(LONG)                   :: NVALUES      ! the number of "words" for all the elments
       INTEGER(LONG)                   :: NTOTAL       ! the number of bytes for all NVALUES
       INTEGER(LONG)                   :: ISUBCASE     ! the subcase ID
+      ! Keep recovery and native OP2 records complete; select only F06 rows.
+      FILTER_SHELL_POINTS = (TYPE == 'QUAD8   ' .AND. NUM_PTS == 9) .OR. &
+                            (TYPE == 'TRIA6   ' .AND. NUM_PTS == 7)
+      PRINT_CORNER = FORC_CORNER_REQ
+      PRINT_CENTER = FORC_CENTER_REQ
+      IF (.NOT.FORC_CENTER_REQ .AND. .NOT.FORC_CORNER_REQ) THEN
+         ! LOADC shares legacy QUAD4 location across FORCE/STRESS/STRAIN.
+         ! An absent native FORCE selector nevertheless defaults to CENTER.
+         PRINT_CORNER = .FALSE.
+         PRINT_CENTER = .TRUE.
+      ENDIF
+
       ! initialize
       ANALYSIS_CODE = -1
 
@@ -613,6 +626,7 @@ headr:IF (IHDR == 'Y') THEN
           K = 0
           DO I=1,NUM,NUM_PTS
               K = I
+             IF (.NOT.FILTER_SHELL_POINTS .OR. PRINT_CENTER) THEN
              SHELL_VALUES_8(1:8) = OGEL(K,1:8)
              LINE_BUF = ' '
              CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(I,1), LINE_BUF(2:9) )
@@ -627,12 +641,16 @@ headr:IF (IHDR == 'Y') THEN
                 J1 = J1 + 14
              ENDDO
              WRITE(F06,'(A)') LINE_BUF(1:J1-1)
+             ENDIF
 
              DO L=2,NUM_PTS
                K = K + 1
-               IF ((TYPE == 'TRIA6   ') .AND. (FORC_LOC /= 'CORNER  ')) CYCLE
+               IF (FILTER_SHELL_POINTS .AND. .NOT.PRINT_CORNER) CYCLE
+               IF (.NOT.FILTER_SHELL_POINTS .AND. TYPE == 'TRIA6   ' .AND. FORC_LOC /= 'CORNER  ') CYCLE
                SHELL_VALUES_8(1:8) = OGEL(K,1:8)
                LINE_BUF = ' '
+               IF (FILTER_SHELL_POINTS .AND. .NOT.PRINT_CENTER .AND. L == 2) &
+                  CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(I,1), LINE_BUF(2:9) )
                LINE_BUF(12:14) = 'GRD'
                CALL FAST_FMT_I8_RJ ( GID_OUT_ARRAY(I,L), LINE_BUF(15:22) )
                J1 = 25
@@ -691,6 +709,7 @@ headr:IF (IHDR == 'Y') THEN
           K = 0
           DO I=1,NUM,NUM_PTS
              K = K + 1
+             IF (.NOT.FILTER_SHELL_POINTS .OR. PRINT_CENTER) THEN
              SHELL_VALUES_8(1:8) = OGEL(K,1:8)
              IF(TYPE == 'QUAD8   ') THEN
                 LINE_BUF = ' '
@@ -707,11 +726,15 @@ headr:IF (IHDR == 'Y') THEN
                 J1 = J1 + 14
              ENDDO
              WRITE(F06,'(A)') LINE_BUF(1:J1-1)
+             ENDIF
 
              DO L=2,NUM_PTS
                K = K + 1
+               IF (FILTER_SHELL_POINTS .AND. .NOT.PRINT_CORNER) CYCLE
                SHELL_VALUES_8(1:8) = OGEL(K,1:8)
                LINE_BUF = ' '
+               IF (FILTER_SHELL_POINTS .AND. .NOT.PRINT_CENTER .AND. L == 2) &
+                  CALL FAST_FMT_I8_RJ ( EID_OUT_ARRAY(I,1), LINE_BUF(2:9) )
                LINE_BUF(12:14) = 'GRD'
                CALL FAST_FMT_I8_RJ ( GID_OUT_ARRAY(I,L), LINE_BUF(15:22) )
                J1 = 25
@@ -899,6 +922,10 @@ headr:IF (IHDR == 'Y') THEN
       ENDDO
 
       DO II=1,NUM
+         IF (FILTER_SHELL_POINTS) THEN
+            IF (MOD(II-1,NUM_PTS) == 0 .AND. .NOT.PRINT_CENTER) CYCLE
+            IF (MOD(II-1,NUM_PTS) /= 0 .AND. .NOT.PRINT_CORNER) CYCLE
+         ENDIF
          DO JJ=BEG_COL,END_COL
             IF (OGEL(II,JJ) > MAX_ANS(JJ)) THEN
                MAX_ANS(JJ) = OGEL(II,JJ)
@@ -911,6 +938,10 @@ headr:IF (IHDR == 'Y') THEN
       ENDDO
 
       DO II=1,NUM
+         IF (FILTER_SHELL_POINTS) THEN
+            IF (MOD(II-1,NUM_PTS) == 0 .AND. .NOT.PRINT_CENTER) CYCLE
+            IF (MOD(II-1,NUM_PTS) /= 0 .AND. .NOT.PRINT_CORNER) CYCLE
+         ENDIF
          DO JJ=BEG_COL,END_COL
             IF (OGEL(II,JJ) < MIN_ANS(JJ)) THEN
                MIN_ANS(JJ) = OGEL(II,JJ)

@@ -41,7 +41,7 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, THIRD, HALF, THREE, TWELVE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  EPSIL, IORQ1M, QUAD4TYP, PCOMPEQ, PCMPTSTM, SHRFXFAC, SUPWARN, TSTM_DEF
+      USE PARAMS, ONLY                :  EPSIL, IORQ1M, QUAD4TYP, QUAD8TYP, PCOMPEQ, PCMPTSTM, SHRFXFAC, SUPWARN, TSTM_DEF
 
       USE MODEL_STUF, ONLY            :  ALPVEC, EB, EBM, EM, ET, EDAT, EID, EMAT, EPNT, EPROP, ETYPE, FAILURE_THEORY, FCONV,      &
                                          INTL_MID, INTL_PID, MASS_PER_UNIT_AREA, MATL, MEPROP, MTRL_TYPE,                          &
@@ -150,6 +150,13 @@ pcom0:IF (PCOMP_PROPS == 'N') THEN                         ! Element is not a co
             FCONV(1)          =  TM
             FCONV(2)          = -IB                        ! Note neq sign on FCONV(2): due to sign convention on positive bending
             FCONV(3)          =  TS
+! Native Q8/T6 BE2 recovers +curvature; eps(z)=eps_m-z*curvature.
+! Nastran engineering moments are +D*curvature. Keep fiber recovery unchanged.
+            IF (TYPE(1:5) == 'TRIA6' .OR. &
+                (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'MACQ8D ' .OR. &
+                 QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+               FCONV(2) = IB
+            ENDIF
          ENDIF
 
          IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ') .OR. (TYPE(1:5) == 'QUAD8') .OR.                                &

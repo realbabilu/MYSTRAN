@@ -62,6 +62,8 @@
       CHARACTER( 8*BYTE)              :: TOKTYP            ! Variable to test whether "THRU" option was used on B.D. PLOAD2 card
       CHARACTER( 8*BYTE)              :: THRU              ! ='Y' if THRU option used on TEMPRB, TEMPP1 continuation card
  
+      CHARACTER(LEN=BD_ENTRY_LEN)     :: CHILD
+      CHARACTER(LEN=JCARD_LEN)        :: CJCARD(10)
       INTEGER(LONG)                   :: EID               ! Actual element ID
       INTEGER(LONG)                   :: EID1,EID2         ! The 2 actual elem ID's in "EID1 THRU EID2" on elem press B.D. card 
       INTEGER(LONG)                   :: EL_PRES_ERR       ! Count of error messages when elements have redundant pressures
@@ -160,6 +162,12 @@ pcards:  DO J=1,NPCARD                                     ! Process elem pressu
                CYCLE pcards                                 ! Ignore record if not for PLOAD1 or PLOAD2
             ENDIF
  
+            IF (NAME(1:6) == 'PLOAD4') THEN
+               READ(L1Q,IOSTAT=IOCHK) CHILD
+               IF (IOCHK /= 0) CALL OUTA_HERE('Y')
+               CALL MKJCARD(SUBR_NAME, CHILD, CJCARD)
+            ENDIF
+
             READ(JCARD(2),'(I8)') SETID                    ! Get pressure load SID
  
             FOUND = 'N'                                    ! (2-b- ii). Scan through LSID to find set that matches SETID read.
@@ -369,6 +377,11 @@ k_do2:      DO K = 1,NSID                                  ! There is a match; w
                   ELSE
                      PDATA(NPDAT) = SCALE*RPDAT1
                   ENDIF
+               ENDDO
+               DO K=2,5
+                  NPDAT = NPDAT + 1
+                  PDATA(NPDAT) = ZERO
+                  IF (CJCARD(K) /= ' ') READ(CJCARD(K),'(F16.0)') PDATA(NPDAT)
                ENDDO
             ENDIF
 
@@ -623,7 +636,8 @@ k_do6:            DO K=EID1,EID2
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NELE, NSUB, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  PRESSURE_DATA_PROC_BEGEND
-      USE MODEL_STUF, ONLY            :  ESORT1, ETYPE, SUBLOD, PPNT, PTYPE
+      USE MODEL_STUF, ONLY            :  ESORT1, ETYPE, SUBLOD, PPNT, PTYPE, PDATA
+      USE PARAMS, ONLY                :  QUAD8TYP, TRIA6TYP
  
       IMPLICIT NONE
  
@@ -678,6 +692,21 @@ k_do6:            DO K=EID1,EID2
          ENDIF 
       ENDIF  
 
+      IF (NAME(1:6) == 'PLOAD4') THEN
+         IF (ANY(PDATA(IPPNT+5:IPPNT+7) /= 0D0)) THEN
+            IF (.NOT. ((ETYPE(IELEM)(1:5) == 'QUAD8' .AND. &
+                (QUAD8TYP == 'SIMOQ8' .OR. QUAD8TYP == 'MACQ8D' .OR. QUAD8TYP == 'ANS8BDG6' .OR. &
+                 QUAD8TYP == 'MITC8' .OR. QUAD8TYP == 'HBQ8')) .OR. &
+                (ETYPE(IELEM)(1:5) == 'TRIA6' .AND. &
+                (TRIA6TYP == 'SIMOT6' .OR. TRIA6TYP == 'MITC6' .OR. TRIA6TYP == 'MH6T' .OR. TRIA6TYP == 'REZAIEE')))) THEN
+               FATAL_ERR=FATAL_ERR+1
+               EL_PRES_ERR=EL_PRES_ERR+1
+               WRITE(ERR,*) ' *ERROR: Directional PLOAD4 requires a supported native Q8/T6 formulation. Element ',EID
+               WRITE(F06,*) ' *ERROR: Directional PLOAD4 requires a supported native Q8/T6 formulation. Element ',EID
+               RETURN
+            ENDIF
+         ENDIF
+      ENDIF
       PPNT(IELEM,JSUB) = IPPNT
 
 ! Set PTYPE for this element

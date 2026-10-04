@@ -152,7 +152,7 @@
                IF (ETYPE(J) == ELMTYP(I)) THEN
                   call is_elem_pcomp_props ( j )
                   if (pcomp_props == 'N') then
-                     IF ((ETYPE(J)(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+                     IF ((ETYPE(J)(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D '))) THEN
                         NUM_PTS(I) = 9
                      ELSE IF (ETYPE(J)(1:5) == 'TRIA6') THEN
 ! Retain nodal recovery internally for the native quadratic OP2 payload.
@@ -261,7 +261,7 @@ elems_3: DO J = 1,NELE
                                        STRESS_OUT_ERR_INDEX, PCT_ERR_MAX )
                               ENDIF
 
-                           ELSEIF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
+                           ELSEIF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D '))) THEN
                               STRESS_OUT(:,:) = STRESS_RAW(:,:)
                            ELSEIF (ETYPE(J)(1:5) == 'QUAD8') THEN
 
@@ -291,7 +291,7 @@ elems_3: DO J = 1,NELE
                            STRESS(:) = STRESS_OUT(:,M)
                            CALL SHELL_ENGR_FORCE_OGEL ( NUM_OGEL )
                            CALL CACHE_SURFACE_FORCE_ROW(NUM_OGEL,M)
-                           IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) CALL Q8_FORCE_CENTER(NUM_OGEL,M)
+                           IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D ')) CALL Q8_FORCE_CENTER(NUM_OGEL,M)
                            GID_OUT_ARRAY(NUM_OGEL_ROWS,1) = 0
                            DO K=1,ELGP
                               GID_OUT_ARRAY(NUM_OGEL_ROWS,K+1) = AGRID(K)
@@ -561,14 +561,14 @@ elems_3: DO J = 1,NELE
 
       SUBROUTINE CACHE_SURFACE_FORCE_ROW(ROW,POINT)
       INTEGER(LONG),INTENT(IN) :: ROW,POINT
-      REAL(DOUBLE) :: XYZ6(6,3),G1(3),G2(3),G3(3),NM
+      REAL(DOUBLE) :: XYZ6(6,3),XYZ8(8,3),G1(3),G2(3),G3(3),NM
       INTEGER(LONG) :: II
       SURFACE_FORCE_RAW(:,ROW)=OGEL(ROW,1:8)
       SURFACE_FORCE_TE(:,:,ROW)=ZERO
       DO II=1,3
          SURFACE_FORCE_TE(II,II,ROW)=ONE
       ENDDO
-      IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ')) THEN
+      IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D ')) THEN
          SURFACE_FORCE_TE(:,:,ROW)=Q8_POINT_BASIS(:,:,POINT)
       ELSE IF (TYPE(1:5) == 'TRIA6') THEN
 ! Native T6 operators use the signed centroid frame, as in stress recovery.

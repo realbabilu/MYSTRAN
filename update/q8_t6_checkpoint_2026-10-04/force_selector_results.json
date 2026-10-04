@@ -1,0 +1,482 @@
+[
+  {
+    "family": "SIMOQ8",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOQ8",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOQ8",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 45,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOQ8",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOQ8",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOQ8",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  },
+  {
+    "family": "ANS8BDG6",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "ANS8BDG6",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "ANS8BDG6",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 45,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "ANS8BDG6",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "ANS8BDG6",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "ANS8BDG6",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  },
+  {
+    "family": "MITC8",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC8",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC8",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 45,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC8",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC8",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC8",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  },
+  {
+    "family": "HBQ8",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "HBQ8",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "HBQ8",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 45,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "HBQ8",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "HBQ8",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "HBQ8",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  },
+  {
+    "family": "MACNEALD",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 45,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  },
+  {
+    "family": "SIMOT6",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOT6",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 60,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOT6",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 70,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOT6",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 60,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOT6",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "SIMOT6",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  },
+  {
+    "family": "MITC6",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC6",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 60,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC6",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 70,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC6",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 60,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC6",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MITC6",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  },
+  {
+    "family": "MH6T",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MH6T",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 60,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MH6T",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 70,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MH6T",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 60,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MH6T",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MH6T",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  },
+  {
+    "family": "REZAIEE",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "REZAIEE",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 60,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "REZAIEE",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 70,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "REZAIEE",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 60,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "REZAIEE",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "REZAIEE",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 10,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  },
+  {
+    "family": "MACNEALD_mixed",
+    "selector": "CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD_mixed",
+    "selector": "CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD_mixed",
+    "selector": "CENTER,CORNER",
+    "pass_gate": true,
+    "force_points_per_subcase": 45,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD_mixed",
+    "selector": "BILIN",
+    "pass_gate": true,
+    "force_points_per_subcase": 40,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD_mixed",
+    "selector": "DEFAULT",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": true
+  },
+  {
+    "family": "MACNEALD_mixed",
+    "selector": "FORCE_ONLY_CENTER",
+    "pass_gate": true,
+    "force_points_per_subcase": 5,
+    "op2_unchanged": true,
+    "surface_and_stress_unchanged": false
+  }
+]

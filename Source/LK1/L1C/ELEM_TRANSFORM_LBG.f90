@@ -116,9 +116,9 @@
 !-----------------------------------------------------------------------------------------------------------------------------------
 ! Transform from local to basic coords (TE_IDENT = 'Y': TE is ident matrix). Note that ELAS elem is already in global coords
 
-      IF ((TE_IDENT /= 'Y') .AND. .NOT. ((WHICH == 'KE') .AND. (TYPE == 'QUAD8   ') .AND.                                      &
+      IF ((TE_IDENT /= 'Y') .AND. .NOT. (((WHICH == 'KE') .OR. (WHICH == 'PPE') .OR. (WHICH == 'ME') .OR. (WHICH == 'PTE') .OR. (WHICH == 'KED')) .AND. (TYPE == 'QUAD8   ') .AND.                                      &
                                          ((QUAD8TYP == 'SIMOQ8  ') .OR. (QUAD8TYP == 'MACQ8D  ') .OR. (QUAD8TYP == 'ANS8BDG6') .OR. (QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) .AND.                     &
-                                  .NOT. ((WHICH == 'KE') .AND. (TYPE(1:5) == 'TRIA6') .AND.                                    &
+                                  .NOT. (((WHICH == 'KE') .OR. (WHICH == 'PPE') .OR. (WHICH == 'ME') .OR. (WHICH == 'PTE') .OR. (WHICH == 'KED')) .AND. (TYPE(1:5) == 'TRIA6') .AND.                                    &
                                          ((TRIA6TYP == 'SIMOT6  ') .OR. (TRIA6TYP == 'MITC6   ') .OR. (TRIA6TYP == 'MH6T    ') .OR.              &
                                           (TRIA6TYP == 'REZAIEE ')))) THEN
          CALL ELMTLB ( OPT )

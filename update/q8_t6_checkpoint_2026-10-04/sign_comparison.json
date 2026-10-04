@@ -1,0 +1,914 @@
+{
+  "summary": [
+    {
+      "family": "SIMOQ8",
+      "kind": "Q8",
+      "force_points": 5,
+      "expected_points": 45,
+      "subcases": [
+        {
+          "subcase": 1,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 4.3919162018291047e-07,
+          "max_center_M_difference": 0.0,
+          "max_center_M_sum": 0.0,
+          "max_center_Q_difference": 0.0,
+          "max_center_stress_difference": 0.003905050931734877,
+          "mystran_basic_eid1": [
+            1.333333,
+            1.333333,
+            0.4,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "nastran_basic_eid1": [
+            1.3333333730697632,
+            1.3333333730697632,
+            0.4000000059604645,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mystran_max_abs_Q_all": 0.0
+        },
+        {
+          "subcase": 2,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.932728408853324e-11,
+          "max_center_M_sum": 2.2222395877149815e-07,
+          "max_center_Q_difference": 0.0032323233317584025,
+          "max_center_stress_difference": 0.00035659102031915246,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111110000000003e-07,
+            1.1111109999999997e-07,
+            3.333333e-08,
+            -1.3552529999999995e-17,
+            2.2587550000000004e-17
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111319905831e-07,
+            1.1111111319905831e-07,
+            3.333333253863202e-08,
+            -1.795734497684543e-18,
+            -0.00323232333175838
+          ],
+          "mystran_max_abs_Q_all": 0.02666667
+        },
+        {
+          "subcase": 3,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.161870376468869e-06,
+          "max_center_M_sum": 5.161870376468869e-06,
+          "max_center_Q_difference": 0.6660633405339005,
+          "max_center_stress_difference": 30.971221923828125,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.3333333000000001,
+            0.6666666999999998
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.2904675941172172e-06,
+            5.161870376468869e-06,
+            9.694313121144662e-07,
+            0.0003973199636675419,
+            0.0018803431885316968
+          ],
+          "mystran_max_abs_Q_all": 0.7155418
+        }
+      ]
+    },
+    {
+      "family": "ANS8BDG6",
+      "kind": "Q8",
+      "force_points": 5,
+      "expected_points": 45,
+      "subcases": [
+        {
+          "subcase": 1,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 4.3919162018291047e-07,
+          "max_center_M_difference": 0.0,
+          "max_center_M_sum": 0.0,
+          "max_center_Q_difference": 0.0,
+          "max_center_stress_difference": 0.003905050931734877,
+          "mystran_basic_eid1": [
+            1.333333,
+            1.333333,
+            0.4,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "nastran_basic_eid1": [
+            1.3333333730697632,
+            1.3333333730697632,
+            0.4000000059604645,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mystran_max_abs_Q_all": 0.0
+        },
+        {
+          "subcase": 2,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.932728408853324e-11,
+          "max_center_M_sum": 2.2222395877149815e-07,
+          "max_center_Q_difference": 0.0032323233317583812,
+          "max_center_stress_difference": 0.00035659102031915246,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111110000000003e-07,
+            1.1111109999999997e-07,
+            3.333333e-08,
+            -1.355253e-17,
+            1.4494880000000028e-18
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111319905831e-07,
+            1.1111111319905831e-07,
+            3.333333253863202e-08,
+            -1.795734497684543e-18,
+            -0.00323232333175838
+          ],
+          "mystran_max_abs_Q_all": 8.990297e-16
+        },
+        {
+          "subcase": 3,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.161870376468869e-06,
+          "max_center_M_sum": 5.161870376468869e-06,
+          "max_center_Q_difference": 0.6660633405339005,
+          "max_center_stress_difference": 30.971221923828125,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.3333333000000001,
+            0.6666666999999998
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.2904675941172172e-06,
+            5.161870376468869e-06,
+            9.694313121144662e-07,
+            0.0003973199636675419,
+            0.0018803431885316968
+          ],
+          "mystran_max_abs_Q_all": 0.7155418
+        }
+      ]
+    },
+    {
+      "family": "MITC8",
+      "kind": "Q8",
+      "force_points": 5,
+      "expected_points": 45,
+      "subcases": [
+        {
+          "subcase": 1,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 4.3919162018291047e-07,
+          "max_center_M_difference": 0.0,
+          "max_center_M_sum": 0.0,
+          "max_center_Q_difference": 0.0,
+          "max_center_stress_difference": 0.003905050931734877,
+          "mystran_basic_eid1": [
+            1.333333,
+            1.333333,
+            0.4,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "nastran_basic_eid1": [
+            1.3333333730697632,
+            1.3333333730697632,
+            0.4000000059604645,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mystran_max_abs_Q_all": 0.0
+        },
+        {
+          "subcase": 2,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.932728408853324e-11,
+          "max_center_M_sum": 2.2222395877149815e-07,
+          "max_center_Q_difference": 0.0032323233317583812,
+          "max_center_stress_difference": 0.00035659102031915246,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111110000000003e-07,
+            1.1111109999999997e-07,
+            3.333333e-08,
+            -1.355253e-17,
+            1.4494880000000028e-18
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111319905831e-07,
+            1.1111111319905831e-07,
+            3.333333253863202e-08,
+            -1.795734497684543e-18,
+            -0.00323232333175838
+          ],
+          "mystran_max_abs_Q_all": 8.990297e-16
+        },
+        {
+          "subcase": 3,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.161870376468869e-06,
+          "max_center_M_sum": 5.161870376468869e-06,
+          "max_center_Q_difference": 0.6660633405339005,
+          "max_center_stress_difference": 30.971221923828125,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.3333333000000001,
+            0.6666666999999998
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.2904675941172172e-06,
+            5.161870376468869e-06,
+            9.694313121144662e-07,
+            0.0003973199636675419,
+            0.0018803431885316968
+          ],
+          "mystran_max_abs_Q_all": 0.7155418
+        }
+      ]
+    },
+    {
+      "family": "HBQ8",
+      "kind": "Q8",
+      "force_points": 5,
+      "expected_points": 45,
+      "subcases": [
+        {
+          "subcase": 1,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 4.3919162018291047e-07,
+          "max_center_M_difference": 0.0,
+          "max_center_M_sum": 0.0,
+          "max_center_Q_difference": 0.0,
+          "max_center_stress_difference": 0.003905050931734877,
+          "mystran_basic_eid1": [
+            1.333333,
+            1.333333,
+            0.4,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "nastran_basic_eid1": [
+            1.3333333730697632,
+            1.3333333730697632,
+            0.4000000059604645,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mystran_max_abs_Q_all": 0.0
+        },
+        {
+          "subcase": 2,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.932728408853324e-11,
+          "max_center_M_sum": 2.2222395877149815e-07,
+          "max_center_Q_difference": 0.0032323233317583812,
+          "max_center_stress_difference": 0.00035659102031915246,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111110000000003e-07,
+            1.1111109999999997e-07,
+            3.333333e-08,
+            -1.355253e-17,
+            1.4494880000000028e-18
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111319905831e-07,
+            1.1111111319905831e-07,
+            3.333333253863202e-08,
+            -1.795734497684543e-18,
+            -0.00323232333175838
+          ],
+          "mystran_max_abs_Q_all": 8.990297e-16
+        },
+        {
+          "subcase": 3,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.161870376468869e-06,
+          "max_center_M_sum": 5.161870376468869e-06,
+          "max_center_Q_difference": 0.6660633405339005,
+          "max_center_stress_difference": 30.971221923828125,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.3333333000000001,
+            0.6666666999999998
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.2904675941172172e-06,
+            5.161870376468869e-06,
+            9.694313121144662e-07,
+            0.0003973199636675419,
+            0.0018803431885316968
+          ],
+          "mystran_max_abs_Q_all": 0.7155418
+        }
+      ]
+    },
+    {
+      "family": "MACNEALD",
+      "kind": "Q8",
+      "force_points": 5,
+      "expected_points": 45,
+      "subcases": [
+        {
+          "subcase": 1,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 4.3919162018291047e-07,
+          "max_center_M_difference": 0.0,
+          "max_center_M_sum": 0.0,
+          "max_center_Q_difference": 0.0,
+          "max_center_stress_difference": 0.003905050931734877,
+          "mystran_basic_eid1": [
+            1.333333,
+            1.333333,
+            0.4,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "nastran_basic_eid1": [
+            1.3333333730697632,
+            1.3333333730697632,
+            0.4000000059604645,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mystran_max_abs_Q_all": 0.0
+        },
+        {
+          "subcase": 2,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.932728408853324e-11,
+          "max_center_M_sum": 2.2222395877149815e-07,
+          "max_center_Q_difference": 0.0032323233317583843,
+          "max_center_stress_difference": 0.00035659102031915246,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111110000000003e-07,
+            1.1111109999999997e-07,
+            3.333333e-08,
+            -4.5175089999999995e-18,
+            4.517509000000001e-18
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111319905831e-07,
+            1.1111111319905831e-07,
+            3.333333253863202e-08,
+            -1.795734497684543e-18,
+            -0.00323232333175838
+          ],
+          "mystran_max_abs_Q_all": 2.529805e-16
+        },
+        {
+          "subcase": 3,
+          "force_points": 45,
+          "stress_points_both_fibers": 45,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.161870376468869e-06,
+          "max_center_M_sum": 5.161870376468869e-06,
+          "max_center_Q_difference": 0.6660633405339005,
+          "max_center_stress_difference": 30.971221923828125,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.3333333000000001,
+            0.6666666999999998
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.2904675941172172e-06,
+            5.161870376468869e-06,
+            9.694313121144662e-07,
+            0.0003973199636675419,
+            0.0018803431885316968
+          ],
+          "mystran_max_abs_Q_all": 0.7155418
+        }
+      ]
+    },
+    {
+      "family": "SIMOT6",
+      "kind": "T6",
+      "force_points": 10,
+      "expected_points": 70,
+      "subcases": [
+        {
+          "subcase": 1,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 3.566741946237073e-07,
+          "max_center_M_difference": 0.0,
+          "max_center_M_sum": 0.0,
+          "max_center_Q_difference": 0.0,
+          "max_center_stress_difference": 0.004537196395403953,
+          "mystran_basic_eid1": [
+            1.3333333294117642,
+            1.3333336705882348,
+            0.40000011764705873,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "nastran_basic_eid1": [
+            1.3333333870943849,
+            1.3333333590451406,
+            0.4000000024543088,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mystran_max_abs_Q_all": 0.0
+        },
+        {
+          "subcase": 2,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.2121534924356334e-14,
+          "max_center_M_sum": 2.2222226867054427e-07,
+          "max_center_Q_difference": 2.222222139285834e-05,
+          "max_center_stress_difference": 5.030519822923907e-07,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111294117643e-07,
+            1.1111112705882349e-07,
+            3.3333331764705866e-08,
+            -6.573945094103558e-18,
+            4.820890320272191e-17
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111278109198e-07,
+            1.111111136170246e-07,
+            3.3333334419480427e-08,
+            -2.264804547167089e-17,
+            4.297125496509337e-17
+          ],
+          "mystran_max_abs_Q_all": 2.891206e-16
+        },
+        {
+          "subcase": 3,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 1.7263800287737518e-21,
+          "max_center_M_sum": 5.057049917882662e-21,
+          "max_center_Q_difference": 5.5406867094376366e-08,
+          "max_center_stress_difference": 1.0358265731575279e-14,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            -2.4671625764705874e-22,
+            -6.78469642352941e-22,
+            -1.8503717058823526e-22,
+            0.33333332317774733,
+            0.6666666948626196
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            -1.6275792414577637e-22,
+            -6.510317051213647e-22,
+            -1.2206844529030066e-22,
+            0.33333333491483436,
+            0.6666666842859186
+          ],
+          "mystran_max_abs_Q_all": 0.745356
+        }
+      ]
+    },
+    {
+      "family": "MITC6",
+      "kind": "T6",
+      "force_points": 10,
+      "expected_points": 70,
+      "subcases": [
+        {
+          "subcase": 1,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 3.566741946237073e-07,
+          "max_center_M_difference": 0.0,
+          "max_center_M_sum": 0.0,
+          "max_center_Q_difference": 0.0,
+          "max_center_stress_difference": 0.004537196395403953,
+          "mystran_basic_eid1": [
+            1.3333333294117642,
+            1.3333336705882348,
+            0.40000011764705873,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "nastran_basic_eid1": [
+            1.3333333870943849,
+            1.3333333590451406,
+            0.4000000024543088,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mystran_max_abs_Q_all": 0.0
+        },
+        {
+          "subcase": 2,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.2121534924356334e-14,
+          "max_center_M_sum": 2.2222226867054427e-07,
+          "max_center_Q_difference": 2.2222221392688635e-05,
+          "max_center_stress_difference": 5.030519822923907e-07,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111294117643e-07,
+            1.1111112705882349e-07,
+            3.3333331764705866e-08,
+            -1.7804425272030932e-17,
+            -5.259153431644533e-17
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111278109198e-07,
+            1.111111136170246e-07,
+            3.3333334419480427e-08,
+            -2.264804547167089e-17,
+            4.297125496509337e-17
+          ],
+          "mystran_max_abs_Q_all": 1.034975e-15
+        },
+        {
+          "subcase": 3,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 1.7263800287737518e-21,
+          "max_center_M_sum": 5.057049917882662e-21,
+          "max_center_Q_difference": 5.5406867094376366e-08,
+          "max_center_stress_difference": 1.0358265731575279e-14,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            -2.4671625764705874e-22,
+            -6.78469642352941e-22,
+            -1.8503717058823526e-22,
+            0.33333332317774733,
+            0.6666666948626196
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            -1.6275792414577637e-22,
+            -6.510317051213647e-22,
+            -1.2206844529030066e-22,
+            0.33333333491483436,
+            0.6666666842859186
+          ],
+          "mystran_max_abs_Q_all": 0.745356
+        }
+      ]
+    },
+    {
+      "family": "MH6T",
+      "kind": "T6",
+      "force_points": 10,
+      "expected_points": 70,
+      "subcases": [
+        {
+          "subcase": 1,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 3.566741946237073e-07,
+          "max_center_M_difference": 0.0,
+          "max_center_M_sum": 0.0,
+          "max_center_Q_difference": 0.0,
+          "max_center_stress_difference": 0.004537196395403953,
+          "mystran_basic_eid1": [
+            1.3333333294117642,
+            1.3333336705882348,
+            0.40000011764705873,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "nastran_basic_eid1": [
+            1.3333333870943849,
+            1.3333333590451406,
+            0.4000000024543088,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mystran_max_abs_Q_all": 0.0
+        },
+        {
+          "subcase": 2,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.2121534924356334e-14,
+          "max_center_M_sum": 2.2222226867054427e-07,
+          "max_center_Q_difference": 2.222222139292198e-05,
+          "max_center_stress_difference": 5.030519822923907e-07,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111294117643e-07,
+            1.1111112705882349e-07,
+            3.3333331764705866e-08,
+            8.765254466306824e-18,
+            4.437410331261932e-17
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111278109198e-07,
+            1.111111136170246e-07,
+            3.3333334419480427e-08,
+            -2.264804547167089e-17,
+            4.297125496509337e-17
+          ],
+          "mystran_max_abs_Q_all": 3.975408e-16
+        },
+        {
+          "subcase": 3,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 1.7263800287737518e-21,
+          "max_center_M_sum": 5.057049917882662e-21,
+          "max_center_Q_difference": 5.5406867094376366e-08,
+          "max_center_stress_difference": 1.0358265731575279e-14,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            -2.4671625764705874e-22,
+            -6.78469642352941e-22,
+            -1.8503717058823526e-22,
+            0.33333332317774733,
+            0.6666666948626196
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            -1.6275792414577637e-22,
+            -6.510317051213647e-22,
+            -1.2206844529030066e-22,
+            0.33333333491483436,
+            0.6666666842859186
+          ],
+          "mystran_max_abs_Q_all": 0.745356
+        }
+      ]
+    },
+    {
+      "family": "REZAIEE",
+      "kind": "T6",
+      "force_points": 10,
+      "expected_points": 70,
+      "subcases": [
+        {
+          "subcase": 1,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 3.566741946237073e-07,
+          "max_center_M_difference": 0.0,
+          "max_center_M_sum": 0.0,
+          "max_center_Q_difference": 0.0,
+          "max_center_stress_difference": 0.004537196395403953,
+          "mystran_basic_eid1": [
+            1.3333333294117642,
+            1.3333336705882348,
+            0.40000011764705873,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "nastran_basic_eid1": [
+            1.3333333870943849,
+            1.3333333590451406,
+            0.4000000024543088,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mystran_max_abs_Q_all": 0.0
+        },
+        {
+          "subcase": 2,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 5.2121534924356334e-14,
+          "max_center_M_sum": 2.2222226867054427e-07,
+          "max_center_Q_difference": 2.222222139301592e-05,
+          "max_center_stress_difference": 5.030519822923907e-07,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111294117643e-07,
+            1.1111112705882349e-07,
+            3.3333331764705866e-08,
+            2.300879691525932e-17,
+            2.9692302627260545e-16
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            1.1111111278109198e-07,
+            1.111111136170246e-07,
+            3.3333334419480427e-08,
+            -2.264804547167089e-17,
+            4.297125496509337e-17
+          ],
+          "mystran_max_abs_Q_all": 1.319113e-15
+        },
+        {
+          "subcase": 3,
+          "force_points": 70,
+          "stress_points_both_fibers": 70,
+          "max_center_N_difference": 0.0,
+          "max_center_M_difference": 1.7263800287737518e-21,
+          "max_center_M_sum": 5.057049917882662e-21,
+          "max_center_Q_difference": 5.5406867094376366e-08,
+          "max_center_stress_difference": 1.0358265731575279e-14,
+          "mystran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            -2.4671625764705874e-22,
+            -6.78469642352941e-22,
+            -1.8503717058823526e-22,
+            0.33333332317774733,
+            0.6666666948626196
+          ],
+          "nastran_basic_eid1": [
+            0.0,
+            0.0,
+            0.0,
+            -1.6275792414577637e-22,
+            -6.510317051213647e-22,
+            -1.2206844529030066e-22,
+            0.33333333491483436,
+            0.6666666842859186
+          ],
+          "mystran_max_abs_Q_all": 0.745356
+        }
+      ]
+    }
+  ],
+  "full_point_comparisons": "Local workspace: test/sign/comparison.json"
+}

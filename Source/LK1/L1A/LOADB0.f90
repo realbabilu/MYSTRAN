@@ -43,7 +43,7 @@
                                          MEDAT0_CUSERIN, MMPC,                                                                     &
                                          MPDAT_PLOAD1, MPDAT_PLOAD2, MPDAT_PLOAD4, MEDAT_PLOTEL, MRBE3, MRSPLINE, MTDAT_TEMPRB,    &
                                          MTDAT_TEMPP1,                                                                            &
-                                         NPBARL, NSPOINT, PROG_NAME
+                                         NPBARL, NSPOINT, LSUB, PROG_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE SUBR_BEGEND_LEVELS, ONLY    :  LOADB0_BEGEND
       USE MODEL_STUF, ONLY            :  GRDSET3, GRDSET7, GRDSET8
@@ -431,14 +431,14 @@
  
          ELSE IF ((CARD(1:6) == 'PLOAD1'  ) .OR. (CARD(1:6) == 'PLOAD2'  ))  THEN
             IF (CARD(1:6) == 'PLOAD1') THEN
-               LPDAT  = LPDAT  + MPDAT_PLOAD1               ! Beam/bar PLOAD1 data slots
+               LPDAT  = LPDAT  + MPDAT_PLOAD1*MAX(1,LSUB)   ! Scaled data are stored separately for each subcase
             ELSE
-               LPDAT  = LPDAT  + MPDAT_PLOAD2
+               LPDAT  = LPDAT  + MPDAT_PLOAD2*MAX(1,LSUB)
             ENDIF
             LPLOAD = LPLOAD + 1
 
          ELSE IF (CARD(1:6) == 'PLOAD4'  )  THEN
-            LPDAT  = LPDAT  + MPDAT_PLOAD4
+            LPDAT  = LPDAT  + MPDAT_PLOAD4*MAX(1,LSUB)
             LPLOAD = LPLOAD + 1
  
          ELSE IF (CARD(1:6) == 'PLOTEL'  )  THEN

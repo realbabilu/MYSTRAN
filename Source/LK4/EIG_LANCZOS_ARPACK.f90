@@ -54,6 +54,7 @@
       USE EIG_LANCZOS_ARPACK_USE_IFs
       USE LINK_MESSAGE_Interface
 
+      USE MATMULT_SFF_Interface
       IMPLICIT NONE
 
       LOGICAL                         :: RVEC              ! = .TRUE. or .FALSE. Specifies whether eigenvectors are to be calculated
@@ -110,6 +111,7 @@
 
       REAL(DOUBLE)                    :: EPS1              ! A small number to compare zero to
 
+      REAL(DOUBLE) :: KG_U(NDOFL,1),KG_KU(NDOFL,1),KG_GU(NDOFL,1),KG_RES,KG_DEN
       INTRINSIC                       :: MIN
 
 
@@ -165,6 +167,14 @@
             WRITE(F06,'(A)') '       Lanczos eigen-count estimate unavailable; using fallback NEV logic'
          ENDIF
 ! --- arpack_surgery end --- !
+      ENDIF
+
+! Native buckling reciprocal: -Kg phi = mu K phi, lambda=1/mu.
+! K is the positive metric; Kg may be singular/indefinite. A default
+! shift of -1 can exceed thin-plate critical factors and destroy that metric.
+      IF (SOL_NAME(1:8) == 'BUCKLING') THEN
+         EIG_MODE=2
+         EIG_SIGMA=ZERO
       ENDIF
 
 ! Calc KMSM = KLL - EIG_SIGMA*MLL (or + EIG_SIGMA*KLLD for BUCKLING) where EIG_SIGMA = shift freq
@@ -329,7 +339,7 @@
 ! Check that user did not ask for more than NDOFL-1 eigens (Lanczos can't be used to find all). If request is > NDOFL-1, decrease
 ! request to NDOFL-1 and give warning
       IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-         LNONZEROS = NDOFL - NUM_KLLD_DIAG_ZEROS
+         LNONZEROS = NDOFL
       ELSE
          LNONZEROS = NDOFL - NUM_MLL_DIAG_ZEROS
       ENDIF
@@ -368,7 +378,7 @@
       ENDIF
       IF (DEBUG(185) == 0) THEN                            ! If 0, only find finite eigens within the range requested
          IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-            NUM1 = NDOFL - NUM_KLLD_DIAG_ZEROS
+            NUM1 = NDOFL
          ELSE
             NUM1 = NDOFL - NUM_MLL_DIAG_ZEROS
          ENDIF
@@ -511,6 +521,8 @@
 
       IF (DEBUG(50) == 1) CALL DEBUG_EIG_LANCZOS
       WHICH = 'LM'
+! Largest positive reciprocal eigenvalues give the first positive load factors.
+      IF (SOL_NAME(1:8) == 'BUCKLING') WHICH = 'LA'
       CALL DSBAND ( RVEC, HOWMNY, SELECT, EIGEN_VAL, EIGEN_VEC, NDOFL, EIG_SIGMA, NDOFL, LDRFAC, RFAC, KL, KU, WHICH, BMAT,        &
                     NEV, ARP_TOL, RESID, NCV, VBAS, NDOFL, IPARAM, WORKD, WORKL, LWORKL, IWORK, INFO_ARPACK,                       &
                     INFO_LAPACK, 'Y', DEBUG(47) )
@@ -605,6 +617,25 @@
          NVEC = MIN(EIG_N2, NUM_EIGENS)
       ENDIF
       NUM_EIGENS = NVEC
+! Check the actual double-precision eigenpairs before OP2 float32 conversion.
+      IF (SOL_NAME(1:8) == 'BUCKLING') THEN
+         DO I=1,NUM_EIGENS
+            KG_U(:,1)=EIGEN_VEC(:,I)
+            CALL MATMULT_SFF('KLL',NDOFL,NDOFL,NTERM_KLL,SYM_KLL,I_KLL,J_KLL,KLL, &
+                            'PHI',NDOFL,1,KG_U,'N','KPHI',ONE,KG_KU)
+            CALL MATMULT_SFF('KLLD',NDOFL,NDOFL,NTERM_KLLD,SYM_KLLD,I_KLLD,J_KLLD,KLLD, &
+                            'PHI',NDOFL,1,KG_U,'N','GPHI',ONE,KG_GU)
+            KG_DEN=SQRT(SUM(KG_KU*KG_KU))+ABS(EIGEN_VAL(I))*SQRT(SUM(KG_GU*KG_GU))
+            KG_RES=SQRT(SUM((KG_KU+EIGEN_VAL(I)*KG_GU)**2))/MAX(KG_DEN,1.0D-300)
+            WRITE(F06,'(A,I8,1X,ES24.16)') ' BUCKLING EIGENPAIR RESIDUAL ',I,KG_RES
+            IF (KG_RES > 1.0D-6) THEN
+               WRITE(ERR,*) ' *ERROR: buckling eigenpair residual exceeds 1E-6',I,KG_RES
+               WRITE(F06,*) ' *ERROR: buckling eigenpair residual exceeds 1E-6',I,KG_RES
+               FATAL_ERR=FATAL_ERR+1
+               CALL OUTA_HERE('Y')
+            ENDIF
+         ENDDO
+      ENDIF
 
 
 

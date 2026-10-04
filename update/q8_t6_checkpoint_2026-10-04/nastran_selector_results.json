@@ -1,0 +1,68 @@
+[
+  {
+    "selector": "CENTER",
+    "engine_completed": true,
+    "op2_shapes": {
+      "1": [
+        1,
+        25,
+        8
+      ],
+      "2": [
+        1,
+        25,
+        8
+      ]
+    }
+  },
+  {
+    "selector": "CORNER",
+    "engine_completed": true,
+    "op2_shapes": {
+      "1": [
+        1,
+        25,
+        8
+      ],
+      "2": [
+        1,
+        25,
+        8
+      ]
+    }
+  },
+  {
+    "family": "T6",
+    "selector": "CENTER",
+    "engine_completed": true,
+    "op2_shapes": {
+      "1": [
+        1,
+        40,
+        8
+      ],
+      "2": [
+        1,
+        40,
+        8
+      ]
+    }
+  },
+  {
+    "family": "T6",
+    "selector": "CORNER",
+    "engine_completed": true,
+    "op2_shapes": {
+      "1": [
+        1,
+        40,
+        8
+      ],
+      "2": [
+        1,
+        40,
+        8
+      ]
+    }
+  }
+]

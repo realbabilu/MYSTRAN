@@ -45,7 +45,7 @@
                                          DEDAT_T3_MATANG_KEY, DEDAT_T3_THICK_KEY, DEDAT_T3_POFFS_KEY,                              &
                                          DEDAT_T6_THICK_KEY, DEDAT_T6_POFFS_KEY,                                                    &
                                                              DEDAT_Q8_THICK_KEY, DEDAT_Q8_POFFS_KEY
-      USE PARAMS, ONLY                :  EPSIL, TSTM_DEF
+      USE PARAMS, ONLY                :  EPSIL, TSTM_DEF, QUAD8TYP
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONEPM4, ONE, TWO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -457,7 +457,10 @@
 
             IF(TYPE(1:5) == 'QUAD8') THEN                  ! Features that aren't currently supported by CQUAD8.
 
-               IF((SOL_NAME(1:7) /= 'STATICS') .AND. (SOL_NAME(1:5) /= 'MODES')) THEN
+               IF((SOL_NAME(1:7) /= 'STATICS') .AND. (SOL_NAME(1:5) /= 'MODES') .AND. &
+                  .NOT. ((SOL_NAME(1:8) == 'BUCKLING') .AND. &
+                  ((QUAD8TYP == 'SIMOQ8  ') .OR. (QUAD8TYP == 'MACQ8D  ') .OR. &
+                   (QUAD8TYP == 'ANS8BDG6') .OR. (QUAD8TYP == 'HBQ8    ') .OR. (QUAD8TYP == 'MITC8   ')))) THEN
                   WRITE(ERR,*) ' *ERROR: CQUAD8 IS NOT ALLOWED WITH SOL', SOL_NAME
                   WRITE(F06,*) ' *ERROR: CQUAD8 IS NOT ALLOWED WITH SOL', SOL_NAME
                   NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
@@ -486,7 +489,10 @@
                   FATAL_ERR          = FATAL_ERR + 1
                ENDIF
 
-               IF(RPSHEL(INTL_PID, 4) /= ZERO) THEN           ! NSM
+               IF ((RPSHEL(INTL_PID,4) /= ZERO) .AND. &
+                   .NOT. ((QUAD8TYP=='SIMOQ8  ') .OR. (QUAD8TYP=='MACQ8D  ') .OR. &
+                          (QUAD8TYP=='ANS8BDG6') .OR. (QUAD8TYP=='MITC8   ') .OR. &
+                          (QUAD8TYP=='HBQ8    '))) THEN ! NSM supported by native surface mass
                   WRITE(ERR,*) ' *ERROR: PSHELL FIELD NSM MUST BE BLANK OR 0.0 FOR QUAD8'
                   WRITE(F06,*) ' *ERROR: PSHELL FIELD NSM MUST BE BLANK OR 0.0 FOR QUAD8'
                   NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
