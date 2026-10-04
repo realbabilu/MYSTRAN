@@ -372,6 +372,9 @@ elems_5: DO J = 1,NELE
 
 ! --- Store EID/GID once per element (not per stress point) ---
                   NUM_ELEM = NUM_ELEM + 1
+! Quadrilateral writers index IDs by recovery point, while OGEL has two fiber rows per point.
+                  IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .AND. NUM_ELEM > 1) &
+                     NUM_ELEM = NUM_ELEM + NUM_PTS_CUR - 1
                   IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D ')) .AND. NUM_ELEM > 1) NUM_ELEM = NUM_ELEM+8
                   EID_OUT_ARRAY(NUM_ELEM,1) = EID
                   IF (TYPE == 'BEAM    ') THEN
@@ -398,6 +401,15 @@ elems_5: DO J = 1,NELE
                      GID_OUT_ARRAY(NUM_ELEM,K+1) = AGRID(K)
                   ENDDO
 
+                  IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+                     DO K=1,NUM_PTS_CUR
+                        SHELL_OUT_TE(:,:,NUM_ELEM+K-1) = SHELL_OUT_TE(:,:,NUM_ELEM)
+                        SHELL_STRESS_IN_LOCAL(NUM_ELEM+K-1) = SHELL_STRESS_IN_LOCAL(NUM_ELEM)
+                        POLY_FIT_ERR(NUM_ELEM+K-1) = STRESS_OUT_PCT_ERR(K)
+                        POLY_FIT_ERR_INDEX(NUM_ELEM+K-1) = STRESS_OUT_ERR_INDEX(K)
+                     ENDDO
+                  ENDIF
+
                   IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D '))) THEN
                      DO K=1,9
                         SHELL_OUT_TE(:,:,NUM_ELEM+K-1)=Q8_POINT_BASIS(:,:,K)
@@ -409,7 +421,9 @@ elems_5: DO J = 1,NELE
                      IF (NUM_OGEL_ROWS == NELREQ(I)) THEN
                         CALL CHK_OGEL_ZEROS ( NUM_OGEL )
                         CALL SET_OES_TABLE_NAME(TYPE, TABLE_NAME, ITABLE)
-                        IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D '))) THEN
+                        IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+                           CALL WRITE_ELEM_STRESSES(JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS_CUR, ITABLE)
+                        ELSE IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D '))) THEN
                            CALL WRITE_ELEM_STRESSES(JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS_CUR, ITABLE)
                         ELSE
                            CALL WRITE_ELEM_STRESSES ( JVEC, NUM_ELEM, IHDR, NUM_PTS_CUR, ITABLE )

@@ -710,8 +710,8 @@
               ! just a copy of the CTRIA3 code
               ! op2 version of the upper & lower layers all in one call, but without the transverse shear
               WRITE(OP2) NVALUES
-              WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(OGEL(2*I-1,J),4), J=1,8), (REAL(OGEL(2*I,J),4), J=1,8), &
-                          I=1,NUM,MAX(1_LONG,NUM_PTS))
+              WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, (REAL(Q8_OES_VALUE(2*I-1,I,J),4), J=1,8), &
+                          (REAL(Q8_OES_VALUE(2*I,I,J),4), J=1,8), I=1,NUM,MAX(1_LONG,NUM_PTS))
            ELSE
               CALL GET_STRESS_CODE( STRESS_CODE, 1,            0,         1)
               ! CQUAD4-144 / CQUAD8-64
@@ -2291,6 +2291,8 @@
       REAL(DOUBLE) :: VALUES(10)
       VALUES=OGEL(FIBER_ROW,1:10)
       IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D ')) CALL QUAD_STRESS_OUTPUT_FRAME(FIBER_ROW,CENTER_POINT,VALUES)
+      IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) &
+         CALL QUAD_STRESS_OUTPUT_FRAME(FIBER_ROW,CENTER_POINT,VALUES)
       VALUE=VALUES(COLUMN)
       END FUNCTION
 
@@ -2313,7 +2315,11 @@
          SHEAR_CENTER=MATMUL(TRANSPOSE(MAP),SHEAR_POINT)
          VALUES(9:10)=SHEAR_CENTER(1:2)
       ELSE
+         IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
+            CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC(SHELL_OUT_TE(:,:,CENTER_POINT),VALUES)
+         ELSE
          CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC(SHELL_OUT_TE(:,:,FIBER_ROW),VALUES)
+         ENDIF
       ENDIF
       END SUBROUTINE
 
