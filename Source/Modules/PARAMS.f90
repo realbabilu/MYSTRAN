@@ -500,7 +500,7 @@
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
 ! ANS8 v3: modified Kikuchi field metric, tensor6 shear, adaptive membrane tying.
-      CHARACTER(8*BYTE) :: ANSFIELD='KIKUCHI ', ANSSHEAR='TENSOR6 ', ANSMEM='AUTO    '
+      CHARACTER(8*BYTE) :: ANSFIELD='KIKUCHI ', ANSSHEAR='AUTO    ', ANSMEM='AUTO    '
       REAL(DOUBLE) :: ANSANG=0.01D0, ANSDEV=0.001D0
       CHARACTER(  8*BYTE)      :: QUAD8TYP       = 'SIMOQ8  ' ! Which element to use in MYSTRAN as the CQUAD8 element
 !                                                              'MITC8   ': existing Dvorkin-Bathe MITC8 CQUAD8 branch

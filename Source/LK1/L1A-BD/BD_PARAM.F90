@@ -2901,12 +2901,12 @@
          CALL CHAR_FLD(JCARD(3),JF(3),CHRPARM)
          IF (IERRFL(3) == 'N') THEN
             CALL LEFT_ADJ_BDFLD(CHRPARM)
-            IF (CHRPARM == 'TENSOR6 ' .OR. CHRPARM == 'BDG4    ') THEN
+            IF (CHRPARM == 'TENSOR6 ' .OR. CHRPARM == 'BDG4    ' .OR. CHRPARM == 'AUTO    ' .OR. CHRPARM == 'DIRECT  ') THEN
                ANSSHEAR=CHRPARM
             ELSE
                FATAL_ERR=FATAL_ERR+1
-               WRITE(ERR,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires TENSOR6/BDG4; received ',TRIM(CHRPARM),'.'
-               WRITE(F06,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires TENSOR6/BDG4; received ',TRIM(CHRPARM),'.'
+               WRITE(ERR,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires AUTO/TENSOR6/BDG4/DIRECT; received ',TRIM(CHRPARM),'.'
+               WRITE(F06,'(A,A,A,A,A)') ' *ERROR: PARAM ',TRIM(PARNAM),' requires AUTO/TENSOR6/BDG4/DIRECT; received ',TRIM(CHRPARM),'.'
             ENDIF
          ENDIF
          CALL BD_IMBEDDED_BLANK(JCARD,0,3,0,0,0,0,0,0)
