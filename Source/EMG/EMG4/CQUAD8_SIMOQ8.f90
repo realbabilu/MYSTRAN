@@ -4,7 +4,7 @@
       SUBROUTINE CQUAD8_SIMOQ8 ( OPT, INT_ELEM_ID )
 
 ! Ported from:
-!   C:/PROJECTAI/18a/python/Simo1993_Q8_ShellElement_v12_standalone.py
+!   C:/PROJECTAI/18a/python/Simo1993_Q8_ShellElement_v13_standalone.py
 !   D:\18a\python\quadratic\Simo1993_Q8_thermal_buckling.py
 !
 ! Static stiffness path:
@@ -14,8 +14,10 @@
 !   phi=(1-r^2)(1-s^2) is condensed at element level.
 !
 ! This branch is the active Simo Q8 path and follows the Python benchmark
-! conventions more closely. Flat membrane geometric stiffness recovers
-! active prestress at each integration point in basic coordinates.
+! conventions more closely. V13 membrane geometric stiffness uses physical
+! tangent-plane gradients, all three basic translation components, 4x4 Gauss
+! integration and active pointwise prestress. Flat geometry is validated;
+! director/rotation and curved-shell stress tangents are not included.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -196,11 +198,12 @@
       CONTAINS
 
 ! Flat-shell membrane initial-stress stiffness, tension-positive resultants.
-! Four-point Gauss/Duffy; standard geometry area, active translation field.
+! V13 k_geometric_global(u_global): 4x4 Gauss, standard Q8 shape gradients.
+! SHELL_A already includes thickness; NV contains membrane resultants.
 ! Mechanical linear reference state only; no director or follower tangent.
       SUBROUTINE NATIVE_MEMBRANE_KG
-      REAL(DOUBLE) :: GX(4),GW(4),RG,SG,WG,NVAL(8),DG(2,8),DF(2,8)
-      REAL(DOUBLE) :: TG(2,3),TF(2,3),CV(3),AREA,AJ,MT(2,2),INV(2,2),DETMT
+      REAL(DOUBLE) :: GX(4),GW(4),RG,SG,WG,NVAL(8),DG(2,8)
+      REAL(DOUBLE) :: TG(2,3),CV(3),AREA,AJ,MT(2,2),INV(2,2),DETMT
       REAL(DOUBLE) :: E1(3),E2(3),E3(3),GRAD(2,8),BMG(3,48),NV(3),SIG(2,2),BLOCK(8,8)
       REAL(DOUBLE) :: SCALE_GEOM,NORMAL(3)
       INTEGER(LONG) :: IG,JG,IN,JN,ID
@@ -237,9 +240,7 @@
                      TG(1,3)*TG(2,1)-TG(1,1)*TG(2,3), &
                      TG(1,1)*TG(2,2)-TG(1,2)*TG(2,1)/)
                AREA=SQRT(SUM(CV*CV))
-               DF=DG
-               TF=MATMUL(DF,XYZ)
-               MT=MATMUL(TF,TRANSPOSE(TF))
+               MT=MATMUL(TG,TRANSPOSE(TG))
                DETMT=MT(1,1)*MT(2,2)-MT(1,2)*MT(2,1)
                IF (AREA <= 1.0D-14 .OR. DETMT <= 1.0D-30) CALL KG_GEOMETRY_ERROR
                INV(1,1)=MT(2,2)/DETMT
@@ -247,8 +248,9 @@
                INV(1,2)=-MT(1,2)/DETMT
                INV(2,1)=INV(1,2)
                CALL LOCAL_BASIS_AT_Q8(XYZ,RG,SG,E1,E2,E3,AJ)
-               GRAD(1,:)=MATMUL(MATMUL(INV,MATMUL(TF,E1)),DF)
-               GRAD(2,:)=MATMUL(MATMUL(INV,MATMUL(TF,E2)),DF)
+! dual = inverse(metric)*tangents; project the physical gradient onto e1/e2.
+               GRAD(1,:)=MATMUL(MATMUL(INV,MATMUL(TG,E1)),DG)
+               GRAD(2,:)=MATMUL(MATMUL(INV,MATMUL(TG,E2)),DG)
                CALL BM_Q8_AT(XYZ,RG,SG,BMG,AJ)
                NV=MATMUL(SHELL_A,MATMUL(BMG,UEB(1:48)))
                SIG(1,:)=(/NV(1),NV(3)/)

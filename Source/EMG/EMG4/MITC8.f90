@@ -517,15 +517,18 @@
       END SUBROUTINE MITC8_LEGACY
 
 ! #################################################################################################################################
-! CQUAD8 MITC8 v3 shell for PARAM,QUAD8TYP,MITC8.
+! CQUAD8 MITC8 v4 shell for PARAM,QUAD8TYP,MITC8.
 
       SUBROUTINE MITC8 ( OPT, INT_ELEM_ID )
 
 ! Ported from:
-!   MITC8_ShellElement_v3.py / MITC8_ShellElement_v3 (static stiffness and recovery).
+!   MITC8_ShellElement_v4.py and shell_q8_common.py (default Kikuchi field).
 ! Adaptation: modified field metric, standard geometry area; not a paper reproduction.
-! Geometric stiffness uses MITC8_LEGACY;
-! these auxiliary paths are not validated against the v3 static reference.
+! V4 defaults: slenderness-dependent tensor6/BDG4 shear blend (s0=15),
+! auto membrane tying, ILS disabled, beta_drill=0.01. Physical TEMPP1
+! connectivity-gradient convention is retained rather than the Python legacy sign.
+! V4 consistent/HRZ mass includes all three rotary inertias. Native pressure
+! and flat membrane geometric stiffness remain active.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -550,7 +553,7 @@
 
       INTEGER(LONG), PARAMETER        :: NNODE = 8
       INTEGER(LONG), PARAMETER        :: NDOF  = 48
-      REAL(DOUBLE), PARAMETER         :: KT_DRILL = 1.0D-4
+      REAL(DOUBLE), PARAMETER         :: KT_DRILL = 1.0D-2
       INTEGER(LONG)                   :: I, J, K, L, IA, JSUB, GP
       REAL(DOUBLE)                    :: XYZ(8,3), XY8(8,2), E1F(3), E2F(3), E3F(3)
       REAL(DOUBLE)                    :: GP3(3), W3(3), R, S, WT, DETJ, THICK, TBAR, GVAL
@@ -561,6 +564,7 @@
       REAL(DOUBLE)                    :: SIG0(2,2), KG8(8,8), STRAIN0(3), N0V(3)
       REAL(DOUBLE) :: NORMALS(8,3),NORMAL_SIGN,FIELD_COEFF(8),RR(9),SS(9),E1OUT(3),E2OUT(3),E3OUT(3),DN8(2,8)
       LOGICAL :: USE_ANS
+      REAL(DOUBLE) :: SHEAR_WEIGHT
       CHARACTER(1*BYTE) :: LEGACY_OPT(6)
       CHARACTER(8),PARAMETER :: ANSSHEAR="TENSOR6"
       INTEGER(LONG)                   :: KI, KJ
@@ -590,11 +594,11 @@
       CALL MI_FIELD_COEFF_Q8(XY8)
       CALL MI_SET_NORMAL_SIGN_Q8(XYZ)
       CALL MI_CALC_NODAL_NORMALS_Q8(XYZ,NORMALS)
-      USE_ANS=.FALSE.
 
       GP3 = (/-DSQRT(3.0D0/5.0D0), ZERO, DSQRT(3.0D0/5.0D0)/)
       W3  = (/5.0D0/9.0D0, 8.0D0/9.0D0, 5.0D0/9.0D0/)
       THICK = EPROP(1)
+      CALL MI_INIT_V4_Q8(XYZ,NORMALS,THICK)
       GVAL = SHELL_T(1,1)
       CDRILL = KT_DRILL*GVAL
 
@@ -609,10 +613,7 @@
       IF (ANY(LEGACY_OPT == 'Y')) CALL MITC8_LEGACY(LEGACY_OPT,INT_ELEM_ID)
 
       IF (OPT(1) == 'Y') THEN
-         CALL MI_SHAPE_Q8(ZERO,ZERO,N8,DN8)
-         N8(1:4)=N8(1:4)+0.25D0
-         N8(5:8)=N8(5:8)-0.5D0
-         CALL QUADRATIC_SURFACE_MASS(8,XYZ,N8)
+         CALL MI_MASS_V4_Q8(XYZ,THICK)
       ENDIF
 
       IF (OPT(2) == 'Y') THEN
@@ -671,7 +672,7 @@
 
       IF (OPT(4) == 'Y') THEN
          KE=ZERO
-! Python beta_drill=1e-4; remove PSHELL shear correction from G*h.
+! Python v4 beta_drill=0.01; remove PSHELL shear correction from G*h.
          CDRILL=KT_DRILL*SHELL_T(1,1)/(5.0D0/6.0D0)
          DO I=1,3
             DO J=1,3
@@ -920,6 +921,89 @@
       NM = DSQRT(MAX(ZERO, DOT_PRODUCT(V,V)))
       END FUNCTION VNORM
 
+! Python V4 consistent mass / positive HRZ diagonal, rotary_inertia='all'.
+! NSM is midsurface translational mass and contributes no rotary inertia.
+      SUBROUTINE MI_MASS_V4_Q8(XYZN,H)
+      REAL(DOUBLE),INTENT(IN) :: XYZN(8,3),H
+      REAL(DOUBLE) :: GX(3),GW(3),M(8,8),AREA,WEIGHT,N(8),DN(2,8),NG(8),DG(2,8)
+      REAL(DOUBLE) :: G1(3),G2(3),CV(3),ROTARY,TRACE_M
+      INTEGER(LONG) :: II,JJ,AA,BB,DD
+      GX=(/-SQRT(0.6D0),ZERO,SQRT(0.6D0)/)
+      GW=(/5.0D0/9.0D0,8.0D0/9.0D0,5.0D0/9.0D0/)
+      M=ZERO
+      AREA=ZERO
+      DO II=1,3
+         DO JJ=1,3
+            CALL MI_SHAPE_Q8(GX(II),GX(JJ),N,DN)
+            CALL MI_GEOM_SHAPE_Q8(GX(II),GX(JJ),NG,DG)
+            G1=MATMUL(DG(1,:),XYZN)
+            G2=MATMUL(DG(2,:),XYZN)
+            CALL MI_CROSS3(G1,G2,CV)
+            WEIGHT=GW(II)*GW(JJ)*MI_VNORM(CV)
+            AREA=AREA+WEIGHT
+            DO AA=1,8
+               DO BB=1,8
+                  M(AA,BB)=M(AA,BB)+WEIGHT*N(AA)*N(BB)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+      IF (COUPMASS <= 0) THEN
+         TRACE_M=SUM((/(M(AA,AA),AA=1,8)/))
+         DO AA=1,8
+            WEIGHT=M(AA,AA)*AREA/TRACE_M
+            M(AA,:)=ZERO
+            M(AA,AA)=WEIGHT
+         ENDDO
+      ENDIF
+      ROTARY=(MASS_PER_UNIT_AREA-EPROP(4))*H*H/12.0D0
+      ME=ZERO
+      DO AA=1,8
+         DO BB=1,8
+            DO DD=1,3
+               ME(6*(AA-1)+DD,6*(BB-1)+DD)=MASS_PER_UNIT_AREA*M(AA,BB)
+               ME(6*(AA-1)+DD+3,6*(BB-1)+DD+3)=ROTARY*M(AA,BB)
+            ENDDO
+         ENDDO
+      ENDDO
+      END SUBROUTINE MI_MASS_V4_Q8
+
+! Python V4 _is_curved and _init_common; all data are per element.
+      SUBROUTINE MI_INIT_V4_Q8(XYZN,NORMS,H)
+      REAL(DOUBLE),INTENT(IN) :: XYZN(8,3),NORMS(8,3),H
+      REAL(DOUBLE) :: NC(3),ANGLE,DEV,EDGE,AREA,N(8),DN(2,8),G1(3),G2(3),CV(3)
+      REAL(DOUBLE) :: GX(3),GW(3),SLENDER
+      INTEGER(LONG) :: II,JJ,AA,BB,MM
+      NC=SUM(NORMS,DIM=1)
+      NC=NC/MI_VNORM(NC)
+      ANGLE=ZERO
+      DO II=1,8
+         ANGLE=MAX(ANGLE,ACOS(MAX(-ONE,MIN(ONE,DOT_PRODUCT(NORMS(II,:),NC)))))
+      ENDDO
+      DEV=ZERO
+      DO AA=1,4
+         BB=MOD(AA,4)+1
+         MM=AA+4
+         EDGE=MI_VNORM(XYZN(BB,:)-XYZN(AA,:))
+         DEV=MAX(DEV,MI_VNORM(XYZN(MM,:)-(XYZN(AA,:)+XYZN(BB,:))/TWO)/MAX(EDGE,1.0D-30))
+      ENDDO
+      USE_ANS=(ANGLE > 0.01D0 .OR. DEV > 0.001D0)
+      GX=(/-SQRT(0.6D0),ZERO,SQRT(0.6D0)/)
+      GW=(/5.0D0/9.0D0,8.0D0/9.0D0,5.0D0/9.0D0/)
+      AREA=ZERO
+      DO II=1,3
+         DO JJ=1,3
+            CALL MI_GEOM_SHAPE_Q8(GX(II),GX(JJ),N,DN)
+            G1=MATMUL(DN(1,:),XYZN)
+            G2=MATMUL(DN(2,:),XYZN)
+            CALL MI_CROSS3(G1,G2,CV)
+            AREA=AREA+GW(II)*GW(JJ)*MI_VNORM(CV)
+         ENDDO
+      ENDDO
+      SLENDER=SQRT(AREA)/H
+      SHEAR_WEIGHT=MAX(ZERO,ONE-15.0D0/SLENDER)
+      END SUBROUTINE MI_INIT_V4_Q8
+
       SUBROUTINE MI_GEOM_SHAPE_Q8 ( XI, ETA, NVAL, DN )
       REAL(DOUBLE), INTENT(IN)  :: XI, ETA
       REAL(DOUBLE), INTENT(OUT) :: NVAL(8), DN(2,8)
@@ -1071,39 +1155,17 @@
       END SUBROUTINE MI_TENSOR_PHYS_Q8
 
 
-! Matched-Gauss ILS: transport sampled physical strain tensors through basic
-! coordinates before projecting into the evaluation-point physical basis.
+! V4 auto membrane tying: direct on flat straight-sided elements, no ILS.
       SUBROUTINE MI_BM_Q8_AT(XYZN,R,S,BMOUT,JAC)
       REAL(DOUBLE),INTENT(IN) :: XYZN(8,3),R,S
       REAL(DOUBLE),INTENT(OUT) :: BMOUT(3,48),JAC
-      REAL(DOUBLE) :: A,N(8),DN(2,8),RR(8),SS(8),E1(3),E2(3),E3(3)
-      REAL(DOUBLE) :: P1(3),P2(3),P3(3),BJ(3,48),T(3,3),GT(3,3,48),DUMMY
-      INTEGER(LONG) :: II,JJ,KK,DD
-      A=ONE/SQRT(3.0D0)
-      RR=(/-ONE,ONE,ONE,-ONE,ZERO,ONE,ZERO,-ONE/)
-      SS=(/-ONE,-ONE,ONE,ONE,-ONE,ZERO,ONE,ZERO/)
-      CALL MI_GEOM_SHAPE_Q8(R/A,S/A,N,DN)
-      GT=ZERO
-      DO II=1,8
-         CALL MI_BM_DIRECT_Q8_AT(XYZN,A*RR(II),A*SS(II),BJ,DUMMY)
-         CALL MI_LOCAL_BASIS_AT_Q8(XYZN,A*RR(II),A*SS(II),P1,P2,P3,DUMMY)
-         DO DD=1,48
-            DO JJ=1,3
-               DO KK=1,3
-                  GT(JJ,KK,DD)=GT(JJ,KK,DD)+N(II)*(P1(JJ)*P1(KK)*BJ(1,DD) &
-                       +P2(JJ)*P2(KK)*BJ(2,DD) &
-                       +0.5D0*(P1(JJ)*P2(KK)+P2(JJ)*P1(KK))*BJ(3,DD))
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-      CALL MI_LOCAL_BASIS_AT_Q8(XYZN,R,S,E1,E2,E3,JAC)
-      DO DD=1,48
-         T=GT(:,:,DD)
-         BMOUT(1,DD)=DOT_PRODUCT(E1,MATMUL(T,E1))
-         BMOUT(2,DD)=DOT_PRODUCT(E2,MATMUL(T,E2))
-         BMOUT(3,DD)=TWO*DOT_PRODUCT(E1,MATMUL(T,E2))
-      ENDDO
+      REAL(DOUBLE) :: G1(3),G2(3),C(4)
+      IF (USE_ANS) THEN
+         CALL MI_COV_MAP_Q8(XYZN,R,S,G1,G2,C,JAC)
+         CALL MI_ANS_BM_Q8(XYZN,R,S,C,BMOUT)
+      ELSE
+         CALL MI_BM_DIRECT_Q8_AT(XYZN,R,S,BMOUT,JAC)
+      ENDIF
       END SUBROUTINE MI_BM_Q8_AT
 
       SUBROUTINE MI_BM_DIRECT_Q8_AT ( XYZN, XI, ETA, BMOUT, JAC )
@@ -1151,9 +1213,13 @@
       SUBROUTINE MI_BS_Q8_AT(XYZN,NORMS,XI,ETA,BSOUT,JAC)
       REAL(DOUBLE),INTENT(IN) :: XYZN(8,3),NORMS(8,3),XI,ETA
       REAL(DOUBLE),INTENT(OUT) :: BSOUT(2,48),JAC
-      REAL(DOUBLE) :: G1(3),G2(3),C(4)
+      REAL(DOUBLE) :: G1(3),G2(3),C(4),BS4(2,48)
       CALL MI_COV_MAP_Q8(XYZN,XI,ETA,G1,G2,C,JAC)
-      CALL MI_ANS_BS_Q8(XYZN,NORMS,XI,ETA,C,BSOUT)
+      CALL MI_ANS_BS_Q8(XYZN,NORMS,XI,ETA,C,BSOUT,'TENSOR6')
+      IF (SHEAR_WEIGHT > ZERO) THEN
+         CALL MI_ANS_BS_Q8(XYZN,NORMS,XI,ETA,C,BS4,'BDG4')
+         BSOUT=(ONE-SHEAR_WEIGHT)*BSOUT+SHEAR_WEIGHT*BS4
+      ENDIF
       END SUBROUTINE MI_BS_Q8_AT
 
       SUBROUTINE MI_BDRILL_Q8_AT ( XYZN, NORMS, XI, ETA, BDOUT, JAC, NORMS_EXT )
@@ -1222,15 +1288,19 @@
       ENDDO
       END SUBROUTINE
 
-      SUBROUTINE MI_ANS_INTERP_Q8(XYZN,NORMS,R,S,COMP,ISMEM,ROW)
+      SUBROUTINE MI_ANS_INTERP_Q8(XYZN,NORMS,R,S,COMP,ISMEM,ROW,PATTERN)
       REAL(DOUBLE), INTENT(IN) :: XYZN(8,3),NORMS(8,3),R,S
       INTEGER(LONG), INTENT(IN) :: COMP
       LOGICAL, INTENT(IN) :: ISMEM
       REAL(DOUBLE), INTENT(OUT) :: ROW(48)
+      CHARACTER(*), INTENT(IN), OPTIONAL :: PATTERN
+      LOGICAL :: IS_BDG4
       REAL(DOUBLE) :: A,B,H,PA(2),PB(3),LR(2),LS(2),QR(3),QS(3),EM(3,48),ES(2,48),P,Q,W
       INTEGER(LONG) :: II,JJ,NJ
       A=ONE/DSQRT(3.0D0)
       B=DSQRT(0.6D0)
+      IS_BDG4=(ANSSHEAR == 'BDG4')
+      IF (PRESENT(PATTERN)) IS_BDG4=(PATTERN == 'BDG4')
       H=A
       IF (ISMEM .AND. COMP /= 3) H=ONE
       PA=(/-H,H/)
@@ -1239,14 +1309,14 @@
       LS=(/0.5D0*(ONE-S/H),0.5D0*(ONE+S/H)/)
       QR=(/R*(R-B)/(TWO*B*B),ONE-R*R/(B*B),R*(R+B)/(TWO*B*B)/)
       QS=(/S*(S-B)/(TWO*B*B),ONE-S*S/(B*B),S*(S+B)/(TWO*B*B)/)
-      IF (.NOT.ISMEM .AND. ANSSHEAR == 'BDG4') THEN
+      IF (.NOT.ISMEM .AND. IS_BDG4) THEN
          PB(1:2)=(/-ONE,ONE/)
          QR(1:2)=(/0.5D0*(ONE-R),0.5D0*(ONE+R)/)
          QS(1:2)=(/0.5D0*(ONE-S),0.5D0*(ONE+S)/)
       ENDIF
       ROW=ZERO
       NJ=3
-      IF (COMP == 3 .OR. (.NOT.ISMEM .AND. ANSSHEAR == 'BDG4')) NJ=2
+      IF (COMP == 3 .OR. (.NOT.ISMEM .AND. IS_BDG4)) NJ=2
       DO II=1,2
          DO JJ=1,NJ
             IF (COMP == 1) THEN
@@ -1280,13 +1350,14 @@
       BMOUT(3,:)=TWO*(C(1)*C(2)*ROWS(1,:)+C(3)*C(4)*ROWS(2,:)+(C(1)*C(4)+C(3)*C(2))*ROWS(3,:))
       END SUBROUTINE
 
-      SUBROUTINE MI_ANS_BS_Q8(XYZN,NORMS,R,S,C,BSOUT)
+      SUBROUTINE MI_ANS_BS_Q8(XYZN,NORMS,R,S,C,BSOUT,PATTERN)
       REAL(DOUBLE), INTENT(IN) :: XYZN(8,3),NORMS(8,3),R,S,C(4)
       REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,48)
+      CHARACTER(*), INTENT(IN), OPTIONAL :: PATTERN
       REAL(DOUBLE) :: ROWS(2,48)
       INTEGER(LONG) :: II
       DO II=1,2
-         CALL MI_ANS_INTERP_Q8(XYZN,NORMS,R,S,II,.FALSE.,ROWS(II,:))
+         CALL MI_ANS_INTERP_Q8(XYZN,NORMS,R,S,II,.FALSE.,ROWS(II,:),PATTERN)
       ENDDO
       BSOUT(1,:)=C(1)*ROWS(1,:)+C(3)*ROWS(2,:)
       BSOUT(2,:)=C(2)*ROWS(1,:)+C(4)*ROWS(2,:)
