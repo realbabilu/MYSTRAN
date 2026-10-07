@@ -425,15 +425,15 @@
 
       END SUBROUTINE CQUAD8_HBQ8_LEGACY
 
-! CQUAD8 HBQ8 Kikuchi v2 shell for PARAM,QUAD8TYP,HBQ8.
+! CQUAD8 HBQ8 Kikuchi v3 shell for PARAM,QUAD8TYP,HBQ8.
 
       SUBROUTINE CQUAD8_HBQ8 ( OPT, INT_ELEM_ID )
 
 ! Ported from:
-!   HBQ8_Kikuchi_v2.py / HBQ8_Kikuchi_v2 (static stiffness and recovery).
+!   HBQ8_Kikuchi_v3.py / shell_q8_common.py (surface operators, loads and mass).
 ! Adaptation: modified field metric, standard geometry area; not a paper reproduction.
-! Geometric stiffness uses CQUAD8_HBQ8_LEGACY;
-! these auxiliary paths are not validated against the v3 static reference.
+! Flat-shell geometric stiffness uses the active membrane reference state.
+! Thermal retains the MYSTRAN connectivity-normal TEMPP1 gradient convention.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -468,9 +468,10 @@
       REAL(DOUBLE)                    :: CTE(3), THERMAL_RESULTANT(3), CDRILL
       REAL(DOUBLE)                    :: SIG0(2,2), KG8(8,8), STRAIN0(3), N0V(3)
       REAL(DOUBLE) :: NORMALS(8,3),NORMAL_SIGN,FIELD_COEFF(8),RR(9),SS(9),E1OUT(3),E2OUT(3),E3OUT(3),DN8(2,8)
+      REAL(DOUBLE) :: SHEAR_WEIGHT
       LOGICAL :: USE_ANS
       CHARACTER(1*BYTE) :: LEGACY_OPT(6)
-      CHARACTER(8),PARAMETER :: ANSSHEAR="TENSOR6"
+      CHARACTER(8),PARAMETER :: ANSSHEAR="AUTO"
       INTEGER(LONG)                   :: KI, KJ
 
       REAL(DOUBLE) :: UNIT_PTG(48), TEMP_GRAD_SIGN, TEMP_NORMAL(3), TEMP_G1(3), TEMP_G2(3)
@@ -498,11 +499,11 @@
       CALL HB_FIELD_COEFF_Q8(XY8)
       CALL HB_SET_NORMAL_SIGN_Q8(XYZ)
       CALL HB_CALC_NODAL_NORMALS_Q8(XYZ,NORMALS)
-      USE_ANS=.FALSE.
 
       GP3 = (/-DSQRT(3.0D0/5.0D0), ZERO, DSQRT(3.0D0/5.0D0)/)
       W3  = (/5.0D0/9.0D0, 8.0D0/9.0D0, 5.0D0/9.0D0/)
       THICK = EPROP(1)
+      CALL HB_INIT_V3_Q8(XYZ,NORMALS,THICK)
       GVAL = SHELL_T(1,1)
       CDRILL = KT_DRILL*GVAL
 
@@ -517,10 +518,7 @@
       IF (ANY(LEGACY_OPT == 'Y')) CALL CQUAD8_HBQ8_LEGACY(LEGACY_OPT,INT_ELEM_ID)
 
       IF (OPT(1) == 'Y') THEN
-         CALL HB_SHAPE_Q8(ZERO,ZERO,N8,DN8)
-         N8(1:4)=N8(1:4)+0.25D0
-         N8(5:8)=N8(5:8)-0.5D0
-         CALL QUADRATIC_SURFACE_MASS(8,XYZ,N8)
+         CALL HB_MASS_V3_Q8(XYZ,THICK)
       ENDIF
 
       IF (OPT(2) == 'Y') THEN
@@ -828,6 +826,87 @@
       NM = DSQRT(MAX(ZERO, DOT_PRODUCT(V,V)))
       END FUNCTION VNORM
 
+      SUBROUTINE HB_MASS_V3_Q8(XYZN,H)
+      REAL(DOUBLE),INTENT(IN) :: XYZN(8,3),H
+      REAL(DOUBLE) :: GX(3),GW(3),M(8,8),AREA,WEIGHT,N(8),DN(2,8),NG(8),DG(2,8)
+      REAL(DOUBLE) :: G1(3),G2(3),CV(3),ROTARY,TRACE_M
+      INTEGER(LONG) :: II,JJ,AA,BB,DD
+      GX=(/-SQRT(0.6D0),ZERO,SQRT(0.6D0)/)
+      GW=(/5.0D0/9.0D0,8.0D0/9.0D0,5.0D0/9.0D0/)
+      M=ZERO
+      AREA=ZERO
+      DO II=1,3
+         DO JJ=1,3
+            CALL HB_SHAPE_Q8(GX(II),GX(JJ),N,DN)
+            CALL HB_GEOM_SHAPE_Q8(GX(II),GX(JJ),NG,DG)
+            G1=MATMUL(DG(1,:),XYZN)
+            G2=MATMUL(DG(2,:),XYZN)
+            CALL HB_CROSS3(G1,G2,CV)
+            WEIGHT=GW(II)*GW(JJ)*HB_VNORM(CV)
+            AREA=AREA+WEIGHT
+            DO AA=1,8
+               DO BB=1,8
+                  M(AA,BB)=M(AA,BB)+WEIGHT*N(AA)*N(BB)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+      IF (COUPMASS <= 0) THEN
+         TRACE_M=SUM((/(M(AA,AA),AA=1,8)/))
+         DO AA=1,8
+            WEIGHT=M(AA,AA)*AREA/TRACE_M
+            M(AA,:)=ZERO
+            M(AA,AA)=WEIGHT
+         ENDDO
+      ENDIF
+      ROTARY=(MASS_PER_UNIT_AREA-EPROP(4))*H*H/12.0D0
+      ME=ZERO
+      DO AA=1,8
+         DO BB=1,8
+            DO DD=1,3
+               ME(6*(AA-1)+DD,6*(BB-1)+DD)=MASS_PER_UNIT_AREA*M(AA,BB)
+               ME(6*(AA-1)+DD+3,6*(BB-1)+DD+3)=ROTARY*M(AA,BB)
+            ENDDO
+         ENDDO
+      ENDDO
+      END SUBROUTINE HB_MASS_V3_Q8
+
+! Python V3 _is_curved and _init_common; all data are per element.
+      SUBROUTINE HB_INIT_V3_Q8(XYZN,NORMS,H)
+      REAL(DOUBLE),INTENT(IN) :: XYZN(8,3),NORMS(8,3),H
+      REAL(DOUBLE) :: NC(3),ANGLE,DEV,EDGE,AREA,N(8),DN(2,8),G1(3),G2(3),CV(3)
+      REAL(DOUBLE) :: GX(3),GW(3),SLENDER
+      INTEGER(LONG) :: II,JJ,AA,BB,MM
+      NC=SUM(NORMS,DIM=1)
+      NC=NC/HB_VNORM(NC)
+      ANGLE=ZERO
+      DO II=1,8
+         ANGLE=MAX(ANGLE,ACOS(MAX(-ONE,MIN(ONE,DOT_PRODUCT(NORMS(II,:),NC)))))
+      ENDDO
+      DEV=ZERO
+      DO AA=1,4
+         BB=MOD(AA,4)+1
+         MM=AA+4
+         EDGE=HB_VNORM(XYZN(BB,:)-XYZN(AA,:))
+         DEV=MAX(DEV,HB_VNORM(XYZN(MM,:)-(XYZN(AA,:)+XYZN(BB,:))/TWO)/MAX(EDGE,1.0D-30))
+      ENDDO
+      USE_ANS=(ANGLE > 0.01D0 .OR. DEV > 0.001D0)
+      GX=(/-SQRT(0.6D0),ZERO,SQRT(0.6D0)/)
+      GW=(/5.0D0/9.0D0,8.0D0/9.0D0,5.0D0/9.0D0/)
+      AREA=ZERO
+      DO II=1,3
+         DO JJ=1,3
+            CALL HB_GEOM_SHAPE_Q8(GX(II),GX(JJ),N,DN)
+            G1=MATMUL(DN(1,:),XYZN)
+            G2=MATMUL(DN(2,:),XYZN)
+            CALL HB_CROSS3(G1,G2,CV)
+            AREA=AREA+GW(II)*GW(JJ)*HB_VNORM(CV)
+         ENDDO
+      ENDDO
+      SLENDER=SQRT(AREA)/H
+      SHEAR_WEIGHT=MAX(ZERO,ONE-15.0D0/SLENDER)
+      END SUBROUTINE HB_INIT_V3_Q8
+
       SUBROUTINE HB_GEOM_SHAPE_Q8 ( XI, ETA, NVAL, DN )
       REAL(DOUBLE), INTENT(IN)  :: XI, ETA
       REAL(DOUBLE), INTENT(OUT) :: NVAL(8), DN(2,8)
@@ -979,7 +1058,7 @@
       END SUBROUTINE HB_TENSOR_PHYS_Q8
 
 
-! HBQ8 v2: direct membrane; tensor6 shear tying; membrane tying OFF.
+! HBQ8 v3: direct membrane on flat straight-sided elements; own tying otherwise.
       SUBROUTINE HB_BM_Q8_AT ( XYZN, XI, ETA, BMOUT, JAC )
       REAL(DOUBLE), INTENT(IN)  :: XYZN(8,3), XI, ETA
       REAL(DOUBLE), INTENT(OUT) :: BMOUT(3,48), JAC
@@ -987,6 +1066,10 @@
       INTEGER(LONG) :: II, COL
       CALL HB_SHAPE_Q8(XI, ETA, NVAL, DN)
       CALL HB_COV_MAP_Q8(XYZN, XI, ETA, G1, G2, C, JAC)
+      IF (USE_ANS) THEN
+         CALL HB_ANS_BM_Q8(XYZN,XI,ETA,C,BMOUT)
+         RETURN
+      ENDIF
       BMOUT = ZERO
       DO II=1,8
          COL = (II-1)*6
@@ -1025,9 +1108,13 @@
       SUBROUTINE HB_BS_Q8_AT(XYZN,NORMS,XI,ETA,BSOUT,JAC)
       REAL(DOUBLE),INTENT(IN) :: XYZN(8,3),NORMS(8,3),XI,ETA
       REAL(DOUBLE),INTENT(OUT) :: BSOUT(2,48),JAC
-      REAL(DOUBLE) :: G1(3),G2(3),C(4)
+      REAL(DOUBLE) :: G1(3),G2(3),C(4),BS4(2,48)
       CALL HB_COV_MAP_Q8(XYZN,XI,ETA,G1,G2,C,JAC)
-      CALL HB_ANS_BS_Q8(XYZN,NORMS,XI,ETA,C,BSOUT)
+      CALL HB_ANS_BS_Q8(XYZN,NORMS,XI,ETA,C,BSOUT,'TENSOR6')
+      IF (SHEAR_WEIGHT > ZERO) THEN
+         CALL HB_ANS_BS_Q8(XYZN,NORMS,XI,ETA,C,BS4,'BDG4')
+         BSOUT=(ONE-SHEAR_WEIGHT)*BSOUT+SHEAR_WEIGHT*BS4
+      ENDIF
       END SUBROUTINE HB_BS_Q8_AT
 
       SUBROUTINE HB_BDRILL_Q8_AT ( XYZN, NORMS, XI, ETA, BDOUT, JAC, NORMS_EXT )
@@ -1096,31 +1183,35 @@
       ENDDO
       END SUBROUTINE
 
-      SUBROUTINE HB_ANS_INTERP_Q8(XYZN,NORMS,R,S,COMP,ISMEM,ROW)
+      SUBROUTINE HB_ANS_INTERP_Q8(XYZN,NORMS,R,S,COMP,ISMEM,ROW,PATTERN)
       REAL(DOUBLE), INTENT(IN) :: XYZN(8,3),NORMS(8,3),R,S
       INTEGER(LONG), INTENT(IN) :: COMP
       LOGICAL, INTENT(IN) :: ISMEM
+      CHARACTER(*),INTENT(IN),OPTIONAL :: PATTERN
+      LOGICAL :: IS_BDG4
       REAL(DOUBLE), INTENT(OUT) :: ROW(48)
       REAL(DOUBLE) :: A,B,H,PA(2),PB(3),LR(2),LS(2),QR(3),QS(3),EM(3,48),ES(2,48),P,Q,W
       INTEGER(LONG) :: II,JJ,NJ
+      IS_BDG4=(ANSSHEAR == 'BDG4')
+      IF (PRESENT(PATTERN)) IS_BDG4=(PATTERN == 'BDG4')
       A=ONE/DSQRT(3.0D0)
       B=DSQRT(0.6D0)
       H=A
-      IF (ISMEM .AND. COMP /= 3) H=ONE
+! HBQ8 membrane tying uses +/-1/sqrt(3) for all components.
       PA=(/-H,H/)
       PB=(/-B,ZERO,B/)
       LR=(/0.5D0*(ONE-R/H),0.5D0*(ONE+R/H)/)
       LS=(/0.5D0*(ONE-S/H),0.5D0*(ONE+S/H)/)
       QR=(/R*(R-B)/(TWO*B*B),ONE-R*R/(B*B),R*(R+B)/(TWO*B*B)/)
       QS=(/S*(S-B)/(TWO*B*B),ONE-S*S/(B*B),S*(S+B)/(TWO*B*B)/)
-      IF (.NOT.ISMEM .AND. ANSSHEAR == 'BDG4') THEN
+      IF (.NOT.ISMEM .AND. IS_BDG4) THEN
          PB(1:2)=(/-ONE,ONE/)
          QR(1:2)=(/0.5D0*(ONE-R),0.5D0*(ONE+R)/)
          QS(1:2)=(/0.5D0*(ONE-S),0.5D0*(ONE+S)/)
       ENDIF
       ROW=ZERO
       NJ=3
-      IF (COMP == 3 .OR. (.NOT.ISMEM .AND. ANSSHEAR == 'BDG4')) NJ=2
+      IF (COMP == 3 .OR. (.NOT.ISMEM .AND. IS_BDG4)) NJ=2
       DO II=1,2
          DO JJ=1,NJ
             IF (COMP == 1) THEN
@@ -1154,13 +1245,14 @@
       BMOUT(3,:)=TWO*(C(1)*C(2)*ROWS(1,:)+C(3)*C(4)*ROWS(2,:)+(C(1)*C(4)+C(3)*C(2))*ROWS(3,:))
       END SUBROUTINE
 
-      SUBROUTINE HB_ANS_BS_Q8(XYZN,NORMS,R,S,C,BSOUT)
+      SUBROUTINE HB_ANS_BS_Q8(XYZN,NORMS,R,S,C,BSOUT,PATTERN)
+      CHARACTER(*),INTENT(IN),OPTIONAL :: PATTERN
       REAL(DOUBLE), INTENT(IN) :: XYZN(8,3),NORMS(8,3),R,S,C(4)
       REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,48)
       REAL(DOUBLE) :: ROWS(2,48)
       INTEGER(LONG) :: II
       DO II=1,2
-         CALL HB_ANS_INTERP_Q8(XYZN,NORMS,R,S,II,.FALSE.,ROWS(II,:))
+         CALL HB_ANS_INTERP_Q8(XYZN,NORMS,R,S,II,.FALSE.,ROWS(II,:),PATTERN)
       ENDDO
       BSOUT(1,:)=C(1)*ROWS(1,:)+C(3)*ROWS(2,:)
       BSOUT(2,:)=C(2)*ROWS(1,:)+C(4)*ROWS(2,:)
