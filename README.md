@@ -72,14 +72,27 @@ NASTRAN. It is an independent program written in modern Fortran 95.
 - Modal analysis
 - Linear Elastic Buckling Analysis
 - Full Suite of 1D, 2D, and 3D elements
-- OP2 Support
-- Added Shell: Simo1989, Simo1993, DKMQ20, DKMQ24, MITC3+, DKMT18, MITC4+/D [Hughes Brezzi Formulation Added)
-- GPSTRES for nodal averaging surface stress
+- Selectable shell formulations through PARAM,QUAD8TYP ; PARAM,TRIA6TYP ; PARAM,QUAD4TYP ; PARAM,TRIA3TYP ; PARAM,QUADRTYP ; PARAM,TRIARTYP.
+- CQUAD4 shell formulations: MIN4, MIN4T, MITC4, MITC4+, DSQK, DKMQ20, and Simo1989 with Hughes–Brezzi stabilization.
+- CQUADR shell formulations: Simo1993, DKMQ24, DKMQ24 with EAS membrane enhancement, DKMQ24 AU, Q4EASANS, Müller–Bischoff P1C0, Krysl Q4RS, and MITC4+/D with Hughes–Brezzi stabilization.
+- CTRIA3 shell formulations: MIN3, MITC3+, Krysl T3FF, and DSG3.
+- CTRIAR shell formulations: DKMT18, Krysl T3FFD, and MITC3+ with Hughes–Brezzi stabilization.
+- CQUAD8 shell formulations: SIMOQ8, MITC8, MITC8D, ANS8BDG6, HBQ8, and MacNeal Q8.
+- CTRIA6 shell formulations: SIMOT6, MITC6, MacNeal MH6T, and Rezaiee2017
+- Enhanced assumed-strain shell formulations: automatic shear blending and membrane tying for selected Q8 elements, with configurable ANS field, shear, and membrane options.
+- Extended GPSTRESS nodal averaging for quadratic/linear shells, including midside nodes.
 - CBEAM with PBEAML Nastran
 - Faster Solver MUMPS for alternative SUPERLU
-- Some Eigen Solver: FEAST, Subspace, DYSEV
+- Some Eigen Solver: FEAST, Subspace, DSYEV
 - Faster RCM for Banded Optimization
 - New Solid with EAS linear and quadratic including CPYRAM, CHEXA, CTETRA, CPENTA
+- Consistent linear and quadratic-shell pressure loads: surface-normal and specified-direction loading, including midside-node contributions and curved-surface integration.
+- Structural thermal loading for shells: uniform temperature changes and through-thickness temperature gradients.
+- Consistent and HRZ lumped shell mass, including nonstructural mass; rotary inertia in selected upgraded formulations.
+- Geometric stiffness and linear buckling support for shells, validated on flat plate and column benchmarks.
+- Expanded shell recovery: membrane forces, bending moments, transverse shear, and top/bottom fiber stresses at center and nodal locations.
+- Native linear and quadratic-shell OP2 stress and force output, with improved SURFACE/GPSTRESS handling and F06 consistency.
+- Shell FORCE output selectors: CENTER, CORNER, and combined locations for native Q8/T6 shells
 
 # Get EXE or Make Binary
 
