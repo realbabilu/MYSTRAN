@@ -4,13 +4,13 @@
       SUBROUTINE CTRIA6_MITC6 ( OPT, INT_ELEM_ID )
 
 ! Ported from:
-!   python/MITC6_Tri_v4.py
+!   python/MITC6_Tri_v5e.py (enhanced edge membrane)
 !
 ! Formulation notes:
 !   6-node quadratic triangle with the same director, bending, drilling,
 !   mass, pressure and thermal framework as CTRIA6_SIMO1993.
 !   Only membrane and transverse shear are replaced with MITC-style
-!   assumed covariant strains and bending from the final Python v4 reference.
+!   assumed covariant strains from the enhanced Python v5e reference.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
@@ -18,7 +18,7 @@
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  ALPVEC, BGRID, DT, EID, ELGP, GRID_SNORM, GRID_ID, SNORM, KE, ME, BE1, BE2, BE3, MASS_PER_UNIT_AREA,    &
                                          NUM_EMG_FATAL_ERRS, PCOMP_PROPS, PPE, PRESS, PTE, RGRID, SHELL_A, SHELL_D, SHELL_T,     &
-                                         TREF, XEB
+                                         TREF, XEB, EPROP
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
       USE PARAMS, ONLY                :  COUPMASS
       USE ELMDIS_Interface
@@ -85,7 +85,7 @@
       SN7 = (/ONE/3.0D0, 0.0D0, 0.0D0, 1.0D0, 0.0D0, 0.5D0, 0.5D0/)
 
       IF (OPT(1) == 'Y') THEN
-         CALL QUADRATIC_SURFACE_MASS(6,XYZ,(/(ZERO,J=1,8)/))
+         CALL MASS_V5E_T6(XYZ,EPROP(1),R6,S6,W6)
       ENDIF
 
       IF (OPT(2) == 'Y') THEN
@@ -167,7 +167,7 @@
       ENDIF
 
       IF (OPT(5) == 'Y') THEN
-         CALL QUADRATIC_SURFACE_PRESSURE(INT_ELEM_ID,6,XYZ,(/(ZERO,J=1,8)/))
+         CALL QUADRATIC_SURFACE_PRESSURE(INT_ELEM_ID,6,XYZ,(/(ZERO,J=1,8)/),.TRUE.)
       ENDIF
 
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
@@ -181,18 +181,14 @@
       CONTAINS
 
 ! Flat-shell membrane initial-stress stiffness, tension-positive resultants.
-! Four-point Gauss/Duffy; standard geometry area, active translation field.
+! Python V5e six-point triangle quadrature; translation-only initial stress.
 ! Mechanical linear reference state only; no director or follower tangent.
       SUBROUTINE NATIVE_MEMBRANE_KG
-      REAL(DOUBLE) :: GX(4),GW(4),RG,SG,WG,NVAL(6),DG(2,6),DF(2,6)
+      REAL(DOUBLE) :: RG,SG,WG,NVAL(6),DG(2,6),DF(2,6)
       REAL(DOUBLE) :: TG(2,3),TF(2,3),CV(3),AREA,AJ,MT(2,2),INV(2,2),DETMT
       REAL(DOUBLE) :: E1(3),E2(3),E3(3),GRAD(2,6),BMG(3,36),NV(3),SIG(2,2),BLOCK(6,6)
       REAL(DOUBLE) :: SCALE_GEOM,NORMAL(3)
-      INTEGER(LONG) :: IG,JG,IN,JN,ID
-      GX=(/-0.8611363115940526D0,-0.3399810435848563D0, &
-            0.3399810435848563D0,0.8611363115940526D0/)
-      GW=(/0.3478548451374538D0,0.6521451548625461D0, &
-           0.6521451548625461D0,0.3478548451374538D0/)
+      INTEGER(LONG) :: IG,IN,JN,ID
       TG(1,:)=XYZ(2,:)-XYZ(1,:)
       TG(2,:)=XYZ(3,:)-XYZ(1,:)
       NORMAL=(/TG(1,2)*TG(2,3)-TG(1,3)*TG(2,2), &
@@ -211,11 +207,10 @@
       ENDDO
       CALL ELMDIS
       BLOCK=ZERO
-      DO IG=1,4
-         DO JG=1,4
-               RG=(GX(IG)+ONE)/TWO
-               SG=(ONE-RG)*(GX(JG)+ONE)/TWO
-               WG=GW(IG)*GW(JG)*(ONE-RG)/4.0D0
+      DO IG=1,6
+               RG=R6(IG)
+               SG=S6(IG)
+               WG=W6(IG)
                CALL SHAPE_T6(RG,SG,NVAL,DG)
                TG=MATMUL(DG,XYZ)
                CV=(/TG(1,2)*TG(2,3)-TG(1,3)*TG(2,2), &
@@ -239,7 +234,6 @@
                SIG(1,:)=(/NV(1),NV(3)/)
                SIG(2,:)=(/NV(3),NV(2)/)
                BLOCK=BLOCK+MATMUL(TRANSPOSE(GRAD),MATMUL(SIG,GRAD))*AREA*WG
-         ENDDO
       ENDDO
       BLOCK=(BLOCK+TRANSPOSE(BLOCK))/TWO
       KED(1:36,1:36)=ZERO
@@ -277,6 +271,42 @@
          ENDIF
       ENDDO
       END SUBROUTINE LOAD_BASIC_COORDS_T6
+
+      SUBROUTINE MASS_V5E_T6(XYZN,H,RP,SP,WP)
+      REAL(DOUBLE),INTENT(IN) :: XYZN(6,3),H,RP(6),SP(6),WP(6)
+      REAL(DOUBLE) :: M(6,6),N(6),DN(2,6),G1(3),G2(3),CV(3),W,ROTARY,TOTAL,TRACE_M
+      INTEGER(LONG) :: GP,AA,BB,DD
+      M=ZERO
+      DO GP=1,6
+         CALL SHAPE_T6(RP(GP),SP(GP),N,DN)
+         G1=MATMUL(DN(1,:),XYZN); G2=MATMUL(DN(2,:),XYZN)
+         CALL CROSS3(G1,G2,CV)
+         W=WP(GP)*VNORM(CV)
+         DO AA=1,6
+            DO BB=1,6
+               M(AA,BB)=M(AA,BB)+W*N(AA)*N(BB)
+            ENDDO
+         ENDDO
+      ENDDO
+      IF (COUPMASS <= 0) THEN
+         TOTAL=SUM(M)
+         TRACE_M=SUM((/(M(AA,AA),AA=1,6)/))
+         DO AA=1,6
+            W=M(AA,AA)*TOTAL/TRACE_M
+            M(AA,:)=ZERO; M(AA,AA)=W
+         ENDDO
+      ENDIF
+      ROTARY=(MASS_PER_UNIT_AREA-EPROP(4))*H*H/12.0D0
+      ME=ZERO
+      DO AA=1,6
+         DO BB=1,6
+            DO DD=1,3
+               ME(6*(AA-1)+DD,6*(BB-1)+DD)=MASS_PER_UNIT_AREA*M(AA,BB)
+               ME(6*(AA-1)+DD+3,6*(BB-1)+DD+3)=ROTARY*M(AA,BB)
+            ENDDO
+         ENDDO
+      ENDDO
+      END SUBROUTINE MASS_V5E_T6
 
       SUBROUTINE SHAPE_T6 ( R, S, NVAL, DN )
       REAL(DOUBLE), INTENT(IN)  :: R, S
@@ -456,78 +486,44 @@
       VOUT(3,:) = TWO*(C(1)*C(3)*V11 + C(2)*C(4)*V22 + (C(1)*C(4)+C(2)*C(3))*V12)
       END SUBROUTINE TENSOR_PHYS_T6
 
+! Enhanced V5e: edge-tangential membrane samples plus centroid closure.
       SUBROUTINE BM_MITC6_AT ( XYZN, R, S, BMOUT, JAC, R1MITC, R2MITC, RCMITC )
-      REAL(DOUBLE), INTENT(IN)  :: XYZN(6,3), R, S, R1MITC, R2MITC, RCMITC
-      REAL(DOUBLE), INTENT(OUT) :: BMOUT(3,36), JAC
-      REAL(DOUBLE) :: RR11(36), SS11(36), RS11(36), RR21(36), SS21(36), RS21(36), RR12(36), SS12(36), RS12(36)
-      REAL(DOUBLE) :: RRC(36), SSC(36), RSC(36), QQ21(36), QQ12(36), QQC(36), A1(36), B1(36), C1V(36)
-      REAL(DOUBLE) :: A2(36), B2(36), C2V(36), A3(36), B3(36), C3V(36), BERR(36), BESS(36), BEQQ(36), BERS(36)
-      REAL(DOUBLE) :: E1F(3), E2F(3), E3F(3), G1(3), G2(3), C(4), VP(3,3)
-      REAL(DOUBLE) :: VALS3(3,36), PTS3(3,2)
-      CALL FIXED_FRAME_T6(XYZN, E1F, E2F, E3F)
-      CALL NAT_MEM_ROWS_T6(XYZN, R1MITC, R1MITC, RR11, SS11, RS11)
-      CALL NAT_MEM_ROWS_T6(XYZN, R2MITC, R1MITC, RR21, SS21, RS21)
-      CALL NAT_MEM_ROWS_T6(XYZN, R1MITC, R2MITC, RR12, SS12, RS12)
-      CALL NAT_MEM_ROWS_T6(XYZN, RCMITC, RCMITC, RRC, SSC, RSC)
-      QQ21 = 0.5D0*(RR21 + SS21) - RS21
-      QQ12 = 0.5D0*(RR12 + SS12) - RS12
-      QQC  = 0.5D0*(RRC  + SSC ) - RSC
-
-      VALS3(1,:) = RR11
-      VALS3(2,:) = RR21
-      VALS3(3,:) = RRC
-      PTS3(1,:) = (/R1MITC, R1MITC/)
-      PTS3(2,:) = (/R2MITC, R1MITC/)
-      PTS3(3,:) = (/RCMITC, RCMITC/)
-      CALL FIT_AFFINE36_T6(VALS3, PTS3, 1, A1, B1, C1V)
-
-      VALS3(1,:) = SS11
-      VALS3(2,:) = SS12
-      VALS3(3,:) = SSC
-      PTS3(1,:) = (/R1MITC, R1MITC/)
-      PTS3(2,:) = (/R1MITC, R2MITC/)
-      PTS3(3,:) = (/RCMITC, RCMITC/)
-      CALL FIT_AFFINE36_T6(VALS3, PTS3, 1, A2, B2, C2V)
-
-      VALS3(1,:) = QQ21
-      VALS3(2,:) = QQ12
-      VALS3(3,:) = QQC
-      PTS3(1,:) = (/R2MITC, R1MITC/)
-      PTS3(2,:) = (/R1MITC, R2MITC/)
-      PTS3(3,:) = (/RCMITC, RCMITC/)
-      CALL FIT_AFFINE36_T6(VALS3, PTS3, 2, A3, B3, C3V)
-
-      BERR = A1 + B1*R + C1V*S
-      BESS = A2 + B2*R + C2V*S
-      BEQQ = A3 + B3*R + C3V*(ONE - R - S)
-      BERS = 0.5D0*(BERR + BESS) - BEQQ
-
-      CALL COV_MAP_T6(XYZN, R, S, E1F, E2F, G1, G2, C, JAC)
-      CALL TENSOR_PHYS_T6(BERR(1:3), BESS(1:3), BERS(1:3), C, VP)
-      BMOUT = ZERO
-      BMOUT(:,1:3) = VP
-      CALL TENSOR_PHYS_T6(BERR(4:6), BESS(4:6), BERS(4:6), C, VP)
-      BMOUT(:,4:6) = VP
-      CALL TENSOR_PHYS_T6(BERR(7:9), BESS(7:9), BERS(7:9), C, VP)
-      BMOUT(:,7:9) = VP
-      CALL TENSOR_PHYS_T6(BERR(10:12), BESS(10:12), BERS(10:12), C, VP)
-      BMOUT(:,10:12) = VP
-      CALL TENSOR_PHYS_T6(BERR(13:15), BESS(13:15), BERS(13:15), C, VP)
-      BMOUT(:,13:15) = VP
-      CALL TENSOR_PHYS_T6(BERR(16:18), BESS(16:18), BERS(16:18), C, VP)
-      BMOUT(:,16:18) = VP
-      CALL TENSOR_PHYS_T6(BERR(19:21), BESS(19:21), BERS(19:21), C, VP)
-      BMOUT(:,19:21) = VP
-      CALL TENSOR_PHYS_T6(BERR(22:24), BESS(22:24), BERS(22:24), C, VP)
-      BMOUT(:,22:24) = VP
-      CALL TENSOR_PHYS_T6(BERR(25:27), BESS(25:27), BERS(25:27), C, VP)
-      BMOUT(:,25:27) = VP
-      CALL TENSOR_PHYS_T6(BERR(28:30), BESS(28:30), BERS(28:30), C, VP)
-      BMOUT(:,28:30) = VP
-      CALL TENSOR_PHYS_T6(BERR(31:33), BESS(31:33), BERS(31:33), C, VP)
-      BMOUT(:,31:33) = VP
-      CALL TENSOR_PHYS_T6(BERR(34:36), BESS(34:36), BERS(34:36), C, VP)
-      BMOUT(:,34:36) = VP
+      REAL(DOUBLE),INTENT(IN) :: XYZN(6,3),R,S,R1MITC,R2MITC,RCMITC
+      REAL(DOUBLE),INTENT(OUT) :: BMOUT(3,36),JAC
+      REAL(DOUBLE) :: RR1(36),RR2(36),SS1(36),SS2(36),TMP1(36),TMP2(36)
+      REAL(DOUBLE) :: RRC(36),SSC(36),RSC(36),QQ1(36),QQ2(36),QQC(36)
+      REAL(DOUBLE) :: VALS(3,36),PTS(3,2),AV(36),BV(36),CV(36),ERR(36),ESS(36),EQQ(36),ERS(36)
+      REAL(DOUBLE) :: E1(3),E2(3),E3(3),G1(3),G2(3),C(4),VP(3,3)
+      INTEGER(LONG) :: II
+      CALL NAT_MEM_ROWS_T6(XYZN,R1MITC,ZERO,RR1,TMP1,TMP2)
+      CALL NAT_MEM_ROWS_T6(XYZN,R2MITC,ZERO,RR2,TMP1,TMP2)
+      CALL NAT_MEM_ROWS_T6(XYZN,ZERO,R1MITC,TMP1,SS1,TMP2)
+      CALL NAT_MEM_ROWS_T6(XYZN,ZERO,R2MITC,TMP1,SS2,TMP2)
+      CALL NAT_MEM_ROWS_T6(XYZN,RCMITC,RCMITC,RRC,SSC,RSC)
+      CALL NAT_MEM_ROWS_T6(XYZN,R2MITC,R1MITC,TMP1,TMP2,QQ1)
+      QQ1=0.5D0*(TMP1+TMP2)-QQ1
+      CALL NAT_MEM_ROWS_T6(XYZN,R1MITC,R2MITC,TMP1,TMP2,QQ2)
+      QQ2=0.5D0*(TMP1+TMP2)-QQ2
+      QQC=0.5D0*(RRC+SSC)-RSC
+      VALS(1,:)=RR1; VALS(2,:)=RR2; VALS(3,:)=RRC
+      PTS(1,:)=(/R1MITC,ZERO/); PTS(2,:)=(/R2MITC,ZERO/); PTS(3,:)=(/RCMITC,RCMITC/)
+      CALL FIT_AFFINE36_T6(VALS,PTS,1,AV,BV,CV)
+      ERR=AV+BV*R+CV*S
+      VALS(1,:)=SS1; VALS(2,:)=SS2; VALS(3,:)=SSC
+      PTS(1,:)=(/ZERO,R1MITC/); PTS(2,:)=(/ZERO,R2MITC/)
+      CALL FIT_AFFINE36_T6(VALS,PTS,1,AV,BV,CV)
+      ESS=AV+BV*R+CV*S
+      VALS(1,:)=QQ1; VALS(2,:)=QQ2; VALS(3,:)=QQC
+      PTS(1,:)=(/R2MITC,R1MITC/); PTS(2,:)=(/R1MITC,R2MITC/)
+      CALL FIT_AFFINE36_T6(VALS,PTS,2,AV,BV,CV)
+      EQQ=AV+BV*R+CV*(ONE-R-S)
+      ERS=0.5D0*(ERR+ESS)-EQQ
+      CALL FIXED_FRAME_T6(XYZN,E1,E2,E3)
+      CALL COV_MAP_T6(XYZN,R,S,E1,E2,G1,G2,C,JAC)
+      DO II=1,36,3
+         CALL TENSOR_PHYS_T6(ERR(II:II+2),ESS(II:II+2),ERS(II:II+2),C,VP)
+         BMOUT(:,II:II+2)=VP
+      ENDDO
       END SUBROUTINE BM_MITC6_AT
 
       SUBROUTINE BB_T6_AT ( XYZN, NORMS, R, S, BBOUT, JAC, NORMS_EXT )
@@ -573,9 +569,9 @@
       RHS(1,:) = BRT
       CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, R2MITC, ZERO,   BRT, BST, JAC)
       RHS(2,:) = BRT
-      CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, R1MITC, R1MITC, BRT, BST, JAC)
+      CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, ZERO, R1MITC, BRT, BST, JAC)
       RHS(3,:) = BST
-      CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, R1MITC, R2MITC, BRT, BST, JAC)
+      CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, ZERO, R2MITC, BRT, BST, JAC)
       RHS(4,:) = BST
       CALL NAT_SHEAR_ROWS_T6(XYZN, NORMS, RCMITC, RCMITC, BRT, BST, JAC)
       RHS(5,:) = BRT
@@ -588,8 +584,8 @@
       MAT8 = ZERO
       MAT8(1,:) = (/ONE, R1MITC, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO/)
       MAT8(2,:) = (/ONE, R2MITC, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO/)
-      MAT8(3,:) = (/ZERO, ZERO, ZERO, ONE, R1MITC, R1MITC, -(R1MITC*R1MITC), -(R1MITC*R1MITC)/)
-      MAT8(4,:) = (/ZERO, ZERO, ZERO, ONE, R1MITC, R2MITC, -(R1MITC*R1MITC), -(R1MITC*R2MITC)/)
+      MAT8(3,:) = (/ZERO, ZERO, ZERO, ONE, ZERO, R1MITC, ZERO, ZERO/)
+      MAT8(4,:) = (/ZERO, ZERO, ZERO, ONE, ZERO, R2MITC, ZERO, ZERO/)
       MAT8(5,:) = (/ONE, RCMITC, RCMITC, ZERO, ZERO, ZERO, RCMITC*RCMITC, RCMITC*RCMITC/)
       MAT8(6,:) = (/ZERO, ZERO, ZERO, ONE, RCMITC, RCMITC, -(RCMITC*RCMITC), -(RCMITC*RCMITC)/)
       MAT8(7,:) = (/ -ONE/SQRT2, -R2MITC/SQRT2, -R1MITC/SQRT2, ONE/SQRT2, R2MITC/SQRT2, R1MITC/SQRT2, &
