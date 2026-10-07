@@ -102,6 +102,17 @@ Static Linux binaries have been built, but releases are in work.
 For now, it is better to build it yourself -- it's really
 straightforward.
 
+# Shell and Solid Elements
+| Elements card | PARAM selector | Values |
+|---|---|---|
+| CQUAD4 | `QUAD4TYP` | `MIN4`, `MIN4T`, `MITC4`, `MITC4+`, `DSQK`, `DKMQ20`, `SIMO` |
+| CQUADR | `QUADRTYP` | `SIMO`, `DKMQ24`, `DKM24EA`, `DKM24AU`, `Q4EASANS`, `MBP1C0`, `Q4RS`, `MITC4PD` |
+| CTRIA3 | `TRIA3TYP` | `MIN3`, `MITC3+`, `T3FF`, `DSG3` |
+| CTRIAR | `TRIARTYP` | `DKMT18`, `T3FFD`, `MITC3+HB` |
+| CQUAD8 | `QUAD8TYP` | `SIMOQ8`, `MITC8`, `MITC8D`, `ANS8BDG6`, `HBQ8`, `MACQ8D` |
+| CTRIA6 | `TRIA6TYP` | `SIMOT6`, `MITC6`, `MH6T`, `REZAIEE` |
+|NEWSOLID| `SOLIDTYP` | `NEWSOLID`, `LEGACY` |
+
 # Documentation
 
 The end user documentation is located the [MYSTRAN_Documentation](https://github.com/MYSTRANsolver/MYSTRAN_Documentation) repository.
