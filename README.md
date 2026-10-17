@@ -49,7 +49,7 @@ See the [5-001 OP2 audit](update/op2_solid_5001_audit.md), [quadratic patch audi
 
 ## Formulation
 
-- [Solids Formulation](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.html) — HTML manuscript covering the eight NEWSOLID solid topologies, mathematical operators and existing benchmark comparisons. Download the [formulation folder](update/Formulation/Solid) to view the HTML with its figures locally; GitHub displays HTML source rather than rendering it.
+- [Solids Formulation](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.md) — Mathematical formulations for the eight NEWSOLID solid topologies and existing benchmark comparisons. [Alternative HTML version](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.html): download the [formulation folder](update/Formulation/Solid) to view it with its figures locally.
 
 # Build Instructions
 

@@ -2,8 +2,8 @@
 
 **Ary · Technical manuscript · 18 October 2026**
 
-- [Open the HTML manuscript](NEWSOLID_CONTINUUM_FORMULATIONS.html) after downloading this folder; equations are pre-rendered as SVG, with navigation and print styling. No network connection or equation-rendering script is required.
-- [Markdown source](NEWSOLID_CONTINUUM_FORMULATIONS.md).
+- [Solids Formulation — read on GitHub](NEWSOLID_CONTINUUM_FORMULATIONS.md).
+- [Alternative HTML version](NEWSOLID_CONTINUUM_FORMULATIONS.html): download this folder to view it locally with its figures. Equations are pre-rendered as SVG, with navigation and print styling. No network connection or equation-rendering script is required.
 - [Numerical tables and provenance](data/provenance.json).
 - [Existing solid benchmark reports and input decks](../../solid_benchmark/README.md).
 
