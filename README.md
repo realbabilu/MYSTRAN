@@ -39,6 +39,13 @@ Validation remains scoped: ABE on the distorted 5-001 patch and some CPENTA6 buc
 
 See the [5-001 OP2 audit](update/op2_solid_5001_audit.md), [quadratic patch audit](update/quadratic_patch_5001_audit.md), [solid defaults and limitations](update/newsolid_op2_default_2026-10-17.md), and [CTETRA4 buckling audit](update/ctetra4_python_kg_parity_2026-10-17.md).
 
+### Solid benchmark comparisons
+
+- [MYSTRAN solid comparison vs Nastran](update/solid_benchmark/mystran_solid_comparison.md): patch, beam, dome, buckling and thermal benchmarks.
+- [All solid elements - SAP2000 benchmarks](update/solid_benchmark/comparison_all.md): eight solid types, matched Nastran/MYSTRAN meshes and refinement curves, with independent and published SAP2000 references.
+- [Download benchmark input decks only](update/solid_benchmark/solid_benchmark_inputs.zip) - no raw solver outputs.
+- [Benchmark index and numerical data](update/solid_benchmark/README.md).
+
 # Build Instructions
 
 See [BUILD.md](BUILD.md) for both Windows and Linux build (compiling) instructions.

@@ -1,0 +1,1270 @@
+{
+  "description": "Input decks only. No raw solver outputs, binaries or scratch databases.",
+  "date": "2026-10-17",
+  "input_decks": 180,
+  "all_solid_matched_models": 56,
+  "all_solid_nastran_inputs": 56,
+  "all_solid_mystran_inputs": 63,
+  "files": [
+    {
+      "path": "comparison_all/5-004/12x2x2/CHEXA20/mystran_NEWSOLID/model.dat",
+      "bytes": 33259,
+      "sha256": "2a1deae2471bb271e0b82e796e1a4a3526e84d6981fdaaa39e5bca35c5bb73be",
+      "source_sha256": "2a1deae2471bb271e0b82e796e1a4a3526e84d6981fdaaa39e5bca35c5bb73be",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CHEXA20/nastran/model.dat",
+      "bytes": 33228,
+      "sha256": "4d8249dc76bac15fe8b41bf35e81f8a91fb51cd1b179eeeedd26f58a2a19f7a3",
+      "source_sha256": "4d8249dc76bac15fe8b41bf35e81f8a91fb51cd1b179eeeedd26f58a2a19f7a3",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CHEXA8/mystran_NEWSOLID/model.dat",
+      "bytes": 9554,
+      "sha256": "ba9128fae7f24eedfdbb1b353ecce875b5502b983a4822e15e9892584e0bd141",
+      "source_sha256": "ba9128fae7f24eedfdbb1b353ecce875b5502b983a4822e15e9892584e0bd141",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CHEXA8/nastran/model.dat",
+      "bytes": 9525,
+      "sha256": "05068e58a152910c121dbcbfe7249555509b245a61b6fbe3d87a8dd447bc92ed",
+      "source_sha256": "05068e58a152910c121dbcbfe7249555509b245a61b6fbe3d87a8dd447bc92ed",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CPENTA15/mystran_NEWSOLID/model.dat",
+      "bytes": 41139,
+      "sha256": "ba23cfdf63fc908e8a262d2b6510c55addf185aef7af2c6419371b2d62767d6d",
+      "source_sha256": "ba23cfdf63fc908e8a262d2b6510c55addf185aef7af2c6419371b2d62767d6d",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CPENTA15/nastran/model.dat",
+      "bytes": 41108,
+      "sha256": "42845c5e8a7bce64049a56d452cce2df4504c2e0beb29a58ce436126a902e011",
+      "source_sha256": "42845c5e8a7bce64049a56d452cce2df4504c2e0beb29a58ce436126a902e011",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CPENTA6/mystran_ABE/model.dat",
+      "bytes": 10813,
+      "sha256": "ddb44f09eccba25d26f3197bf00ecf991785a98797b0f05fc2d8ab718df50adb",
+      "source_sha256": "ddb44f09eccba25d26f3197bf00ecf991785a98797b0f05fc2d8ab718df50adb",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CPENTA6/mystran_EAS9/model.dat",
+      "bytes": 10814,
+      "sha256": "ea76ba97de83de547d6fa1042abcf796c5d56f4d51dbd9ffb0a939b9c47e22a7",
+      "source_sha256": "ea76ba97de83de547d6fa1042abcf796c5d56f4d51dbd9ffb0a939b9c47e22a7",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CPENTA6/nastran/model.dat",
+      "bytes": 10764,
+      "sha256": "2806b2480931280c932a697e3596e1e8201ac27c06b74f573abd47c54eaa28bc",
+      "source_sha256": "2806b2480931280c932a697e3596e1e8201ac27c06b74f573abd47c54eaa28bc",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CPYRAM13/mystran_NEWSOLID/model.dat",
+      "bytes": 90912,
+      "sha256": "2afcd932e6159a5d8c9dcc89fd2f842bc7b560882d3ec606dc779260edbb9d2e",
+      "source_sha256": "2afcd932e6159a5d8c9dcc89fd2f842bc7b560882d3ec606dc779260edbb9d2e",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CPYRAM13/nastran/model.dat",
+      "bytes": 90881,
+      "sha256": "8b4b9bc099b1afb9d23cc7ec68b4cb68c5379b2b9c4706b4405f1fe3e66f1daf",
+      "source_sha256": "8b4b9bc099b1afb9d23cc7ec68b4cb68c5379b2b9c4706b4405f1fe3e66f1daf",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CPYRAM5/mystran_NEWSOLID/model.dat",
+      "bytes": 21789,
+      "sha256": "1810f8ca294b69d2cd3cb6f0ef5e2016217c00d46dc9e6b2c1a8332eb7cc3df7",
+      "source_sha256": "1810f8ca294b69d2cd3cb6f0ef5e2016217c00d46dc9e6b2c1a8332eb7cc3df7",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CPYRAM5/nastran/model.dat",
+      "bytes": 21760,
+      "sha256": "cfa98c082ed3cd0936fa945b89113a0b2a915af6763dd81f92f99150f25aaf00",
+      "source_sha256": "cfa98c082ed3cd0936fa945b89113a0b2a915af6763dd81f92f99150f25aaf00",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CTETRA10/mystran_NEWSOLID/model.dat",
+      "bytes": 67915,
+      "sha256": "631665b6b1f7316c8036217ea3e16cdb8a71e075df73373079340f26695f423d",
+      "source_sha256": "631665b6b1f7316c8036217ea3e16cdb8a71e075df73373079340f26695f423d",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CTETRA10/nastran/model.dat",
+      "bytes": 67884,
+      "sha256": "3ebbf359e80c550da8fe224e89d8a68290130ec6f604a4a2465d9494a2e46b37",
+      "source_sha256": "3ebbf359e80c550da8fe224e89d8a68290130ec6f604a4a2465d9494a2e46b37",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CTETRA4/mystran_NEWSOLID/model.dat",
+      "bytes": 15604,
+      "sha256": "cdaba09d381841268b3f232dee43b0b18748e2ac9682819dd1176297ef61f7d0",
+      "source_sha256": "cdaba09d381841268b3f232dee43b0b18748e2ac9682819dd1176297ef61f7d0",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/12x2x2/CTETRA4/nastran/model.dat",
+      "bytes": 15575,
+      "sha256": "96c1fef3e156df1b9695dda86a3241b3557a00f008de6fab38d87809b65053f0",
+      "source_sha256": "96c1fef3e156df1b9695dda86a3241b3557a00f008de6fab38d87809b65053f0",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CHEXA20/mystran_NEWSOLID/model.dat",
+      "bytes": 118953,
+      "sha256": "844894d3d8f22db4f794a56d19cb4b2f9811f44a33fe150b92f32170d5c73a79",
+      "source_sha256": "844894d3d8f22db4f794a56d19cb4b2f9811f44a33fe150b92f32170d5c73a79",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CHEXA20/nastran/model.dat",
+      "bytes": 118922,
+      "sha256": "9ff96c9578065818036f2b2330ad8f4d1182f83e56d1944784e4f57dc057eece",
+      "source_sha256": "9ff96c9578065818036f2b2330ad8f4d1182f83e56d1944784e4f57dc057eece",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CHEXA8/mystran_NEWSOLID/model.dat",
+      "bytes": 32007,
+      "sha256": "79ce42c88e28f82050c75e0e029b91fcd6c3eafe8d362341e426a1ba13e80f00",
+      "source_sha256": "79ce42c88e28f82050c75e0e029b91fcd6c3eafe8d362341e426a1ba13e80f00",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CHEXA8/nastran/model.dat",
+      "bytes": 31978,
+      "sha256": "53abf26ad9912a2e13bfa9496cf4d04020721ea8ae1b83a97d18acdbd3bf2a6e",
+      "source_sha256": "53abf26ad9912a2e13bfa9496cf4d04020721ea8ae1b83a97d18acdbd3bf2a6e",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CPENTA15/mystran_NEWSOLID/model.dat",
+      "bytes": 150624,
+      "sha256": "f4523005b19f74a19586de625e62f7534b38a480a3fead9584a619a957a85525",
+      "source_sha256": "f4523005b19f74a19586de625e62f7534b38a480a3fead9584a619a957a85525",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CPENTA15/nastran/model.dat",
+      "bytes": 150593,
+      "sha256": "975c857b43386ea3a263352ad08ef5cf044b59b22b935871ee823887b4c0195d",
+      "source_sha256": "975c857b43386ea3a263352ad08ef5cf044b59b22b935871ee823887b4c0195d",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CPENTA6/mystran_ABE/model.dat",
+      "bytes": 37198,
+      "sha256": "1aae98efcf535a14eff4eec3d5159c14b1fb97f556c0a460dbb1bc2ff6a32896",
+      "source_sha256": "1aae98efcf535a14eff4eec3d5159c14b1fb97f556c0a460dbb1bc2ff6a32896",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CPENTA6/mystran_EAS9/model.dat",
+      "bytes": 37199,
+      "sha256": "2e9607509b45bf5a5334dff362ad7fb05c1369d7c1a61985b4da2d28f5d836a1",
+      "source_sha256": "2e9607509b45bf5a5334dff362ad7fb05c1369d7c1a61985b4da2d28f5d836a1",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CPENTA6/nastran/model.dat",
+      "bytes": 37149,
+      "sha256": "b852363bec2708ab423443815014a98b2e3cd385e155b73d3c6a3600bffdd5e5",
+      "source_sha256": "b852363bec2708ab423443815014a98b2e3cd385e155b73d3c6a3600bffdd5e5",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CPYRAM13/mystran_NEWSOLID/model.dat",
+      "bytes": 351887,
+      "sha256": "782a387bb785a0f45c9cc4dd4106f2597df84a3d67102fec29f5eb92b4c938c1",
+      "source_sha256": "782a387bb785a0f45c9cc4dd4106f2597df84a3d67102fec29f5eb92b4c938c1",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CPYRAM13/nastran/model.dat",
+      "bytes": 351856,
+      "sha256": "92acdeeea6a2d28ecaa9b36cb437e0766aadbac654a29dae85914f3cb68ee048",
+      "source_sha256": "92acdeeea6a2d28ecaa9b36cb437e0766aadbac654a29dae85914f3cb68ee048",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CPYRAM5/mystran_NEWSOLID/model.dat",
+      "bytes": 81618,
+      "sha256": "7a80f337a550e656509297b430a9a7232a4f2634387e56e8ac9993fee4e6c3aa",
+      "source_sha256": "7a80f337a550e656509297b430a9a7232a4f2634387e56e8ac9993fee4e6c3aa",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CPYRAM5/nastran/model.dat",
+      "bytes": 81589,
+      "sha256": "682bee49c18479d83c76fc3dab0bd984099d9218a2ffd66ad0d6ea6c954874c7",
+      "source_sha256": "682bee49c18479d83c76fc3dab0bd984099d9218a2ffd66ad0d6ea6c954874c7",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CTETRA10/mystran_NEWSOLID/model.dat",
+      "bytes": 256069,
+      "sha256": "24dc428328ca153bb94e588da865254ddd1f491c549d08ac076ae191ceb88aa2",
+      "source_sha256": "24dc428328ca153bb94e588da865254ddd1f491c549d08ac076ae191ceb88aa2",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CTETRA10/nastran/model.dat",
+      "bytes": 256038,
+      "sha256": "5bb66c442165891a8373adf36ff317ba7bbc16c6a5782c1265745055c085b233",
+      "source_sha256": "5bb66c442165891a8373adf36ff317ba7bbc16c6a5782c1265745055c085b233",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CTETRA4/mystran_NEWSOLID/model.dat",
+      "bytes": 56677,
+      "sha256": "f78aeea1122f9405e8e36dcfa78b105b5117ae66a3a62c3873ddfd2a0789c268",
+      "source_sha256": "f78aeea1122f9405e8e36dcfa78b105b5117ae66a3a62c3873ddfd2a0789c268",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/24x4x2/CTETRA4/nastran/model.dat",
+      "bytes": 56648,
+      "sha256": "d11a1bdae2bad45ebf55bf63fd3e7f85317010c2651b4158c9e89ebb8ed7b09e",
+      "source_sha256": "d11a1bdae2bad45ebf55bf63fd3e7f85317010c2651b4158c9e89ebb8ed7b09e",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CHEXA20/mystran_NEWSOLID/model.dat",
+      "bytes": 6475,
+      "sha256": "08b16f64328f38c775d3267dbbd8cacda9a26bf94f9e77e1777a81d181d05330",
+      "source_sha256": "08b16f64328f38c775d3267dbbd8cacda9a26bf94f9e77e1777a81d181d05330",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CHEXA20/nastran/model.dat",
+      "bytes": 6444,
+      "sha256": "3371f5f19b2286ce8fac2c3ff1ea5e39d1b9a31db607996c6e912cf7612ff8e4",
+      "source_sha256": "3371f5f19b2286ce8fac2c3ff1ea5e39d1b9a31db607996c6e912cf7612ff8e4",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CHEXA8/mystran_NEWSOLID/model.dat",
+      "bytes": 2296,
+      "sha256": "509e65325eba8a040a5f7d7b33d3a42cb0fc5b7837263b10ecc93beeba219349",
+      "source_sha256": "509e65325eba8a040a5f7d7b33d3a42cb0fc5b7837263b10ecc93beeba219349",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CHEXA8/nastran/model.dat",
+      "bytes": 2267,
+      "sha256": "2972ae64a641ded7dd0b15169deb255d69b15d1f8c58980bdb2cf73088e4c8d8",
+      "source_sha256": "2972ae64a641ded7dd0b15169deb255d69b15d1f8c58980bdb2cf73088e4c8d8",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CPENTA15/mystran_NEWSOLID/model.dat",
+      "bytes": 7333,
+      "sha256": "5bf51231ef29b9531a0c47b79dc94bf7e72ceaf7293c7cb0471e41d1867e5257",
+      "source_sha256": "5bf51231ef29b9531a0c47b79dc94bf7e72ceaf7293c7cb0471e41d1867e5257",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CPENTA15/nastran/model.dat",
+      "bytes": 7302,
+      "sha256": "b538703456739fc7f81a8e6d2cf20076b4d501f3d8be4f04da5cf9869bb7bc69",
+      "source_sha256": "b538703456739fc7f81a8e6d2cf20076b4d501f3d8be4f04da5cf9869bb7bc69",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CPENTA6/mystran_ABE/model.dat",
+      "bytes": 2469,
+      "sha256": "6a4fc177a208a30440bc426bc465b69e761c6d62a9084262b5ca441dd4e8da3e",
+      "source_sha256": "6a4fc177a208a30440bc426bc465b69e761c6d62a9084262b5ca441dd4e8da3e",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CPENTA6/mystran_EAS9/model.dat",
+      "bytes": 2470,
+      "sha256": "78633f5d0bf9ffef351f5faab2d9b471188bf411fcf56528abda709e3bc78fde",
+      "source_sha256": "78633f5d0bf9ffef351f5faab2d9b471188bf411fcf56528abda709e3bc78fde",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CPENTA6/nastran/model.dat",
+      "bytes": 2420,
+      "sha256": "24b8fe05b251df9f2f3f12308a7a3f5f4e6e6aedc401089d34fe21a3745c882b",
+      "source_sha256": "24b8fe05b251df9f2f3f12308a7a3f5f4e6e6aedc401089d34fe21a3745c882b",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CPYRAM13/mystran_NEWSOLID/model.dat",
+      "bytes": 13348,
+      "sha256": "fc7d577505dec92dc262df7d081c0d27350238197146555471fd5667fb1f839d",
+      "source_sha256": "fc7d577505dec92dc262df7d081c0d27350238197146555471fd5667fb1f839d",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CPYRAM13/nastran/model.dat",
+      "bytes": 13317,
+      "sha256": "8465f0eff4e4d4438423ce004ff933db4f9f85c4a4e0eeb47569153ea49ab7aa",
+      "source_sha256": "8465f0eff4e4d4438423ce004ff933db4f9f85c4a4e0eeb47569153ea49ab7aa",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CPYRAM5/mystran_NEWSOLID/model.dat",
+      "bytes": 3769,
+      "sha256": "fbd613c183f7719ddc6af5e6e8afa996d81d58cb85108a6ddcfc5ff4a25417f9",
+      "source_sha256": "fbd613c183f7719ddc6af5e6e8afa996d81d58cb85108a6ddcfc5ff4a25417f9",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CPYRAM5/nastran/model.dat",
+      "bytes": 3740,
+      "sha256": "c2af6d95d0fa16bd192f59c7774414ea9d2768e97f57ba9d2bb3460d5816d6f3",
+      "source_sha256": "c2af6d95d0fa16bd192f59c7774414ea9d2768e97f57ba9d2bb3460d5816d6f3",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CTETRA10/mystran_NEWSOLID/model.dat",
+      "bytes": 11101,
+      "sha256": "12429556a511e5b271e6a37ffcff0cc90647b46b68055f83303684ad0968a510",
+      "source_sha256": "12429556a511e5b271e6a37ffcff0cc90647b46b68055f83303684ad0968a510",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CTETRA10/nastran/model.dat",
+      "bytes": 11070,
+      "sha256": "eca24bdca653c9a1e28f7dea5bcd15ea85577853a64ba451ae84f1501b6b2128",
+      "source_sha256": "eca24bdca653c9a1e28f7dea5bcd15ea85577853a64ba451ae84f1501b6b2128",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CTETRA4/mystran_NEWSOLID/model.dat",
+      "bytes": 3026,
+      "sha256": "dd9f63498fab5d6f2df6e6004db67989f4a01725b170a60e56781c59541ed6ed",
+      "source_sha256": "dd9f63498fab5d6f2df6e6004db67989f4a01725b170a60e56781c59541ed6ed",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-004/6x1x1/CTETRA4/nastran/model.dat",
+      "bytes": 2997,
+      "sha256": "f11b54fc05eaef08c07dc927840c9854c72d2947f2dbed355b66d49ac9716dcb",
+      "source_sha256": "f11b54fc05eaef08c07dc927840c9854c72d2947f2dbed355b66d49ac9716dcb",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CHEXA20/mystran_NEWSOLID/model.dat",
+      "bytes": 190241,
+      "sha256": "04ac1f58513026615087d7e2422cbdc7de8a7fec21d0348826279467757a2ef2",
+      "source_sha256": "04ac1f58513026615087d7e2422cbdc7de8a7fec21d0348826279467757a2ef2",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CHEXA20/nastran/model.dat",
+      "bytes": 190210,
+      "sha256": "f1a2b5790160cb270daaf87d87025fcd40d5348396e35712d3c02a7e71745ef9",
+      "source_sha256": "f1a2b5790160cb270daaf87d87025fcd40d5348396e35712d3c02a7e71745ef9",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CHEXA8/mystran_NEWSOLID/model.dat",
+      "bytes": 51537,
+      "sha256": "2a714da78dd195264b7ceacd23083029e44f1e86491752d7d5ca54acd0c0e0d9",
+      "source_sha256": "2a714da78dd195264b7ceacd23083029e44f1e86491752d7d5ca54acd0c0e0d9",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CHEXA8/nastran/model.dat",
+      "bytes": 51508,
+      "sha256": "ea32ae3656ac5586dcaffbe525ae6c8b09f50027a8fe5a56798db2a8e4774fc5",
+      "source_sha256": "ea32ae3656ac5586dcaffbe525ae6c8b09f50027a8fe5a56798db2a8e4774fc5",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CPENTA15/mystran_NEWSOLID/model.dat",
+      "bytes": 254685,
+      "sha256": "934efa9fad25ee5fcec57da3eb6e9bdb1eb5dd22496c9c43b42526f85e1e995a",
+      "source_sha256": "934efa9fad25ee5fcec57da3eb6e9bdb1eb5dd22496c9c43b42526f85e1e995a",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CPENTA15/nastran/model.dat",
+      "bytes": 254654,
+      "sha256": "c319255544cbeb00158a8fbe362fe1d4129d1efa3de9b76ca8430c042fb938de",
+      "source_sha256": "c319255544cbeb00158a8fbe362fe1d4129d1efa3de9b76ca8430c042fb938de",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CPENTA6/mystran_ABE/model.dat",
+      "bytes": 58563,
+      "sha256": "44682c7e8a04ba754fbc1f2fd2860ac55c23fa6b019906d92d78032f4d14dfa7",
+      "source_sha256": "44682c7e8a04ba754fbc1f2fd2860ac55c23fa6b019906d92d78032f4d14dfa7",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CPENTA6/mystran_EAS9/model.dat",
+      "bytes": 58564,
+      "sha256": "70f2a958e548d7e26fe5a55f2cfe0e6bc6b47b07ff7853a87d41f4ce674708d2",
+      "source_sha256": "70f2a958e548d7e26fe5a55f2cfe0e6bc6b47b07ff7853a87d41f4ce674708d2",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CPENTA6/nastran/model.dat",
+      "bytes": 58514,
+      "sha256": "debb896d6e83b46fce3291bcc380755bc0194fbeeaea2b79d99ee6a0bd1063e8",
+      "source_sha256": "debb896d6e83b46fce3291bcc380755bc0194fbeeaea2b79d99ee6a0bd1063e8",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CPYRAM13/mystran_NEWSOLID/model.dat",
+      "bytes": 519143,
+      "sha256": "f2962612ae1e2ae85efad450c5462e10ebfa9a15814bd286e823bb5899474eaf",
+      "source_sha256": "f2962612ae1e2ae85efad450c5462e10ebfa9a15814bd286e823bb5899474eaf",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CPYRAM13/nastran/model.dat",
+      "bytes": 519112,
+      "sha256": "aae1d65ea548c93e57bfc78e64214660ce86042a1312dbf4d9dbe30a33ffc217",
+      "source_sha256": "aae1d65ea548c93e57bfc78e64214660ce86042a1312dbf4d9dbe30a33ffc217",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CPYRAM5/mystran_NEWSOLID/model.dat",
+      "bytes": 120493,
+      "sha256": "8525dc4ac2fb907485c0ea8b2f9a070a41db49a2704c14a7932d6e306504b29d",
+      "source_sha256": "8525dc4ac2fb907485c0ea8b2f9a070a41db49a2704c14a7932d6e306504b29d",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CPYRAM5/nastran/model.dat",
+      "bytes": 120464,
+      "sha256": "afb5d87c095a9547af68a8b162c2856aa331ee88a6a70864808aaaca82f83eae",
+      "source_sha256": "afb5d87c095a9547af68a8b162c2856aa331ee88a6a70864808aaaca82f83eae",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CTETRA10/mystran_NEWSOLID/model.dat",
+      "bytes": 388898,
+      "sha256": "69125290122254e2adf36c8ae23a5cf7bd68f5c6b6ecd4b39a3f4bf24a566b5c",
+      "source_sha256": "69125290122254e2adf36c8ae23a5cf7bd68f5c6b6ecd4b39a3f4bf24a566b5c",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CTETRA10/nastran/model.dat",
+      "bytes": 388867,
+      "sha256": "66e49d13999604cb7e39d944a3f264f3b5eac0831a845ae523829481d3ff51fe",
+      "source_sha256": "66e49d13999604cb7e39d944a3f264f3b5eac0831a845ae523829481d3ff51fe",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CTETRA4/mystran_NEWSOLID/model.dat",
+      "bytes": 85215,
+      "sha256": "2aac144ee7e3a50a5118a08db9984e5a5126023a8cbe0dec7b885dfb7183b885",
+      "source_sha256": "2aac144ee7e3a50a5118a08db9984e5a5126023a8cbe0dec7b885dfb7183b885",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/16x16_L1/CTETRA4/nastran/model.dat",
+      "bytes": 85186,
+      "sha256": "b00d724e6a5d8c41f43c2b1018954023fd3120ffc78d239587475f3714005d22",
+      "source_sha256": "b00d724e6a5d8c41f43c2b1018954023fd3120ffc78d239587475f3714005d22",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CHEXA20/mystran_NEWSOLID/model.dat",
+      "bytes": 419647,
+      "sha256": "a1368f571d04cebb51880cefc6b8d762789d76e3a065e97de121031ee91009de",
+      "source_sha256": "a1368f571d04cebb51880cefc6b8d762789d76e3a065e97de121031ee91009de",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CHEXA20/nastran/model.dat",
+      "bytes": 419616,
+      "sha256": "9d1cb6d36ea7a5921cbd06a2b38ec8e03fa6d9e3b0fc244078d20154ac74798f",
+      "source_sha256": "9d1cb6d36ea7a5921cbd06a2b38ec8e03fa6d9e3b0fc244078d20154ac74798f",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CHEXA8/mystran_NEWSOLID/model.dat",
+      "bytes": 113917,
+      "sha256": "9ef019c6d8003aef4580de3598bd4c772b40d0fe1a45afd8e64e1e282ec89528",
+      "source_sha256": "9ef019c6d8003aef4580de3598bd4c772b40d0fe1a45afd8e64e1e282ec89528",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CHEXA8/nastran/model.dat",
+      "bytes": 113888,
+      "sha256": "d099b344152824cce2a6998fe5326e89d7324ca1783665bb7d7a91a3ad9269ba",
+      "source_sha256": "d099b344152824cce2a6998fe5326e89d7324ca1783665bb7d7a91a3ad9269ba",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CPENTA15/mystran_NEWSOLID/model.dat",
+      "bytes": 565323,
+      "sha256": "a5a5f752e307e2fbc5316dd9c17ac6e45ba0a899574006128074f67224fe43d2",
+      "source_sha256": "a5a5f752e307e2fbc5316dd9c17ac6e45ba0a899574006128074f67224fe43d2",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CPENTA15/nastran/model.dat",
+      "bytes": 565292,
+      "sha256": "0010d9c1bce939adf7c8b504ad844c380fcbe7f59d14e6b18b7e8ac8cf4eb6bb",
+      "source_sha256": "0010d9c1bce939adf7c8b504ad844c380fcbe7f59d14e6b18b7e8ac8cf4eb6bb",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CPENTA6/mystran_ABE/model.dat",
+      "bytes": 130502,
+      "sha256": "ae83ece9fcbdfb7d471822398a8c4c15eee0489896514e7b9b3db48d531350a4",
+      "source_sha256": "ae83ece9fcbdfb7d471822398a8c4c15eee0489896514e7b9b3db48d531350a4",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CPENTA6/mystran_EAS9/model.dat",
+      "bytes": 130503,
+      "sha256": "83e6ec23f0722d24e35ac681e5bf1f80c82c27fbed3cb9edf1b8762e93fe6382",
+      "source_sha256": "83e6ec23f0722d24e35ac681e5bf1f80c82c27fbed3cb9edf1b8762e93fe6382",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CPENTA6/nastran/model.dat",
+      "bytes": 130453,
+      "sha256": "64d3103a4c2d7fcb2fcf204bcec8ac98884c980d4aecc91c159ffab834e7162f",
+      "source_sha256": "64d3103a4c2d7fcb2fcf204bcec8ac98884c980d4aecc91c159ffab834e7162f",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CPYRAM13/mystran_NEWSOLID/model.dat",
+      "bytes": 1163491,
+      "sha256": "112a02da90153145f998ea4d14c103f09005c3204d91a0b8bee4c149d5842f31",
+      "source_sha256": "112a02da90153145f998ea4d14c103f09005c3204d91a0b8bee4c149d5842f31",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CPYRAM13/nastran/model.dat",
+      "bytes": 1163460,
+      "sha256": "fcc0cfcce0e9e9df86f2f3f68846e21ebdd8f05fc5a0199ff67a43683b08ef8b",
+      "source_sha256": "fcc0cfcce0e9e9df86f2f3f68846e21ebdd8f05fc5a0199ff67a43683b08ef8b",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CPYRAM5/mystran_NEWSOLID/model.dat",
+      "bytes": 272911,
+      "sha256": "970abe20fdf8a3fb89e16e76db8a109910aa82d7216938d0cf47787054cf8cef",
+      "source_sha256": "970abe20fdf8a3fb89e16e76db8a109910aa82d7216938d0cf47787054cf8cef",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CPYRAM5/nastran/model.dat",
+      "bytes": 272882,
+      "sha256": "9b3f7816d9a99b6aeaf231ec43896407dbd4f7547fd20b542c8fcd0e3ad2677c",
+      "source_sha256": "9b3f7816d9a99b6aeaf231ec43896407dbd4f7547fd20b542c8fcd0e3ad2677c",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CTETRA10/mystran_NEWSOLID/model.dat",
+      "bytes": 867846,
+      "sha256": "56ba0e0e8d924aa06f2aec205578539d64cdf0741b1a661506b067f407991748",
+      "source_sha256": "56ba0e0e8d924aa06f2aec205578539d64cdf0741b1a661506b067f407991748",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CTETRA10/nastran/model.dat",
+      "bytes": 867815,
+      "sha256": "90f0917f2f9db2e58ce47967674e033bbd1727c90fab3a1fad810ffe062e0684",
+      "source_sha256": "90f0917f2f9db2e58ce47967674e033bbd1727c90fab3a1fad810ffe062e0684",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CTETRA4/mystran_NEWSOLID/model.dat",
+      "bytes": 193543,
+      "sha256": "64e49feaaaca1e185b0272bdb2a7628bbf35dc3e6d1c9db58b04210588a3e142",
+      "source_sha256": "64e49feaaaca1e185b0272bdb2a7628bbf35dc3e6d1c9db58b04210588a3e142",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/24x24_L1/CTETRA4/nastran/model.dat",
+      "bytes": 193514,
+      "sha256": "c01d3de506027af94cf8ffb434fa793e207c86256604e428f107eb420fabc598",
+      "source_sha256": "c01d3de506027af94cf8ffb434fa793e207c86256604e428f107eb420fabc598",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CHEXA20/mystran_NEWSOLID/model.dat",
+      "bytes": 14318,
+      "sha256": "330b24547b0800212a581b1ddeb500dd2008b97eab8755c8f127e96d68385037",
+      "source_sha256": "330b24547b0800212a581b1ddeb500dd2008b97eab8755c8f127e96d68385037",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CHEXA20/nastran/model.dat",
+      "bytes": 14287,
+      "sha256": "689feb75eea7904cb70f56c6b4d95de6d9498b92ae6447fde85b026a037eab6f",
+      "source_sha256": "689feb75eea7904cb70f56c6b4d95de6d9498b92ae6447fde85b026a037eab6f",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CHEXA8/mystran_NEWSOLID/model.dat",
+      "bytes": 4189,
+      "sha256": "99f690bbd98ea681cd676c242491b288aa75e85dded487fd145c0ab223f8778a",
+      "source_sha256": "99f690bbd98ea681cd676c242491b288aa75e85dded487fd145c0ab223f8778a",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CHEXA8/nastran/model.dat",
+      "bytes": 4160,
+      "sha256": "5cd64c8159abf310ffe2c6bf8a3f3f1417d13db3fb891a394c6fd7588f815d85",
+      "source_sha256": "5cd64c8159abf310ffe2c6bf8a3f3f1417d13db3fb891a394c6fd7588f815d85",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CPENTA15/mystran_NEWSOLID/model.dat",
+      "bytes": 18260,
+      "sha256": "f8be6d971a93b2060a3167aa0c9df4dad7028f96ebfd45fa3c3a45ca67a17856",
+      "source_sha256": "f8be6d971a93b2060a3167aa0c9df4dad7028f96ebfd45fa3c3a45ca67a17856",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CPENTA15/nastran/model.dat",
+      "bytes": 18229,
+      "sha256": "87132fec4ac056a56e977dae3f5bcbac9e92752ad9579b7c2f70c084439b91d8",
+      "source_sha256": "87132fec4ac056a56e977dae3f5bcbac9e92752ad9579b7c2f70c084439b91d8",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CPENTA6/mystran_ABE/model.dat",
+      "bytes": 4571,
+      "sha256": "618b5320f36780c1b9d138f6fc990aafb3373b523b73ee6d4c486d8b995b757e",
+      "source_sha256": "618b5320f36780c1b9d138f6fc990aafb3373b523b73ee6d4c486d8b995b757e",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CPENTA6/mystran_EAS9/model.dat",
+      "bytes": 4572,
+      "sha256": "bc1f9ef975b78487438fe505f44e18349442c01878f7d90f7daf3dfa6ed63683",
+      "source_sha256": "bc1f9ef975b78487438fe505f44e18349442c01878f7d90f7daf3dfa6ed63683",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CPENTA6/nastran/model.dat",
+      "bytes": 4522,
+      "sha256": "a005736adc45d291ab21814d7c0684f2076bf14b7ae33d535886ae4ffff1d7c6",
+      "source_sha256": "a005736adc45d291ab21814d7c0684f2076bf14b7ae33d535886ae4ffff1d7c6",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CPYRAM13/mystran_NEWSOLID/model.dat",
+      "bytes": 34547,
+      "sha256": "9e23f4caa7427947361a26e0cfc24c9596faef5846a008dc9608e7d604e81181",
+      "source_sha256": "9e23f4caa7427947361a26e0cfc24c9596faef5846a008dc9608e7d604e81181",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CPYRAM13/nastran/model.dat",
+      "bytes": 34516,
+      "sha256": "b9e8882bfb9bb7edfb93308bc1e1984ce2ac019ed33d5d8ba37fb41f7026c8f6",
+      "source_sha256": "b9e8882bfb9bb7edfb93308bc1e1984ce2ac019ed33d5d8ba37fb41f7026c8f6",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CPYRAM5/mystran_NEWSOLID/model.dat",
+      "bytes": 8144,
+      "sha256": "c83bea4295a3daa248d3aad39dedb4383f080c7f67653efebf7bc326a840d1e9",
+      "source_sha256": "c83bea4295a3daa248d3aad39dedb4383f080c7f67653efebf7bc326a840d1e9",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CPYRAM5/nastran/model.dat",
+      "bytes": 8115,
+      "sha256": "6f303c91fe3672e07e5b62b9c850e486814604bd1f8e39b43abb448b09159ae1",
+      "source_sha256": "6f303c91fe3672e07e5b62b9c850e486814604bd1f8e39b43abb448b09159ae1",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CTETRA10/mystran_NEWSOLID/model.dat",
+      "bytes": 26814,
+      "sha256": "8880fb4b25aaac44168aeb06bbdbc172576c3b214f19b9666ad163e8cc594da0",
+      "source_sha256": "8880fb4b25aaac44168aeb06bbdbc172576c3b214f19b9666ad163e8cc594da0",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CTETRA10/nastran/model.dat",
+      "bytes": 26806,
+      "sha256": "520ef102e14888069280edea199aa4e99e59d2f62c7a79b062b054de7a10b1b7",
+      "source_sha256": "520ef102e14888069280edea199aa4e99e59d2f62c7a79b062b054de7a10b1b7",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CTETRA4/mystran_NEWSOLID/model.dat",
+      "bytes": 5939,
+      "sha256": "928164c0cfff7903c6f6a07718a3f94d5a55b8cb9eee4d396a014d60fc3d07c9",
+      "source_sha256": "928164c0cfff7903c6f6a07718a3f94d5a55b8cb9eee4d396a014d60fc3d07c9",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/4x4_L1/CTETRA4/nastran/model.dat",
+      "bytes": 5933,
+      "sha256": "5744cd034c4b1f640ed30d639e44db7311629f8a09be65c2d9845d35da15b1df",
+      "source_sha256": "5744cd034c4b1f640ed30d639e44db7311629f8a09be65c2d9845d35da15b1df",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CHEXA20/mystran_NEWSOLID/model.dat",
+      "bytes": 50249,
+      "sha256": "babaa1a1263f0f6136b648271f7553bfeda63c94384a92d53b320e522ec0559c",
+      "source_sha256": "babaa1a1263f0f6136b648271f7553bfeda63c94384a92d53b320e522ec0559c",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CHEXA20/nastran/model.dat",
+      "bytes": 50218,
+      "sha256": "7b60315288fed3b65da8e88b663a564d9f4ddecb61b4c246c48be41644570d62",
+      "source_sha256": "7b60315288fed3b65da8e88b663a564d9f4ddecb61b4c246c48be41644570d62",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CHEXA8/mystran_NEWSOLID/model.dat",
+      "bytes": 13772,
+      "sha256": "afcb0244c15ebf71cd20ea19ecb64e6261a0149f4f4ab0a2781cecb1fb8cac6b",
+      "source_sha256": "afcb0244c15ebf71cd20ea19ecb64e6261a0149f4f4ab0a2781cecb1fb8cac6b",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CHEXA8/nastran/model.dat",
+      "bytes": 13743,
+      "sha256": "f888930a7a564138751329be9535c7abee3bed69b9a15728a6712d2665be43c9",
+      "source_sha256": "f888930a7a564138751329be9535c7abee3bed69b9a15728a6712d2665be43c9",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CPENTA15/mystran_NEWSOLID/model.dat",
+      "bytes": 66140,
+      "sha256": "3e171b53262280b46f6d7fb015d7347a69d81ad53ba0ab0d02c67e82408e9344",
+      "source_sha256": "3e171b53262280b46f6d7fb015d7347a69d81ad53ba0ab0d02c67e82408e9344",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CPENTA15/nastran/model.dat",
+      "bytes": 66109,
+      "sha256": "56e638f7def703f68d839dcb2805627f5ded9f5e3de5f3ada93ba25a0f148288",
+      "source_sha256": "56e638f7def703f68d839dcb2805627f5ded9f5e3de5f3ada93ba25a0f148288",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CPENTA6/mystran_ABE/model.dat",
+      "bytes": 15383,
+      "sha256": "9c9ae5b15ef8be2ad0d68ac3a7acf1c2d90fb86d8d260049abf339241ede6122",
+      "source_sha256": "9c9ae5b15ef8be2ad0d68ac3a7acf1c2d90fb86d8d260049abf339241ede6122",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CPENTA6/mystran_EAS9/model.dat",
+      "bytes": 15384,
+      "sha256": "a9662cbdcaafc622b27bd97bba2b70711120f3deccd28b983ae9063bf7af71b4",
+      "source_sha256": "a9662cbdcaafc622b27bd97bba2b70711120f3deccd28b983ae9063bf7af71b4",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CPENTA6/nastran/model.dat",
+      "bytes": 15334,
+      "sha256": "24fc01da890e0d46d41f2ec9b5c10b080df83ace8fbda58bd9b7d774d0aeb480",
+      "source_sha256": "24fc01da890e0d46d41f2ec9b5c10b080df83ace8fbda58bd9b7d774d0aeb480",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CPYRAM13/mystran_NEWSOLID/model.dat",
+      "bytes": 131611,
+      "sha256": "7f2b01924b9585b2d19a2e726803bb8d32d77e1f55d6112cc8fc6c98e20dbd63",
+      "source_sha256": "7f2b01924b9585b2d19a2e726803bb8d32d77e1f55d6112cc8fc6c98e20dbd63",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CPYRAM13/nastran/model.dat",
+      "bytes": 131580,
+      "sha256": "9d08f78abf27c289b57b337584e4e49e8ae97cc58915414b2d1200254d59e41f",
+      "source_sha256": "9d08f78abf27c289b57b337584e4e49e8ae97cc58915414b2d1200254d59e41f",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CPYRAM5/mystran_NEWSOLID/model.dat",
+      "bytes": 30310,
+      "sha256": "6ef0f4938382a1db35f81cb6d02cc2cc458b742ad02d0e88f072d68e5e6937b3",
+      "source_sha256": "6ef0f4938382a1db35f81cb6d02cc2cc458b742ad02d0e88f072d68e5e6937b3",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CPYRAM5/nastran/model.dat",
+      "bytes": 30281,
+      "sha256": "1bab5cecaabdcddb1eb3a5b84bbaf1c3b692c00ed8652f0b1bbd0bb46199e16d",
+      "source_sha256": "1bab5cecaabdcddb1eb3a5b84bbaf1c3b692c00ed8652f0b1bbd0bb46199e16d",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CTETRA10/mystran_NEWSOLID/model.dat",
+      "bytes": 99714,
+      "sha256": "99d8cdd24c8cd2fe14129166d1837b8d2f4ada597bdb148aac6e885b16a8eb34",
+      "source_sha256": "99d8cdd24c8cd2fe14129166d1837b8d2f4ada597bdb148aac6e885b16a8eb34",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CTETRA10/nastran/model.dat",
+      "bytes": 99683,
+      "sha256": "5973d1e6298e219a70e249b55413d8fa8284368b9d8add1574da1fa617d2b2bd",
+      "source_sha256": "5973d1e6298e219a70e249b55413d8fa8284368b9d8add1574da1fa617d2b2bd",
+      "solver": "Nastran"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CTETRA4/mystran_NEWSOLID/model.dat",
+      "bytes": 21518,
+      "sha256": "2ed6b955409a7bb25927c1b24b4ab94ab7b9970c9eddd07efb2aac77fd7e2f76",
+      "source_sha256": "2ed6b955409a7bb25927c1b24b4ab94ab7b9970c9eddd07efb2aac77fd7e2f76",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "comparison_all/5-007/8x8_L1/CTETRA4/nastran/model.dat",
+      "bytes": 21489,
+      "sha256": "aae9df4fca2e0d33a5116db7ca94bdfafad80c81c5dbd88f2e490e32eadbde53",
+      "source_sha256": "aae9df4fca2e0d33a5116db7ca94bdfafad80c81c5dbd88f2e490e32eadbde53",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/mystran/5-001/ABE/model.dat",
+      "bytes": 68432,
+      "sha256": "ce15eb0f1589116e1f6b8ad76368be7221c4419273ed34f17cfb1b5a447165bf",
+      "source_sha256": "ce15eb0f1589116e1f6b8ad76368be7221c4419273ed34f17cfb1b5a447165bf",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-001/EAS9/model.dat",
+      "bytes": 68433,
+      "sha256": "f436a23a2ff3291067ec94442415f43835034ac7b07e7a84659634b902e37665",
+      "source_sha256": "f436a23a2ff3291067ec94442415f43835034ac7b07e7a84659634b902e37665",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-004/12x2x2/ABE/model.dat",
+      "bytes": 8843,
+      "sha256": "3cdaba9b7a41892388227c6c986722839533f5631858248fbaec3050d9e7c653",
+      "source_sha256": "3cdaba9b7a41892388227c6c986722839533f5631858248fbaec3050d9e7c653",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-004/12x2x2/CPYRAM13/model.dat",
+      "bytes": 70787,
+      "sha256": "bda7a0065f848522b62949dda4a113c3d4d778bdaf13d97bdd5c7b7d739ceb9c",
+      "source_sha256": "bda7a0065f848522b62949dda4a113c3d4d778bdaf13d97bdd5c7b7d739ceb9c",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-004/12x2x2/CPYRAM5/model.dat",
+      "bytes": 18006,
+      "sha256": "c9b953bc02c315808c87d73f957f29cd7ea1ce9b11ab9d5b1a203ab7d42b94b1",
+      "source_sha256": "c9b953bc02c315808c87d73f957f29cd7ea1ce9b11ab9d5b1a203ab7d42b94b1",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-004/12x2x2/EAS9/model.dat",
+      "bytes": 8844,
+      "sha256": "7367bdb920188d4cb7b6419df4ebdabce3c2d36ad34eb8430f77a1db794f9a51",
+      "source_sha256": "7367bdb920188d4cb7b6419df4ebdabce3c2d36ad34eb8430f77a1db794f9a51",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-004/24x4x2/ABE/model.dat",
+      "bytes": 31665,
+      "sha256": "10c2226924af89fe0e17bcbd996b5acdffa2dd7a1066f41faa01457744cc1281",
+      "source_sha256": "10c2226924af89fe0e17bcbd996b5acdffa2dd7a1066f41faa01457744cc1281",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-004/24x4x2/CPYRAM13/model.dat",
+      "bytes": 275018,
+      "sha256": "b1a62acb318c20fe6751c4382fa11b652e778d535b7756c4f3f9c6db395b2cd9",
+      "source_sha256": "b1a62acb318c20fe6751c4382fa11b652e778d535b7756c4f3f9c6db395b2cd9",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-004/24x4x2/CPYRAM5/model.dat",
+      "bytes": 70214,
+      "sha256": "be919c499cf418419177b322f419286f8639e6efd855c8b3c8f3fde66271c00d",
+      "source_sha256": "be919c499cf418419177b322f419286f8639e6efd855c8b3c8f3fde66271c00d",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-004/24x4x2/EAS9/model.dat",
+      "bytes": 31666,
+      "sha256": "0644edc309c06e68361a82b2c589f24208391b6e2298f3df2ddba519902212b5",
+      "source_sha256": "0644edc309c06e68361a82b2c589f24208391b6e2298f3df2ddba519902212b5",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/16x16_L1/CPYRAM13/model.dat",
+      "bytes": 409354,
+      "sha256": "996167eea6a5170a44c3ca0f89ab09b3368f764d3591b80c1bd00fab7707c726",
+      "source_sha256": "996167eea6a5170a44c3ca0f89ab09b3368f764d3591b80c1bd00fab7707c726",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/16x16_L1/CPYRAM5/model.dat",
+      "bytes": 104459,
+      "sha256": "746e4d851f72c776200e2a6283126a5dc11609390a19124236c0986bd585f832",
+      "source_sha256": "746e4d851f72c776200e2a6283126a5dc11609390a19124236c0986bd585f832",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/16x16_L2/CPYRAM13/model.dat",
+      "bytes": 771632,
+      "sha256": "59f389e964458deacf72310edfb1847565d6e306db3be5420e42c01732dd8fad",
+      "source_sha256": "59f389e964458deacf72310edfb1847565d6e306db3be5420e42c01732dd8fad",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/16x16_L2/CPYRAM5/model.dat",
+      "bytes": 194160,
+      "sha256": "d61523f4ca0e89b208f6ab6e9e22020327897a77827c229aa332216697583be5",
+      "source_sha256": "d61523f4ca0e89b208f6ab6e9e22020327897a77827c229aa332216697583be5",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/24x24_L1/CPYRAM13/model.dat",
+      "bytes": 915433,
+      "sha256": "36218bd3a24424729bf38f7f957d28325ec92fe0a6d7ab54ced06eec076519f7",
+      "source_sha256": "36218bd3a24424729bf38f7f957d28325ec92fe0a6d7ab54ced06eec076519f7",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/24x24_L1/CPYRAM5/model.dat",
+      "bytes": 235812,
+      "sha256": "292e499e92818eca1b8c31bb87ee079e6fcbbbb5310c4261bce451e55552c8f9",
+      "source_sha256": "292e499e92818eca1b8c31bb87ee079e6fcbbbb5310c4261bce451e55552c8f9",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/24x24_L2/CPYRAM13/model.dat",
+      "bytes": 1735772,
+      "sha256": "c7d9296b91c235e5fdef6d3868431b1dc1ab235e1ed38e4dd4aa3a4f606ffa42",
+      "source_sha256": "c7d9296b91c235e5fdef6d3868431b1dc1ab235e1ed38e4dd4aa3a4f606ffa42",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/24x24_L2/CPYRAM5/model.dat",
+      "bytes": 447292,
+      "sha256": "c560adae5f7f1a54d0dad1ddea09d60176601a70ce2c983ea876ec0a1d1a2186",
+      "source_sha256": "c560adae5f7f1a54d0dad1ddea09d60176601a70ce2c983ea876ec0a1d1a2186",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/4x4_L1/CPYRAM13/model.dat",
+      "bytes": 28358,
+      "sha256": "db683cc519afd5ad84b0ef7c5e15cbadfae0c034766346a154aac3aac0eae88f",
+      "source_sha256": "db683cc519afd5ad84b0ef7c5e15cbadfae0c034766346a154aac3aac0eae88f",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/4x4_L1/CPYRAM5/model.dat",
+      "bytes": 7759,
+      "sha256": "f3c6b63183580538689950239af9340f8325e4643b13fb29306bddec3a4ccf0c",
+      "source_sha256": "f3c6b63183580538689950239af9340f8325e4643b13fb29306bddec3a4ccf0c",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/4x4_L2/CPYRAM13/model.dat",
+      "bytes": 51648,
+      "sha256": "bf5b781c32ecea999fc85f49eb51ef18e6b1641599b101e6acaeca8cf50a8810",
+      "source_sha256": "bf5b781c32ecea999fc85f49eb51ef18e6b1641599b101e6acaeca8cf50a8810",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/4x4_L2/CPYRAM5/model.dat",
+      "bytes": 13084,
+      "sha256": "345229388c1add41bf8f85a86b4b50ff0c1f83c893f8dc17d87c4db760687f28",
+      "source_sha256": "345229388c1add41bf8f85a86b4b50ff0c1f83c893f8dc17d87c4db760687f28",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/8x8_L1/CPYRAM13/model.dat",
+      "bytes": 105124,
+      "sha256": "9def438ec411b960c846c89ae8d609e2b96960befaec148a336e383a190d1b23",
+      "source_sha256": "9def438ec411b960c846c89ae8d609e2b96960befaec148a336e383a190d1b23",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/8x8_L1/CPYRAM5/model.dat",
+      "bytes": 26876,
+      "sha256": "e2434f0f0c139c4198b1694a3e6d4825ba657a7b4a7b90faac8abce0d147c29c",
+      "source_sha256": "e2434f0f0c139c4198b1694a3e6d4825ba657a7b4a7b90faac8abce0d147c29c",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/8x8_L2/CPYRAM13/model.dat",
+      "bytes": 196486,
+      "sha256": "1d906b2db739622654baafa139ae5d14c5157558e0a06abd1be693e22bb14bec",
+      "source_sha256": "1d906b2db739622654baafa139ae5d14c5157558e0a06abd1be693e22bb14bec",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-007/8x8_L2/CPYRAM5/model.dat",
+      "bytes": 49069,
+      "sha256": "117aa181731bb00d9af8c7d89af6efb567c4bddf93965644278607098ffbf17d",
+      "source_sha256": "117aa181731bb00d9af8c7d89af6efb567c4bddf93965644278607098ffbf17d",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-010/CHEXA8/NEWSOLID/model.dat",
+      "bytes": 3481,
+      "sha256": "e8e30cdfa87f14707f0a54f12db0985df8ace06d12612dffe1f2fe3615ec2f1e",
+      "source_sha256": "e8e30cdfa87f14707f0a54f12db0985df8ace06d12612dffe1f2fe3615ec2f1e",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-010/CPENTA6/ABE/model.dat",
+      "bytes": 4043,
+      "sha256": "7d5d94720048eadc2d3f0438f3098132ab8b52ee26b7e023c2e2bb3660991c81",
+      "source_sha256": "7d5d94720048eadc2d3f0438f3098132ab8b52ee26b7e023c2e2bb3660991c81",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-010/CPENTA6/EAS9/model.dat",
+      "bytes": 4044,
+      "sha256": "ff5cf7493d1f8bf2791f878e02da8b577b4b2f44e568dfa17d4dcb2366155712",
+      "source_sha256": "ff5cf7493d1f8bf2791f878e02da8b577b4b2f44e568dfa17d4dcb2366155712",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-010/CPYRAM5/NEWSOLID/model.dat",
+      "bytes": 7269,
+      "sha256": "483a7e752771f96cd8192d872e446f1d8f1d1c3e24bd3579d6ab9d67877eee4a",
+      "source_sha256": "483a7e752771f96cd8192d872e446f1d8f1d1c3e24bd3579d6ab9d67877eee4a",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-010/CTETRA4/NEWSOLID/model.dat",
+      "bytes": 6148,
+      "sha256": "a136a4393ceb30d70f29ca4d91b57d4cc5fa152f4db6ad760f6f15ddb48cfc47",
+      "source_sha256": "a136a4393ceb30d70f29ca4d91b57d4cc5fa152f4db6ad760f6f15ddb48cfc47",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-011/ABE/model.dat",
+      "bytes": 49881,
+      "sha256": "d2eb951ce46026b748472d51d9fd269d23800eb35437b663cd83ccd276ff987a",
+      "source_sha256": "d2eb951ce46026b748472d51d9fd269d23800eb35437b663cd83ccd276ff987a",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/mystran/5-011/EAS9/model.dat",
+      "bytes": 49882,
+      "sha256": "0612edc9d18b46603ce2a1ba1fe0abd00ae243c8dc07cb964346e77e0645da15",
+      "source_sha256": "0612edc9d18b46603ce2a1ba1fe0abd00ae243c8dc07cb964346e77e0645da15",
+      "solver": "MYSTRAN"
+    },
+    {
+      "path": "five_case/nastran/5-001_8_SOLIDS_GPSTRESS_PENTA_REMESH.dat",
+      "bytes": 66559,
+      "sha256": "b4efe70cd735d82bd037c6f93307e4117137ecf084a746d52203cdcddec04074",
+      "source_sha256": "b4efe70cd735d82bd037c6f93307e4117137ecf084a746d52203cdcddec04074",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/5011_nastran.dat",
+      "bytes": 49836,
+      "sha256": "8635076cd1d913e08d24c62fad2f7edf05abff0c2f87f32cb7a67721fc16caa0",
+      "source_sha256": "8635076cd1d913e08d24c62fad2f7edf05abff0c2f87f32cb7a67721fc16caa0",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap5010_chexa8_sol105.dat",
+      "bytes": 3247,
+      "sha256": "041213a1aa308037569fadbb86398f19c8c9ccb871f9ab8753c66a635872f261",
+      "source_sha256": "041213a1aa308037569fadbb86398f19c8c9ccb871f9ab8753c66a635872f261",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap5010_cpenta6_sol105.dat",
+      "bytes": 3790,
+      "sha256": "90d7a55ec005bf9959daf3295af354d52f6d9379dfca8b460495a5f6b8cb724e",
+      "source_sha256": "90d7a55ec005bf9959daf3295af354d52f6d9379dfca8b460495a5f6b8cb724e",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap5010_cpyram5_sol105.dat",
+      "bytes": 6898,
+      "sha256": "6a3e597f8198919f4687531f69660e023437f1ea999bef0b18f86d3158ed1578",
+      "source_sha256": "6a3e597f8198919f4687531f69660e023437f1ea999bef0b18f86d3158ed1578",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap5010_ctetra4_sol105.dat",
+      "bytes": 5825,
+      "sha256": "7bd8236d8b3e2326efa957b3ba070569b9848e2f68311de5a782b66585e30818",
+      "source_sha256": "7bd8236d8b3e2326efa957b3ba070569b9848e2f68311de5a782b66585e30818",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5004_twist_cpenta_12x2x2.dat",
+      "bytes": 8539,
+      "sha256": "a968b7036a6aa3fbc00937d585a51c9306f3517b53aec220b2f34bc00722cd31",
+      "source_sha256": "a968b7036a6aa3fbc00937d585a51c9306f3517b53aec220b2f34bc00722cd31",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5004_twist_cpenta_24x4x2.dat",
+      "bytes": 30809,
+      "sha256": "15d6726a0232b5b47b92e1b353279576860989cf3343357531a8942e9a347613",
+      "source_sha256": "15d6726a0232b5b47b92e1b353279576860989cf3343357531a8942e9a347613",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5004_twist_cpyram13_12x2x2_consistent.dat",
+      "bytes": 69314,
+      "sha256": "2a36aed619461b9a8f8ed19067e4d628436f10b4ea4436d92701d3281db7a624",
+      "source_sha256": "2a36aed619461b9a8f8ed19067e4d628436f10b4ea4436d92701d3281db7a624",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5004_twist_cpyram13_24x4x2_consistent.dat",
+      "bytes": 269625,
+      "sha256": "12dff4b21fabaa7c370ad8cc29736a0cbe2d66f10ac422ca86435e09a738db12",
+      "source_sha256": "12dff4b21fabaa7c370ad8cc29736a0cbe2d66f10ac422ca86435e09a738db12",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5004_twist_cpyram_12x2x2.dat",
+      "bytes": 17488,
+      "sha256": "14e3f2e77b45170263add91fd04e269c6aed3bb69e3b54d0cc36930f00ae323e",
+      "source_sha256": "14e3f2e77b45170263add91fd04e269c6aed3bb69e3b54d0cc36930f00ae323e",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5004_twist_cpyram_24x4x2.dat",
+      "bytes": 68432,
+      "sha256": "37ee2731f7d4a0e69309cf5d3e9a219fa3019efd83e5a87cce1174f782aa47df",
+      "source_sha256": "37ee2731f7d4a0e69309cf5d3e9a219fa3019efd83e5a87cce1174f782aa47df",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram13_16x16_l1.dat",
+      "bytes": 402182,
+      "sha256": "953d1c80dc31e5ff8bea2934d2d164b08b656056f74e2525bab9dc490dfc8ed3",
+      "source_sha256": "953d1c80dc31e5ff8bea2934d2d164b08b656056f74e2525bab9dc490dfc8ed3",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram13_16x16_l2.dat",
+      "bytes": 758138,
+      "sha256": "5340e41ee179f01addbf996dce4b109c9bad26e4800d287fad21324462631c66",
+      "source_sha256": "5340e41ee179f01addbf996dce4b109c9bad26e4800d287fad21324462631c66",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram13_24x24_l1.dat",
+      "bytes": 899324,
+      "sha256": "505ed5155c847d203d736cfe387315c683b63562411bca3e33ee9680a7aff2f9",
+      "source_sha256": "505ed5155c847d203d736cfe387315c683b63562411bca3e33ee9680a7aff2f9",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram13_24x24_l2.dat",
+      "bytes": 1705356,
+      "sha256": "11a5117efd6a804a2e2eaa77254a754d7f7059cf0711994383fa543f59ecd3a0",
+      "source_sha256": "11a5117efd6a804a2e2eaa77254a754d7f7059cf0711994383fa543f59ecd3a0",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram13_4x4_l1.dat",
+      "bytes": 27894,
+      "sha256": "e37d028600c566e6e066a44dcebe12efbe4308b947a6f7c462a3cbd5563a972f",
+      "source_sha256": "e37d028600c566e6e066a44dcebe12efbe4308b947a6f7c462a3cbd5563a972f",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram13_4x4_l2.dat",
+      "bytes": 50814,
+      "sha256": "9124525d2fdfc6d3b1e291b5ca4c2cc5ec9284e5d1dcadf3cf0f97727833b78c",
+      "source_sha256": "9124525d2fdfc6d3b1e291b5ca4c2cc5ec9284e5d1dcadf3cf0f97727833b78c",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram13_8x8_l1.dat",
+      "bytes": 103322,
+      "sha256": "bdf570b383326f904988638453b0f745566374b558369b99fa24c0b709839efd",
+      "source_sha256": "bdf570b383326f904988638453b0f745566374b558369b99fa24c0b709839efd",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram13_8x8_l2.dat",
+      "bytes": 193127,
+      "sha256": "5190279599cbce6595691ebf00049f5fa156555f3a8c2a7191f94f63cf8d59cd",
+      "source_sha256": "5190279599cbce6595691ebf00049f5fa156555f3a8c2a7191f94f63cf8d59cd",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram5_16x16.dat",
+      "bytes": 102026,
+      "sha256": "66468f22dd13dc786f334798e4077a8824ea095b87a9bc8edbac5b5db4af220b",
+      "source_sha256": "66468f22dd13dc786f334798e4077a8824ea095b87a9bc8edbac5b5db4af220b",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram5_16x16_l2.dat",
+      "bytes": 189625,
+      "sha256": "87833e3ad352a012a3313e26217c24d92a5b213252d11b3bd6359f6c0746f8c7",
+      "source_sha256": "87833e3ad352a012a3313e26217c24d92a5b213252d11b3bd6359f6c0746f8c7",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram5_24x24.dat",
+      "bytes": 230442,
+      "sha256": "a543ea06306ae55fcd9d6fe7d62fb4993fb160c4f0d90e2df53cba7ba4cb26b0",
+      "source_sha256": "a543ea06306ae55fcd9d6fe7d62fb4993fb160c4f0d90e2df53cba7ba4cb26b0",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram5_24x24_l2.dat",
+      "bytes": 437214,
+      "sha256": "e4268121b647f7f02ec9a9a73ec5490485470fb3aabe938a089d3a3e2f5ff3ed",
+      "source_sha256": "e4268121b647f7f02ec9a9a73ec5490485470fb3aabe938a089d3a3e2f5ff3ed",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram5_4x4.dat",
+      "bytes": 7560,
+      "sha256": "7718a74c83446888b7e3c5a655cfb73dd681a91b0839c0b8b2def8bbd4e97cb4",
+      "source_sha256": "7718a74c83446888b7e3c5a655cfb73dd681a91b0839c0b8b2def8bbd4e97cb4",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram5_4x4_l2.dat",
+      "bytes": 12743,
+      "sha256": "4aff5f92672bfcf7358f40615701e1fbe40b88e72e14bf54da00fc275510c2a9",
+      "source_sha256": "4aff5f92672bfcf7358f40615701e1fbe40b88e72e14bf54da00fc275510c2a9",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram5_8x8.dat",
+      "bytes": 26217,
+      "sha256": "b4c1e42e8134bc43711e8d6cb3a9b35fa4293007a349df4ea93b446303fc20ec",
+      "source_sha256": "b4c1e42e8134bc43711e8d6cb3a9b35fa4293007a349df4ea93b446303fc20ec",
+      "solver": "Nastran"
+    },
+    {
+      "path": "five_case/nastran/sap_5007_dome_cpyram5_8x8_l2.dat",
+      "bytes": 47874,
+      "sha256": "d4a92f1c2ed40eaebd8122c72c61c30c9269928913c0e793c059c851dd683e5b",
+      "source_sha256": "d4a92f1c2ed40eaebd8122c72c61c30c9269928913c0e793c059c851dd683e5b",
+      "solver": "Nastran"
+    }
+  ]
+}
