@@ -4,11 +4,11 @@
 **Technical manuscript · Revision 3 · 18 October 2026**
 Implementation snapshot: `v18.00.a`, commit `5acbd00e`. Benchmark archive: 17 October 2026.
 
-**Subsequent implementation update:** the [18 October ordinary recovery correction](../../solid_element_recovery_5001_2026-10-18.md) restores all 462 element stress/strain results in 5-001, including CHEXA8 and CPYRAM13. The mathematical stiffness formulations and historical beam/dome results in this manuscript are unchanged.
+**Subsequent implementation update:** the [18 October ordinary recovery correction](../../solid_element_recovery_5001_2026-10-18.md) restores all 462 element stress/strain results in 5-001, including CHEXA8 and CPYRAM13. The earlier recovery correction did not change stiffness. The subsequent CHEXA8 TIED integration below changes only the linear-brick selection and operators; historical beam/dome tables remain labeled as archives.
 
 ## Abstract
 
-This manuscript documents eight three-dimensional continuum solid elements in MYSTRAN NEWSOLID: four- and ten-node tetrahedra, six- and fifteen-node prisms, eight- and twenty-node bricks, and five- and thirteen-node pyramids. Compatible interpolation, nodal strain smoothing, enhanced assumed strains, selective shear integration, local condensation and stress recovery are formulated in a common small-strain framework. The nine enhanced-strain columns for the linear brick and prism are transcribed from the current Fortran source. A matched-model comparison with Nastran covers 56 meshes, 63 MYSTRAN analysis selections and 126 displacement responses on a twisted beam and a pinched dome derived from SAP2000 verification examples. Existing constant-strain and rigid-rotation audits provide separate evidence for quadratic interpolation and recovery. The results show case-dependent accuracy: close agreement for several quadratic families coexists with substantial thin-dome errors for some linear formulations and the EAS9 prism. Solver agreement and error relative to independent reference solutions are reported separately. All numerical tables and curves are reused from existing results; no new solver analyses are reported.
+This manuscript documents eight three-dimensional continuum solid elements in MYSTRAN NEWSOLID: four- and ten-node tetrahedra, six- and fifteen-node prisms, eight- and twenty-node bricks, and five- and thirteen-node pyramids. Compatible interpolation, nodal strain smoothing, enhanced assumed strains, selective shear integration, local condensation and stress recovery are formulated in a common small-strain framework. The nine enhanced-strain columns for the linear brick and prism are transcribed from the current Fortran source. A matched-model comparison with Nastran covers 56 meshes, 63 MYSTRAN analysis selections and 126 displacement responses on a twisted beam and a pinched dome derived from SAP2000 verification examples. Existing constant-strain and rigid-rotation audits provide separate evidence for quadratic interpolation and recovery. The results show case-dependent accuracy: close agreement for several quadratic families coexists with substantial thin-dome errors for some linear formulations and the EAS9 prism. Solver agreement and error relative to independent reference solutions are reported separately. The original manuscript tables/curves are retained as historical evidence. The 18 October CHEXA8 amendment adds new operator and solver results, linked separately below.
 
 **Keywords:** continuum finite elements; nodal smoothing; enhanced assumed strain; quadratic solids; rational pyramid; patch test; mesh refinement; MYSTRAN; Nastran.
 
@@ -25,7 +25,8 @@ The mathematical lineage includes enhanced assumed strain theory [1,2], node-bas
 | CPENTA6 | Edge-tied assumed shear plus nine enhanced modes (ABE) | 18 | Default `PENTATYP,ABE` |
 | CPENTA6 | Compatible strain plus nine enhanced modes | 18 | `PENTATYP,EAS9` |
 | CPENTA15 | Quadratic prism with conditional selective shear integration | 45 | NEWSOLID |
-| CHEXA8 | Trilinear brick plus nine enhanced modes | 24 | NEWSOLID, integration order 2 |
+| CHEXA8 | Corrected physical shear tying plus EAS9 | 24 | Default `HEXATYP,TIED`, order 2; provisional |
+| CHEXA8 | Previous trilinear EAS9 brick | 24 | Explicit `HEXATYP,EAS9`, order 2 |
 | CHEXA20 | Quadratic serendipity brick with conditional selective shear integration | 60 | NEWSOLID |
 | CPYRAM5 | Five-node collapsed-coordinate pyramid | 15 | NEWSOLID |
 | CPYRAM13 | Bedrosian rational quadratic pyramid | 39 | NEWSOLID |
@@ -119,7 +120,7 @@ Each block follows by integrating the corresponding pair of strain operators aga
 \mathbf B_{\rm eff}=\overline{\mathbf B}-\mathbf G\mathbf K_{\eta\eta}^{-1}\mathbf K_{\eta d}.
 ```
 
-Stress recovery must include the condensed enhancement and thermal contribution, rather than substituting the compatible strain alone. The current prism state routine uses Cholesky factorization and rejects local reciprocal condition estimates below $10^{-12}$; it does not add the diagonal regularization described in the archive's historical Python ABE article. The brick state routine uses partial pivoting and explicitly symmetrizes the condensed matrix.
+Stress recovery must include the condensed enhancement and thermal contribution, rather than substituting the compatible strain alone. The current prism state routine uses Cholesky factorization and rejects local reciprocal condition estimates below $10^{-12}$; it does not add the diagonal regularization described in the archive's historical Python ABE article. The legacy EAS9 brick retains partial pivoting. The TIED brick uses Cholesky with a reciprocal-condition threshold of $10^{-12}$; only roundoff asymmetry is symmetrized.
 
 For the EAS9 transformation, set $\mathbf A_0=\partial\mathbf x/\partial\boldsymbol\xi$ at the parent centroid. Interpret a natural Voigt column as a symmetric tensor $\widehat{\mathbf E}$, dividing engineering shears by two. The physical column is obtained from
 
@@ -217,7 +218,7 @@ These give six vertices, six triangular-face edge midpoints and three vertical-e
 
 When the quadratic selective-integration path is enabled at seven triangle points, the code retains the full-rule normal contribution and replaces the shear contribution with a three-point triangle times two-point axial rule. This correction changes integration of the standard quadratic interpolation; it adds no internal or global DOF.
 
-### 3.5 CHEXA8: trilinear brick with EAS9
+### 3.5 CHEXA8: TIED default and retained EAS9 option
 
 For corner signs $s_a,t_a,v_a\in\{-1,1\}$ on $[-1,1]^3$,
 
@@ -236,6 +237,27 @@ The source-specific natural enhancement matrix is
 ```
 
 It uses the transformation in Section 2.3 and a $2\times2\times2$ Gauss rule with coordinates $\pm1/\sqrt3$ and unit one-dimensional weights. NEWSOLID CHEXA8 requires order 2 in this path. All nine enhancement parameters are condensed into a $24\times24$ matrix. These columns are the implemented project variant, not a claim of literal identity with every historical nine-mode brick.
+
+
+#### Corrected Stage 6 tying and orientation policy
+
+As of 18 October 2026, omitted HEXATYP and `PARAM,HEXATYP,TIED` select `HEXA8_TIED_EAS9`. `PARAM,HEXATYP,EAS9` retains the previous formulation without retuning. Both have 24 translational DOFs and nine locally condensed enhanced variables. CHEXA20 is unchanged. TIED is explicitly **provisional**, pending official Nastran acceptance.
+
+Let $P_{xz}$ and $P_{yz}$ project physical engineering strains onto transverse shears in the centroid physical frame. For transverse natural axis zeta,
+
+```math
+B_t(g)=B(g)+P_{xz}[B(0,\eta_g,\zeta_g)-B(g)]
+             +P_{yz}[B(\xi_g,0,\zeta_g)-B(g)],
+\qquad
+\Delta\bar B=\frac{\sum_g w_g\det J_g[B_t(g)-B(g)]}{\sum_gw_g\det J_g},
+\qquad B_c(g)=B_t(g)-\Delta\bar B.
+```
+
+Use $B_c$ in all displacement/thermal blocks in Section 2.3, with the unchanged covariant EAS9 columns above. This mean correction preserves the weighted ordinary gradient and constant-stress orthogonality. Raw Stage 4 tying is not exposed. Positive mapping determinants are checked; Kaa is solved using Cholesky and DPOCON conditioning checks, not an explicit inverse. Stress uses corrected B plus the recovered enhanced state. Thermal loads retain the enhanced internal RHS. KG uses physical gradients with the selected formulation's actual preload stress; compatible mass integration is unchanged. Corner/GPSTRESS extrapolation is distinct from direct Gauss-point recovery.
+
+`PARAM,HEXATAX,ZETA` is the default. XI and ETA explicitly cycle the natural transverse axis. AUTO is opt-in: the shortest mean edge direction is accepted only if its mean length is at most half the next-shortest, each edge-family max/min ratio is at most 1.5, and the maximum absolute cosine between mean edge directions is at most 0.3. Otherwise ZETA is retained and the fallback is logged. F06 records formulation, policy and selected axis. Existing `HEXAXIS` semantics are preserved. Cycling the operators in the original nodal coordinates is equivalent to a right-handed cyclic node relabeling followed by inverse DOF scattering.
+
+Thirty-six operator comparisons, six rigid modes, consistent/lumped mass checks, the full distorted patch and cyclic-axis audits pass. Explicit EAS9 matches the saved executable on 20 models. The initial sandbox attempts encountered USER FATAL 3060; all 20 jobs subsequently completed using the user batch outside the sandbox. The new explicit-PSOLID-IN=2 Nastran results differ substantially from the historical source/default-integration archive on the dome and buckling. They are reported separately; completed solves do not establish universal accuracy acceptance. On the 24x24x1 dome, TIED/ZETA has 7.314% error, versus 0.759% for TIED/AUTO; the 8x8 AUTO mesh still has 26.48% error. See the [integration report](../../chexa8_tied_2026-10-18.md) and [updated CHEXA8 benchmark](../../solid_benchmark/comparison_all.md#chexa8) for model provenance and remaining gates.
 
 ### 3.6 CHEXA20: quadratic serendipity brick
 
@@ -515,6 +537,8 @@ The original plots below show beam IN/OUT ratios, dome A ratio and dome A percen
 
 #### CHEXA8
 
+**Historical EAS9 archive (17 October):** the table/figure below retain the previous formulation and original meshes. Current TIED/ZETA and opt-in AUTO measurements are reported [separately](../../solid_benchmark/comparison_all.md#chexa8); new explicit-IN=2 Nastran results are separate from the earlier default-integration archive.
+
 ![CHEXA8 existing mesh-refinement curves](figures/CHEXA8_benchmark.png)
 
 | Case | Option | Response | Nastran | MYSTRAN | Independent | N error (%) | M error (%) |
@@ -561,7 +585,7 @@ The original plots below show beam IN/OUT ratios, dome A ratio and dome A percen
 
 On the finest beam mesh, CTETRA4 smoothing substantially reduces independent-reference error compared with the ordinary Nastran tetrahedron, although the remaining IN error is about 20.66%. CPENTA6 ABE and EAS9 improve the beam responses relative to the tested Nastran prism; their performance cannot be extrapolated to every geometry. Several quadratic families closely reproduce Nastran on the matched meshes, with distinct remaining errors against independent targets.
 
-The dome exposes the limits of the enhanced linear formulations under one-layer in-plane refinement. CHEXA8 has approximately 7.33% MYSTRAN A-response error compared with 0.682% for Nastran. CPENTA6 EAS9 has approximately 98.92% A-response error, whereas ABE has approximately 8.92%. CPENTA15 has approximately 3.74% MYSTRAN error, and CHEXA20 and CPYRAM13 have approximately 0.913% and 1.894%, respectively. CTETRA4 and CPYRAM5 remain very stiff on this mesh sequence. Consequently, the evidence does not support a statement that only CHEXA8 trails Nastran, nor a claim that all NEWSOLID results are equal or better.
+The dome exposes the limits of the enhanced linear formulations under one-layer in-plane refinement. In the historical EAS9 archive, CHEXA8 has approximately 7.33% MYSTRAN A-response error compared with 0.682% for Nastran. CPENTA6 EAS9 has approximately 98.92% A-response error, whereas ABE has approximately 8.92%. CPENTA15 has approximately 3.74% MYSTRAN error, and CHEXA20 and CPYRAM13 have approximately 0.913% and 1.894%, respectively. CTETRA4 and CPYRAM5 remain very stiff on this mesh sequence. Consequently, the evidence does not support a statement that only CHEXA8 trails Nastran, nor a claim that all NEWSOLID results are equal or better.
 
 The curves are empirical mesh-refinement evidence. Different topology counts, fixed thickness-layer count and formulation-dependent locking preclude claiming a universal asymptotic convergence order from these data alone. No fitted convergence slope or extrapolated exact value is introduced. Agreement of a scalar displacement does not establish pointwise stress, force, mass, eigenvalue or thermal accuracy.
 
@@ -572,7 +596,7 @@ The curves are empirical mesh-refinement evidence. Different topology counts, fi
 | Selectors | [PARAMS.f90](../../../Source/Modules/PARAMS.f90) | NEWSOLID default; CPENTA6 ABE default, EAS9 alternative |
 | CTETRA4 smoothing | [CTETRA4S_SMOOTH_ASSEMBLY.f90](../../../Source/LK1/L1E/CTETRA4S_SMOOTH_ASSEMBLY.f90) | NS weight 0.9; skip heterogeneous material-row patches |
 | Tetrahedron operators | [TETRA.f90](../../../Source/EMG/EMG5/TETRA.f90) | Compatible tetrahedral operators and T4 initial stress |
-| Brick stiffness | [HEXA.f90](../../../Source/EMG/EMG5/HEXA.f90) | EAS9 columns; conditional quadratic shear replacement |
+| Brick stiffness | [HEXA.f90](../../../Source/EMG/EMG5/HEXA.f90) | CHEXA8 TIED default / retained EAS9; conditional quadratic shear replacement |
 | Prism stiffness | [PENTA.f90](../../../Source/EMG/EMG5/PENTA.f90) | EAS9 and ABE paths; conditional quadratic shear replacement |
 | Enhanced state and recovery | [EAS9_FRAME.f90](../../../Source/Modules/EAS9_FRAME.f90) | Exact nine-column matrices; condensed thermal/state recovery |
 | Pyramid dispatch | [PYRAM.f90](../../../Source/EMG/EMG5/PYRAM.f90) | Five-node and Bedrosian thirteen-node paths |
@@ -592,7 +616,7 @@ The NEWSOLID family combines compatible linear/quadratic interpolation, nodal sm
 - [All-solid benchmark report](../../solid_benchmark/comparison_all.md) and [five-case report](../../solid_benchmark/mystran_solid_comparison.md), including separate buckling and thermal evidence outside the main beam/dome comparison.
 - [Runnable eight-solid GPSTRESS VOLUME patch input](../../solid_benchmark/5-001_8_SOLIDS_GPSTRESS_PENTA_REMESH_FIXED_QUADRATIC_MYSTRAN_EAS9.dat).
 
-This revision performs documentation and data-transcription checks only. It reports no new solver runs, no modified stiffness operators and no invented reference results.
+The original Revision 3 performed documentation/data-transcription checks only. The subsequent 18 October CHEXA8 amendment changes the linear-brick operator and adds the explicitly scoped solver results above; independent targets are unchanged.
 
 ## References
 

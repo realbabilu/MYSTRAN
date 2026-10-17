@@ -1,10 +1,95 @@
 module EAS9_FRAME
-   use PARAMS, only: PENTATYP
+   use PARAMS, only: PENTATYP, HEXATYP, HEXATAX
    use iso_fortran_env, only: real64
    implicit none
    private
-   public :: MAP_NATURAL_EAS9, HEX8_EAS9_STATE, HEX8_POINT, PENTA6_ANSEAS_STATE, HEX8_EAS9_RECOVERY
+   public :: MAP_NATURAL_EAS9, HEX8_EAS9_STATE, HEX8_POINT, PENTA6_ANSEAS_STATE, HEX8_EAS9_RECOVERY, HEX8_AXIS
 contains
+   subroutine HEX8_AXIS(x,axis,lengths,fallback)
+      real(real64),intent(in)::x(8,3)
+      integer,intent(out)::axis
+      real(real64),intent(out)::lengths(3)
+      logical,intent(out)::fallback
+      integer,parameter::edges(2,4,3)=reshape([1,2,4,3,5,6,8,7,1,4,2,3,5,8,6,7,1,5,2,6,3,7,4,8],[2,4,3])
+      real(real64)::len(4,3),v(3),jac(3,3),spread,skew
+      integer::a,i,j
+      do a=1,3
+         jac(a,:)=0
+         do i=1,4
+            v=x(edges(2,i,a),:)-x(edges(1,i,a),:)
+            len(i,a)=sqrt(sum(v*v));jac(a,:)=jac(a,:)+v/4
+         enddo
+         lengths(a)=sum(len(:,a))/4
+      enddo
+      axis=3;fallback=.false.
+      select case(trim(HEXATAX))
+      case('XI');axis=1
+      case('ETA');axis=2
+      case('AUTO')
+         axis=minloc(lengths,dim=1)
+         spread=maxval(maxval(len,dim=1)/max(minval(len,dim=1),tiny(1.0_real64)))
+         skew=0
+         do i=1,3
+            do j=i+1,3
+               skew=max(skew,abs(dot_product(jac(i,:),jac(j,:)))/ &
+                  max(sqrt(sum(jac(i,:)**2)*sum(jac(j,:)**2)),tiny(1.0_real64)))
+            enddo
+         enddo
+         v=lengths;v(axis)=huge(1.0_real64)
+         fallback=lengths(axis)>0.5_real64*minval(v).or.spread>1.5_real64.or.skew>0.3_real64
+         if(fallback)axis=3
+      end select
+   end subroutine
+
+   subroutine HEX8_PROJECTORS(x,axis,px,py,ierr)
+      real(real64),intent(in)::x(8,3)
+      integer,intent(in)::axis
+      real(real64),intent(out)::px(6,6),py(6,6)
+      integer,intent(out)::ierr
+      integer,parameter::signs(8,3)=reshape([-1,1,1,-1,-1,1,1,-1, &
+         -1,-1,1,1,-1,-1,1,1,-1,-1,-1,-1,1,1,1,1],[8,3])
+      real(real64)::jac(3,3),rot(3,3),t(3),n(3),v(6),e(3,3),local(3,3),part(3,3),out(3,3),norm
+      integer::a,j,h
+      jac=matmul(transpose(real(signs,real64)),x)/8
+      n=jac(axis,:);norm=sqrt(sum(n*n));ierr=1
+      if(norm<=tiny(norm))return
+      n=n/norm;t=jac(mod(axis,3)+1,:);t=t-n*dot_product(n,t);norm=sqrt(sum(t*t))
+      if(norm<=epsilon(norm)*maxval(abs(jac)))return
+      t=t/norm;rot(:,1)=t;rot(:,3)=n
+      rot(:,2)=[n(2)*t(3)-n(3)*t(2),n(3)*t(1)-n(1)*t(3),n(1)*t(2)-n(2)*t(1)]
+      do j=1,6
+         v=0;v(j)=1;e=0;e(1,1)=v(1);e(2,2)=v(2);e(3,3)=v(3)
+         e(1,2)=v(4)/2;e(2,1)=e(1,2);e(2,3)=v(5)/2;e(3,2)=e(2,3)
+         e(1,3)=v(6)/2;e(3,1)=e(1,3)
+         local=matmul(transpose(rot),matmul(e,rot))
+         do h=1,2
+            part=0;part(h,3)=local(h,3);part(3,h)=local(3,h)
+            out=matmul(rot,matmul(part,transpose(rot)))
+            v=[out(1,1),out(2,2),out(3,3),2*out(1,2),2*out(2,3),2*out(1,3)]
+            if(h==1)px(:,j)=v
+            if(h==2)py(:,j)=v
+         enddo
+      enddo
+      ierr=0
+   end subroutine
+
+   subroutine HEX8_TIED_B(x,p,axis,px,py,b,ierr)
+      real(real64),intent(in)::x(8,3),p(3),px(6,6),py(6,6)
+      integer,intent(in)::axis
+      real(real64),intent(out)::b(6,24)
+      integer,intent(out)::ierr
+      real(real64)::n(8),g(3,8),iv(3,3),det,bx(6,24),by(6,24),q(3)
+      call HEX8_POINT(x,p,n,g,b,iv,det,ierr)
+      if(ierr/=0)return
+      q=p;q(mod(axis,3)+1)=0
+      call HEX8_POINT(x,q,n,g,bx,iv,det,ierr)
+      if(ierr/=0)return
+      q=p;q(mod(axis+1,3)+1)=0
+      call HEX8_POINT(x,q,n,g,by,iv,det,ierr)
+      if(ierr/=0)return
+      b=b+matmul(px,bx-b)+matmul(py,by-b)
+   end subroutine
+
    subroutine MAP_NATURAL_EAS9(invj0,mhat,m)
       ! v2: covariant natural strain -> local Cartesian strain at center.
       ! J0(i,a)=dx_a/dxi_i; Ecart=inv(J0)*Enat*transpose(inv(J0)).
@@ -66,6 +151,17 @@ contains
    end subroutine
 
    subroutine HEX8_EAS9_STATE(x,d,alpha,temp,tref,u,point,k,f,beff,eps,sigma,kg,ierr)
+      real(real64),intent(in)::x(8,3),d(6,6),alpha(6),temp(8),tref,u(24),point(3)
+      real(real64),intent(out)::k(24,24),f(24),beff(6,24),eps(6),sigma(6),kg(24,24)
+      integer,intent(out)::ierr
+      if(HEXATYP=='TIED')then
+         call HEXA8_TIED_EAS9(x,d,alpha,temp,tref,u,point,k,f,beff,eps,sigma,kg,ierr)
+      else
+         call HEX8_EAS9_LEGACY(x,d,alpha,temp,tref,u,point,k,f,beff,eps,sigma,kg,ierr)
+      endif
+   end subroutine
+
+   subroutine HEX8_EAS9_LEGACY(x,d,alpha,temp,tref,u,point,k,f,beff,eps,sigma,kg,ierr)
       ! Same Kuu/Kua/Kaa and covariant transformation as Python EAS9 v2.
       ! Local alpha = inv(Kaa)*(Fa-Kau*u); no global enrichment DOFs.
       ! Kg is the physical initial-stress operator, not a finite-strain EAS tangent.
@@ -122,6 +218,99 @@ contains
       call HEX8_POINT(x,point,n,g,b,iv,det,ierr)
       if(ierr/=0)return
       call HEX8_MODES(point,iv0,det0,det,m)
+      beff=b-matmul(m,sol(:,1:24))
+      eps=matmul(b,u)+matmul(m,eta)
+      sigma=matmul(d,eps-alpha*(dot_product(n,temp)-tref))
+      do t=1,8
+         v=matmul(d,matmul(bg(:,:,t),u)+matmul(mg(:,:,t),eta)-alpha*nt(t))
+         sg(1,:)=[v(1),v(4),v(6)];sg(2,:)=[v(4),v(2),v(5)];sg(3,:)=[v(6),v(5),v(3)]
+         h=matmul(transpose(gg(:,:,t)),matmul(sg,gg(:,:,t)))*dv(t)
+         do i=1,8
+            do j=1,8
+               do c=1,3
+                  kg(3*(i-1)+c,3*(j-1)+c)=kg(3*(i-1)+c,3*(j-1)+c)+h(i,j)
+               end do
+            end do
+         end do
+      end do
+      kg=(kg+transpose(kg))*0.5_real64
+   end subroutine
+
+   subroutine HEXA8_TIED_EAS9(x,d,alpha,temp,tref,u,point,k,f,beff,eps,sigma,kg,ierr)
+      ! Same Kuu/Kua/Kaa and covariant transformation as Python EAS9 v2.
+      ! Local alpha = inv(Kaa)*(Fa-Kau*u); no global enrichment DOFs.
+      ! Kg is the physical initial-stress operator, not a finite-strain EAS tangent.
+      real(real64),intent(in)::x(8,3),d(6,6),alpha(6),temp(8),tref,u(24),point(3)
+      real(real64),intent(out)::k(24,24),f(24),beff(6,24),eps(6),sigma(6),kg(24,24)
+      integer,intent(out)::ierr
+      real(real64)::p(3,8),n(8),g(3,8),b(6,24),iv(3,3),iv0(3,3),det,det0,m(6,9)
+      real(real64)::ku(24,9),ka(9,9),fa(9),rhs(9,25),a(9,9),factor,tmp(25),sol(9,25)
+      real(real64)::eta(9),thermal(6),bg(6,24,8),mg(6,9,8),gg(3,8,8),dv(8),nt(8)
+      real(real64)::sg(3,3),h(8,8),v(6),q
+      integer::i,j,l,c,r,piv,t,axis,info
+      real(real64)::px(6,6),py(6,6),meanb(6,24),bt(6,24),lengths(3)
+      logical::fallback
+      k=0;f=0;beff=0;eps=0;sigma=0;kg=0;ku=0;ka=0;fa=0;ierr=0
+      call HEX8_POINT(x,[0.0_real64,0.0_real64,0.0_real64],n,g,b,iv0,det0,ierr)
+      if(ierr/=0)return
+      call HEX8_AXIS(x,axis,lengths,fallback)
+      call HEX8_PROJECTORS(x,axis,px,py,ierr)
+      if(ierr/=0)return
+      meanb=0
+      q=1/sqrt(3.0_real64);t=0
+      do l=1,2
+         do j=1,2
+            do i=1,2
+               t=t+1;p(:,t)=[(2*i-3)*q,(2*j-3)*q,(2*l-3)*q]
+               call HEX8_POINT(x,p(:,t),n,g,b,iv,det,ierr)
+               if(ierr/=0)return
+               call HEX8_MODES(p(:,t),iv0,det0,det,m)
+               bg(:,:,t)=b;mg(:,:,t)=m;gg(:,:,t)=g;dv(t)=det;nt(t)=dot_product(n,temp)-tref
+               call HEX8_TIED_B(x,p(:,t),axis,px,py,bt,ierr)
+               if(ierr/=0)return
+               meanb=meanb+(bt-b)*det
+               bg(:,:,t)=bt
+            end do
+         end do
+      end do
+      meanb=meanb/sum(dv)
+      do t=1,8
+               b=bg(:,:,t)-meanb;bg(:,:,t)=b;m=mg(:,:,t);det=dv(t)
+               thermal=matmul(d,alpha)*nt(t)
+               k=k+matmul(transpose(b),matmul(d,b))*det
+               ku=ku+matmul(transpose(b),matmul(d,m))*det
+               ka=ka+matmul(transpose(m),matmul(d,m))*det
+               f=f+matmul(transpose(b),thermal)*det
+               fa=fa+matmul(transpose(m),thermal)*det
+      end do
+      ! Symmetric positive definite factorization with reciprocal condition check.
+      a=ka;rhs(:,1:24)=transpose(ku);rhs(:,25)=fa
+      call dpotrf('U',9,a,9,info)
+      if(info/=0)then
+         ierr=2;return
+      endif
+      block
+         real(real64)::rcond,work(27),anorm
+         integer::iw(9)
+         anorm=maxval(sum(abs(ka),dim=1))
+         call dpocon('U',9,a,9,anorm,rcond,work,iw,info)
+         if(info/=0.or.rcond<1.0e-12_real64)then
+            ierr=2;return
+         endif
+      end block
+      sol=rhs
+      call dpotrs('U',9,25,a,9,sol,9,info)
+      if(info/=0)then
+         ierr=2;return
+      endif
+      k=k-matmul(ku,sol(:,1:24));k=(k+transpose(k))*0.5_real64
+      f=f-matmul(ku,sol(:,25));eta=sol(:,25)-matmul(sol(:,1:24),u)
+      call HEX8_POINT(x,point,n,g,b,iv,det,ierr)
+      if(ierr/=0)return
+      call HEX8_MODES(point,iv0,det0,det,m)
+      call HEX8_TIED_B(x,point,axis,px,py,b,ierr)
+      if(ierr/=0)return
+      b=b-meanb
       beff=b-matmul(m,sol(:,1:24))
       eps=matmul(b,u)+matmul(m,eta)
       sigma=matmul(d,eps-alpha*(dot_product(n,temp)-tref))

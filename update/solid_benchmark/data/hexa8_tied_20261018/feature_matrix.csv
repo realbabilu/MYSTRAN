@@ -1,0 +1,9 @@
+test,status,max_relative_eigenvalue_error,selected_axis
+default_explicit_lowercase_and_invalid,PASS,,
+COUPMASS_0,PASS,1.9621648705836492e-07,
+COUPMASS_1,PASS,1.3333333015452808e-07,
+AUTO_cube,PASS,,ZETA
+AUTO_thin_xi,PASS,,XI
+AUTO_thin_eta,PASS,,ETA
+AUTO_thin_zeta,PASS,,ZETA
+AUTO_skewed,PASS,,ZETA

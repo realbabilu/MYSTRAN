@@ -25,6 +25,14 @@ More easier dimension parameter for section, etc.
 
 ---
 
+## CHEXA8 TIED update — 18 October 2026
+
+- NEWSOLID CHEXA8 now defaults to `PARAM,HEXATYP,TIED`, using mean-gradient-corrected physical shear tying with EAS9 condensation. `PARAM,HEXATYP,EAS9` retains the previous formulation.
+- `PARAM,HEXATAX,ZETA` is the default axis policy; XI/ETA are explicit controls and AUTO is opt-in with logged geometry checks/fallback. On the 24x24 dome, ZETA has 7.314% error and AUTO 0.759% against the published reference.
+- TIED remains **provisional**: 36 operator checks and 80 MYSTRAN jobs completed, with patch/recovery, mass and axis checks passing and 20 EAS9 baseline matches. All 20 Nastran jobs subsequently completed outside the sandbox after initial USER FATAL 3060 errors. New explicit-IN=2 results, including large dome/buckling differences, are reported separately from the historical Nastran archive; no surrogate is counted as validation.
+
+[Windows binary and runtime](update/binaries/mystran18a-chexa8-tied-win64.zip) · [Integration report](update/chexa8_tied_2026-10-18.md) · [HEXA8 benchmark](update/solid_benchmark/comparison_all.md#chexa8) · [Manual Nastran inputs](update/solid_benchmark/chexa8_tied_nastran_inputs.zip)
+
 ## Solid recovery update - 18 October 2026
 
 The [5-001 recovery correction](update/solid_element_recovery_5001_2026-10-18.md) restores ordinary OP2 element stress and strain for all 462 elements in the eight-solid patch. CHEXA8 corner recovery uses valid interior states; CPYRAM5/13 now supply center and corner tensors. The original patch displacements and GPSTRESS VOLUME payloads are unchanged. See the [before/after comparison](update/solid_benchmark/data/element_recovery_5001_20261018.csv) and audit for validation scope.
@@ -142,6 +150,8 @@ straightforward.
 | CQUAD8 | `QUAD8TYP` | `SIMOQ8`, `MITC8`, `MITC8D`, `ANS8BDG6`, `HBQ8`, `MACQ8D` |
 | CTRIA6 | `TRIA6TYP` | `SIMOT6`, `MITC6`, `MH6T`, `REZAIEE` |
 | SOLID  | `SOLIDTYP` | `NEWSOLID` (default), `LEGACY` |
+| CHEXA8 NEWSOLID | `HEXATYP` | `TIED` (default, provisional), `EAS9` |
+| CHEXA8 TIED axis | `HEXATAX` | `ZETA` (default), `XI`, `ETA`, `AUTO` (opt-in) |
 | CPENTA6 NEWSOLID | `PENTATYP` | `ABE` (default), `EAS9` |
 
 # Documentation

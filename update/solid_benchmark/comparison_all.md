@@ -121,6 +121,63 @@ Independent targets: 5-004 IN=0.005429 and OUT=0.001749; 5-007 A=+0.094 and B=-0
 
 ## CHEXA8
 
+### CHEXA8 TIED update — 18 October 2026
+
+NEWSOLID CHEXA8 now defaults to `PARAM,HEXATYP,TIED`: mean-gradient-corrected physical transverse-shear tying with covariant EAS9 condensation. `PARAM,HEXATYP,EAS9` retains the previous formulation. TIED is **provisional**: the first sandbox attempts stopped with USER FATAL 3060, but all 20 jobs subsequently completed using the user batch outside the sandbox. The new table contains actual Nastran results and MYSTRAN measurements, with published/analytical references kept separate. No surrogate is counted as solver validation.
+
+`PARAM,HEXATAX,ZETA` is the default orientation policy. XI and ETA are explicit alternatives; AUTO is opt-in with geometry checks and a logged ZETA fallback for ambiguous bricks. On the 24x24x1 dome, default ZETA has 7.314% error and AUTO has 0.759%; those are distinct configurations.
+
+[Detailed integration report](../chexa8_tied_2026-10-18.md) · [Full benchmark CSV](data/hexa8_tied_20261018/benchmark_matrix.csv) · [Execution status](data/hexa8_tied_20261018/runs.csv) · [20 manual Nastran inputs](chexa8_tied_nastran_inputs.zip)
+
+The new suite contains the exact distorted seven-brick patch (six affine states plus rotation), native 5-004 S2K beam, source-coordinate dome meshes 8/16/24, plane-strain 5-008, actual-preload 5-010 buckling and free/restrained/gradient 5-011 thermal cases. Eighty MYSTRAN jobs completed. Twenty explicit EAS9 models reproduce the saved baseline exactly. Patch center/corner stress and all 16 GPSTRESS grids pass analytical checks; COUPMASS=0/1 and cyclic-axis checks pass. Source-coordinate coarsening and equivalent planar-pressure nodal loads are documented in the manifest. General pressure-card compatibility and large-mesh memory remain uncertified.
+
+![CHEXA8 TIED dome convergence](figures/CHEXA8_TIED_20261018.png)
+
+| Case / mesh | Response | Formulation / axis policy | MYSTRAN | Reference | M error % | New Nastran (IN=2) |
+|---|---|---|---:|---:|---:|---:|
+| 5-004 / 5004_native | IN_1 | EAS9 | 0.00532332358 | 0.005429 | 1.9465 | 0.0011291729 |
+| 5-004 / 5004_native | OUT_2 | EAS9 | 0.00171940409 | 0.001749 | 1.6922 | 0.000585400034 |
+| 5-004 / 5004_native | IN_1 | TIED | 0.00532653555 | 0.005429 | 1.8874 | 0.0011291729 |
+| 5-004 / 5004_native | OUT_2 | TIED | 0.00171881548 | 0.001749 | 1.7258 | 0.000585400034 |
+| 5-004 / 5004_native | IN_1 | TIED / AUTO | 0.00532653555 | 0.005429 | 1.8874 | 0.0011291729 |
+| 5-004 / 5004_native | OUT_2 | TIED / AUTO | 0.00171881548 | 0.001749 | 1.7258 | 0.000585400034 |
+| 5-007 / 5007_8x8 | 1_0 | EAS9 | 0.0152654345 | 0.094 | 83.76 | 0.000250899058 |
+| 5-007 / 5007_8x8 | 1_0 | TIED | 0.0152697507 | 0.094 | 83.756 | 0.000250899058 |
+| 5-007 / 5007_8x8 | 1_0 | TIED / AUTO | 0.0691111945 | 0.094 | 26.477 | 0.000250899058 |
+| 5-007 / 5007_16x16 | 1_0 | EAS9 | 0.0700592324 | 0.094 | 25.469 | 0.000970832742 |
+| 5-007 / 5007_16x16 | 1_0 | TIED | 0.0700825751 | 0.094 | 25.444 | 0.000970832742 |
+| 5-007 / 5007_16x16 | 1_0 | TIED / AUTO | 0.0923826844 | 0.094 | 1.7205 | 0.000970832742 |
+| 5-007 / 5007_24x24 | 1_0 | EAS9 | 0.0871067196 | 0.094 | 7.3333 | 0.00211390248 |
+| 5-007 / 5007_24x24 | 1_0 | TIED | 0.0871243849 | 0.094 | 7.3145 | 0.00211390248 |
+| 5-007 / 5007_24x24 | 1_0 | TIED / AUTO | 0.0932866223 | 0.094 | 0.75891 | 0.00211390248 |
+| 5-008 / 5008_c_nu0p3 | inner_radial_mean | EAS9 | 0.00453900086 | 0.0045825 | 0.94924 | 0.00451824666 |
+| 5-008 / 5008_c_nu0p3 | inner_radial_mean | TIED | 0.00453900086 | 0.0045825 | 0.94924 | 0.00451824666 |
+| 5-008 / 5008_c_nu0p3 | inner_radial_mean | TIED / AUTO | 0.00453900086 | 0.0045825 | 0.94924 | 0.00451824666 |
+| 5-008 / 5008_c_nu0p49 | inner_radial_mean | EAS9 | 0.00497138236 | 0.005039925 | 1.36 | 0.00425792469 |
+| 5-008 / 5008_c_nu0p49 | inner_radial_mean | TIED | 0.00497138236 | 0.005039925 | 1.36 | 0.00425792469 |
+| 5-008 / 5008_c_nu0p49 | inner_radial_mean | TIED / AUTO | 0.00497138236 | 0.005039925 | 1.36 | 0.00425792469 |
+| 5-008 / 5008_c_nu0p499 | inner_radial_mean | EAS9 | 0.00499005215 | 0.00506024925 | 1.3872 | 0.00181586234 |
+| 5-008 / 5008_c_nu0p499 | inner_radial_mean | TIED | 0.00499005215 | 0.00506024925 | 1.3872 | 0.00181586234 |
+| 5-008 / 5008_c_nu0p499 | inner_radial_mean | TIED / AUTO | 0.00499005215 | 0.00506024925 | 1.3872 | 0.00181586234 |
+| 5-008 / 5008_c_nu0p4999 | inner_radial_mean | EAS9 | 0.00499190912 | 0.00506227499 | 1.39 | 0.000269027753 |
+| 5-008 / 5008_c_nu0p4999 | inner_radial_mean | TIED | 0.00499190912 | 0.00506227499 | 1.39 | 0.000269027753 |
+| 5-008 / 5008_c_nu0p4999 | inner_radial_mean | TIED / AUTO | 0.00499190912 | 0.00506227499 | 1.39 | 0.000269027753 |
+| 5-008 / 5008_e_nu0p49 | inner_radial_mean | EAS9 | 0.00503622271 | 0.005039925 | 0.073459 | 0.00496989157 |
+| 5-008 / 5008_e_nu0p49 | inner_radial_mean | TIED | 0.00503622271 | 0.005039925 | 0.073459 | 0.00496989157 |
+| 5-008 / 5008_e_nu0p49 | inner_radial_mean | TIED / AUTO | 0.00503622271 | 0.005039925 | 0.073459 | 0.00496989157 |
+| 5-010 / 5010_buckling | weak_about_X | EAS9 | 0.8914981 | 0.888 | 0.39393 | 26.7418 |
+| 5-010 / 5010_buckling | strong_about_Y | EAS9 | 127.1197 | 127.91 | 0.61786 | 155.2266 |
+| 5-010 / 5010_buckling | weak_about_X | TIED | 0.8909257 | 0.888 | 0.32947 | 26.7418 |
+| 5-010 / 5010_buckling | strong_about_Y | TIED | 127.1197 | 127.91 | 0.61786 | 155.2266 |
+| 5-010 / 5010_buckling | weak_about_X | TIED / AUTO | 0.8909257 | 0.888 | 0.32947 | 26.7418 |
+| 5-010 / 5010_buckling | strong_about_Y | TIED / AUTO | 127.1197 | 127.91 | 0.61786 | 155.2266 |
+
+**Nastran integration scope:** the new decks explicitly specify PSOLID IN=2, while the historical archive used the source/default Nastran setting. The new Nastran dome is much stiffer (24x24 A=0.00211390) and the weak buckling factor is 26.7418. These new reference results must not be substituted for the historical default-integration Nastran values or labeled equivalent-kernel parity. TIED/AUTO gives 0.0932866 and 0.8909257 respectively. Buckling mode MAC is reported separately from factor error. All 20 solves completed; broad accuracy acceptance remains provisional.
+
+#### Historical EAS9 archive — 17 October 2026
+
+The following figure and matched Nastran table retain the earlier CHEXA8 EAS9 results and their original generated meshes. Their NEWSOLID labels mean the historical EAS9 default, not the current TIED default. Do not mix their Nastran values with the new source-mesh rows above.
+
 ![CHEXA8 convergence](figures/CHEXA8.png)
 
 | Case | Mesh | Nodes | Elementts | Responsee | MYSTRAN option | Independent | SAP2000* | Nastran | MYSTRAN | N error % | M error % |

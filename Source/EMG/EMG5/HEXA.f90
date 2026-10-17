@@ -43,13 +43,13 @@
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  QUARTER, HALF, ZERO, ONE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  EPSIL, SOLIDTYP
+      USE PARAMS, ONLY                :  EPSIL, SOLIDTYP, HEXATYP, HEXATAX
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  AGRID, ALPVEC, BE1, BE2, DT, EID, ELGP, NUM_EMG_FATAL_ERRS, ES, KE, KED, ME,              &
                                          NUM_EMG_FATAL_ERRS, PLOAD4_3D_DATA, PPE, PRESS, PTE, RHO, SE1, SE2, STE1, STRESS, TREF,   &
                                          TYPE, XEL, UEL, SUBLOD
       USE HEXA_USE_IFs
-      USE EAS9_FRAME, ONLY            : MAP_NATURAL_EAS9, HEX8_EAS9_STATE, HEX8_EAS9_RECOVERY
+      USE EAS9_FRAME, ONLY            : MAP_NATURAL_EAS9, HEX8_EAS9_STATE, HEX8_EAS9_RECOVERY, HEX8_AXIS
       USE EXPAND_MASS_DOFS_Interface
 
 
@@ -161,6 +161,10 @@
       REAL(DOUBLE)                    :: M_1DOF(ELGP,ELGP)      ! Consistent mass matrix with 1 DOF per node.
 
 ! --- newsolid_add begin --- !
+      INTEGER :: TIED_AXIS
+      REAL(DOUBLE) :: TIED_LENGTHS(3)
+      LOGICAL :: TIED_FALLBACK
+      LOGICAL, SAVE :: TIED_NOTICE=.FALSE.
       LOGICAL                          :: USE_EAS9_NEWSOLID      ! Use Python CHEXA8 EAS9 v2 condensed stiffness
 ! --- newsolid_add end --- !
 
@@ -176,6 +180,15 @@
          RETURN
       ENDIF
       USE_EAS9_NEWSOLID = ((SOLIDTYP == 'NEWSOLID') .AND. (ELGP == 8) .AND. (IORD == 2))
+      IF (USE_EAS9_NEWSOLID.AND.HEXATYP=='TIED'.AND..NOT.TIED_NOTICE) THEN
+         WRITE(F06,'(A)') ' CHEXA8 TIED IS PROVISIONAL: OFFICIAL NASTRAN REGRESSION NOT CERTIFIED'
+         TIED_NOTICE=.TRUE.
+      ENDIF
+      IF (USE_EAS9_NEWSOLID.AND.OPT(4)=='Y') THEN
+         CALL HEX8_AXIS(XEL(1:8,1:3),TIED_AXIS,TIED_LENGTHS,TIED_FALLBACK)
+         WRITE(F06,'(A,I0,4A,I1,A,L1)') ' CHEXA8 ELEMENT ',EID,' HEXATYP=',TRIM(HEXATYP), &
+            ' HEXATAX=',TRIM(HEXATAX)//' SELECTED=',TIED_AXIS,' AUTO_FALLBACK=',TIED_FALLBACK
+      ENDIF
 ! --- newsolid_add end --- !
 
 ! Calculate ID array
@@ -556,6 +569,15 @@
 
       IF (OPT(4) == 'Y') THEN
 
+         IF (USE_EAS9_NEWSOLID.AND.HEXATYP=='TIED') THEN
+            V2TEMP=ZERO;V2U=ZERO
+            CALL HEX8_EAS9_STATE(XEL(1:8,1:3),ES,[ZERO,ZERO,ZERO,ZERO,ZERO,ZERO], &
+                 V2TEMP,ZERO,V2U,[ZERO,ZERO,ZERO],V2K,V2F,V2B,V2EPS,V2SIG,V2KG,IERR)
+            IF (IERR/=0) THEN
+               CALL V2_ERROR; RETURN
+            ENDIF
+            DUM3=V2K
+         ELSE
          DO I=1,3*ELGP
             DO J=1,3*ELGP
                DUM3(I,J) = ZERO
@@ -671,6 +693,8 @@
                   DUM3(Q,P) = EAS_CORR
                ENDDO
             ENDDO
+         ENDIF
+
          ENDIF
 
          DO I=1,3*ELGP

@@ -524,6 +524,8 @@
 !                                                              'REZAIEE ': Rezaiee2017 triangular shell branch
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
+      CHARACTER(  8*BYTE)      :: HEXATYP = 'TIED    '! NEWSOLID CHEXA8; provisional validation status.
+      CHARACTER(  8*BYTE)      :: HEXATAX = 'ZETA    '! Explicit XI/ETA/ZETA; AUTO is opt-in.
       CHARACTER(  8*BYTE)      :: PENTATYP = 'ABE     '! NEWSOLID CPENTA6: ABE default, EAS9_V2 alternate.
       CHARACTER(  8*BYTE)      :: SOLIDTYP       = 'NEWSOLID'! Default solid formulation selector; LEGACY is opt-in.
 !                                                              'LEGACY  ': explicitly selected existing MYSTRAN solid paths

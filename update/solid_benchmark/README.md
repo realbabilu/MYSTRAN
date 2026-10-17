@@ -1,3 +1,5 @@
+> **18 October CHEXA8 update:** TIED is the provisional NEWSOLID default; EAS9 is explicit. [New benchmark section](comparison_all.md#chexa8), [full CSV](data/hexa8_tied_20261018/benchmark_matrix.csv), and [20 manual Nastran decks](chexa8_tied_nastran_inputs.zip). All 20 new Nastran solves completed outside the sandbox; explicit-IN=2 comparisons retain measured accuracy limitations, and the original matched-results archive below remains historical EAS9 evidence for CHEXA8.
+
 # Solid benchmarks: MYSTRAN vs Nastran
 
 Comparison reports for SAP2000-derived solid benchmarks, with independent reference values, published SAP2000 values, mesh counts and refinement curves. All text is in English.
