@@ -290,7 +290,8 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
             ENDDO
          ENDDO
 
-         IF ((RED_INT_SHEAR == 'Y') .AND. (.NOT. USE_EAS9_NEWSOLID)) THEN
+         IF ((RED_INT_SHEAR == 'Y') .AND. (.NOT. USE_EAS9_NEWSOLID) .AND. &
+             .NOT. (SOLIDTYP == 'NEWSOLID' .AND. ELGP == 15 .AND. IORD_IJ == 7)) THEN
 
             IF (IORD_IJ == 3) THEN                            ! Full integ is 2x3 so calc B using selective substit for shear terms
 !                                                               -------------------------------------------------------------------
@@ -585,6 +586,9 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
             ENDDO
          ENDDO
 
+         IF (SOLIDTYP == 'NEWSOLID' .AND. ELGP == 15 .AND. IORD_IJ == 7 .AND. RED_INT_SHEAR == 'Y') &
+            CALL QUADRATIC_SHEAR_INTEGRAL
+
          IF (USE_EAS9_NEWSOLID) THEN
             EAS_TRACE = ZERO
             DO P=1,9
@@ -751,6 +755,37 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
 ! **********************************************************************************************************************************
 
       CONTAINS
+
+! Integrate the quadratic wedge shear block on its own 3x2 rule. Do not
+! overwrite full-rule B/DETJ entries and then reuse the 7x3 rule's weights.
+      SUBROUTINE QUADRATIC_SHEAR_INTEGRAL
+      REAL(DOUBLE) :: DS(6,6),BS(6,3*ELGP),JS(3,3),JIS(3,3),DETS,FAC
+      REAL(DOUBLE) :: RS(MAX_ORDER_GAUSS),SS(MAX_ORDER_GAUSS),WT(MAX_ORDER_GAUSS)
+      REAL(DOUBLE) :: ZS(MAX_ORDER_GAUSS),WZ(MAX_ORDER_GAUSS)
+      INTEGER :: A,C,GP
+      DS=ZERO; DS(4:6,4:6)=ES(4:6,4:6)
+      GP=0
+      DO C=1,IORD_K
+         DO A=1,IORD_IJ
+            GP=GP+1
+            FAC=DETJ(GP)*HH_IJ(A)*HH_K(C)
+            BS=B(:,:,GP)
+            DUM3=DUM3-FAC*MATMUL(TRANSPOSE(BS),MATMUL(DS,BS))
+         ENDDO
+      ENDDO
+      CALL ORDER_TRIA(3_LONG,RS,SS,WT)
+      CALL ORDER_GAUSS(2_LONG,ZS,WZ)
+      DO C=1,2
+         DO A=1,3
+            CALL SHP3DP(A,A,C,ELGP,SUBR_NAME,'quadratic shear',3_LONG,2_LONG,RS(A),SS(A),ZS(C),'N',PSH,DPSHG)
+            CALL JAC3D(RS(A),SS(A),ZS(C),DPSHG,'N',JS,JIS,DETS)
+            DPSHX=MATMUL(JIS,DPSHG)
+            CALL B3D_ISOPARAMETRIC(DPSHX,0_LONG,A,A,C,'all strains','N',BS)
+            FAC=DETS*WT(A)*WZ(C)
+            DUM3=DUM3+FAC*MATMUL(TRANSPOSE(BS),MATMUL(DS,BS))
+         ENDDO
+      ENDDO
+      END SUBROUTINE QUADRATIC_SHEAR_INTEGRAL
 
       SUBROUTINE ANSEAS_BRANCH
       REAL(DOUBLE) :: AK(18,18),AF(18),AB(6,18),AE(6),AS(6),AG(18,18),AU(18),AT(6),ASE(6,18)

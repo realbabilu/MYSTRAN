@@ -1,0 +1,12 @@
+__pycache__/
+*.exe
+*.npy
+*.npz
+*.log
+*.stdout
+*.L*
+*.ERR
+*.F06
+*.OP2
+*.NEU
+MYSTRAN.INI

@@ -1,0 +1,9 @@
+volume,simcenter_grids,mystran_grids,simcenter_analytical_maxrel,mystran_analytical_maxrel_at_common_grids,mystran_simcenter_maxrel,simcenter_patch
+1,47,47,0.0,0.0,0.0,PASS
+2,47,273,0.0,0.0,0.0,PASS
+3,16,16,0.1854621124267578,0.5125284194946289,0.38947383880615233,FAIL
+4,16,56,0.0,0.5632124328613282,0.5632124328613282,PASS
+5,16,16,0.0,0.0,0.0,PASS
+6,16,48,0.0,0.6505703735351562,0.6505703735351562,PASS
+7,23,23,0.0,0.0,0.0,PASS
+8,23,111,0.0,0.0,0.0,PASS

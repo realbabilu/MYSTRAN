@@ -28,7 +28,7 @@
 
    INTERFACE
 
-      SUBROUTINE ELEM_STRE_STRN_ARRAYS ( STR_PT_NUM )
+      SUBROUTINE ELEM_STRE_STRN_ARRAYS ( STR_PT_NUM, RECOVERY_COORD )
 
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -44,6 +44,7 @@
       IMPLICIT NONE
 
       INTEGER(LONG), INTENT(IN)       :: STR_PT_NUM        ! Which point (3rd index in SEi matrices) this call is for
+      REAL(DOUBLE), OPTIONAL, INTENT(IN) :: RECOVERY_COORD(3)
 
 
       REAL(DOUBLE)                    :: DUM31(3)          ! Array used in an intermediate calc

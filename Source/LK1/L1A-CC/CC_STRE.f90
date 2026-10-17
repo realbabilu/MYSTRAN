@@ -31,12 +31,11 @@
       ! They request corner-style shell stress recovery for the separate
       ! GPSTRESS surface/volume writer without changing ordinary STRESS output.
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_CMD_DESCRIBERS, ECHO, LSUB, NSUB, NCCCD, WARN_ERR
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, CC_CMD_DESCRIBERS, LSUB, NSUB, NCCCD
       USE TIMDAT, ONLY                :  TSEC
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OUT, GPSTRESS_OUT, GPSTRESS_REQ, GPSTRESS_SETID, STRESS_USER_REQ
       USE MODEL_STUF, ONLY            :  SC_STRE
-      USE PARAMS, ONLY                :  SUPWARN
+      USE CC_OUTPUT_DESCRIBERS, ONLY : GP_ORIGINAL_SC_STRE, GP_ORIGINAL_STRE_LOC, REGISTER_GP_VOLUME_REQUEST
 
       USE CC_STRE_USE_IFs
 
@@ -66,6 +65,10 @@
 
       GPSTRESS_ALIAS = .FALSE.
       IF (PRESENT(IS_GPSTRESS_ALIAS)) GPSTRESS_ALIAS = IS_GPSTRESS_ALIAS
+      IF (GPSTRESS_ALIAS .AND. .NOT. ALLOCATED(GP_ORIGINAL_SC_STRE)) THEN
+         GP_ORIGINAL_SC_STRE=SC_STRE
+         GP_ORIGINAL_STRE_LOC=STRE_LOC
+      ENDIF
 
       CALL CC_OUTPUTS ( CARD, 'STRE', SETID )
       RECOVERY_SETID = SETID
@@ -97,15 +100,9 @@
          GPSTRESS_REQ = .TRUE.
          GPSTRESS_SETID = SETID
          GPSTRESS_OUT = REQUEST_OUT
+         CALL REGISTER_GP_VOLUME_REQUEST(NSUB,SETID,REQUEST_OUT)
          STRE_LOC = 'CORNER'
          RECOVERY_SETID = -1
-         WARN_ERR = WARN_ERR + 1
-         WRITE(ERR,901) CARD(1:LEN_TRIM(CARD))
-         IF (SUPWARN == 'N') THEN
-            IF (ECHO == 'NONE  ') THEN
-               WRITE(F06,901) CARD(1:LEN_TRIM(CARD))
-            ENDIF
-         ENDIF
       ELSE
          STRESS_USER_REQ = .TRUE.
          STRE_OUT = REQUEST_OUT
@@ -119,13 +116,19 @@
       ELSE
          SC_STRE(NSUB) = RECOVERY_SETID
       ENDIF
+      IF (.NOT. GPSTRESS_ALIAS .AND. ALLOCATED(GP_ORIGINAL_SC_STRE)) THEN
+         IF (NSUB == 0) THEN
+            GP_ORIGINAL_SC_STRE=SC_STRE
+         ELSE
+            GP_ORIGINAL_SC_STRE(NSUB)=RECOVERY_SETID
+         ENDIF
+         GP_ORIGINAL_STRE_LOC=STRE_LOC
+      ENDIF
 
 
 
       RETURN
 
 ! **********************************************************************************************************************************
-  901 FORMAT(' *WARNING    : ',A,/,14X,' IS MAPPED TO STRESS(CORNER) FOR GPSTRESS RECOVERY IN THIS MYSTRAN BUILD.',/, &
-             14X,' OUTPUT(POST) SURFACE/VOLUME CARDS ARE ACCEPTED; OGS1 OUTPUT IS A BASELINE COMPATIBILITY WRITER.')
 
       END SUBROUTINE CC_STRE

@@ -48,13 +48,14 @@
       USE MODEL_STUF, ONLY            :  AGRID, ISOLID, BGRID, RGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
                                          Q8_POINT_BASIS, ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, OGROUT, PCOMP_PROPS, PLY_NUM,   &
                                          STRESS, PBEAM_NSTATIONS, TE, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID, XEB
-      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, GPSTRESS_REQ, STRE_CORNER_REQ
+      USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, GPSTRESS_REQ, STRE_CORNER_REQ, NUM_GP_VOLUME
       USE LINK9_STUFF, ONLY           :  CBEAM_XL_OUT, EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, SHELL_OUT_TE,                 &
                                          SHELL_STRESS_IN_LOCAL, POLY_FIT_ERR, POLY_FIT_ERR_INDEX
       USE OUTPUT4_MATRICES, ONLY      :  OTM_STRE, TXT_STRE
 
       USE PLANE_COORD_TRANS_21_Interface
       USE TRANSFORM_SHELL_STR_Interface
+      USE GPSTRESS_SURFACE_UTILS, ONLY : WRITE_GPSTRESS_VOLUMES
       USE OFP3_STRE_NO_PCOMP_USE_IFs
 
       IMPLICIT NONE
@@ -89,6 +90,7 @@
       INTEGER(LONG)                   :: NUM_PTS_CUR       ! Actual number of stress points for the current element
       INTEGER(LONG)                   :: NUM_PTS_ELEM      ! Actual number of stress points for the current element in request counting
       INTEGER(LONG)                   :: RECOVERY_POINT    ! Actual SEi/STEi recovery point used for this output point
+      INTEGER(LONG)                   :: GP_START_ERRORS
 
                                                            ! Stress index (1 through 9) where poly fit err is max
       INTEGER(LONG)                   :: STRESS_OUT_ERR_INDEX(MAX_STRESS_POINTS+1)
@@ -1181,6 +1183,9 @@ elems_5: DO J = 1,NELE
 
 
 
+      GP_START_ERRORS=FATAL_ERR
+      CALL WRITE_GPSTRESS_VOLUMES
+      IF (FATAL_ERR > GP_START_ERRORS) CALL OUTA_HERE('Y')
       RETURN
 
 ! **********************************************************************************************************************************

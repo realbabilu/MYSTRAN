@@ -308,7 +308,8 @@
             ENDDO
          ENDDO
 
-         IF ((RED_INT_SHEAR == 'Y') .AND. (.NOT. USE_EAS9_NEWSOLID)) THEN
+         IF ((RED_INT_SHEAR == 'Y') .AND. (.NOT. USE_EAS9_NEWSOLID) .AND. &
+             .NOT. (SOLIDTYP == 'NEWSOLID' .AND. ELGP == 20 .AND. IORD == 3)) THEN
 
             IF (IORD == 2) THEN                               ! Use selective substitution for the 2x2x2 integration
 
@@ -493,9 +494,25 @@
                                                            ! Calc SE1,2,3
           IORD_MSG = 'for 3-D solid strains,                      = '
           CALL SHP3DH ( 0, 0, 0, ELGP, SUBR_NAME, IORD_MSG, 1, SSI, SSJ, SSK, 'N', PSH, DPSHG )
-          CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, DUM_DETJ )
-          CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
-          CALL B3D_ISOPARAMETRIC ( DPSHX, 0, 1, 1, 1, 'all strains', 'N', BI )
+          IF (SOLIDTYP == 'NEWSOLID' .AND. ELGP == 20 .AND. IORD == 3 .AND. STR_PT_NUM > 1) THEN
+! Quadratic corner output is extrapolated from the valid 3x3x3 integration
+! field. Do not invert a corner Jacobian outside the integration rule.
+             BI=ZERO
+             GAUSS_PT=0
+             DO K=1,IORD
+                DO J=1,IORD
+                   DO I=1,IORD
+                      GAUSS_PT=GAUSS_PT+1
+                      INTFAC=RECOVERY_WEIGHT(SSI,I)*RECOVERY_WEIGHT(SSJ,J)*RECOVERY_WEIGHT(SSK,K)
+                      BI=BI+INTFAC*B(:,:,GAUSS_PT)
+                   ENDDO
+                ENDDO
+             ENDDO
+          ELSE
+             CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, DUM_DETJ )
+             CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
+             CALL B3D_ISOPARAMETRIC ( DPSHX, 0, 1, 1, 1, 'all strains', 'N', BI )
+          ENDIF
           IF (USE_EAS9_NEWSOLID) THEN
              V2TEMP=TREF1;V2U=ZERO
              CALL HEX8_EAS9_STATE(XEL(1:8,1:3),ES,ALP,V2TEMP,TREF1,V2U,[SSI,SSJ,SSK], &
@@ -616,6 +633,9 @@
                ENDDO
             ENDDO
          ENDDO
+
+         IF (SOLIDTYP == 'NEWSOLID' .AND. ELGP == 20 .AND. IORD == 3 .AND. RED_INT_SHEAR == 'Y') &
+            CALL QUADRATIC_SHEAR_INTEGRAL
 
          IF (USE_EAS9_NEWSOLID) THEN
             DO P=1,9
@@ -927,6 +947,50 @@
 ! ##################################################################################################################################
 
       CONTAINS
+
+      REAL(DOUBLE) FUNCTION RECOVERY_WEIGHT(X,INDEX) RESULT(W)
+      REAL(DOUBLE), INTENT(IN) :: X
+      INTEGER, INTENT(IN) :: INDEX
+      INTEGER :: Q
+      W=ONE
+      DO Q=1,IORD
+         IF (Q /= INDEX) W=W*(X-SSS(Q))/(SSS(INDEX)-SSS(Q))
+      ENDDO
+      END FUNCTION RECOVERY_WEIGHT
+
+! Keep the full-rule B/DETJ arrays intact. Replace only the pure shear energy
+! integral using a separate 2x2x2 rule, rather than mixing low-rule samples
+! with the first eight entries and weights of the 3x3x3 rule.
+      SUBROUTINE QUADRATIC_SHEAR_INTEGRAL
+      REAL(DOUBLE) :: DS(6,6),BS(6,3*ELGP),JS(3,3),JIS(3,3),DETS,FAC
+      REAL(DOUBLE) :: XS(MAX_ORDER_GAUSS),WS(MAX_ORDER_GAUSS)
+      INTEGER :: A,C,D,GP
+      DS=ZERO; DS(4:6,4:6)=ES(4:6,4:6)
+      GP=0
+      DO D=1,IORD
+         DO C=1,IORD
+            DO A=1,IORD
+               GP=GP+1
+               FAC=DETJ(GP)*HHH(A)*HHH(C)*HHH(D)
+               BS=B(:,:,GP)
+               DUM3=DUM3-FAC*MATMUL(TRANSPOSE(BS),MATMUL(DS,BS))
+            ENDDO
+         ENDDO
+      ENDDO
+      CALL ORDER_GAUSS(2_LONG,XS,WS)
+      DO D=1,2
+         DO C=1,2
+            DO A=1,2
+               CALL SHP3DH(A,C,D,ELGP,SUBR_NAME,'quadratic shear',2_LONG,XS(A),XS(C),XS(D),'N',PSH,DPSHG)
+               CALL JAC3D(XS(A),XS(C),XS(D),DPSHG,'N',JS,JIS,DETS)
+               DPSHX=MATMUL(JIS,DPSHG)
+               CALL B3D_ISOPARAMETRIC(DPSHX,0_LONG,A,C,D,'all strains','N',BS)
+               FAC=DETS*WS(A)*WS(C)*WS(D)
+               DUM3=DUM3+FAC*MATMUL(TRANSPOSE(BS),MATMUL(DS,BS))
+            ENDDO
+         ENDDO
+      ENDDO
+      END SUBROUTINE QUADRATIC_SHEAR_INTEGRAL
 
       SUBROUTINE V2_ERROR
          WRITE(ERR,'(A,I0,A,I0)') ' *ERROR: CHEXA8 EAS9 V2 ELEMENT ',EID,' INVALID POINT OR CONDENSATION, CODE ',IERR

@@ -24,7 +24,7 @@
 
 ! End MIT license text.
 
-      SUBROUTINE ELEM_STRE_STRN_ARRAYS ( STR_PT_NUM )
+      SUBROUTINE ELEM_STRE_STRN_ARRAYS ( STR_PT_NUM, RECOVERY_COORD )
 
 ! Calculates element stress and strain arrays (arrays STRESS and STRAIN). Stresses are calculated for all engineering elements
 ! (1-D, 2-D, 3-D elements). Strains are calculated for the BUSH element, all 2-D and 3-D elements. The default method for
@@ -62,6 +62,8 @@
       INTEGER(LONG)                   :: K                 ! Counter
 
       INTEGER(LONG)                   :: STR_CID_SOLID
+      REAL(DOUBLE), OPTIONAL, INTENT(IN) :: RECOVERY_COORD(3)
+      REAL(DOUBLE) :: SOLID_POINT(3)
 
       INTEGER(LONG) :: V2ERR, V2ID(24)
       REAL(DOUBLE) :: V2K(24,24),V2KG(24,24),V2F(24),V2B(6,24),V2EPS(6),V2SIG(6),V2TEMP(8),V2U(24)
@@ -486,7 +488,9 @@
          ENDDO
          V2U=UEL(V2ID);V2TEMP=TREF(1)
          IF (SUBLOD(INT_SC_NUM,2)>0) V2TEMP=DT(1:8,JTSUB)
-         CALL HEX8_EAS9_STATE(XEL(1:8,1:3),ES,ALPVEC(:,1),V2TEMP,TREF(1),V2U,V2POINTS(:,STR_PT_NUM), &
+         SOLID_POINT=V2POINTS(:,STR_PT_NUM)
+         IF (PRESENT(RECOVERY_COORD)) SOLID_POINT=RECOVERY_COORD
+         CALL HEX8_EAS9_STATE(XEL(1:8,1:3),ES,ALPVEC(:,1),V2TEMP,TREF(1),V2U,SOLID_POINT, &
                              V2K,V2F,V2B,V2EPS,V2SIG,V2KG,V2ERR)
          IF (V2ERR /= 0) THEN
             WRITE(ERR,'(A,I0)') ' *ERROR: CHEXA8 EAS9 V2 RECOVERY FAILED, ELEMENT ',EID
@@ -503,7 +507,9 @@
          ENDDO
          AU=UEL(AID);AT=TREF(1)
          IF (SUBLOD(INT_SC_NUM,2)>0) AT=DT(1:6,JTSUB)
-         CALL PENTA6_ANSEAS_STATE(XEL(1:6,1:3),ES,ALPVEC(:,1),AT,TREF(1),AU,AP(:,STR_PT_NUM),AK,AF,AB,AE,AS,AG,V2ERR)
+         SOLID_POINT=AP(:,STR_PT_NUM)
+         IF (PRESENT(RECOVERY_COORD)) SOLID_POINT=RECOVERY_COORD
+         CALL PENTA6_ANSEAS_STATE(XEL(1:6,1:3),ES,ALPVEC(:,1),AT,TREF(1),AU,SOLID_POINT,AK,AF,AB,AE,AS,AG,V2ERR)
          IF (V2ERR/=0) THEN
             WRITE(ERR,'(A,I0)') ' *ERROR: CPENTA6 ANSEAS RECOVERY FAILED, ELEMENT ',EID
             WRITE(F06,'(A,I0)') ' *ERROR: CPENTA6 ANSEAS RECOVERY FAILED, ELEMENT ',EID

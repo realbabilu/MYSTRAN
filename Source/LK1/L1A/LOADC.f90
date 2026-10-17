@@ -46,7 +46,8 @@
                                          EIG_SUBSPACE_NSUB, EIG_SUBSPACE_TOL, EIG_SUBSPACE_MAX_ITER, EIG_DENSE_NEX
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRN_LOC, STRE_LOC, FORC_LOC, OUTPUT_POST_REQ, STRFIELD_REQ, NUM_GP_SURFACE, NUM_GP_VOLUME,&
                                          RESET_GPSTRESS_POST_STATE
-      USE GPSTRESS_SURFACE_UTILS, ONLY:  PARSE_GPSTRESS_SET_CARD, PARSE_GPSTRESS_SURFACE_CARD
+      USE GPSTRESS_SURFACE_UTILS, ONLY:  PARSE_GPSTRESS_SET_CARD, PARSE_GPSTRESS_SURFACE_CARD, PARSE_GPSTRESS_VOLUME_CARD
+      USE CC_OUTPUT_DESCRIBERS, ONLY : GP_ORIGINAL_SC_STRE, GP_ORIGINAL_STRE_LOC
 
       USE LOADC_USE_IFs
 
@@ -268,7 +269,13 @@ inner:         DO
             ENDIF
 
          ELSE IF (CARD1(1:6) == 'VOLUME') THEN
-            NUM_GP_VOLUME = NUM_GP_VOLUME + 1
+            IF (OUTPUT_POST_REQ) THEN
+               CALL PARSE_GPSTRESS_VOLUME_CARD(CARD1)
+            ELSE
+               FATAL_ERR = FATAL_ERR+1
+               WRITE(ERR,'(A)') ' *ERROR: VOLUME REQUIRES OUTPUT(POST)'
+               WRITE(F06,'(A)') ' *ERROR: VOLUME REQUIRES OUTPUT(POST)'
+            ENDIF
 
          ELSE IF (CARD1(1:8) == 'SUBCASE ') THEN
             CALL CC_SUBC   ( CARD1 )
@@ -303,6 +310,13 @@ inner:         DO
          ENDIF
 
       ENDDO outer
+
+! Solid GPSTRESS has its own recovery pass; do not enlarge OES requests or
+! change their recovery locations. Retain historical hidden shell recovery.
+      IF (NUM_GP_VOLUME > 0 .AND. NUM_GP_SURFACE == 0 .AND. ALLOCATED(GP_ORIGINAL_SC_STRE)) THEN
+         SC_STRE=GP_ORIGINAL_SC_STRE
+         STRE_LOC=GP_ORIGINAL_STRE_LOC
+      ENDIF
 
       IF       (SC_STRE(1) /= 0) THEN
          QUAD4_LOC = STRE_LOC
