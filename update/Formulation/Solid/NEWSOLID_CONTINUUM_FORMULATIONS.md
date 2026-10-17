@@ -36,47 +36,61 @@ The existing six-slot grid storage is preserved. Only translations enter these c
 
 For a body occupying $\Omega$, linear momentum balance and displacement/traction boundary conditions are
 
-$$\nabla\!\cdot\boldsymbol\sigma+\mathbf b=\mathbf0,\qquad
+```math
+\nabla\!\cdot\boldsymbol\sigma+\mathbf b=\mathbf0,\qquad
 \mathbf u=\bar{\mathbf u}\text{ on }\Gamma_u,\qquad
-\boldsymbol\sigma\mathbf n=\bar{\mathbf t}\text{ on }\Gamma_t.$$
+\boldsymbol\sigma\mathbf n=\bar{\mathbf t}\text{ on }\Gamma_t.
+```
 
 With engineering shear strains, the six-component ordering is
 
-$$\boldsymbol\varepsilon=[\varepsilon_{xx},\varepsilon_{yy},\varepsilon_{zz},\gamma_{xy},\gamma_{yz},\gamma_{zx}]^{\mathsf T},\quad
-\boldsymbol\sigma=[\sigma_{xx},\sigma_{yy},\sigma_{zz},\tau_{xy},\tau_{yz},\tau_{zx}]^{\mathsf T}.$$
+```math
+\boldsymbol\varepsilon=[\varepsilon_{xx},\varepsilon_{yy},\varepsilon_{zz},\gamma_{xy},\gamma_{yz},\gamma_{zx}]^{\mathsf T},\quad
+\boldsymbol\sigma=[\sigma_{xx},\sigma_{yy},\sigma_{zz},\tau_{xy},\tau_{yz},\tau_{zx}]^{\mathsf T}.
+```
 
-$$\boldsymbol\sigma=\mathbf D(\boldsymbol\varepsilon-\boldsymbol\varepsilon_T),\quad
+```math
+\boldsymbol\sigma=\mathbf D(\boldsymbol\varepsilon-\boldsymbol\varepsilon_T),\quad
 \mathbf D=\begin{bmatrix}
 \lambda+2\mu&\lambda&\lambda&0&0&0\\
 \lambda&\lambda+2\mu&\lambda&0&0&0\\
 \lambda&\lambda&\lambda+2\mu&0&0&0\\
 0&0&0&\mu&0&0\\0&0&0&0&\mu&0\\0&0&0&0&0&\mu
 \end{bmatrix},\quad
-\lambda=\frac{E\nu}{(1+\nu)(1-2\nu)},\quad\mu=\frac{E}{2(1+\nu)}.$$
+\lambda=\frac{E\nu}{(1+\nu)(1-2\nu)},\quad\mu=\frac{E}{2(1+\nu)}.
+```
 
 The isotropic specialization is the material model in the reported comparisons. A tensor shear component is half its engineering-strain counterpart; stress shear components require no such factor.
 
 ### 2.2 Isoparametric interpolation and virtual work
 
-$$\mathbf x(\boldsymbol\xi)=\sum_aN_a\mathbf x_a,\qquad
+```math
+\mathbf x(\boldsymbol\xi)=\sum_aN_a\mathbf x_a,\qquad
 \mathbf u^h(\boldsymbol\xi)=\sum_aN_a\mathbf d_a,\qquad
 \nabla_xN_a=\mathbf J^{-\mathsf T}\nabla_\xi N_a,\qquad
-\mathbf J=\frac{\partial\mathbf x}{\partial\boldsymbol\xi}.$$
+\mathbf J=\frac{\partial\mathbf x}{\partial\boldsymbol\xi}.
+```
 
 The Fortran modules store the transpose Jacobian, with natural-coordinate indices in rows; their inverse-times-natural-gradient multiplication is equivalent to this convention. The compatible strain block is
 
-$$\mathbf B_a=\begin{bmatrix}
+```math
+\mathbf B_a=\begin{bmatrix}
 N_{a,x}&0&0\\0&N_{a,y}&0\\0&0&N_{a,z}\\
 N_{a,y}&N_{a,x}&0\\0&N_{a,z}&N_{a,y}\\N_{a,z}&0&N_{a,x}
-\end{bmatrix},\qquad\boldsymbol\varepsilon=\mathbf B\mathbf d_e.$$
+\end{bmatrix},\qquad\boldsymbol\varepsilon=\mathbf B\mathbf d_e.
+```
 
 Stationarity of elastic potential energy gives
 
-$$\mathbf K_e=\int_{\Omega_e}\mathbf B^{\mathsf T}\mathbf D\mathbf B\,dV,\qquad
+```math
+\mathbf K_e=\int_{\Omega_e}\mathbf B^{\mathsf T}\mathbf D\mathbf B\,dV,\qquad
 \mathbf f_e=\int_{\Omega_e}\mathbf N^{\mathsf T}\mathbf b\,dV+
-\int_{\Gamma_t^e}\mathbf N^{\mathsf T}\bar{\mathbf t}\,dA+\mathbf f_T.$$
+\int_{\Gamma_t^e}\mathbf N^{\mathsf T}\bar{\mathbf t}\,dA+\mathbf f_T.
+```
 
-$$\mathbf K_e\simeq\sum_gw_g\det\mathbf J_g\,\mathbf B_g^{\mathsf T}\mathbf D\mathbf B_g.$$
+```math
+\mathbf K_e\simeq\sum_gw_g\det\mathbf J_g\,\mathbf B_g^{\mathsf T}\mathbf D\mathbf B_g.
+```
 
 Partition of unity, linear-coordinate reproduction, zero derivative sum and positive integration-point Jacobians are basic consistency conditions. They do not alone establish distorted-patch accuracy or constrained positive definiteness. In global assembly, prescribed displacements satisfy $\mathbf K_{ff}\mathbf u_f=\mathbf f_f-\mathbf K_{fc}\bar{\mathbf u}_c$; every constrained quadratic midside displacement must use its own coordinate.
 
@@ -84,25 +98,33 @@ Partition of unity, linear-coordinate reproduction, zero derivative sum and posi
 
 Let $\overline{\mathbf B}$ denote either the compatible operator or an explicitly assumed-strain modification. Introduce nine element-local parameters $\boldsymbol\eta$:
 
-$$\boldsymbol\varepsilon=\overline{\mathbf B}\mathbf d_e+\mathbf G\boldsymbol\eta,\qquad
+```math
+\boldsymbol\varepsilon=\overline{\mathbf B}\mathbf d_e+\mathbf G\boldsymbol\eta,\qquad
 \begin{bmatrix}\mathbf K_{dd}&\mathbf K_{d\eta}\\\mathbf K_{\eta d}&\mathbf K_{\eta\eta}\end{bmatrix}
 \begin{bmatrix}\mathbf d_e\\\boldsymbol\eta\end{bmatrix}
-=\begin{bmatrix}\mathbf f_d\\\mathbf f_\eta\end{bmatrix}.$$
+=\begin{bmatrix}\mathbf f_d\\\mathbf f_\eta\end{bmatrix}.
+```
 
 Each block follows by integrating the corresponding pair of strain operators against $\mathbf D$. Elimination gives
 
-$$\mathbf K_c=\mathbf K_{dd}-\mathbf K_{d\eta}\mathbf K_{\eta\eta}^{-1}\mathbf K_{\eta d},\qquad
-\mathbf f_c=\mathbf f_d-\mathbf K_{d\eta}\mathbf K_{\eta\eta}^{-1}\mathbf f_\eta,$$
+```math
+\mathbf K_c=\mathbf K_{dd}-\mathbf K_{d\eta}\mathbf K_{\eta\eta}^{-1}\mathbf K_{\eta d},\qquad
+\mathbf f_c=\mathbf f_d-\mathbf K_{d\eta}\mathbf K_{\eta\eta}^{-1}\mathbf f_\eta,
+```
 
-$$\boldsymbol\eta=\mathbf K_{\eta\eta}^{-1}(\mathbf f_\eta-\mathbf K_{\eta d}\mathbf d_e),\qquad
-\mathbf B_{\rm eff}=\overline{\mathbf B}-\mathbf G\mathbf K_{\eta\eta}^{-1}\mathbf K_{\eta d}.$$
+```math
+\boldsymbol\eta=\mathbf K_{\eta\eta}^{-1}(\mathbf f_\eta-\mathbf K_{\eta d}\mathbf d_e),\qquad
+\mathbf B_{\rm eff}=\overline{\mathbf B}-\mathbf G\mathbf K_{\eta\eta}^{-1}\mathbf K_{\eta d}.
+```
 
 Stress recovery must include the condensed enhancement and thermal contribution, rather than substituting the compatible strain alone. The current prism state routine uses Cholesky factorization and rejects local reciprocal condition estimates below $10^{-12}$; it does not add the diagonal regularization described in the archive's historical Python ABE article. The brick state routine uses partial pivoting and explicitly symmetrizes the condensed matrix.
 
 For the EAS9 transformation, set $\mathbf A_0=\partial\mathbf x/\partial\boldsymbol\xi$ at the parent centroid. Interpret a natural Voigt column as a symmetric tensor $\widehat{\mathbf E}$, dividing engineering shears by two. The physical column is obtained from
 
-$$\mathbf E=\frac{\det\mathbf A_0}{\det\mathbf A(\boldsymbol\xi)}
-\mathbf A_0^{-\mathsf T}\widehat{\mathbf E}\mathbf A_0^{-1}.$$
+```math
+\mathbf E=\frac{\det\mathbf A_0}{\det\mathbf A(\boldsymbol\xi)}
+\mathbf A_0^{-\mathsf T}\widehat{\mathbf E}\mathbf A_0^{-1}.
+```
 
 Repack using engineering shears. Constant-stress orthogonality must hold under the actual quadrature; a mode that vanishes at the centroid need not satisfy that integral condition by itself.
 
@@ -112,14 +134,18 @@ Repack using engineering shears. Constant-stress orthogonality must hold under t
 
 For barycentric coordinates $L_a$, $a=1,\ldots,4$, $N_a=L_a$ and $\mathbf B_e$ is constant on a straight tetrahedron. The standard stiffness is $V_e\mathbf B_e^{\mathsf T}\mathbf D\mathbf B_e$. NEWSOLID adds a nodal-patch correction after element assembly. For a node $I$ with incident tetrahedra $\mathcal P_I$, the embedded patch operator is
 
-$$V_I=\frac14\sum_{e\in\mathcal P_I}V_e,\qquad
+```math
+V_I=\frac14\sum_{e\in\mathcal P_I}V_e,\qquad
 \overline{\mathbf B}_I=
 \frac{\sum_{e\in\mathcal P_I}V_e\mathbf B_e^{(I)}}{\sum_{e\in\mathcal P_I}V_e},\qquad
-\mathbf K_{\rm NS}=\sum_I V_I\overline{\mathbf B}_I^{\mathsf T}\mathbf D_I\overline{\mathbf B}_I.$$
+\mathbf K_{\rm NS}=\sum_I V_I\overline{\mathbf B}_I^{\mathsf T}\mathbf D_I\overline{\mathbf B}_I.
+```
 
 For eligible homogeneous patches, the resulting blend is
 
-$$\mathbf K_{\rm blend}=(1-\beta)\mathbf K_{\rm FEM}+\beta\mathbf K_{\rm NS},\qquad\beta=0.9.$$
+```math
+\mathbf K_{\rm blend}=(1-\beta)\mathbf K_{\rm FEM}+\beta\mathbf K_{\rm NS},\qquad\beta=0.9.
+```
 
 The code subtracts $\beta V_e\mathbf B_e^{\mathsf T}\mathbf D\mathbf B_e/4$ and adds $\beta V_I\overline{\mathbf B}_I^{\mathsf T}\mathbf D\overline{\mathbf B}_I$ per eligible patch. It skips a patch if incident material-row IDs differ or its material cannot be built. Thus a mixed-material model is not represented by applying the homogeneous blend indiscriminately. Boundary patches use their incident elements; no artificial exterior tetrahedra are introduced.
 
@@ -129,7 +155,9 @@ The source variable is named `ALPHA`, but its value is the NS weight $\beta$. In
 
 The four vertex and six edge functions are
 
-$$N_i=L_i(2L_i-1),\quad i=1,\ldots,4,\qquad N_{ij}=4L_iL_j.$$
+```math
+N_i=L_i(2L_i-1),\quad i=1,\ldots,4,\qquad N_{ij}=4L_iL_j.
+```
 
 They span the quadratic tetrahedral space and use 30 translational DOFs. Edge functions must be associated with the actual input edge ordering. Curved geometry changes the mapping and quadrature demand; the reported refinement suite uses straight edge midpoints. No CTETRA4 nodal-smoothing correction is applied to CTETRA10. The dispatch maps the solid integration selector to either a centroid rule of weight $1/6$ or a four-point tetrahedral rule. The latter uses barycentric permutations of $(0.58541020,0.13819660,0.13819660,0.13819660)$ and weight $1/24$ per point, as rounded in `ORDER_TETRA.f90`. These are source values, not a claim that a centroid rule suffices for quadratic stiffness.
 
@@ -137,27 +165,35 @@ They span the quadratic tetrahedral space and use 30 translational DOFs. Edge fu
 
 Set $L_1=1-r-s$, $L_2=r$, $L_3=s$ on the unit triangle and $z\in[-1,1]$ axially. The six compatible functions are
 
-$$N_i=\tfrac12L_i(1-z),\qquad N_{i+3}=\tfrac12L_i(1+z),\qquad i=1,2,3.$$
+```math
+N_i=\tfrac12L_i(1-z),\qquad N_{i+3}=\tfrac12L_i(1+z),\qquad i=1,2,3.
+```
 
 With $\bar r=r-1/3$, $\bar s=s-1/3$, and natural-strain unit vectors $\mathbf e_j\in\mathbb R^6$, the actual EAS9 natural columns, before centroid transformation and determinant scaling, are
 
-$$\widehat{\mathbf G}_{\rm wedge}=\left[
+```math
+\widehat{\mathbf G}_{\rm wedge}=\left[
 \bar r\mathbf e_1,\ \bar s\mathbf e_2,\ z\mathbf e_3,
 \bar r\mathbf e_4,\ \bar s\mathbf e_4,
-\bar s\mathbf e_5,\ z\mathbf e_5,\ z\mathbf e_6,\ \bar r\mathbf e_6\right].$$
+\bar s\mathbf e_5,\ z\mathbf e_5,\ z\mathbf e_6,\ \bar r\mathbf e_6\right].
+```
 
 EAS9 uses the compatible $\mathbf B$. ABE instead replaces two shear rows in the frozen natural frame. Let $\mathbf a=\widehat{\mathbf B}_{rz}(1/2,0,z)$, $\mathbf b=\widehat{\mathbf B}_{sz}(0,1/2,z)$ and
 
-$$\mathbf c=\mathbf b-\mathbf a-
-[\widehat{\mathbf B}_{sz}-\widehat{\mathbf B}_{rz}]_{(1/2,1/2,z)}.$$
+```math
+\mathbf c=\mathbf b-\mathbf a-
+[\widehat{\mathbf B}_{sz}-\widehat{\mathbf B}_{rz}]_{(1/2,1/2,z)}.
+```
 
 Then $\overline{\mathbf B}_{rz}=\mathbf a+s\mathbf c$ and $\overline{\mathbf B}_{sz}=\mathbf b-r\mathbf c$. The other rows retain their compatible values. The ABE natural enhancement columns are
 
-$$\widehat{\mathbf G}_{\rm ABE}=\left[
+```math
+\widehat{\mathbf G}_{\rm ABE}=\left[
 z\mathbf e_3,z\mathbf e_5,z\mathbf e_6,
 \bar r\mathbf e_1,\bar s\mathbf e_1,
 \bar r\mathbf e_2,\bar s\mathbf e_2,
-\bar r\mathbf e_4,\bar s\mathbf e_4\right].$$
+\bar r\mathbf e_4,\bar s\mathbf e_4\right].
+```
 
 ABE therefore also contains nine local parameters. The current operator has no affine-field projection correction. Both state variants use three triangle points $(1/6,1/6)$, $(2/3,1/6)$, $(1/6,2/3)$ with weights $1/6$, crossed with $z=\pm1/\sqrt3$, weights 1: six volume points in total. ABE is the executable default; the 5-001 example explicitly selects EAS9. Their benchmark behavior differs strongly by geometry and should not be collapsed into one CPENTA6 curve.
 
@@ -165,11 +201,15 @@ ABE therefore also contains nine local parameters. The current operator has no a
 
 In the same coordinates, a convenient topology-based definition is
 
-$$N_i^- =\tfrac12L_i(1-z)(2L_i-2-z),\qquad
-N_i^+ =\tfrac12L_i(1+z)(2L_i-2+z),$$
+```math
+N_i^- =\tfrac12L_i(1-z)(2L_i-2-z),\qquad
+N_i^+ =\tfrac12L_i(1+z)(2L_i-2+z),
+```
 
-$$N_{ij}^- =2L_iL_j(1-z),\qquad
-N_{ij}^+ =2L_iL_j(1+z),\qquad N_i^v=L_i(1-z^2).$$
+```math
+N_{ij}^- =2L_iL_j(1-z),\qquad
+N_{ij}^+ =2L_iL_j(1+z),\qquad N_i^v=L_i(1-z^2).
+```
 
 These give six vertices, six triangular-face edge midpoints and three vertical-edge midpoints. Equations specify physical edges, not a universal positional permutation. For the supplied FIXED_QUADRATIC convention, the audited mapping to MYSTRAN positions is `[1..9,13..15,10..12]`; coordinates and prescribed values are preserved.
 
@@ -179,15 +219,19 @@ When the quadratic selective-integration path is enabled at seven triangle point
 
 For corner signs $s_a,t_a,v_a\in\{-1,1\}$ on $[-1,1]^3$,
 
-$$N_a=\tfrac18(1+s_a\xi)(1+t_a\eta)(1+v_a\zeta).$$
+```math
+N_a=\tfrac18(1+s_a\xi)(1+t_a\eta)(1+v_a\zeta).
+```
 
 The source-specific natural enhancement matrix is
 
-$$\widehat{\mathbf G}_{\rm brick}=\left[
+```math
+\widehat{\mathbf G}_{\rm brick}=\left[
 \xi\mathbf e_1,\eta\mathbf e_2,\zeta\mathbf e_3,
 \xi\mathbf e_4,\eta\mathbf e_4,
 \eta\mathbf e_5,\zeta\mathbf e_5,
-\zeta\mathbf e_6,\xi\mathbf e_6\right].$$
+\zeta\mathbf e_6,\xi\mathbf e_6\right].
+```
 
 It uses the transformation in Section 2.3 and a $2\times2\times2$ Gauss rule with coordinates $\pm1/\sqrt3$ and unit one-dimensional weights. NEWSOLID CHEXA8 requires order 2 in this path. All nine enhancement parameters are condensed into a $24\times24$ matrix. These columns are the implemented project variant, not a claim of literal identity with every historical nine-mode brick.
 
@@ -195,16 +239,20 @@ It uses the transformation in Section 2.3 and a $2\times2\times2$ Gauss rule wit
 
 The vertex functions are
 
-$$N_a=\tfrac18(1+s_a\xi)(1+t_a\eta)(1+v_a\zeta)
-(s_a\xi+t_a\eta+v_a\zeta-2).$$
+```math
+N_a=\tfrac18(1+s_a\xi)(1+t_a\eta)(1+v_a\zeta)
+(s_a\xi+t_a\eta+v_a\zeta-2).
+```
 
 For an edge parallel to $\xi$, $N_e=\tfrac14(1-\xi^2)(1+t_e\eta)(1+v_e\zeta)$; cyclic permutations define the other eight edge functions. The interpolation has 20 nodes and 60 translations. The supplied FIXED_QUADRATIC-to-MYSTRAN mapping is `[1..12,17..20,13..16]`. This audited input-convention mapping is not a proposed change to the element basis.
 
 For the enabled order-3 selective-shear path, define $\mathbf D_s$ by retaining only the shear block $D_{4:6,4:6}$ and setting all other entries to zero. The implemented replacement is
 
-$$\mathbf K=Q_{\rm full}[\mathbf B^{\mathsf T}\mathbf D\mathbf B]
+```math
+\mathbf K=Q_{\rm full}[\mathbf B^{\mathsf T}\mathbf D\mathbf B]
 -Q_{\rm full}[\mathbf B^{\mathsf T}\mathbf D_s\mathbf B]
-+Q_{\rm shear}[\mathbf B^{\mathsf T}\mathbf D_s\mathbf B].$$
++Q_{\rm shear}[\mathbf B^{\mathsf T}\mathbf D_s\mathbf B].
+```
 
 Here $Q_{\rm full}$ is $3\times3\times3$ and $Q_{\rm shear}$ is $2\times2\times2$, each including its own determinant. CPENTA15 uses the same replacement principle with its triangular-product rules. Shear rows of the unreduced strain operator are retained for stress evaluation; quadrature reduction must not be implemented by deleting strain components.
 
@@ -212,7 +260,9 @@ Here $Q_{\rm full}$ is $3\times3\times3$ and $Q_{\rm shear}$ is $2\times2\times2
 
 Let $a,b\in[-1,1]$, $z\in[0,1]$, and $q=1-z$. The reference physical coordinates are $\xi=qa$, $\eta=qb$, $\zeta=z$. With basal signs $(s_i,t_i)=(-1,-1),(1,-1),(1,1),(-1,1)$,
 
-$$N_i=\tfrac14q(1+s_i a)(1+t_i b),\quad i=1,\ldots,4,\qquad N_5=z.$$
+```math
+N_i=\tfrac14q(1+s_i a)(1+t_i b),\quad i=1,\ldots,4,\qquad N_5=z.
+```
 
 The implementation integrates in collapsed coordinates using two Legendre points in each basal direction and a two-point rule on $z\in[0,1]$. The determinant of the collapsed geometry mapping already contains the shrinking cross-section. The apex is a singular mapping location and is excluded from volume integration.
 
@@ -220,23 +270,29 @@ The implementation integrates in collapsed coordinates using two Legendre points
 
 The source evaluates an algebraically cancelled form in collapsed coordinates. Let $u_i=1+s_i a$, $v_i=1+t_i b$, $h_i=s_i a+t_i b$. The basal vertices, apex and lateral midpoint functions are
 
-$$N_i=\tfrac14q\,u_iv_i(qh_i-1),\quad
-N_5=z(2z-1),\quad N_{i+9}=zq\,u_iv_i,\qquad i=1,\ldots,4.$$
+```math
+N_i=\tfrac14q\,u_iv_i(qh_i-1),\quad
+N_5=z(2z-1),\quad N_{i+9}=zq\,u_iv_i,\qquad i=1,\ldots,4.
+```
 
 The basal midpoint functions, in order around the square, are
 
-$$\begin{aligned}
+```math
+\begin{aligned}
 N_6&=\tfrac12q^2(1-a^2)(1-b),&N_7&=\tfrac12q^2(1-b^2)(1+a),\\
 N_8&=\tfrac12q^2(1-a^2)(1+b),&N_9&=\tfrac12q^2(1-b^2)(1-a).
-\end{aligned}$$
+\end{aligned}
+```
 
 They are rational when expressed in uncollapsed pyramid coordinates. Derivatives in the module are with respect to $(a,b,z)$ and must be combined with the corresponding collapsed Jacobian. No fourteenth node or enrichment DOF is used.
 
 The stiffness rule crosses two-point Legendre integration in $a,b$ with a two-point Jacobi rule carrying weight $(1-z)^2$:
 
-$$z_\pm=\frac{5\pm\sqrt{10}}{15},\qquad
+```math
+z_\pm=\frac{5\pm\sqrt{10}}{15},\qquad
 w_- =\frac16+\frac{\sqrt{10}}{48},\quad
-w_+ =\frac16-\frac{\sqrt{10}}{48}.$$
+w_+ =\frac16-\frac{\sqrt{10}}{48}.
+```
 
 Because the collapsed Jacobian already carries the axial weight, the code uses $w_z/(1-z)^2$ when multiplying that determinant. Applying $(1-z)^2$ a second time is incorrect. A separate 27-point product rule is provided for mass. Shape values and collapsed derivatives have finite apex limits, while the physical mapping remains singular at the apex.
 
@@ -280,25 +336,31 @@ The following figures are reused from the supplied revision-2 archive as geometr
 
 The standard consistent mass and thermal loading expressions are
 
-$$\mathbf M=\int_{\Omega_e}\rho\mathbf N^{\mathsf T}\mathbf N\,dV,\qquad
+```math
+\mathbf M=\int_{\Omega_e}\rho\mathbf N^{\mathsf T}\mathbf N\,dV,\qquad
 \boldsymbol\varepsilon_T=\alpha_T\Delta T[1,1,1,0,0,0]^{\mathsf T},\qquad
-\mathbf f_T=\int_{\Omega_e}\mathbf B^{\mathsf T}\mathbf D\boldsymbol\varepsilon_T\,dV.$$
+\mathbf f_T=\int_{\Omega_e}\mathbf B^{\mathsf T}\mathbf D\boldsymbol\varepsilon_T\,dV.
+```
 
 Enhanced variants condense thermal loads consistently using Section 2.3. These equations describe the operator family; the displacement comparison in Section 6 does not independently validate mass or thermal behavior for every element.
 
 For a physical prestress tensor $\boldsymbol\sigma_0$ and ordinary displacement gradients,
 
-$$\mathbf K_{G,ab}=\int_{\Omega_e}(\nabla N_a)^{\mathsf T}
+```math
+\mathbf K_{G,ab}=\int_{\Omega_e}(\nabla N_a)^{\mathsf T}
 \boldsymbol\sigma_0(\nabla N_b)\,\mathbf I_3\,dV,\qquad
-(\mathbf K+\lambda_b\mathbf K_G)\boldsymbol\phi=\mathbf0.$$
+(\mathbf K+\lambda_b\mathbf K_G)\boldsymbol\phi=\mathbf0.
+```
 
 Compression is negative in the stress convention used by these state routines. A physical initial-stress operator is not a derived finite-strain ANS/EAS tangent. The CTETRA4 audit separately verifies its Python/Fortran initial-stress operator and independence from output coordinates; this does not establish every solid's buckling accuracy.
 
 At material sampling points, stresses follow $\mathbf D(\boldsymbol\varepsilon-\boldsymbol\varepsilon_T)$ with the appropriate recovered strain. GPSTRESS VOLUME produces grid-point stress results for the requested recovery volumes; those values are distinct from raw integration-point stresses and ordinary element OES output. The 5-001 audit checks direct tensors, principal values/directions, pressure and von Mises, with
 
-$$p=-\tfrac13\operatorname{tr}\boldsymbol\sigma,\qquad
+```math
+p=-\tfrac13\mathrm{tr}\boldsymbol\sigma,\qquad
 \sigma_{\rm vm}=\sqrt{\tfrac32\mathbf s:\mathbf s},\qquad
-\mathbf s=\boldsymbol\sigma-\tfrac13\operatorname{tr}(\boldsymbol\sigma)\mathbf I.$$
+\mathbf s=\boldsymbol\sigma-\tfrac13\mathrm{tr}(\boldsymbol\sigma)\mathbf I.
+```
 
 GPSTRAIN has not been implemented in this work. `STRAIN(PLOT)` requests ordinary element strain OSTR, not GPSTRAIN. CPYRAM13 ordinary OP2 strain remains suppressed by the writer because the available center-only output does not populate its standard six-location layout; center strain is available through F06 printing. This limitation is separate from the validated GPSTRESS VOLUME records.
 
@@ -330,10 +392,12 @@ The two geometry families are SAP2000-derived 5-004 twisted beam and 5-007 pinch
 
 The mesh inventory records the actual selected grids, support counts and load resultants. Using the same output reduction in both solvers is essential; comparing one surface node with a through-thickness average would change the response definition.
 
-For scalar response $q$ and independent target $q_*$,
+For scalar response $q$ and independent target $q_{\mathrm{ref}}$,
 
-$$R=q/q_*,\qquad e_{\rm ref}=100\frac{|q-q_*|}{|q_*|},\qquad
-e_{\rm pair}=100\frac{|q_M-q_N|}{|q_N|}.$$
+```math
+R=q/q_{\mathrm{ref}},\qquad e_{\rm ref}=100\frac{|q-q_{\mathrm{ref}}|}{|q_{\mathrm{ref}}|},\qquad
+e_{\rm pair}=100\frac{|q_M-q_N|}{|q_N|}.
+```
 
 The report contains 56 distinct matched meshes, 56 Nastran analyses and 63 MYSTRAN selections because ABE and EAS9 share prism meshes. Two scalar responses per selection give 126 response comparisons. Beam refinement uses 6x1x1, 12x2x2 and 24x4x2 parent grids; dome refinement uses 4x4x1, 8x8x1, 16x16x1 and 24x24x1. The dome has one thickness layer at every level. These are in-plane refinement studies, not simultaneous through-thickness convergence studies.
 
