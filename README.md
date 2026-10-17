@@ -27,11 +27,11 @@ More easier dimension parameter for section, etc.
 
 ## CHEXA8 TIED update — 18 October 2026
 
-- NEWSOLID CHEXA8 now defaults to `PARAM,HEXATYP,TIED`, using mean-gradient-corrected physical shear tying with EAS9 condensation. `PARAM,HEXATYP,EAS9` retains the previous formulation.
-- `PARAM,HEXATAX,ZETA` is the default axis policy; XI/ETA are explicit controls and AUTO is opt-in with logged geometry checks/fallback. On the 24x24 dome, ZETA has 7.314% error and AUTO 0.759% against the published reference.
-- TIED remains **provisional**: 36 operator checks and 80 MYSTRAN jobs completed, with patch/recovery, mass and axis checks passing and 20 EAS9 baseline matches. Results from 20 Nastran comparisons are included in the benchmark tables, with the integration setting recorded for each dataset.
+- NEWSOLID CHEXA8 defaults to `PARAM,HEXATYP,TIED`, using mean-gradient-corrected physical shear tying with EAS9 condensation. `PARAM,HEXATYP,EAS9` retains EAS9v2.
+- The [updated graph](update/solid_benchmark/comparison_all.md#chexa8) compares TIED and EAS9v2 on the existing beam/dome benchmark meshes against the previously published Nastran results.
+- On the 24x24x1 dome, point A error is **0.759% for TIED**, **7.333% for EAS9v2**, and **0.682% for Nastran**. Default TIED uses ZETA; `HEXATAX` also provides explicit XI/ETA and opt-in AUTO controls.
 
-[Windows binary and runtime](update/binaries/mystran18a-chexa8-tied-win64.zip) · [Integration report](update/chexa8_tied_2026-10-18.md) · [HEXA8 benchmark](update/solid_benchmark/comparison_all.md#chexa8) · [Manual Nastran inputs](update/solid_benchmark/chexa8_tied_nastran_inputs.zip)
+[Windows binary and runtime](update/binaries/mystran18a-chexa8-tied-win64.zip) · [CHEXA8 formulation](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.md#35-chexa8-tied-default-and-retained-eas9-option) · [Benchmark comparison](update/solid_benchmark/comparison_all.md#chexa8)
 
 ## Solid recovery update - 18 October 2026
 
@@ -150,7 +150,7 @@ straightforward.
 | CQUAD8 | `QUAD8TYP` | `SIMOQ8`, `MITC8`, `MITC8D`, `ANS8BDG6`, `HBQ8`, `MACQ8D` |
 | CTRIA6 | `TRIA6TYP` | `SIMOT6`, `MITC6`, `MH6T`, `REZAIEE` |
 | SOLID  | `SOLIDTYP` | `NEWSOLID` (default), `LEGACY` |
-| CHEXA8 NEWSOLID | `HEXATYP` | `TIED` (default, provisional), `EAS9` |
+| CHEXA8 NEWSOLID | `HEXATYP` | `TIED` (default), `EAS9` |
 | CHEXA8 TIED axis | `HEXATAX` | `ZETA` (default), `XI`, `ETA`, `AUTO` (opt-in) |
 | CPENTA6 NEWSOLID | `PENTATYP` | `ABE` (default), `EAS9` |
 

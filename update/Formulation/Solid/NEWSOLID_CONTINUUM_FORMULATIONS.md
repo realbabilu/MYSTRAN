@@ -25,7 +25,7 @@ The mathematical lineage includes enhanced assumed strain theory [1,2], node-bas
 | CPENTA6 | Edge-tied assumed shear plus nine enhanced modes (ABE) | 18 | Default `PENTATYP,ABE` |
 | CPENTA6 | Compatible strain plus nine enhanced modes | 18 | `PENTATYP,EAS9` |
 | CPENTA15 | Quadratic prism with conditional selective shear integration | 45 | NEWSOLID |
-| CHEXA8 | Corrected physical shear tying plus EAS9 | 24 | Default `HEXATYP,TIED`, order 2; provisional |
+| CHEXA8 | Corrected physical shear tying plus EAS9 | 24 | Default `HEXATYP,TIED`, order 2 |
 | CHEXA8 | Previous trilinear EAS9 brick | 24 | Explicit `HEXATYP,EAS9`, order 2 |
 | CHEXA20 | Quadratic serendipity brick with conditional selective shear integration | 60 | NEWSOLID |
 | CPYRAM5 | Five-node collapsed-coordinate pyramid | 15 | NEWSOLID |
@@ -241,7 +241,7 @@ It uses the transformation in Section 2.3 and a $2\times2\times2$ Gauss rule wit
 
 #### Corrected Stage 6 tying and orientation policy
 
-As of 18 October 2026, omitted HEXATYP and `PARAM,HEXATYP,TIED` select `HEXA8_TIED_EAS9`. `PARAM,HEXATYP,EAS9` retains the previous formulation without retuning. Both have 24 translational DOFs and nine locally condensed enhanced variables. CHEXA20 is unchanged. TIED is explicitly **provisional**, pending official Nastran acceptance.
+As of 18 October 2026, omitted HEXATYP and `PARAM,HEXATYP,TIED` select `HEXA8_TIED_EAS9`. `PARAM,HEXATYP,EAS9` retains the previous formulation without retuning. Both have 24 translational DOFs and nine locally condensed enhanced variables. CHEXA20 is unchanged.
 
 Let $P_{xz}$ and $P_{yz}$ project physical engineering strains onto transverse shears in the centroid physical frame. For transverse natural axis zeta,
 
@@ -257,7 +257,8 @@ Use $B_c$ in all displacement/thermal blocks in Section 2.3, with the unchanged 
 
 `PARAM,HEXATAX,ZETA` is the default. XI and ETA explicitly cycle the natural transverse axis. AUTO is opt-in: the shortest mean edge direction is accepted only if its mean length is at most half the next-shortest, each edge-family max/min ratio is at most 1.5, and the maximum absolute cosine between mean edge directions is at most 0.3. Otherwise ZETA is retained and the fallback is logged. F06 records formulation, policy and selected axis. Existing `HEXAXIS` semantics are preserved. Cycling the operators in the original nodal coordinates is equivalent to a right-handed cyclic node relabeling followed by inverse DOF scattering.
 
-Thirty-six operator comparisons, six rigid modes, consistent/lumped mass checks, the full distorted patch and cyclic-axis audits pass. Explicit EAS9 matches the saved executable on 20 models. The new explicit-PSOLID-IN=2 Nastran results differ substantially from the historical source/default-integration archive on the dome and buckling. They are reported separately; completed solves do not establish universal accuracy acceptance. On the 24x24x1 dome, TIED/ZETA has 7.314% error, versus 0.759% for TIED/AUTO; the 8x8 AUTO mesh still has 26.48% error. See the [integration report](../../chexa8_tied_2026-10-18.md) and [updated CHEXA8 benchmark](../../solid_benchmark/comparison_all.md#chexa8) for model provenance and remaining gates.
+Thirty-six operator comparisons, six rigid modes, consistent/lumped mass checks, the full distorted patch and cyclic-axis audits pass. Explicit EAS9 matches the saved executable on 20 models. The current comparison uses TIED and EAS9v2 on the existing beam/dome benchmark decks, against the previously published Nastran results. On the 24x24x1 dome, TIED has 0.7589% point A error, EAS9v2 7.3333%, and Nastran 0.6823%. See the [comparison graph and table](../../solid_benchmark/comparison_all.md#chexa8).
+
 
 ### 3.6 CHEXA20: quadratic serendipity brick
 
@@ -537,16 +538,9 @@ The original plots below show beam IN/OUT ratios, dome A ratio and dome A percen
 
 #### CHEXA8
 
-**Historical EAS9 archive (17 October):** the table/figure below retain the previous formulation and original meshes. Current TIED/ZETA and opt-in AUTO measurements are reported [separately](../../solid_benchmark/comparison_all.md#chexa8); new explicit-IN=2 Nastran results are separate from the earlier default-integration archive.
+![CHEXA8 TIED vs EAS9v2 and existing Nastran](figures/CHEXA8_benchmark.png)
 
-![CHEXA8 existing mesh-refinement curves](figures/CHEXA8_benchmark.png)
-
-| Case | Option | Response | Nastran | MYSTRAN | Independent | N error (%) | M error (%) |
-|---|---|---|---:|---:|---:|---:|---:|
-| 5-004 | NEWSOLID | IN | 0.0054018464 | 0.005395933 | 0.005429 | 0.50015852 | 0.609081 |
-| 5-004 | NEWSOLID | OUT | 0.0017470133 | 0.0017461829 | 0.001749 | 0.1135927 | 0.16106894 |
-| 5-007 | NEWSOLID | A | 0.09335861 | 0.087106735 | 0.094 | 0.68232997 | 7.3332612 |
-| 5-007 | NEWSOLID | B | -0.09335861 | -0.087106735 | -0.094 | 0.68232997 | 7.3332612 |
+TIED and EAS9v2 use the existing archived beam/dome meshes; Nastran values are the original benchmark results. On the 24x24x1 dome, point A is 0.09328662 (TIED), 0.08710673 (EAS9v2), and 0.09335861 (Nastran), against 0.094 independent. [Full comparison](../../solid_benchmark/comparison_all.md#chexa8).
 
 #### CHEXA20
 
