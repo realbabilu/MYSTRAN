@@ -34,16 +34,16 @@
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, ELOUT_STRN_BIT, FATAL_ERR, IBIT, INT_SC_NUM,                                &
                                          MAX_STRESS_POINTS, MBUG, MOGEL,                                                           &
                                          NELE, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20,       &
-                                         NCPENTA6, NCPENTA15, NPYRAM5, NPYRAM14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, &
+                                         NCPENTA6, NCPENTA15, NPYRAM5, NPYRAM13, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, &
                                          NCROD,                                                                                      &
                                          NCSHEAR, NCTRIA3, NCTRIA3K, NCTRIA6,                                                       &
                                          SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, TWO, FOUR
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP
+      USE PARAMS, ONLY                :  OTMSKIP, STR_CID
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRN
-      USE MODEL_STUF, ONLY            :  AGRID, ANY_STRN_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, ELGP, ELMTYP,     &
+      USE MODEL_STUF, ONLY            :  AGRID, ISOLID, ANY_STRN_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, ELGP, ELMTYP,     &
                                          ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, PBEAM_NSTATIONS, PCOMP_PROPS, PLY_NUM, STRAIN, &
                                          TYPE, SHELL_STR_ANGLE, ZS
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -323,6 +323,12 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
 
                      NUM_OGEL_ROWS = NUM_OGEL_ROWS + 1
                      EID_OUT_ARRAY(NUM_OGEL_ROWS,1) = EID
+                  IF ((TYPE(1:4)=='HEXA').OR.(TYPE(1:5)=='PENTA').OR.(TYPE(1:5)=='TETRA').OR. &
+                      (TYPE(1:5)=='PYRAM')) THEN
+                     ! Solid column 2 stores the actual recovery CID (not a shell ply).
+                     EID_OUT_ARRAY(NUM_OGEL_ROWS,2)=STR_CID
+                     IF (STR_CID==-2) EID_OUT_ARRAY(NUM_OGEL_ROWS,2)=ISOLID(3)
+                  ENDIF
 ! --- cbeam_stations begin --- !
                      IF (TYPE == 'BEAM    ') THEN
                         CBEAM_XL_OUT(NUM_OGEL_ROWS) = CBEAM_ACTIVE_XL(M)
@@ -824,14 +830,14 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
          CALL DEALLOCATE_FEMAP_DATA
 
          NDUM = 0
-         NUM_FROWS= 0                                      ! Write out PYRAM14 strains
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NPYRAM14, 12, SUBR_NAME )
+         NUM_FROWS= 0                                      ! Write out PYRAM13 strains
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NPYRAM13, 12, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
                EID   = EDAT(EPNT(J))
                TYPE  = ETYPE(J)
-               IF (ETYPE(J)(1:7) == 'PYRAM14') THEN
+               IF (ETYPE(J)(1:7) == 'PYRAM13') THEN
                   NUM_FROWS= NUM_FROWS+ 1
                   DO K=0,MBUG-1
                      WRT_BUG(K) = 0
@@ -845,12 +851,12 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   ENDIF
                   CALL ELMDIS
                   CALL ELEM_STRE_STRN_ARRAYS ( 1 )
-                  CALL CALC_ELEM_STRAINS ( NPYRAM14, NDUM, NUM_FROWS, 'N', 'Y' )
+                  CALL CALC_ELEM_STRAINS ( NPYRAM13, NDUM, NUM_FROWS, 'N', 'Y' )
                ENDIF
             ENDIF
          ENDDO
          IF (NUM_FROWS > 0) THEN
-            CALL WRITE_FEMAP_STRN_VECS ( 'PYRAM14 ', 'N', NUM_FROWS, FEMAP_SET_ID )
+            CALL WRITE_FEMAP_STRN_VECS ( 'PYRAM13 ', 'N', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
 

@@ -168,6 +168,11 @@
       FIELD6_EIGENVALUE = 0.0
       WRITE_F06 = (STRN_OUT(1:1) == 'Y')
       INQUIRE ( UNIT=OP2, OPENED=WRITE_OP2 )
+! Center-only PYRAM13 recovery cannot fill the standard six-location layout.
+      IF ((TYPE == 'PYRAM13 ') .AND. WRITE_OP2) THEN
+         WRITE_OP2 = .FALSE.
+         WRITE(F06,'(A)') ' *WARNING: PYRAM13 OP2 STRAIN NOT VALIDATED; CENTER STRAIN IS AVAILABLE IN F06'
+      ENDIF
       IF (STRN_CUR == 'FIBER') THEN
          IS_FIBER_DISTANCE = 1
       ELSE
@@ -624,7 +629,7 @@
 
            !CALL GET_STRESS_CODE(STRESS_CODE, IS_VON_MISES, IS_STRAIN, IS_FIBER_DISTANCE)
            CALL GET_STRESS_CODE( STRESS_CODE, 1,            1,         0)
-           CALL WRITE_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
+           CALL WRITE_SOLID_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEMENT_TYPE, NUM_WIDE, STRESS_CODE, &
                                   TITLEI, STITLEI, LABELI, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
            WRITE(OP2) NVALUES
            CEN_WORD = "CEN/"
@@ -648,7 +653,7 @@
           !  Element    Sigma-xx      Sigma-yy      Sigma-zz       Tau-xy        Tau-yz        Tau-zx      von Mises
           !     ID
 
-           WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, CID, CEN_WORD, NNODES-1,                                       &
+           WRITE(OP2) (EID_OUT_ARRAY(I,1)*10+DEVICE_CODE, EID_OUT_ARRAY(I,2), CEN_WORD, NNODES-1,                                       &
                        (GID_OUT_ARRAY(I,J),                                                                              &
                         REAL(OGEL(I+J-1,1),4), REAL(OGEL(I+J-1,4),4), REAL(OGEL(I+J-1,9), 4), 0., 0., 0.,              &
                         REAL(OGEL(I+J-1,12),4), REAL(OGEL(I+J-1,7),4),                                                    &

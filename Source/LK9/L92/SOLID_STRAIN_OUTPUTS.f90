@@ -53,6 +53,7 @@
       INTEGER(LONG)                   :: J                  ! DO loop indices
 
 
+      REAL(DOUBLE)                    :: TENSOR_STRAIN(9) ! Tensor shear for principal/invariant calculation
       REAL(DOUBLE)                    :: MEAN               ! Mean strains
       REAL(DOUBLE)                    :: PRINCIPAL_STRAIN(3)! Principal strains
       REAL(DOUBLE)                    :: SIG_OCT            ! Octrahedral normal strain
@@ -69,7 +70,12 @@
 ! Calc engineering strains from array STRAIN and put into array OGEL
 
       IF ((TYPE(1:4) == 'HEXA') .OR. (TYPE(1:5) == 'PYRAM') .OR. (TYPE(1:5) == 'PENTA') .OR. (TYPE(1:5) == 'TETRA')) THEN
-         CALL PRINCIPAL_3D ( STRAIN, PRINCIPAL_STRAIN, MEAN, VONMISES, SIG_OCT, TAU_OCT )
+         ! STRAIN stores engineering shear gamma; eigenvalues use epsilon_ij=gamma_ij/2.
+         TENSOR_STRAIN=STRAIN
+         TENSOR_STRAIN(4:6)=TENSOR_STRAIN(4:6)*0.5D0
+         CALL PRINCIPAL_3D ( TENSOR_STRAIN, PRINCIPAL_STRAIN, MEAN, VONMISES, SIG_OCT, TAU_OCT )
+         ! Equivalent strain sqrt(2/3 * e_dev:e_dev), rather than stress sqrt(3/2 * s_dev:s_dev).
+         VONMISES=VONMISES*(2D0/3D0)
          IF (WRITE_OGEL == 'Y') THEN
             NUM1 = NUM1 + 1
             IF (NUM1 > SIZE_ALLOCATED) THEN

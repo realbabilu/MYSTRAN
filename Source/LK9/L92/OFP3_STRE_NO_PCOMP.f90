@@ -35,7 +35,7 @@
                                          MAX_STRESS_POINTS, MBUG, MOGEL,                                                           &
                                          NELE, NGRID, NCBAR, NCBEAM, NCBUSH, NCELAS1, NCELAS2, NCELAS3, NCELAS4, NCHEXA8, NCHEXA20,&
                                          NCPENTA6,                                                                                   &
-                                         NCPENTA15, NPYRAM5, NPYRAM14, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, NCROD,    &
+                                         NCPENTA15, NPYRAM5, NPYRAM13, NCTETRA4, NCTETRA10, NCQUAD4, NCQUAD4K, NCQUADR, NCROD,    &
                                          NCSHEAR,                                                                                     &
                                          NCTRIA3, NCTRIA3K, NCTRIA6,                                                                &
                                          SOL_NAME
@@ -43,9 +43,9 @@
       USE CONSTANTS_1, ONLY           :  ZERO, HALF, ONE, THREE, FOUR
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE FEMAP_ARRAYS, ONLY          :  FEMAP_EL_NUMS, FEMAP_EL_VECS
-      USE PARAMS, ONLY                :  OTMSKIP, QUAD4TYP, QUADRTYP, QUAD8TYP, TRIA3TYP, TRIA6TYP, TRIARTYP
+      USE PARAMS, ONLY                :  OTMSKIP, STR_CID, QUAD4TYP, QUADRTYP, QUAD8TYP, TRIA3TYP, TRIA6TYP, TRIARTYP
       USE LINK9_STUFF, ONLY           :  WRITE_NEU_STRE
-      USE MODEL_STUF, ONLY            :  AGRID, BGRID, RGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
+      USE MODEL_STUF, ONLY            :  AGRID, ISOLID, BGRID, RGRID, ANY_STRE_OUTPUT, CBEAM_ACTIVE_NSTATIONS, CBEAM_ACTIVE_XL, EDAT, EPNT, ETYPE, EID, &
                                          Q8_POINT_BASIS, ELGP, ELMTYP, ELOUT, METYPE, NUM_SEi, NUM_EMG_FATAL_ERRS, OGROUT, PCOMP_PROPS, PLY_NUM,   &
                                          STRESS, PBEAM_NSTATIONS, TE, TYPE, SHELL_STR_ANGLE, ZS, GRID_ID, XEB
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_LOC, STRE_OPT, GPSTRESS_REQ, STRE_CORNER_REQ
@@ -370,13 +370,21 @@ elems_5: DO J = 1,NELE
 
                   ENDDO do_stress_pts
 
-! --- Store EID/GID once per element (not per stress point) ---
+! Store solid IDs at the first recovery row, matching solid OP2/F06 writers.
                   NUM_ELEM = NUM_ELEM + 1
 ! Quadrilateral writers index IDs by recovery point, while OGEL has two fiber rows per point.
                   IF (((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) .AND. NUM_ELEM > 1) &
                      NUM_ELEM = NUM_ELEM + NUM_PTS_CUR - 1
                   IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D ')) .AND. NUM_ELEM > 1) NUM_ELEM = NUM_ELEM+8
+                  IF (((TYPE(1:4)=='HEXA').OR.(TYPE(1:5)=='PENTA').OR.(TYPE(1:5)=='TETRA').OR. &
+                       (TYPE(1:5)=='PYRAM')).AND.(NUM_ELEM>1)) NUM_ELEM=NUM_ELEM+NUM_PTS_CUR-1
                   EID_OUT_ARRAY(NUM_ELEM,1) = EID
+                  IF ((TYPE(1:4)=='HEXA').OR.(TYPE(1:5)=='PENTA').OR.(TYPE(1:5)=='TETRA').OR. &
+                      (TYPE(1:5)=='PYRAM')) THEN
+                     ! Solid column 2 stores the actual recovery CID (not a shell ply).
+                     EID_OUT_ARRAY(NUM_ELEM,2)=STR_CID
+                     IF (STR_CID==-2) EID_OUT_ARRAY(NUM_ELEM,2)=ISOLID(3)
+                  ENDIF
                   IF (TYPE == 'BEAM    ') THEN
                      CBEAM_XL_OUT(NUM_ELEM) = CBEAM_ACTIVE_XL(1)
                   ELSE
@@ -424,6 +432,9 @@ elems_5: DO J = 1,NELE
                         IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                            CALL WRITE_ELEM_STRESSES(JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS_CUR, ITABLE)
                         ELSE IF ((TYPE(1:5) == 'QUAD8') .AND. ((QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D '))) THEN
+                           CALL WRITE_ELEM_STRESSES(JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS_CUR, ITABLE)
+                        ELSE IF ((TYPE(1:4)=='HEXA').OR.(TYPE(1:5)=='PENTA').OR.(TYPE(1:5)=='TETRA').OR. &
+                                 (TYPE(1:5)=='PYRAM')) THEN
                            CALL WRITE_ELEM_STRESSES(JVEC, NUM_OGEL_ROWS, IHDR, NUM_PTS_CUR, ITABLE)
                         ELSE
                            CALL WRITE_ELEM_STRESSES ( JVEC, NUM_ELEM, IHDR, NUM_PTS_CUR, ITABLE )
@@ -913,14 +924,14 @@ elems_5: DO J = 1,NELE
          CALL DEALLOCATE_FEMAP_DATA
 
          NDUM = 0
-         NUM_FROWS= 0                                      ! Write out PYRAM14 stresses
-         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NPYRAM14, 12, SUBR_NAME )
+         NUM_FROWS= 0                                      ! Write out PYRAM13 stresses
+         CALL ALLOCATE_FEMAP_DATA ( 'FEMAP ELEM ARRAYS', NPYRAM13, 12, SUBR_NAME )
          DO J=1,NELE
             CALL IS_ELEM_PCOMP_PROPS ( J )
             IF (PCOMP_PROPS == 'N') THEN
                EID   = EDAT(EPNT(J))
                TYPE  = ETYPE(J)
-               IF (ETYPE(J)(1:7) == 'PYRAM14') THEN
+               IF (ETYPE(J)(1:7) == 'PYRAM13') THEN
                   NUM_FROWS= NUM_FROWS+ 1
                   DO K=0,MBUG-1
                      WRT_BUG(K) = 0
@@ -934,12 +945,12 @@ elems_5: DO J = 1,NELE
                   ENDIF
                   CALL ELMDIS
                   CALL ELEM_STRE_STRN_ARRAYS ( 1 )
-                  CALL CALC_ELEM_STRESSES ( NPYRAM14, NDUM, NUM_FROWS, 'N', 'Y' )
+                  CALL CALC_ELEM_STRESSES ( NPYRAM13, NDUM, NUM_FROWS, 'N', 'Y' )
                ENDIF
             ENDIF
          ENDDO
          IF (NUM_FROWS > 0) THEN
-            CALL WRITE_FEMAP_STRE_VECS ( 'PYRAM14 ', 'N', NUM_FROWS, FEMAP_SET_ID )
+            CALL WRITE_FEMAP_STRE_VECS ( 'PYRAM13 ', 'N', NUM_FROWS, FEMAP_SET_ID )
          ENDIF
          CALL DEALLOCATE_FEMAP_DATA
 

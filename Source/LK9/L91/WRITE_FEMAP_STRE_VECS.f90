@@ -113,7 +113,7 @@
          VEC_ID_OFFSET = 61100
       ELSE IF (ELEM_TYP == 'PYRAM5  ') THEN
          VEC_ID_OFFSET = 61600
-      ELSE IF (ELEM_TYP == 'PYRAM14 ') THEN
+      ELSE IF (ELEM_TYP == 'PYRAM13 ') THEN
          VEC_ID_OFFSET = 61700
       ELSE IF (ELEM_TYP == 'TETRA4  ') THEN
          VEC_ID_OFFSET = 61200
@@ -259,7 +259,7 @@
 
       ELSE IF ((ELEM_TYP == 'HEXA8   ') .OR. (ELEM_TYP == 'PENTA6  ') .OR. (ELEM_TYP == 'PYRAM5  ') .OR.                         &
                (ELEM_TYP == 'TETRA4  ') .OR. (ELEM_TYP == 'HEXA20  ') .OR.                                                         &
-               (ELEM_TYP == 'PENTA15 ') .OR. (ELEM_TYP == 'PYRAM14 ') .OR.                                                         &
+               (ELEM_TYP == 'PENTA15 ') .OR. (ELEM_TYP == 'PYRAM13 ') .OR.                                                         &
                (ELEM_TYP == 'TETRA10 ')) THEN
 
          TITLE_E( 1) = 'X Direct Stress' ;   CALC_WARN( 1) = '0';   COMP_DIR( 1) = '0';   CENT_TOTAL( 1) = '1'

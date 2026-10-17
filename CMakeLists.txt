@@ -365,6 +365,7 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
 
 set(MYSTRAN_C_HELPER_FILES
   "${PROJECT_SOURCE_DIR}/Source/UTIL/f06_fast.c"
+  "${PROJECT_SOURCE_DIR}/Source/UTIL/numeric_locale.c"
 )
 
 # ! --- MUMPS_COO add begin --- !

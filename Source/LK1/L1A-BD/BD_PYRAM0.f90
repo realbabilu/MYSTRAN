@@ -1,10 +1,10 @@
       SUBROUTINE BD_PYRAM0 ( CARD, LARGE_FLD_INP, DELTA_LEDAT )
 
-! Counts EDAT storage for PYRAM5/PYRAM14. No continuation means PYRAM5; any
-! nonblank continuation promotes the entry to the 14-node pyramid.
+! Conservative EDAT capacity for PYRAM5/13. Any continuation reserves
+! 13-node capacity; BD_PYRAM determines the actual topology from GRID count.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, JCARD_LEN, MEDAT_PYRAM5, MEDAT_PYRAM14
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, JCARD_LEN, MEDAT_PYRAM5, MEDAT_PYRAM13
       USE TIMDAT, ONLY                :  TSEC
 
       USE BD_PYRAM0_USE_IFs
@@ -30,7 +30,7 @@
       ENDIF
 
       IF (ICONT == 1) THEN
-         DELTA_LEDAT = MEDAT_PYRAM14
+         DELTA_LEDAT = MEDAT_PYRAM13
       ELSE
          DELTA_LEDAT = MEDAT_PYRAM5
       ENDIF

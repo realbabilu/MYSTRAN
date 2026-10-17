@@ -47,6 +47,8 @@
       REAL(DOUBLE) , INTENT(OUT)      :: R8INP             ! The 8 byte real value read
 
 ! **********************************************************************************************************************************
+! BDF always uses decimal points; MinGW file I/O can restore a comma locale.
+      CALL MYSTRAN_SET_NUMERIC_LOCALE
       R8INP = ZERO
       IERRFL(IFLD) = 'N'
 

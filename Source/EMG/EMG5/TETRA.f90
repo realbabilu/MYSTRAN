@@ -38,14 +38,14 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_TETRA, NTSUB
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_TETRA, NTSUB, JTSUB
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  HALF, QUARTER, ZERO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE PARAMS, ONLY                :  EPSIL
+      USE PARAMS, ONLY                :  EPSIL, SOLIDTYP
       USE MODEL_STUF, ONLY            :  ALPVEC, BE1, BE2, DT, EID, ELGP, NUM_EMG_FATAL_ERRS, ES, KE, KED, ME, PTE, RHO,           &
-                                         SE1, SE2, STE1, STRESS, TREF, TYPE
+                                         SE1, SE2, STE1, STRESS, TREF, TYPE, UEL
 
       USE TETRA_USE_IFs
       USE EXPAND_MASS_DOFS_Interface
@@ -117,6 +117,7 @@
       REAL(DOUBLE)                    :: VOLUME                  ! 3D element volume
       REAL(DOUBLE)                    :: SSI,SSJ,SSK             ! Isoparametric coordinates of a point.
       REAL(DOUBLE)                    :: M_1DOF(ELGP,ELGP)      ! Consistent mass matrix with 1 DOF per node.
+      REAL(DOUBLE)                    :: SIG_LOCAL(6), KG_ENTRY ! NEWSOLID T4 initial-stress operator in element axes
 
 
 
@@ -382,6 +383,40 @@
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
 
         CALL ELMDIS
+        IF ((TYPE == 'TETRA4  ') .AND. (SOLIDTYP == 'NEWSOLID')) THEN
+! Match the Python T4 initial-stress operator using recovered LOCAL prestress.
+! ELEM_STRE_STRN_ARRAYS rotates STRESS to the requested output CID; that array
+! must not be combined with local shape gradients. Output coordinates must not
+! change an eigenvalue. Retain the historical LEGACY path below unchanged.
+          DO I=1,3*ELGP
+            DUM0(I) = UEL(ID(I))
+          ENDDO
+          SIG_LOCAL = MATMUL(ES,MATMUL(B(:,:,1),DUM0))
+          IF ((JTSUB >= 1) .AND. (JTSUB <= NTSUB)) THEN
+            TEMP = SUM(DT(1:ELGP,JTSUB))/ELGP - TREF1
+            SIG_LOCAL = SIG_LOCAL - EALP*TEMP
+          ENDIF
+          KWW(1,:) = [SIG_LOCAL(1),SIG_LOCAL(4),SIG_LOCAL(6)]
+          KWW(2,:) = [SIG_LOCAL(4),SIG_LOCAL(2),SIG_LOCAL(5)]
+          KWW(3,:) = [SIG_LOCAL(6),SIG_LOCAL(5),SIG_LOCAL(3)]
+          DUM3(:,:) = ZERO
+          DO I=1,IORD
+            DO L=1,ELGP
+              DPSHX(1,L) = B(1,3*(L-1)+1,I)
+              DPSHX(2,L) = B(2,3*(L-1)+2,I)
+              DPSHX(3,L) = B(3,3*(L-1)+3,I)
+            ENDDO
+            INTFAC = DETJ(I)*HHH_IJK(I)
+            DO L=1,ELGP
+              DO M=1,ELGP
+                KG_ENTRY = INTFAC*DOT_PRODUCT(DPSHX(:,L),MATMUL(KWW,DPSHX(:,M)))
+                DO K=1,3
+                  DUM3(3*(L-1)+K,3*(M-1)+K) = DUM3(3*(L-1)+K,3*(M-1)+K) + KG_ENTRY
+                ENDDO
+              ENDDO
+            ENDDO
+          ENDDO
+        ELSE
         CALL ELEM_STRE_STRN_ARRAYS ( 1 )
 
         SIGxx = STRESS(1)
@@ -426,6 +461,8 @@
             ENDDO
           ENDDO
         ENDDO
+
+        ENDIF
 
         DO I=1,3*ELGP
           DO J=1,3*ELGP

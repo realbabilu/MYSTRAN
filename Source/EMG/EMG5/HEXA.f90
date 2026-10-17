@@ -39,7 +39,7 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, MELDOF, MPLOAD4_3D_DATA, NPLOAD4_3D, NSUB, NTSUB
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_GAUSS, MELDOF, MPLOAD4_3D_DATA, NPLOAD4_3D, NSUB, NTSUB, INT_SC_NUM, JTSUB
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  QUARTER, HALF, ZERO, ONE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -47,12 +47,15 @@
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  AGRID, ALPVEC, BE1, BE2, DT, EID, ELGP, NUM_EMG_FATAL_ERRS, ES, KE, KED, ME,              &
                                          NUM_EMG_FATAL_ERRS, PLOAD4_3D_DATA, PPE, PRESS, PTE, RHO, SE1, SE2, STE1, STRESS, TREF,   &
-                                         TYPE, XEL
+                                         TYPE, XEL, UEL, SUBLOD
       USE HEXA_USE_IFs
+      USE EAS9_FRAME, ONLY            : MAP_NATURAL_EAS9, HEX8_EAS9_STATE
       USE EXPAND_MASS_DOFS_Interface
 
 
       IMPLICIT NONE
+      REAL(DOUBLE)                    :: EAS_INVJ0(3,3)
+      REAL(DOUBLE) :: V2K(24,24), V2KG(24,24), V2F(24), V2B(6,24), V2EPS(6), V2SIG(6), V2TEMP(8), V2U(24)
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'HEXA'
       CHARACTER( 1*BYTE), INTENT(IN)  :: RED_INT_SHEAR          ! If 'Y', use Gaussian weighted avg of B matrices for shear terms
@@ -158,7 +161,7 @@
       REAL(DOUBLE)                    :: M_1DOF(ELGP,ELGP)      ! Consistent mass matrix with 1 DOF per node.
 
 ! --- newsolid_add begin --- !
-      LOGICAL                          :: USE_EAS9_NEWSOLID      ! Use Python CHEXA8_EAS9_FROZEN style condensed stiffness
+      LOGICAL                          :: USE_EAS9_NEWSOLID      ! Use Python CHEXA8 EAS9 v2 condensed stiffness
 ! --- newsolid_add end --- !
 
 
@@ -166,6 +169,12 @@
 
       EPS1 = EPSIL(1)
 ! --- newsolid_add begin --- !
+      IF ((SOLIDTYP == 'NEWSOLID') .AND. (ELGP == 8) .AND. (IORD /= 2)) THEN
+         WRITE(ERR,'(A,I0)') ' *ERROR: CHEXA8 NEWSOLID EAS9 V2 REQUIRES PSOLID IN=2, ELEMENT ', EID
+         WRITE(F06,'(A,I0)') ' *ERROR: CHEXA8 NEWSOLID EAS9 V2 REQUIRES PSOLID IN=2, ELEMENT ', EID
+         FATAL_ERR=FATAL_ERR+1; NUM_EMG_FATAL_ERRS=NUM_EMG_FATAL_ERRS+1
+         RETURN
+      ENDIF
       USE_EAS9_NEWSOLID = ((SOLIDTYP == 'NEWSOLID') .AND. (ELGP == 8) .AND. (IORD == 2))
 ! --- newsolid_add end --- !
 
@@ -429,6 +438,15 @@
                ENDDO
             ENDDO
 
+            IF (USE_EAS9_NEWSOLID) THEN
+               V2TEMP=DT(1:8,N);V2U=ZERO
+               CALL HEX8_EAS9_STATE(XEL(1:8,1:3),ES,ALP,V2TEMP,TREF1,V2U,[ZERO,ZERO,ZERO], &
+                                   V2K,V2F,V2B,V2EPS,V2SIG,V2KG,IERR)
+               IF (IERR /= 0) THEN
+                  CALL V2_ERROR; RETURN
+               ENDIF
+               DUM1=V2F
+            ENDIF
             DO L=1,3*ELGP
                PTE(ID(L),N) = DUM1(L)
             ENDDO
@@ -478,6 +496,15 @@
           CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, DUM_DETJ )
           CALL MATMULT_FFF ( JACI, DPSHG, 3, 3, ELGP, DPSHX )
           CALL B3D_ISOPARAMETRIC ( DPSHX, 0, 1, 1, 1, 'all strains', 'N', BI )
+          IF (USE_EAS9_NEWSOLID) THEN
+             V2TEMP=TREF1;V2U=ZERO
+             CALL HEX8_EAS9_STATE(XEL(1:8,1:3),ES,ALP,V2TEMP,TREF1,V2U,[SSI,SSJ,SSK], &
+                                 V2K,V2F,V2B,V2EPS,V2SIG,V2KG,IERR)
+             IF (IERR /= 0) THEN
+                CALL V2_ERROR; RETURN
+             ENDIF
+             BI=V2B
+          ENDIF
           CALL MATMULT_FFF ( ES, BI, 6, 6, 3*ELGP, DUM2 )
 
           DO I=1,3                                         ! Stress-displ matrices
@@ -532,6 +559,7 @@
             IORD_MSG = 'for CHEXA8 NEWSOLID EAS9 center,      = '
             CALL SHP3DH ( 0, 0, 0, ELGP, SUBR_NAME, IORD_MSG, 1, SSI, SSJ, SSK, 'N', PSH, DPSHG )
             CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, EAS_DETJ0 )
+            EAS_INVJ0 = JACI
          ENDIF
 
          IORD_MSG = ' '
@@ -569,6 +597,8 @@
                      EAS_M(5,7) = EAS_SCALE*SSS(K)
                      EAS_M(6,8) = EAS_SCALE*SSS(K)
                      EAS_M(6,9) = EAS_SCALE*SSS(I)
+                     CALL MAP_NATURAL_EAS9 ( EAS_INVJ0, EAS_M, EAS_DM )
+                     EAS_M = EAS_DM
                      CALL MATMULT_FFF ( ES, EAS_M, 6, 6, 9, EAS_DM )
                      CALL MATMULT_FFF_T ( BI, EAS_DM, 6, 3*ELGP, 9, EAS_KUA_GP )
                      CALL MATMULT_FFF_T ( EAS_M, EAS_DM, 6, 9, 9, EAS_KAA_GP )
@@ -604,6 +634,12 @@
                      DUM3(P,Q) = DUM3(P,Q) - EAS_CORR
                   ENDDO
                ENDDO
+            ELSE
+               WRITE(ERR,'(A,I0,A)') ' *ERROR: CHEXA8 EAS9 ELEMENT ',EID,' LOCAL CONDENSATION FAILED'
+               WRITE(F06,'(A,I0,A)') ' *ERROR: CHEXA8 EAS9 ELEMENT ',EID,' LOCAL CONDENSATION FAILED'
+               NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+               FATAL_ERR = FATAL_ERR + 1
+               RETURN
             ENDIF
             DO P=2,3*ELGP
                DO Q=1,P-1
@@ -706,6 +742,17 @@
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
 
         CALL ELMDIS
+        IF (USE_EAS9_NEWSOLID) THEN
+           V2U=UEL(ID);V2TEMP=TREF1
+           IF (SUBLOD(INT_SC_NUM,2)>0) V2TEMP=DT(1:8,JTSUB)
+           CALL HEX8_EAS9_STATE(XEL(1:8,1:3),ES,ALP,V2TEMP,TREF1,V2U,[ZERO,ZERO,ZERO], &
+                               V2K,V2F,V2B,V2EPS,V2SIG,V2KG,IERR)
+           IF (IERR /= 0) THEN
+              CALL V2_ERROR; RETURN
+           ENDIF
+           KED=ZERO
+           KED(ID,ID)=V2KG
+        ELSE
         CALL ELEM_STRE_STRN_ARRAYS ( 1 )
 
         SIGxx = STRESS(1)
@@ -834,6 +881,7 @@
 
 
 
+        ENDIF ! NEWSOLID physical GP initial-stress Kg / existing legacy path
         IF (DEBUG(178) >= 1) THEN
           WRITE(F06,2001) TRIM(SUBR_NAME), OPT(6), LOAD_ISTEP, TYPE, EID
           K = 0
@@ -879,6 +927,13 @@
 ! ##################################################################################################################################
 
       CONTAINS
+
+      SUBROUTINE V2_ERROR
+         WRITE(ERR,'(A,I0,A,I0)') ' *ERROR: CHEXA8 EAS9 V2 ELEMENT ',EID,' INVALID POINT OR CONDENSATION, CODE ',IERR
+         WRITE(F06,'(A,I0,A,I0)') ' *ERROR: CHEXA8 EAS9 V2 ELEMENT ',EID,' INVALID POINT OR CONDENSATION, CODE ',IERR
+         FATAL_ERR=FATAL_ERR+1;NUM_EMG_FATAL_ERRS=NUM_EMG_FATAL_ERRS+1
+      END SUBROUTINE
+
 
 ! ##################################################################################################################################
 

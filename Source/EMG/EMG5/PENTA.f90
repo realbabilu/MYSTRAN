@@ -38,19 +38,21 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_TRIA, MAX_ORDER_GAUSS, NTSUB
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MAX_ORDER_TRIA, MAX_ORDER_GAUSS, NTSUB, SOL_NAME, INT_SC_NUM, JTSUB
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  HALF, THIRD, TWO, ZERO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  EPSIL, SOLIDTYP
+      USE PARAMS, ONLY                :  EPSIL, SOLIDTYP, PENTATYP
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  ALPVEC, BE1, BE2, DT, EID, ELGP, NUM_EMG_FATAL_ERRS, ES, KE, KED, ME, PTE, RHO,           &
-                                         SE1, SE2, STE1, STRESS, TE, TREF, TYPE
+                                         SE1, SE2, STE1, STRESS, TREF, TYPE, XEL, UEL, SUBLOD
 
       USE PENTA_USE_IFs
+      USE EAS9_FRAME, ONLY            : MAP_NATURAL_EAS9, PENTA6_ANSEAS_STATE
       USE EXPAND_MASS_DOFS_Interface
 
       IMPLICIT NONE
+      REAL(DOUBLE)                    :: EAS_INVJ0(3,3)
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'PENTA'
       CHARACTER( 1*BYTE), INTENT(IN)  :: RED_INT_SHEAR           ! If 'Y', use Gaussian weighted avg of B matrices for shear terms
@@ -100,7 +102,7 @@
       REAL(DOUBLE)                    :: EAS_KUA(3*ELGP,9)       ! Displacement/EAS coupling stiffness
       REAL(DOUBLE)                    :: EAS_KUA_GP(3*ELGP,9)    ! Gauss point displacement/EAS coupling contribution
       REAL(DOUBLE)                    :: EAS_M(6,9)              ! CPENTA6 EAS9 enhanced strain modes
-      REAL(DOUBLE)                    :: EAS_MBASIC(6,9)         ! EAS9 modes in the basic Cartesian strain basis used by Python
+      REAL(DOUBLE)                    :: EAS_MHAT(6,9)         ! EAS9 natural covariant strain modes (v2)
       REAL(DOUBLE)                    :: EAS_REG                 ! Tiny diagonal regularization for Kaa
       REAL(DOUBLE)                    :: EAS_RHS(9,3*ELGP)       ! RHS for KAA solve, KUA transpose
       REAL(DOUBLE)                    :: EAS_SCALE               ! detJ0/detJ scale used by EAS9
@@ -143,11 +145,16 @@
       REAL(DOUBLE)                    :: M_1DOF(ELGP,ELGP)      ! Consistent mass matrix with 1 DOF per node.
 
 ! --- newsolid_add begin --- !
-      LOGICAL                          :: USE_EAS9_NEWSOLID       ! Use Python CPENTA6_EAS9_TRIAL style condensed stiffness
+      LOGICAL,SAVE                     :: LEGACY_PENTA_NOTICE=.FALSE.
+      LOGICAL                          :: USE_EAS9_NEWSOLID       ! Use Python CPENTA6 EAS9 v2 condensed stiffness
 ! --- newsolid_add end --- !
 
 
 ! **********************************************************************************************************************************
+      IF ((ELGP==6).AND.(SOLIDTYP/='NEWSOLID').AND.(.NOT.LEGACY_PENTA_NOTICE)) THEN
+         WRITE(F06,'(A)') ' *WARNING: PENTATYP IS IGNORED OUTSIDE NEWSOLID CPENTA6; LEGACY PATH RETAINED'
+         LEGACY_PENTA_NOTICE=.TRUE.
+      ENDIF
       EPS1 = EPSIL(1)
 ! --- newsolid_add begin --- !
       USE_EAS9_NEWSOLID = ((SOLIDTYP == 'NEWSOLID') .AND. (ELGP == 6) .AND. (IORD_IJ >= 3) .AND. (IORD_K >= 2))
@@ -248,6 +255,13 @@
 ! **********************************************************************************************************************************
 ! Generate B matrices. Dimensions 1 and 2 of B store a element B matrix for 1 Gauss point. The 3rd dimension has B for all other
 ! Gauss points (denoted by IGAUSS index)
+
+! NEWSOLID CPENTA6 variant applies to elastic and prestress phases.
+      IF ((SOLIDTYP == 'NEWSOLID') .AND. &
+          (ELGP == 6)) THEN
+         CALL ANSEAS_BRANCH
+         RETURN
+      ENDIF
 
 opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6) == 'Y')) THEN
 
@@ -516,6 +530,7 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
             IORD_MSG = 'for CPENTA6 NEWSOLID EAS9 center,     = '
             CALL SHP3DP ( 1, 1, 1, ELGP, SUBR_NAME, IORD_MSG, 1, 1, SSI, SSJ, SSK, 'N', PSH, DPSHG )
             CALL JAC3D ( SSI, SSJ, SSK, DPSHG, 'N', JAC, JACI, EAS_DETJ0 )
+            EAS_INVJ0 = JACI
          ENDIF
 
          IORD_MSG = ' '
@@ -539,20 +554,20 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
                IF (USE_EAS9_NEWSOLID) THEN
                   DO P=1,6
                      DO Q=1,9
-                        EAS_MBASIC(P,Q) = ZERO
+                        EAS_MHAT(P,Q) = ZERO
                      ENDDO
                   ENDDO
                   EAS_SCALE = EAS_DETJ0/DETJ(GAUSS_PT)
-                  EAS_MBASIC(1,1) = EAS_SCALE*(SS_I(IJ) - THIRD)
-                  EAS_MBASIC(2,2) = EAS_SCALE*(SS_J(IJ) - THIRD)
-                  EAS_MBASIC(3,3) = EAS_SCALE*SS_K(K)
-                  EAS_MBASIC(4,4) = EAS_SCALE*(SS_I(IJ) - THIRD)
-                  EAS_MBASIC(4,5) = EAS_SCALE*(SS_J(IJ) - THIRD)
-                  EAS_MBASIC(5,6) = EAS_SCALE*(SS_J(IJ) - THIRD)
-                  EAS_MBASIC(5,7) = EAS_SCALE*SS_K(K)
-                  EAS_MBASIC(6,8) = EAS_SCALE*SS_K(K)
-                  EAS_MBASIC(6,9) = EAS_SCALE*(SS_I(IJ) - THIRD)
-                  CALL TRANSFORM_EAS_MODES_TO_LOCAL ( EAS_MBASIC, EAS_M )
+                  EAS_MHAT(1,1) = EAS_SCALE*(SS_I(IJ) - THIRD)
+                  EAS_MHAT(2,2) = EAS_SCALE*(SS_J(IJ) - THIRD)
+                  EAS_MHAT(3,3) = EAS_SCALE*SS_K(K)
+                  EAS_MHAT(4,4) = EAS_SCALE*(SS_I(IJ) - THIRD)
+                  EAS_MHAT(4,5) = EAS_SCALE*(SS_J(IJ) - THIRD)
+                  EAS_MHAT(5,6) = EAS_SCALE*(SS_J(IJ) - THIRD)
+                  EAS_MHAT(5,7) = EAS_SCALE*SS_K(K)
+                  EAS_MHAT(6,8) = EAS_SCALE*SS_K(K)
+                  EAS_MHAT(6,9) = EAS_SCALE*(SS_I(IJ) - THIRD)
+                  CALL MAP_NATURAL_EAS9 ( EAS_INVJ0, EAS_MHAT, EAS_M )
                   CALL MATMULT_FFF ( ES, EAS_M, 6, 6, 9, EAS_DM )
                   CALL MATMULT_FFF_T ( BI, EAS_DM, 6, 3*ELGP, 9, EAS_KUA_GP )
                   CALL MATMULT_FFF_T ( EAS_M, EAS_DM, 6, 9, 9, EAS_KAA_GP )
@@ -598,6 +613,12 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
                      DUM3(P,Q) = DUM3(P,Q) - EAS_CORR
                   ENDDO
                ENDDO
+            ELSE
+               WRITE(ERR,'(A,I0,A)') ' *ERROR: CPENTA6 EAS9 ELEMENT ',EID,' LOCAL CONDENSATION FAILED'
+               WRITE(F06,'(A,I0,A)') ' *ERROR: CPENTA6 EAS9 ELEMENT ',EID,' LOCAL CONDENSATION FAILED'
+               NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+               FATAL_ERR = FATAL_ERR + 1
+               RETURN
             ENDIF
             DO P=2,3*ELGP
                DO Q=1,P-1
@@ -731,6 +752,60 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
 
       CONTAINS
 
+      SUBROUTINE ANSEAS_BRANCH
+      REAL(DOUBLE) :: AK(18,18),AF(18),AB(6,18),AE(6),AS(6),AG(18,18),AU(18),AT(6),ASE(6,18)
+      REAL(DOUBLE), PARAMETER :: AP(3,7)=RESHAPE([THIRD,THIRD,ZERO, &
+           0D0,0D0,-1D0,1D0,0D0,-1D0,0D0,1D0,-1D0,0D0,0D0,1D0,1D0,0D0,1D0,0D0,1D0,1D0],[3,7])
+      INTEGER(LONG) :: NN,SP,IER
+      LOGICAL,SAVE :: WARNED=.FALSE.
+      IF (.NOT.WARNED) THEN
+         WRITE(F06,'(A,A)') ' CPENTA6 NEWSOLID PENTATYP=',PENTATYP
+         IF (PENTATYP=='ABE     ') WRITE(ERR,'(A)') ' *WARNING: ABE DISTORTED PATCH FAILURE RETAINED; KG IS PHYSICAL INITIAL STRESS, NOT NONLINEAR TANGENT'
+         WARNED=.TRUE.
+      ENDIF
+      AU=ZERO;AT=TREF1
+      CALL PENTA6_ANSEAS_STATE(XEL(1:6,1:3),ES,ALP,AT,TREF1,AU,AP(:,1),AK,AF,AB,AE,AS,AG,IER)
+      IF (IER /= 0) GOTO 990
+      IF (OPT(4)=='Y') KE(ID,ID)=AK
+      IF (OPT(2)=='Y') THEN
+         DO NN=1,NTSUB
+            AT=DT(1:6,NN)
+            CALL PENTA6_ANSEAS_STATE(XEL(1:6,1:3),ES,ALP,AT,TREF1,AU,AP(:,1),AK,AF,AB,AE,AS,AG,IER)
+            IF (IER /= 0) GOTO 990
+            PTE(ID,NN)=AF
+         ENDDO
+      ENDIF
+      IF ((OPT(3)=='Y') .OR. (OPT(6)=='Y')) THEN
+         AT=TREF1
+         DO SP=1,7
+            CALL PENTA6_ANSEAS_STATE(XEL(1:6,1:3),ES,ALP,AT,TREF1,AU,AP(:,SP),AK,AF,AB,AE,AS,AG,IER)
+            IF (IER /= 0) GOTO 990
+            ASE=MATMUL(ES,AB)
+            BE1(:,ID,SP)=AB(1:3,:);BE2(:,ID,SP)=AB(4:6,:)
+            SE1(:,ID,SP)=ASE(1:3,:);SE2(:,ID,SP)=ASE(4:6,:)
+! Full thermal recovery is evaluated directly by ELEM_STRE_STRN_ARRAYS.
+            DO NN=1,NTSUB
+               STE1(:,NN,SP)=ZERO
+            ENDDO
+         ENDDO
+      ENDIF
+      IF ((OPT(6)=='Y') .AND. (LOAD_ISTEP>1)) THEN
+         CALL ELMDIS
+         AU=UEL(ID);AT=TREF1
+         IF (SUBLOD(INT_SC_NUM,2)>0) AT=DT(1:6,JTSUB)
+         CALL PENTA6_ANSEAS_STATE(XEL(1:6,1:3),ES,ALP,AT,TREF1,AU,AP(:,1),AK,AF,AB,AE,AS,AG,IER)
+         IF (IER /= 0) GOTO 990
+         KED=ZERO;KED(ID,ID)=AG
+      ENDIF
+      RETURN
+990   WRITE(ERR,'(A,I0,A,I0)') ' *ERROR: CPENTA6 ENHANCED STATE FAILED, ELEMENT ',EID, &
+           ' CODE (1=GEOMETRY,2=NOT SPD,3=ILL CONDITIONED): ',IER
+      WRITE(F06,'(A,I0,A,I0)') ' *ERROR: CPENTA6 ENHANCED STATE FAILED, ELEMENT ',EID, &
+           ' CODE (1=GEOMETRY,2=NOT SPD,3=ILL CONDITIONED): ',IER
+      FATAL_ERR=FATAL_ERR+1;NUM_EMG_FATAL_ERRS=NUM_EMG_FATAL_ERRS+1
+      END SUBROUTINE
+
+
 ! ##################################################################################################################################
 
       SUBROUTINE SOLVE_EAS9_SYSTEM ( A_IN, B_IN, X_OUT, IERR_OUT )
@@ -827,70 +902,7 @@ opt234:IF ((OPT(2) == 'Y') .OR. (OPT(3) == 'Y') .OR. (OPT(4) == 'Y') .OR. (OPT(6
 
 ! ##################################################################################################################################
 
-      SUBROUTINE TRANSFORM_EAS_MODES_TO_LOCAL ( M_BASIC, M_LOCAL )
 
-! Transform engineering-strain EAS modes from basic axes into the element local axes.
-! CPENTA6_EAS9 in the Python reference is assembled in the model Cartesian basis; MYSTRAN
-! evaluates solid material/stiffness in the element local basis, so the condensed modes
-! must be rotated as strain tensors before they are coupled to the local B matrix.
-
-      IMPLICIT NONE
-
-      REAL(DOUBLE), INTENT(IN)        :: M_BASIC(6,9)
-      REAL(DOUBLE), INTENT(OUT)       :: M_LOCAL(6,9)
-
-      INTEGER(LONG)                   :: IMODE
-      INTEGER(LONG)                   :: IA
-      INTEGER(LONG)                   :: IB
-      INTEGER(LONG)                   :: IC
-      INTEGER(LONG)                   :: IDD
-
-      REAL(DOUBLE)                    :: E_BASIC(3,3)
-      REAL(DOUBLE)                    :: E_LOCAL(3,3)
-
-! **********************************************************************************************************************************
-
-      DO IMODE=1,9
-
-         DO IA=1,3
-            DO IB=1,3
-               E_BASIC(IA,IB) = ZERO
-               E_LOCAL(IA,IB) = ZERO
-            ENDDO
-         ENDDO
-
-         E_BASIC(1,1) = M_BASIC(1,IMODE)
-         E_BASIC(2,2) = M_BASIC(2,IMODE)
-         E_BASIC(3,3) = M_BASIC(3,IMODE)
-         E_BASIC(1,2) = HALF*M_BASIC(4,IMODE)
-         E_BASIC(2,1) = E_BASIC(1,2)
-         E_BASIC(2,3) = HALF*M_BASIC(5,IMODE)
-         E_BASIC(3,2) = E_BASIC(2,3)
-         E_BASIC(3,1) = HALF*M_BASIC(6,IMODE)
-         E_BASIC(1,3) = E_BASIC(3,1)
-
-         DO IA=1,3
-            DO IB=1,3
-               DO IC=1,3
-                  DO IDD=1,3
-                     E_LOCAL(IA,IB) = E_LOCAL(IA,IB) + TE(IA,IC)*E_BASIC(IC,IDD)*TE(IB,IDD)
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-
-         M_LOCAL(1,IMODE) = E_LOCAL(1,1)
-         M_LOCAL(2,IMODE) = E_LOCAL(2,2)
-         M_LOCAL(3,IMODE) = E_LOCAL(3,3)
-         M_LOCAL(4,IMODE) = TWO*E_LOCAL(1,2)
-         M_LOCAL(5,IMODE) = TWO*E_LOCAL(2,3)
-         M_LOCAL(6,IMODE) = TWO*E_LOCAL(3,1)
-
-      ENDDO
-
-! **********************************************************************************************************************************
-
-      END SUBROUTINE TRANSFORM_EAS_MODES_TO_LOCAL
 
 ! ##################################################################################################################################
 

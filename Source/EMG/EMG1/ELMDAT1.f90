@@ -584,6 +584,15 @@
       ENDIF
 
 ! Set default integration order if IN = blank
+! Pyramid kernels have their own fixed quadrature rules. Copy PSOLID data
+! as for other solids so material coordinates cannot leak from a prior element.
+      IF (TYPE(1:5) == 'PYRAM') THEN
+         DO I=1,MPSOLID
+            ISOLID(I) = PSOLID(INTL_PID,I)
+         ENDDO
+         IF (ISOLID(4) == -1) ISOLID(4) = 2
+         IF (ISOLID(6) < 0) ISOLID(6) = 1
+      ENDIF
 
       IF (ISOLID(4) == -1) THEN
 

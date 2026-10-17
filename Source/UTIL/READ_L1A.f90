@@ -74,7 +74,7 @@
 
       USE SCONTR
       USE PARAMS, ONLY                :  CBMIN3, CBMIN4, ELFORCEN, HEXAXIS, IORQ1B, IORQ1M, IORQ1S, IORQ2B, IORQ2T,&
-                                         MATSPARS, MIN4TRED, QUAD4TYP, QUAD8TYP, QUADRTYP, QUADAXIS, SOLIDTYP, SPARSTOR, TRIA3TYP
+                                         MATSPARS, MIN4TRED, QUAD4TYP, QUAD8TYP, QUADRTYP, QUADAXIS, SOLIDTYP, PENTATYP, SPARSTOR, TRIA3TYP
 
 
       USE TIMDAT, ONLY                :  STIME, TSEC
@@ -625,6 +625,18 @@
          REC_NO = -99
          CALL READERR ( IOCHKI(1), LINK1A, MESSAG, REC_NO, OUNT )
          JERR = JERR + 1
+      ENDIF
+
+! Optional trailing selector permits reading older L1A files.
+      READ(L1A,191,IOSTAT=IOCHKI(1)) PENTATYP
+      IF (IOCHKI(1) < 0) PENTATYP='ABE     '
+      IF ((PENTATYP/='ABE     ').AND.(PENTATYP/='EAS9    ')) THEN
+         WRITE(F06,'(A)') ' *ERROR: RESTART PENTATYP MUST BE ABE OR EAS9; REGENERATE OLD ANSEAS RESTART'
+         JERR=JERR+1
+      ENDIF
+      IF (IOCHKI(1) > 0) THEN
+         CALL READERR(IOCHKI(1),LINK1A,'PARAM PENTATYP',-99,OUNT)
+         JERR=JERR+1
       ENDIF
 
 ! Finished reading L1A, so close:

@@ -6,7 +6,7 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, JCARD_LEN, NPYRAM5, NPYRAM14, NELE
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, JCARD_LEN, NPYRAM5, NPYRAM13, NELE
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  ETYPE
 

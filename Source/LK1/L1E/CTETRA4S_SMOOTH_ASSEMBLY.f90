@@ -7,9 +7,10 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NELE, NGRID
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NELE, NGRID, SOL_NAME
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO
       USE PARAMS, ONLY                :  EPSIL, SOLIDTYP, SPARSTOR
+      USE NONLINEAR_PARAMS, ONLY: LOAD_ISTEP
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE MODEL_STUF, ONLY            :  EDAT, EPNT, ETYPE, GRID_ID, MATL, PSOLID, RGRID, RMATL
       USE STF_ARRAYS, ONLY            :  STFKEY, STF3
@@ -37,6 +38,8 @@
       IF ((ACTION /= 'COUNT') .AND. (ACTION /= 'ADD  ')) RETURN
       IF (LTERM < 0) RETURN
       IF (SOLIDTYP /= 'NEWSOLID') RETURN
+! The nodal blend is an elastic K correction, never a prestress Kg term.
+      IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP > 1)) RETURN
 
       EPS1 = EPSIL(1)
       ALLOCATE(ADJ_ELEMS(NELE))

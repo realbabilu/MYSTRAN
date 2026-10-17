@@ -102,7 +102,7 @@
           (TYPE == 'ROD     ') .OR. (TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR. (TYPE == 'BUSH    ') .OR.                  &
           (TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ') .OR.                                                                      &
           (TYPE == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                                      &
-          (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                                      &
+          (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM13 ') .OR.                                                                      &
           (TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ') .OR.                                                                      &
           (TYPE == 'USER1   ') .OR. (TYPE == 'USERIN  ') .OR. (TYPE == 'PLOTEL  ') .OR.                                            &
           (TYPE == 'SHEAR   ') .OR. (TYPE(1:5) == 'TRIA3') .OR. (TYPE(1:5) == 'TRIA6') .OR. (TYPE(1:5) == 'QUAD4'   ) .OR.       &
@@ -127,7 +127,7 @@
       IF      ((TYPE      == 'ROD     ') .OR. (TYPE == 'BAR     ') .OR. (TYPE == 'BEAM    ') .OR.                                  &
                (TYPE(1:5) == 'TRIA3'   ) .OR. (TYPE(1:5) == 'TRIA6'   ) .OR.                                                       &
                (TYPE      == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                            &
-               (TYPE      == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                            &
+               (TYPE      == 'PYRAM5  ') .OR. (TYPE == 'PYRAM13 ') .OR.                                                            &
                (TYPE      == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ')) THEN
          CALL ELMGM1 ( INT_ELEM_ID, WRITE_WARN )
          FIX_EDAT = 'N'
@@ -308,7 +308,7 @@
 
       IF ((TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ') .OR.                                                                      &
           (TYPE == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                                      &
-          (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                                      &
+          (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM13 ') .OR.                                                                      &
           (TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ')) THEN
          CALL MATERIAL_PROPS_3D ( WRITE_WARN )
          CALL ROT_AXES_MATL_TO_LOC ( WRITE_WARN )
@@ -356,7 +356,7 @@
           (TYPE == 'USER1   ') .OR.                                                                                                  &
           (TYPE      == 'HEXA8   ') .OR. (TYPE      == 'HEXA20  ') .OR.                                                            &
           (TYPE      == 'PENTA6  ') .OR. (TYPE      == 'PENTA15 ') .OR.                                                            &
-          (TYPE      == 'PYRAM5  ') .OR. (TYPE      == 'PYRAM14 ') .OR.                                                            &
+          (TYPE      == 'PYRAM5  ') .OR. (TYPE == 'PYRAM13 ') .OR.                                                            &
           (TYPE      == 'TETRA4  ') .OR. (TYPE      == 'TETRA10 ')) THEN
          CALL ELMDAT2 ( INT_ELEM_ID, OPT, WRITE_WARN )
       ENDIF
@@ -509,7 +509,7 @@
 
       ELSE IF ((TYPE == 'HEXA8   ') .OR. (TYPE == 'HEXA20  ') .OR.                                                                 &
                (TYPE == 'PENTA6  ') .OR. (TYPE == 'PENTA15 ') .OR.                                                                 &
-               (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ') .OR.                                                                 &
+               (TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM13 ') .OR.                                                                 &
                (TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ')) THEN
 
          IF (ISOLID(6) == 0) THEN                          ! Integration scheme
@@ -530,7 +530,7 @@
                IORD_IJ = 7
             ENDIF
             CALL PENTA ( OPT, INT_ELEM_ID, IORD_IJ, IORD_K, RED_INT_SHEAR, WRITE_WARN )
-         ELSE IF ((TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM14 ')) THEN
+         ELSE IF ((TYPE == 'PYRAM5  ') .OR. (TYPE == 'PYRAM13 ')) THEN
             CALL PYRAM ( OPT, INT_ELEM_ID, RED_INT_SHEAR, WRITE_WARN )
          ELSE IF ((TYPE == 'TETRA4  ') .OR. (TYPE == 'TETRA10 ')) THEN
             IF (ISOLID(4) == 2) THEN                       ! Integration order
@@ -942,6 +942,13 @@
          EDAT(EPNTK+3) = DUM_AGRID(3)
          EDAT(EPNTK+4) = DUM_AGRID(2)
          EDAT(EPNTK+5) = DUM_AGRID(4)
+
+      ELSE IF (TYPE == 'PYRAM13 ') THEN
+! Reverse base winding and its physical edge pairs together. Keep apex 5.
+         DO I=1,13
+            DUM_AGRID(I) = EDAT(EPNTK+I+1)
+         ENDDO
+         EDAT(EPNTK+2:EPNTK+14) = DUM_AGRID((/4,3,2,1,5,8,7,6,9,13,12,11,10/))
 
       ELSE IF (TYPE == 'PYRAM5  ') THEN
 

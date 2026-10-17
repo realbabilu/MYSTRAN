@@ -60,7 +60,7 @@
                          PRTCORD, PRTDISP, PRTDLR, PRTDOF, PRTFOR, PRTHMN, PRTGMN, PRTGOA, PRTCGLTM, PRTPHIZL,      &
                          PRTIFLTM, PRTKXX, PRTMXX, PRTOU4, PRTPHIXA, PRTMASS, PRTMASSD, PRTRMG, PRTSCP, PRTPSET,    &
                          PRTTSET, PRTUSET, PRTSTIFD, PRTSTIFF, PRTUO0, PRTYS, PRTQSYS, Q4SURFIT, QUADAXIS,          &
-                          ANSFIELD, ANSSHEAR, ANSMEM, ANSANG, ANSDEV, QUAD4TYP, QUAD8TYP, QUADRTYP, SOLIDTYP, TRIA3TYP, TRIA6TYP, TRIARTYP, RCONDK, RELINK3, RSPECTRA, SCRSPEC, RSCOMB, &
+                          ANSFIELD, ANSSHEAR, ANSMEM, ANSANG, ANSDEV, QUAD4TYP, QUAD8TYP, QUADRTYP, SOLIDTYP, PENTATYP, TRIA3TYP, TRIA6TYP, TRIARTYP, RCONDK, RELINK3, RSPECTRA, SCRSPEC, RSCOMB, &
                           RSTYPE, SEQPRT, SEQQUIT,   &
                          SETLKTM, SETLKTK, SHRFXFAC, SKIPMGG, SNORM_ANG, &
                          SOLLIB,                                                                                      &
@@ -2993,6 +2993,28 @@
          CALL BD_IMBEDDED_BLANK   ( JCARD,0,3,0,0,0,0,0,0 )
          CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,4,5,6,7,8,9 )
          CALL CRDERR ( CARD )
+
+! Retired selector must never silently select the new default.
+      ELSE IF (JCARD(2)(1:8) == 'PENTABUC') THEN
+         WRITE(ERR,'(A)') ' *ERROR: PARAM PENTABUC HAS BEEN REMOVED; USE PARAM,PENTATYP,ABE OR EAS9'
+         WRITE(F06,'(A)') ' *ERROR: PARAM PENTABUC HAS BEEN REMOVED; USE PARAM,PENTATYP,ABE OR EAS9'
+         FATAL_ERR=FATAL_ERR+1
+
+! CPENTA6 selection for all NEWSOLID solution phases.
+      ELSE IF (JCARD(2)(1:8) == 'PENTATYP') THEN
+         PARNAM='PENTATYP'
+         CALL CHAR_FLD(JCARD(3),JF(3),CHRPARM)
+         CALL LEFT_ADJ_BDFLD(CHRPARM)
+         IF ((CHRPARM == 'EAS9    ') .OR. (CHRPARM == 'ABE     ')) THEN
+            PENTATYP=CHRPARM
+         ELSE
+            WRITE(ERR,'(A)') ' *ERROR: PARAM PENTATYP MUST BE ABE OR EAS9'
+            WRITE(F06,'(A)') ' *ERROR: PARAM PENTATYP MUST BE ABE OR EAS9'
+            FATAL_ERR=FATAL_ERR+1
+         ENDIF
+         CALL BD_IMBEDDED_BLANK(JCARD,0,3,0,0,0,0,0,0)
+         CALL CARD_FLDS_NOT_BLANK(JCARD,0,0,4,5,6,7,8,9)
+         CALL CRDERR(CARD)
 
 ! SOLIDTYP selects isolated alternative solid formulations where available
 

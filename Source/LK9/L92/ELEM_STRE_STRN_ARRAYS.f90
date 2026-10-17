@@ -40,14 +40,15 @@
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, INT_SC_NUM, JTSUB
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, INT_SC_NUM, JTSUB, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
       USE MODEL_STUF, ONLY            :  ALPVEC, BE1, BE2, BE3, CBEAM_ACTIVE_XL, CBEAM_ACTIVE_NSTATIONS, CBEAM_FORCE_B1,           &
                                          CBEAM_FORCE_B2, DT, EM, EB, ES, ET, ELDOF, PEL, PHI_SQ, STRAIN, STRESS, SUBLOD, TREF, TYPE,&
-                                         UEL, UEB, SE1, SE2, SE3, STE1, STE2, STE3, ELGP, ISOLID, EID, SHELL_T, XEB
+                                         UEL, UEB, SE1, SE2, SE3, STE1, STE2, STE3, ELGP, ISOLID, EID, SHELL_T, XEB, XEL
+      USE EAS9_FRAME, ONLY: HEX8_EAS9_STATE, PENTA6_ANSEAS_STATE
       USE DEBUG_PARAMETERS
-      USE PARAMS, ONLY                :  STR_CID, QUAD4TYP, QUAD8TYP
+      USE PARAMS, ONLY                :  STR_CID, QUAD4TYP, QUAD8TYP, SOLIDTYP, PENTATYP
 
 
       USE ELEM_STRE_STRN_ARRAYS_USE_IFs
@@ -62,6 +63,15 @@
 
       INTEGER(LONG)                   :: STR_CID_SOLID
 
+      INTEGER(LONG) :: V2ERR, V2ID(24)
+      REAL(DOUBLE) :: V2K(24,24),V2KG(24,24),V2F(24),V2B(6,24),V2EPS(6),V2SIG(6),V2TEMP(8),V2U(24)
+      REAL(DOUBLE), PARAMETER :: V2POINTS(3,9)=RESHAPE([ &
+           0D0,0D0,0D0, -1D0,-1D0,-1D0, 1D0,-1D0,-1D0, 1D0,1D0,-1D0, -1D0,1D0,-1D0, &
+           -1D0,-1D0,1D0, 1D0,-1D0,1D0, 1D0,1D0,1D0, -1D0,1D0,1D0],[3,9])
+      REAL(DOUBLE) :: AK(18,18),AG(18,18),AF(18),AB(6,18),AE(6),AS(6),AT(6),AU(18)
+      INTEGER(LONG) :: AID(18)
+      REAL(DOUBLE), PARAMETER :: AP(3,7)=RESHAPE([1D0/3,1D0/3,0D0, &
+           0D0,0D0,-1D0,1D0,0D0,-1D0,0D0,1D0,-1D0,0D0,0D0,1D0,1D0,0D0,1D0,0D0,1D0,1D0],[3,7])
       REAL(DOUBLE) :: THERM_GRAD, THERM_G1(3), THERM_G2(3)
       REAL(DOUBLE)                    :: ALPT(6)           ! Col of ALPVEC times temperatures
       REAL(DOUBLE)                    :: ALPTM(3)          ! Col of ALPVEC times temperatures
@@ -469,6 +479,40 @@
       ENDIF
 
 ! **********************************************************************************************************************************
+! Recover local EAS strain and stress before the existing output-axis transform.
+      IF ((TYPE == 'HEXA8   ') .AND. (SOLIDTYP == 'NEWSOLID')) THEN
+         DO I=1,24
+            V2ID(I)=6*((I-1)/3)+MOD(I-1,3)+1
+         ENDDO
+         V2U=UEL(V2ID);V2TEMP=TREF(1)
+         IF (SUBLOD(INT_SC_NUM,2)>0) V2TEMP=DT(1:8,JTSUB)
+         CALL HEX8_EAS9_STATE(XEL(1:8,1:3),ES,ALPVEC(:,1),V2TEMP,TREF(1),V2U,V2POINTS(:,STR_PT_NUM), &
+                             V2K,V2F,V2B,V2EPS,V2SIG,V2KG,V2ERR)
+         IF (V2ERR /= 0) THEN
+            WRITE(ERR,'(A,I0)') ' *ERROR: CHEXA8 EAS9 V2 RECOVERY FAILED, ELEMENT ',EID
+            WRITE(F06,'(A,I0)') ' *ERROR: CHEXA8 EAS9 V2 RECOVERY FAILED, ELEMENT ',EID
+            FATAL_ERR=FATAL_ERR+1
+            RETURN
+         ENDIF
+         STRAIN(1:6)=V2EPS;STRESS(1:6)=V2SIG
+      ENDIF
+
+      IF ((TYPE=='PENTA6  ') .AND. (SOLIDTYP=='NEWSOLID')) THEN
+         DO I=1,18
+            AID(I)=6*((I-1)/3)+MOD(I-1,3)+1
+         ENDDO
+         AU=UEL(AID);AT=TREF(1)
+         IF (SUBLOD(INT_SC_NUM,2)>0) AT=DT(1:6,JTSUB)
+         CALL PENTA6_ANSEAS_STATE(XEL(1:6,1:3),ES,ALPVEC(:,1),AT,TREF(1),AU,AP(:,STR_PT_NUM),AK,AF,AB,AE,AS,AG,V2ERR)
+         IF (V2ERR/=0) THEN
+            WRITE(ERR,'(A,I0)') ' *ERROR: CPENTA6 ANSEAS RECOVERY FAILED, ELEMENT ',EID
+            WRITE(F06,'(A,I0)') ' *ERROR: CPENTA6 ANSEAS RECOVERY FAILED, ELEMENT ',EID
+            FATAL_ERR=FATAL_ERR+1
+            RETURN
+         ENDIF
+         STRAIN(1:6)=AE;STRESS(1:6)=AS
+      ENDIF
+
 ! Transform coord for STRESS/STRAIN arrays, if requested.
 !
 ! Important shell note:

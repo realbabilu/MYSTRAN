@@ -2,19 +2,20 @@
 
 ! PYRAM solid element kernel.
 !
-! PYRAM5 : linear five-node pyramid with optional NEWSOLID EAS54 stiffness.
-! PYRAM14: quadratic fourteen-node pyramid using the Liu-style shape basis
-!          carried in the snapshot used for this branch.
+! PYRAM5 : standard linear five-node pyramid in both SOLIDTYP modes.
+! PYRAM13: Bedrosian rational interpolation, eight-point stiffness.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NTSUB
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NTSUB, MAX_ORDER_GAUSS, SOL_NAME, INT_SC_NUM, JTSUB
       USE CONSTANTS_1, ONLY           :  HALF, ZERO, ONE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  ALPVEC, BE1, BE2, DT, EID, ELGP, NUM_EMG_FATAL_ERRS, ES, KE, KED, ME, PTE, RHO,         &
-                                         SE1, SE2, STE1, STRESS, TREF, TYPE, XEL
-      USE PARAMS, ONLY                :  EPSIL, SOLIDTYP
+                                         SE1, SE2, STE1, STRESS, TREF, TYPE, XEL, UEL, ISOLID, SUBLOD
+      USE PARAMS, ONLY                :  EPSIL, COUPMASS
+      USE PYRAM13_BEDROSIAN, ONLY     :  BEDROSIAN13_SHAPE, BEDROSIAN13_QUADRATURE, &
+                                         BEDROSIAN13_RECOVER, BEDROSIAN13_KG
 
       USE PYRAM_USE_IFs
 
@@ -29,9 +30,9 @@
       INTEGER(LONG)                   :: I,J,K,L
       INTEGER(LONG)                   :: ID(3*ELGP)
       INTEGER(LONG)                   :: II,JJ
-      INTEGER(LONG)                   :: NGP
-      INTEGER(LONG), PARAMETER        :: EAS54_N = 54
+      INTEGER(LONG)                   :: NGP, KGORDER, KGERR, KGNP
 
+      REAL(DOUBLE)                    :: GPSTRESS(6,27), GPSTRAIN(6,27), UTEMP(39), TNODES(13)
       REAL(DOUBLE)                    :: ALP(6)
       REAL(DOUBLE)                    :: B(6,3*ELGP)
       REAL(DOUBLE)                    :: CBAR(3,3*ELGP)
@@ -43,11 +44,6 @@
       REAL(DOUBLE)                    :: DUM5(3*ELGP,3*ELGP)
       REAL(DOUBLE)                    :: DUM6(3,3*ELGP)
       REAL(DOUBLE)                    :: EALP(6)
-      REAL(DOUBLE)                    :: EAS_DM(6,EAS54_N)
-      REAL(DOUBLE)                    :: EAS_KAA(EAS54_N,EAS54_N)
-      REAL(DOUBLE)                    :: EAS_KUA(3*ELGP,EAS54_N)
-      REAL(DOUBLE)                    :: EAS_M(6,EAS54_N)
-      REAL(DOUBLE)                    :: EAS_X(EAS54_N,3*ELGP)
       REAL(DOUBLE)                    :: EPS1
       REAL(DOUBLE)                    :: INT_R(64)
       REAL(DOUBLE)                    :: INT_S(64)
@@ -102,8 +98,8 @@
 
       IF (TYPE == 'PYRAM5  ') THEN
          CALL PYRAM5_POINTS ( NGP, INT_R, INT_S, INT_T, INT_W )
-      ELSE IF (TYPE == 'PYRAM14 ') THEN
-         CALL PYRAM14_POINTS ( NGP, INT_R, INT_S, INT_T, INT_W )
+      ELSE IF (TYPE == 'PYRAM13 ') THEN
+         CALL PYRAM13_POINTS ( NGP, INT_R, INT_S, INT_T, INT_W )
       ELSE
          RETURN
       ENDIF
@@ -125,6 +121,17 @@
       IF (OPT(1) == 'Y') THEN
          RHO1 = RHO(1)
          IF (RHO1 /= ZERO) THEN
+            IF ((TYPE == 'PYRAM13 ') .AND. (SOL_NAME(1:5) == 'MODES') .AND. (COUPMASS <= 0)) THEN
+               WRITE(ERR,'(A)') ' *ERROR: PYRAM13 MODAL MASS REQUIRES PARAM,COUPMASS,1; ROW-SUM MASS IS INDEFINITE'
+               WRITE(F06,'(A)') ' *ERROR: PYRAM13 MODAL MASS REQUIRES PARAM,COUPMASS,1; ROW-SUM MASS IS INDEFINITE'
+               NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+               FATAL_ERR = FATAL_ERR + 1
+               RETURN
+            ENDIF
+! Stiffness underintegration must not be reused for quadratic mass: eight
+! samples give only rank 24/39. Integrate mass independently, then restore
+! the validated eight-point stiffness/thermal/recovery quadrature.
+            IF (TYPE == 'PYRAM13 ') CALL PYRAM13_MASS_POINTS ( NGP, INT_R, INT_S, INT_T, INT_W )
             M_1DOF(:,:) = ZERO
             DO I=1,NGP
                CALL PYRAM_BMAT ( INT_R(I), INT_S(I), INT_T(I), DETJ, B, N )
@@ -135,6 +142,7 @@
                ENDDO
             ENDDO
             CALL EXPAND_MASS_DOFS ( M_1DOF )
+            IF (TYPE == 'PYRAM13 ') CALL PYRAM13_POINTS ( NGP, INT_R, INT_S, INT_T, INT_W )
          ENDIF
       ENDIF
 
@@ -162,9 +170,8 @@
       ENDIF
 
       IF (OPT(4) == 'Y') THEN
-         IF ((TYPE == 'PYRAM5  ') .AND. (SOLIDTYP == 'NEWSOLID')) THEN
-            CALL PYRAM5_EAS54_STIFFNESS ( ID, DUM3, EAS_KUA, EAS_KAA, EAS_X, EAS_M, EAS_DM )
-         ELSE
+! Standard PYRAM5 is deliberately retained under NEWSOLID. Experimental
+! EAS54 is not selected. PYRAM13 has no rank-one stabilization.
             DUM3(:,:) = ZERO
             DO I=1,NGP
                CALL PYRAM_BMAT ( INT_R(I), INT_S(I), INT_T(I), DETJ, B, N )
@@ -181,8 +188,6 @@
                   KE(ID(J),ID(K)) = DUM3(J,K)
                ENDDO
             ENDDO
-         ENDIF
-
          DO I=2,6*ELGP
             DO J=1,I-1
                KE(I,J) = KE(J,I)
@@ -210,6 +215,34 @@
 
       IF ((OPT(6) == 'Y') .AND. (LOAD_ISTEP > 1)) THEN
          CALL ELMDIS
+         IF (TYPE == 'PYRAM13 ') THEN
+! PSOLID IN=2/3 selects only initial-stress quadrature here; K remains K8.
+            KGORDER = 2
+            IF (ISOLID(4) == 3) KGORDER = 3
+            DO I=1,39
+               UTEMP(I) = UEL(ID(I))
+            ENDDO
+            TNODES = TREF1
+            IF (SUBLOD(INT_SC_NUM,2) > 0) THEN
+               IF ((JTSUB < 1) .OR. (JTSUB > NTSUB)) THEN
+                  WRITE(ERR,'(A,I8)') ' *ERROR: PYRAM13 INVALID THERMAL SUBCASE FOR KG, ELEMENT ', EID
+                  WRITE(F06,'(A,I8)') ' *ERROR: PYRAM13 INVALID THERMAL SUBCASE FOR KG, ELEMENT ', EID
+                  FATAL_ERR = FATAL_ERR + 1
+                  NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+                  RETURN
+               ENDIF
+               TNODES = DT(1:13,JTSUB)
+            ENDIF
+            CALL BEDROSIAN13_RECOVER(XEL(1:13,1:3),ES,UTEMP,ALP,TNODES,TREF1,KGORDER,GPSTRESS,GPSTRAIN,KGNP,KGERR)
+            IF (KGERR == 0) CALL BEDROSIAN13_KG(XEL(1:13,1:3),GPSTRESS,KGORDER,DUM3,KGERR)
+            IF (KGERR /= 0) THEN
+               WRITE(ERR,'(A,I8)') ' *ERROR: PYRAM13 INVALID INTEGRATION POINT FOR KG, ELEMENT ', EID
+               WRITE(F06,'(A,I8)') ' *ERROR: PYRAM13 INVALID INTEGRATION POINT FOR KG, ELEMENT ', EID
+               FATAL_ERR = FATAL_ERR + 1
+               NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+               RETURN
+            ENDIF
+         ELSE
          CALL ELEM_STRE_STRN_ARRAYS ( 1 )
 
          SIGxx = STRESS(1)
@@ -252,6 +285,8 @@
                ENDDO
             ENDDO
          ENDDO
+
+         ENDIF
 
          DO I=1,3*ELGP
             DO J=1,3*ELGP
@@ -310,299 +345,51 @@
 
       END SUBROUTINE PYRAM5_POINTS
 
-      SUBROUTINE PYRAM14_POINTS ( NPT, RR, SS, TT, WW )
-
-      INTEGER(LONG), INTENT(OUT)      :: NPT
-      REAL(DOUBLE),  INTENT(OUT)      :: RR(:),SS(:),TT(:),WW(:)
-
-      INTEGER(LONG)                   :: A,B
-      REAL(DOUBLE)                    :: BARY(4,4)
-      REAL(DOUBLE)                    :: TET(4,4,3)
-      REAL(DOUBLE)                    :: VOL
-
-      BARY(1,1) = 0.5854101966249685D0
-      BARY(1,2) = 0.1381966011250105D0
-      BARY(1,3) = 0.1381966011250105D0
-      BARY(1,4) = 0.1381966011250105D0
-      BARY(2,1) = 0.1381966011250105D0
-      BARY(2,2) = 0.5854101966249685D0
-      BARY(2,3) = 0.1381966011250105D0
-      BARY(2,4) = 0.1381966011250105D0
-      BARY(3,1) = 0.1381966011250105D0
-      BARY(3,2) = 0.1381966011250105D0
-      BARY(3,3) = 0.5854101966249685D0
-      BARY(3,4) = 0.1381966011250105D0
-      BARY(4,1) = 0.1381966011250105D0
-      BARY(4,2) = 0.1381966011250105D0
-      BARY(4,3) = 0.1381966011250105D0
-      BARY(4,4) = 0.5854101966249685D0
-
-      TET(:,:,:) = ZERO
-      TET(1,2,1) = -ONE
-      TET(1,2,2) = -ONE
-      TET(1,3,1) =  ONE
-      TET(1,3,2) = -ONE
-      TET(1,4,3) = ONE
-      TET(2,2,1) =  ONE
-      TET(2,2,2) = -ONE
-      TET(2,3,1) =  ONE
-      TET(2,3,2) =  ONE
-      TET(2,4,3) = ONE
-      TET(3,2,1) =  ONE
-      TET(3,2,2) =  ONE
-      TET(3,3,1) = -ONE
-      TET(3,3,2) =  ONE
-      TET(3,4,3) = ONE
-      TET(4,2,1) = -ONE
-      TET(4,2,2) =  ONE
-      TET(4,3,1) = -ONE
-      TET(4,3,2) = -ONE
-      TET(4,4,3) = ONE
-
-      VOL = 1.0D0/3.0D0
+      SUBROUTINE PYRAM13_POINTS ( NPT, RR, SS, TT, WW )
+! 2x2 Legendre x 2 Jacobi(alpha=2,beta=0), as test_v7.assemble.
+! Jacobi weights already include (1-z)^2; divide it out because
+! PYRAM_BMAT uses the collapsed-coordinate Jacobian containing that factor.
+      INTEGER(LONG), INTENT(OUT) :: NPT
+      REAL(DOUBLE), INTENT(OUT) :: RR(:),SS(:),TT(:),WW(:)
+      REAL(DOUBLE) :: G(2), Z(2), WZ(2), SQ10
+      INTEGER(LONG) :: A,B,C
+      G = (/-ONE,ONE/)/DSQRT(3.0D0)
+      SQ10 = DSQRT(10.0D0)
+      Z = (/5.0D0-SQ10,5.0D0+SQ10/)/15.0D0
+      WZ = (/ONE/6.0D0+SQ10/48.0D0,ONE/6.0D0-SQ10/48.0D0/)
       NPT = 0
-      DO A=1,4
-         DO B=1,4
-            NPT = NPT + 1
-            RR(NPT) = BARY(B,1)*TET(A,1,1) + BARY(B,2)*TET(A,2,1) + BARY(B,3)*TET(A,3,1) + BARY(B,4)*TET(A,4,1)
-            SS(NPT) = BARY(B,1)*TET(A,1,2) + BARY(B,2)*TET(A,2,2) + BARY(B,3)*TET(A,3,2) + BARY(B,4)*TET(A,4,2)
-            TT(NPT) = BARY(B,1)*TET(A,1,3) + BARY(B,2)*TET(A,2,3) + BARY(B,3)*TET(A,3,3) + BARY(B,4)*TET(A,4,3)
-            WW(NPT) = VOL/4.0D0
-         ENDDO
-      ENDDO
-
-      END SUBROUTINE PYRAM14_POINTS
-
-      SUBROUTINE PYRAM5_EAS54_POINTS ( NPT, RR, SS, TT, WW )
-
-      INTEGER(LONG), INTENT(OUT)      :: NPT
-      REAL(DOUBLE),  INTENT(OUT)      :: RR(:),SS(:),TT(:),WW(:)
-
-      INTEGER(LONG)                   :: A,B,C
-      REAL(DOUBLE)                    :: G(3),GT(3),W(3),WT(3)
-
-      G(1)  = -DSQRT(3.0D0/5.0D0)
-      G(2)  =  ZERO
-      G(3)  =  DSQRT(3.0D0/5.0D0)
-      W(1)  =  5.0D0/9.0D0
-      W(2)  =  8.0D0/9.0D0
-      W(3)  =  5.0D0/9.0D0
-      GT(1) =  0.5D0*(ONE - DSQRT(3.0D0/5.0D0))
-      GT(2) =  0.5D0
-      GT(3) =  0.5D0*(ONE + DSQRT(3.0D0/5.0D0))
-      WT(1) =  0.5D0*5.0D0/9.0D0
-      WT(2) =  0.5D0*8.0D0/9.0D0
-      WT(3) =  0.5D0*5.0D0/9.0D0
-
-      NPT = 0
-      DO A=1,3
-         DO B=1,3
-            DO C=1,3
+      DO A=1,2
+         DO B=1,2
+            DO C=1,2
                NPT = NPT + 1
                RR(NPT) = G(A)
                SS(NPT) = G(B)
-               TT(NPT) = GT(C)
-               WW(NPT) = W(A)*W(B)*WT(C)
+               TT(NPT) = Z(C)
+               WW(NPT) = WZ(C)/(ONE-Z(C))**2
             ENDDO
          ENDDO
       ENDDO
+      END SUBROUTINE PYRAM13_POINTS
 
-      END SUBROUTINE PYRAM5_EAS54_POINTS
-
-      SUBROUTINE PYRAM5_EAS54_STIFFNESS ( ID, KUU, KUA, KAA, X, M, DM )
-
-      INTEGER(LONG), INTENT(IN)       :: ID(3*ELGP)
-      REAL(DOUBLE), INTENT(OUT)       :: KUU(3*ELGP,3*ELGP)
-      REAL(DOUBLE), INTENT(OUT)       :: KUA(3*ELGP,EAS54_N)
-      REAL(DOUBLE), INTENT(OUT)       :: KAA(EAS54_N,EAS54_N)
-      REAL(DOUBLE), INTENT(OUT)       :: X(EAS54_N,3*ELGP)
-      REAL(DOUBLE), INTENT(OUT)       :: M(6,EAS54_N)
-      REAL(DOUBLE), INTENT(OUT)       :: DM(6,EAS54_N)
-
-      INTEGER(LONG)                   :: A,BMODE,GP,PP,QQ
-      INTEGER(LONG)                   :: NPT
-      INTEGER(LONG)                   :: IERR
-      REAL(DOUBLE)                    :: DETJ0,DETJ1
-      REAL(DOUBLE)                    :: RR(27),SS(27),TT(27),WW(27)
-      REAL(DOUBLE)                    :: REG,SCALE,TRACE
-
-      KUU(:,:) = ZERO
-      KUA(:,:) = ZERO
-      KAA(:,:) = ZERO
-
-      CALL PYRAM_BMAT ( ZERO, ZERO, 0.25D0, DETJ0, B, N )
-      CALL PYRAM5_EAS54_POINTS ( NPT, RR, SS, TT, WW )
-
-      DO GP=1,NPT
-         CALL PYRAM_BMAT ( RR(GP), SS(GP), TT(GP), DETJ1, B, N )
-         CALL MATMULT_FFF ( ES, B, 6, 6, 3*ELGP, DUM4 )
-         CALL MATMULT_FFF_T ( B, DUM4, 6, 3*ELGP, 3*ELGP, DUM5 )
-         DO PP=1,3*ELGP
-            DO QQ=1,3*ELGP
-               KUU(PP,QQ) = KUU(PP,QQ) + DUM5(PP,QQ)*WW(GP)*DETJ1
-            ENDDO
-         ENDDO
-
-         SCALE = DETJ0/DETJ1
-         CALL PYRAM5_EAS54_MODES ( RR(GP), SS(GP), TT(GP), SCALE, M )
-         DM(:,:) = ZERO
-         DO A=1,6
-            DO BMODE=1,EAS54_N
-               DO PP=1,6
-                  DM(A,BMODE) = DM(A,BMODE) + ES(A,PP)*M(PP,BMODE)
-               ENDDO
-            ENDDO
-         ENDDO
-         DO PP=1,3*ELGP
-            DO BMODE=1,EAS54_N
-               DO A=1,6
-                  KUA(PP,BMODE) = KUA(PP,BMODE) + B(A,PP)*DM(A,BMODE)*WW(GP)*DETJ1
-               ENDDO
-            ENDDO
-         ENDDO
-         DO A=1,EAS54_N
-            DO BMODE=1,EAS54_N
-               DO PP=1,6
-                  KAA(A,BMODE) = KAA(A,BMODE) + M(PP,A)*DM(PP,BMODE)*WW(GP)*DETJ1
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-
-      TRACE = ZERO
-      DO A=1,EAS54_N
-         TRACE = TRACE + KAA(A,A)
-      ENDDO
-      REG = 1.0D-14*DABS(TRACE)
-      IF (REG < 1.0D-14) REG = 1.0D-14
-      DO A=1,EAS54_N
-         KAA(A,A) = KAA(A,A) + REG
-      ENDDO
-
-      DO A=1,EAS54_N
-         DO PP=1,3*ELGP
-            X(A,PP) = KUA(PP,A)
-         ENDDO
-      ENDDO
-      CALL SOLVE_EAS54_SYSTEM ( KAA, X, IERR )
-      IF (IERR == 0) THEN
-         DO PP=1,3*ELGP
-            DO QQ=1,3*ELGP
-               DO A=1,EAS54_N
-                  KUU(PP,QQ) = KUU(PP,QQ) - KUA(PP,A)*X(A,QQ)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
-
-      DO PP=1,3*ELGP
-         DO QQ=1,3*ELGP
-            KE(ID(PP),ID(QQ)) = HALF*(KUU(PP,QQ) + KUU(QQ,PP))
-         ENDDO
-      ENDDO
-
-      END SUBROUTINE PYRAM5_EAS54_STIFFNESS
-
-      SUBROUTINE PYRAM5_EAS54_MODES ( R, S, T, SCALE, M )
-
-      REAL(DOUBLE), INTENT(IN)        :: R,S,T,SCALE
-      REAL(DOUBLE), INTENT(OUT)       :: M(6,EAS54_N)
-
-      INTEGER(LONG)                   :: A,STRAIN
-      REAL(DOUBLE)                    :: MODES(9)
-      REAL(DOUBLE)                    :: TB
-
-      TB = T - 0.25D0
-      MODES(1) = R
-      MODES(2) = S
-      MODES(3) = TB
-      MODES(4) = R*S
-      MODES(5) = R*TB
-      MODES(6) = S*TB
-      MODES(7) = R*R - ONE/3.0D0
-      MODES(8) = S*S - ONE/3.0D0
-      MODES(9) = TB*TB - 0.0375D0
-
-      M(:,:) = ZERO
-      DO STRAIN=1,6
-         DO A=1,9
-            M(STRAIN,9*(STRAIN-1)+A) = SCALE*MODES(A)
-         ENDDO
-      ENDDO
-
-      END SUBROUTINE PYRAM5_EAS54_MODES
-
-      SUBROUTINE SOLVE_EAS54_SYSTEM ( A_INOUT, B_INOUT, IERR )
-
-      REAL(DOUBLE), INTENT(INOUT)     :: A_INOUT(EAS54_N,EAS54_N)
-      REAL(DOUBLE), INTENT(INOUT)     :: B_INOUT(EAS54_N,3*ELGP)
-      INTEGER(LONG), INTENT(OUT)      :: IERR
-
-      INTEGER(LONG)                   :: I,J,KCOL,KROW,PIV
-      REAL(DOUBLE)                    :: FACTOR,MAXVAL,TMP
-
-      IERR = 0
-      DO KCOL=1,EAS54_N
-         PIV = KCOL
-         MAXVAL = DABS(A_INOUT(KCOL,KCOL))
-         DO I=KCOL+1,EAS54_N
-            IF (DABS(A_INOUT(I,KCOL)) > MAXVAL) THEN
-               MAXVAL = DABS(A_INOUT(I,KCOL))
-               PIV = I
-            ENDIF
-         ENDDO
-         IF (MAXVAL <= EPS1) THEN
-            IERR = 1
-            RETURN
-         ENDIF
-         IF (PIV /= KCOL) THEN
-            DO J=KCOL,EAS54_N
-               TMP = A_INOUT(KCOL,J)
-               A_INOUT(KCOL,J) = A_INOUT(PIV,J)
-               A_INOUT(PIV,J) = TMP
-            ENDDO
-            DO J=1,3*ELGP
-               TMP = B_INOUT(KCOL,J)
-               B_INOUT(KCOL,J) = B_INOUT(PIV,J)
-               B_INOUT(PIV,J) = TMP
-            ENDDO
-         ENDIF
-         DO I=KCOL+1,EAS54_N
-            FACTOR = A_INOUT(I,KCOL)/A_INOUT(KCOL,KCOL)
-            A_INOUT(I,KCOL) = ZERO
-            DO J=KCOL+1,EAS54_N
-               A_INOUT(I,J) = A_INOUT(I,J) - FACTOR*A_INOUT(KCOL,J)
-            ENDDO
-            DO J=1,3*ELGP
-               B_INOUT(I,J) = B_INOUT(I,J) - FACTOR*B_INOUT(KCOL,J)
-            ENDDO
-         ENDDO
-      ENDDO
-
-      DO KROW=EAS54_N,1,-1
-         DO J=1,3*ELGP
-            TMP = B_INOUT(KROW,J)
-            DO I=KROW+1,EAS54_N
-               TMP = TMP - A_INOUT(KROW,I)*B_INOUT(I,J)
-            ENDDO
-            B_INOUT(KROW,J) = TMP/A_INOUT(KROW,KROW)
-         ENDDO
-      ENDDO
-
-      END SUBROUTINE SOLVE_EAS54_SYSTEM
+      SUBROUTINE PYRAM13_MASS_POINTS ( NPT, RR, SS, TT, WW )
+! Independent 3x3x3 Jacobi quadrature, v3 Python mass_order=3.
+      INTEGER(LONG), INTENT(OUT) :: NPT
+      REAL(DOUBLE), INTENT(OUT) :: RR(:),SS(:),TT(:),WW(:)
+      REAL(DOUBLE) :: P(3,27), W(27)
+      INTEGER(LONG) :: IERR
+      CALL BEDROSIAN13_QUADRATURE(3,P,W,NPT,IERR)
+      RR(1:NPT)=P(1,1:NPT); SS(1:NPT)=P(2,1:NPT); TT(1:NPT)=P(3,1:NPT); WW(1:NPT)=W(1:NPT)
+      END SUBROUTINE PYRAM13_MASS_POINTS
 
       SUBROUTINE PYRAM_SHAPE ( R, S, T, N, DN )
 
       REAL(DOUBLE), INTENT(IN)        :: R,S,T
       REAL(DOUBLE), INTENT(OUT)       :: N(ELGP), DN(3,ELGP)
-      REAL(DOUBLE)                    :: H
 
       IF (TYPE == 'PYRAM5  ') THEN
          CALL PYRAM5_SHAPE ( R, S, T, N, DN )
-      ELSE
-         CALL LIU_SHAPE ( R, S, T, N )
-         H = 1.0D-6
-         CALL LIU_DERIV ( R, S, T, H, DN )
+      ELSE IF (TYPE == 'PYRAM13 ') THEN
+         CALL BEDROSIAN13_SHAPE ( R, S, T, N, DN )
       ENDIF
 
       END SUBROUTINE PYRAM_SHAPE
@@ -700,81 +487,6 @@
  2925 FORMAT(' *ERROR  1925: ELEMENT ',I8,', TYPE ',A,' HAS NONPOSITIVE ',A,' = ',1ES14.6)
 
       END SUBROUTINE PYRAM_BMAT
-
-      SUBROUTINE LIU_DERIV ( R, S, T, H, DN )
-
-      REAL(DOUBLE), INTENT(IN)        :: R,S,T,H
-      REAL(DOUBLE), INTENT(OUT)       :: DN(3,ELGP)
-      REAL(DOUBLE)                    :: NP(ELGP),NM(ELGP)
-
-      CALL LIU_SHAPE ( R+H, S, T, NP )
-      CALL LIU_SHAPE ( R-H, S, T, NM )
-      DN(1,:) = (NP(:) - NM(:))/(2.0D0*H)
-      CALL LIU_SHAPE ( R, S+H, T, NP )
-      CALL LIU_SHAPE ( R, S-H, T, NM )
-      DN(2,:) = (NP(:) - NM(:))/(2.0D0*H)
-      CALL LIU_SHAPE ( R, S, T+H, NP )
-      CALL LIU_SHAPE ( R, S, T-H, NM )
-      DN(3,:) = (NP(:) - NM(:))/(2.0D0*H)
-
-      END SUBROUTINE LIU_DERIV
-
-      SUBROUTINE LIU_SHAPE ( X, Y, Z, N )
-
-      REAL(DOUBLE), INTENT(IN)        :: X,Y,Z
-      REAL(DOUBLE), INTENT(OUT)       :: N(ELGP)
-      INTEGER(LONG)                   :: A
-      INTEGER(LONG)                   :: MM(14)
-      REAL(DOUBLE)                    :: Q(14),QM(14)
-
-      MM = (/2,1,4,3,5,6,9,8,7,10,12,11,14,13/)
-      CALL LIU_RAW ( X, Y, Z, Q )
-      CALL LIU_RAW ( -X, Y, Z, QM )
-      DO A=1,14
-         N(A) = 0.5D0*(Q(A) + QM(MM(A)))
-      ENDDO
-      N(5) = Q(5)
-
-      END SUBROUTINE LIU_SHAPE
-
-      SUBROUTINE LIU_RAW ( X, Y, Z, Q )
-
-      REAL(DOUBLE), INTENT(IN)        :: X,Y,Z
-      REAL(DOUBLE), INTENT(OUT)       :: Q(14)
-
-      Q(:) = ZERO
-      IF (X > Y) THEN
-         Q(1)  =  0.25D0*(X + Z)*(X + Z - ONE)*(Y - Z - ONE)*(Y - Z)
-         Q(2)  = -0.25D0*(X + Z)*(Y - Z)*((X + Z + ONE)*(-Y + Z + ONE) - 4.0D0*Z) - Z*(X - Y)
-         Q(3)  =  0.25D0*(Y - Z)*(X + Z)*(Y - Z + ONE)*(X + Z + ONE)
-         Q(4)  =  0.25D0*(X + Z)*(Y - Z)*(Y - Z + ONE)*(X + Z - ONE)
-         Q(6)  = -0.5D0*(X + Z - ONE)*(((Y - Z - ONE)*(X + ONE)*Y - Z) + Z*(2.0D0*X + ONE))
-         Q(7)  = -0.5D0*(Y - Z + ONE)*(((X + Z + ONE)*(Y - ONE)*X - Z) + Z*(2.0D0*Y + ONE))
-         Q(8)  = -0.5D0*(Y - Z + ONE)*(X + Z - ONE)*(X + ONE)*Y
-         Q(9)  = -0.5D0*(Y - Z + ONE)*(X + Z - ONE)*(Y - ONE)*X
-         Q(10) = (Y - Z + ONE)*(X + Z - ONE)*((Y - ONE)*(X + ONE) + Z*(X - Y + Z + ONE))
-         Q(11) = Z*(X + Z - ONE)*(Y - Z - ONE)
-         Q(12) = -Z*((X + Z + ONE)*(Y - Z - ONE) + 4.0D0*Z)
-         Q(13) = Z*(Y - Z + ONE)*(X + Z + ONE)
-         Q(14) = -Z*(Y - Z + ONE)*(X + Z - ONE)
-      ELSE
-         Q(1)  =  0.25D0*(Y + Z)*(Y + Z - ONE)*(X - Z - ONE)*(X - Z)
-         Q(2)  = -0.25D0*(X - Z)*(Y + Z)*(X - Z + ONE)*(-Y - Z + ONE)
-         Q(3)  =  0.25D0*(Y + Z)*(X - Z)*(X - Z + ONE)*(Y + Z + ONE)
-         Q(4)  =  0.25D0*(X - Z)*(Y + Z)*((X - Z - ONE)*(Y + Z + ONE) + 4.0D0*Z) + Z*(X - Y)
-         Q(6)  = -0.5D0*(X - Z + ONE)*(Y + Z - ONE)*(X - ONE)*Y
-         Q(7)  = -0.5D0*(X - Z + ONE)*(Y + Z - ONE)*(Y + ONE)*X
-         Q(8)  = -0.5D0*(X - Z + ONE)*(((Y + Z + ONE)*(X - ONE)*Y - Z) + Z*(2.0D0*X + ONE))
-         Q(9)  = -0.5D0*(Y + Z - ONE)*(((X - Z - ONE)*(Y + ONE)*X - Z) + Z*(2.0D0*Y + ONE))
-         Q(10) = (X - Z + ONE)*(Y + Z - ONE)*((Y + ONE)*(X - ONE) - Z*(X - Y - Z - ONE))
-         Q(11) = Z*(Y + Z - ONE)*(X - Z - ONE)
-         Q(12) = -Z*(X - Z + ONE)*(Y + Z - ONE)
-         Q(13) = Z*(X - Z + ONE)*(Y + Z + ONE)
-         Q(14) = -Z*((Y + Z + ONE)*(X - Z - ONE) + 4.0D0*Z)
-      ENDIF
-      Q(5) = Z*(2.0D0*Z - ONE)
-
-      END SUBROUTINE LIU_RAW
 
       SUBROUTINE INV3 ( A, DET, AI )
 

@@ -1296,7 +1296,7 @@
                                                                  'USERIN  ',      & !         23
                                                                  'QUADR   ',      & !         24
                                                                  'PYRAM5  ',      & !         25
-                                                                 'PYRAM14 ',      & !         26
+                                                                 'PYRAM13 ',      & !         26
                                                                  'TRIA6   '/)       !         27
 
                                                              ! Character name for output purposed in LINK9 WRTELi subr's
@@ -1325,7 +1325,7 @@
                                                                  'U S E R I N  ', & !         23
                                                                  'C Q U A D R  ', & !         24
                                                                  'C P Y R A M 5', & !         25
-                                                                 'C P Y R A M14', & !         26
+                                                                 'C P Y R A M13', & !         26
                                                                  'T R I A 6    '/)  !         27
 
                                                              ! Array of number of grid points for the various element types
@@ -1354,7 +1354,7 @@
                                                                    0,             & ! USERIN  23
                                                                    4,             & ! QUADR   24
                                                                    5,             & ! PYRAM5  25
-                                                                  14,             & ! PYRAM14 26
+                                                                  13,             & ! PYRAM13 26
                                                                    6/)              ! TRIA6   27
 
                                                              ! Array of number of stress recovery points for various elem types
@@ -1385,7 +1385,7 @@
                                                                    0,             & ! USERIN  23
                                                                    5,             & ! QUADR   24
                                                                    6,             & ! PYRAM5  25
-                                                                  15,             & ! PYRAM14 26
+                                                                  1,             & ! PYRAM13 26
                                                                    3/)              ! TRIA6   27 (3 GP stress recovery pts: (1/6,1/6), (1/2,1/6), (1/6,1/2))
 
 ! **********************************************************************************************************************************

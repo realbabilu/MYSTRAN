@@ -524,9 +524,10 @@
 !                                                              'REZAIEE ': Rezaiee2017 triangular shell branch
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
-      CHARACTER(  8*BYTE)      :: SOLIDTYP       = 'LEGACY  '! Solid formulation selector.
-!                                                              'LEGACY  ': existing MYSTRAN solid paths
-!                                                              'NEWSOLID': enable isolated new solid experiments where available
+      CHARACTER(  8*BYTE)      :: PENTATYP = 'ABE     '! NEWSOLID CPENTA6: ABE default, EAS9_V2 alternate.
+      CHARACTER(  8*BYTE)      :: SOLIDTYP       = 'NEWSOLID'! Default solid formulation selector; LEGACY is opt-in.
+!                                                              'LEGACY  ': explicitly selected existing MYSTRAN solid paths
+!                                                              'NEWSOLID': default new solid formulations where available
 !                                                              'EAS     ': accepted alias for NEWSOLID in PARAM parsing
 
 ! ----------------------------------------------------------------------------------------------------------------------------------

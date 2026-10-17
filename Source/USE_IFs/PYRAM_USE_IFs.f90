@@ -5,5 +5,6 @@
       USE ELEM_STRE_STRN_ARRAYS_Interface
       USE MATMULT_FFF_Interface
       USE MATMULT_FFF_T_Interface
+      USE ORDER_GAUSS_Interface
 
       END MODULE PYRAM_USE_IFs

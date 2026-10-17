@@ -18,7 +18,7 @@
                (ETYPE == 'TRIA3   ') .OR. (ETYPE == 'QUAD4   ') .OR. (ETYPE == 'QUADR   ') .OR. (ETYPE == 'QUAD8   ') .OR.      &
                (ETYPE == 'SHEAR   ') .OR.                                                                                         &
                (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'PYRAM5  ') .OR. (ETYPE == 'TETRA4  ') .OR.      &
-               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRAM14 ') .OR. (ETYPE == 'TETRA10 ')) THEN
+               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRAM13 ') .OR. (ETYPE == 'TETRA10 ')) THEN
         TABLE_NAME_NEW = "OSTR1X  "
         RETURN_FLAG = .FALSE.
       ELSE
@@ -83,7 +83,7 @@
                (ETYPE == 'QUADR   ') .OR. (ETYPE == 'QUAD8   ') .OR.                                                          &
                (ETYPE == 'SHEAR   ') .OR.                                                                                           &
                (ETYPE == 'HEXA8   ') .OR. (ETYPE == 'PENTA6  ') .OR. (ETYPE == 'PYRAM5  ') .OR. (ETYPE == 'TETRA4  ') .OR.        &
-               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRAM14 ') .OR. (ETYPE == 'TETRA10 ')) THEN
+               (ETYPE == 'HEXA20  ') .OR. (ETYPE == 'PENTA15 ') .OR. (ETYPE == 'PYRAM13 ') .OR. (ETYPE == 'TETRA10 ')) THEN
         TABLE_NAME_NEW= TABLE_NAME_SHELL_SOLID !"OES1X1  "
         RETURN_FLAG = .FALSE.
       ELSE
@@ -328,3 +328,31 @@
       END SUBROUTINE GET_STRESS_CODE
 
 ! ##################################################################################################################################
+
+! Append linear/quadratic solid families with the same OP2 type to one table-4 record.
+! A repeated table-3 header would otherwise be interpreted as another time step,
+! losing the second family's EIDs in readers that keep one element-node array.
+      SUBROUTINE WRITE_SOLID_OES3_STATIC(ITABLE, ISUBCASE, DEVICE_CODE, ELEM_TYPE, NUM_WIDE, STRESS_CODE, &
+                                        TITLE, LABEL, SUBTITLE, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
+      USE PENTIUM_II_KIND, ONLY: LONG, DOUBLE
+      IMPLICIT NONE
+      INTEGER(LONG),INTENT(INOUT)::ITABLE
+      INTEGER(LONG),INTENT(IN)::ISUBCASE,DEVICE_CODE,ELEM_TYPE,NUM_WIDE,STRESS_CODE,FIELD5_INT_MODE
+      REAL(DOUBLE),INTENT(IN)::FIELD6_EIGENVALUE
+      CHARACTER(128),INTENT(IN)::TITLE,LABEL,SUBTITLE
+      INTEGER(LONG),SAVE::LAST_ITABLE=0,LAST_CASE=-1,LAST_DEVICE=-1,LAST_TYPE=-1,LAST_WIDTH=-1,LAST_STRESS=-1,LAST_MODE=-1
+      REAL(DOUBLE),SAVE::LAST_EIGEN=0D0
+      CHARACTER(128),SAVE::LAST_TITLE='',LAST_LABEL='',LAST_SUBTITLE=''
+      LOGICAL::APPEND_RECORD
+      APPEND_RECORD=(ITABLE==LAST_ITABLE).AND.(ISUBCASE==LAST_CASE).AND.(DEVICE_CODE==LAST_DEVICE).AND. &
+                    (ELEM_TYPE==LAST_TYPE).AND.(NUM_WIDE==LAST_WIDTH).AND.(STRESS_CODE==LAST_STRESS).AND. &
+                    (FIELD5_INT_MODE==LAST_MODE).AND.(FIELD6_EIGENVALUE==LAST_EIGEN).AND. &
+                    (TITLE==LAST_TITLE).AND.(LABEL==LAST_LABEL).AND.(SUBTITLE==LAST_SUBTITLE)
+      IF (.NOT.APPEND_RECORD) THEN
+         CALL WRITE_OES3_STATIC(ITABLE,ISUBCASE,DEVICE_CODE,ELEM_TYPE,NUM_WIDE,STRESS_CODE, &
+                                TITLE,LABEL,SUBTITLE,FIELD5_INT_MODE,FIELD6_EIGENVALUE)
+      ENDIF
+      LAST_ITABLE=ITABLE;LAST_CASE=ISUBCASE;LAST_DEVICE=DEVICE_CODE;LAST_TYPE=ELEM_TYPE
+      LAST_WIDTH=NUM_WIDE;LAST_STRESS=STRESS_CODE;LAST_MODE=FIELD5_INT_MODE;LAST_EIGEN=FIELD6_EIGENVALUE
+      LAST_TITLE=TITLE;LAST_LABEL=LABEL;LAST_SUBTITLE=SUBTITLE
+      END SUBROUTINE WRITE_SOLID_OES3_STATIC

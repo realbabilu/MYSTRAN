@@ -1,11 +1,10 @@
       SUBROUTINE BD_PYRAM ( CARD, LARGE_FLD_INP, NUM_GRD )
 
-! Processes pyramid solid Bulk Data Cards for 5-node linear and 14-node
-! quadratic elements. Legacy CPYRAM/CPYRA card names remain accepted on input.
+! Standard Nastran 5/13-node connectivity; reject nonstandard 14-node input.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, JCARD_LEN, NPYRAM5, NPYRAM14, NELE
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, JCARD_LEN, NPYRAM5, NPYRAM13, NELE
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  ETYPE
 
@@ -24,77 +23,72 @@
 
       INTEGER(LONG), INTENT(OUT)      :: NUM_GRD
       INTEGER(LONG)                   :: I
+      INTEGER(LONG)                   :: NF
       INTEGER(LONG)                   :: ICONT = 0
       INTEGER(LONG)                   :: IERR  = 0
 
       CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
       NAME = JCARD(1)
       ID   = JCARD(2)
+      IF ((TRIM(NAME) /= 'CPYRAM') .AND. (TRIM(NAME) /= 'CPYRA') .AND. &
+          (TRIM(NAME) /= 'CPYRAM*') .AND. (TRIM(NAME) /= 'CPYRA*')) THEN
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,'(A,A)') ' *ERROR: NONSTANDARD PYRAMID CARD NAME ',TRIM(NAME)
+         WRITE(F06,'(A,A)') ' *ERROR: NONSTANDARD PYRAMID CARD NAME ',TRIM(NAME)
+         NUM_GRD = 0
+         RETURN
+      ENDIF
 
       DO I=1,10
          JCARD_EDAT(I) = JCARD(I)
       ENDDO
 
-      CALL ELEPRO ( 'Y', JCARD_EDAT, 7, 7, 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'N' )
-      CALL BD_IMBEDDED_BLANK   ( JCARD,2,3,4,5,6,7,8,0 )
-      CALL CARD_FLDS_NOT_BLANK ( JCARD,0,0,0,0,0,0,0,9 )
+      NF = 7
+      IF (JCARD(9) /= ' ') NF = 8
+      CALL ELEPRO ( 'Y', JCARD_EDAT, NF, NF, 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y' )
+      CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
       CALL CRDERR ( CARD )
-
-      ETYPE(NELE)(1:) = ' '
-      IF (LARGE_FLD_INP == 'N') THEN
-         CALL NEXTC  ( CARD, ICONT, IERR )
-      ELSE
-         CALL NEXTC2 ( CARD, ICONT, IERR, CHILD )
-         CARD = CHILD
-      ENDIF
-      CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
-
-      IF (ICONT == 0) THEN
-         NPYRAM5     = NPYRAM5 + 1
-         ETYPE(NELE) = 'PYRAM5  '
-         NUM_GRD     = 5
-      ELSE
-         IF (CARD(1:) /= ' ') THEN
-            NPYRAM14    = NPYRAM14 + 1
-            ETYPE(NELE) = 'PYRAM14 '
-            NUM_GRD      = 14
-
-            DO I=1,10
-               JCARD_EDAT(I) = JCARD(I)
-            ENDDO
-            CALL ELEPRO ( 'N', JCARD_EDAT, 8, 8, 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y' )
-            CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
-            CALL CRDERR ( CARD )
-
-            IF (LARGE_FLD_INP == 'N') THEN
-               CALL NEXTC  ( CARD, ICONT, IERR )
-            ELSE
-               CALL NEXTC2 ( CARD, ICONT, IERR, CHILD )
-               CARD = CHILD
-            ENDIF
-            CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
-            IF (ICONT == 1) THEN
-               DO I=1,10
-                  JCARD_EDAT(I) = JCARD(I)
-               ENDDO
-               CALL ELEPRO ( 'N', JCARD_EDAT, 1, 1, 'Y', 'N', 'N', 'N', 'N', 'N', 'N', 'N' )
-               CALL BD_IMBEDDED_BLANK( JCARD,2,0,0,0,0,0,0,0 )
-               CALL CARD_FLDS_NOT_BLANK(JCARD,0,3,4,5,6,7,8,9)
-               CALL CRDERR ( CARD )
-            ELSE
-               FATAL_ERR = FATAL_ERR + 1
-               WRITE(ERR,1136) NAME, ID
-               WRITE(F06,1136) NAME, ID
-            ENDIF
+      NUM_GRD = NF - 2
+      DO
+         IF (LARGE_FLD_INP == 'N') THEN
+            CALL NEXTC ( CARD, ICONT, IERR )
          ELSE
-            NPYRAM5     = NPYRAM5 + 1
-            ETYPE(NELE) = 'PYRAM5  '
-            NUM_GRD     = 5
+            CALL NEXTC2 ( CARD, ICONT, IERR, CHILD )
+            CARD = CHILD
          ENDIF
-      ENDIF
+         IF (ICONT == 0) EXIT
+         CALL MKJCARD ( SUBR_NAME, CARD, JCARD )
+         NF = 0
+         DO I=2,9
+            IF (JCARD(I) /= ' ') NF = I - 1
+         ENDDO
+         IF (NF == 0) EXIT
+         IF (NUM_GRD + NF > 13) THEN
+            FATAL_ERR = FATAL_ERR + 1
+            WRITE(ERR,1137) NAME, ID, NUM_GRD + NF
+            WRITE(F06,1137) NAME, ID, NUM_GRD + NF
+            EXIT
+         ENDIF
+         CALL ELEPRO ( 'N', JCARD, NF, NF, 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y' )
+         CALL BD_IMBEDDED_BLANK ( JCARD,2,3,4,5,6,7,8,9 )
+         CALL CRDERR ( CARD )
+         NUM_GRD = NUM_GRD + NF
+      ENDDO
+      SELECT CASE (NUM_GRD)
+      CASE (5)
+         NPYRAM5 = NPYRAM5 + 1
+         ETYPE(NELE) = 'PYRAM5  '
+      CASE (13)
+         NPYRAM13 = NPYRAM13 + 1
+         ETYPE(NELE) = 'PYRAM13 '
+      CASE DEFAULT
+         FATAL_ERR = FATAL_ERR + 1
+         WRITE(ERR,1137) NAME, ID, NUM_GRD
+         WRITE(F06,1137) NAME, ID, NUM_GRD
+      END SELECT
 
       RETURN
 
- 1136 FORMAT(' *ERROR  1136: REQUIRED CONTINUATION FOR ',A,' ID = ',A,' MISSING')
+ 1137 FORMAT(' *ERROR  1137: ',A,' ID = ',A,' HAS ',I4,' GRIDS; EXPECTED 5 OR 13')
 
       END SUBROUTINE BD_PYRAM
