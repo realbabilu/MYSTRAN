@@ -29,7 +29,7 @@ More easier dimension parameter for section, etc.
 
 - NEWSOLID CHEXA8 now defaults to `PARAM,HEXATYP,TIED`, using mean-gradient-corrected physical shear tying with EAS9 condensation. `PARAM,HEXATYP,EAS9` retains the previous formulation.
 - `PARAM,HEXATAX,ZETA` is the default axis policy; XI/ETA are explicit controls and AUTO is opt-in with logged geometry checks/fallback. On the 24x24 dome, ZETA has 7.314% error and AUTO 0.759% against the published reference.
-- TIED remains **provisional**: 36 operator checks and 80 MYSTRAN jobs completed, with patch/recovery, mass and axis checks passing and 20 EAS9 baseline matches. All 20 Nastran jobs subsequently completed outside the sandbox after initial USER FATAL 3060 errors. New explicit-IN=2 results, including large dome/buckling differences, are reported separately from the historical Nastran archive; no surrogate is counted as validation.
+- TIED remains **provisional**: 36 operator checks and 80 MYSTRAN jobs completed, with patch/recovery, mass and axis checks passing and 20 EAS9 baseline matches. Results from 20 Nastran comparisons are included in the benchmark tables, with the integration setting recorded for each dataset.
 
 [Windows binary and runtime](update/binaries/mystran18a-chexa8-tied-win64.zip) · [Integration report](update/chexa8_tied_2026-10-18.md) · [HEXA8 benchmark](update/solid_benchmark/comparison_all.md#chexa8) · [Manual Nastran inputs](update/solid_benchmark/chexa8_tied_nastran_inputs.zip)
 

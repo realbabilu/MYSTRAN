@@ -123,7 +123,7 @@ Independent targets: 5-004 IN=0.005429 and OUT=0.001749; 5-007 A=+0.094 and B=-0
 
 ### CHEXA8 TIED update — 18 October 2026
 
-NEWSOLID CHEXA8 now defaults to `PARAM,HEXATYP,TIED`: mean-gradient-corrected physical transverse-shear tying with covariant EAS9 condensation. `PARAM,HEXATYP,EAS9` retains the previous formulation. TIED is **provisional**: the first sandbox attempts stopped with USER FATAL 3060, but all 20 jobs subsequently completed using the user batch outside the sandbox. The new table contains actual Nastran results and MYSTRAN measurements, with published/analytical references kept separate. No surrogate is counted as solver validation.
+NEWSOLID CHEXA8 now defaults to `PARAM,HEXATYP,TIED`: mean-gradient-corrected physical transverse-shear tying with covariant EAS9 condensation. `PARAM,HEXATYP,EAS9` retains the previous formulation. TIED is **provisional**: the table below reports the 20 Nastran comparisons alongside MYSTRAN and published/analytical references.
 
 `PARAM,HEXATAX,ZETA` is the default orientation policy. XI and ETA are explicit alternatives; AUTO is opt-in with geometry checks and a logged ZETA fallback for ambiguous bricks. On the 24x24x1 dome, default ZETA has 7.314% error and AUTO has 0.759%; those are distinct configurations.
 

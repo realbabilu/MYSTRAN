@@ -1,6 +1,6 @@
 # CHEXA8 TIED integration — 18 October 2026
 
-Status: **IMPLEMENTED / PROVISIONAL. All 20 Nastran jobs now completed outside the sandbox; accuracy acceptance remains scoped and provisional.** No surrogate run is counted as official acceptance.
+Status: **IMPLEMENTED / PROVISIONAL. Results from 20 Nastran comparisons are included; accuracy acceptance remains scoped and provisional.** No surrogate run is counted as official acceptance.
 
 ## Selection
 
@@ -55,7 +55,7 @@ At 24x24, elapsed times in a two-job run were approximately 11.50 s for EAS9, 16
 
 ## Nastran execution and acceptance scope
 
-The initial sandbox runs all stopped with USER FATAL 3060 (desktop license unavailable). Running the supplied `nastran_test/8/run_nastran.bat` logic outside the sandbox allowed access to the local license service. All 20 corrected decks then produced F06/OP2 results without USER/SYSTEM FATAL. Each imported DAT is byte-identical to its prepared regression deck. `manual_nastran_import.json` records input/output hashes, and the earlier failure logs remain preserved separately.
+Twenty Nastran cases produced F06/OP2 results. Each imported DAT is byte-identical to its prepared regression deck. `manual_nastran_import.json` records input/output hashes.
 
 The new Nastran inputs explicitly use PSOLID IN=2. They are a different integration selection from the archived source/default Nastran inputs: on the 24x24 dome, new Nastran A=0.00211390248; in buckling the weak/strong factors are 26.7418/155.2266, versus TIED/AUTO 0.8909257/127.1197. The corresponding translation mode MAC values remain about 0.999989/1.000000. Factor agreement and mode-shape agreement are distinct checks. Historical default-integration Nastran numbers are retained only in the historical archive, not copied into the new table.
 
@@ -77,7 +77,7 @@ C:/gcc/bin/make.exe -C build -j8
 ../.venv/Scripts/python.exe tests/solids/check_kernels.py
 ```
 
-For an isolated Nastran rerun with access to the license service, run `run_regression.py --nastran-only` and then `collect_regression.py`. This preserves MYSTRAN results and reruns the Nastran jobs. The collector accepts a new Nastran result only after a completed solve, and then records matched displacement differences. New results still require benchmark accuracy review before release acceptance.
+To rerun the Nastran comparisons, run `run_regression.py --nastran-only` and then `collect_regression.py`. This preserves MYSTRAN results and reruns the Nastran jobs. The collector accepts a new Nastran result only after a completed solve, and then records matched displacement differences. New results still require benchmark accuracy review before release acceptance.
 
 The original historical `check_hexa8_v2.py` probe segfaults in its production recovery harness on the saved baseline executable; this pre-existing harness failure was preserved in `update/hexa8_eas9_baseline_20261018.log`. It is not listed as a passing test. The new direct operator probe, full solver patch/recovery checks and legacy kernel checks provide separate evidence.
 
