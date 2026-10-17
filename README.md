@@ -47,6 +47,10 @@ See the [5-001 OP2 audit](update/op2_solid_5001_audit.md), [quadratic patch audi
 - [Download benchmark input decks only](update/solid_benchmark/solid_benchmark_inputs.zip) - no raw solver outputs.
 - [Benchmark index and numerical data](update/solid_benchmark/README.md).
 
+## Formulation
+
+- [Solids Formulation](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.html) — HTML manuscript covering the eight NEWSOLID solid topologies, mathematical operators and existing benchmark comparisons. Download the [formulation folder](update/Formulation/Solid) to view the HTML with its figures locally; GitHub displays HTML source rather than rendering it.
+
 # Build Instructions
 
 See [BUILD.md](BUILD.md) for both Windows and Linux build (compiling) instructions.
