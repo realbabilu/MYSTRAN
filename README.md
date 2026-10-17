@@ -41,7 +41,7 @@ See the [5-001 OP2 audit](update/op2_solid_5001_audit.md), [quadratic patch audi
 
 ### Solid benchmark comparisons
 
-- [GPSTRESS VOLUME and solid-element patch-test example](update/solid_benchmark/5-001_8_SOLIDS_GPSTRESS_PENTA_REMESH_FIXED_QUADRATIC_MYSTRAN_EAS9.dat): validated 5-001 MYSTRAN input with eight solid groups, reconciled quadratic node ordering and CPENTA6 EAS9. The [original FIXED_QUADRATIC input](update/solid_benchmark/5-001_8_SOLIDS_GPSTRESS_PENTA_REMESH_FIXED_QUADRATIC.dat) is preserved separately; see the [example notes](update/solid_benchmark/README.md#5-001-gpstress-volume-and-solid-element-patch-test-example) for validation scope.
+- [GPSTRESS VOLUME and solid-element patch-test example](update/solid_benchmark/5-001_8_SOLIDS_GPSTRESS_PENTA_REMESH_FIXED_QUADRATIC_MYSTRAN_EAS9.dat): validated 5-001 MYSTRAN input with eight solid groups, reconciled quadratic node ordering and CPENTA6 EAS9. See the [example notes](update/solid_benchmark/README.md#5-001-gpstress-volume-and-solid-element-patch-test-example) for validation scope.
 - [MYSTRAN solid comparison vs Nastran](update/solid_benchmark/mystran_solid_comparison.md): patch, beam, dome, buckling and thermal benchmarks.
 - [All solid elements - SAP2000 benchmarks](update/solid_benchmark/comparison_all.md): eight solid types, matched Nastran/MYSTRAN meshes and refinement curves, with independent and published SAP2000 references.
 - [Download benchmark input decks only](update/solid_benchmark/solid_benchmark_inputs.zip) - no raw solver outputs.
