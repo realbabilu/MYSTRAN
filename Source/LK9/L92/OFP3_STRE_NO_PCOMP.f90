@@ -121,6 +121,8 @@
       INTRINSIC DABS, DMAX1, DMIN1, IAND
       ITABLE = 0
       TABLE_NAME = "OES ERR "
+      IERROR = 0
+      REQUEST = 'ELEMENT STRESS'
 
       WRITE_NEU = WRITE_NEU_STRE
 
@@ -222,6 +224,8 @@ elems_5: DO J = 1,NELE
                   CALL EMG ( J   , OPT, 'N', SUBR_NAME, 'N' )
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE elems_5
                   ENDIF
                   CALL ELMDIS
@@ -303,8 +307,8 @@ elems_5: DO J = 1,NELE
                               (TYPE(1:5) == 'PYRAM') .OR.                                                                          &
                               (TYPE(1:5) == 'PENTA') .OR.                                                                          &
                               (TYPE(1:5) == 'TETRA')) THEN
-! Stresses are directly evaluated at the corner grid points. If they are going to be evaluated at Gauss points
-! then extrapolated to grid points, that should be done here, in POLYNOM_FIT_STRE_STRN, or in an equivalent subroutine.
+! Keep the kernel's recovered center/corner tensors, including interior
+! extrapolation for NEWSOLID bricks and pyramids.
                         STRESS_OUT(:,:) = STRESS_RAW(:,:)
 
                      ENDIF
@@ -427,7 +431,9 @@ elems_5: DO J = 1,NELE
                      ENDDO
                   ENDIF
 
-                  IF (ETYPE(J)(1:5) /='USER1') THEN
+                  IF ((ETYPE(J)(1:5) /='USER1') .AND. .NOT. &
+                      ((TYPE(1:4)=='HEXA').OR.(TYPE(1:5)=='PENTA').OR. &
+                       (TYPE(1:5)=='TETRA').OR.(TYPE(1:5)=='PYRAM'))) THEN
                      IF (NUM_OGEL_ROWS == NELREQ(I)) THEN
                         CALL CHK_OGEL_ZEROS ( NUM_OGEL )
                         CALL SET_OES_TABLE_NAME(TYPE, TABLE_NAME, ITABLE)
@@ -450,6 +456,17 @@ elems_5: DO J = 1,NELE
             ENDIF
 
          ENDDO elems_5
+
+! Flush the successfully recovered solid rows even if another element in
+! this type failed. The original request count is not the written count.
+         IF (NUM_OGEL_ROWS>0 .AND. &
+             ((ELMTYP(I)(1:4)=='HEXA').OR.(ELMTYP(I)(1:5)=='PENTA').OR. &
+              (ELMTYP(I)(1:5)=='TETRA').OR.(ELMTYP(I)(1:5)=='PYRAM'))) THEN
+            TYPE=ELMTYP(I)
+            CALL CHK_OGEL_ZEROS(NUM_OGEL)
+            CALL SET_OES_TABLE_NAME(TYPE,TABLE_NAME,ITABLE)
+            CALL WRITE_ELEM_STRESSES(JVEC,NUM_OGEL_ROWS,IHDR,NUM_PTS(I),ITABLE)
+         ENDIF
 
       ENDDO reqs5
 
@@ -486,6 +503,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -571,6 +590,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -602,6 +623,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -633,6 +656,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -664,6 +689,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -695,6 +722,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -726,6 +755,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -757,6 +788,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -788,6 +821,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -819,6 +854,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -850,6 +887,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -881,6 +920,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -912,6 +953,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -943,6 +986,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -974,6 +1019,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -1005,6 +1052,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -1036,6 +1085,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -1067,6 +1118,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -1098,6 +1151,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -1129,6 +1184,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -1160,6 +1217,8 @@ elems_5: DO J = 1,NELE
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -1175,11 +1234,7 @@ elems_5: DO J = 1,NELE
 
       ENDIF
 
-      IF (IERROR > 0) THEN
-         REQUEST = 'ELEMENT STRESS'
-         WRITE(ERR,9201) TYPE, REQUEST, EID
-         WRITE(F06,9201) TYPE, REQUEST, EID
-      ENDIF
+
 
 
 

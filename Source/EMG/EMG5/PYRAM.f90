@@ -12,7 +12,7 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
       USE MODEL_STUF, ONLY            :  ALPVEC, BE1, BE2, DT, EID, ELGP, NUM_EMG_FATAL_ERRS, ES, KE, KED, ME, PTE, RHO,         &
-                                         SE1, SE2, STE1, STRESS, TREF, TYPE, XEL, UEL, ISOLID, SUBLOD
+                                         SE1, SE2, STE1, STE2, STRESS, TREF, TYPE, XEL, UEL, ISOLID, SUBLOD
       USE PARAMS, ONLY                :  EPSIL, COUPMASS
       USE PYRAM13_BEDROSIAN, ONLY     :  BEDROSIAN13_SHAPE, BEDROSIAN13_QUADRATURE, &
                                          BEDROSIAN13_RECOVER, BEDROSIAN13_KG
@@ -31,6 +31,7 @@
       INTEGER(LONG)                   :: ID(3*ELGP)
       INTEGER(LONG)                   :: II,JJ
       INTEGER(LONG)                   :: NGP, KGORDER, KGERR, KGNP
+      INTEGER(LONG)                   :: OUT_PT
 
       REAL(DOUBLE)                    :: GPSTRESS(6,27), GPSTRAIN(6,27), UTEMP(39), TNODES(13)
       REAL(DOUBLE)                    :: ALP(6)
@@ -63,6 +64,8 @@
       REAL(DOUBLE)                    :: TEMP
       REAL(DOUBLE)                    :: TREF1
       REAL(DOUBLE)                    :: VOLUME
+      REAL(DOUBLE)                    :: OUT_POINTS(3,6), SAMPLE_B(6,3*ELGP,8), SHAPE_DN(3,ELGP)
+      REAL(DOUBLE)                    :: G, ZLO, ZHI, WEIGHT, ZWEIGHT
 
       IF ((RED_INT_SHEAR == 'Y') .AND. (WRITE_WARN == 'Y') .AND. (INT_ELEM_ID < 0)) THEN
          RETURN
@@ -196,19 +199,47 @@
       ENDIF
 
       IF ((OPT(3) == 'Y') .OR. (OPT(6) == 'Y')) THEN
-         CALL PYRAM_BMAT ( ZERO, ZERO, 0.25D0, DETJ, B, N )
-         CALL MATMULT_FFF ( ES, B, 6, 6, 3*ELGP, DUM4 )
-         DO I=1,3
-            DO J=1,3*ELGP
-               BE1(I,ID(J),1) = B(I  ,J)
-               BE2(I,ID(J),1) = B(I+3,J)
-               SE1(I,ID(J),1) = DUM4(I  ,J)
-               SE2(I,ID(J),1) = DUM4(I+3,J)
-            ENDDO
+! Center plus five corner tensors. Extrapolate the valid eight-point field
+! in collapsed coordinates; the apex itself has no invertible Jacobian.
+         OUT_POINTS=RESHAPE([ZERO,ZERO,0.25D0, -ONE,-ONE,ZERO, ONE,-ONE,ZERO, &
+                             ONE,ONE,ZERO, -ONE,ONE,ZERO, ZERO,ZERO,ONE],[3,6])
+         DO I=1,NGP
+            CALL PYRAM_BMAT(INT_R(I),INT_S(I),INT_T(I),DETJ,SAMPLE_B(:,:,I),N)
          ENDDO
-         DO L=1,NTSUB
+         IF (NUM_EMG_FATAL_ERRS > 0) RETURN
+         G=ONE/DSQRT(3.0D0); ZLO=MINVAL(INT_T(1:NGP)); ZHI=MAXVAL(INT_T(1:NGP))
+         DO OUT_PT=1,6
+            IF (OUT_PT==1) THEN
+               CALL PYRAM_BMAT(ZERO,ZERO,0.25D0,DETJ,B,N)
+            ELSE
+               B=ZERO
+               DO I=1,NGP
+                  IF (DABS(INT_T(I)-ZLO)<EPS1) THEN
+                     ZWEIGHT=(ZHI-OUT_POINTS(3,OUT_PT))/(ZHI-ZLO)
+                  ELSE
+                     ZWEIGHT=(OUT_POINTS(3,OUT_PT)-ZLO)/(ZHI-ZLO)
+                  ENDIF
+                  WEIGHT=(ONE+OUT_POINTS(1,OUT_PT)*INT_R(I)/(G*G))* &
+                         (ONE+OUT_POINTS(2,OUT_PT)*INT_S(I)/(G*G))*ZWEIGHT/4.0D0
+                  B=B+WEIGHT*SAMPLE_B(:,:,I)
+               ENDDO
+               CALL PYRAM_SHAPE(OUT_POINTS(1,OUT_PT),OUT_POINTS(2,OUT_PT),OUT_POINTS(3,OUT_PT),N,SHAPE_DN)
+            ENDIF
+            CALL MATMULT_FFF ( ES, B, 6, 6, 3*ELGP, DUM4 )
             DO I=1,3
-               STE1(I,L,1) = EALP(I)*TBAR(L)
+               DO J=1,3*ELGP
+                  BE1(I,ID(J),OUT_PT) = B(I  ,J)
+                  BE2(I,ID(J),OUT_PT) = B(I+3,J)
+                  SE1(I,ID(J),OUT_PT) = DUM4(I  ,J)
+                  SE2(I,ID(J),OUT_PT) = DUM4(I+3,J)
+               ENDDO
+            ENDDO
+            DO L=1,NTSUB
+               TEMP=DOT_PRODUCT(N,DT(1:ELGP,L))-TREF1
+               DO I=1,3
+                  STE1(I,L,OUT_PT) = EALP(I)*TEMP
+                  STE2(I,L,OUT_PT) = EALP(I+3)*TEMP
+               ENDDO
             ENDDO
          ENDDO
       ENDIF

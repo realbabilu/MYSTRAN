@@ -268,6 +268,8 @@
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
       USE MODEL_STUF, ONLY : NUM_EMG_FATAL_ERRS
+      USE MODEL_STUF, ONLY : SUBLOD
+      USE SCONTR, ONLY : INT_SC_NUM
       INTEGER(LONG), INTENT(IN) :: V
       INTEGER(LONG), ALLOCATABLE, INTENT(OUT) :: GRIDS(:)
       REAL(DOUBLE), ALLOCATABLE, INTENT(OUT) :: VALUES(:,:)
@@ -328,6 +330,9 @@
          ENDDO
       ENDIF
       OPT=['N','N','N','N','N','N']
+! With every option N, EMG returns before ELMDAT2 loads temperatures. Ask
+! for the thermal load operator in thermal subcases so recovery sees DT.
+      IF (SUBLOD(INT_SC_NUM,2)>0) OPT(2)='Y'
       DO I=1,SIZE(ELEMENTS)
          BEFORE=FATAL_ERR
          OPT(3)='N'

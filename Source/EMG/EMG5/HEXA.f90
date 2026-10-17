@@ -49,7 +49,7 @@
                                          NUM_EMG_FATAL_ERRS, PLOAD4_3D_DATA, PPE, PRESS, PTE, RHO, SE1, SE2, STE1, STRESS, TREF,   &
                                          TYPE, XEL, UEL, SUBLOD
       USE HEXA_USE_IFs
-      USE EAS9_FRAME, ONLY            : MAP_NATURAL_EAS9, HEX8_EAS9_STATE
+      USE EAS9_FRAME, ONLY            : MAP_NATURAL_EAS9, HEX8_EAS9_STATE, HEX8_EAS9_RECOVERY
       USE EXPAND_MASS_DOFS_Interface
 
 
@@ -494,7 +494,10 @@
                                                            ! Calc SE1,2,3
           IORD_MSG = 'for 3-D solid strains,                      = '
           CALL SHP3DH ( 0, 0, 0, ELGP, SUBR_NAME, IORD_MSG, 1, SSI, SSJ, SSK, 'N', PSH, DPSHG )
-          IF (SOLIDTYP == 'NEWSOLID' .AND. ELGP == 20 .AND. IORD == 3 .AND. STR_PT_NUM > 1) THEN
+          IF (USE_EAS9_NEWSOLID) THEN
+! The enhanced recovery below supplies BI from valid interior states.
+             BI=ZERO
+          ELSE IF (SOLIDTYP == 'NEWSOLID' .AND. ELGP == 20 .AND. IORD == 3 .AND. STR_PT_NUM > 1) THEN
 ! Quadratic corner output is extrapolated from the valid 3x3x3 integration
 ! field. Do not invert a corner Jacobian outside the integration rule.
              BI=ZERO
@@ -515,7 +518,7 @@
           ENDIF
           IF (USE_EAS9_NEWSOLID) THEN
              V2TEMP=TREF1;V2U=ZERO
-             CALL HEX8_EAS9_STATE(XEL(1:8,1:3),ES,ALP,V2TEMP,TREF1,V2U,[SSI,SSJ,SSK], &
+             CALL HEX8_EAS9_RECOVERY(XEL(1:8,1:3),ES,ALP,V2TEMP,TREF1,V2U,[SSI,SSJ,SSK], &
                                  V2K,V2F,V2B,V2EPS,V2SIG,V2KG,IERR)
              IF (IERR /= 0) THEN
                 CALL V2_ERROR; RETURN

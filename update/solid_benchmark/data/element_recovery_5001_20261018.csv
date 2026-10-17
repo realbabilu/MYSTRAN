@@ -1,0 +1,17 @@
+result,element,expected_elements,before_elements,corrected_elements,nastran_elements,point_rows,max_abs_tensor_difference_from_nastran
+stress,CTETRA4,168,168,168,168,840,0.0
+stress,CTETRA10,168,168,168,168,840,0.0
+stress,CPENTA6,14,14,14,14,98,2034.2601432800293
+stress,CPENTA15,14,14,14,14,98,0.0
+stress,CHEXA8,7,0,7,7,63,0.0
+stress,CHEXA20,7,7,7,7,63,0.0
+stress,CPYRAM5,42,42,42,42,252,0.0
+stress,CPYRAM13,42,0,42,42,252,0.0
+strain,CTETRA4,168,168,168,168,840,0.0
+strain,CTETRA10,168,168,168,168,840,0.0
+strain,CPENTA6,14,14,14,14,98,0.0016482999781146646
+strain,CPENTA15,14,14,14,14,98,0.0
+strain,CHEXA8,7,0,7,7,63,0.0
+strain,CHEXA20,7,7,7,7,63,0.0
+strain,CPYRAM5,42,42,42,42,252,0.0
+strain,CPYRAM13,42,0,42,42,252,0.0

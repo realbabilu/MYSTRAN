@@ -168,11 +168,6 @@
       FIELD6_EIGENVALUE = 0.0
       WRITE_F06 = (STRN_OUT(1:1) == 'Y')
       INQUIRE ( UNIT=OP2, OPENED=WRITE_OP2 )
-! Center-only PYRAM13 recovery cannot fill the standard six-location layout.
-      IF ((TYPE == 'PYRAM13 ') .AND. WRITE_OP2) THEN
-         WRITE_OP2 = .FALSE.
-         WRITE(F06,'(A)') ' *WARNING: PYRAM13 OP2 STRAIN NOT VALIDATED; CENTER STRAIN IS AVAILABLE IN F06'
-      ENDIF
       IF (STRN_CUR == 'FIBER') THEN
          IS_FIBER_DISTANCE = 1
       ELSE

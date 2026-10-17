@@ -171,11 +171,6 @@
       WRITE_GPSTRESS_F06 = GPSTRESS_REQ .AND. (GPSTRESS_OUT(1:1) == 'Y')
       INQUIRE ( UNIT=OP2, OPENED=OP2_OPENED )
       WRITE_OP2 = STRESS_USER_REQ .AND. OP2_OPENED
-! Center-only PYRAM13 recovery cannot fill the standard six-location layout.
-      IF ((TYPE == 'PYRAM13 ') .AND. WRITE_OP2) THEN
-         WRITE_OP2 = .FALSE.
-         WRITE(F06,'(A)') ' *WARNING: PYRAM13 OP2 STRESS NOT VALIDATED; CENTER STRESS IS AVAILABLE IN F06'
-      ENDIF
 
       IF (IHEADER == 'Y') THEN
          IF (WRITE_F06) THEN

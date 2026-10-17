@@ -116,6 +116,8 @@
       INTRINSIC DABS, DMAX1, DMIN1, IAND
       ITABLE = 0
       TABLE_NAME = "OES ERR "
+      IERROR = 0
+      REQUEST = 'ELEMENT STRAIN'
 
       WRITE_NEU = WRITE_NEU_STRN
 
@@ -201,6 +203,8 @@ elems_7: DO J = 1,NELE
                   CALL EMG ( J   , OPT, 'N', SUBR_NAME, 'N' )! Calc SEi matrices
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE elems_7
                   ENDIF
                   CALL ELMDIS
@@ -258,8 +262,8 @@ elems_7: DO J = 1,NELE
                               (TYPE(1:5) == 'PYRAM') .OR.                                                                          &
                               (TYPE(1:5) == 'PENTA') .OR.                                                                          &
                               (TYPE(1:5) == 'TETRA')) THEN
-! Strains are directly evaluated at the corner grid points. If they are going to be evaluated at Gauss points
-! then extrapolated to grid points, that should be done here, in POLYNOM_FIT_STRE_STRN, or in an equivalent subroutine.
+! Keep the kernel's recovered center/corner strains, including interior
+! extrapolation for NEWSOLID bricks and pyramids.
                         STRAIN_OUT(:,:) = STRAIN_RAW(:,:)
 
                      ENDIF
@@ -349,7 +353,9 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
 
                   ENDDO do_strain_pts
 
-                  IF (ETYPE(J)(1:5) /='USER1') THEN
+                  IF ((ETYPE(J)(1:5) /='USER1') .AND. .NOT. &
+                      ((TYPE(1:4)=='HEXA').OR.(TYPE(1:5)=='PENTA').OR. &
+                       (TYPE(1:5)=='TETRA').OR.(TYPE(1:5)=='PYRAM'))) THEN
                      IF (NUM_OGEL_ROWS == NELREQ(I)) THEN
                         CALL CHK_OGEL_ZEROS ( NUM_OGEL )
  100                    FORMAT("*DEBUG:      ",A,"; ELEMENT_TYPE=",A,"; TABLE_NAME=",A,"; ITABLE=",I8)
@@ -366,6 +372,16 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
             ENDIF
 
          ENDDO elems_7
+
+! A failed solid must not suppress valid records of the same type.
+         IF (NUM_OGEL_ROWS>0 .AND. &
+             ((ELMTYP(I)(1:4)=='HEXA').OR.(ELMTYP(I)(1:5)=='PENTA').OR. &
+              (ELMTYP(I)(1:5)=='TETRA').OR.(ELMTYP(I)(1:5)=='PYRAM'))) THEN
+            TYPE=ELMTYP(I)
+            CALL CHK_OGEL_ZEROS(NUM_OGEL)
+            CALL SET_OST_TABLE_NAME(TYPE,TABLE_NAME,ITABLE)
+            CALL WRITE_ELEM_STRAINS(JVEC,NUM_OGEL_ROWS,IHDR,NUM_PTS(I),ITABLE)
+         ENDIF
 
       ENDDO reqs7
 
@@ -396,6 +412,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -475,6 +493,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -506,6 +526,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -537,6 +559,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -568,6 +592,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -599,6 +625,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -630,6 +658,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -661,6 +691,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -692,6 +724,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -723,6 +757,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -754,6 +790,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -785,6 +823,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -816,6 +856,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -847,6 +889,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -877,6 +921,8 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
                   FEMAP_EL_NUMS(NUM_FROWS,1) = EID
                   IF (NUM_EMG_FATAL_ERRS > 0) THEN
                      IERROR = IERROR + 1
+                     WRITE(ERR,9201) TYPE, REQUEST, EID
+                     WRITE(F06,9201) TYPE, REQUEST, EID
                      CYCLE
                   ENDIF
                   CALL ELMDIS
@@ -892,11 +938,7 @@ do_strain_pts:    DO M=1,NUM_PTS_CUR
 
       ENDIF
 
-      IF (IERROR > 0) THEN
-         REQUEST = 'ELEMENT STRAIN'
-         WRITE(ERR,9201) TYPE, REQUEST, EID
-         WRITE(F06,9201) TYPE, REQUEST, EID
-      ENDIF
+
 
 
 

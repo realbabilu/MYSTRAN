@@ -4,6 +4,8 @@
 **Technical manuscript · Revision 3 · 18 October 2026**
 Implementation snapshot: `v18.00.a`, commit `5acbd00e`. Benchmark archive: 17 October 2026.
 
+**Subsequent implementation update:** the [18 October ordinary recovery correction](../../solid_element_recovery_5001_2026-10-18.md) restores all 462 element stress/strain results in 5-001, including CHEXA8 and CPYRAM13. The mathematical stiffness formulations and historical beam/dome results in this manuscript are unchanged.
+
 ## Abstract
 
 This manuscript documents eight three-dimensional continuum solid elements in MYSTRAN NEWSOLID: four- and ten-node tetrahedra, six- and fifteen-node prisms, eight- and twenty-node bricks, and five- and thirteen-node pyramids. Compatible interpolation, nodal strain smoothing, enhanced assumed strains, selective shear integration, local condensation and stress recovery are formulated in a common small-strain framework. The nine enhanced-strain columns for the linear brick and prism are transcribed from the current Fortran source. A matched-model comparison with Nastran covers 56 meshes, 63 MYSTRAN analysis selections and 126 displacement responses on a twisted beam and a pinched dome derived from SAP2000 verification examples. Existing constant-strain and rigid-rotation audits provide separate evidence for quadratic interpolation and recovery. The results show case-dependent accuracy: close agreement for several quadratic families coexists with substantial thin-dome errors for some linear formulations and the EAS9 prism. Solver agreement and error relative to independent reference solutions are reported separately. All numerical tables and curves are reused from existing results; no new solver analyses are reported.
@@ -362,7 +364,7 @@ p=-\tfrac13\mathrm{tr}\boldsymbol\sigma,\qquad
 \mathbf s=\boldsymbol\sigma-\tfrac13\mathrm{tr}(\boldsymbol\sigma)\mathbf I.
 ```
 
-GPSTRAIN has not been implemented in this work. `STRAIN(PLOT)` requests ordinary element strain OSTR, not GPSTRAIN. CPYRAM13 ordinary OP2 strain remains suppressed by the writer because the available center-only output does not populate its standard six-location layout; center strain is available through F06 printing. This limitation is separate from the validated GPSTRESS VOLUME records.
+GPSTRAIN has not been implemented in this work. `STRAIN(PLOT)` requests ordinary element strain OSTR, not GPSTRAIN. In the documented 17 October source snapshot, CPYRAM13 ordinary OP2 strain was suppressed because center-only output did not populate its six-location layout. The [18 October correction](../../solid_element_recovery_5001_2026-10-18.md) now supplies center and corner recovery and enables ordinary stress/strain OP2 output. This subsequent output correction is separate from GPSTRESS VOLUME and does not introduce GPSTRAIN.
 
 ## 5. Verification strategy and existing patch evidence
 

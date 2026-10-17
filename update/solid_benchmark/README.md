@@ -15,7 +15,7 @@ The all-solid report covers CTETRA4/10, CPENTA6/15, CHEXA8/20 and CPYRAM5/13. CP
 
 The example contains eight independent solid groups: CTETRA4/10, CPENTA6/15, CHEXA8/20 and CPYRAM5/13. It requests GPSTRESS VOLUME direct and principal OP2 results in the basic coordinate system. Coordinates, material and prescribed displacement values retain the supplied 5-001 patch definition.
 
-Use the validated MYSTRAN input to reproduce the audited run. Seven volumes match the tested Nastran OP2 float payloads; CPENTA6 EAS9 passes the analytical patch while differing from the Nastran result. The combined deck can still report the documented ordinary CHEXA8 corner-recovery Jacobian diagnostic; this is separate from GPSTRESS VOLUME recovery. See the [OP2 audit](../op2_solid_5001_audit.md) and [quadratic patch audit](../quadratic_patch_5001_audit.md) for numerical results and limitations.
+Use the validated MYSTRAN input to reproduce the audited run. Seven volumes match the tested Nastran OP2 float payloads; CPENTA6 EAS9 passes the analytical patch while differing from the Nastran result. The [18 October recovery correction](../solid_element_recovery_5001_2026-10-18.md) restores ordinary element stress/strain for all 462 elements, including CHEXA8 and CPYRAM13, while preserving this patch's GPSTRESS payloads. See the [OP2 audit](../op2_solid_5001_audit.md) and [quadratic patch audit](../quadratic_patch_5001_audit.md) for the earlier numerical results and scope.
 
 ## Benchmark input archive
 

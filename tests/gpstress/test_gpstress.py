@@ -205,8 +205,9 @@ class VolumeTests(unittest.TestCase):
                 if not in_ogs and len(item)>32: out.append(item)
             return out
         self.assertEqual(existing(a.with_suffix('.OP2')),existing(b.with_suffix('.OP2')))
-        # Do not certify this deck as a patch pass: preserve its existing errors.
-        self.assertIn('HAS JACOBIAN LESS THAN OR EQUAL TO ZERO',f06)
+        # Interior recovery no longer inverts distorted corner maps. This
+        # output check is separate from analytical/formulation acceptance.
+        self.assertNotIn('HAS JACOBIAN LESS THAN OR EQUAL TO ZERO',f06)
 
 
 if __name__=='__main__': unittest.main(verbosity=2)

@@ -25,6 +25,10 @@ More easier dimension parameter for section, etc.
 
 ---
 
+## Solid recovery update - 18 October 2026
+
+The [5-001 recovery correction](update/solid_element_recovery_5001_2026-10-18.md) restores ordinary OP2 element stress and strain for all 462 elements in the eight-solid patch. CHEXA8 corner recovery uses valid interior states; CPYRAM5/13 now supply center and corner tensors. The original patch displacements and GPSTRESS VOLUME payloads are unchanged. See the [before/after comparison](update/solid_benchmark/data/element_recovery_5001_20261018.csv) and audit for validation scope.
+
 ## Solid update - 17 October 2026
 
 The [October release](https://github.com/realbabilu/MYSTRAN/releases/tag/mystran18a-october2026) includes the latest MYSTRAN 18.0.A Windows binary from `v18.00.a`.
@@ -35,7 +39,7 @@ The [October release](https://github.com/realbabilu/MYSTRAN/releases/tag/mystran
 - Solid GPSTRESS VOLUME writes OP2 direct tensors, principal stresses and directions, pressure and von Mises for all eight 5-001 solid groups. Corner-grid rows and metadata match the tested Nastran reference. In the tested 5-001 case, seven volumes produce OP2 float payloads identical to Nastran. CPENTA6 EAS9 MYSTRAN is closer to the analytical solution than the Nastran reference. Thus, the tested GPSTRESS results are equal to or better than that reference for this case; this comparison does not extend to all solid benchmarks.
 - Solid OP2 recovery indexing, mixed linear/quadratic records and engineering-shear principal strains are corrected. CTETRA4 NEWSOLID geometric stiffness matches the audited Python buckling operator and is independent of output coordinates.
 
-Validation remains scoped: ABE on the distorted 5-001 patch and some CPENTA6 buckling benchmarks remain outside the established analytical acceptance tolerance. Ordinary CHEXA8 corner recovery can report a nonpositive Jacobian on the supplied distorted mesh. GPSTRESS VOLUME coverage does not imply complete ordinary element-stress OP2 coverage: CPYRAM13 OES/OSTR output remains limited.
+Validation remains scoped: ABE on the distorted 5-001 patch and some CPENTA6 buckling benchmarks remain outside the established analytical acceptance tolerance. The ordinary CHEXA8 recovery and CPYRAM13 OES/OSTR limitations recorded on 17 October are superseded by the 18 October recovery correction above.
 
 See the [5-001 OP2 audit](update/op2_solid_5001_audit.md), [quadratic patch audit](update/quadratic_patch_5001_audit.md), [solid defaults and limitations](update/newsolid_op2_default_2026-10-17.md), and [CTETRA4 buckling audit](update/ctetra4_python_kg_parity_2026-10-17.md).
 

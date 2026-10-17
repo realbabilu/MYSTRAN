@@ -3,7 +3,7 @@ module EAS9_FRAME
    use iso_fortran_env, only: real64
    implicit none
    private
-   public :: MAP_NATURAL_EAS9, HEX8_EAS9_STATE, HEX8_POINT, PENTA6_ANSEAS_STATE
+   public :: MAP_NATURAL_EAS9, HEX8_EAS9_STATE, HEX8_POINT, PENTA6_ANSEAS_STATE, HEX8_EAS9_RECOVERY
 contains
    subroutine MAP_NATURAL_EAS9(invj0,mhat,m)
       ! v2: covariant natural strain -> local Cartesian strain at center.
@@ -138,6 +138,33 @@ contains
          end do
       end do
       kg=(kg+transpose(kg))*0.5_real64
+   end subroutine
+
+   subroutine HEX8_EAS9_RECOVERY(x,d,alpha,temp,tref,u,point,k,f,beff,eps,sigma,kg,ierr)
+      ! Ordinary corner output is a trilinear extrapolation of the eight
+      ! valid interior EAS states. Never invert a corner mapping for output.
+      ! Interior/center requests retain the direct enhanced state.
+      real(real64),intent(in)::x(8,3),d(6,6),alpha(6),temp(8),tref,u(24),point(3)
+      real(real64),intent(out)::k(24,24),f(24),beff(6,24),eps(6),sigma(6),kg(24,24)
+      integer,intent(out)::ierr
+      real(real64)::q,p(3),w,bs(6,24),es(6),ss(6)
+      integer::i,j,l
+      if(maxval(abs(point))<1.0_real64-1.0e-12_real64)then
+         call HEX8_EAS9_STATE(x,d,alpha,temp,tref,u,point,k,f,beff,eps,sigma,kg,ierr)
+         return
+      end if
+      q=1/sqrt(3.0_real64);beff=0;eps=0;sigma=0;ierr=0
+      do l=1,2
+         do j=1,2
+            do i=1,2
+               p=[(2*i-3)*q,(2*j-3)*q,(2*l-3)*q]
+               w=product((1+point*p/(q*q))/2)
+               call HEX8_EAS9_STATE(x,d,alpha,temp,tref,u,p,k,f,bs,es,ss,kg,ierr)
+               if(ierr/=0)return
+               beff=beff+w*bs;eps=eps+w*es;sigma=sigma+w*ss
+            end do
+         end do
+      end do
    end subroutine
 
    subroutine PENTA6_POINT(x,p,n,g,b,jac,iv,det,ierr)
