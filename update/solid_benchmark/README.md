@@ -28,3 +28,7 @@ Nastran and MYSTRAN are compared on matched inputs. Independent values and publi
 Accuracy depends on the case, mesh and formulation. Agreement between solvers does not establish agreement with independent. The reports retain actual numerical differences and documented geometry-check settings. No production stiffness code or empirical scaling factor was changed for these comparison runs.
 
 GitHub renders the Markdown reports and PNG figures directly. Download the HTML reports to use the local element selector in a browser.
+
+## Reference Hex Benchmarks
+https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Solids/Problem%205-001.pdf to https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Solids/Problem%205-013.pdf
+Computers & Structures, Inc. (2024). SAP2000 is a proven FEA well-known product for civil engineering by Computers & Structures, Inc.
