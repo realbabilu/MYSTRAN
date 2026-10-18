@@ -42,6 +42,8 @@
       USE COL_VECS, ONLY              :  FG_COL, PG_COL, QGm_COL, QGs_COL, QGr_COL, UG_COL
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  GPFO_OUT
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
+      USE PARAMS, ONLY                :  QUAD8TYP, TRIA6TYP
+      USE MODEL_STUF, ONLY            :  ELDOF, KE, UEB, PEL
 
       USE GP_FORCE_BALANCE_PROC_USE_IFs
 
@@ -96,6 +98,7 @@
 
       LOGICAL                         :: WRITE_F06, WRITE_OP2, IS_GPFORCE_SUMMARY_INFO  ! flags
       LOGICAL                         :: IS_MODES, IS_THERMAL, IS_APP, IS_SPC, IS_MPC
+      LOGICAL                         :: BASIC_SHELL_FORCES
 
       INTEGER(LONG)                   :: ISUBCASE_INDEX         ! helper to get the title/subcase
       INTEGER(LONG)                   :: ISUBCASE               ! the correct subcase id
@@ -547,9 +550,24 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
 
                      CALL ELMDIS                           ! Get local displ, UEL, for this element
                                                            ! Calc elem loads, PEL.
-                     CALL CALC_ELEM_NODE_FORCES            ! JTSUB will only be used if SUBLOD(INT_SC_NUM,2) > 0
+                     ! These quadratic kernels return KE/PTE in basic DOFs, as
+                     ! in ELEM_TRANSFORM_LBG. UEL is local; use UEB instead.
+                     BASIC_SHELL_FORCES = ((TYPE == 'QUAD8   ') .AND. &
+                          ((QUAD8TYP == 'SIMOQ8  ') .OR. (QUAD8TYP == 'MITC8   ') .OR. &
+                           (QUAD8TYP == 'HBQ8    ') .OR. (QUAD8TYP == 'ANS8BDG6') .OR. &
+                           (QUAD8TYP == 'MACQ8D  '))) .OR. &
+                          ((TYPE(1:5) == 'TRIA6') .AND. &
+                          ((TRIA6TYP == 'SIMOT6  ') .OR. &
+                           (TRIA6TYP == 'MITC6   ') .OR. (TRIA6TYP == 'MH6T    ') .OR. &
+                           (TRIA6TYP == 'REZAIEE ')))
+                     IF (BASIC_SHELL_FORCES) THEN
+                        PEL(1:ELDOF) = MATMUL(KE(1:ELDOF,1:ELDOF), UEB(1:ELDOF))
+                        IF (SUBLOD(INT_SC_NUM,2) > 0) PEL(1:ELDOF) = PEL(1:ELDOF) - PTE(1:ELDOF,JTSUB)
+                     ELSE
+                        CALL CALC_ELEM_NODE_FORCES
+                     ENDIF
                                                            ! Transform elem loads from local to global coords
-                     CALL TRANSFORM_NODE_FORCES (COORD_SYS)! Now we have elem node forces in global coords for the elem that has
+                     CALL TRANSFORM_NODE_FORCES (COORD_SYS, BASIC_SHELL_FORCES)
 !                                                            internal grid K (actual grid GRID_BUM) for this elem
                      DO L=1,6
                         BEG_ROW_NUM = 6*(K-1) + 1

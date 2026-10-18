@@ -1,0 +1,8 @@
+case,native_tables,max_absolute_OP2_difference,bitwise_equal,status,notes
+patch,6,0.0,True,PASS,"Before/after displacement, eigenvectors, stress and force arrays; unchanged regression is not validation of shear/curved accuracy"
+twisted,6,0.0,True,PASS,"Before/after displacement, eigenvectors, stress and force arrays; unchanged regression is not validation of shear/curved accuracy"
+thermal,3,0.0,True,PASS,"Before/after displacement, eigenvectors, stress and force arrays; unchanged regression is not validation of shear/curved accuracy"
+pressure,3,0.0,True,PASS,"Before/after displacement, eigenvectors, stress and force arrays; unchanged regression is not validation of shear/curved accuracy"
+modal,1,0.0,True,PASS,"Before/after displacement, eigenvectors, stress and force arrays; unchanged regression is not validation of shear/curved accuracy"
+buckling,6,0.0,True,PASS,"Before/after displacement, eigenvectors, stress and force arrays; unchanged regression is not validation of shear/curved accuracy"
+HBQ8_guard,6,0.0,True,PASS,"Before/after displacement, eigenvectors, stress and force arrays; unchanged regression is not validation of shear/curved accuracy"

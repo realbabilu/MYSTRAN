@@ -24,10 +24,10 @@
 
 ! End MIT license text.
 
-      SUBROUTINE TRANSFORM_NODE_FORCES ( COORD_SYS )
+      SUBROUTINE TRANSFORM_NODE_FORCES ( COORD_SYS, BASIC_INPUT )
 
-! Converts node forces for all elements from local to global or local to basic coords. The local to basic transformation is done
-! every time this subr is called since that transformation must be done if either basic global is the final system anyway.
+! Converts local node forces to basic/global, or basic node forces to global
+! when BASIC_INPUT is present and true. Existing callers default to local input.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
@@ -43,6 +43,8 @@
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'TRANSFORM_NODE_FORCES'
       CHARACTER(LEN=*), INTENT(IN)    :: COORD_SYS         ! 'B" for basic, 'G' for global
+      LOGICAL, OPTIONAL, INTENT(IN)   :: BASIC_INPUT       ! PEL already uses basic DOFs
+      LOGICAL                        :: INPUT_IS_BASIC
 
       INTEGER(LONG)                   :: GLOBAL_CID        ! Global coord. sys. ID for a grid (BGRID(i)) of the element
       INTEGER(LONG)                   :: I,J               ! DO loop indices
@@ -71,6 +73,8 @@
 
 ! **********************************************************************************************************************************
       NROWS = ELDOF
+      INPUT_IS_BASIC = .FALSE.
+      IF (PRESENT(BASIC_INPUT)) INPUT_IS_BASIC = BASIC_INPUT
 
       DO I=1,NROWS
          PEB(I) = ZERO
@@ -79,12 +83,16 @@
 
       IF ((TYPE(1:4) /= 'ELAS') .AND. (TYPE /= 'USERIN  ')) THEN
                                                            ! (1) Transform from local to basic. Use TE transpose to get PEB from PEL
-         DO I=1,2*ELGP
-            I1 = 3*I - 2
-            PEB(I1)   = TE(1,1)*PEL(I1)+ TE(2,1)*PEL(I1+1)+ TE(3,1)*PEL(I1+2)
-            PEB(I1+1) = TE(1,2)*PEL(I1)+ TE(2,2)*PEL(I1+1)+ TE(3,2)*PEL(I1+2)
-            PEB(I1+2) = TE(1,3)*PEL(I1)+ TE(2,3)*PEL(I1+1)+ TE(3,3)*PEL(I1+2)
-         ENDDO
+         IF (INPUT_IS_BASIC) THEN
+            PEB(1:ELDOF) = PEL(1:ELDOF)
+         ELSE
+            DO I=1,2*ELGP
+               I1 = 3*I - 2
+               PEB(I1)   = TE(1,1)*PEL(I1)+ TE(2,1)*PEL(I1+1)+ TE(3,1)*PEL(I1+2)
+               PEB(I1+1) = TE(1,2)*PEL(I1)+ TE(2,2)*PEL(I1+1)+ TE(3,2)*PEL(I1+2)
+               PEB(I1+2) = TE(1,3)*PEL(I1)+ TE(2,3)*PEL(I1+1)+ TE(3,3)*PEL(I1+2)
+            ENDDO
+         ENDIF
 
          IF (COORD_SYS == 'G') THEN                        ! (2) Transform from basic to global if output is to be in global
 

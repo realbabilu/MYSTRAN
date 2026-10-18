@@ -44,7 +44,7 @@
                                          BGRID, Q8_POINT_BASIS, PLY_NUM, TYPE, STRESS, SHELL_STR_ANGLE, NUM_SEi, ELGP, AGRID, GRID_ID, RGRID
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  FORC_LOC, GPSTRESS_REQ, NUM_GP_SURFACE, MAX_GP_SURFACES, GP_SURFACE_IDS,                 &
                                          GP_SURFACE_NORMAL_MODE
-      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL
+      USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, GID_OUT_ARRAY, MAXREQ, OGEL, SHELL_POINT_TENSOR_TO_FRAME
       USE OUTPUT4_MATRICES, ONLY      :  OTM_ELFE, TXT_ELFE
       USE GPSTRESS_SURFACE_UTILS, ONLY:  GPSTRESS_COLLECT_SURFACE_PATCH
       USE FAST_OUTPUT_FORMATTERS, ONLY:  FAST_FMT_I8_RJ, FAST_FMT_F06_E14_6
@@ -598,9 +598,15 @@ elems_3: DO J = 1,NELE
       R=MATMUL(Q8_POINT_BASIS(:,:,1),TRANSPOSE(Q8_POINT_BASIS(:,:,POINT)))
       DO II=1,4,3
          UV=OGEL(ROW,II:II+2)
-         T=ZERO
-         T(1,1)=UV(1); T(2,2)=UV(2); T(1,2)=UV(3); T(2,1)=UV(3)
-         V=MATMUL(R,MATMUL(T,TRANSPOSE(R)))
+         IF (QUAD8TYP == 'SIMOQ8  ') THEN
+! Raw N/M is point-local, not center-local. Preserve the existing OP2
+! center-frame convention through the explicit same-point tensor transform.
+            CALL SHELL_POINT_TENSOR_TO_FRAME(Q8_POINT_BASIS(:,:,POINT),Q8_POINT_BASIS(:,:,1),UV,V)
+         ELSE
+            T=ZERO
+            T(1,1)=UV(1); T(2,2)=UV(2); T(1,2)=UV(3); T(2,1)=UV(3)
+            V=MATMUL(R,MATMUL(T,TRANSPOSE(R)))
+         ENDIF
          OGEL(ROW,II:II+2)=(/V(1,1),V(2,2),V(1,2)/)
       ENDDO
       UV(1:2)=OGEL(ROW,7:8)

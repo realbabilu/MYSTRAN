@@ -74,4 +74,24 @@
       REAL(DOUBLE)      , ALLOCATABLE :: RSA_ELFE_SUMABS(:)    ! Row-wise ABS accumulator for RSA ELFORCE(ENGR) summaries
       CHARACTER(132*BYTE), ALLOCATABLE:: RSA_ELFE_DESC(:)      ! Row descriptors for RSA ELFORCE(ENGR) summaries
 
+      CONTAINS
+
+      PURE SUBROUTINE SHELL_POINT_TENSOR_TO_FRAME ( POINT_BASIS, OUTPUT_BASIS, POINT_VALUES, OUTPUT_TENSOR )
+! Basis vectors are rows (basic -> local). POINT_VALUES must be recovered at
+! the SAME point as POINT_BASIS. An identity OUTPUT_BASIS returns the full
+! physical basic-coordinate tensor; the OP2 convention uses the center basis.
+! This output-only operation does not change shell operators or stiffness.
+      REAL(DOUBLE), INTENT(IN)  :: POINT_BASIS(3,3), OUTPUT_BASIS(3,3), POINT_VALUES(3)
+      REAL(DOUBLE), INTENT(OUT) :: OUTPUT_TENSOR(3,3)
+      REAL(DOUBLE) :: LOCAL_TENSOR(3,3), ROTATION(3,3)
+
+      LOCAL_TENSOR = 0.0_DOUBLE
+      LOCAL_TENSOR(1,1) = POINT_VALUES(1)
+      LOCAL_TENSOR(2,2) = POINT_VALUES(2)
+      LOCAL_TENSOR(1,2) = POINT_VALUES(3)
+      LOCAL_TENSOR(2,1) = POINT_VALUES(3)
+      ROTATION = MATMUL(OUTPUT_BASIS, TRANSPOSE(POINT_BASIS))
+      OUTPUT_TENSOR = MATMUL(ROTATION, MATMUL(LOCAL_TENSOR, TRANSPOSE(ROTATION)))
+      END SUBROUTINE SHELL_POINT_TENSOR_TO_FRAME
+
       END MODULE LINK9_STUFF

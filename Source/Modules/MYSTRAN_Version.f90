@@ -36,7 +36,7 @@
 
       CHARACTER(256*BYTE)            :: MYSTRAN_COMMENT  = '*** Please report any problems to mystransolver@gmail.com ***'
       CHARACTER(  8*BYTE), PARAMETER :: MYSTRAN_VER_NUM  = '18.0.A'
-      CHARACTER(  3*BYTE), PARAMETER :: MYSTRAN_VER_MONTH= 'JUL'
+      CHARACTER(  3*BYTE), PARAMETER :: MYSTRAN_VER_MONTH= 'OCT'
       CHARACTER(  2*BYTE), PARAMETER :: MYSTRAN_VER_DAY  = '19'
       CHARACTER(  4*BYTE), PARAMETER :: MYSTRAN_VER_YEAR = '2026'
       CHARACTER( 33*BYTE), PARAMETER :: MYSTRAN_AUTHOR   = 'MYSTRAN developed by Dr Bill Case'

@@ -2298,20 +2298,34 @@
 
       SUBROUTINE QUAD_STRESS_OUTPUT_FRAME(FIBER_ROW,CENTER_POINT,VALUES)
       USE PENTIUM_II_KIND, ONLY: LONG, DOUBLE
-      USE LINK9_STUFF, ONLY: SHELL_OUT_TE
+      USE LINK9_STUFF, ONLY: SHELL_OUT_TE, SHELL_POINT_TENSOR_TO_FRAME
       USE MODEL_STUF, ONLY: TYPE
       USE PARAMS, ONLY: QUAD8TYP
       IMPLICIT NONE
       INTEGER(LONG),INTENT(IN) :: FIBER_ROW,CENTER_POINT
       REAL(DOUBLE),INTENT(INOUT) :: VALUES(10)
-      REAL(DOUBLE) :: MAP(3,3),SHEAR_POINT(3),SHEAR_CENTER(3)
+      REAL(DOUBLE) :: MAP(3,3),SHEAR_POINT(3),SHEAR_CENTER(3),POINT_TENSOR(3,3),IDENTITY_BASIS(3,3)
       IF (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    ' .OR. QUAD8TYP == 'MACQ8D ')) THEN
          MAP=MATMUL(SHELL_OUT_TE(:,:,(FIBER_ROW+1)/2),TRANSPOSE(SHELL_OUT_TE(:,:,9*((FIBER_ROW-1)/18)+1)))
 ! Recover membrane/bending as an in-plane tensor, shear as a separate vector.
 ! This matches the Python shell resultants rather than mixing Q into fiber stress.
          SHEAR_POINT=(/VALUES(9),VALUES(10),0.0D0/)
          VALUES(9:10)=0.0D0
-         CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC(MAP,VALUES)
+         IF (QUAD8TYP == 'SIMOQ8  ') THEN
+! The same point basis as the recovered stress is required. Export remains
+! in the center basis; do not rotate a stored OP2 center-frame tensor twice.
+            CALL SHELL_POINT_TENSOR_TO_FRAME(SHELL_OUT_TE(:,:,(FIBER_ROW+1)/2), &
+                 SHELL_OUT_TE(:,:,9*((FIBER_ROW-1)/18)+1),VALUES(2:4),POINT_TENSOR)
+            VALUES(2:4)=(/POINT_TENSOR(1,1),POINT_TENSOR(2,2),POINT_TENSOR(1,2)/)
+            IDENTITY_BASIS=0.0_DOUBLE
+            IDENTITY_BASIS(1,1)=1.0_DOUBLE
+            IDENTITY_BASIS(2,2)=1.0_DOUBLE
+            IDENTITY_BASIS(3,3)=1.0_DOUBLE
+! Recompute the reported principal values/angle in the unchanged output frame.
+            CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC(IDENTITY_BASIS,VALUES)
+         ELSE
+            CALL TRANSFORM_SHELL_OUTPUT_ROW_TO_BASIC(MAP,VALUES)
+         ENDIF
          SHEAR_CENTER=MATMUL(TRANSPOSE(MAP),SHEAR_POINT)
          VALUES(9:10)=SHEAR_CENTER(1:2)
       ELSE

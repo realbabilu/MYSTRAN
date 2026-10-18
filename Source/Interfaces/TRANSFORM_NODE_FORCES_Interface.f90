@@ -28,7 +28,7 @@
 
    INTERFACE
 
-      SUBROUTINE TRANSFORM_NODE_FORCES ( COORD_SYS )
+      SUBROUTINE TRANSFORM_NODE_FORCES ( COORD_SYS, BASIC_INPUT )
 
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
@@ -42,6 +42,7 @@
       IMPLICIT NONE
 
       CHARACTER(LEN=*), INTENT(IN)    :: COORD_SYS         ! 'B" for basic, 'G' for global
+      LOGICAL, OPTIONAL, INTENT(IN)   :: BASIC_INPUT
 
       INTEGER(LONG), PARAMETER        :: NCOLA     = 3     ! An input to subr MATMULT_FFF called herein
       INTEGER(LONG), PARAMETER        :: NCOLB     = 1     ! An input to subr MATMULT_FFF called herein
