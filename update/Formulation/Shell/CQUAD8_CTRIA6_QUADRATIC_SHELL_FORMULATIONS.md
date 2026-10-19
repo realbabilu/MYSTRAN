@@ -521,7 +521,7 @@ Q_{-b}(x)=\frac{x(x-b)}{2b^2},\qquad Q_0(x)=1-\frac{x^2}{b^2},\qquad Q_{+b}(x)=\
 For the selected automatic shear treatment define slenderness $s_A=\sqrt A/h$, transition $s_0=15$ and mixing coefficient
 
 ```math
-\omega=\operatorname{clip}\left(1-\frac{s_0}{s_A},0,1\right),\quad
+\omega=\min\left(1,\max\left(0,1-\frac{s_0}{s_A}\right)\right),\quad
 \bar B_s=(1-\omega)\bar B_s^{(6)}+\omega\bar B_s^{(4)}.
 ```
 
