@@ -34,7 +34,8 @@ N_5=\tfrac12(1-r^2)(1-s),\quad N_6=\tfrac12(1+r)(1-s^2),
 
 Each node carries \(\mathbf d_I=[u_x,u_y,u_z,\theta_x,\theta_y,\theta_z]_I^T\), and \(\mathbf d_e\in\mathbb R^{48}\). Nodal translations and rotations are expressed in a common global Cartesian system; no element-wide frozen planar basis is imposed.
 
-**Figure 1 — to be inserted:** CQUAD8 numbering, natural coordinates, reference orientation, and positive midsurface normal.
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/9b2eb1bb-0493-4e59-b1ca-7ac56da4c561" />
+**Figure 1 :** CQUAD8 numbering, natural coordinates, reference orientation, and positive midsurface normal.
 
 ### 2.2 Midsurface, covariant basis and dual basis
 
@@ -129,7 +130,8 @@ Here \(\widetilde{\mathbf B}_m^{\rm cov}\) uses separate 6-point projections for
 
 where \(\theta_0=0.01\) rad and \(\delta_0=10^{-3}\). Consequently, a flat straight-sided patch employs direct membrane strain and avoids the patch-test error introduced by always-on tying. An optional in-plane strain smoothing/interpolation step is inactive by default because earlier sampling variants degraded the membrane patch test.
 
-**Figure 2 — to be inserted:** covariant membrane sampling sites: six \(\epsilon_{11}\) sites, six \(\epsilon_{22}\) sites and four \(\epsilon_{12}\) sites.
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/4bf22d0d-e0a6-4dc6-b4ec-a51529a03efb" />
+**Figure 2 :** covariant membrane sampling sites: six \(\epsilon_{11}\) sites, six \(\epsilon_{22}\) sites and four \(\epsilon_{12}\) sites.
 
 ## 4. Transverse-shear interpolation and the v4 modification
 
@@ -179,7 +181,8 @@ The four-point-per-component alternative is
 
 These are **twelve** and **eight** scalar shear tying observations per element, respectively. Such sample counts are not a proof of locking; the locking inference below is supported by the documented numerical slenderness studies.
 
-**Figure 3 — to be inserted:** superposed `tensor6` (12 scalar observations) and `bdg4` (8 scalar observations) shear tying patterns, with separate symbols for \(\gamma_1\) and \(\gamma_2\).
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/36f8fec0-2142-4823-b5b0-9b6947672c58" />
+**Figure 3 :** superposed `tensor6` (12 scalar observations) and `bdg4` (8 scalar observations) shear tying patterns, with separate symbols for \(\gamma_1\) and \(\gamma_2\).
 
 ### 4.3 Slenderness-dependent mixed projection
 
@@ -301,8 +304,11 @@ The numerical tables distinguish **independent analytical/CSI-reference comparis
 | T9, \(N=4/8/16\), response ratio | 0.37 / 0.87 / 1.07 | 0.82 / 0.88 / 1.00 | approximately 1.24 / 0.992 / 1.01 | Coarse-mesh overshoot remains |
 | 2-004 twisted member, \(n_x=24\), \(U_z/U_y\) error (%) | −53 / −68 | +1.76 / +7.01 | +1.75 / +7.02 | No material regression from v3 |
 
-**Figure 4 — to be inserted:** 2-003 curved-beam convergence, signed error versus number of elements, separate connected line series for v1p2/v3/v4.  
-**Figure 5 — to be inserted:** T9 curved-shell displacement ratio versus refinement, showing v4 coarse-mesh overshoot.
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/ad2ad4d0-c747-47af-84c0-c0901fd3b640" />
+**Figure 4 :** 2-003 curved-beam convergence, signed error versus number of elements, separate connected line series for v1p2/v3/v4.  
+
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/7237ce6e-ba34-4293-9bad-d765813dda2e" />
+**Figure 5 :** T9 curved-shell displacement ratio versus refinement, showing v4 coarse-mesh overshoot.
 
 ### 9.3 Thin-plate locking and slenderness
 
@@ -317,8 +323,10 @@ A quarter simply supported square plate at \(h=10^{-4}\) has the following repor
 
 The non-monotonic earlier sequence confirms that mesh density alone cannot be assumed to cure the particular shear constraint. For a 4 × 4 quarter-plate sweep, the final mixed operator yields a ratio of approximately 1.001 even at thickness \(10^{-4}\), whereas the six-point-only result falls to 0.053. On an elongated 2 × 10 plate the single-cell-per-quarter mixed result overshoots by approximately 35%, a clear counterexample to any blanket claim of superior coarse-mesh accuracy.
 
-**Figure 6 — to be inserted:** continuous convergence curves for central deflection ratio versus quarter-mesh refinement, two shear projections, both square and elongated panels.  
-**Figure 7 — to be inserted:** deflection ratio versus thickness, fixed 4 × 4 plate mesh.
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/3d6d1ffd-7145-48f1-b093-087305475bd7" />
+**Figure 6 :** continuous convergence curves for central deflection ratio versus quarter-mesh refinement, two shear projections, both square and elongated panels.  
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/0b778f48-4b75-4215-804d-ea3f48211913" />
+**Figure 7 :** deflection ratio versus thickness, fixed 4 × 4 plate mesh.
 
 ### 9.4 Adapted CSI problem 2-005: transverse pressure
 
@@ -333,7 +341,8 @@ The recorded study uses a quarter model of a 2 × 10 thin plate and a progressiv
 
 A later **native MYSTRAN** validation note reports 2-005 CQUAD8 at 16 × 16 with central \(U_z=-12.97469330\) in, compared with \(-12.97\) in, or +0.0362% signed error; the matched earlier native model gave \(-13.51560497\) in (+4.2067%). This is a separate executable/deck campaign, not the same numerical series as the four-quarter-mesh study above. A Nastran solver value for that exact matched study is not supplied here.
 
-**Figure 8 — to be inserted:** 2-005 uniform and concentrated loading convergence, error (%) versus quarter-mesh refinement; distinguish boundary conditions by line style.
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/ee2846ae-7583-4797-922d-2add745125d5" />
+**Figure 8 :** 2-005 uniform and concentrated loading convergence, error (%) versus quarter-mesh refinement; distinguish boundary conditions by line style.
 
 ### 9.5 Dynamics and mass consistency
 
@@ -361,8 +370,10 @@ For problem 2-016 at \(h=0.01\), the reference **critical stresses** are \(0.042
 
 At 16 × 16 the v3 shear and bending errors are +8.073% and +7.281%, respectively. The separate native MYSTRAN before/after campaign reports 2-016 16 × 16 final errors of −0.1817% and −0.3242%, consistent with the independent formulation reference. On 2-017 the first native column eigenfactors are 126.5028 (2 × 12) and 126.4854 (4 × 24), unchanged from its matched earlier run. This checks an in-plane geometric-stiffness mode, but does not validate rotational prestress coupling or curved-shell nonlinear stability.
 
-**Figure 9 — to be inserted:** 2-016 critical shear and bending stresses versus mesh density, with independent reference lines and v3/v4 connected curves.  
-**Figure 10 — to be inserted:** 2-017 lowest column buckling factor versus refinement.
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/d6320221-a7d4-4d2b-ab6a-8ad318dcc9b8" />
+**Figure 9 :** 2-016 critical shear and bending stresses versus mesh density, with independent reference lines and v3/v4 connected curves.  
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/7fa4537e-824a-41b6-9a5d-74393349b8f8" />
+**Figure 10 :** 2-017 lowest column buckling factor versus refinement.
 
 ## 10. Discussion, limitations and reproducibility
 
@@ -392,8 +403,7 @@ The exact code revision, active field functions, nodal winding, density conventi
 
 ---
 
-### Supplement: graphical material to attach
-
+### Supplement: graphical material attached
 | Figure | Intended content | Axes / annotation |
 |---|---|---|
 | 1 | CQUAD8 natural coordinate topology | Corner and midside numbering, positive normal |
