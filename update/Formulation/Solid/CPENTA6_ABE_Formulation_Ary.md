@@ -147,7 +147,27 @@ For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible she
 \left(\frac{1}{2},\frac{1}{2},\zeta_g\right)
 ```
 
-Here, $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c}$ are **row vectors of length 18**. The operators $\widehat{\mathbf{B}}_{r\zeta}$ and $\widehat{\mathbf{B}}_{s\zeta}$ denote rows 6 and 5 of $\widehat{\mathbf{B}}$, respectively.
+
+Here, `a`, `b`, and `c` are **row vectors of length 18**.
+
+The following operators denote rows 6 and 5 of the compatible strain-displacement matrix, respectively:
+
+```math
+\widehat{\mathbf{B}}_{r\zeta}
+\qquad \text{(row 6)}
+```
+
+```math
+\widehat{\mathbf{B}}_{s\zeta}
+\qquad \text{(row 5)}
+```
+
+Both operators are extracted from the compatible matrix:
+
+```math
+\widehat{\mathbf{B}}
+```
+
 
 The assumed transverse-shear strain operators are interpolated as follows.
 
