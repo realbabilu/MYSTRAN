@@ -33,84 +33,271 @@ Winding controls the oriented normal and, consequently, sign of oriented pressur
 
 ![T6 winding diagram](FIG_T6_WINDING.svg)
 
-### 2.2 Displacements and rotations
+## 2.2 Displacements and rotations
 
-Each node has \(\mathbf q_I=[u_I,v_I,w_I,\theta_{xI},\theta_{yI},\theta_{zI}]^{T}\), resulting in \(48\times48\) (Q8) or \(36\times36\) (T6) stiffness. Let \(\mathbf t_1,\mathbf t_2,\mathbf n\) be orthonormal local directions. In a linear Reissner–Mindlin approximation,
-\[
-\mathbf u(r,s,z)=\mathbf u_0(r,s)+z(\boldsymbol\theta(r,s)\times\mathbf n),\qquad
-\mathbf u_0=\sum_I N_I\mathbf u_I,\quad \boldsymbol\theta=\sum_I N_I\boldsymbol\theta_I.
-\]
-The original degenerated-director derivations of some references have **five physical DOFs**, with no drilling variable. The Python/MYSTRAN compatibility layer introduces a sixth nodal rotation and a separate drilling constraint: that is an adaptation, not an identity with the reference paper. In curved shell implementations director normals may vary node-to-node, so the above expression is a reference linearization rather than a complete description of each Python class.
+Each node has six global degrees of freedom, with the nodal vector
 
-### 2.3 Local physical membrane, curvature, shear operators
+```math
+\mathbf q_I=\begin{bmatrix}u_I&v_I&w_I&\theta_{xI}&\theta_{yI}&\theta_{zI}\end{bmatrix}^{T}.
+```
 
-Using \(x,y\) as coordinates along the local tangent plane and the convention \(\boldsymbol\theta\times\mathbf n=(\theta_y,-\theta_x,0)\) for \(\mathbf n=\hat z\),
-\[
-\boldsymbol\varepsilon_m=\begin{bmatrix}u_{,x}\\v_{,y}\\u_{,y}+v_{,x}\end{bmatrix}=B_m\mathbf q,\qquad
-\boldsymbol\kappa=\begin{bmatrix}\theta_{y,x}\\-\theta_{x,y}\\\theta_{y,y}-\theta_{x,x}\end{bmatrix}=B_b\mathbf q,
-\]
-\[
-\boldsymbol\gamma=\begin{bmatrix}w_{,x}+\theta_y\\w_{,y}-\theta_x\end{bmatrix}=B_s\mathbf q.
-\]
-For a standard interpolation with physical derivatives \(N_{I,x},N_{I,y}\), the illustrative 3×6 nodal blocks are
-\[
-B_m^I=\begin{bmatrix}N_{I,x}&0&0&0&0&0\\0&N_{I,y}&0&0&0&0\\N_{I,y}&N_{I,x}&0&0&0&0\end{bmatrix},
-\quad B_b^I=\begin{bmatrix}0&0&0&0&N_{I,x}&0\\0&0&0&-N_{I,y}&0&0\\0&0&0&-N_{I,x}&N_{I,y}&0\end{bmatrix},
-\]
-\[
-B_s^I=\begin{bmatrix}0&0&N_{I,x}&0&N_I&0\\0&0&N_{I,y}&-N_I&0&0\end{bmatrix}.
-\]
-**Crucial:** these are *baseline operators*. MITC8, ANS8, MITC6, Rezaiee, MacNeal variants replace or reproject specified rows. Do not equate all their \(B\) matrices with these direct-gradient blocks.
+Consequently, the Q8 and T6 element stiffness matrices have dimensions 48 × 48 and 36 × 36, respectively. Let `t1`, `t2`, and `n` be an orthonormal right-handed local triad. In the linear Reissner–Mindlin approximation about a flat reference surface,
 
-### 2.4 Drilling rotation and objective rigid motion
+```math
+\mathbf u(r,s,z)=\mathbf u_0(r,s)+z\left(\boldsymbol\theta(r,s)\times\mathbf n\right)
+```
 
-A common 6-DOF adaptation ties \(\theta_z\) to in-plane skew displacement gradient:
-\[
-\gamma_d=\theta_z-\tfrac12(v_{,x}-u_{,y})=B_d\mathbf q,
-\qquad K_d=\int_A \alpha_d B_d^TB_d\,\mathrm dA.
-\]
-Define \(\alpha_d\) explicitly per class (it may scale with \(Gh\), \(G\), \(\beta_{drill}\), \(k_t\)). Sign conventions can differ; energy-equivalent \(B_d\) signs are harmless only when the *entire* row is reversed. A penalty fixed in absolute units may corrupt thin-shell convergence. Verify rigid rotation \(\mathbf u=\boldsymbol\omega\times\mathbf x\) and \(\boldsymbol\theta=\boldsymbol\omega\), and test \(\mathbf q_{RBM}^{T}K\mathbf q_{RBM}\to0\).
+```math
+\mathbf u_0(r,s)=\sum_{I=1}^{n}N_I(r,s)\mathbf u_I,
+\qquad
+\boldsymbol\theta(r,s)=\sum_{I=1}^{n}N_I(r,s)\boldsymbol\theta_I.
+```
 
-### 2.5 Constitutive blocks, thickness and units
+Here `z` is the signed physical distance from the reference midsurface, and `n` is constant for the flat-surface baseline. With varying nodal directors a curved-shell element requires the appropriate director interpolation and covariant strain construction; this simplified expression is not a complete curved-shell formulation.
 
-For homogeneous isotropic material,
-\[
-D_p=\frac{E}{1-\nu^2}\begin{bmatrix}1&\nu&0\\\nu&1&0\\0&0&(1-\nu)/2\end{bmatrix},\quad
-D_s=\kappa_s G I_2,\quad G=\frac{E}{2(1+\nu)}.
-\]
-\[
-A=hD_p,\qquad D=\frac{h^3}{12}D_p,\qquad S=hD_s,\qquad
-K_e=\int_A(B_m^TAB_m+B_b^TDB_b+B_s^TSB_s+\alpha_d B_d^TB_d)\,\mathrm dA.
-\]
-For a general laminate or eccentric reference surface use \(\begin{bmatrix}N\\M\end{bmatrix}=\begin{bmatrix}A&B\\B&D\end{bmatrix}\begin{bmatrix}\varepsilon_m\\\kappa\end{bmatrix}\), where \(A=\int C(z)dz\), \(B=\int zC(z)dz\), \(D=\int z^2C(z)dz\). **The documented baseline implementations mainly assume constant isotropic thickness; introducing a generic ABD expression here does not mean composite ABD has been implemented.**
+Classical degenerated-director formulations generally use five physical nodal DOFs, whereas the present six-DOF representation includes a separate drilling constraint. This is an implementation adaptation, not an exact reproduction of every cited reference.
+
+## 2.3 Local physical membrane, curvature, shear operators
+
+For a flat element, let `(x,y,z)` denote the local orthonormal coordinates, with the director along the positive local `z` axis and the rotational convention
+
+```math
+\boldsymbol\theta\times\mathbf n=
+\begin{bmatrix}\theta_y&-\theta_x&0\end{bmatrix}^{T}.
+```
+
+The linear membrane engineering-strain vector is
+
+```math
+\boldsymbol\varepsilon_m=
+\begin{bmatrix}
+u_{,x}\\v_{,y}\\u_{,y}+v_{,x}\end{bmatrix}
+=\mathbf B_m\mathbf q.
+```
+
+The curvature vector, in engineering twisting-curvature convention, is
+
+```math
+\boldsymbol\kappa=
+\begin{bmatrix}
+\theta_{y,x}\\
+-\theta_{x,y}\\
+\theta_{y,y}-\theta_{x,x}
+\end{bmatrix}
+=\mathbf B_b\mathbf q.
+```
+
+The transverse engineering-shear strain vector is
+
+```math
+\boldsymbol\gamma=
+\begin{bmatrix}
+w_{,x}+\theta_y\\
+w_{,y}-\theta_x
+\end{bmatrix}
+=\mathbf B_s\mathbf q.
+```
+
+For the local nodal ordering `[u,v,w,theta_x,theta_y,theta_z]`, direct-gradient 3 × 6 and 2 × 6 blocks are
+
+```math
+\mathbf B_m^I=
+\begin{bmatrix}
+N_{I,x}&0&0&0&0&0\\
+0&N_{I,y}&0&0&0&0\\
+N_{I,y}&N_{I,x}&0&0&0&0
+\end{bmatrix}.
+```
+
+```math
+\mathbf B_b^I=
+\begin{bmatrix}
+0&0&0&0&N_{I,x}&0\\
+0&0&0&-N_{I,y}&0&0\\
+0&0&0&-N_{I,x}&N_{I,y}&0
+\end{bmatrix}.
+```
+
+```math
+\mathbf B_s^I=
+\begin{bmatrix}
+0&0&N_{I,x}&0&N_I&0\\
+0&0&N_{I,y}&-N_I&0&0
+\end{bmatrix}.
+```
+
+These blocks are the **baseline flat-shell operators** only. MITC8, ANS8, MITC6, Rezaiee, and MacNeal-family elements replace or project selected strain rows. They must not be represented as having identical strain-displacement operators.
+
+## 2.4 Drilling rotation and objective rigid motion
+
+For the local drilling rotation about `n`, a common weak drilling constraint is
+
+```math
+\gamma_d=\theta_z-\frac{1}{2}(v_{,x}-u_{,y})=\mathbf B_d\mathbf q.
+```
+
+The corresponding penalty stiffness is
+
+```math
+\mathbf K_d=\int_A\alpha_d\mathbf B_d^T\mathbf B_d\,\mathrm dA.
+```
+
+Here `alpha_d` must have dimensions of force per length and should be specified for each formulation. A conventional choice scales it with `Gh` and a dimensionless drilling factor; other implementation-specific scalings must be stated explicitly. Changing the overall sign of **the entire drilling row** does not alter its quadratic energy; changing only selected terms does.
+
+Rigid-body objectivity requires the discrete field for
+
+```math
+\mathbf u(\mathbf x)=\boldsymbol\omega\times\mathbf x,
+\qquad
+\boldsymbol\theta=\boldsymbol\omega
+```
+
+to produce zero strain energy, within numerical tolerance:
+
+```math
+\mathbf q_{\mathrm{RBM}}^T\mathbf K\mathbf q_{\mathrm{RBM}}\approx0.
+```
+
+## 2.5 Constitutive blocks, thickness and units
+
+For an isotropic, homogeneous, linearly elastic plane-stress shell, the membrane/bending constitutive matrix is
+
+```math
+\mathbf D_p=\frac{E}{1-\nu^2}
+\begin{bmatrix}
+1&\nu&0\\
+\nu&1&0\\
+0&0&\frac{1-\nu}{2}
+\end{bmatrix}.
+```
+
+The transverse-shear constitutive matrix and shear modulus are
+
+```math
+\mathbf D_s=\kappa_sG\mathbf I_2,
+\qquad G=\frac{E}{2(1+\nu)}.
+```
+
+For constant, symmetric thickness `h` measured about the midsurface,
+
+```math
+\mathbf A=h\mathbf D_p,
+\qquad
+\mathbf D=\frac{h^3}{12}\mathbf D_p,
+\qquad
+\mathbf S=h\mathbf D_s.
+```
+
+The corresponding material-plus-drilling stiffness is
+
+```math
+\mathbf K_e=\int_A\left(
+\mathbf B_m^T\mathbf A\mathbf B_m
++\mathbf B_b^T\mathbf D\mathbf B_b
++\mathbf B_s^T\mathbf S\mathbf B_s
++\alpha_d\mathbf B_d^T\mathbf B_d
+\right)\,\mathrm dA.
+```
+
+A general laminate or eccentric reference surface instead uses the laminate resultant relationship
+
+```math
+\begin{bmatrix}\mathbf N\\\mathbf M\end{bmatrix}=
+\begin{bmatrix}\mathbf A&\mathbf B\\\mathbf B&\mathbf D\end{bmatrix}
+\begin{bmatrix}\boldsymbol\varepsilon_m\\\boldsymbol\kappa\end{bmatrix}.
+```
+
+Here, for symmetric constitutive tensors with reciprocal coupling,
+
+```math
+\mathbf A=\int\mathbf C(z)\,\mathrm dz,\qquad
+\mathbf B=\int z\mathbf C(z)\,\mathrm dz,\qquad
+\mathbf D=\int z^2\mathbf C(z)\,\mathrm dz.
+```
+
+This general ABD expression is theoretical context **only**. It does not imply that a composite-laminate ABD implementation is available or validated in the documented quadratic shell elements.
 
 ## 3. Shape functions: independent Q8 and T6 definitions
 
 ### 3.1 Eight-node serendipity Q8
 
-Corner natural coordinates \((r_I,s_I)=(-1,-1),(1,-1),(1,1),(-1,1)\). For \(I=1,\ldots,4\):
-\[
-N_I=\frac14(1+r_Ir)(1+s_Is)(r_Ir+s_Is-1).
-\]
-For midside nodes in the numbering illustrated above:
-\[
-\begin{aligned}
-N_5&=\tfrac12(1-r^2)(1-s),&N_6&=\tfrac12(1+r)(1-s^2),\\
-N_7&=\tfrac12(1-r^2)(1+s),&N_8&=\tfrac12(1-r)(1-s^2).
-\end{aligned}
-\]
-Differentiation must be analytical (or independently checked using complex-step / numerical derivatives). For example, \(N_{5,r}=-r(1-s)\), \(N_{5,s}=-(1-r^2)/2\). The 2×2 physical map for planar geometry is \(J=[\mathbf x_{,r}^{T};\mathbf x_{,s}^{T}]\); hence \([N_{,x};N_{,y}]=J^{-1}[N_{,r};N_{,s}]\). For true curved surfaces, use surface tangent/dual basis rather than a frozen two-dimensional map for geometry-sensitive operators.
+The four corners use the natural coordinates `(-1,-1)`, `(1,-1)`, `(1,1)`, and `(-1,1)`. For corner nodes `I=1,...,4`, with corresponding coordinate signs `r_I, s_I`,
+
+```math
+N_I(r,s)=\frac14(1+r_Ir)(1+s_Is)(r_Ir+s_Is-1).
+```
+
+For midside nodes numbered successively along edges 1–2, 2–3, 3–4, and 4–1,
+
+```math
+N_5=\frac12(1-r^2)(1-s),
+\qquad
+N_6=\frac12(1+r)(1-s^2).
+```
+
+```math
+N_7=\frac12(1-r^2)(1+s),
+\qquad
+N_8=\frac12(1-r)(1-s^2).
+```
+
+Two analytical derivatives used to audit the interpolation are
+
+```math
+N_{5,r}=-r(1-s),
+\qquad
+N_{5,s}=-\frac12(1-r^2).
+```
+
+For a planar map, define
+
+```math
+\mathbf J=\begin{bmatrix}x_{,r}&y_{,r}\\x_{,s}&y_{,s}\end{bmatrix}.
+```
+
+Then physical derivatives follow from
+
+```math
+\begin{bmatrix}N_{I,x}\\N_{I,y}\end{bmatrix}
+=\mathbf J^{-1}
+\begin{bmatrix}N_{I,r}\\N_{I,s}\end{bmatrix}.
+```
+
+The Jacobian convention is stated explicitly so that transpose conventions are not inadvertently interchanged. For curved midsurfaces, use surface tangent and dual bases rather than a frozen planar Jacobian.
 
 ### 3.2 Six-node quadratic triangle T6
 
-Barycentric coordinates \(L_1=1-r-s,L_2=r,L_3=s\), with \(r\ge0,s\ge0,r+s\le1\):
-\[
-\begin{aligned}
-N_1&=L_1(2L_1-1),&N_2&=L_2(2L_2-1),&N_3&=L_3(2L_3-1),\\
-N_4&=4L_1L_2,&N_5&=4L_2L_3,&N_6&=4L_3L_1.
-\end{aligned}
-\]
-Examples: \(N_{1,r}=1-4L_1\), \(N_{4,r}=4(L_1-L_2)\), \(N_{6,s}=4(L_1-L_3)\). The reference triangle has area \(1/2\), **not 1**; quadrature weights must integrate constants to \(1/2\). T6 is not a 3-node triangle with only midside geometry: all six translational/rotational nodal fields participate.
+Define barycentric coordinates on the reference triangle:
+
+```math
+L_1=1-r-s,\qquad L_2=r,\qquad L_3=s.
+```
+
+The reference domain satisfies `r >= 0`, `s >= 0`, and `r+s <= 1`. The vertex shape functions are
+
+```math
+N_1=L_1(2L_1-1),\quad
+N_2=L_2(2L_2-1),\quad
+N_3=L_3(2L_3-1).
+```
+
+The midside shape functions are
+
+```math
+N_4=4L_1L_2,\quad
+N_5=4L_2L_3,\quad
+N_6=4L_3L_1.
+```
+
+Analytical derivative checks include
+
+```math
+N_{1,r}=1-4L_1,\quad
+N_{4,r}=4(L_1-L_2),\quad
+N_{6,s}=4(L_1-L_3).
+```
+
+The reference triangle has area **1/2**, not 1. A quadrature rule must therefore integrate the constant function to 1/2 in the reference domain. All six translational and rotational nodal fields participate in the quadratic interpolation.
 
 ### 3.3 Curvilinear strain transformation
 
@@ -319,38 +506,48 @@ Internal project documents and software method names are not cited as research l
 
 The CSI verification PDFs are the primary benchmark definitions. The online PDF endpoints could not be retrieved during this revision. Accordingly, parameters available from traceable research decks are explicitly identified as such, while parameters not independently checked against the official documents remain blank. No missing model description, material or boundary condition has been inferred. Each linked PDF remains the authoritative source for eventual reconciliation.
 
+## 10. CSI shell verification reference table
 
-| Test and reference | Physical problem and schematic |
-|---|---|---|---|---|
-| [2-001](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-001.pdf) | Patch test — prescribed membrane and bending displacements | 
+The following benchmark names are **working descriptions** where the official title has not been independently checked. They are not claims of numerical validation.
+
+| Test and official PDF | Physical problem / working description |
+|:---|:---|
+| [2-001](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-001.pdf) | Patch test — prescribed membrane and bending displacements |
 | [2-002](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-002.pdf) | Clamped shell/beam verification |
-| [2-003](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-003.pdf) | Combined shell response | 
-| [2-004](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-004.pdf) | Twisted beam | 
-| [2-005](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf) | Plate bending / pressure | 
-| [2-006](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-006.pdf) | Cylindrical roof / Scordelis–Lo |  
-| [2-007](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-007.pdf) | Pinched hemisphere / curved shell | 
-| [2-008](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-008.pdf) | Modal / eigenfrequency |  
-| [2-009](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-009.pdf) | Shell verification case 2-009 (official title not yet verified) | 
-| [2-010](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-010.pdf) | Pipe / curved shell | 
-| [2-012](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-012.pdf) | Shell verification case 2-012 (official title not yet verified) |  
-| [2-013](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-013.pdf) | Thermal response (working classification; official test definition pending) |  
-| [2-014](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-014.pdf) | Thermal/annular-shell response (working classification; official test definition pending) | 
-| [2-015](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-015.pdf) | Shell verification case 2-015 (official title not yet verified) |  
+| [2-003](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-003.pdf) | Combined shell response |
+| [2-004](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-004.pdf) | Twisted beam |
+| [2-005](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf) | Plate bending / pressure |
+| [2-006](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-006.pdf) | Cylindrical roof / Scordelis–Lo |
+| [2-007](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-007.pdf) | Pinched hemisphere / curved shell |
+| [2-008](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-008.pdf) | Modal / eigenfrequency |
+| [2-009](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-009.pdf) | Verification case 2-009 — official title unverified |
+| [2-010](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-010.pdf) | Pipe / curved shell |
+| [2-012](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-012.pdf) | Verification case 2-012 — official title unverified |
+| [2-013](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-013.pdf) | Thermal response — working classification |
+| [2-014](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-014.pdf) | Thermal / annular-shell response — working classification |
+| [2-015](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-015.pdf) | Verification case 2-015 — official title unverified |
 | [2-016](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-016.pdf) | Plate out-of-plane buckling |
 | [2-017](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-017.pdf) | In-plane column buckling |
 
-### 10.1 Per-formulation comparison tables
+### Problem Plate bending / pressure
+<img width="1690" height="1170" alt="image" src="https://github.com/user-attachments/assets/7acc7bd7-0753-4348-9e39-4df347dbeeed" />
+<img width="1690" height="1170" alt="image" src="https://github.com/user-attachments/assets/0bd7e09e-6b0e-40a5-b53c-6a56742043f1" />
+<img width="1690" height="1170" alt="image" src="https://github.com/user-attachments/assets/2baf4805-3b17-4e20-a54d-ebad835f8d16" />
+<img width="1690" height="1170" alt="image" src="https://github.com/user-attachments/assets/458ae760-e796-4e4c-9fa3-52fdc53acbbf" />
 
-Each independent row represents **one specific problem, output component, load case, mesh, and matching coordinate frame**. Where multiple components or load cases exist, add rows; do not collapse them into a single numerical value. No unverified number has been inserted below. The columns “Nastran error” and “MYSTRAN error” are relative to the same independently selected reference, not relative to each other:
-\[
- e_{N}(\%)=100\frac{v_N-v_{ref}}{v_{ref}},\qquad e_M(\%)=100\frac{v_M-v_{ref}}{v_{ref}},\qquad v_{ref}\ne0.
-\]
-For reference values near zero use a separately declared absolute-error criterion. 
+### Problem Shell Thermal Patch Test
+<img width="1800" height="675" alt="image" src="https://github.com/user-attachments/assets/0dac2fa5-15f0-44e0-940b-46220e62d60a" />
 
+### Problem Shell Mass Mode Shape
+<img width="1690" height="1040" alt="image" src="https://github.com/user-attachments/assets/93e81f5c-5fd4-49f7-8c6b-e6b94d6ab440" />
+<img width="1690" height="1040" alt="image" src="https://github.com/user-attachments/assets/4cd06e0a-afc1-49ef-b57f-c04ee5707de2" />
+<img width="1690" height="1040" alt="image" src="https://github.com/user-attachments/assets/f790991a-efe1-4513-b307-66e802c7c54e" />
+<img width="1690" height="1040" alt="image" src="https://github.com/user-attachments/assets/da5cf269-144d-4b46-9f88-51ee6c6744cc" />
 
-### 10.2 Comparison interpretation
+### Problem Shell Buckling
+<img width="1560" height="1040" alt="image" src="https://github.com/user-attachments/assets/b5b0a58f-2828-48e6-9995-0bf4bbaae423" />
+<img width="1560" height="1040" alt="image" src="https://github.com/user-attachments/assets/9cfc1b3b-a342-433f-96f7-1ea109d6e84f" />
 
-The selected winding (CW or CCW), reference axis and loading definition must be recorded with the table at the time the result is inserted. A sign difference in local moments or transverse shear is not an error percentage until all components are transformed into a common physical basis. Nastran OP2 or Run-derived CSV may populate the table once element IDs, node IDs, units, output station and solver subcases are matched. The 2-001 published independent values are \(\sigma_{xx}=\sigma_{yy}=1333\,\mathrm{psi}\), \(\tau_{xy}=400\,\mathrm{psi}\), \(M_{xx}=M_{yy}=1.111\times10^{-7}\) and \(M_{xy}=3.333\times10^{-8}\,\mathrm{lb\,in/in}\), for the official model's respective membrane and bending cases; they must not be copied blindly into the distinct DUEL3B mesh or a formulation row before load and units are matched.
 
 
 
