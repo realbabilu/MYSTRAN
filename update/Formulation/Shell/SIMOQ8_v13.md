@@ -1,7 +1,7 @@
 # SIMOQ8 v13: a quadratic serendipity CQUAD8 degenerated shell with selective assumed-natural-strain interpolation and condensed transverse-shear enhancement
 **Ary · Independent Researcher · Personal Research** · MYSTRAN v18.00.a · 19 October 2026
 
-**Technical formulation and verification note — MYSTRAN NEWSHELL / CQUAD8**  
+**Technical formulation and verification note — MYSTRAN CQUAD8**  
 **Revision:** 19 October 2026  
 **Status:** research formulation; numerical tables distinguish reported historical verification from recent comparative evaluations. Not an assertion of peer review or complete independent Nastran certification.
 
