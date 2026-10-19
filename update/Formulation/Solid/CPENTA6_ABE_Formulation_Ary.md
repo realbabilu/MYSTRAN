@@ -52,19 +52,34 @@ $$
 \boldsymbol\varepsilon_V=\mathbf B\mathbf d.
 $$
 
-For isotropic linear elasticity,
+For isotropic linear elasticity, the constitutive relationship in engineering-shear Voigt notation is
 
 $$
-\boldsymbol\sigma_V=\mathbf D\boldsymbol\varepsilon_V,\qquad
-\mathbf D=\begin{bmatrix}
-\lambda+2\mu&\lambda&\lambda&0&0&0\\
-\lambda&\lambda+2\mu&\lambda&0&0&0\\
-\lambda&\lambda&\lambda+2\mu&0&0&0\\
-0&0&0&\mu&0&0\\0&0&0&0&\mu&0\\0&0&0&0&0&\mu
-\end{bmatrix},
+\boldsymbol{\sigma}_v = \mathbf{D}\boldsymbol{\varepsilon}_v
 $$
 
-where $\lambda=E\nu/[(1+\nu)(1-2\nu)]$ and $\mu=E/[2(1+\nu)]$.
+where
+
+$$
+\mathbf{D} =
+\begin{bmatrix}
+\lambda+2\mu & \lambda & \lambda & 0 & 0 & 0 \\
+\lambda & \lambda+2\mu & \lambda & 0 & 0 & 0 \\
+\lambda & \lambda & \lambda+2\mu & 0 & 0 & 0 \\
+0 & 0 & 0 & \mu & 0 & 0 \\
+0 & 0 & 0 & 0 & \mu & 0 \\
+0 & 0 & 0 & 0 & 0 & \mu
+\end{bmatrix}
+$$
+
+The Lamé parameters are
+
+$$
+\lambda = \frac{E\nu}{(1+\nu)(1-2\nu)},
+\qquad
+\mu = \frac{E}{2(1+\nu)}.
+$$
+  
 
 ## 2. Frozen centroid covariant transformation
 
