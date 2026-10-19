@@ -319,26 +319,25 @@ Internal project documents and software method names are not cited as research l
 
 The CSI verification PDFs are the primary benchmark definitions. The online PDF endpoints could not be retrieved during this revision. Accordingly, parameters available from traceable research decks are explicitly identified as such, while parameters not independently checked against the official documents remain blank. No missing model description, material or boundary condition has been inferred. Each linked PDF remains the authoritative source for eventual reconciliation.
 
-![Benchmark schematic overview](FIG_BENCHMARK_OVERVIEW.svg)
 
-| Test and reference | Physical problem and schematic | Material \(E,\nu\) | Thickness \(h\) | Boundary and loading statement |
+| Test and reference | Physical problem and schematic |
 |---|---|---|---|---|
-| [2-001](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-001.pdf) | Patch test — prescribed membrane and bending displacements | 1,000,000 psi; 0.25 | 0.001 in | Edges: prescribed \(U_x,U_y\) or \(U_z,R_x,R_y\); patch test (original CSI model) |
-| [2-002](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-002.pdf) | Clamped shell/beam verification |  |  |  |
-| [2-003](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-003.pdf) | Combined shell response |  |  |  |
-| [2-004](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-004.pdf) | Twisted beam |  |  |  |
-| [2-005](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf) | Plate bending / pressure |  |  |  |
-| [2-006](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-006.pdf) | Cylindrical roof / Scordelis–Lo |  |  |  |
-| [2-007](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-007.pdf) | Pinched hemisphere / curved shell |  |  |  |
-| [2-008](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-008.pdf) | Modal / eigenfrequency |  |  |  |
-| [2-009](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-009.pdf) | Shell verification case 2-009 (official title not yet verified) |  |  |  |
-| [2-010](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-010.pdf) | Pipe / curved shell |  |  |  |
-| [2-012](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-012.pdf) | Shell verification case 2-012 (official title not yet verified) |  |  |  |
-| [2-013](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-013.pdf) | Thermal response (working classification; official test definition pending) |  |  |  |
-| [2-014](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-014.pdf) | Thermal/annular-shell response (working classification; official test definition pending) |  |  |  |
-| [2-015](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-015.pdf) | Shell verification case 2-015 (official title not yet verified) |  |  |  |
-| [2-016](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-016.pdf) | Plate out-of-plane buckling | 29,000; 0.30 (research deck) | 0.01 / 1 (research deck) | Quadratic research model: 24×24 plate; shear/bending traction; supported edges; confirm official CSI case separately |
-| [2-017](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-017.pdf) | In-plane column buckling | 3,600; 0.20 (research deck) | 1 (research deck) | Quadratic research model: 12×100 column; pinned/roller base; unit top compression; confirm official CSI case separately |
+| [2-001](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-001.pdf) | Patch test — prescribed membrane and bending displacements | 
+| [2-002](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-002.pdf) | Clamped shell/beam verification |
+| [2-003](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-003.pdf) | Combined shell response | 
+| [2-004](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-004.pdf) | Twisted beam | 
+| [2-005](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf) | Plate bending / pressure | 
+| [2-006](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-006.pdf) | Cylindrical roof / Scordelis–Lo |  
+| [2-007](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-007.pdf) | Pinched hemisphere / curved shell | 
+| [2-008](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-008.pdf) | Modal / eigenfrequency |  
+| [2-009](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-009.pdf) | Shell verification case 2-009 (official title not yet verified) | 
+| [2-010](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-010.pdf) | Pipe / curved shell | 
+| [2-012](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-012.pdf) | Shell verification case 2-012 (official title not yet verified) |  
+| [2-013](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-013.pdf) | Thermal response (working classification; official test definition pending) |  
+| [2-014](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-014.pdf) | Thermal/annular-shell response (working classification; official test definition pending) | 
+| [2-015](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-015.pdf) | Shell verification case 2-015 (official title not yet verified) |  
+| [2-016](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-016.pdf) | Plate out-of-plane buckling |
+| [2-017](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-017.pdf) | In-plane column buckling |
 
 ### 10.1 Per-formulation comparison tables
 
@@ -346,200 +345,12 @@ Each independent row represents **one specific problem, output component, load c
 \[
  e_{N}(\%)=100\frac{v_N-v_{ref}}{v_{ref}},\qquad e_M(\%)=100\frac{v_M-v_{ref}}{v_{ref}},\qquad v_{ref}\ne0.
 \]
-For reference values near zero use a separately declared absolute-error criterion. Blank cells are intentional pending Codex comparison outputs.
+For reference values near zero use a separately declared absolute-error criterion. 
 
-#### SIMOQ8 v13
-
-| CSI problem | Response / component | Independent reference | Nastran result | MYSTRAN result | Nastran error (%) | MYSTRAN error (%) |
-|---|---|---:|---:|---:|---:|---:|
-| 2-001 |  |  |  |  |  |  |
-| 2-002 |  |  |  |  |  |  |
-| 2-003 |  |  |  |  |  |  |
-| 2-004 |  |  |  |  |  |  |
-| 2-005 |  |  |  |  |  |  |
-| 2-006 |  |  |  |  |  |  |
-| 2-007 |  |  |  |  |  |  |
-| 2-008 |  |  |  |  |  |  |
-| 2-009 |  |  |  |  |  |  |
-| 2-010 |  |  |  |  |  |  |
-| 2-012 |  |  |  |  |  |  |
-| 2-013 |  |  |  |  |  |  |
-| 2-014 |  |  |  |  |  |  |
-| 2-015 |  |  |  |  |  |  |
-| 2-016 |  |  |  |  |  |  |
-| 2-017 |  |  |  |  |  |  |
-
-#### SIMOT6 v2
-
-| CSI problem | Response / component | Independent reference | Nastran result | MYSTRAN result | Nastran error (%) | MYSTRAN error (%) |
-|---|---|---:|---:|---:|---:|---:|
-| 2-001 |  |  |  |  |  |  |
-| 2-002 |  |  |  |  |  |  |
-| 2-003 |  |  |  |  |  |  |
-| 2-004 |  |  |  |  |  |  |
-| 2-005 |  |  |  |  |  |  |
-| 2-006 |  |  |  |  |  |  |
-| 2-007 |  |  |  |  |  |  |
-| 2-008 |  |  |  |  |  |  |
-| 2-009 |  |  |  |  |  |  |
-| 2-010 |  |  |  |  |  |  |
-| 2-012 |  |  |  |  |  |  |
-| 2-013 |  |  |  |  |  |  |
-| 2-014 |  |  |  |  |  |  |
-| 2-015 |  |  |  |  |  |  |
-| 2-016 |  |  |  |  |  |  |
-| 2-017 |  |  |  |  |  |  |
-
-#### MITC8 v4
-
-| CSI problem | Response / component | Independent reference | Nastran result | MYSTRAN result | Nastran error (%) | MYSTRAN error (%) |
-|---|---|---:|---:|---:|---:|---:|
-| 2-001 |  |  |  |  |  |  |
-| 2-002 |  |  |  |  |  |  |
-| 2-003 |  |  |  |  |  |  |
-| 2-004 |  |  |  |  |  |  |
-| 2-005 |  |  |  |  |  |  |
-| 2-006 |  |  |  |  |  |  |
-| 2-007 |  |  |  |  |  |  |
-| 2-008 |  |  |  |  |  |  |
-| 2-009 |  |  |  |  |  |  |
-| 2-010 |  |  |  |  |  |  |
-| 2-012 |  |  |  |  |  |  |
-| 2-013 |  |  |  |  |  |  |
-| 2-014 |  |  |  |  |  |  |
-| 2-015 |  |  |  |  |  |  |
-| 2-016 |  |  |  |  |  |  |
-| 2-017 |  |  |  |  |  |  |
-
-#### ANS8BDG6 v4
-
-| CSI problem | Response / component | Independent reference | Nastran result | MYSTRAN result | Nastran error (%) | MYSTRAN error (%) |
-|---|---|---:|---:|---:|---:|---:|
-| 2-001 |  |  |  |  |  |  |
-| 2-002 |  |  |  |  |  |  |
-| 2-003 |  |  |  |  |  |  |
-| 2-004 |  |  |  |  |  |  |
-| 2-005 |  |  |  |  |  |  |
-| 2-006 |  |  |  |  |  |  |
-| 2-007 |  |  |  |  |  |  |
-| 2-008 |  |  |  |  |  |  |
-| 2-009 |  |  |  |  |  |  |
-| 2-010 |  |  |  |  |  |  |
-| 2-012 |  |  |  |  |  |  |
-| 2-013 |  |  |  |  |  |  |
-| 2-014 |  |  |  |  |  |  |
-| 2-015 |  |  |  |  |  |  |
-| 2-016 |  |  |  |  |  |  |
-| 2-017 |  |  |  |  |  |  |
-
-#### HBQ8 Kikuchi v3
-
-| CSI problem | Response / component | Independent reference | Nastran result | MYSTRAN result | Nastran error (%) | MYSTRAN error (%) |
-|---|---|---:|---:|---:|---:|---:|
-| 2-001 |  |  |  |  |  |  |
-| 2-002 |  |  |  |  |  |  |
-| 2-003 |  |  |  |  |  |  |
-| 2-004 |  |  |  |  |  |  |
-| 2-005 |  |  |  |  |  |  |
-| 2-006 |  |  |  |  |  |  |
-| 2-007 |  |  |  |  |  |  |
-| 2-008 |  |  |  |  |  |  |
-| 2-009 |  |  |  |  |  |  |
-| 2-010 |  |  |  |  |  |  |
-| 2-012 |  |  |  |  |  |  |
-| 2-013 |  |  |  |  |  |  |
-| 2-014 |  |  |  |  |  |  |
-| 2-015 |  |  |  |  |  |  |
-| 2-016 |  |  |  |  |  |  |
-| 2-017 |  |  |  |  |  |  |
-
-#### MacNeal Q8 v3
-
-| CSI problem | Response / component | Independent reference | Nastran result | MYSTRAN result | Nastran error (%) | MYSTRAN error (%) |
-|---|---|---:|---:|---:|---:|---:|
-| 2-001 |  |  |  |  |  |  |
-| 2-002 |  |  |  |  |  |  |
-| 2-003 |  |  |  |  |  |  |
-| 2-004 |  |  |  |  |  |  |
-| 2-005 |  |  |  |  |  |  |
-| 2-006 |  |  |  |  |  |  |
-| 2-007 |  |  |  |  |  |  |
-| 2-008 |  |  |  |  |  |  |
-| 2-009 |  |  |  |  |  |  |
-| 2-010 |  |  |  |  |  |  |
-| 2-012 |  |  |  |  |  |  |
-| 2-013 |  |  |  |  |  |  |
-| 2-014 |  |  |  |  |  |  |
-| 2-015 |  |  |  |  |  |  |
-| 2-016 |  |  |  |  |  |  |
-| 2-017 |  |  |  |  |  |  |
-
-#### MITC6 v5e
-
-| CSI problem | Response / component | Independent reference | Nastran result | MYSTRAN result | Nastran error (%) | MYSTRAN error (%) |
-|---|---|---:|---:|---:|---:|---:|
-| 2-001 |  |  |  |  |  |  |
-| 2-002 |  |  |  |  |  |  |
-| 2-003 |  |  |  |  |  |  |
-| 2-004 |  |  |  |  |  |  |
-| 2-005 |  |  |  |  |  |  |
-| 2-006 |  |  |  |  |  |  |
-| 2-007 |  |  |  |  |  |  |
-| 2-008 |  |  |  |  |  |  |
-| 2-009 |  |  |  |  |  |  |
-| 2-010 |  |  |  |  |  |  |
-| 2-012 |  |  |  |  |  |  |
-| 2-013 |  |  |  |  |  |  |
-| 2-014 |  |  |  |  |  |  |
-| 2-015 |  |  |  |  |  |  |
-| 2-016 |  |  |  |  |  |  |
-| 2-017 |  |  |  |  |  |  |
-
-#### MH6T v4
-
-| CSI problem | Response / component | Independent reference | Nastran result | MYSTRAN result | Nastran error (%) | MYSTRAN error (%) |
-|---|---|---:|---:|---:|---:|---:|
-| 2-001 |  |  |  |  |  |  |
-| 2-002 |  |  |  |  |  |  |
-| 2-003 |  |  |  |  |  |  |
-| 2-004 |  |  |  |  |  |  |
-| 2-005 |  |  |  |  |  |  |
-| 2-006 |  |  |  |  |  |  |
-| 2-007 |  |  |  |  |  |  |
-| 2-008 |  |  |  |  |  |  |
-| 2-009 |  |  |  |  |  |  |
-| 2-010 |  |  |  |  |  |  |
-| 2-012 |  |  |  |  |  |  |
-| 2-013 |  |  |  |  |  |  |
-| 2-014 |  |  |  |  |  |  |
-| 2-015 |  |  |  |  |  |  |
-| 2-016 |  |  |  |  |  |  |
-| 2-017 |  |  |  |  |  |  |
-
-#### Rezaiee T6 v3
-
-| CSI problem | Response / component | Independent reference | Nastran result | MYSTRAN result | Nastran error (%) | MYSTRAN error (%) |
-|---|---|---:|---:|---:|---:|---:|
-| 2-001 |  |  |  |  |  |  |
-| 2-002 |  |  |  |  |  |  |
-| 2-003 |  |  |  |  |  |  |
-| 2-004 |  |  |  |  |  |  |
-| 2-005 |  |  |  |  |  |  |
-| 2-006 |  |  |  |  |  |  |
-| 2-007 |  |  |  |  |  |  |
-| 2-008 |  |  |  |  |  |  |
-| 2-009 |  |  |  |  |  |  |
-| 2-010 |  |  |  |  |  |  |
-| 2-012 |  |  |  |  |  |  |
-| 2-013 |  |  |  |  |  |  |
-| 2-014 |  |  |  |  |  |  |
-| 2-015 |  |  |  |  |  |  |
-| 2-016 |  |  |  |  |  |  |
-| 2-017 |  |  |  |  |  |  |
 
 ### 10.2 Comparison interpretation
 
-The selected winding (CW or CCW), reference axis and loading definition must be recorded with the table at the time the result is inserted. A sign difference in local moments or transverse shear is not an error percentage until all components are transformed into a common physical basis. Nastran OP2 or Codex-derived CSV may populate the table once element IDs, node IDs, units, output station and solver subcases are matched. The 2-001 published independent values are \(\sigma_{xx}=\sigma_{yy}=1333\,\mathrm{psi}\), \(\tau_{xy}=400\,\mathrm{psi}\), \(M_{xx}=M_{yy}=1.111\times10^{-7}\) and \(M_{xy}=3.333\times10^{-8}\,\mathrm{lb\,in/in}\), for the official model's respective membrane and bending cases; they must not be copied blindly into the distinct DUEL3B mesh or a formulation row before load and units are matched.
+The selected winding (CW or CCW), reference axis and loading definition must be recorded with the table at the time the result is inserted. A sign difference in local moments or transverse shear is not an error percentage until all components are transformed into a common physical basis. Nastran OP2 or Run-derived CSV may populate the table once element IDs, node IDs, units, output station and solver subcases are matched. The 2-001 published independent values are \(\sigma_{xx}=\sigma_{yy}=1333\,\mathrm{psi}\), \(\tau_{xy}=400\,\mathrm{psi}\), \(M_{xx}=M_{yy}=1.111\times10^{-7}\) and \(M_{xy}=3.333\times10^{-8}\,\mathrm{lb\,in/in}\), for the official model's respective membrane and bending cases; they must not be copied blindly into the distinct DUEL3B mesh or a formulation row before load and units are matched.
 
 
 
@@ -563,7 +374,7 @@ For 2-001, all four T6 formulations pass analytical flat membrane, bending and z
 
 Report the **physical model and thickness** before reporting numerical agreement. For every measured observable provide problem ID, element family and formulation, thin/thick flag, winding, independent reference (if verified), solver, point and fiber, local/basic-coordinate convention, results, difference/error and source checksum. Preserve analytical zero targets using absolute error rather than division by zero. **No missing result shall be represented by numerical zero**. For public repository delivery, keep source and generated benchmark DAT traceable separately and store bulky OP2/F06 outside the documentation ZIP.
 
-The CODEx handoff included with this document assigns **all DAT selection, thin/thick MID3 verification, Q8/T6 extraction, winding CCW normalization and DAT ZIP construction to Codex**. The Markdown/HTML package itself contains no benchmark DAT.
+The included with this document assigns **all DAT selection, thin/thick MID3 verification, Q8/T6 extraction, winding CCW normalization and DAT ZIP construction *. The Markdown/HTML package itself contains no benchmark DAT.
 
 ## References — primary journal literature (no citations to project Markdown)
 
