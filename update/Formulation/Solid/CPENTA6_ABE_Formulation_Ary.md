@@ -431,8 +431,8 @@ subject to the precise signs and conventions of the MYSTRAN buckling eigenproble
 The **mesh labels and ratios are reproduced from the original note**. Numerical data tables are retained below; convergence plots will be inserted after the illustrations are supplied. No new numerical solutions or Nastran runs are claimed.
 
 ### 7.1 SAP2000 5-010: first buckling factor
-
-> **Figure reserved:** 5-010 buckling-factor convergence. Illustration will be inserted later.
+<img width="1639" height="1040" alt="sap5010_buckling_convergence" src="https://github.com/user-attachments/assets/0bb83067-7639-45b3-899e-adef8e4ff6c8" />
+> **Figure reserved:** 5-010 buckling-factor convergence. 
 
 **Planned Figure 1.** Connected-point convergence of the first buckling factor, using a logarithmic vertical axis.
 
@@ -444,25 +444,31 @@ The **mesh labels and ratios are reproduced from the original note**. Numerical 
 
 **Reference:** Euler buckling factor 0.8883; the original note also reports Nastran CPENTA6 factor 0.8910 for its audited mesh. These are **different kinds of reference**: Euler is a theoretical asymptote, while Nastran is a discrete FE result and should not be represented as a universal exact solution.
 
-> **Figure reserved:** 5-010 relative buckling error. Illustration will be inserted later.
+<img width="1639" height="1040" alt="sap5010_relative_error" src="https://github.com/user-attachments/assets/095fc285-3084-4b0b-9a9f-43a182671329" />
+> **Figure reserved:** 5-010 relative buckling error. 
 
 **Planned Figure 2.** Absolute relative error $100|\lambda_h/0.8883-1|$ (%) against the Euler factor on the three reported mesh levels. The logarithmic ordinate highlights the ABE $f=0$ result. Its relative errors are approximately **0.326%, 0.079%, 0.023%**.
 
-### 7.2 SAP2000 5-001: distorted constant-stress patch
 
-The reported model consists of seven irregular solids (14 wedges), $E=10^6$, $\nu=0.25$, with prescribed exact displacement
+### 7.2 SAP2000 5-001: Distorted constant-stress patch
 
-$$
-\mathbf u(\mathbf x)=\frac1{2000}
-\begin{bmatrix}2x+y+z\\x+2y+z\\x+y+2z\end{bmatrix}.
-$$
+The reported model consists of seven irregular solids (14 wedges), with material properties E = 10⁶ and ν = 0.25.
 
-This is an affine field, giving the uniform exact strain
+The prescribed exact displacement field is:
 
-$$
-\boldsymbol\varepsilon_V^{\mathrm{exact}}=
-\frac1{2000}[2,2,2,2,2,2]^T.
-$$
+```math
+\mathbf{u}(\mathbf{x})
+=
+\frac{1}{2000}
+\begin{bmatrix}
+2x+y+z \\
+x+2y+z \\
+x+y+2z
+\end{bmatrix}
+```
+
+This displacement field produces a constant strain state throughout the model.
+
 
 | Formulation | Relative displacement error | Relative stress error |
 |---|---:|---:|
@@ -473,13 +479,16 @@ $$
 | ABE $f=0.25$ | 0.079 | 0.27 |
 | ABE $f=0$ | 0.091 | 0.33 |
 
-> **Figure reserved:** 5-001 patch-consistency trade-off. Illustration will be inserted later.
+<img width="1600" height="1000" alt="sap5001_patch_tradeoff" src="https://github.com/user-attachments/assets/087cd2d4-83d5-4a3e-9721-c71cb79af8ed" />
+
+> **Figure reserved:** 5-001 patch-consistency trade-off. 
 
 **Planned Figure 3.** Observed patch-test accuracy versus mean-restoration parameter $f$. Values at $f=1$ are near machine precision; the graph uses a linear ordinate. **These data show that the high buckling accuracy at $f=0$ does not imply general patch consistency.**
 
 ### 7.3 Distorted patch refinement: nonzero consistency-error floor
 
-> **Figure reserved:** distorted patch mesh-refinement. Illustration will be inserted later.
+<img width="1600" height="1000" alt="distorted_patch_refinement" src="https://github.com/user-attachments/assets/ba8f3e68-fff7-42a5-b991-3baf45781dc5" />
+> **Figure reserved:** distorted patch mesh-refinement. 
 
 **Planned Figure 4.** Reported error under 10% relative interior-node distortion. The error changes with $n$, but does **not** tend to numerical zero over the tested mesh sequence. This is a consistency warning, not a definitive asymptotic-order estimate.
 
