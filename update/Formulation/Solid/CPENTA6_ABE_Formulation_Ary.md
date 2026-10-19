@@ -132,6 +132,74 @@ The other four rows remain compatible. Define $\overline{\mathbf B}$ as this six
 
 The edge-tied construction follows the *isotropic MITC3-type* shear interpolation discussed by Lee and Bathe (2004), adapted here to the continuum wedge. It is **not** identical to a shell MITC3 element; solid normal strains and the nine local EAS parameters remain present.
 
+
+
+
+## 3. Edge-tied assumed transverse shear
+
+For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible shear rows at triangle-edge midpoints.
+
+**Edge 1-2:**
+
+$$
+\mathbf a(\zeta_g)
+=
+\widehat{\mathbf B}_{r\zeta}
+\left(\frac{1}{2},0,\zeta_g\right)
+$$
+
+**Edge 1-3:**
+
+$$
+\mathbf b(\zeta_g)
+=
+\widehat{\mathbf B}_{s\zeta}
+\left(0,\frac{1}{2},\zeta_g\right)
+$$
+
+**Edge 2-3:**
+
+$$
+\begin{aligned}
+\mathbf c(\zeta_g)
+&= \mathbf b(\zeta_g)-\mathbf a(\zeta_g)\\
+&\quad -
+\left[
+\widehat{\mathbf B}_{s\zeta}
+-
+\widehat{\mathbf B}_{r\zeta}
+\right]
+\left(\frac{1}{2},\frac{1}{2},\zeta_g\right).
+\end{aligned}
+$$
+
+Here, $\mathbf a$, $\mathbf b$, and $\mathbf c$ are row vectors of length 18. The operators $\widehat{\mathbf B}_{r\zeta}$ and $\widehat{\mathbf B}_{s\zeta}$ denote rows 6 and 5 of $\widehat{\mathbf B}$, respectively.
+
+The assumed transverse-shear operators are interpolated as
+
+$$
+\boxed{
+\overline{\mathbf B}_{r\zeta}(r,s,\zeta_g)
+=
+\mathbf a+\mathbf c\,s
+}
+$$
+
+$$
+\boxed{
+\overline{\mathbf B}_{s\zeta}(r,s,\zeta_g)
+=
+\mathbf b-\mathbf c\,r
+}
+$$
+
+The other four strain rows remain compatible. The resulting six-row operator is denoted by $\overline{\mathbf B}$.
+
+The edge-tied construction is applied at the quadrature planes used by the present implementation; no additional through-thickness interpolation is assumed.
+
+
+
+
 ## 4. Nine local enhanced assumed strain parameters
 
 With $\bar r=r-1/3$, $\bar s=s-1/3$, the natural strain is augmented as
