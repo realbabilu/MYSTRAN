@@ -1,7 +1,7 @@
 # CPENTA6 ABE: edge-tied assumed shear and condensed enhanced-strain wedge
 
 **Technical formulation and numerical-validation note — MYSTRAN NEWSOLID (`PENTATYP,ABE`)**  
-**Revision:** 19 October 2026 | **Origin:** Ary, [project formulation note](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/Formulation/Solid/CPENTA6_ABE_Formulation_Ary.md)  
+**Revision:** 19 October 2026 (GitHub math syntax corrected) | **Origin:** Ary, [project formulation note](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/Formulation/Solid/CPENTA6_ABE_Formulation_Ary.md)  
 **Evidence status:** Figures and numerical tables reproduce reported Python-reference data from the linked original document. This revision does **not** claim new finite-element runs or a newly verified Fortran port.
 
 ## Abstract
@@ -94,25 +94,16 @@ $$
 
 ## 3. Edge-tied assumed transverse shear
 
-## 3. Edge-tied assumed transverse shear
-
-For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible shear rows at the three triangle-edge midpoints:
+For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible shear rows at triangle-edge midpoints:
 
 $$
 \begin{aligned}
-\mathbf a(\zeta_g)
-&=\widehat{\mathbf B}_{r\zeta}\left(\frac12,0,\zeta_g\right),\\[4pt]
-\mathbf b(\zeta_g)
-&=\widehat{\mathbf B}_{s\zeta}\left(0,\frac12,\zeta_g\right),\\[4pt]
-\mathbf c(\zeta_g)
-&=\mathbf b(\zeta_g)-\mathbf a(\zeta_g)\\
-&\quad-\left[
-\widehat{\mathbf B}_{s\zeta}\left(\frac12,\frac12,\zeta_g\right)
--\widehat{\mathbf B}_{r\zeta}\left(\frac12,\frac12,\zeta_g\right)
-\right].
+\mathbf a(\zeta_g)&=\widehat{\mathbf B}_{r\zeta}(1/2,0,\zeta_g),\\
+\mathbf b(\zeta_g)&=\widehat{\mathbf B}_{s\zeta}(0,1/2,\zeta_g),\\
+\mathbf c(\zeta_g)&=\mathbf b-\mathbf a-
+\left[\widehat{\mathbf B}_{s\zeta}-\widehat{\mathbf B}_{r\zeta}\right](1/2,1/2,\zeta_g).
 \end{aligned}
 $$
-
 
 Here $\mathbf a$, $\mathbf b$, and $\mathbf c$ are **row vectors of length 18**; $\widehat{\mathbf B}_{r\zeta}$ and $\widehat{\mathbf B}_{s\zeta}$ denote rows 6 and 5 of $\widehat{\mathbf B}$, respectively. Interpolate them as
 
@@ -165,7 +156,7 @@ $$
 =\det\mathbf J_0\int_{\widehat\Omega}\mathbf M_\xi\,d\widehat V=\mathbf0.
 $$
 
-This ensures the EAS modes alone are orthogonal to any *constant natural-frame stress*. It **does not** prove that the edge-tied displacement operator passes the patch test on distorted geometry (see Section 7).
+This ensures the EAS modes alone are orthogonal to any *constant stress represented in the frozen natural frame*. It **does not** prove that the edge-tied displacement operator passes the patch test on distorted geometry (see Section 7).
 
 ### 4.1 Mixed stationarity and static condensation
 
@@ -245,7 +236,7 @@ Use the tensor product of a three-point triangular rule and two-point Gauss–Le
 | 5 | 2/3 | 1/6 | $+1/\sqrt3$ | 1/6 |
 | 6 | 1/6 | 2/3 | $+1/\sqrt3$ | 1/6 |
 
-Thus $\sum_g w_g=1$ and numerical integrals read
+Thus $\sum_g w_g=1$ (the reference prism has unit volume) and numerical integrals read
 
 $$
 \int_{\Omega_e}\mathbf H\,dV\approx
@@ -275,13 +266,13 @@ subject to the precise signs and conventions of the MYSTRAN buckling eigenproble
 
 ## 7. Numerical verification and convergence (reported Python data)
 
-The **mesh labels and ratios are reproduced from the original note**; points in the figures are the stated runs, connected by straight segments. Interpolated line segments are only visual guides, **not** new numerical solutions. No fabricated refinement levels or claimed Nastran runs are included.
+The **mesh labels and ratios are reproduced from the original note**. Numerical data tables are retained below; convergence plots will be inserted after the illustrations are supplied. No new numerical solutions or Nastran runs are claimed.
 
 ### 7.1 SAP2000 5-010: first buckling factor
 
-![Buckling factor convergence](figures/sap5010_buckling_convergence.png)
+> **Figure reserved:** 5-010 buckling-factor convergence. Illustration will be inserted later.
 
-**Figure 1.** Connected-point mesh convergence of the first reported buckling factor. Vertical axis logarithmic so stiff/locked elements and the accurate ABE branch fit on the same plot.
+**Planned Figure 1.** Connected-point convergence of the first buckling factor, using a logarithmic vertical axis.
 
 | Mesh | Standard | EAS9 v2 | ABE $f=1$ | ABE $f=0$ |
 |---|---:|---:|---:|---:|
@@ -291,9 +282,9 @@ The **mesh labels and ratios are reproduced from the original note**; points in 
 
 **Reference:** Euler buckling factor 0.8883; the original note also reports Nastran CPENTA6 factor 0.8910 for its audited mesh. These are **different kinds of reference**: Euler is a theoretical asymptote, while Nastran is a discrete FE result and should not be represented as a universal exact solution.
 
-![Relative buckling error convergence](figures/sap5010_relative_error.png)
+> **Figure reserved:** 5-010 relative buckling error. Illustration will be inserted later.
 
-**Figure 2.** Absolute relative error $100|\lambda_h/0.8883-1|$ (%) against the Euler factor on the three reported mesh levels. The logarithmic ordinate highlights the ABE $f=0$ result. Its relative errors are approximately **0.326%, 0.079%, 0.023%**.
+**Planned Figure 2.** Absolute relative error $100|\lambda_h/0.8883-1|$ (%) against the Euler factor on the three reported mesh levels. The logarithmic ordinate highlights the ABE $f=0$ result. Its relative errors are approximately **0.326%, 0.079%, 0.023%**.
 
 ### 7.2 SAP2000 5-001: distorted constant-stress patch
 
@@ -320,15 +311,15 @@ $$
 | ABE $f=0.25$ | 0.079 | 0.27 |
 | ABE $f=0$ | 0.091 | 0.33 |
 
-![Patch-consistency tradeoff](figures/sap5001_patch_tradeoff.png)
+> **Figure reserved:** 5-001 patch-consistency trade-off. Illustration will be inserted later.
 
-**Figure 3.** Observed patch-test accuracy versus mean-restoration parameter $f$. Values at $f=1$ are near machine precision; the graph uses a linear ordinate. **These data show that the high buckling accuracy at $f=0$ does not imply general patch consistency.**
+**Planned Figure 3.** Observed patch-test accuracy versus mean-restoration parameter $f$. Values at $f=1$ are near machine precision; the graph uses a linear ordinate. **These data show that the high buckling accuracy at $f=0$ does not imply general patch consistency.**
 
 ### 7.3 Distorted patch refinement: nonzero consistency-error floor
 
-![Distorted patch mesh convergence](figures/distorted_patch_refinement.png)
+> **Figure reserved:** distorted patch mesh-refinement. Illustration will be inserted later.
 
-**Figure 4.** Reported error under 10% relative interior-node distortion. The error changes with $n$, but does **not** tend to numerical zero over the tested mesh sequence. This is a consistency warning, not a definitive asymptotic-order estimate.
+**Planned Figure 4.** Reported error under 10% relative interior-node distortion. The error changes with $n$, but does **not** tend to numerical zero over the tested mesh sequence. This is a consistency warning, not a definitive asymptotic-order estimate.
 
 | Cube grid $n\times n\times n$ | $n=2$ | $n=3$ | $n=4$ | $n=6$ |
 |---|---:|---:|---:|---:|
