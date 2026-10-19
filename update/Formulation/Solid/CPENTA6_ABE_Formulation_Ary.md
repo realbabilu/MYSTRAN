@@ -111,6 +111,14 @@ $$
 
 For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible shear rows at triangle-edge midpoints:
 
+**Edge 1-2:**
+$$
+**\mathbf a(\zeta_g)**
+=
+\widehat{\mathbf B}_{r\zeta}
+\left(\frac{1}{2},0,\zeta_g\right)
+$$
+
 $$
 \begin{aligned}
 \mathbf a(\zeta_g)&=\widehat{\mathbf B}_{r\zeta}(1/2,0,\zeta_g),\\
