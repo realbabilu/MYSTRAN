@@ -208,7 +208,9 @@ $$
 \qquad V_e=\int_{\Omega_e}dV.
 $$
 
-The corrected assumed operator for $f=\texttt{patch\_consistency}\in[0,1]$ is
+The corrected assumed operator for
+$f=\texttt{patch\_consistency}\in[0,1]$ 
+is
 
 $$
 \boxed{\overline{\mathbf B}_f=\overline{\mathbf B}
