@@ -121,7 +121,8 @@ The mean edge length along $\xi$, $\eta$, $\zeta$ is computed; the shortest dire
 
 ### 5.2 Pinched dome 5-007
 
-![Pinched dome convergence](figures_en/fig1_dome.png)
+<img width="1036" height="644" alt="fig1_dome" src="https://github.com/user-attachments/assets/978f8f26-4b5f-409c-bc2e-20aa63a27e46" />
+
 
 Ratio $U_x(A)/0.094$ (error against reference).
 
@@ -135,7 +136,8 @@ Ratio $U_x(A)/0.094$ (error against reference).
 
 ### 5.3 Twisted beam 5-004
 
-![Twisted beam](figures_en/fig2_beam.png)
+<img width="1232" height="602" alt="fig2_beam" src="https://github.com/user-attachments/assets/82ddcf0f-1b61-4484-bfcd-f20144442ebe" />
+
 
 | Source | IN (ft) | error IN | OUT (ft) | error OUT |
 |---|---|---|---|---|
@@ -151,7 +153,8 @@ Ratio $U_x(A)/0.094$ (error against reference).
 
 ### 5.4 Pinched cylinder
 
-![Pinched cylinder convergence](figures_en/fig3_cylinder.png)
+<img width="924" height="588" alt="fig3_cylinder" src="https://github.com/user-attachments/assets/aa1b76dd-bbb0-48f4-be43-d1bba1752fdf" />
+
 
 Ratio to reference.
 
@@ -165,7 +168,8 @@ Ratio to reference.
 
 ### 5.5 Affine patch test and rotation invariance
 
-![Patch test](figures_en/fig4_patch.png)
+<img width="1064" height="574" alt="fig4_patch" src="https://github.com/user-attachments/assets/e646c0e0-b2c2-4c08-994d-860fbf4326e4" />
+
 
 Relative error of free-node displacement. Thin shell: 3×3×0.1 box.
 
