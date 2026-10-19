@@ -111,13 +111,6 @@ $$
 
 For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible shear rows at triangle-edge midpoints:
 
-**Edge 1-2:**
-$$
-**\mathbf a(\zeta_g)**
-=
-\widehat{\mathbf B}_{r\zeta}
-\left(\frac{1}{2},0,\zeta_g\right)
-$$
 
 $$
 \begin{aligned}
@@ -127,6 +120,9 @@ $$
 \left[\widehat{\mathbf B}_{s\zeta}-\widehat{\mathbf B}_{r\zeta}\right](1/2,1/2,\zeta_g).
 \end{aligned}
 $$
+
+
+
 
 Here $\mathbf a$, $\mathbf b$, and $\mathbf c$ are **row vectors of length 18**; $\widehat{\mathbf B}_{r\zeta}$ and $\widehat{\mathbf B}_{s\zeta}$ denote rows 6 and 5 of $\widehat{\mathbf B}$, respectively. Interpolate them as
 
