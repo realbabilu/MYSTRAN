@@ -529,6 +529,8 @@ The following benchmark names are **working descriptions** where the official ti
 | [2-016](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-016.pdf) | Plate out-of-plane buckling |
 | [2-017](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-017.pdf) | In-plane column buckling |
 
+Will be updated in here : https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/shell_benchmark/comparison_all.md
+
 ### Problem Plate bending / pressure
 <img width="1690" height="1170" alt="image" src="https://github.com/user-attachments/assets/7acc7bd7-0753-4348-9e39-4df347dbeeed" />
 <img width="1690" height="1170" alt="image" src="https://github.com/user-attachments/assets/0bd7e09e-6b0e-40a5-b53c-6a56742043f1" />
