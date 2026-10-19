@@ -283,34 +283,107 @@ $$
 
 In code, **solve** $\mathbf K_{\alpha\alpha}\mathbf X=\mathbf K_{\alpha d}$ by a factorization rather than forming an inverse; verify its conditioning and reject/diagnose singular local enhanced systems. No new global DOFs are introduced.
 
+
 ## 5. Patch-consistency mean correction
 
-Define the shear-only row difference $\Delta\mathbf B=\widehat{\mathbf B}-\overline{\mathbf B}$, where all non-transverse-shear rows of $\Delta\mathbf B$ are zero. Its volume mean is
+Define the shear-only row difference:
 
-$$
-\langle\Delta\mathbf B\rangle
-=\frac{1}{V_e}\int_{\Omega_e}(\widehat{\mathbf B}-\overline{\mathbf B})\,dV,
-\qquad V_e=\int_{\Omega_e}dV.
-$$
+```math
+\Delta\mathbf{B}
+=
+\widehat{\mathbf{B}}
+-
+\overline{\mathbf{B}}
+```
 
-The corrected assumed operator for
-$$
-$f=\texttt{patch\_consistency}\in[0,1]$ 
-$$
-is
+All non-transverse-shear rows of the difference matrix are zero.
 
-$$
-\boxed{\overline{\mathbf B}_f=\overline{\mathbf B}
-+f\langle\Delta\mathbf B\rangle}.
-$$
+The volume-averaged difference is defined as:
 
-The correction is applied **only to the two transverse-shear rows** and is constant within the element. At $f=1$,
+```math
+\langle\Delta\mathbf{B}\rangle
+=
+\frac{1}{V_e}
+\int_{\Omega_e}
+\left(
+\widehat{\mathbf{B}}
+-
+\overline{\mathbf{B}}
+\right)
+\,dV
+```
 
-$$
-\int_{\Omega_e}(\overline{\mathbf B}_1-\widehat{\mathbf B})\,dV=\mathbf0.
-$$
+where the element volume is:
 
-Combined with EAS zero-mean orthogonality, this provides the constant-stress consistency condition for the reported linear patch tests; the actual proof also assumes a valid mesh, exact Dirichlet setup, and correct element integration. At $f=0$, no correction is applied and **distorted patch consistency is not satisfied** in the reported tests. Neither $f=0$ nor $f=1$ is universally superior.
+```math
+V_e
+=
+\int_{\Omega_e}dV
+```
+
+The patch-consistency correction factor `f` is controlled by the parameter `patch_consistency`, with:
+
+```math
+0\leq f\leq 1
+```
+
+The corrected assumed strain-displacement operator is:
+
+```math
+\boxed{
+\overline{\mathbf{B}}_f
+=
+\overline{\mathbf{B}}
++
+f\langle\Delta\mathbf{B}\rangle
+}
+```
+
+The correction is applied **only to the two transverse-shear rows** and is constant within the element.
+
+### 5.1 Full mean correction (f = 1)
+
+For `f = 1`, the correction restores the volume mean of the compatible transverse-shear operators:
+
+```math
+\int_{\Omega_e}
+\left(
+\overline{\mathbf{B}}_1
+-
+\widehat{\mathbf{B}}
+\right)
+\,dV
+=
+\mathbf{0}
+```
+
+This property, combined with the EAS zero-mean orthogonality condition, supports constant-stress consistency for the reported linear patch tests.
+
+The consistency argument also assumes a valid element mesh, correct Dirichlet boundary conditions, and sufficiently accurate numerical integration.
+
+### 5.2 No mean correction (f = 0)
+
+For `f = 0`, the original edge-tied operator is retained:
+
+```math
+\overline{\mathbf{B}}_0
+=
+\overline{\mathbf{B}}
+```
+
+No patch-consistency mean correction is applied.
+
+In the reported distorted-mesh patch tests, the uncorrected formulation did not satisfy the patch-consistency requirements.
+
+### 5.3 Interpretation of the correction factor
+
+The parameter `patch_consistency` controls the interpolation between the uncorrected and fully mean-corrected operators.
+
+- `f = 0`: Original edge-tied assumed-shear operator.
+- `0 < f < 1`: Partial mean correction.
+- `f = 1`: Full volume-mean correction.
+
+Neither `f = 0` nor `f = 1` is universally superior for every benchmark. The selection must consider patch consistency, bending, twisting, and element distortion sensitivity.
 
 ## 6. Quadrature, stress recovery, and other operators
 
