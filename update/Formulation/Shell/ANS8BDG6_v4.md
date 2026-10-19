@@ -37,6 +37,7 @@ For local flat coordinates $(x,y)$, $\mathbf J=\partial(x,y)/\partial(r,s)$. Its
 \quad \mathbf C_s=\kappa_s\frac{E}{2(1+\nu)}\mathbf I_2,\quad \kappa_s=5/6.
 ```
 
+
 ## 2. Compatible and assumed strain operators
 
 In first-order shear-deformation kinematics, let $(u,v,w,\theta_x,\theta_y,\theta_z)$ be the local degrees of freedom, with the rotational sign convention
@@ -112,6 +113,10 @@ The adopted switching rule is
 
 Thus flat, straight-sided patches retain compatible membrane strain, while curved/warped elements receive assumed strain. The switching rule is **heuristic and discontinuous** at the threshold; it is not a theorem of locking-free behavior. Variants forcing membrane tying on or off should remain exposed for verification.
 
+<img width="1007" height="1071" alt="image" src="https://github.com/user-attachments/assets/da714dbf-c0bf-4c59-8d39-1d03f93590cb" />
+
+<img width="2616" height="996" alt="fig02_ans_tying" src="https://github.com/user-attachments/assets/579d36b3-8149-4220-b625-8fd7f57a8b41" />
+
 ## 3. Two alternative transverse-shear sampling spaces
 
 The v4 research formulation retains three named transverse-shear choices: *tensor6*, *BDG4*, and *direct*. To prevent confusion with Jung and Han's published βδγ nomenclature, these are here explicitly treated as **project operator names**.
@@ -168,9 +173,14 @@ This contains cross-coupling $\omega(1-\omega)(\mathbf B_6^T\mathbf C_s\mathbf B
 
 **Trade-off:** the archived v4 design notes report substantial thin-plate locking for pure tensor6 (approximately 5% of reference deflection at $h=10^{-4}$) and excess flexibility for pure BDG4 (approximately +27% deflection at 2×2 and +7% at 4×4). The auto blend improves the supplied plate test but is an **empirical thickness-sensitive choice**, not an unconditional proof of optimal convergence, patch consistency, or stability for arbitrary distortion.
 
-![Shear blend coefficient](figures/fig03_shear_blend.png)
 
-*Figure 3. Adopted shear blending weight versus normalized characteristic dimension $\sqrt{A_e}/h$. This is a plot of the defining equation, not fitted numerical test data.*
+<img width="1516" height="914" alt="image" src="https://github.com/user-attachments/assets/ed41f5e2-f214-4df7-95c0-fdbffc413fb5" />
+
+### 3.4 Relationship to compatible-field enrichment and modified Q8 interpolation
+
+Kikuchi and Ishii (1999) developed a **four-node, 12-DOF Reissner–Mindlin plate** whose transverse displacement is enriched by biquadratic terms constrained through nodal rotations. Their contribution motivates compatible-field improvement and careful handling of thin-limit shear locking, but their interpolation is **not** the present eight-node ANS8BDG6 operator.
+
+MacNeal and Harder (1992) demonstrated that a modified eight-node interpolation can recover quadratic displacement completeness for **bilinear geometric mappings** by constraining a ninth internal interpolation value. Their patch tests distinguish membrane and constant-curvature responses, and also distinguish straight from curved edges. This supports evaluating quadratic completeness and distorted patch performance as **separate** validation requirements. Neither paper establishes exact equivalence to the default Kikuchi-type field used here without a coefficient-by-coefficient comparison.
 
 ## 4. Default quadratic field and bending/drilling strain
 
@@ -226,13 +236,6 @@ The active 48×48 stiffness therefore has four contributions:
 
 The formulation uses full **3×3 Gauss–Legendre surface integration** for elastic stiffness, with abscissae $0,\pm\sqrt{3/5}$ and weights $8/9,5/9,5/9$. $\sum_{i,j}w_iw_j=4$. Figure 1 identifies the nine integration points; Figure 2 identifies the classical β–δ–γ tying families, which are **not** to be confused with the tensor6 shared-operator locations.
 
-![Q8 Gauss points](figures/fig01_q8_gauss.png)
-
-*Figure 1. Node positions and nine Gauss–Legendre integration points in the Q8 parent plane.*
-
-![ANS tying families](figures/fig02_ans_tying.png)
-
-*Figure 2. The β normal-membrane, δ in-plane-shear, and γ four-point transverse-shear sampling sets, reflecting the family of interpolation patterns motivating the hybrid formulation.*
 
 ## 6. Mass, pressure, temperature, and initial-stress stiffness
 
@@ -319,9 +322,7 @@ The corrected independent target is $U_z=-12.97$ in for the simply supported C u
 
 The comparison establishes a measurable accuracy improvement relative to the CSI target on this **specific** flat plate and support/load combination; it does not independently prove all curved-shell pressure loads are correct.
 
-![Pressure comparison](figures/fig04_pressure_reference.png)
-
-*Figure 4. Error relative to the corrected CSI 2-005 C uniform-pressure target. This is a before/after comparison at one mesh, **not** a mesh-convergence curve.*
+<img width="1737" height="940" alt="fig04_pressure_reference" src="https://github.com/user-attachments/assets/b6ee4298-bb2c-423e-8752-aefb3e2cf910" />
 
 ### 8.2 CSI 2-016: thin-plate buckling, first reported factor
 
@@ -336,7 +337,8 @@ The published CSI thin-plate stress references are approximately $\tau_{cr}=0.04
 
 ![Buckling reference errors](figures/fig05_buckling_errors.png)
 
-*Figure 5. Before/after signed critical-stress errors on the 0.01-thickness plate, from the archived ANS8 v4 validation record. Not a mesh-convergence plot.*
+<img width="1737" height="896" alt="fig05_buckling_errors" src="https://github.com/user-attachments/assets/5bb462b2-1da2-43ac-a357-30aa82aae6ad" />
+
 
 ### 8.3 CSI 2-017 and additional solver parity
 
@@ -374,15 +376,13 @@ The archived v4 memo reports several improvements but does **not** supply a comp
 - **Benchmark scope.** 2-009 is excluded by the public benchmark index; 2-015 lacks a confirmed independent reference; some 2-016/2-017 normalization and Nastran recovery states remain pending. Do not populate missing columns from other solvers.
 - **Evidence levels.** Distinguish independent CSI reference agreement, Nastran agreement on exact matched mesh, MYSTRAN/reference operator parity, and isolated historical test values.
 
-## 11. Figures supplied for insertion
 
-1. `figures/fig01_q8_gauss.png` — Q8 node numbering and 3×3 Gauss points.
-2. `figures/fig02_ans_tying.png` — β, δ, and γ classical tying patterns.
-3. `figures/fig03_shear_blend.png` — dimensionless auto shear weight from the governing equation.
-4. `figures/fig04_pressure_reference.png` — actual reported baseline/v4 pressure error versus CSI 2-005.
-5. `figures/fig05_buckling_errors.png` — actual reported 2-016 thin plate critical-stress error.
 
 ## References
+
+**Additional primary sources for modified-field interpretation:**
+
+
 
 1. Jung, W.-Y., and Han, S.-C. (2013). **An 8-Node Shell Element for Nonlinear Analysis of Shells Using the Refined Combination of Membrane and Shear Interpolation Functions.** *Mathematical Problems in Engineering*, Article 276304. https://doi.org/10.1155/2013/276304 . **Primary theoretical basis for β/δ/γ sampling; not the exact v4 hybrid.**
 2. Jung, W.-Y., and Han, S.-C. (2014). **Shear buckling responses of laminated composite shells using a modified 8-node ANS shell element.** *Composite Structures*, **109**, 119–129. https://doi.org/10.1016/j.compstruct.2013.10.055 . **Separate publication, not interchangeable with the 2013 Mathematical Problems in Engineering paper.**
@@ -390,6 +390,9 @@ The archived v4 memo reports several improvements but does **not** supply a comp
 4. MacNeal, R. H., and Harder, R. L. (1985). **A proposed standard set of problems to test finite element accuracy.** *Finite Elements in Analysis and Design*, **1**, 3–20.
 5. Bathe, K.-J., and Dvorkin, E. N. (1986). **A formulation of general shell elements—the use of mixed interpolation of tensorial components.** *International Journal for Numerical Methods in Engineering*, **22**, 697–722. (Background on mixed/assumed interpolation.)
 6. Hughes, T. J. R., and Brezzi, F. (1989). **On drilling degrees of freedom.** *Computer Methods in Applied Mechanics and Engineering*, **72**, 105–121.
-7. Computers and Structures, Inc. **Shells Verification Problems**, particularly [2-001](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-001.pdf), [2-005](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf), [2-016](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-016.pdf), and [2-017](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-017.pdf).
-8. MYSTRAN project. [Quadratic shell benchmark library, v18.00.a](https://github.com/realbabilu/MYSTRAN/tree/v18.00.a/update/shell_benchmark); [reference-anchored comparison](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/shell_benchmark/comparison_all.md); [2-005 corrected benchmark](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/shell_benchmark/benchmark_2_005.md).
-9. MYSTRAN project archive. **ANS8BDG6_V4_VALIDATION.md**, supplied validation record for the v4 Fortran port, with baseline and final executable/deck hashes and detailed case results.
+7. Kikuchi, F., and Ishii, K. (1999). **An improved 4-node quadrilateral plate bending element of the Reissner-Mindlin type.** *Computational Mechanics*, **23**, 240–249. The four-node compatible enriched-displacement plate is conceptual background; it is not a direct eight-node ANS8BDG6 formulation.
+8. MacNeal, R. H., and Harder, R. L. (1992). **Eight Nodes or Nine?** *International Journal for Numerical Methods in Engineering*, **33**, 1049–1058. Primary reference for metric-aware modified Q8 shape functions and constant-curvature patch tests, including their geometric limits.
+9. Computers and Structures, Inc. **Shells Verification Problems**, particularly [2-001](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-001.pdf), [2-005](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf), [2-016](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-016.pdf), and [2-017](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-017.pdf).
+10. MYSTRAN project. [Quadratic shell benchmark library, v18.00.a](https://github.com/realbabilu/MYSTRAN/tree/v18.00.a/update/shell_benchmark); [reference-anchored comparison](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/shell_benchmark/comparison_all.md); [2-005 corrected benchmark](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/shell_benchmark/benchmark_2_005.md).
+11. MYSTRAN project archive. **ANS8BDG6_V4_VALIDATION.md**, supplied validation record for the v4 Fortran port, with baseline and final executable/deck hashes and detailed case results.
+
