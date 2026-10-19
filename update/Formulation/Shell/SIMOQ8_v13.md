@@ -7,7 +7,7 @@
 
 ## Abstract
 
-A quadratic eight-node degenerated shell is presented for linear analysis of thin and moderately thick curved structures. The formulation retains conventional isoparametric serendipity geometry, six nodal global degrees of freedom, a continuously interpolated reference director, point-consistent covariant-to-physical strain transformations, a regularized drilling term, and a geometry-triggered selection of assumed-natural-strain (ANS) interpolation or a locally condensed enhanced-assumed-strain (EAS) shear mode. The development from early implementations through version 13 corrects inconsistent bending/shear kinematics and director orientation, while version 13 revises translational initial-stress geometric stiffness. The central numerical trade-off is explicit: ANS improves curved-shell performance but may violate the distorted flat-patch response; compatible shear with EAS retains the flat-patch behavior but does not guarantee absence of locking in every regime. Recovery of the eliminated EAS parameter is needed to reconstruct the strain field that is consistent with the condensed stiffness. Historical 2-001 patch and T9 convergence results, together with comparative NAFEMS LE5 stress recovery, are documented without conflating equivalent recovery-frame changes with improvements in stiffness or accuracy.
+A quadratic eight-node degenerated shell is presented for linear analysis of thin and moderately thick curved structures. The formulation retains conventional isoparametric serendipity geometry, six nodal global degrees of freedom, a continuously interpolated reference director, point-consistent covariant-to-physical strain transformations, a regularized drilling term, and a geometry-triggered selection of assumed-natural-strain (ANS) interpolation or a locally condensed enhanced-assumed-strain (EAS) shear mode. The development from early implementations through version 13 corrects inconsistent bending/shear kinematics and director orientation, while version 13 revises translational initial-stress geometric stiffness. The central numerical trade-off is explicit: ANS improves curved-shell performance but may violate the distorted flat-patch response; compatible shear with EAS retains the flat-patch behavior but does not guarantee absence of locking in every regime. Recovery of the eliminated EAS parameter is needed to reconstruct the strain field that is consistent with the condensed stiffness. Historical 2-001 patch and Pinched Cylinder Test convergence results, together with comparative NAFEMS LE5 stress recovery, are documented without conflating equivalent recovery-frame changes with improvements in stiffness or accuracy.
 
 **Keywords:** quadratic shell; Q8; assumed natural strain; enhanced assumed strain; static condensation; drilling rotation; stress recovery; geometric stiffness; patch consistency.
 
@@ -123,7 +123,7 @@ $$
 
 If $\mathbf D_s=\kappa_sGh\mathbf I_2$, $\mathbf q_s$ has units of force/length; $\boldsymbol\tau_s=\mathbf q_s/h$ is the corresponding shear stress under the adopted effective-shear constitutive law. Reporting only $\mathbf D_s\mathbf B_s\mathbf d_e$ while EAS is active omits the condensed strain correction. This is a **recovery-consistency improvement**, not a change to the formulation's stiffness. It must not be confused with setting shear to zero or performing ad hoc constant projection.
 
-The documented 2-001 LC2 EID 24 results were $Q_y=\pm0.02666667$ using raw recovery, and approximately $10^{-15}$ after internal-mode reconstruction; a constant nonzero-shear T4 test preserved the imposed analytic result. These findings do **not** establish a general physical shear-stress solution for arbitrary curved or loaded shells.
+The documented 2-001 LC2 EID 24 results were $Q_y=\pm0.02666667$ using raw recovery, and approximately $10^{-15}$ after internal-mode reconstruction; a constant nonzero-shear patch test preserved the imposed analytic result. These findings do **not** establish a general physical shear-stress solution for arbitrary curved or loaded shells.
 
 ## 5. Drilling stabilization, integration and initial-stress stiffness
 
@@ -165,9 +165,9 @@ CW–CCW comparisons shall use an explicit node/DOF permutation, the same physic
 
 | Modification | Mathematical significance | Reported consequence |
 |---|---|---|
-| Early baseline | Initial director and bending/shear sign inconsistencies | Distorted 2-001 bending failure (~301%); T9 N=16 ratio ~0.388 |
+| Early baseline | Initial director and bending/shear sign inconsistencies | Distorted 2-001 bending failure (~301%); Pinched Cylinder Test N=16 ratio ~0.388 |
 | V10 | Rotation sign in $\mathbf B_s$ and consistent translation–director-gradient sign in $\mathbf B_b$ | 2-001 bending deviation ~0.84% |
-| V11 | Elementwise director orientation; selective ANS and EAS | T9 N=16 ratio ~1.026 |
+| V11 | Elementwise director orientation; selective ANS and EAS | Pinched Cylinder Test N=16 ratio ~1.026 |
 | V12 | Common winding sign for physical frames/directors; unnormalized shear director; pointwise drilling and EAS basis | Distorted 2-001 bending displacement error near machine precision |
 | v13 | Revised physical-gradient translational $\mathbf K_G$ | Improvement in operator definition; full nonlinear shell-buckling equivalence not established |
 
@@ -175,9 +175,9 @@ The prior development note reports the flat distorted 2-001 V12 bending displace
 
 ### 7.2 Curved shell convergence
 
-![T9 convergence](figures/fig01_t9_convergence.png)
+![Pinched Cylinder Test convergence](figures/fig01_Pinched Cylinder Test_convergence.png)
 
-**Figure 3.** Historical T9 pinched-cylinder refinement, response normalized by the published benchmark. Connecting lines are visual guides between actual recorded mesh sizes, not interpolated FE solutions. V12 is an antecedent of v13; this plot does not claim an additional newly executed v13 refinement series.
+**Figure 3.** Historical Pinched Cylinder Test pinched-cylinder refinement, response normalized by the published benchmark. Connecting lines are visual guides between actual recorded mesh sizes, not interpolated FE solutions. V12 is an antecedent of v13; this plot does not claim an additional newly executed v13 refinement series.
 
 | Number of divisions $N$ | Early baseline | V11 | V12 |
 |---:|---:|---:|---:|
@@ -189,18 +189,18 @@ The prior development note reports the flat distorted 2-001 V12 bending displace
 
 **ANS must not be presented as an unconditional improvement.** A historical V11 operator ablation yielded:
 
-| Shear/membrane treatment | Flat distorted 2-001 bending reported error | T9 at $N=4$ (target 1) |
+| Shear/membrane treatment | Flat distorted 2-001 bending reported error | Pinched Cylinder Test at $N=4$ (target 1) |
 |---|---:|---:|
 | No ANS, with EAS | 0.84% | 0.21 |
 | ANS shear alone | 133% | 0.82 |
 | ANS membrane alone | 14.9% | 0.42 |
 | ANS membrane + shear | 133% | 0.96 |
 
-![Tradeoff](figures/fig03_patch_curved_tradeoff.png)
+<img width="1958" height="803" alt="image" src="https://github.com/user-attachments/assets/17a3dd1a-c111-4566-a4aa-16624bac27e8" />
 
 **Figure 4.** Historical V11 ablation. These are *not* v13 auto-mode patch-test results. V12 improved the no-ANS patch result substantially by resolving frame/sign inconsistency; the V11 ablation remains evidence that curved-shell improvement alone cannot justify applying ANS indiscriminately. **V13 ANS-forced distorted-patch acceptance must be verified separately** using consistent stress extraction.
 
-The stronger shear locking risk of compatible full-integration Q8 in thin bending motivates local enhancement, but a smooth stress plot or an accurate coarse mesh is **not** proof of locking freedom. Required gates are distorted and affine patch consistency, nonzero-shear patch T4, rigid-body rank, bending/twist, shear-energy scaling with $h/L$, and curved-shell displacement convergence. Partial-patch error or additional zero eigenmodes must not be hidden by a recovery-only transformation.
+The stronger shear locking risk of compatible full-integration Q8 in thin bending motivates local enhancement, but a smooth stress plot or an accurate coarse mesh is **not** proof of locking freedom. Required gates are distorted and affine patch consistency, nonzero-shear patch Test, rigid-body rank, bending/twist, shear-energy scaling with $h/L$, and curved-shell displacement convergence. Partial-patch error or additional zero eigenmodes must not be hidden by a recovery-only transformation.
 
 ### 7.4 Stress recovery: NAFEMS LE5 Z-section cantilever
 
@@ -223,12 +223,12 @@ Reported model properties: $E=210\,\mathrm{GPa}$, $h=0.1\,\mathrm m$; target axi
 |---|---|---|---|
 | SAP2000/Nastran 2-001 LC1–LC2 | Analytic constant membrane stress and moment, prescribed boundary field | v13 exact interior displacement in a reproduced LC2 equilibrium; stress/moment extraction needs reconciled basis/sign checks | **Partial** |
 | 2-001 transverse shear | Zero analytic shear for manufactured bending | Raw $Q_y\approx\pm0.02666667$ at EID 24 midsides; enhanced-mode reconstruction approximately zero | **Recovery mechanism identified**, independent Nastran shear parity not established |
-| T4 nonzero transverse shear | $Q_x=(5/6)Gha$ | Prescribed constant-shear test retained nonzero result | **Pass for prescribed-field test** |
-| T9 pinched cylinder | Published benchmark displacement | Historical V12 ratios 0.965 / 1.023 / 1.026 | **Reported antecedent** |
+| Patch nonzero transverse shear Test| $Q_x=(5/6)Gha$ | Prescribed constant-shear test retained nonzero result | **Pass for prescribed-field test** |
+| Pinched Cylinder Test pinched cylinder | Published benchmark displacement | Historical V12 ratios 0.965 / 1.023 / 1.026 | **Reported antecedent** |
 | NAFEMS LE5 | $\sigma_{xx}(A)=-108$ MPa | Both v13/v13b around -108.8 to -110.2 MPa | **Close, limited mesh study** |
 | 2-016/2-017 eigen-buckling | Discrete eigenvalue and matching prestress | Geometric operator available, no newly established comprehensive parity table | **Open** |
 
-A historical comparison harness also produced approximately 6.14% difference in 2-001 stress/moment and 200% bending/twist sign discrepancies in T2/T5, despite near-exact displacements; these outcomes have not been reconciled against the declared local/global frame and sign conventions. They **remain unresolved verification flags**, not evidence that the physical shell stiffness is either right or wrong. The comparison with Nastran bending moments likewise cannot be used as an absolute reference until stress location, fiber, tensor definition and output conventions match.
+A historical comparison harness also produced approximately 6.14% difference in 2-001 stress/moment and 200% bending/twist sign discrepancies in Patch Test, despite near-exact displacements; these outcomes have not been reconciled against the declared local/global frame and sign conventions. They **remain unresolved verification flags**, not evidence that the physical shell stiffness is either right or wrong. The comparison with Nastran bending moments likewise cannot be used as an absolute reference until stress location, fiber, tensor definition and output conventions match.
 
 ## 8. Scope, limitations and acceptance recommendations
 
@@ -236,7 +236,7 @@ A historical comparison harness also produced approximately 6.14% difference in 
 2. Treat internal EAS shear reconstruction as a separate postprocessing candidate, requiring equilibrium shear and curved-shell regression; do not confuse recovery changes with stiffness improvement.
 3. Treat v13b point-to-center tensor representation as output-frame equivalence until warped/curved, edge discontinuity and solver-parity tests show otherwise. Displacement and global stress equality alone do not warrant preference for either presentation convention.
 4. Separate membrane stress, bending fiber stress, bending moment, transverse-shear force, local center/corner stress, global tensor and nodal averaging. Compare Nastran only at matching physical coordinates and unaveraged stress positions.
-5. Determine mechanical patch acceptance using both **interior equilibrium displacement** and **actual stress/moment**; test ANS forced versus auto with nonzero shear and curved geometry. Explicitly report any patch sacrifice associated with improved T9/curved-shell performance.
+5. Determine mechanical patch acceptance using both **interior equilibrium displacement** and **actual stress/moment**; test ANS forced versus auto with nonzero shear and curved geometry. Explicitly report any patch sacrifice associated with improved Pinched Cylinder Test/curved-shell performance.
 6. The provided translational geometric stiffness does not constitute a complete geometrically nonlinear consistent shell tangent; modal, thermal, mass, pressure and buckling parity should be tracked independently.
 
 ## References
