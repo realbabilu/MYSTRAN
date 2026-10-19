@@ -226,7 +226,6 @@ Reported model properties: $E=210\,\mathrm{GPa}$, $h=0.1\,\mathrm m$; target axi
 | T4 nonzero transverse shear | $Q_x=(5/6)Gha$ | Prescribed constant-shear test retained nonzero result | **Pass for prescribed-field test** |
 | T9 pinched cylinder | Published benchmark displacement | Historical V12 ratios 0.965 / 1.023 / 1.026 | **Reported antecedent** |
 | NAFEMS LE5 | $\sigma_{xx}(A)=-108$ MPa | Both v13/v13b around -108.8 to -110.2 MPa | **Close, limited mesh study** |
-| Nastran direct element stress, matched mesh | Output center/corner/fiber and frame conventions | No verified matched stress series in the present evidence table | **Not claimed** |
 | 2-016/2-017 eigen-buckling | Discrete eigenvalue and matching prestress | Geometric operator available, no newly established comprehensive parity table | **Open** |
 
 A historical comparison harness also produced approximately 6.14% difference in 2-001 stress/moment and 200% bending/twist sign discrepancies in T2/T5, despite near-exact displacements; these outcomes have not been reconciled against the declared local/global frame and sign conventions. They **remain unresolved verification flags**, not evidence that the physical shell stiffness is either right or wrong. The comparison with Nastran bending moments likewise cannot be used as an absolute reference until stress location, fiber, tensor definition and output conventions match.
