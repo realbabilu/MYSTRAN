@@ -3,7 +3,7 @@
 [All comparisons](comparison_all.md)
 
 - [2-001: Membrane/bending patch; pointwise recovery](benchmark_2_001.md) — Joint and element stresses require correct frame; Q8 transverse shear recovery LC2 under review.
-- [2-002: Cantilever six loading branches](benchmark_2_002.md) — Support/rotational DOF parity and low-mesh pivot warnings under review.
+- [2-002: Fixed source A/Q8 and E/T6, six load cases](benchmark_2_002.md) — One source mesh each; bar errors, corner-BC baseline and midpoint126 diagnostic; pivot warnings retained. No convergence study.
 - [2-003: Plate/shell validation](benchmark_2_003.md) — Q8 7-mesh full-clamp convergence and 6×1 values; T6 support parity pending.
 - [2-004: Thin and thick shell response](benchmark_2_004.md) — Fixed three-point tip convergence with explicit rotated-axis mapping.
 - [2-005: 2×10 in C/D plate quarter convergence](benchmark_2_005.md) — Corrected reference: C uniform 12.97 in; C point 16.95 in; D uniform 2.60 in; D point 7.25 in. T6 point-load under investigation.

@@ -1,6 +1,6 @@
 # Publication QA — 19 October 2026
 
-The supplied CQUAD8/CTRIA6 publication draft is reconciled with locally audited data. Nine individual theory pages, their combined manuscript, and16 benchmark case pages are retained in Markdown and HTML. No solver runs or formulation code changes were made during publication.
+The supplied CQUAD8/CTRIA6 publication draft is reconciled with locally audited data. Nine individual theory pages, their combined manuscript, and16 benchmark case pages are retained in Markdown and HTML. The initial publication did not run solvers; subsequent 20 October additions and diagnostic runs are recorded below. No formulation kernel was changed.
 
 ## Gates
 
@@ -9,7 +9,7 @@ The supplied CQUAD8/CTRIA6 publication draft is reconciled with locally audited 
 - Local file/image targets and Markdown anchors pass static verification. Regenerated numerical tables share the same private input records as their plots; private CSV is not copied into public folders.
 - Plot sample inspection confirms readable labels/markers; multimesh studies use distinct markers/dashes and independent ratio/error references; single-mesh thermal cases use bars.
 - HTML TeX is preserved and uses MathJax from its public CDN. Browser screenshot automation could not connect to the local preview server in this environment; interactive rendering is not represented as screenshot-verified. PNG numerical figures were inspected directly.
-- DAT archive CRC and every manifest SHA256 are verified. After the 20 October 2026 refresh, the archive contains607 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.
+- DAT archive CRC and every manifest SHA256 are verified. After the 20 October 2026 refresh, the archive contains532 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.
 
 ## Reconciliation
 
@@ -78,3 +78,7 @@ Existing Solid input archives were inspected for forbidden result/Python/CSV ent
 ## 20 October 2026 — 2-007 input archive refresh
 
 Replaced 30 legacy 2-007 Q8 DAT with 44 executed S2K-based thick inputs: 24 Q8 (4 Nastran/20 MYSTRAN) and 20 T6 (4 Nastran/16 MYSTRAN), nx4/8/16/32. All new DAT hashes match the run manifest; native OP2 has been verified for every deck. Other 563 DAT are byte-identical. Archive CRC and all 607 SHA256 entries pass; only DAT plus README/hash Markdown are included. No Python, CSV, S2K program/license metadata or solver outputs are archived.
+
+## 20 October 2026 — fixed-mesh 2-002 and boundary diagnostic
+
+At user request, removed the 97 regular-refinement 2-002 DAT from the current archive and inserted 22 executed A/Q8 and E/four-triangle T6 DAT: source-corner BC and root-midpoint-SPC126 diagnostic, with unchanged mesh in each pair. No new mesh level or formulation stiffness change. All 510 other DAT remain identical. Current total532; CRC and all input SHA256 checked. Nastran warning4698/BAILOUT retained. Both additional Nastran variants were run successfully with the existing run_nastran.bat. Internal scripts, CSV and raw outputs remain local.
