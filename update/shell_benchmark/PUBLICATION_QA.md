@@ -9,7 +9,7 @@ The supplied CQUAD8/CTRIA6 publication draft is reconciled with locally audited 
 - Local file/image targets and Markdown anchors pass static verification. Regenerated numerical tables share the same private input records as their plots; private CSV is not copied into public folders.
 - Plot sample inspection confirms readable labels/markers; multimesh studies use distinct markers/dashes and independent ratio/error references; single-mesh thermal cases use bars.
 - HTML TeX is preserved and uses MathJax from its public CDN. Browser screenshot automation could not connect to the local preview server in this environment; interactive rendering is not represented as screenshot-verified. PNG numerical figures were inspected directly.
-- DAT archive CRC and every manifest SHA256 are verified. After the 20 October 2026 refresh, the archive contains482 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.
+- DAT archive CRC and every manifest SHA256 are verified. After the 20 October 2026 refresh, the archive contains487 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.
 
 ## Reconciliation
 
@@ -86,3 +86,7 @@ Per user instruction, only midpoint-supported Q8/T6 models are presented. Source
 ## 20 October2026 — fixed-source 2-004 root and tip midsides
 
 Replaced61 prior2-004 refinement-series DAT with22 executed fixed12x2 source-based DAT. Q8:24 CQUAD8; T6:48 CTRIA6, two per source quad. Root midsides clamped in all runs; source point-load and consistent quadratic-line interpretations separately labelled, each1-lb and resultant-moment checked through nativeOP2 OLOAD. All22 OUG outputs finite; no numbered fatal/warning. MACQ8D SPCF output moment residual8.94484lb-in is explicitly classified as a failure. No stiffness/recovery edits. All460 other DAT unchanged; current main archive482 inputs, CRC and SHA256 verified. All four Nastran cases ran through configured run_nastran.bat without a license failure. No internal Python or raw solver output published.
+
+## 20 October2026 — fixed-source2-012A thick annulus
+
+Replaced6 earlier Q8-only DAT with11 accepted-output Q8/T6 thick source6x96 inputs. Inner midsides included inSPC123, rotations free;800-lb/in source chord line load consistently transferred. Original strict Nastran Q8/T6 failed9137 and are explicitly logged locally; included Nastran decks are separate BAILOUT=-1 recoveries with4698 warning. All11 accepted OP2 outputs finite, explicit SPC residuals zero, all192 OLOAD nodes verified, primary observation at(2,0,0). One mesh only; no claim of exact error ranking below rounded reference precision. Other476 DAT unchanged; main archive487, CRC and hashes verified. All Nastran jobs attempted directly through run_nastran.bat. No raw outputs or internal Python published.

@@ -1,9 +1,130 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>benchmark_2_012</title><style>body{font:16px/1.65 system-ui;max-width:1250px;margin:auto;padding:28px;color:#202b39}img{max-width:100%;height:auto}table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;font-size:13px}td,th{border:1px solid #d5dce6;padding:7px;white-space:nowrap}th{background:#eef3f8}h1,h2{color:#163a59}a{color:#145a9e}pre{overflow:auto;background:#f3f5f7;padding:12px}</style><script>window.MathJax={"tex":{"inlineMath":[["\\(","\\)"]],"displayMath":[["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1 id="csi-2-012--shell-benchmark">CSI 2-012 — Shell benchmark</h1>
-<p><strong>Status:</strong> Do not infer validated reference from solver parity.</p>
-<h2 id="model-and-comparison-rules">Model and comparison rules</h2>
-<p>Results must compare <strong>Nastran vs independent</strong> and <strong>MYSTRAN vs independent</strong>, separately. For zero reference, report absolute residual, not relative percent. One mesh → grouped bar plot; multiple mesh levels → connected line plots with distinct markers and dashes for each formulation. Frequency cases use f/f_ref.</p>
-<h2 id="available-measured-figures">Available measured figures</h2>
-<p>No verified figure yet. Re-export or re-run required.</p>
-<h2 id="reproducibility">Reproducibility</h2>
-<p>Numerical source data are retained locally; public tables contain the reported values. Do not treat solver parity as an independent validation.</p>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>benchmark_2_012</title><style>body{font:16px/1.65 system-ui;max-width:1250px;margin:auto;padding:28px;color:#202b39}img{max-width:100%;height:auto}table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;font-size:13px}td,th{border:1px solid #d5dce6;padding:7px;white-space:nowrap}th{background:#eef3f8}h1,h2{color:#163a59}a{color:#145a9e}pre{overflow:auto;background:#f3f5f7;padding:12px}</style><script>window.MathJax={"tex":{"inlineMath":[["\\(","\\)"]],"displayMath":[["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1 id="csi2-012a--annular-plate-thick-one-source-mesh">CSI2-012A — annular plate, thick, one source mesh</h1>
+<p>20 October2026. <strong>Single fixed source6×96 mesh, no refinement or convergence study.</strong> Five Q8 and four T6 MYSTRAN formulations plus matching Nastran are measured at a geometry-defined free outer-edge point. Nastran results require BAILOUT=−1 and remain pivot-warning qualified; the two initial fatal9137 runs are preserved and reported.</p>
+<h2 id="source-model-and-reference">Source model and reference</h2>
+<p>Engineering source: user-supplied Example2-012a-thick.s2k. Full annulus, inner radius1.4 in, outer radius2 in, h0.5 in; E=18,000,000 psi, G=6,923,076.92307692 psi, nu0.3. Source Shell-Thick with V13/V23 modifiers1, not the separate1000× shear-stiffened2-012B model. PSHELL MID1=MID2=MID3=1, transverse shear factor5/6. Units lb/in.</p>
+<p>The independent thick target is outer-edge <strong>UZ=−0.00534 in</strong>, bending plus shear. CSI quotes bending−0.00521 in and shear−0.000125 in; their printed sum is−0.005335 in and the quoted combined value is rounded−0.00534. The thin/bending-only target is not used for these thick runs. CSI SAP2000 A-thick also reports−0.00534 in.</p>
+<p>All percentages below use the printed combined−0.00534 target. Differences below0.04% should not be interpreted as an exact analytical ranking of formulations: the independent values are rounded, and source polygon geometry/load length differ slightly from an ideal circular annulus. A single mesh does not establish convergence or a general shell validation.</p>
+<h2 id="fixed-quadratic-geometry-and-simply-supported-inner-edge">Fixed quadratic geometry and simply supported inner edge</h2>
+<p>All672 original source coordinates/IDs and576 source quads are retained. Q8 enriches to576 CQUAD8 /1920 nodes. T6 splits each source quad into <strong>two</strong> CTRIA6, giving1152 elements /2496 nodes. New shared edge nodes are arithmetic chord midpoints. No projection to an exact circle, no new mesh level and no remeshing were applied. Both families have positive +Z integration-point Jacobians.</p>
+<p>The source inner-edge96 nodes are SPC123, with all rotations free. The same SPC123 is extended to its96 new midsides:192 supported nodes per family. This is a simply supported inner boundary, not a full rotational clamp. All GRID CP/CD=0; basic UZ is extracted directly from native OP2.</p>
+<h2 id="circular-line-load-and-dummy-frames">Circular line load and dummy frames</h2>
+<p>The S2K uses96 DUMMY frame segments on the r1.8-in source polygon, loaded by800 lb/in in gravity (basic−Z). All frame stiffness, mass and weight modifiers are zero. No beam stiffness is introduced into the shell DAT. The physical line traction is transferred with consistent quadratic edge weights L/6,2L/3,L/6, including the new midsides; contributions at shared corners are accumulated.</p>
+<p>This is the consistent shell-edge representation of the distributed physical load, not an assertion of identical SAP2000 dummy-frame fixed-end-force processing. Source chord length11.3077150232 in gives total FZ=−9046.17201856 lb. The ideal circumference would give−9047.78684234 lb: a0.01785% geometric load-length difference. The actual source-segment load is retained without rescaling to improve agreement. Global resultant moments are zero to input precision.</p>
+<p>Native OP2 OLOAD verifies every loaded quadratic node and total force/moment for all11 accepted outputs. The dummy frames are only a load carrier and are omitted as structural elements. In particular, uniform pressure over the annulus is not substituted for the r1.8 line load.</p>
+<h2 id="fixed-physical-observation">Fixed physical observation</h2>
+<p>The primary observation is <strong>GRID577 at(2,0,0) in</strong>, identified by geometry within1e−10 in, with combined thick reference−0.00534 in. Every original outer-edge vertex is additionally exported:96 locations per run,1056 signed observations in total. The outer-vertex spread is zero at native OP2 float precision for each run. Neither a maximum-response probe nor a varying nearest node is used as the primary observable; quadratic outer midsides have chord radii slightly below2 and are not silently mixed into the source-vertex statistic.</p>
+<h2 id="one-mesh-independent-error-bars">One-mesh independent error bars</h2>
+<p><img src="figures/2_012_fixed_mesh_error.png" alt="Fixed-mesh reference errors"></p>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Solver/formulation</th>
+<th>UZ at(2,0,0) (in)</th>
+<th>Independent (in)</th>
+<th>Error (%)</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Q8</td>
+<td>NASTRAN</td>
+<td>-0.005338378251</td>
+<td>-0.00534</td>
+<td>0.0303698</td>
+<td>PIVOT_WARNING_BAILOUT</td>
+</tr>
+<tr>
+<td>Q8</td>
+<td>ANS8BDG6</td>
+<td>-0.00533794472</td>
+<td>-0.00534</td>
+<td>0.0384884</td>
+<td>NATIVE_OP2</td>
+</tr>
+<tr>
+<td>Q8</td>
+<td>HBQ8</td>
+<td>-0.00533794472</td>
+<td>-0.00534</td>
+<td>0.0384884</td>
+<td>NATIVE_OP2</td>
+</tr>
+<tr>
+<td>Q8</td>
+<td>MACQ8D</td>
+<td>-0.005338020157</td>
+<td>-0.00534</td>
+<td>0.0370757</td>
+<td>NATIVE_OP2</td>
+</tr>
+<tr>
+<td>Q8</td>
+<td>MITC8</td>
+<td>-0.00533794472</td>
+<td>-0.00534</td>
+<td>0.0384884</td>
+<td>NATIVE_OP2</td>
+</tr>
+<tr>
+<td>Q8</td>
+<td>SIMOQ8</td>
+<td>-0.005339966156</td>
+<td>-0.00534</td>
+<td>0.00063379</td>
+<td>NATIVE_OP2</td>
+</tr>
+<tr>
+<td>T6</td>
+<td>NASTRAN</td>
+<td>-0.005337956827</td>
+<td>-0.00534</td>
+<td>0.0382617</td>
+<td>PIVOT_WARNING_BAILOUT</td>
+</tr>
+<tr>
+<td>T6</td>
+<td>MH6T</td>
+<td>-0.005340493284</td>
+<td>-0.00534</td>
+<td>0.00923753</td>
+<td>NATIVE_OP2</td>
+</tr>
+<tr>
+<td>T6</td>
+<td>MITC6</td>
+<td>-0.005338759162</td>
+<td>-0.00534</td>
+<td>0.0232367</td>
+<td>NATIVE_OP2</td>
+</tr>
+<tr>
+<td>T6</td>
+<td>REZAIEE</td>
+<td>-0.005338759162</td>
+<td>-0.00534</td>
+<td>0.0232367</td>
+<td>NATIVE_OP2</td>
+</tr>
+<tr>
+<td>T6</td>
+<td>SIMOT6</td>
+<td>-0.005337956827</td>
+<td>-0.00534</td>
+<td>0.0382617</td>
+<td>NATIVE_OP2</td>
+</tr>
+</tbody></table>
+<h2 id="pivot-failures-and-numerical-recovery">Pivot failures and numerical recovery</h2>
+<p>Both initial Nastran runs stop with fatal9137 (excessive pivot ratios), with warnings6916/4698. Those outputs are failed, not zero displacement and not accepted reference runs. The diagnostic Q8 table identifies a high ratio on an R3 (drilling) DOF. No extra rotational support or formulation stiffness was added to conceal it.</p>
+<p>Separate reruns add only PARAM,BAILOUT,−1. Geometry, material, loads, SPC and numerical discretization remain identical. Both recovered OP2 files contain finite GRID displacements and retain warning4698. They are <strong>PIVOT_WARNING_BAILOUT</strong>, not unconditional solver-validation passes. The accepted Nastran Q8 displacement is−0.00533837825 in (0.03037% from printed reference); T6 is−0.00533795683 in (0.03826%).</p>
+<p>All four Nastran executions, including the two original failures, were launched directly through the configured run_nastran.bat. There was no license failure. The nine MYSTRAN cases terminate normally. No formulation kernel was changed.</p>
+<h2 id="output-audit-and-limits">Output audit and limits</h2>
+<p>There are13 execution receipts:two failed strict Nastran and11 accepted finite OP2 outputs (nine MYSTRAN plus two warning-qualified Nastran recoveries). Physical bulk signatures match within each family, DAT hashes remain unchanged after preparation, all GRID displacements are finite and explicit SPC residuals are zero.</p>
+<p>Unloaded in-plane translations and RZ are zero at native precision in the accepted outputs. This supports interpretation of the transverse response but does not remove the Nastran pivot warning. Applied-force nodal distribution and resultant checks use OP2 OLOAD. Maximum global reaction-force imbalance is0.000550 lb out of9046.17 lb (about6.1e−8 relative); maximum resultant-moment imbalance is below3.4e−11 lb-in. These are global equilibrium checks, not a claim of all-point stress or shear-recovery validation.</p>
+<p>All numerical displacements and force checks are from OP2; F06 is diagnostic only. The reported total thick deflection does not separately extract bending and shear contributions. No thin run or1000× shear-stiffness variant is included. All tested values lie within0.04% of the rounded thick reference, with the reference-precision and polygon-model qualifications above.</p>
+<h2 id="reference-and-input-archive">Reference and input archive</h2>
+<p><a href="https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-012.pdf">CSI Example2-012</a>, supplied verification pages and thick S2K engineering tables. Original files and failed outputs remain local. Source program/license metadata, internal Python and raw solver outputs are not published.</p>
+<p><a href="DAT/CSI_2_012A_Q8_T6_FIXED_SOURCE_DAT_20261020.zip">Executed fixed-source DAT</a>:11 accepted-output decks, including the two explicitly warning-qualified Nastran BAILOUT recoveries. The two failed strict inputs are preserved locally and identified above. <a href="DAT/quadratic_shell_benchmark_DAT.zip">Complete benchmark DAT archive</a>.</p>
+<p><a href="README.html">Benchmark index</a> · <a href="comparison_all.html">All comparisons</a></p>
 </body></html>
