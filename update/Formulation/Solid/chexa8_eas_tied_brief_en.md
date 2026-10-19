@@ -1,5 +1,10 @@
 # CHEXA8 formulation versions: EAS9 and Tied-EAS9
 
+**Technical formulation and numerical-validation note — MYSTRAN NEWSOLID (`PENTATYP,ABE`)**  
+**Revision:** 19 October 2026 (GitHub math syntax corrected) | **Origin:** Ary, [project formulation note](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/Formulation/Solid/CPENTA6_ABE_Formulation_Ary.md)  
+
+
+
 ## 1. Versions
 
 | # | Version | Strain field | Difference from the previous version |
