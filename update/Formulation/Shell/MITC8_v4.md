@@ -39,7 +39,6 @@ N_5=\tfrac12(1-r^2)(1-s),\quad N_6=\tfrac12(1+r)(1-s^2),
 Each node carries $\mathbf d_I=[u_x,u_y,u_z,\theta_x,\theta_y,\theta_z]_I^T$, and $\mathbf d_e\in\mathbb R^{48}$. Nodal translations and rotations are expressed in a common global Cartesian system; no element-wide frozen planar basis is imposed.
 
 <img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/9b2eb1bb-0493-4e59-b1ca-7ac56da4c561" />
-**Figure 1 :** CQUAD8 numbering, natural coordinates, reference orientation, and positive midsurface normal.
 
 ### 2.2 Midsurface, covariant basis and dual basis
 
@@ -153,7 +152,6 @@ Here $\widetilde{\mathbf B}_m^{\rm cov}$ uses separate 6-point projections for $
 where $\theta_0=0.01$ rad and $\delta_0=10^{-3}$. Consequently, a flat straight-sided patch employs direct membrane strain and avoids the patch-test error introduced by always-on tying. An optional in-plane strain smoothing/interpolation step is inactive by default because earlier sampling variants degraded the membrane patch test.
 
 <img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/4bf22d0d-e0a6-4dc6-b4ec-a51529a03efb" />
-**Figure 2 :** covariant membrane sampling sites: six $\epsilon_{11}$ sites, six $\epsilon_{22}$ sites and four $\epsilon_{12}$ sites.
 
 ## 4. Transverse-shear interpolation and the v4 modification
 
@@ -216,7 +214,6 @@ The four-point-per-component alternative is
 These are **twelve** and **eight** scalar shear tying observations per element, respectively. Such sample counts are not a proof of locking; the locking inference below is supported by the documented numerical slenderness studies.
 
 <img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/36f8fec0-2142-4823-b5b0-9b6947672c58" />
-**Figure 3 :** superposed `tensor6` (12 scalar observations) and `bdg4` (8 scalar observations) shear tying patterns, with separate symbols for $\gamma_1$ and $\gamma_2$.
 
 ### 4.3 Slenderness-dependent mixed projection
 
@@ -355,10 +352,8 @@ The numerical tables distinguish **independent analytical/CSI-reference comparis
 | 2-004 twisted member, $n_x=24$, $U_z/U_y$ error (%) | −53 / −68 | +1.76 / +7.01 | +1.75 / +7.02 | No material regression from v3 |
 
 <img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/ad2ad4d0-c747-47af-84c0-c0901fd3b640" />
-**Figure 4 :** 2-003 curved-beam convergence, signed error versus number of elements, separate connected line series for v1p2/v3/v4.  
 
 <img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/7237ce6e-ba34-4293-9bad-d765813dda2e" />
-**Figure 5 :** T9 curved-shell displacement ratio versus refinement, showing v4 coarse-mesh overshoot.
 
 ### 9.3 Thin-plate locking and slenderness
 
@@ -392,7 +387,6 @@ The recorded study uses a quarter model of a 2 × 10 thin plate and a progressiv
 A later **native MYSTRAN** validation note reports 2-005 CQUAD8 at 16 × 16 with central $U_z=-12.97469330$ in, compared with $-12.97$ in, or +0.0362% signed error; the matched earlier native model gave $-13.51560497$ in (+4.2067%). This is a separate executable/deck campaign, not the same numerical series as the four-quarter-mesh study above. A Nastran solver value for that exact matched study is not supplied here.
 
 <img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/ee2846ae-7583-4797-922d-2add745125d5" />
-**Figure 8 :** 2-005 uniform and concentrated loading convergence, error (%) versus quarter-mesh refinement; distinguish boundary conditions by line style.
 
 ### 9.5 Dynamics and mass consistency
 
@@ -431,7 +425,7 @@ The v4 modification reduces thin-plate shear locking while retaining the princip
 
 The available evidence is strongest for flat-plate bending, consistent pressure forces, patch-type thermal response, selected modal checks, and thin-plate/column bifurcation. In contrast, the following remain **unverified or incomplete**: severely distorted high-curvature shell studies; rigorous thin-limit stability proof; laminate/orthotropic constitutive matrices; variable shell thickness; nonlinear finite rotations; full rotational/curvature initial-stress terms; thermal-prestress buckling; independently audited curved-shell fiber stresses and moments; and complete matched external-solver comparisons on every CSI case. The $s_0=15$ blending parameter is empirically selected and should be treated as a calibration parameter pending a broader convergence study.
 
-The exact code revision, active field functions, nodal winding, density convention, pressure normal, reference prestress, integration order, mode correspondence and recovery basis should accompany each future comparison. **Reported native MYSTRAN evidence and standalone element studies must not be silently combined into a single matched MSC Nastran comparison.**
+The exact code revision, active field functions, nodal winding, density convention, pressure normal, reference prestress, integration order, mode correspondence and recovery basis should accompany each future comparison. **Reported native MYSTRAN evidence and standalone element studies must not be silently combined into a single matched Nastran comparison.**
 
 ## 11. Conclusions
 
@@ -466,4 +460,4 @@ The exact code revision, active field functions, nodal winding, density conventi
 | 8 | 2-016 thin-plate critical stresses | Mesh refinement vs critical stress; two modes |
 | 9 | 2-017 column stability | Panel refinement vs lowest eigenvalue |
 
-**Data integrity statement:** The reported benchmark results were transcribed from the supplied formulation review and the available project reports. No fresh benchmark simulation was performed for this document. Unreported or non-matched MSC Nastran values have not been manufactured.
+**Data integrity statement:** The reported benchmark results were transcribed from the supplied formulation review and the available project reports. No fresh benchmark simulation was performed for this document. Unreported or non-matched Nastran values have not been manufactured.
