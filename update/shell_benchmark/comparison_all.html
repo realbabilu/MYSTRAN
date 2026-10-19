@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>comparison_all</title><style>body{font:16px/1.65 system-ui;max-width:1250px;margin:auto;padding:28px;color:#202b39}img{max-width:100%;height:auto}table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;font-size:13px}td,th{border:1px solid #d5dce6;padding:7px;white-space:nowrap}th{background:#eef3f8}h1,h2{color:#163a59}a{color:#145a9e}pre{overflow:auto;background:#f3f5f7;padding:12px}</style><script>window.MathJax={"tex":{"inlineMath":[["\\(","\\)"]],"displayMath":[["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1 id="quadratic-shell-benchmark--reference-anchored-comparisons">Quadratic shell benchmark — reference-anchored comparisons</h1>
-<p><strong>Ary · Independent Researcher · Personal Research</strong> · Rev 4 · 19 October 2026</p>
+<p><strong>Ary · Independent Researcher · Personal Research</strong> · Rev 5 · 20 October 2026</p>
 <blockquote>
 <p>This supersedes the invalid 2-005 A/B plate overlays and older 2-009 unsupported-foundation figures. Includes available published data and diagnostic curves with explicit status.</p>
 </blockquote>
@@ -24,7 +24,7 @@
 <li><a href="benchmark_2_007.html">2-007: S2K-based hemispherical shell thick convergence</a> — Complete Q8/T6 native OP2, nx4/8/16/32; independent-reference ratios and errors, 44 matching runs.</li>
 <li><a href="benchmark_2_008.html">2-008: Thick plate modal / diagonal CONM2</a> — CSI five independent periods: 0.01723, 0.00704, 0.00281, 0.00219, 0.00193 s; plot f/fref.</li>
 <li><a href="benchmark_2_009.html">2-009: Plate on elastic foundation</a> — EXCLUDED invalid older model; foundation A/B stiffness must be corrected and rerun.</li>
-<li><a href="benchmark_2_010.html">2-010: Shell benchmark</a> — No verified independent-reference figure in consolidated dataset.</li>
+<li><a href="benchmark_2_010.html">2-010B: Fixed24×48 pressure cylinder</a> — TargetsUr+0.12414in, topUZ−0.12414in, hoop60ksi; native OLOAD verified; fiber/corner stress nonuniformity explicit.</li>
 <li><a href="benchmark_2_012.html">2-012A: Fixed6×96 annulus, thick shear/bending</a> — One source mesh; midpoint inner support and consistent line load; targetUZ−0.00534in. Nastran9137 failures and BAILOUT warnings retained.</li>
 <li><a href="benchmark_2_013.html">2-013: Thermal constant through thickness</a> — 2-013A Ux=0.000132, Uy=0.000066 in at joint8; 2-013B sigma_xx=sigma_yy=-733.33 psi, with measured GPSTRESS.</li>
 <li><a href="benchmark_2_014.html">2-014: Annular thermal gradient</a> — 9×16 CSI thick reference: Uz=0.01931 in, R2=0.00352 rad, M11=-2.181 and M22=-4.406 kip-in/in; Python-generated 28×32 Q8 / 1792 T6 triangles is not the CSI mesh.</li>
@@ -38,90 +38,210 @@
 <tr>
 <th>CSI</th>
 <th>Output</th>
-<th align="right">Independent reference</th>
+<th>Independent reference</th>
 <th>Units</th>
-<th>Qualification</th>
+<th>Qualification / source</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>2-005 C simple uniform</td>
-<td>center Uz absolute</td>
-<td align="right">12.97</td>
+<td>2-001</td>
+<td>sigma XX / YY; XY</td>
+<td>1333.333333 / 1333.333333; 400</td>
+<td>psi</td>
+<td>Global basic frame; zero quantities use absolute residual; <a href="benchmark_2_001.html">case</a></td>
+</tr>
+<tr>
+<td>2-002 A/E LC1</td>
+<td>Mean tip Ux</td>
+<td>0.000030</td>
 <td>in</td>
-<td>quarter model 2×10 full plate</td>
+<td>Selected midpoint SPC126; fixed source meshes; <a href="benchmark_2_002.html">case</a></td>
+</tr>
+<tr>
+<td>2-002 A/E LC2</td>
+<td>Mean tip Uz</td>
+<td>0.1081</td>
+<td>in</td>
+<td>Signed mean, joints7 and14; <a href="benchmark_2_002.html">case</a></td>
+</tr>
+<tr>
+<td>2-002 A/E LC3</td>
+<td>Mean tip Uy</td>
+<td>0.4321</td>
+<td>in</td>
+<td>Signed mean, joints7 and14; <a href="benchmark_2_002.html">case</a></td>
+</tr>
+<tr>
+<td>2-002 A/E LC4</td>
+<td>Mean absolute tip Uy</td>
+<td>0.00341</td>
+<td>in</td>
+<td>Twist; <a href="benchmark_2_002.html">case</a></td>
+</tr>
+<tr>
+<td>2-002 A/E LC5</td>
+<td>Mean absolute tip Ux</td>
+<td>0.000900</td>
+<td>in</td>
+<td>In-plane moment; <a href="benchmark_2_002.html">case</a></td>
+</tr>
+<tr>
+<td>2-002 A/E LC6</td>
+<td>Mean tip Rz</td>
+<td>0.03600</td>
+<td>rad</td>
+<td>Out-of-plane moment; <a href="benchmark_2_002.html">case</a></td>
+</tr>
+<tr>
+<td>2-003</td>
+<td>Mean tip Uy IN / Uz OUT</td>
+<td>0.0886 / 0.5004</td>
+<td>in</td>
+<td>Q8 full clamp; T6 support parity pending; alternative OUT0.4546 torsional correction is separate; <a href="benchmark_2_003.html">case</a></td>
+</tr>
+<tr>
+<td>2-004</td>
+<td>Mean tip Uy IN / Uz OUT</td>
+<td>0.005429 / 0.001749</td>
+<td>in</td>
+<td>Original three tip nodes; source-point and quadratic-line loads labelled separately; <a href="benchmark_2_004.html">case</a></td>
+</tr>
+<tr>
+<td>2-005 C simple uniform</td>
+<td>Absolute center Uz</td>
+<td>12.97</td>
+<td>in</td>
+<td>Quarter of2×10-in full plate; <a href="benchmark_2_005.html">case</a></td>
 </tr>
 <tr>
 <td>2-005 C simple point</td>
-<td>center Uz absolute</td>
-<td align="right">16.95</td>
+<td>Absolute center Uz</td>
+<td>16.95</td>
 <td>in</td>
-<td>same</td>
+<td>Same geometry; <a href="benchmark_2_005.html">case</a></td>
 </tr>
 <tr>
 <td>2-005 D fixed uniform</td>
-<td>center Uz absolute</td>
-<td align="right">2.60</td>
+<td>Absolute center Uz</td>
+<td>2.60</td>
 <td>in</td>
-<td>same</td>
+<td>Same geometry; <a href="benchmark_2_005.html">case</a></td>
 </tr>
 <tr>
 <td>2-005 D fixed point</td>
-<td>center Uz absolute</td>
-<td align="right">7.25</td>
+<td>Absolute center Uz</td>
+<td>7.25</td>
 <td>in</td>
-<td>same</td>
+<td>Same geometry; <a href="benchmark_2_005.html">case</a></td>
 </tr>
 <tr>
-<td>2-013 A</td>
-<td>Ux/Uy joint 8</td>
-<td align="right">0.000132 / 0.000066</td>
-<td>in</td>
-<td>free expansion</td>
+<td>2-006</td>
+<td>Free-edge Uz</td>
+<td>−0.3086</td>
+<td>ft</td>
+<td>Displacement target; moment-axis validation pending; <a href="benchmark_2_006.html">case</a></td>
 </tr>
 <tr>
-<td>2-013 B</td>
-<td>sigma_xx/sigma_yy joint 8</td>
-<td align="right">−733.33 / −733.33</td>
+<td>2-007</td>
+<td>Loaded-point Ux / Uy</td>
+<td>+0.0940 / −0.0940</td>
+<td>ft</td>
+<td>18-degree opening;0.0924 no-opening lower bound excluded; <a href="benchmark_2_007.html">case</a></td>
+</tr>
+<tr>
+<td>2-008</td>
+<td>Ordered frequencies1–5</td>
+<td>58.038305 / 142.045455 / 355.871886 / 456.621005 / 518.134715</td>
+<td>Hz</td>
+<td>1/T from independent periods; mode MAC not verified; <a href="benchmark_2_008.html">case</a></td>
+</tr>
+<tr>
+<td>2-010B</td>
+<td>Radial Ur at(60,0,100)</td>
+<td>+0.12414</td>
+<td>in</td>
+<td>Printed independent target; exact0.1241379310; fixed24×48 polygon; <a href="benchmark_2_010.html">case</a></td>
+</tr>
+<tr>
+<td>2-010B</td>
+<td>Top Uz at(60,0,200)</td>
+<td>−0.12414</td>
+<td>in</td>
+<td>Printed independent target; exact−0.1241379310; <a href="benchmark_2_010.html">case</a></td>
+</tr>
+<tr>
+<td>2-010B</td>
+<td>Hoop stress anywhere</td>
+<td>60</td>
+<td>ksi</td>
+<td>Pointwise fiber/corner range reported; centroid mean is a separate diagnostic; <a href="benchmark_2_010.html">case</a></td>
+</tr>
+<tr>
+<td>2-012A thick</td>
+<td>Outer-edge Uz at(2,0,0)</td>
+<td>−0.00534</td>
+<td>in</td>
+<td>Combined bending/shear; fixed6×96; Nastran recovery warnings retained; <a href="benchmark_2_012.html">case</a></td>
+</tr>
+<tr>
+<td>2-013A</td>
+<td>Ux / Uy at joint8</td>
+<td>0.000132 / 0.000066</td>
+<td>in</td>
+<td>Free expansion; zero stress uses absolute residual; <a href="benchmark_2_013.html">case</a></td>
+</tr>
+<tr>
+<td>2-013B</td>
+<td>sigma XX / YY</td>
+<td>−733.33 / −733.33</td>
 <td>psi</td>
-<td>restrained; OGS audit</td>
+<td>Rounded reference; GPSTRESS audit; <a href="benchmark_2_013.html">case</a></td>
 </tr>
 <tr>
 <td>2-014 thick A</td>
-<td>Uz / R2 inner</td>
-<td align="right">0.01931 / 0.00352</td>
+<td>Inner Uz / R2</td>
+<td>0.01931 / 0.00352</td>
 <td>in / rad</td>
-<td>inner boundary</td>
+<td>CSI9×16 reference; research28×32 mesh distinct; <a href="benchmark_2_014.html">case</a></td>
 </tr>
 <tr>
 <td>2-014 thick A</td>
-<td>M11 outer / M22 inner</td>
-<td align="right">−2.181 / −4.406</td>
+<td>Outer M11 / inner M22</td>
+<td>−2.181 / −4.406</td>
 <td>kip-in/in</td>
-<td>local axes</td>
+<td>Local shell axes; <a href="benchmark_2_014.html">case</a></td>
 </tr>
 <tr>
-<td>2-016, t=1</td>
-<td>tau_cr / sigma_cr</td>
-<td align="right">425 / 1165</td>
+<td>2-016 t=1</td>
+<td>Critical shear / normal stress</td>
+<td>425 / 1165</td>
 <td>ksi</td>
-<td>load-basis audit before lambda overlay</td>
+<td>Eigenvalue load-basis audit required; <a href="benchmark_2_016.html">case</a></td>
 </tr>
 <tr>
-<td>2-016, t=.01</td>
-<td>tau_cr / sigma_cr</td>
-<td align="right">0.0425 / 0.1165</td>
+<td>2-016 t=.01</td>
+<td>Critical shear / normal stress</td>
+<td>0.0425 / 0.1165</td>
 <td>ksi</td>
-<td>source Nastran missing</td>
+<td>Nastran7340 missing output; normalization pending; <a href="benchmark_2_016.html">case</a></td>
 </tr>
 <tr>
 <td>2-017</td>
 <td>Pcr</td>
-<td align="right">127.91</td>
+<td>127.91</td>
 <td>kip</td>
-<td>reference vs eigenvalue needs load basis</td>
+<td>Load basis and physical mode verification required; <a href="benchmark_2_017.html">case</a></td>
 </tr>
 </tbody></table>
+<p>Targets are independent references, not a blanket PASS. Cases2-009 and2-015 have no verified target admitted here. For2-012, the printed bending−0.00521in and shear−0.000125in are source components, not separately extracted runs.</p>
 <h2 id="measured-figures-and-status">Measured figures and status</h2>
+<h3 id="csi-2-010b">CSI 2-010B</h3>
+<p><a href="benchmark_2_010.html">Fixed-source results and recovery audit</a>. All11 native OP2 runs completed. Nastran displacement errors are approximately0.216%. T6 fiber/corner hoop recovery is nonuniform; the maximum pointwise error remains visible alongside the centroid diagnostic.</p>
+<p><img src="figures/2_010B_Q8_fixed_mesh_errors.png" alt="2-010B Q8"></p>
+<p><img src="figures/2_010B_T6_fixed_mesh_errors.png" alt="2-010B T6"></p>
+<h3 id="csi-2-012a-thick">CSI 2-012A thick</h3>
+<p><a href="benchmark_2_012.html">Fixed-source annulus results</a>. One6×96 mesh, simply supported inner edge including midsides. Two strict Nastran failures remain recorded; separate BAILOUT recovery outputs retain pivot warnings.</p>
+<p><img src="figures/2_012_fixed_mesh_error.png" alt="2-012A fixed mesh"></p>
 <h3 id="csi-2-005">CSI 2-005</h3>
 <p><a href="benchmark_2_005.html">Detailed embedded values and audit</a></p>
 <p><img src="figures/2_005_Q8_CD_displacement_convergence.png" alt="CSI 2-005"></p>

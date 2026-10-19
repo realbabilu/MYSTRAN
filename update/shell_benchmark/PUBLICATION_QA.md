@@ -9,7 +9,7 @@ The supplied CQUAD8/CTRIA6 publication draft is reconciled with locally audited 
 - Local file/image targets and Markdown anchors pass static verification. Regenerated numerical tables share the same private input records as their plots; private CSV is not copied into public folders.
 - Plot sample inspection confirms readable labels/markers; multimesh studies use distinct markers/dashes and independent ratio/error references; single-mesh thermal cases use bars.
 - HTML TeX is preserved and uses MathJax from its public CDN. Browser screenshot automation could not connect to the local preview server in this environment; interactive rendering is not represented as screenshot-verified. PNG numerical figures were inspected directly.
-- DAT archive CRC and every manifest SHA256 are verified. After the 20 October 2026 refresh, the archive contains487 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.
+- DAT archive CRC and every manifest SHA256 are verified. After the 20 October 2026 refresh, the archive contains480 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.
 
 ## Reconciliation
 
@@ -90,3 +90,7 @@ Replaced61 prior2-004 refinement-series DAT with22 executed fixed12x2 source-bas
 ## 20 October2026 — fixed-source2-012A thick annulus
 
 Replaced6 earlier Q8-only DAT with11 accepted-output Q8/T6 thick source6x96 inputs. Inner midsides included inSPC123, rotations free;800-lb/in source chord line load consistently transferred. Original strict Nastran Q8/T6 failed9137 and are explicitly logged locally; included Nastran decks are separate BAILOUT=-1 recoveries with4698 warning. All11 accepted OP2 outputs finite, explicit SPC residuals zero, all192 OLOAD nodes verified, primary observation at(2,0,0). One mesh only; no claim of exact error ranking below rounded reference precision. Other476 DAT unchanged; main archive487, CRC and hashes verified. All Nastran jobs attempted directly through run_nastran.bat. No raw outputs or internal Python published.
+
+## 20 October2026 — fixed-source2-010B and reference targets
+
+All11 fixed24×48 pressure-cylinder runs completed with finite native OP2 and verified nodal OLOAD. Local cylindrical BC includes midsides; no BAILOUT. Centroid diagnostic and full native fiber/corner hoop extrema are separately reported, including T6 nonuniform recovery. The main archive replaces18 earlier2-010 DAT with11 verified DAT; other469 inputs unchanged,480 total, CRC and every DAT hash checked. Reference targets in comparison_all include verified current cases and preserve pending qualifications. No raw solver output, CSV or Python published.
