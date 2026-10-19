@@ -209,7 +209,9 @@ $$
 $$
 
 The corrected assumed operator for
+$$
 $f=\texttt{patch\_consistency}\in[0,1]$ 
+$$
 is
 
 $$
