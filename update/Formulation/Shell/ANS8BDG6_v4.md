@@ -114,9 +114,11 @@ The adopted switching rule is
 Thus flat, straight-sided patches retain compatible membrane strain, while curved/warped elements receive assumed strain. The switching rule is **heuristic and discontinuous** at the threshold; it is not a theorem of locking-free behavior. Variants forcing membrane tying on or off should remain exposed for verification.
 
 <img width="1007" height="1071" alt="image" src="https://github.com/user-attachments/assets/da714dbf-c0bf-4c59-8d39-1d03f93590cb" />
+
 *Figure 1. Node positions and nine Gauss–Legendre integration points in the Q8 parent plane.*
 
 <img width="2616" height="996" alt="fig02_ans_tying" src="https://github.com/user-attachments/assets/579d36b3-8149-4220-b625-8fd7f57a8b41" />
+
 *Figure 2. The β normal-membrane, δ in-plane-shear, and γ four-point transverse-shear sampling sets, reflecting the family of interpolation patterns motivating the hybrid formulation.*
 
 ## 3. Two alternative transverse-shear sampling spaces
@@ -177,6 +179,7 @@ This contains cross-coupling $\omega(1-\omega)(\mathbf B_6^T\mathbf C_s\mathbf B
 
 
 <img width="1516" height="914" alt="image" src="https://github.com/user-attachments/assets/ed41f5e2-f214-4df7-95c0-fdbffc413fb5" />
+
 *Figure 3. Adopted shear blending weight versus normalized characteristic dimension \\(\\sqrt{A_e}/h\\). This is a plot of the defining equation, not fitted numerical test data.*
 
 ### 3.4 Relationship to compatible-field enrichment and modified Q8 interpolation
@@ -326,7 +329,9 @@ The corrected independent target is $U_z=-12.97$ in for the simply supported C u
 The comparison establishes a measurable accuracy improvement relative to the CSI target on this **specific** flat plate and support/load combination; it does not independently prove all curved-shell pressure loads are correct.
 
 <img width="1737" height="940" alt="fig04_pressure_reference" src="https://github.com/user-attachments/assets/b6ee4298-bb2c-423e-8752-aefb3e2cf910" />
+
 *Figure 4. Error relative to the corrected CSI 2-005 C uniform-pressure target. This is a before/after comparison at one mesh, **not** a mesh-convergence curve.*
+
 ### 8.2 CSI 2-016: thin-plate buckling, first reported factor
 
 | Mode, thickness $h$ | Native baseline $\lambda_1$ | Native v4 $\lambda_1$ | Archived critical-stress error (baseline → v4) |
@@ -340,6 +345,7 @@ The published CSI thin-plate stress references are approximately $\tau_{cr}=0.04
 
 
 <img width="1737" height="896" alt="fig05_buckling_errors" src="https://github.com/user-attachments/assets/5bb462b2-1da2-43ac-a357-30aa82aae6ad" />
+
 *Figure 5. Before/after signed critical-stress errors on the 0.01-thickness plate, from the archived ANS8 v4 validation record. Not a mesh-convergence plot.*
 
 
