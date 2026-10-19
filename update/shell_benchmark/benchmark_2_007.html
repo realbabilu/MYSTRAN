@@ -2,6 +2,57 @@
 <p>Updated 19 October 2026. Existing solver runs only; numerical results come from native OP2.</p>
 <p><strong>Status: existing Q8 responses measured; DAT loading does not match CSI. No independent-reference accuracy claim. T6 2-007 input/output was not found in the verified production set.</strong></p>
 <p>CSI uses radius 10 ft, thickness 0.04 ft, E=68,250,000 kip/ft², nu=0.3 and an 18° pole opening, with symmetry and radial alternating equatorial point loads of 1 kip on the quadrant. Its independent displacement is +0.0940 ft at (10,0,0), and −0.0940 ft at (0,10,0), in the load directions.</p>
+<h2 id="verified-csi-reference">Verified CSI reference</h2>
+<p>Reference clarified 20 October 2026 from the supplied CSI Example 2-007 pages. The reference for the <strong>18° opening model is 0.0940 ft</strong>. The value 0.0924 ft is a theoretical lower bound for the hemisphere <strong>without</strong> the opening; it is not the comparison target for this model.</p>
+<table>
+<thead>
+<tr>
+<th>Shell option</th>
+<th>Physical observable</th>
+<th align="right">Independent (ft)</th>
+<th align="right">CSI SAP2000 (ft)</th>
+<th align="right">Absolute SAP2000/reference error (%)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Thin</td>
+<td>UX at CSI joint 1, equatorial X end</td>
+<td align="right">+0.0940</td>
+<td align="right">+0.0939</td>
+<td align="right">0.1064</td>
+</tr>
+<tr>
+<td>Thin</td>
+<td>UY at CSI joint 9, equatorial Y end</td>
+<td align="right">−0.0940</td>
+<td align="right">−0.0939</td>
+<td align="right">0.1064</td>
+</tr>
+<tr>
+<td>Thick</td>
+<td>UX at CSI joint 1, equatorial X end</td>
+<td align="right">+0.0940</td>
+<td align="right">+0.0927</td>
+<td align="right">1.3830</td>
+</tr>
+<tr>
+<td>Thick</td>
+<td>UY at CSI joint 9, equatorial Y end</td>
+<td align="right">−0.0940</td>
+<td align="right">−0.0927</td>
+<td align="right">1.3830</td>
+</tr>
+</tbody></table>
+<p>Errors in this table are recomputed as 100×abs(solver−reference)/abs(reference) from the printed displacements. CSI prints rounded signed differences of 0% for thin and −1% for thick. These SAP2000 values are published reference evidence, not outputs of the local Nastran/MYSTRAN runs. The smaller thick displacement is discussed by CSI as increased bending stiffness where shear deformation is small; it does not justify rescaling local solver results.</p>
+<h3 id="reference-model-and-boundary-conditions">Reference model and boundary conditions</h3>
+<ul>
+<li>Radius 10 ft; thickness 0.04 ft; E=68,250,000 kip/ft²; nu=0.3; G=26,250,000 kip/ft². Opening half-angle 18° from the pole.</li>
+<li>Quarter hemisphere, original CSI mesh 8×8 area objects. Top opening and equatorial bottom edges are free apart from the stated stabilization restraint and point loads.</li>
+<li>Four full-model equatorial loads alternate inward/outward at 90° intervals, magnitude 2 kip. The quarter-model corner contribution is <strong>1 kip</strong>, giving FX=+1 kip at (10,0,0) and FY=−1 kip at (0,10,0) in the chosen basic axes.</li>
+<li>CSI joint-local axis 1 is radial from the sphere center; local axis 2 is horizontal and tangent to the sphere; the third axis completes the joint frame. Symmetry restrains <strong>local U2 and R3</strong> on both side edges. These are local components, not universal basic DOF numbers 2 and 6 at every point.</li>
+<li>One additional vertical translation restraint at the center of the equatorial bottom edge (CSI joint 5) stabilizes the model. Joint 1/5/9 are source-mesh labels; locate their physical coordinates when using a different quadratic mesh.</li>
+</ul>
+<p>The CSI reference is now established. A matching load, symmetry frame, material/units, opening and fixed physical observation are still required before attaching reference errors to a local run. MID3 remains active for the intended thick comparison.</p>
 <h2 id="forensic-finding">Forensic finding</h2>
 <p>Existing DAT has basic FORCE CID=0, magnitude 50 at both points. At (10,0,0) its direction is (0.70710678,0.70710678,0), giving approximately (35.3553,35.3553,0) force components; at (0,10,0) it is (0,−1,0), giving (0,−50,0). Both magnitude and the first force direction differ from CSI. Scalar normalization cannot repair that physical mismatch. Additional symmetry/DOF parity must be verified before any corrected CSI run.</p>
 <p>The observations below use exact geometry-selected equator points, CD=0, tolerance 1e-6 ft, not a maximum over arbitrary probes. Raw curves document solver response only. The old probe envelope is superseded. DAT is preserved unchanged; a corrected physical model would require a separate authorized rerun.</p>
