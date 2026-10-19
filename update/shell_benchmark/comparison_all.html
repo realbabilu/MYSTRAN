@@ -1,0 +1,154 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>comparison_all</title><style>body{font:16px/1.65 system-ui;max-width:1250px;margin:auto;padding:28px;color:#202b39}img{max-width:100%;height:auto}table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;font-size:13px}td,th{border:1px solid #d5dce6;padding:7px;white-space:nowrap}th{background:#eef3f8}h1,h2{color:#163a59}a{color:#145a9e}pre{overflow:auto;background:#f3f5f7;padding:12px}</style><script>window.MathJax={"tex":{"inlineMath":[["\\(","\\)"]],"displayMath":[["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1 id="quadratic-shell-benchmark--reference-anchored-comparisons">Quadratic shell benchmark — reference-anchored comparisons</h1>
+<p><strong>Ary · Independent Researcher · Personal Research</strong> · Rev 4 · 19 October 2026</p>
+<blockquote>
+<p>This supersedes the invalid 2-005 A/B plate overlays and older 2-009 unsupported-foundation figures. Includes available published data and diagnostic curves with explicit status.</p>
+</blockquote>
+<h2 id="method">Method</h2>
+<ul>
+<li>Independent reference is mandatory to claim physical accuracy; present Nastran/reference and MYSTRAN/reference separately.</li>
+<li>For 2-005 use 2×10-in C/D CSI references (12.97, 16.95, 2.60, 7.25 in).</li>
+<li>For 2-008 compute frequencies as <code>f=1/T</code>, not CSI period-based percentage errors.</li>
+<li>For 2-014 radial/tangential axes and local shell moments must be audited; one-mesh figures are bar charts.</li>
+<li>For 2-016–2-017 signed buckling eigenvalues are not automatically stress/force; assess prestress baseline, sign, and mode MAC.</li>
+<li>For reference exactly 0, report absolute residual. Preserve missing data and flags; don&#39;t interpolate missing mesh runs.</li>
+<li>Distinct markers, line patterns and labels identify different element formulations, even if curves overlap.</li>
+</ul>
+<h2 id="case-index">Case index</h2>
+<ul>
+<li><a href="benchmark_2_001.html">2-001: Membrane/bending patch; pointwise recovery</a> — Joint and element stresses require correct frame; Q8 transverse shear recovery LC2 under review.</li>
+<li><a href="benchmark_2_002.html">2-002: Cantilever six loading branches</a> — Support/rotational DOF parity and low-mesh pivot warnings under review.</li>
+<li><a href="benchmark_2_003.html">2-003: Plate/shell validation</a> — Q8 123456 clamped fix audited; T6 support parity pending.</li>
+<li><a href="benchmark_2_004.html">2-004: Thin and thick shell response</a> — Comparison only when location and same independent reference fixed.</li>
+<li><a href="benchmark_2_005.html">2-005: 2×10 in C/D plate quarter convergence</a> — Corrected reference: C uniform 12.97 in; C point 16.95 in; D uniform 2.60 in; D point 7.25 in. T6 point-load under investigation.</li>
+<li><a href="benchmark_2_006.html">2-006: Scordelis-Lo roof</a> — Several newer quadratic variants require regression checks.</li>
+<li><a href="benchmark_2_007.html">2-007: Shell benchmark</a> — Do not use old exported-probe envelope as reference PASS.</li>
+<li><a href="benchmark_2_008.html">2-008: Thick plate modal / diagonal CONM2</a> — CSI five independent periods: 0.01723, 0.00704, 0.00281, 0.00219, 0.00193 s; plot f/fref.</li>
+<li><a href="benchmark_2_009.html">2-009: Plate on elastic foundation</a> — EXCLUDED invalid older model; foundation A/B stiffness must be corrected and rerun.</li>
+<li><a href="benchmark_2_010.html">2-010: Shell benchmark</a> — No verified independent-reference figure in consolidated dataset.</li>
+<li><a href="benchmark_2_012.html">2-012: Shell benchmark</a> — Do not infer validated reference from solver parity.</li>
+<li><a href="benchmark_2_013.html">2-013: Thermal constant through thickness</a> — 2-013A Ux=0.000132, Uy=0.000066 in at joint8; 2-013B sigma_xx=sigma_yy=-733.33 psi, with measured GPSTRESS.</li>
+<li><a href="benchmark_2_014.html">2-014: Annular thermal gradient</a> — 9×16 CSI thick reference: Uz=0.01931 in, R2=0.00352 rad, M11=-2.181 and M22=-4.406 kip-in/in; Python-generated 28×32 Q8 / 1792 T6 triangles is not the CSI mesh.</li>
+<li><a href="benchmark_2_015.html">2-015: Shell benchmark</a> — Pending independent-reference and run metadata verification.</li>
+<li><a href="benchmark_2_016.html">2-016: Out-of-plane buckling</a> — CSI shear/bend references t=1: 425/1165 ksi; t=0.01: 0.0425/0.1165 ksi. Buckling lambda to critical stress requires load normalization, including t=1 provisional.</li>
+<li><a href="benchmark_2_017.html">2-017: In-plane buckling</a> — CSI reference Pcr=127.91 kip; lambda requires load basis and physical buckling mode matching.</li>
+</ul>
+<h2 id="reference-tables">Reference tables</h2>
+<table>
+<thead>
+<tr>
+<th>CSI</th>
+<th>Output</th>
+<th align="right">Independent reference</th>
+<th>Units</th>
+<th>Qualification</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2-005 C simple uniform</td>
+<td>center Uz absolute</td>
+<td align="right">12.97</td>
+<td>in</td>
+<td>quarter model 2×10 full plate</td>
+</tr>
+<tr>
+<td>2-005 C simple point</td>
+<td>center Uz absolute</td>
+<td align="right">16.95</td>
+<td>in</td>
+<td>same</td>
+</tr>
+<tr>
+<td>2-005 D fixed uniform</td>
+<td>center Uz absolute</td>
+<td align="right">2.60</td>
+<td>in</td>
+<td>same</td>
+</tr>
+<tr>
+<td>2-005 D fixed point</td>
+<td>center Uz absolute</td>
+<td align="right">7.25</td>
+<td>in</td>
+<td>same</td>
+</tr>
+<tr>
+<td>2-013 A</td>
+<td>Ux/Uy joint 8</td>
+<td align="right">0.000132 / 0.000066</td>
+<td>in</td>
+<td>free expansion</td>
+</tr>
+<tr>
+<td>2-013 B</td>
+<td>sigma_xx/sigma_yy joint 8</td>
+<td align="right">−733.33 / −733.33</td>
+<td>psi</td>
+<td>restrained; OGS audit</td>
+</tr>
+<tr>
+<td>2-014 thick A</td>
+<td>Uz / R2 inner</td>
+<td align="right">0.01931 / 0.00352</td>
+<td>in / rad</td>
+<td>inner boundary</td>
+</tr>
+<tr>
+<td>2-014 thick A</td>
+<td>M11 outer / M22 inner</td>
+<td align="right">−2.181 / −4.406</td>
+<td>kip-in/in</td>
+<td>local axes</td>
+</tr>
+<tr>
+<td>2-016, t=1</td>
+<td>tau_cr / sigma_cr</td>
+<td align="right">425 / 1165</td>
+<td>ksi</td>
+<td>load-basis audit before lambda overlay</td>
+</tr>
+<tr>
+<td>2-016, t=.01</td>
+<td>tau_cr / sigma_cr</td>
+<td align="right">0.0425 / 0.1165</td>
+<td>ksi</td>
+<td>source Nastran missing</td>
+</tr>
+<tr>
+<td>2-017</td>
+<td>Pcr</td>
+<td align="right">127.91</td>
+<td>kip</td>
+<td>reference vs eigenvalue needs load basis</td>
+</tr>
+</tbody></table>
+<h2 id="measured-figures-and-status">Measured figures and status</h2>
+<h3 id="csi-2-005">CSI 2-005</h3>
+<p><a href="benchmark_2_005.html">Detailed embedded values and audit</a></p>
+<p><img src="figures/2_005_Q8_CD_displacement_convergence.png" alt="CSI 2-005"></p>
+<p><img src="figures/2_005_Q8_CD_ratio_convergence.png" alt="Q8 reference ratio"></p>
+<p><img src="figures/2_005_T6_CD_displacement_convergence.png" alt="CSI 2-005"></p>
+<p><img src="figures/2_005_T6_CD_ratio_convergence.png" alt="T6 reference ratio"></p>
+<h3 id="csi-2-013">CSI 2-013</h3>
+<p><a href="benchmark_2_013.html">Detailed embedded values and audit</a></p>
+<p><img src="figures/2_013B_GPSTRESS_reference_error.png" alt="CSI 2-013"></p>
+<h3 id="csi-2-014">CSI 2-014</h3>
+<p><a href="benchmark_2_014.html">Detailed embedded values and audit</a></p>
+<p><img src="figures/CSI_2_014_Q8.png" alt="CSI 2-014"></p>
+<p><img src="figures/CSI_2_014_T6.png" alt="CSI 2-014"></p>
+<h3 id="csi-2-008">CSI 2-008</h3>
+<p><a href="benchmark_2_008.html">Detailed embedded values and audit</a></p>
+<p><img src="figures/2_008_Q8_2008_frequency_ratio.png" alt="CSI 2-008"></p>
+<p><img src="figures/2_008_Q8_2008_frequency_error.png" alt="CSI 2-008"></p>
+<p><img src="figures/2_008_T6_2008_frequency_ratio.png" alt="CSI 2-008"></p>
+<p><img src="figures/2_008_T6_2008_frequency_error.png" alt="CSI 2-008"></p>
+<h3 id="csi-2-016">CSI 2-016</h3>
+<p><a href="benchmark_2_016.html">Detailed embedded values and audit</a></p>
+<p><img src="figures/buckling_Q8_2-016_raw_pending.png" alt="CSI 2-016"></p>
+<p><img src="figures/buckling_T6_2-016_raw_pending.png" alt="CSI 2-016"></p>
+<h3 id="csi-2-017">CSI 2-017</h3>
+<p><a href="benchmark_2_017.html">Detailed embedded values and audit</a></p>
+<p><img src="figures/buckling_Q8_2-017_raw_pending.png" alt="CSI 2-017"></p>
+<p><img src="figures/buckling_T6_2-017_raw_pending.png" alt="CSI 2-017"></p>
+<h2 id="exclusions-and-open-issues">Exclusions and open issues</h2>
+<p>2-009 <strong>EXCLUDED</strong> (incorrect plate size/foundation); original 2-005 invalid A/B graphs <strong>SUPERSEDED</strong>; 2-002 <strong>under review</strong> for restraints/pivots; 2-016 t=.01 <strong>FAILED NASTRAN7340</strong>; native eigenvalue normalization remainsPENDING; 2-017 <strong>reference conversion conditional</strong>. No global ranking of elements is warranted by incomplete benchmarks.</p>
+</body></html>

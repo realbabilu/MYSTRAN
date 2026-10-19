@@ -129,7 +129,7 @@ The graph compares TIED with its default ZETA policy, EAS9v2, and the original N
 
 ![CHEXA8 TIED vs EAS9v2 and existing Nastran](figures/CHEXA8_TIED_20261018.png)
 
-[Comparison CSV and source-deck hashes](data/hexa8_tied_vs_eas9v2_archive.csv)
+Comparison CSV and source-deck hashes (research data retained locally; see embedded tables)
 
 | Case | Mesh | Response | MYSTRAN formulation | Independent | Existing Nastran | MYSTRAN | N error % | M error % |
 |---|---|---|---|---:|---:|---:|---:|---:|
@@ -241,6 +241,6 @@ Download [solid_benchmark_inputs.zip](solid_benchmark_inputs.zip). It contains i
 
 The `five_case` directory contains the inputs for the original MYSTRAN solid comparison. The `comparison_all` directory contains 56 matched mesh models: 56 Nastran decks and 63 MYSTRAN decks, including CPENTA6 ABE/EAS9. Use each deck with its designated solver and inspect the solver diagnostics before comparing results. The original full-precision solver outputs remain in the local validation archive.
 
-Published numerical summaries are in [data](data); these CSVs are derived comparison data, not raw solver output files. Checksums and provenance for the distributed decks are in [input_manifest.json](input_manifest.json).
+Published numerical summaries are in [data](data); these CSVs are derived comparison data, not raw solver output files. Checksums and provenance for the distributed decks are in input_manifest.json (research data retained locally; see embedded tables).
 
 [Original five-case comparison](mystran_solid_comparison.md).

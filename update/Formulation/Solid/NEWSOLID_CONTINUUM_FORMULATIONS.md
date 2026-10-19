@@ -440,7 +440,7 @@ The existing mesh audits identify no unused nodes or unintended internal free tr
 
 ### 6.2 Finest-mesh scalar results
 
-Tables 1-3 are generated directly from the published `finest_mesh_summary.csv`. Displacements are rounded for display; downloadable CSVs retain the original precision. The element count varies with topology even when the parent grid is identical. Dome B is retained in the full data and per-element tables below.
+Tables 1-3 are generated directly from the published `finest_mesh_summary.csv`. Displacements are rounded for display; full precision research data remain local. The element count varies with topology even when the parent grid is identical. Dome B is retained in the full data and per-element tables below.
 
 **Table 1. Twisted beam, IN response; parent grid 24x4x2.**
 
@@ -597,7 +597,7 @@ The curves are empirical mesh-refinement evidence. Different topology counts, fi
 | Rational basis and quadrature | [PYRAM13_BEDROSIAN.f90](../../../Source/Modules/PYRAM13_BEDROSIAN.f90) | Explicit collapsed basis; axial-weight correction |
 | Ordinary element strain output | [WRITE_ELEM_STRAINS.f90](../../../Source/LK9/L91/WRITE_ELEM_STRAINS.f90) | CPYRAM13 ordinary OP2 strain limitation |
 
-The source snapshot is identified above so later code changes do not silently redefine this manuscript. The revision-2 archive labels ABE as not selected; this manuscript documents it because it is the executable default. Historical statements that the EAS columns still need extraction are superseded by Section 3's source transcription. The archive's generic mass/thermal/buckling equations are retained as theoretical operators and are not turned into new validation claims. Source hashes and input-archive provenance are stored in [provenance.json](data/provenance.json).
+The source snapshot is identified above so later code changes do not silently redefine this manuscript. The revision-2 archive labels ABE as not selected; this manuscript documents it because it is the executable default. Historical statements that the EAS columns still need extraction are superseded by Section 3's source transcription. The archive's generic mass/thermal/buckling equations are retained as theoretical operators and are not turned into new validation claims. Source hashes and input-archive provenance are stored in provenance.json (research data retained locally; see embedded tables).
 
 ## 8. Conclusions
 
@@ -605,7 +605,7 @@ The NEWSOLID family combines compatible linear/quadratic interpolation, nodal sm
 
 ## Data availability and reproducibility
 
-- [All 126 response comparisons](data/comparison_all.csv), [finest-mesh results](data/finest_mesh_summary.csv), [mesh inventory](data/mesh_inventory.csv), [geometry audit](data/geometry_audit.csv), [constraint audit](data/constraint_audit.csv) and [published reference values](data/sap2000_reference.csv).
+- All 126 response comparisons (research data retained locally; see embedded tables), finest-mesh results (research data retained locally; see embedded tables), mesh inventory (research data retained locally; see embedded tables), geometry audit (research data retained locally; see embedded tables), constraint audit (research data retained locally; see embedded tables) and published reference values (research data retained locally; see embedded tables).
 - [Input-deck archive](../../solid_benchmark/solid_benchmark_inputs.zip), containing inputs, instructions and checksums, with no raw solver outputs.
 - [All-solid benchmark report](../../solid_benchmark/comparison_all.md) and [five-case report](../../solid_benchmark/mystran_solid_comparison.md), including separate buckling and thermal evidence outside the main beam/dome comparison.
 - [Runnable eight-solid GPSTRESS VOLUME patch input](../../solid_benchmark/5-001_8_SOLIDS_GPSTRESS_PENTA_REMESH_FIXED_QUADRATIC_MYSTRAN_EAS9.dat).

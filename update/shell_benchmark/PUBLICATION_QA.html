@@ -1,0 +1,115 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>PUBLICATION_QA</title><style>body{font:16px/1.65 system-ui;max-width:1250px;margin:auto;padding:28px;color:#202b39}img{max-width:100%;height:auto}table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;font-size:13px}td,th{border:1px solid #d5dce6;padding:7px;white-space:nowrap}th{background:#eef3f8}h1,h2{color:#163a59}a{color:#145a9e}pre{overflow:auto;background:#f3f5f7;padding:12px}</style><script>window.MathJax={"tex":{"inlineMath":[["\\(","\\)"]],"displayMath":[["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1 id="publication-qa--19-october-2026">Publication QA — 19 October 2026</h1>
+<p>The supplied CQUAD8/CTRIA6 publication draft is reconciled with locally audited data. Nine individual theory pages, their combined manuscript, and16 benchmark case pages are retained in Markdown and HTML. No solver runs or formulation code changes were made during publication.</p>
+<h2 id="gates">Gates</h2>
+<ul>
+<li>Current publication trees contain Markdown/HTML, SVG/PNG, license text and input archives; no tracked CSV/Python/notebook/raw solver outputs in Solid or Shell publication paths.</li>
+<li>Research source files removed from Git tracking remain byte-identical on the local research computer. This is current-tree cleanup, not rewriting Git history.</li>
+<li>Local file/image targets and Markdown anchors pass static verification. Regenerated numerical tables share the same private input records as their plots; private CSV is not copied into public folders.</li>
+<li>Plot sample inspection confirms readable labels/markers; multimesh studies use distinct markers/dashes and independent ratio/error references; single-mesh thermal cases use bars.</li>
+<li>HTML TeX is preserved and uses MathJax from its public CDN. Browser screenshot automation could not connect to the local preview server in this environment; interactive rendering is not represented as screenshot-verified. PNG numerical figures were inspected directly.</li>
+<li>DAT archive CRC and every manifest SHA256 are verified. The archive contains593 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.</li>
+</ul>
+<h2 id="reconciliation">Reconciliation</h2>
+<p>2-005 uses the correctedC/D supplied independent targets, audited quarter-only4/8/16/32 observations, and the complete PLOAD4-to-nodal audit. No old zero probes or CW result is substituted. Independent-error and normalized-ratio graphs replace parity-based accuracy plots.</p>
+<p>2-013B uses the latest native GPSTRESS for both Q8/T6, target geometry, Z1/Z2 and basic-aligned SURFACE100. Nastran-only MID rows and MYSTRAN-only midsides are not silently paired. 2-014 retains the actual Python28×32 mesh and declared radial/tangential moment recovery; older cross-case thermal figures are omitted.</p>
+<p>2-008 uses diagonal CONM2 and frequency references1/T. CSI mode shapes were unavailable, so ordered-frequency comparisons do not claim MAC identity. 2-016/017 normalization and physical mode matching remain PENDING; provisional stress/force overlays have been removed. Raw signed mode-index1 diagnostics and the complete eigenvalue tables are labeled accordingly. Nastran t=.01 fatal7340 is a failure/missing result, notzero. 2-009 remains EXCLUDED. Case2-015 is PENDING and has no input archive entry without a verified-run receipt.</p>
+<p>The theory pages preserve the supplied mathematical content, primary-reference list and limitations. Bibliographic items explicitly labeled for later title/DOI confirmation in the supplied manuscript remain provisional; publication here is research documentation, not a claim those bibliographies were independently verified for journal submission.</p>
+<h2 id="solid-privacy-cleanup">Solid privacy cleanup</h2>
+<p>No Solid formulation math or result tables were rewritten. Only research-data links/prose were adjusted to retain embedded public tables while removing links to private source files. The following28 tracked research files were untracked with local bytes preserved:</p>
+<ul>
+<li><code>update/Formulation/Solid/data/comparison_all.csv</code></li>
+<li><code>update/Formulation/Solid/data/constraint_audit.csv</code></li>
+<li><code>update/Formulation/Solid/data/documentation_checks.json</code></li>
+<li><code>update/Formulation/Solid/data/finest_mesh_summary.csv</code></li>
+<li><code>update/Formulation/Solid/data/geometry_audit.csv</code></li>
+<li><code>update/Formulation/Solid/data/mesh_inventory.csv</code></li>
+<li><code>update/Formulation/Solid/data/provenance.json</code></li>
+<li><code>update/Formulation/Solid/data/sap2000_reference.csv</code></li>
+<li><code>update/solid_benchmark/data/comparison_all.csv</code></li>
+<li><code>update/solid_benchmark/data/constraint_audit.csv</code></li>
+<li><code>update/solid_benchmark/data/element_recovery_5001_20261018.csv</code></li>
+<li><code>update/solid_benchmark/data/finest_mesh_summary.csv</code></li>
+<li><code>update/solid_benchmark/data/five_case_mesh_inventory.csv</code></li>
+<li><code>update/solid_benchmark/data/geometry_audit.csv</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/artifact_hashes.json</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/benchmark_matrix.csv</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/eas9_baseline_parity.csv</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/feature_matrix.csv</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/manifest.json</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/manual_nastran_import.json</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/operator_matrix.csv</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/orientation_matrix.csv</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/output_coverage.csv</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_20261018/runs.csv</code></li>
+<li><code>update/solid_benchmark/data/hexa8_tied_vs_eas9v2_archive.csv</code></li>
+<li><code>update/solid_benchmark/data/mesh_inventory.csv</code></li>
+<li><code>update/solid_benchmark/data/mystran_solid_comparison.csv</code></li>
+<li><code>update/solid_benchmark/data/sap2000_reference.csv</code></li>
+</ul>
+<h2 id="input-archive-coverage">Input archive coverage</h2>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th align="right">DAT count</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2-001</td>
+<td align="right">6</td>
+</tr>
+<tr>
+<td>2-002</td>
+<td align="right">97</td>
+</tr>
+<tr>
+<td>2-003</td>
+<td align="right">42</td>
+</tr>
+<tr>
+<td>2-004</td>
+<td align="right">61</td>
+</tr>
+<tr>
+<td>2-005</td>
+<td align="right">88</td>
+</tr>
+<tr>
+<td>2-006</td>
+<td align="right">22</td>
+</tr>
+<tr>
+<td>2-007</td>
+<td align="right">30</td>
+</tr>
+<tr>
+<td>2-008</td>
+<td align="right">33</td>
+</tr>
+<tr>
+<td>2-010</td>
+<td align="right">18</td>
+</tr>
+<tr>
+<td>2-012</td>
+<td align="right">6</td>
+</tr>
+<tr>
+<td>2-013</td>
+<td align="right">24</td>
+</tr>
+<tr>
+<td>2-014</td>
+<td align="right">13</td>
+</tr>
+<tr>
+<td>2-016</td>
+<td align="right">120</td>
+</tr>
+<tr>
+<td>2-017</td>
+<td align="right">33</td>
+</tr>
+</tbody></table>
+<p>Existing Solid input archives were inspected for forbidden result/Python/CSV entries; none were found. One retained Solid archive includes its existing Nastran batch launcher; it contains no solver output. No production Python scripts elsewhere in the repository were blanket-ignored or removed.</p>
+</body></html>

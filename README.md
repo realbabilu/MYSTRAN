@@ -35,7 +35,7 @@ More easier dimension parameter for section, etc.
 
 ## Solid recovery update - 18 October 2026
 
-The [5-001 recovery correction](update/solid_element_recovery_5001_2026-10-18.md) restores ordinary OP2 element stress and strain for all 462 elements in the eight-solid patch. CHEXA8 corner recovery uses valid interior states; CPYRAM5/13 now supply center and corner tensors. The original patch displacements and GPSTRESS VOLUME payloads are unchanged. See the [before/after comparison](update/solid_benchmark/data/element_recovery_5001_20261018.csv) and audit for validation scope.
+The [5-001 recovery correction](update/solid_element_recovery_5001_2026-10-18.md) restores ordinary OP2 element stress and strain for all 462 elements in the eight-solid patch. CHEXA8 corner recovery uses valid interior states; CPYRAM5/13 now supply center and corner tensors. The original patch displacements and GPSTRESS VOLUME payloads are unchanged. See the [recovery audit](update/solid_element_recovery_5001_2026-10-18.md) and audit for validation scope.
 
 ## Solid update - 17 October 2026
 
@@ -58,6 +58,20 @@ See the [5-001 OP2 audit](update/op2_solid_5001_audit.md), [quadratic patch audi
 - [All solid elements - SAP2000 benchmarks](update/solid_benchmark/comparison_all.md): eight solid types, matched Nastran/MYSTRAN meshes and refinement curves, with independent and published SAP2000 references.
 - [Download benchmark input decks only](update/solid_benchmark/solid_benchmark_inputs.zip) - no raw solver outputs.
 - [Benchmark index and numerical data](update/solid_benchmark/README.md).
+
+## Quadratic CQUAD8 and CTRIA6 Shell Formulations
+
+Research formulations for quadratic shell elements with 6 DOF per node: five **CQUAD8** and four **CTRIA6** variants. The theory pages and CSI benchmark results distinguish independent-reference validation from pending investigations.
+
+- [Quadratic shell formulation overview](update/Formulation/Shell/CQUAD8_CTRIA6_QUADRATIC_SHELL_FORMULATIONS.md)
+- [Individual Q8/T6 formulations](update/Formulation/Shell/README.md)
+- [Shell benchmark overview](update/shell_benchmark/README.md)
+- [All-case reference-based comparison](update/shell_benchmark/comparison_all.md)
+- [Browser comparison](update/shell_benchmark/comparison_all.html)
+- [Benchmark DAT archive](update/shell_benchmark/DAT/quadratic_shell_benchmark_DAT.zip)
+
+Note: CSV/Python files are research-internal and not part of the public repository.
+
 
 ## Formulation
 

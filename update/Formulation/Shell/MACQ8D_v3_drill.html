@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>MACQ8D_v3_drill</title><style>body{font:16px/1.65 system-ui;max-width:1250px;margin:auto;padding:28px;color:#202b39}img{max-width:100%;height:auto}table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;font-size:13px}td,th{border:1px solid #d5dce6;padding:7px;white-space:nowrap}th{background:#eef3f8}h1,h2{color:#163a59}a{color:#145a9e}pre{overflow:auto;background:#f3f5f7;padding:12px}</style><script>window.MathJax={"tex":{"inlineMath":[["\\(","\\)"]],"displayMath":[["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1 id="macq8d-v3_drill--cquad8-quadratic-shell">MACQ8D v3_drill — CQUAD8 quadratic shell</h1>
+<p><strong>Ary · Independent Researcher · Personal Research</strong> · MYSTRAN v18.00.a · 19 October 2026</p>
+<blockquote>
+<p>Research documentation. Full derivation and primary references: <a href="CQUAD8_CTRIA6_QUADRATIC_SHELL_FORMULATIONS.html">master formulation</a>. Exact Fortran source selection, sign conventions and validation branch must be checked before asserting implementation identity.</p>
+</blockquote>
+<h2 id="element-specific-formulation-preserved-from-earlier-research-manuscript">Element-specific formulation (preserved from earlier research manuscript)</h2>
+<h3 id="76-macneal-q8-v3--eight-node-modified-interpolation-with-drilling">7.6 MacNeal Q8 v3 — eight-node modified interpolation with drilling</h3>
+<p>A geometry-dependent interpolation \(\widetilde N_I\) replaces the standard Q8 field for the displacement/strain approximation while preserving the eight external nodes. The surface geometry is still reconstructed from the physical Q8 nodal positions. From the modified interpolation form \(\widetilde B_m,\widetilde B_b,\widetilde B_s\) and independent drilling penalty \(\widetilde B_d\), assemble
+\[
+K^{\mathrm{MN8}}=\int_A h\widetilde B_m^TC_m\widetilde B_m+\frac{h^3}{12}\widetilde B_b^TC_m\widetilde B_b+h\widetilde B_s^TC_s\widetilde B_s+h c_d\widetilde B_d^T\widetilde B_d\,dA.
+\]
+<strong>Adopted:</strong> MacNeal–Harder (1992) motivation for improved eight-node field interpolation. <strong>Modified:</strong> separate drilling constraint and six-DOF shell extension. <strong>Not reproduced:</strong> claim of equivalence to all original nine-node formulations or general nonlinear constitutive theory.</p>
+<h2 id="applicable-verification-and-limitations">Applicable verification and limitations</h2>
+<p>See <a href="../../shell_benchmark/comparison_all.html">reference-anchored comparison</a>, including 2-001 patch checks, 2-005 C/D convergence, 2-008 modal, 2-013 thermal stress, 2-014 thermal bending, 2-016 and 2-017 buckling. A solver pairing is not a reference accuracy proof. <code>2-009</code> foundation remains excluded.</p>
+<ul>
+<li><strong>Modal:</strong> frequency reference is <code>1 / period</code>; compare ratio <code>f_solver/f_ref</code> and absolute frequency errors separately.</li>
+<li><strong>Thermal:</strong> local radial–tangential axes and resultants must match CSI definitions.</li>
+<li><strong>Buckling:</strong> preserve signed eigenvalues, prestress load basis and mode pairing; do not assume mode indices are interchangeable.</li>
+<li><strong>Solver caveats:</strong> report AUTOSPC/BAILOUT conditions where present.</li>
+</ul>
+<h2 id="current-checkout-recovery-note--19-october-2026">Current checkout recovery note — 19 October 2026</h2>
+<p>Commit1f97ea99 makes SIMOQ8 same-point tensor recovery explicit while preserving the OP2 center basis, and corrects basic/local basis handling in quadratic GPFORCE. Stiffness and pressure kernels are unchanged; applied loads and displacements remain unchanged. This does not remove transverse-shear, curved-shell or buckling-normalization limitations. See <a href="../../shell_benchmark/comparison_all.html">reference comparison</a>.</p>
+</body></html>

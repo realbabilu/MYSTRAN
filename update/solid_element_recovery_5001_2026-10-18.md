@@ -8,7 +8,7 @@ The corrected MYSTRAN executable writes ordinary OP2 **element stress and strain
 
 On the unchanged 5-001 input, all six tensor components for CTETRA4/10, CPENTA15, CHEXA8/20 and CPYRAM5/13 match the freshly computed Nastran results at OP2 single precision. CPENTA6 EAS9 retains the analytical constant-strain solution; the Nastran prism differs. Matching tensor values is not a claim of byte-identical entire OP2 files or identical eigenvector direction conventions.
 
-[Before/after comparison CSV](solid_benchmark/data/element_recovery_5001_20261018.csv).
+Before/after comparison CSV (research data retained locally; see embedded tables).
 
 | Element | Before | Corrected | Nastran | Corrected stress point rows |
 |---|---:|---:|---:|---:|

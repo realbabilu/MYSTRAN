@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="500" viewBox="0 0 1240 500">
+<rect width="100%" height="100%" fill="white"/>
+<text x="30" y="40" font-family="Arial" font-size="22" fill="#111">CSI Shell Verification 2-001–2-020 · conceptual map (not to scale)</text>
+<rect x="22" y="75" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="34" y="102" font-size="17" font-family="Arial" fill="#1a2833">2-001 Patch</text>
+<line x1="54" y1="137" x2="54" y2="220" stroke="#567"/>
+<line x1="119" y1="137" x2="119" y2="220" stroke="#567"/>
+<line x1="184" y1="137" x2="184" y2="220" stroke="#567"/>
+<line x1="54" y1="137" x2="184" y2="137" stroke="#567"/>
+<line x1="54" y1="178" x2="184" y2="178" stroke="#567"/>
+<line x1="54" y1="219" x2="184" y2="219" stroke="#567"/>
+<rect x="267" y="75" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="279" y="102" font-size="17" font-family="Arial" fill="#1a2833">2-004 Twist</text>
+<path d="M 291 225 L 444 185 M 291 175 L 444 133 M 291 175L291 225 M444 133L444 185" fill="none" stroke="#567" stroke-width="3"/>
+<rect x="512" y="75" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="524" y="102" font-size="17" font-family="Arial" fill="#1a2833">2-005 Plate</text>
+<line x1="544" y1="137" x2="544" y2="220" stroke="#567"/>
+<line x1="609" y1="137" x2="609" y2="220" stroke="#567"/>
+<line x1="674" y1="137" x2="674" y2="220" stroke="#567"/>
+<line x1="544" y1="137" x2="674" y2="137" stroke="#567"/>
+<line x1="544" y1="178" x2="674" y2="178" stroke="#567"/>
+<line x1="544" y1="219" x2="674" y2="219" stroke="#567"/>
+<rect x="757" y="75" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="769" y="102" font-size="17" font-family="Arial" fill="#1a2833">2-006 Roof</text>
+<path d="M 789 210 Q 867 120 944 210" fill="none" stroke="#567" stroke-width="3"/>
+<rect x="1002" y="75" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="1014" y="102" font-size="17" font-family="Arial" fill="#1a2833">2-007 Hemisphere</text>
+<path d="M 1034 210 Q 1112 120 1189 210" fill="none" stroke="#567" stroke-width="3"/>
+<rect x="22" y="283" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="34" y="310" font-size="17" font-family="Arial" fill="#1a2833">2-008 Modal</text>
+<line x1="54" y1="345" x2="54" y2="428" stroke="#567"/>
+<line x1="119" y1="345" x2="119" y2="428" stroke="#567"/>
+<line x1="184" y1="345" x2="184" y2="428" stroke="#567"/>
+<line x1="54" y1="345" x2="184" y2="345" stroke="#567"/>
+<line x1="54" y1="386" x2="184" y2="386" stroke="#567"/>
+<line x1="54" y1="427" x2="184" y2="427" stroke="#567"/>
+<rect x="267" y="283" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="279" y="310" font-size="17" font-family="Arial" fill="#1a2833">2-010 Pipe</text>
+<path d="M 299 418 Q 377 328 454 418" fill="none" stroke="#567" stroke-width="3"/>
+<rect x="512" y="283" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="524" y="310" font-size="17" font-family="Arial" fill="#1a2833">2-013 Thermal</text>
+<line x1="544" y1="345" x2="544" y2="428" stroke="#567"/>
+<line x1="609" y1="345" x2="609" y2="428" stroke="#567"/>
+<line x1="674" y1="345" x2="674" y2="428" stroke="#567"/>
+<line x1="544" y1="345" x2="674" y2="345" stroke="#567"/>
+<line x1="544" y1="386" x2="674" y2="386" stroke="#567"/>
+<line x1="544" y1="427" x2="674" y2="427" stroke="#567"/>
+<rect x="757" y="283" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="769" y="310" font-size="17" font-family="Arial" fill="#1a2833">2-016 Buckling</text>
+<line x1="789" y1="345" x2="789" y2="428" stroke="#567"/>
+<line x1="854" y1="345" x2="854" y2="428" stroke="#567"/>
+<line x1="919" y1="345" x2="919" y2="428" stroke="#567"/>
+<line x1="789" y1="345" x2="919" y2="345" stroke="#567"/>
+<line x1="789" y1="386" x2="919" y2="386" stroke="#567"/>
+<line x1="789" y1="427" x2="919" y2="427" stroke="#567"/>
+<rect x="1002" y="283" width="227" height="185" rx="8" fill="#f8fafc" stroke="#ccd5de"/>
+<text x="1014" y="310" font-size="17" font-family="Arial" fill="#1a2833">2-017 Column</text>
+<rect x="1092" y="336" width="42" height="96" fill="none" stroke="#567" stroke-width="3"/>
+</svg>

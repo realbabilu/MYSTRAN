@@ -1,5 +1,0 @@
-case,response,independent,sap2000,mesh
-5-004,IN,0.005429,0.005322,Published original SAP mesh; distinct from generated refinement
-5-004,OUT,0.001749,0.001719,Published original SAP mesh; distinct from generated refinement
-5-007,A,0.094,0.0701,Original 16x16x1 HEXA8: 578 nodes / 256 elements
-5-007,A,0.094,0.093,Original 48x48x1 HEXA8: 4802 nodes / 2304 elements

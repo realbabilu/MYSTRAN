@@ -1,4 +1,4 @@
-> **18 October CHEXA8 update:** [TIED vs EAS9v2](comparison_all.md#chexa8) uses the existing beam/dome benchmark meshes and previously published Nastran results. [Comparison CSV](data/hexa8_tied_vs_eas9v2_archive.csv).
+> **18 October CHEXA8 update:** [TIED vs EAS9v2](comparison_all.md#chexa8) uses the existing beam/dome benchmark meshes and previously published Nastran results. Comparison CSV (research data retained locally; see embedded tables).
 
 # Solid benchmarks: MYSTRAN vs Nastran
 
@@ -21,15 +21,15 @@ Use the validated MYSTRAN input to reproduce the audited run. Seven volumes matc
 
 ## Benchmark input archive
 
-[Download input decks only](solid_benchmark_inputs.zip). The ZIP contains input DAT files, instructions and an input manifest. **No Nastran or MYSTRAN output files are included.** See [input checksums](input_manifest.json).
+[Download input decks only](solid_benchmark_inputs.zip). The ZIP contains input DAT files, instructions and an input manifest. **No Nastran or MYSTRAN output files are included.** See input checksums (research data retained locally; see embedded tables).
 
 ## Numerical summaries
 
-- [Five-case comparison CSV](data/mystran_solid_comparison.csv)
-- [All-solid comparison CSV](data/comparison_all.csv)
-- [Mesh inventory](data/mesh_inventory.csv)
-- [Geometry audit](data/geometry_audit.csv)
-- [Constraint audit](data/constraint_audit.csv)
+- Five-case comparison CSV (research data retained locally; see embedded tables)
+- All-solid comparison CSV (research data retained locally; see embedded tables)
+- Mesh inventory (research data retained locally; see embedded tables)
+- Geometry audit (research data retained locally; see embedded tables)
+- Constraint audit (research data retained locally; see embedded tables)
 
 ## Reading the comparison
 

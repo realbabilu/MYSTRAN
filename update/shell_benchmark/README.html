@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>README</title><style>body{font:16px/1.65 system-ui;max-width:1250px;margin:auto;padding:28px;color:#202b39}img{max-width:100%;height:auto}table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;font-size:13px}td,th{border:1px solid #d5dce6;padding:7px;white-space:nowrap}th{background:#eef3f8}h1,h2{color:#163a59}a{color:#145a9e}pre{overflow:auto;background:#f3f5f7;padding:12px}</style><script>window.MathJax={"tex":{"inlineMath":[["\\(","\\)"]],"displayMath":[["\\[","\\]"]]},"svg":{"fontCache":"global"}}</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1 id="shell-benchmark-library">Shell benchmark library</h1>
+<p><a href="comparison_all.html">All comparisons</a></p>
+<ul>
+<li><a href="benchmark_2_001.html">2-001: Membrane/bending patch; pointwise recovery</a> — Joint and element stresses require correct frame; Q8 transverse shear recovery LC2 under review.</li>
+<li><a href="benchmark_2_002.html">2-002: Cantilever six loading branches</a> — Support/rotational DOF parity and low-mesh pivot warnings under review.</li>
+<li><a href="benchmark_2_003.html">2-003: Plate/shell validation</a> — Q8 123456 clamped fix audited; T6 support parity pending.</li>
+<li><a href="benchmark_2_004.html">2-004: Thin and thick shell response</a> — Comparison only when location and same independent reference fixed.</li>
+<li><a href="benchmark_2_005.html">2-005: 2×10 in C/D plate quarter convergence</a> — Corrected reference: C uniform 12.97 in; C point 16.95 in; D uniform 2.60 in; D point 7.25 in. T6 point-load under investigation.</li>
+<li><a href="benchmark_2_006.html">2-006: Scordelis-Lo roof</a> — Several newer quadratic variants require regression checks.</li>
+<li><a href="benchmark_2_007.html">2-007: Shell benchmark</a> — Do not use old exported-probe envelope as reference PASS.</li>
+<li><a href="benchmark_2_008.html">2-008: Thick plate modal / diagonal CONM2</a> — CSI five independent periods: 0.01723, 0.00704, 0.00281, 0.00219, 0.00193 s; plot f/fref.</li>
+<li><a href="benchmark_2_009.html">2-009: Plate on elastic foundation</a> — EXCLUDED invalid older model; foundation A/B stiffness must be corrected and rerun.</li>
+<li><a href="benchmark_2_010.html">2-010: Shell benchmark</a> — No verified independent-reference figure in consolidated dataset.</li>
+<li><a href="benchmark_2_012.html">2-012: Shell benchmark</a> — Do not infer validated reference from solver parity.</li>
+<li><a href="benchmark_2_013.html">2-013: Thermal constant through thickness</a> — 2-013A Ux=0.000132, Uy=0.000066 in at joint8; 2-013B sigma_xx=sigma_yy=-733.33 psi, with measured GPSTRESS.</li>
+<li><a href="benchmark_2_014.html">2-014: Annular thermal gradient</a> — 9×16 CSI thick reference: Uz=0.01931 in, R2=0.00352 rad, M11=-2.181 and M22=-4.406 kip-in/in; Python-generated 28×32 Q8 / 1792 T6 triangles is not the CSI mesh.</li>
+<li><a href="benchmark_2_015.html">2-015: Shell benchmark</a> — Pending independent-reference and run metadata verification.</li>
+<li><a href="benchmark_2_016.html">2-016: Out-of-plane buckling</a> — CSI shear/bend references t=1: 425/1165 ksi; t=0.01: 0.0425/0.1165 ksi. Buckling lambda to critical stress requires load normalization, including t=1 provisional.</li>
+<li><a href="benchmark_2_017.html">2-017: In-plane buckling</a> — CSI reference Pcr=127.91 kip; lambda requires load basis and physical buckling mode matching.</li>
+</ul>
+<p><a href="PUBLICATION_QA.html">Publication and Solid privacy audit</a> · <a href="DAT/quadratic_shell_benchmark_DAT.zip">Actual tested DAT archive</a></p>
+</body></html>
