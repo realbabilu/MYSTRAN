@@ -94,16 +94,25 @@ $$
 
 ## 3. Edge-tied assumed transverse shear
 
-For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible shear rows at triangle-edge midpoints:
+## 3. Edge-tied assumed transverse shear
+
+For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible shear rows at the three triangle-edge midpoints:
 
 $$
 \begin{aligned}
-\mathbf a(\zeta_g)&=\widehat{\mathbf B}_{r\zeta}(1/2,0,\zeta_g),\\
-\mathbf b(\zeta_g)&=\widehat{\mathbf B}_{s\zeta}(0,1/2,\zeta_g),\\
-\mathbf c(\zeta_g)&=\mathbf b-\mathbf a-
-\left[\widehat{\mathbf B}_{s\zeta}-\widehat{\mathbf B}_{r\zeta}\right](1/2,1/2,\zeta_g).
+\mathbf a(\zeta_g)
+&=\widehat{\mathbf B}_{r\zeta}\left(\frac12,0,\zeta_g\right),\\[4pt]
+\mathbf b(\zeta_g)
+&=\widehat{\mathbf B}_{s\zeta}\left(0,\frac12,\zeta_g\right),\\[4pt]
+\mathbf c(\zeta_g)
+&=\mathbf b(\zeta_g)-\mathbf a(\zeta_g)\\
+&\quad-\left[
+\widehat{\mathbf B}_{s\zeta}\left(\frac12,\frac12,\zeta_g\right)
+-\widehat{\mathbf B}_{r\zeta}\left(\frac12,\frac12,\zeta_g\right)
+\right].
 \end{aligned}
 $$
+
 
 Here $\mathbf a$, $\mathbf b$, and $\mathbf c$ are **row vectors of length 18**; $\widehat{\mathbf B}_{r\zeta}$ and $\widehat{\mathbf B}_{s\zeta}$ denote rows 6 and 5 of $\widehat{\mathbf B}$, respectively. Interpolate them as
 
