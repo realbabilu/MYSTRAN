@@ -75,6 +75,23 @@ A convenient first-order approximation is
 
 where $\mathbf n_0$ is obtained from consistently oriented nodal directors and $\widehat N_I$ denote the active field-interpolation functions. This representation identifies the kinematic model; the discrete operators also include the derivatives of interpolated nodal directors on curved surfaces. The sign of the director cross product, bending curvature and physical bending-moment recovery must be kept consistent.
 
+### 2.4 Relation to Kikuchi–Ishii and MacNeal–Harder modified interpolation
+
+The baseline Q8 geometry remains the standard eight-node serendipity mapping, whereas the research formulation permits a separate modified kinematic interpolation $\widehat N_I$. Two relevant precursors motivate this choice but **must not be conflated with the implemented MITC8 v4 field**.
+
+**Kikuchi–Ishii (1999)** developed a *four-node*, 12-DOF Reissner–Mindlin plate element with biquadratic lateral-deflection enrichment and displacement–rotation coupling. Its improved representation of pure bending and documented sensitivity to shear locking motivate geometry-aware compatible-field corrections. It is **not** an eight-node MITC shell and does not establish that MITC8 v4 uses its exact coupling coefficients.
+
+**MacNeal–Harder (1992)** established how an eight-node interpolation can recover quadratic physical displacement fields under bilinear geometry by constraining the virtual ninth-node displacement. In hierarchical form, the modified eight-node field may be written
+
+```math
+\widehat N_I(r,s)=N_I^{(8)}(r,s)+N_9^{(9)}(r,s)\left[T_I-N_I^{(8)}(0,0)\right],
+\qquad N_9^{(9)}=(1-r^2)(1-s^2),
+```
+
+where $T_I$ are metric-dependent constraint coefficients. This is the **published MacNeal–Harder construction**, included to motivate the optional field choice; it must not be taken as proof that the project's alternative branch uses these precise $T_I$ without a source-level comparison. In the cited patch study, modified Q8 passed constant-curvature tests with straight edges but did not pass the curved-edge case. Accordingly, local field completeness, pointwise director consistency and the curved/distorted stress patches must each be tested separately.
+
+The present **MITC8 v4 defaults to a Kikuchi-type research field**, with a MacNeal–Harder-type alternative, as stated in Section 2.2 and the formulation-evolution table. The type label describes its inspiration, not mathematical identity with either original paper. Its covariant membrane tying and shear blending are independent project modifications.
+
 ## 3. Generalised strain and elastic stiffness
 
 Write the generalised mechanical strain as
@@ -442,8 +459,10 @@ The exact code revision, active field functions, nodal winding, density conventi
 3. Bucalem, M. L., and Bathe, K.-J. (1993). Higher-order MITC general shell elements. *International Journal for Numerical Methods in Engineering*, **36**, 3729–3754. [Bibliographic details should be checked against the publisher's final record before journal submission.]
 4. Hughes, T. J. R., and Brezzi, F. (1989). On drilling degrees of freedom. *Computer Methods in Applied Mechanics and Engineering*, **72**, 105–121.
 5. MacNeal, R. H., and Harder, R. L. (1985). A proposed standard set of problems to test finite element accuracy. *Finite Elements in Analysis and Design*, **1**, 3–20.
-6. Computers and Structures, Inc. (CSI). *SAP2000/CSiBridge Verification Manuals*, shell problems 2-001 through 2-017. Representative problem references: [2-001](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-001.pdf), [2-003](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-003.pdf), [2-004](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-004.pdf), [2-005](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf), [2-016](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-016.pdf), [2-017](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-017.pdf).
-7. Internal research records (2026): *MITC8 v1p2 versus v3 review*; *MITC8 v3 to v4 changes*; *MITC8v4–MITC8D formulations*; *SIMOQ8 V13 alignment and MITC8 V4 upgrade*. Internal validation reports; not independent peer-reviewed literature.
+6. Kikuchi, F., and Ishii, K. (1999). An improved 4-node quadrilateral plate bending element of the Reissner–Mindlin type. *Computational Mechanics*, **23**, 240–249. **Modified-field and shear-locking background; not the exact Q8 operator.**
+7. MacNeal, R. H., and Harder, R. L. (1992). Eight nodes or nine? *International Journal for Numerical Methods in Engineering*, **33**, 1049–1058. **Eight-node metric interpolation and constant-curvature patch-test background.**
+8. Computers and Structures, Inc. (CSI). *SAP2000/CSiBridge Verification Manuals*, shell problems 2-001 through 2-017. Representative problem references: [2-001](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-001.pdf), [2-003](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-003.pdf), [2-004](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-004.pdf), [2-005](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf), [2-016](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-016.pdf), [2-017](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-017.pdf).
+9. Internal research records (2026): *MITC8 v1p2 versus v3 review*; *MITC8 v3 to v4 changes*; *MITC8v4–MITC8D formulations*; *SIMOQ8 V13 alignment and MITC8 V4 upgrade*. Internal validation reports; not independent peer-reviewed literature.
 
 ---
 
