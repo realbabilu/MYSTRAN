@@ -33,21 +33,101 @@ Jacobian $J_{ai}=\partial x_i/\partial\xi_a=\sum_k \partial N_k/\partial\xi_a\,x
 
 $$K=\sum_g w_g\,B_g^TDB_g.$$
 
+
 ### 3.2 EAS9, scalar scaling
 
-Nine zero-mean enhanced modes in natural strain order $[\xi\xi,\eta\eta,\zeta\zeta,\xi\eta,\eta\zeta,\zeta\xi]$:
+The EAS9 formulation introduces nine zero-mean enhanced
+strain modes in the natural engineering-strain order:
 
-$$\hat M=\begin{bmatrix}\xi&0&0&0&0&0&0&0&0\\0&\eta&0&0&0&0&0&0&0\\0&0&\zeta&0&0&0&0&0&0\\0&0&0&\xi&\eta&0&0&0&0\\0&0&0&0&0&\eta&\zeta&0&0\\0&0&0&0&0&0&0&\zeta&\xi\end{bmatrix},\qquad M(\boldsymbol\xi)=\frac{\det J_0}{\det J(\boldsymbol\xi)}\hat M(\boldsymbol\xi).$$
+`[xi-xi, eta-eta, zeta-zeta, xi-eta, eta-zeta, zeta-xi]`
 
-The matrices
+The enhanced strain interpolation matrix is:
 
-$$K_{uu}=\sum_g w_gB_g^TDB_g,\quad K_{u\alpha}=\sum_g w_gB_g^TDM_g,\quad K_{\alpha\alpha}=\sum_g w_gM_g^TDM_g$$
+```math
+\widehat{\mathbf{M}} =
+\begin{bmatrix}
+\xi & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & \eta & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & \zeta & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & \xi & \eta & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & \eta & \zeta & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & \zeta & \xi
+\end{bmatrix}
+```
 
-are condensed:
+The scalar-scaled enhanced strain operator is:
 
-$$K=K_{uu}-K_{u\alpha}K_{\alpha\alpha}^{-1}K_{u\alpha}^T.$$
+```math
+\mathbf{M}(\boldsymbol{\xi})
+=
+\frac{\det\mathbf{J}_0}
+{\det\mathbf{J}(\boldsymbol{\xi})}
+\widehat{\mathbf{M}}(\boldsymbol{\xi})
+```
 
-Because $\hat M$ is used directly as a Cartesian strain field, $K$ depends on the global axis orientation.
+where `J0` is the Jacobian evaluated at the element center.
+
+The element matrices are:
+
+**Displacement stiffness:**
+
+```math
+\mathbf{K}_{uu}
+=
+\sum_g w_g
+\mathbf{B}_g^T
+\mathbf{D}
+\mathbf{B}_g
+```
+
+**Displacement-enhancement coupling:**
+
+```math
+\mathbf{K}_{u\alpha}
+=
+\sum_g w_g
+\mathbf{B}_g^T
+\mathbf{D}
+\mathbf{M}_g
+```
+
+**Enhanced-mode stiffness:**
+
+```math
+\mathbf{K}_{\alpha\alpha}
+=
+\sum_g w_g
+\mathbf{M}_g^T
+\mathbf{D}
+\mathbf{M}_g
+```
+
+The nine internal enhanced parameters are eliminated
+by static condensation:
+
+```math
+\boxed{
+\mathbf{K}
+=
+\mathbf{K}_{uu}
+-
+\mathbf{K}_{u\alpha}
+\mathbf{K}_{\alpha\alpha}^{-1}
+\mathbf{K}_{u\alpha}^{T}
+}
+```
+
+**Limitation of scalar scaling:**
+
+Because the natural enhanced modes are used directly
+as Cartesian strain components, without a covariant
+strain transformation, the resulting stiffness matrix
+is generally dependent on the orientation of the
+global Cartesian coordinate system.
+
+Section 3.3 introduces the covariant EAS9 formulation
+to eliminate this deficiency.
+
 
 ### 3.3 EAS9, covariant
 
