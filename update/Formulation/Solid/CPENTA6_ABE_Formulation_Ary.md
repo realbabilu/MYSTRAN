@@ -17,8 +17,9 @@ EAS9 for the wedge defines modes such as <span class="m">r̄</span> on the (r,ζ
 ### 2.1 Nodal numbering and natural coordinates
 
 <div>
+<img width="518" height="456" alt="image" src="https://github.com/user-attachments/assets/7fe68c51-d147-430b-94d1-6b5e8bce9061" />
 
-![Figure 1. CPENTA6 grid order (Nastran): G1-G2-G3 on the bottom triangle (ζ = −1), G4-G5-G6 on the top triangle (ζ = +1), G4 above G1. Natural axes r (G1→G2), s (G1→G3), ζ (bottom to top) are right-handed; the volume is positive when G1→G2→G3 is counter-clockwise seen from the G4-G6 face.](CPENTA6_ABE_figures/figure_1.svg)
+![Figure 1. CPENTA6 grid order (Nastran): G1-G2-G3 on the bottom triangle (ζ = −1), G4-G5-G6 on the top triangle (ζ = +1), G4 above G1. Natural axes r (G1→G2), s (G1→G3), ζ (bottom to top) are right-handed; the volume is positive when G1→G2→G3 is counter-clockwise seen from the G4-G6 face.]
 
 ***Figure 1.** CPENTA6 grid order (Nastran): G1-G2-G3 on the bottom triangle (ζ = −1), G4-G5-G6 on the top triangle (ζ = +1), G4 above G1. Natural axes r (G1→G2), s (G1→G3), ζ (bottom to top) are right-handed; the volume is positive when G1→G2→G3 is counter-clockwise seen from the G4-G6 face.*
 
@@ -115,15 +116,15 @@ Family A lowers 5-010 from 0.9287 to 0.8912 (thickness locking, Hauptmann–Schw
 ## 5. Coordinate systems, Gauss points and integration
 
 <div>
-
-![Figure 2. Triangle plane (r,s). Three Gauss points, the three edge-midpoint tying points used by the assumed shear (re-evaluated on each ζ plane), and the centroid at which the frame J 0 , T 0 and det J 0 are frozen.](CPENTA6_ABE_figures/figure_2.svg)
+<img width="795" height="530" alt="image" src="https://github.com/user-attachments/assets/d77b6ff9-4404-428d-97d8-e67c13f38257" />
+![Figure 2. Triangle plane (r,s). Three Gauss points, the three edge-midpoint tying points used by the assumed shear (re-evaluated on each ζ plane), and the centroid at which the frame J 0 , T 0 and det J 0 are frozen.]
 
 ***Figure 2.** Triangle plane (r,s). Three Gauss points, the three edge-midpoint tying points used by the assumed shear (re-evaluated on each ζ plane), and the centroid at which the frame J<sub>0</sub>, T<sub>0</sub> and det J<sub>0</sub> are frozen.*
 
 
 <div>
-
-![Figure 3. The six volume Gauss points: the 3-point triangle rule at the two Gauss planes ζ = ±1/√3. Tying points use the same two planes.](CPENTA6_ABE_figures/figure_3.svg)
+<img width="417" height="381" alt="image" src="https://github.com/user-attachments/assets/cb8b0b9e-c1d6-4bbd-8d02-a53a469007e7" />
+![Figure 3. The six volume Gauss points: the 3-point triangle rule at the two Gauss planes ζ = ±1/√3. Tying points use the same two planes.]
 
 ***Figure 3.** The six volume Gauss points: the 3-point triangle rule at the two Gauss planes ζ = ±1/√3. Tying points use the same two planes.*
 
@@ -146,8 +147,9 @@ All values below come from the Python reference implementation and the benchmark
 ### 6.1 SAP2000 5-010 column buckling (12×1×100 in, 48 wedges)
 
 <div>
+<img width="726" height="430" alt="image" src="https://github.com/user-attachments/assets/beb4d7ce-7fcc-43cd-bb21-2b7ed252e7da" />
 
-![Figure 4. First buckling factor of the 5-010 column; Nastran CPENTA6 value from the audit archive.](CPENTA6_ABE_figures/figure_4.svg)
+![Figure 4. First buckling factor of the 5-010 column; Nastran CPENTA6 value from the audit archive.]
 
 ***Figure 4.** First buckling factor of the 5-010 column; Nastran CPENTA6 value from the audit archive.*
 
