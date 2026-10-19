@@ -1,5 +1,7 @@
 # HBQ8–Kikuchi v3: Modified Serendipity Surface Shell with Geometry-Adaptive Membrane Tying and Slenderness-Dependent Transverse-Shear Blending
+
 **Ary · Independent Researcher · Personal Research** · MYSTRAN v18.00.a · 19 October 2026
+
 **Mathematical formulation and numerical verification note — MYSTRAN quadratic shells**  
 **Revision:** 20 October 2026 — explicit modified-field coefficients addendum  
 **Evidence classification:** Mathematical operators audited from supplied HBQ8 base, Kikuchi/MacNeal v1, complete HBQ8 v2 and HBQ8 v3 source, shared Q8 operator module, and modified shape-function source; benchmark numbers reproduced from the user's reported runs unless explicitly noted. No new Python, MYSTRAN, or Nastran benchmark is claimed in this document.
@@ -148,7 +150,8 @@ The field-tangent metric introduced subsequently in Section 3 is a separate cons
 
 The standard geometry integration surface and modified-field strain metric are intentionally different in v2/v3. Modified shape functions follow Kikuchi, Okabe and Fujio (1999), whose design motivation is to improve polynomial reproduction in distorted bilinear quadrilaterals; the precise shell extension used here is project specific.
 
-![Q8 node locations and 3x3 Gauss rule](figures/fig01_gauss_Q8.png)
+
+<img width="1470" height="1260" alt="fig01_gauss_Q8" src="https://github.com/user-attachments/assets/116946a0-4a5f-425d-9c92-beeff96b36a6" />
 
 **Figure 1.** Standard Q8 connectivity and $3\times3$ Gauss–Legendre integration stations $r,s\in\{-\sqrt{3/5},0,+\sqrt{3/5}\}$, weights $(5/9,8/9,5/9)$ per direction. These are integration sites, **not** ANS tying sites.
 
@@ -321,11 +324,11 @@ $$
 
 This distinction is important because the mixed cross-term contributes to the stiffness and to the thin-plate behavior. Direct (`tying=False`), forced six-point, and forced four-point branches remain distinct research settings.
 
-![Six-point and four-point tying layouts](figures/fig02_shear_tying.png)
+<img width="2730" height="840" alt="fig02_shear_tying" src="https://github.com/user-attachments/assets/dadaf7a0-d701-4be5-8724-f4e2a414bfe1" />
 
 **Figure 2.** Shear sampling locations for the $r$-component and the combined six-point pattern. The $s$-component uses transposed coordinates, not coincident duplication.
 
-![Slenderness blend](figures/fig03_blend_weight.png)
+<img width="1680" height="987" alt="fig03_blend_weight" src="https://github.com/user-attachments/assets/b862d05e-4672-4d35-a218-99a2baf048ea" />
 
 **Figure 3.** Continuous blending parameter $\omega_e$ as a function of $\chi_e=\sqrt{A_e}/h$; $\omega_e=0$ for $\chi_e\le15$, while $\omega_e\to1$ for increasingly thin shells.
 
@@ -484,7 +487,8 @@ The reported response is the **central deflection divided by the analytical/refe
 | $10^{-3}$ | 1 / 2 / 4 | .820 / .977 / .995 | .380 / .130 / .765 | **.910 / .990 / 1.001** | Same as v3 (reported) |
 | $10^{-4}$ | 1 / 2 / 4 / 8 | .820 / .977 / .995 / .999 | .379 / **.095 / .053** / .683 | **.911 / .990 / 1.001 / 1.001** | Same as v3 (reported) |
 
-![Thin plate convergence](figures/fig04_thinplate_convergence.png)
+
+<img width="1890" height="1176" alt="fig04_thinplate_convergence" src="https://github.com/user-attachments/assets/e56e9e37-2c7a-47a4-9316-dddfbacf19b8" />
 
 **Figure 4.** **Connected-point line convergence** of the reported quarter-plate response. Each marker corresponds to a supplied numerical value; line segments are guides only, not interpolated FE solutions. Nonmonotonic deterioration of v2 with plate thinning is a strong locking indicator. The plot does not establish stress convergence, which remains separately required.
 
@@ -505,7 +509,8 @@ The deliberate trade-off is that curved-element membrane tying improves resistan
 | T9 | $N=8$ | .875 | **1.02** | Displacement/reference |
 | T9 | $N=16$ | 1.00 | **1.02** | Displacement/reference |
 
-![Curved beam convergence](figures/fig05_2003_convergence.png)
+<img width="1470" height="965" alt="fig05_2003_convergence" src="https://github.com/user-attachments/assets/b926cb0b-63dd-4c15-96bd-889897aa3444" />
+
 
 **Figure 5.** Connected-point refinement of 2-003 LC1 for v3. The residual approximately 2% overshoot at T9 $N=16$ is **not erased**: the curved geometry membrane tying improves coarse meshes but can overshoot the reference at finer levels.
 
