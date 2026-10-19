@@ -107,36 +107,30 @@ $$
 =\widehat{\boldsymbol\varepsilon}_V^T\widehat{\mathbf D}_0\widehat{\boldsymbol\varepsilon}_V.
 $$
 
+
 ## 3. Edge-tied assumed transverse shear
 
-For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible shear rows at triangle-edge midpoints:
-
-
-$$
-\begin{aligned}
-\mathbf a(\zeta_g)&=\widehat{\mathbf B}_{r\zeta}(1/2,0,\zeta_g),\\
-\mathbf b(\zeta_g)&=\widehat{\mathbf B}_{s\zeta}(0,1/2,\zeta_g),\\
-\mathbf c(\zeta_g)&=\mathbf b-\mathbf a-
-\left[\widehat{\mathbf B}_{s\zeta}-\widehat{\mathbf B}_{r\zeta}\right](1/2,1/2,\zeta_g).
-\end{aligned}
-$$
-
-
-Here $\mathbf a$, $\mathbf b$, and $\mathbf c$ are **row vectors of length 18**; $\widehat{\mathbf B}_{r\zeta}$ and $\widehat{\mathbf B}_{s\zeta}$ denote rows 6 and 5 of $\widehat{\mathbf B}$, respectively. Interpolate them as
-
-$$
-\boxed{\overline{\mathbf B}_{r\zeta}(r,s,\zeta_g)=\mathbf a+\mathbf c\,s},
-\qquad
-\boxed{\overline{\mathbf B}_{s\zeta}(r,s,\zeta_g)=\mathbf b-\mathbf c\,r}.
-$$
-
-The other four rows remain compatible. Define $\overline{\mathbf B}$ as this six-row natural-frame matrix. The tied operator is only asserted at the quadrature planes used by this implementation; no higher-order $\zeta$ reconstruction is assumed.
-
-The edge-tied construction follows the *isotropic MITC3-type* shear interpolation discussed by Lee and Bathe (2004), adapted here to the continuum wedge. It is **not** identical to a shell MITC3 element; solid normal strains and the nine local EAS parameters remain present.
-
-
-
 For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible shear rows at triangle-edge midpoints.
+
+**Edge 1-2:**
+
+```math
+\mathbf{a}(\zeta_g)
+=
+\widehat{\mathbf{B}}_{r\zeta}
+\left(\frac{1}{2},0,\zeta_g\right)
+```
+
+**Edge 1-3:**
+
+```math
+\mathbf{b}(\zeta_g)
+=
+\widehat{\mathbf{B}}_{s\zeta}
+\left(0,\frac{1}{2},\zeta_g\right)
+```
+
+**Edge 2-3:**
 
 ```math
 \mathbf{c}(\zeta_g)
@@ -152,6 +146,41 @@ For each quadrature plane $\zeta=\zeta_g$, evaluate the covariant compatible she
 \right]
 \left(\frac{1}{2},\frac{1}{2},\zeta_g\right)
 ```
+
+Here, $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c}$ are **row vectors of length 18**. The operators $\widehat{\mathbf{B}}_{r\zeta}$ and $\widehat{\mathbf{B}}_{s\zeta}$ denote rows 6 and 5 of $\widehat{\mathbf{B}}$, respectively.
+
+The assumed transverse-shear strain operators are interpolated as follows.
+
+**First transverse-shear component:**
+
+```math
+\boxed{
+\overline{\mathbf{B}}_{r\zeta}(r,s,\zeta_g)
+=
+\mathbf{a}+\mathbf{c}\,s
+}
+```
+
+**Second transverse-shear component:**
+
+```math
+\boxed{
+\overline{\mathbf{B}}_{s\zeta}(r,s,\zeta_g)
+=
+\mathbf{b}-\mathbf{c}\,r
+}
+```
+
+The other four strain rows remain compatible. Define $\overline{\mathbf{B}}$ as the resulting six-row natural-frame strain-displacement matrix.
+
+The edge-tied operator is evaluated only at the quadrature planes used in this implementation. No higher-order reconstruction through the thickness coordinate $\zeta$ is assumed.
+
+The edge-tied construction follows the *isotropic MITC3-type* transverse-shear interpolation discussed by Lee and Bathe (2004), adapted here to the continuum wedge.
+
+However, this formulation is **not identical to a conventional MITC3 shell element**, because the CPENTA6 ABE formulation retains the three-dimensional solid normal-strain components and the nine local enhanced assumed-strain (EAS) parameters.
+
+
+
 
 ## 4. Nine local enhanced assumed strain parameters
 
