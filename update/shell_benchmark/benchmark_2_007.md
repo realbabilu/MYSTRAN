@@ -167,7 +167,7 @@ The input audit covers positive outward integration-point Jacobians, quadratic c
 
 ## Input and historical diagnosis
 
-[New tested Q8/T6 DAT archive](DAT/CSI_2_007_Q8_T6_DAT_ONLY_20261020.zip): 44 decks, 8 Nastran and 36 MYSTRAN, all represented by the current outputs. No solver outputs or Python are included. The older multi-case DAT archive contains legacy inputs; use this new archive for the current 2-007 comparison.
+[New tested Q8/T6 DAT archive](DAT/CSI_2_007_Q8_T6_DAT_ONLY_20261020.zip): 44 decks, 8 Nastran and 36 MYSTRAN, all represented by the current outputs. No solver outputs or Python are included. The [complete benchmark DAT archive](DAT/quadratic_shell_benchmark_DAT.zip) is also updated: 607 DAT across 14 cases. Its 2-007 section contains these same 44 tested Q8/T6 inputs; the 30 legacy oblique-load decks have been removed. Other cases retain identical DAT bytes.
 
 Earlier 2-007 diagnostic curves used FORCE magnitude 50 and an oblique first load. They are superseded for independent CSI comparison and are not reused as new-run data. Historical evidence remains in version control; the new dataset is identified separately by this S2K-based thick model and its input archive.
 
