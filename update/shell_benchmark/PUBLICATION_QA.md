@@ -9,7 +9,7 @@ The supplied CQUAD8/CTRIA6 publication draft is reconciled with locally audited 
 - Local file/image targets and Markdown anchors pass static verification. Regenerated numerical tables share the same private input records as their plots; private CSV is not copied into public folders.
 - Plot sample inspection confirms readable labels/markers; multimesh studies use distinct markers/dashes and independent ratio/error references; single-mesh thermal cases use bars.
 - HTML TeX is preserved and uses MathJax from its public CDN. Browser screenshot automation could not connect to the local preview server in this environment; interactive rendering is not represented as screenshot-verified. PNG numerical figures were inspected directly.
-- DAT archive CRC and every manifest SHA256 are verified. After the 20 October 2026 refresh, the archive contains521 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.
+- DAT archive CRC and every manifest SHA256 are verified. After the 20 October 2026 refresh, the archive contains482 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.
 
 ## Reconciliation
 
@@ -82,3 +82,7 @@ Replaced 30 legacy 2-007 Q8 DAT with 44 executed S2K-based thick inputs: 24 Q8 (
 ## 20 October2026 — selected 2-002 midpoint support
 
 Per user instruction, only midpoint-supported Q8/T6 models are presented. Source-corner-only comparisons are removed from current tables, bar figures and input archives. Both fixed source topologies are retained, with midpointSPC126; no refinement series or kernel change. The selected11 DAT have11 verified native OP2 files, six subcases each. Nastran4698/BAILOUT warnings remain. Current main archive521 DAT; other510 decks unchanged. CRC and all SHA256 entries checked. Earlier variants remain local, with originals preserved.
+
+## 20 October2026 — fixed-source 2-004 root and tip midsides
+
+Replaced61 prior2-004 refinement-series DAT with22 executed fixed12x2 source-based DAT. Q8:24 CQUAD8; T6:48 CTRIA6, two per source quad. Root midsides clamped in all runs; source point-load and consistent quadratic-line interpretations separately labelled, each1-lb and resultant-moment checked through nativeOP2 OLOAD. All22 OUG outputs finite; no numbered fatal/warning. MACQ8D SPCF output moment residual8.94484lb-in is explicitly classified as a failure. No stiffness/recovery edits. All460 other DAT unchanged; current main archive482 inputs, CRC and SHA256 verified. All four Nastran cases ran through configured run_nastran.bat without a license failure. No internal Python or raw solver output published.
