@@ -2,7 +2,6 @@
 
 **Technical formulation and numerical-validation note — MYSTRAN NEWSOLID (`PENTATYP,ABE`)**  
 **Revision:** 19 October 2026 (GitHub math syntax corrected) | **Origin:** Ary, [project formulation note](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/Formulation/Solid/CPENTA6_ABE_Formulation_Ary.md)  
-**Evidence status:** Figures and numerical tables reproduce reported Python-reference data from the linked original document. This revision does **not** claim new finite-element runs or a newly verified Fortran port.
 
 ## Abstract
 
