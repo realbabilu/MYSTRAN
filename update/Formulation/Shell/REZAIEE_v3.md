@@ -10,6 +10,16 @@
 
 This technical formulation describes a six-node quadratic triangular shell following the strain-assumption methodology of Rezaiee-Pajand, Arabi and Masoodi (published online 2017; journal 2018). It separates (i) concepts and equations sourced directly from the original paper, (ii) additional engineering provisions for a 36-DOF MYSTRAN-compatible element, and (iii) changes made between the original Python `Final` implementation and current `v3`. **“Final” is the historical first implementation; v3 is the authoritative current development.** The status of each theoretical feature and benchmark is recorded without attributing cross-formulation aggregates to Rezaiee.
 
+## Selecting this element in MYSTRAN
+
+Use six-node `CTRIA6` shell elements and place this PARAM entry in Bulk Data:
+
+```nastran
+PARAM,TRIA6TYP,REZAIEE
+```
+
+This selects the REZAIEE formulation for CTRIA6 elements. The formulation version described here is **v3**; no version suffix is entered on the PARAM card.
+
 ## 1. Element topology and natural coordinates
 
 <img width="1021" height="996" alt="nodal_numbering" src="https://github.com/user-attachments/assets/2c963946-fc9a-422a-b2e3-aec3399113d7" />
@@ -104,8 +114,6 @@ Here **assumed strain** modifies the membrane/shear operators; `B_b` represents 
 
 The v3 stiffness uses the 3-point triangle rule with stations `(1/6,1/6)`, `(2/3,1/6)`, `(1/6,2/3)` and weights `1/6` each (weights integrate the reference triangle of area `1/2`).
 
-
-
 It uses the six-point degree-four triangle rule for drilling/mass, with `(a,a),(b,a),(a,b)` for `a=0.445948490144588`, `b=0.108103018168070` (each weight `0.11169079483905`), and `(c,c),(d,c),(c,d)` for `c=0.091576213509771`, `d=0.816847572980459` (each weight `0.054975871827661`). The *source paper*, Section 5, p. 9, explicitly uses **seven Gaussian points** in its nonlinear element integration. Thus **the displayed 3/6 Gauss diagrams depict project implementation only**, not the published 7-point pattern.
 
 ## 7. Version history — INITIAL `Final` → LATEST `v3`
@@ -132,7 +140,7 @@ The direct comparison is **initial Final → current v3**, while an intermediate
 
 ## 8. Numerical evidence and its limits
 
-### 8.1 Project Python regression — latest v3 (not Nastran)
+### 8.1 Project Python regression — latest v3
 
 | Benchmark | Mesh or case | v3 response / reference | Error / qualification |
 |---|---:|---:|---|
@@ -146,7 +154,7 @@ The direct comparison is **initial Final → current v3**, while an intermediate
 
 The underlying v3 verification document reports maximum rigid residual `1.38×10⁻¹⁵`, a six near-zero rigid-mode count in sampled models and a maximum sampled corner-permutation relative K discrepancy of `8.65×10⁻¹²`. These are *sampled code-verification tests*, not a universal mathematical proof.
 
-### 8.2 Python intermediate v2 → v3 regression (not Final → v3)
+### 8.2 Benchmark intermediate v2 → v3 regression
 
 | Test | v2 | v3 | Interpretation |
 |---|---:|---:|---|
@@ -155,11 +163,66 @@ The underlying v3 verification document reports maximum rigid residual `1.38×10
 | 2-004 Fixed Uy error | +96.4471% | +7.4576% | Major improvement |
 | 2-002 case 4 error | −5.9795% | −10.2136% | **Regression/trade-off:** not every case improves |
 
-### 8.3 Nastran CTRIA6 and MYSTRAN REZAIEE
+### 8.3 SAP2000 / CSI benchmarks — REZAIEE versus Nastran
 
-The project **T6 comparison summary** dated 18 October 2026 records native OP2-based checks across four selectors (`SIMOT6`, `MITC6`, `MH6T`, `REZAIEE`), including flat patch tests and an extensive thick-shell campaign. It reports aggregate patch quality across those selectors and states that curved element force/stress frame equivalence is **pending**. The source available here does **not** give a filterable **Rezaiee-only** CSV with individual matched Nastran and MYSTRAN numerical outputs. Consequently **no Rezaiee-only solver percent differences are asserted** in this report. Full table construction must join equal case, physical model, node/element, station, load case, stress fiber, basis, units, and signed response; Nastran is not itself an independent CSI reference.
+#### CSI 2-005 — plate C/D, quarter-mesh convergence
 
-## 9. Published nonlinear capabilities deliberately NOT claimed for current v3
+Quarter of a 2 × 10 in plate; thickness 0.0001 in. Center displacement at GRID 1, (0,0,0). C is simply supported; D is fixed. Uniform pressure and center point load are separate subcases. Identical planar stabilization is used by both solvers. Runs retain BAILOUT=-1 and AUTOSPC=Y; the T6 point-load discrepancy remains unresolved.
+
+<img width="1920" height="1360" alt="image" src="https://github.com/user-attachments/assets/41b4798d-e01d-419f-aa9a-1c353ad0b9f3" />
+
+Center displacement magnitude and independent C/D reference values.
+
+<img width="1920" height="768" alt="image" src="https://github.com/user-attachments/assets/d49dc7fc-046e-4cc8-8b9a-ea5f6e389d7d" />
+
+Absolute reference error (%)
+
+<details>
+<summary>Compared numerical values</summary>
+
+<table><thead><tr><th>Support</th><th>Load</th><th>n</th><th>Nastran |UZ| (in)</th><th>REZAIEE |UZ| (in)</th><th>Reference (in)</th><th>Nastran error (%)</th><th>REZAIEE error (%)</th></tr></thead><tbody><tr><td>simple</td><td>uniform</td><td>4</td><td>13.7042112</td><td>13.1377935</td><td>12.97</td><td>5.66084221</td><td>1.29370502</td></tr><tr><td>simple</td><td>uniform</td><td>8</td><td>13.8939114</td><td>13.0087967</td><td>12.97</td><td>7.1234492</td><td>0.299126383</td></tr><tr><td>simple</td><td>uniform</td><td>16</td><td>13.2323313</td><td>12.9797354</td><td>12.97</td><td>2.02260043</td><td>0.0750607128</td></tr><tr><td>simple</td><td>uniform</td><td>32</td><td>13.0240564</td><td>12.9731102</td><td>12.97</td><td>0.416780529</td><td>0.0239799458</td></tr><tr><td>simple</td><td>point</td><td>4</td><td>7.47659588</td><td>13.3760595</td><td>16.95</td><td>55.8902898</td><td>21.0851945</td></tr><tr><td>simple</td><td>point</td><td>8</td><td>9.49578571</td><td>15.858779</td><td>16.95</td><td>43.9776654</td><td>6.43788228</td></tr><tr><td>simple</td><td>point</td><td>16</td><td>12.4030571</td><td>16.6561699</td><td>16.95</td><td>26.8256218</td><td>1.73351097</td></tr><tr><td>simple</td><td>point</td><td>32</td><td>15.2085943</td><td>16.8745575</td><td>16.95</td><td>10.2737798</td><td>0.445088524</td></tr><tr><td>fixed</td><td>uniform</td><td>4</td><td>0.0344455019</td><td>2.57239676</td><td>2.6</td><td>98.675173</td><td>1.06166326</td></tr><tr><td>fixed</td><td>uniform</td><td>8</td><td>1.08831203</td><td>2.60359669</td><td>2.6</td><td>58.141845</td><td>0.138334128</td></tr><tr><td>fixed</td><td>uniform</td><td>16</td><td>2.58719039</td><td>2.60555696</td><td>2.6</td><td>0.492677322</td><td>0.213729418</td></tr><tr><td>fixed</td><td>uniform</td><td>32</td><td>2.60869837</td><td>2.60484195</td><td>2.6</td><td>0.334552618</td><td>0.186228752</td></tr><tr><td>fixed</td><td>point</td><td>4</td><td>0.0325325616</td><td>4.9514575</td><td>7.25</td><td>99.551275</td><td>31.7040345</td></tr><tr><td>fixed</td><td>point</td><td>8</td><td>1.16524994</td><td>6.41247416</td><td>7.25</td><td>83.927587</td><td>11.5520806</td></tr><tr><td>fixed</td><td>point</td><td>16</td><td>3.58911109</td><td>6.97742081</td><td>7.25</td><td>50.4950195</td><td>3.75971301</td></tr><tr><td>fixed</td><td>point</td><td>32</td><td>5.73838949</td><td>7.1625061</td><td>7.25</td><td>20.8498001</td><td>1.20681237</td></tr></tbody></table>
+</details>
+
+#### CSI 2-007 — hemispherical shell convergence
+
+S2K-based thick-shell model with an 18-degree opening. Loaded-point UX and UY are compared in the basic frame with references +0.0940 ft and −0.0940 ft. The signed response ratio preserves direction; the absolute relative error measures distance from the independent reference.
+
+<img width="1920" height="1360" alt="image" src="https://github.com/user-attachments/assets/35bf5691-413e-4d83-8e89-1aa7badf0293" />
+
+Hemispherical shell: signed reference ratios and absolute reference errors.
+
+<details>
+<summary>Compared numerical values</summary>
+
+<table><thead><tr><th>Component</th><th>nx</th><th>Nastran (ft)</th><th>REZAIEE (ft)</th><th>Reference (ft)</th><th>Nastran error (%)</th><th>REZAIEE error (%)</th></tr></thead><tbody><tr><td>UX</td><td>4</td><td>0.00726902019</td><td>0.0765010566</td><td>0.094</td><td>92.2669998</td><td>18.6158973</td></tr><tr><td>UX</td><td>8</td><td>0.0365754329</td><td>0.0893820897</td><td>0.094</td><td>61.089965</td><td>4.91267056</td></tr><tr><td>UX</td><td>16</td><td>0.0832760707</td><td>0.0931618065</td><td>0.094</td><td>11.4084355</td><td>0.891695251</td></tr><tr><td>UX</td><td>32</td><td>0.0926483274</td><td>0.0936017632</td><td>0.094</td><td>1.43794963</td><td>0.423656119</td></tr><tr><td>UY</td><td>4</td><td>-0.00682850648</td><td>-0.0784458518</td><td>-0.094</td><td>92.7356314</td><td>16.5469662</td></tr><tr><td>UY</td><td>8</td><td>-0.0363723263</td><td>-0.0896254852</td><td>-0.094</td><td>61.3060358</td><td>4.6537391</td></tr><tr><td>UY</td><td>16</td><td>-0.0829963237</td><td>-0.0932477489</td><td>-0.094</td><td>11.7060386</td><td>0.800267116</td></tr><tr><td>UY</td><td>32</td><td>-0.092602469</td><td>-0.093623504</td><td>-0.094</td><td>1.48673508</td><td>0.400527614</td></tr></tbody></table>
+</details>
+
+#### CSI 2-002 E — six load cases on the source T6 mesh
+
+Fixed source mesh, midpoint SPC126. Aggregation and units vary by subcase and are stated in the table. These are single-mesh comparisons, not convergence curves. Pivot warnings and BAILOUT conditions remain applicable.
+
+<img width="1920" height="1360" alt="image" src="https://github.com/user-attachments/assets/72a66e27-8bd3-4ed0-88ab-469df66d477c" />
+
+Independent-reference errors for six source-mesh load cases.
+
+<details>
+<summary>Compared numerical values</summary>
+
+<table><thead><tr><th>LC</th><th>Quantity</th><th>Aggregation</th><th>Units</th><th>Nastran</th><th>REZAIEE</th><th>Reference</th><th>Nastran error (%)</th><th>REZAIEE error (%)</th><th>Status</th></tr></thead><tbody><tr><td>1</td><td>UX</td><td>signed_mean</td><td>in</td><td>3.03175711e-05</td><td>3.03170764e-05</td><td>3e-05</td><td>1.05857048</td><td>1.05692127</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>2</td><td>UZ</td><td>signed_mean</td><td>in</td><td>0.107494935</td><td>0.107494853</td><td>0.1081</td><td>0.559726741</td><td>0.559802556</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>3</td><td>UY</td><td>signed_mean</td><td>in</td><td>0.427932769</td><td>0.431028724</td><td>0.4321</td><td>0.964413548</td><td>0.247923231</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>4</td><td>abs_UY</td><td>mean_absolute</td><td>in</td><td>0.00334176095</td><td>0.00334879966</td><td>0.00341</td><td>2.0011451</td><td>1.79473152</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>5</td><td>abs_UX</td><td>mean_absolute</td><td>in</td><td>0.000899999985</td><td>0.000899999985</td><td>0.0009</td><td>1.71777275e-06</td><td>1.71777275e-06</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>6</td><td>RZ</td><td>signed_mean</td><td>rad</td><td>0.036247056</td><td>0.0362315588</td><td>0.036</td><td>0.686266604</td><td>0.643218805</td><td>PIVOT_WARNING_BAILOUT</td></tr></tbody></table>
+</details>
+
+#### Data provenance and scope
+
+Figures use only REZAIEE rows from the completed CSV comparison campaigns below. Nastran is a separate solver comparison; CSI / analytical targets are independent references. Errors are 100 × |result − reference| / |reference|. No missing result is replaced by zero. Values are embedded above; full CSV files remain in the local research archive.
+
+- `CSI_2005_quarter_20261019/release/paired.csv` — SHA-256: `bfc67ce43b0d51c684cd6bff5cec2085c4dd16c0f13c690430ffa6db1812b4ba`
+- `CSI_2007_s2k_comparison_20261020/convergence_Nastran_MYSTRAN_comparison.csv` — SHA-256: `85ef1c8746b17b853a00b12f196d123154e3472bf6695b0b19dd837af2b7525f`
+- `CSI_2002_S2K_A_E_20261020/release/midBC_2-002_A_E_comparison.csv` — SHA-256: `3cb802edf9212ad6ca06c782e383b05cef9aef3d65a7552ab9f6d8df54f7bc33`
+
+Plate reference values follow the corrected C/D publication dataset, not the blank reference columns in paired.csv. Other benchmark cases and qualifications remain available in the [full benchmark report](../../shell_benchmark/comparison_all.md).
+
+
+## 9. Published nonlinear capabilities deliberately NOT reproduced yet for current v3
 
 - Finite director rotations and `α²+β²` update as a nonlinear state variable (paper Eqs. 3–7)
 - Green–Lagrange quadratic strain contribution and its consistent tangent (Eqs. 8–11, 20–21)
