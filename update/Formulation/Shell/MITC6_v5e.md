@@ -129,7 +129,8 @@ The final row stores **engineering** membrane shear strain $\gamma_{xy}=2\vareps
 
 ## 4. Coupled transverse-shear tying in v5e
 
-![MITC6 v5e shear tying locations](figures/mitc6_tying.svg)
+<img width="1225" height="962" alt="v5_vs_v5e_shear_tying" src="https://github.com/user-attachments/assets/abd26cc1-beb2-4efe-8694-6e79980c372e" />
+
 
 The two-component assumed covariant shear field is
 
@@ -284,13 +285,13 @@ The rotational geometric blocks are zero in this simplified linearized formulati
 
 | Revision | Main formulation state | Scope / caveat |
 |---|---|---|
-| `MITC6_Tri_v0.py` | Early MITC-inspired edge-tangential membrane and edge/coupled shear sampling | Source identifies a best-effort literature reconstruction; not a certified Kim–Bathe reproduction |
-| `MITC6_Tri_v1.py` | Interior affine membrane sampling; eight-condition coupled shear interpolation; original `st` interior line | Kinematic inconsistencies persisted |
-| `MITC6_Tri_v4.py` | One director orientation sign, same unnormalized interpolated director in both shear terms, bending translation-sign correction, point-normal-consistent drilling | Elastic-production baseline reported for native MYSTRAN before subsequent upgrade |
-| `MITC6_Tri_v5.py` | Identical elastic stiffness operators to v4; consistent/HRZ mass, thermal, normal/directional pressure, gravity and geometric stiffness | Same interior `st` shear samples as v4 |
-| **`MITC6_Tri_v5e.py`** | **Moves `st` shear observations from $(R_1,R_1),(R_1,R_2)$ to $(0,R_1),(0,R_2)$** | **All other functions match v5 aside from the class name** |
+| `MITC6_Tri_v0` | Early MITC-inspired edge-tangential membrane and edge/coupled shear sampling | Source identifies a best-effort literature reconstruction; not a certified Kim–Bathe reproduction |
+| `MITC6_Tri_v1` | Interior affine membrane sampling; eight-condition coupled shear interpolation; original `st` interior line | Kinematic inconsistencies persisted |
+| `MITC6_Tri_v4` | One director orientation sign, same unnormalized interpolated director in both shear terms, bending translation-sign correction, point-normal-consistent drilling | Elastic-production baseline reported for native MYSTRAN before subsequent upgrade |
+| `MITC6_Tri_v5` | Identical elastic stiffness operators to v4; consistent/HRZ mass, thermal, normal/directional pressure, gravity and geometric stiffness | Same interior `st` shear samples as v4 |
+| **`MITC6_Tri_v5e`** | **Moves `st` shear observations from $(R_1,R_1),(R_1,R_2)$ to $(0,R_1),(0,R_2)$** | **All other functions match v5 aside from the class name** |
 
-No changes in `MITC6_Tri_v5e.py` to the membrane interpolation are present in the uploaded source. Thus the phrase *“enhanced V5e”* is ambiguous unless accompanied by a source checksum and a definition of the active membrane operator.
+No changes in `MITC6_Tri_v5e` to the membrane interpolation are present in the uploaded source. Thus the phrase *“enhanced V5e”* is ambiguous unless accompanied by a source checksum and a definition of the active membrane operator.
 
 ## 11. Numerical validation: what the available evidence can and cannot establish
 
@@ -308,7 +309,11 @@ The earlier port summary supplied by the researcher records the following before
 | 2-006 linear roof $U_z$ | −0.30377501 | −0.30441040 | −0.3086 |
 | 2-006 cylindrical roof $U_z$ | −0.28382701 | −0.30164146 | −0.3086 |
 
-The checkpoint additionally reports 165-point operator comparisons ($6.141\times10^{-15}$ max difference), six SOL105 parity checks (relative difference $4.222\times10^{-7}$), six SOL103 checks (five frequencies within $3.670\times10^{-7}$), thermal and 36 pressure tests. These are **reported archival checks**, not newly executed in producing this manuscript, and they refer to the reported enhanced deployment rather than a separately established binary/source match to the uploaded `MITC6_Tri_v5e.py`.
+The checkpoint additionally reports 165-point operator comparisons ($6.141\times10^{-15}$ max difference), six SOL105 parity checks (relative difference $4.222\times10^{-7}$), six SOL103 checks (five frequencies within $3.670\times10^{-7}$), thermal and 36 pressure tests. These are **reported archival checks**, not newly executed in producing this manuscript, and they refer to the reported enhanced deployment rather than a separately established binary/source match to the uploaded `MITC6_Tri_v5e`.
+
+<img width="1400" height="770" alt="checkpoint_buckling_error" src="https://github.com/user-attachments/assets/c03477ba-782a-41ba-9b13-1dd2bddf5c5c" />
+![Uploading checkpoint_pressure_roof_error.png…]()
+
 
 ### 11.2 Required independent comparisons and test definitions
 
@@ -327,6 +332,22 @@ The checkpoint additionally reports 165-point operator comparisons ($6.141\times
 
 No numerical Nastran-v5e comparisons are supplied in this package. The [MYSTRAN comparison index](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/shell_benchmark/comparison_all.md) is a repository pointer, **not** evidence of a matching direct row unless its deck, formulation, observation and coordinate basis are traced.
 
+### 11.3 MITC6 versus Nastran CTRIA6: archived plate convergence
+
+The following figures compare the archived native MYSTRAN MITC6 implementation with Nastran CTRIA6 for the corrected CSI 2-005 quarter-plate campaign. They do not establish parity with the uploaded Python v5e source. Both solvers use the same physical model within each case, with mesh parameters 4, 8, 16 and 32. The quarter domain is 1 by 5 in, thickness 0.0001 in, E=17472000 psi and Poisson ratio 0.3. The plotted observable is the magnitude of center displacement at GRID 1. Independent displacement targets are 12.97, 16.95, 2.60 and 7.25 in for simply supported uniform/point and clamped uniform/point loading, respectively.
+
+<img width="2160" height="1440" alt="image" src="https://github.com/user-attachments/assets/0204054b-4efa-4acd-b053-5e4348822172" />
+
+
+**Figure 11-3.** Center-displacement convergence. Distinct markers and line patterns identify each solver; dotted lines show the independent reference supplied in the archived benchmark. The mesh parameter is not the total number of triangular elements.
+
+
+
+**Figure 11-4.** Absolute percentage error, 100 | |Uz| / Uref - 1 |, calculated separately for each solver. Solver agreement alone is not an accuracy measure. The point-load response discrepancy remains unresolved in the archived campaign, and BAILOUT/AUTOSPC warnings are retained. These figures support case-specific observations only; no universal formulation superiority is inferred.
+
+**Reproducible evidence:** `comparison_data.csv` contains all 32 plotted observations; `make_graphs` extracts them from `source/update/shell_benchmark/benchmark_2_005.md` (Rev 5, 20 October 2026). Figures use that published table's numerical precision. No solver was rerun for this addition. SVG versions are supplied for publication.
+
+
 ## 12. MYSTRAN implementation notes and known limits
 
 The reported selector `PARAM,TRIA6TYP,MITC6` identifies the active Fortran element family, but **not by itself** whether the compiled solver uses uploaded Python v5e interior membrane or the separately reported edge-membrane enhanced checkpoint. Verify the compiled `CTRIA6_MITC6.f90` operator and executable hash before describing production as mathematically identical to this source. The port summary reports original and upgraded binaries with SHA256 `80cccf87736c26a192beb675ca2f4e2cd8450b6c40c65e22af77e53bc7f0e714` and `13ce3108c61f9ac75c1c92ca576caebf58b3524bbabbd6d658d8faa287d28cae`, respectively; hashes establish archive identity, not the mathematical relationship to an unattested source.
@@ -335,7 +356,7 @@ The supplied code assumes homogeneous isotropic small-strain shell material, sca
 
 ## 13. Comparison with published MITC6 formulations (source-to-literature audit)
 
-**Scope and evidence.** The comparison below is made by examining the uploaded `MITC6_Tri_v5e.py` against the three full papers supplied by the researcher: Lee and Bathe (2004), Kim and Bathe (2009), and Lee and Bathe (2010). The purpose is to identify **mathematical equivalence and differences**, not to imply that the project's code is the authors' original implementation. Numerical comparisons reported in the articles are results of the published elements, **not measurements of the project v5e**.
+**Scope and evidence.** The comparison below is made by examining the uploaded `MITC6_Tri_v5e` against the three full papers supplied by the researcher: Lee and Bathe (2004), Kim and Bathe (2009), and Lee and Bathe (2010). The purpose is to identify **mathematical equivalence and differences**, not to imply that the project's code is the authors' original implementation. Numerical comparisons reported in the articles are results of the published elements, **not measurements of the project v5e**.
 
 ### 13.1 Literature lineage and what is actually implemented
 
@@ -411,13 +432,13 @@ Recommended same-model tests for an eventual explicit implementation comparison:
 
 ### 13.6 Engineering conclusion and publication wording
 
-The project's **uploaded Python v5e** is best described as a *MITC6-inspired, quadratic six-node shell using a source-specific affine membrane tying projection and an eight-condition coupled assumed transverse-shear projection, augmented with project drilling, mass, loading, thermal, and initial-stress operators*. It is **not asserted** to be the complete improved Kim–Bathe 2009 shell. The primary source references support the MITC methodology and polynomial design, but do not substitute for operator-by-operator mathematical and numerical parity checks.
+The project's **v5e** is best described as a *MITC6-inspired, quadratic six-node shell using a source-specific affine membrane tying projection and an eight-condition coupled assumed transverse-shear projection, augmented with project drilling, mass, loading, thermal, and initial-stress operators*. It is **not asserted** to be the complete improved Kim–Bathe 2009 shell. The primary source references support the MITC methodology and polynomial design, but do not substitute for operator-by-operator mathematical and numerical parity checks.
 
 ---
 
 ## 14. Conclusions
 
-The delivered `MITC6_Tri_v5e.py` differs from `MITC6_Tri_v5.py` solely through the physically meaningful relocation of two **transverse shear** tying samples to the edge $r=0$. It retains the same interior/centroid-affine **membrane** recovery as v4/v5. Its principal mathematical identity is a source-specific MITC-inspired shell with two-component coupled shear projection, director-consistent bending/drilling, and supplementary linear mass/pressure/thermal/buckling operators. The distinct enhanced-MYSTRAN checkpoint may show improved benchmark behavior, but those numerical results cannot yet be attributed to the uploaded source without an exact operator match. Accordingly, no universal accuracy superiority over v5, SimoT6, or the independent REZAIEE element is asserted here.
+The delivered `MITC6_Tri_v5e` differs from `MITC6_Tri_v5` solely through the physically meaningful relocation of two **transverse shear** tying samples to the edge $r=0$. It retains the same interior/centroid-affine **membrane** recovery as v4/v5. Its principal mathematical identity is a source-specific MITC-inspired shell with two-component coupled shear projection, director-consistent bending/drilling, and supplementary linear mass/pressure/thermal/buckling operators. The distinct enhanced-MYSTRAN checkpoint may show improved benchmark behavior, but those numerical results cannot yet be attributed to the uploaded source without an exact operator match. Accordingly, no universal accuracy superiority over v5, SimoT6, or the independent REZAIEE element is asserted here.
 
 ## References
 
@@ -427,7 +448,7 @@ The delivered `MITC6_Tri_v5e.py` differs from `MITC6_Tri_v5.py` solely through t
 4. Bathe, K.-J., and Dvorkin, E. N. (1986). **A formulation of general shell elements—the use of mixed interpolation of tensorial components.** *International Journal for Numerical Methods in Engineering* **22**, 697–722. MITC methodology.
 5. Hughes, T. J. R., and Brezzi, F. (1989). **On drilling degrees of freedom.** *Computer Methods in Applied Mechanics and Engineering* **72**, 105–121. Background on drilling, not direct proof that the coded penalty is the same mixed method.
 6. Computers and Structures, Inc. **SAP2000/CSiBridge Verification Manual**, shell problems [2-001](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-001.pdf), [2-005](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf), [2-006](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-006.pdf), [2-016](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-016.pdf), and [2-017](https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-017.pdf).
-7. Primary project implementation archive: `MITC6_Tri_v0.py`, `MITC6_Tri_v1.py`, `MITC6_Tri_v4.py`, `MITC6_Tri_v5.py`, `MITC6_Tri_v5e.py` (source supplied to this study, 2026).
+7. Primary project implementation archive: `MITC6_Tri_v0`, `MITC6_Tri_v1`, `MITC6_Tri_v4`, `MITC6_Tri_v5`, `MITC6_Tri_v5e` (source supplied to this study, 2026).
 8. Internal MYSTRAN V5e upgrade checkpoint supplied by the researcher, October 2026; not independently verified against this uploaded source.
 
 **Research attribution note:** Rezaiee-Pajand's separate triangular element is maintained as an independent implementation in this project and is **not represented as the origin or a synonym of the MITC6 v5e formulation**.
