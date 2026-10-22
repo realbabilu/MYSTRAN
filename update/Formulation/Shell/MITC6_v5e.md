@@ -1,4 +1,4 @@
-# MITC6 Six-Node Triangular Shell — Research Formulation, Python Evolution (v0–v5e), and MYSTRAN Validation Boundaries
+# MITC6 Six-Node Triangular Shell — Research Formulation, Evolution, and MYSTRAN Validation Boundaries
 
 **Author:** Ary  
 **Date:** 23 October 2026  
