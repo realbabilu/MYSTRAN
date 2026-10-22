@@ -3,7 +3,7 @@
 **Author:** Ary  
 **Project:** MYSTRAN — quadratic triangular shell (CTRIA6 / T6)  
 **Date:** 23 October 2026  
-**Implementation selected:** `Rezaiee2017_Tri6_v3.py` (**latest**). `Rezaiee2017_Tri6_Final(1).py` (**initial implementation**, despite the filename “Final”).  
+**Implementation selected:** `Rezaiee2017_Tri6_v3` (**latest**). `Rezaiee2017_Tri6_Final.py` (**initial implementation**, despite the filename “Final”).  
 **Scientific classification:** *Research adaptation of the linearized six-node assumed-strain shell; not a reproduction of the paper's full geometrically nonlinear formulation.*
 
 ## Abstract
