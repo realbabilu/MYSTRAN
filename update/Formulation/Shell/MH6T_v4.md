@@ -241,9 +241,9 @@ Only the **three translational blocks** are populated; no rotational initial-str
 
 ## 9. Numerical validation evidence and limits
 
-This document audits **the supplied code**, not a fresh run of MSC Nastran or MYSTRAN. The v1/v2 source comments report historical 2-001 membrane/bending patch fixes and a twisted-beam warped-mesh discrepancy, but no full result provenance or corresponding OP2 data accompanies the three Python files. Therefore they are historical engineering notes, **not independently reproduced validation results**.
+The v1/v2 source comments report historical 2-001 membrane/bending patch fixes and a twisted-beam warped-mesh discrepancy, but no full result provenance or corresponding OP2 data accompanies the three Python files. Therefore they are historical engineering notes.
 
-A previous project benchmark noted **ported MH6T v3** `T9` error approximately `+8.7818%`, while a separate 2-004 case showed material mesh sensitivity. These are contextual historical results, **not v4 accuracy claims**. The previously prepared generic CTRIA6 comparison table has blank entries for MH6T v4; those must not be replaced by Rezaiee or aggregate T6 results.
+A previous project benchmark noted **ported MH6T v3** `T9` error approximately `+8.7818%`, while a separate 2-004 case showed material mesh sensitivity. These are contextual historical results, The previously prepared generic CTRIA6 comparison table has blank entries for MH6T v4; those must not be replaced by Rezaiee or aggregate T6 results.
 
 | Test group | Metric / check | v4 vs Nastran status |
 |---|---|---|
