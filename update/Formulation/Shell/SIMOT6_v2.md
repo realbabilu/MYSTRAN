@@ -3,18 +3,18 @@
 **A technical research formulation and source-traceability report for MYSTRAN quadratic CTRIA6**  
 **Author:** Ary  
 **Date:** 23 October 2026  
-**Version audited:** `Simo1993_Tri6_ShellElement_v2.py` (current); `Simo1993_Tri6_ShellElement_v1p8(1).py` (earlier).  
-**Evidence classification:** source-code audit; historical project CSV excerpts; **not** a new MSC Nastran execution.  
+**Formulation:** SIMOT6 v2; six-node quadratic one-director shell with conforming membrane and shear strains.  
+**Numerical evidence:** existing formulation-specific MYSTRAN/Nastran CSV, compared separately against independent references; no new solver runs.  
 
 ## Abstract
 
-This document describes the project's six-node, quadratic, linear-elastic triangular shell (SimoT6), its geometric interpolation and membrane/bending/transverse-shear/drilling operators, integration rules, auxiliary mass/pressure/thermal/geometric-stiffness routines, and the correspondence with the Simo–Fox–Rifai shell literature. It carefully separates **published shell-theory concepts** from **project-specific discretization and stabilization**, and separates existing Python numerical evidence from still-unconfirmed per-case Nastran comparisons. The immediate intended scope is **MYSTRAN SOL 101 linear statics**; modal, thermal and buckling integrations require separate verification.
+This document describes the project's six-node, quadratic, linear-elastic triangular shell (SimoT6), its geometric interpolation and membrane/bending/transverse-shear/drilling operators, integration rules, auxiliary mass/pressure/thermal/geometric-stiffness routines, and the correspondence with the Simo–Fox–Rifai shell literature. It carefully separates **published shell-theory concepts** from **project-specific discretization and stabilization**, and presents existing formulation-specific benchmark results against independent references.
 
 ## 1. Formulation provenance and scope
 
-The relevant published lineage is the geometrically exact one-director/stress-resultant shell formulation of Simo and Fox and its linear computational treatment by Simo, Fox and Rifai. **This project Python v2 is NOT a direct implementation of a published 1993 six-node Simo element.** The class name is a project historical identifier. The source implements standard isoparametric P2 displacement/geometry interpolation and directly evaluated conforming strains, rather than reproducing every mixed Hellinger–Reissner or nonlinear director-field treatment of the research series.
+The relevant published lineage is the geometrically exact one-director/stress-resultant shell formulation of Simo and Fox and its linear computational treatment by Simo, Fox and Rifai. **SIMOT6 v2 is a project-specific discretization, not a verbatim published 1993 six-node Simo element.** The SimoT6 name identifies the project formulation. The element employs standard isoparametric P2 displacement/geometry interpolation and directly evaluated conforming strains, rather than reproducing every mixed Hellinger–Reissner or nonlinear director-field treatment of the research series.
 
-| Feature | Published Simo/Fox/Rifai lineage | Project Python v2 (audited source) | Status |
+| Feature | Published Simo/Fox/Rifai lineage | SIMOT6 v2 formulation | Status |
 |---|---|---|---|
 | One-director shell kinematics | Fundamental continuum framework | Interpolated nodal directors; linearized rotation coupling | Adapted |
 | Membrane strain | Geometric shell strain; mixed methods in published FE | Direct pointwise covariant `Bm` using P2 geometry | Adapted; not complete mixed scheme |
@@ -28,9 +28,10 @@ The relevant published lineage is the geometrically exact one-director/stress-re
 
 ### 1.1 Nodal ordering and kinematics
 
-![Nodal numbering for six-node triangle](figures/simo_t6_nodes.svg)
+![Nodal numbering for six-node triangle](<img width="1080" height="900" alt="simo_t6_nodes" src="https://github.com/user-attachments/assets/1142e1d2-7bc3-4188-9a7a-02d2bad62d51" />
+)
 
-Reference domain $\hat\Omega=\{(r,s):r\geq0,s\geq0,r+s\leq1\}$, with area $1/2$. Coordinates are $(0,0),(1,0),(0,1),(1/2,0),(1/2,1/2),(0,1/2)$ for nodes 1 to 6. Each node carries $\mathbf q_i=[u_x,u_y,u_z,\theta_x,\theta_y,\theta_z]^T$, so $\mathbf q_e\in\mathbb R^{36}$ and `T_matrix()=I`.
+Reference domain $\hat\Omega=\{(r,s):r\geq0,s\geq0,r+s\leq1\}$, with area $1/2$. Coordinates are $(0,0),(1,0),(0,1),(1/2,0),(1/2,1/2),(0,1/2)$ for nodes 1 to 6. Each node carries $\mathbf q_i=[u_x,u_y,u_z,\theta_x,\theta_y,\theta_z]^T$, so $\mathbf q_e\in\mathbb R^{36}$ with global nodal coordinates and an identity element-level coordinate mapping.
 
 Define barycentric coordinates $L_1=1-r-s$, $L_2=r$, $L_3=s$. The six quadratic shape functions are
 
@@ -47,7 +48,7 @@ $$
 \mathbf g_r=\mathbf x_{,r},\quad\mathbf g_s=\mathbf x_{,s},\quad a_{\alpha\beta}=\mathbf g_\alpha\cdot\mathbf g_\beta,\quad J_A=\|\mathbf g_r\times\mathbf g_s\|.
 $$
 
-At each node the code evaluates $\mathbf n_i\propto\mathbf g_r\times\mathbf g_s$. In v2 a **single centroid-derived sign** is applied to all nodal normals, to reduce winding-inconsistent normals. The local frame is $\mathbf e_1=\mathbf g_r/\|\mathbf g_r\|$, $\mathbf e_3=\operatorname{sign}_0(\mathbf g_r\times\mathbf g_s)/J_A$, $\mathbf e_2=\mathbf e_3\times\mathbf e_1$. In the current source, the geometric conversion uses the metric inverse, not an explicit `2×2` Cartesian Jacobian.
+At each node evaluate $\mathbf n_i\propto\mathbf g_r\times\mathbf g_s$. In v2 a **single centroid-derived sign** is applied to all nodal normals, to reduce winding-inconsistent normals. The local frame is $\mathbf e_1=\mathbf g_r/\|\mathbf g_r\|$, $\mathbf e_3=\mathrm{sign}_0(\mathbf g_r\times\mathbf g_s)/J_A$, $\mathbf e_2=\mathbf e_3\times\mathbf e_1$. The geometric conversion uses the metric inverse, not an explicit `2×2` Cartesian Jacobian.
 
 ## 2. Linear membrane formulation
 
@@ -67,7 +68,7 @@ $$
 \mathbf B_{rs,I}=\frac12(N_{I,r}\mathbf g_s^T+N_{I,s}\mathbf g_r^T).
 $$
 
-Let $a^{\alpha\beta}$ denote the inverse surface metric, and set $c^\alpha_i=\mathbf g^\alpha\cdot\mathbf e_i$ for the physical tangent basis $i=1,2$. The source's `_tensor_to_physical` converts the tensor components, with engineering shear third row:
+Let $a^{\alpha\beta}$ denote the inverse surface metric, and set $c^\alpha_i=\mathbf g^\alpha\cdot\mathbf e_i$ for the physical tangent basis $i=1,2$. The tensor transformation converts the covariant components, with engineering shear third row:
 
 $$
 \varepsilon_{xx}=(c^r_1)^2\varepsilon_{rr}+(c^s_1)^2\varepsilon_{ss}+2c^r_1c^s_1\varepsilon_{rs},
@@ -83,7 +84,7 @@ These relations assemble $\boldsymbol\varepsilon_m=B_m\mathbf q_e$, where $B_m\i
 
 ## 3. Linearized bending and director field
 
-The code creates director vectors $\mathbf n_I$ and their natural gradients $\mathbf n_{,r}=\sum_IN_{I,r}\mathbf n_I$, $\mathbf n_{,s}=\sum_IN_{I,s}\mathbf n_I$. Each node contributes both a translational and a rotational curvature block. For example, the natural $rr$ curvature contributions in source v2 are
+The director field uses vectors $\mathbf n_I$ and their natural gradients $\mathbf n_{,r}=\sum_IN_{I,r}\mathbf n_I$, $\mathbf n_{,s}=\sum_IN_{I,s}\mathbf n_I$. Each node contributes both a translational and a rotational curvature block. For example, the natural $rr$ curvature contributions in v2 are
 
 $$
 \delta\rho_{rr}^{(\theta_I)}=N_{I,r}\,[\mathbf g_r\times\mathbf n_I]\cdot\delta\boldsymbol\theta_I,
@@ -95,7 +96,7 @@ The $ss$ and symmetric $rs$ rows follow by exchanging $r,s$ and taking their hal
 
 ## 4. Transverse shear and drilling
 
-The code's shear director interpolant is **unnormalized**: $\mathbf t_0(r,s)=\sum_I N_I\mathbf n_I$. The covariant shear rows in v2 are
+The shear director interpolant is **unnormalized**: $\mathbf t_0(r,s)=\sum_I N_I\mathbf n_I$. The covariant shear rows in v2 are
 
 $$
 \mathbf B_{rt,I}^{(u)}=N_{I,r}\mathbf t_0^T,\quad
@@ -108,59 +109,65 @@ $$
 
 These rows are transformed to physical $xz$ and $yz$ shear components via the contravariant tangents to form $B_s\in\mathbb R^{2\times36}$. **Shear is conforming rather than tied:** inspect thin-shell locking and distorted/curved tests independently; matching one patch test does not establish uniform convergence.
 
-For drilling stabilization, define the projected nodal derivatives $N_{I,x}$ and $N_{I,y}$ (code uses metric inverse and tangential projection). The source uses
+For drilling stabilization, define the projected nodal derivatives $N_{I,x}$ and $N_{I,y}$ (obtained with the metric inverse and tangential projection). The formulation uses
 
 $$
 B_{d,I}^{(u)}=\frac12\big(N_{I,x}\mathbf e_2-N_{I,y}\mathbf e_1\big)^T,\qquad
 B_{d,I}^{(\theta)}=-N_I\mathbf e_3^T,
 $$
 
-and $K_d=\int_{\Omega}\beta_d G h B_d^TB_d\,\mathrm dA$, with default $\beta_d=0.02$. The drilling treatment and its coefficient are **not identified as a published Simo T6 specification**.
+and $K_d=\int_{\Omega}\beta_d G h B_d^TB_d\,\mathrm dA$, with default $\beta_d=0.02$. The drilling treatment and its coefficient are **not a published Simo T6 specification**.
 
 ## 5. Elastic stiffness and integration
 
 For an isotropic plane-stress shell,
 
 $$
-D=\frac{E}{1-\nu^2}\begin{bmatrix}1&\nu&0\\\nu&1&0\\0&0&(1-\nu)/2\end{bmatrix},\quad D_s=\kappa_s G I_2,\quad \kappa_s=5/6.
+D=\frac{E}{1-\nu^2}\begin{bmatrix}
+1 & \nu & 0 \\
+\nu & 1 & 0 \\
+0 & 0 & (1-\nu)/2
+\end{bmatrix},\quad D_s=\kappa_s G I_2,\quad \kappa_s=5/6.
 $$
 
-The linear element stiffness in `k_local()` is
+The linear element stiffness is
 
 $$
 K_e=\int_{\Omega}\left[hB_m^TDB_m+\frac{h^3}{12}B_b^TDB_b+hB_s^TD_sB_s+\beta_dGhB_d^TB_d\right]\mathrm dA.
 $$
 
-The uploaded implementation uses **mean nodal thickness** $\bar h=(1/6)\sum_Ih_I$ rather than evaluating a variable interpolated $h(r,s)$. The integrations are grouped as follows.
+The formulation uses **mean nodal thickness** $\bar h=(1/6)\sum_Ih_I$ rather than evaluating a variable interpolated $h(r,s)$. The integrations are grouped as follows.
 
-| Stiffness block | Rule | Source method |
+| Contribution | Integration rule | Mathematical role |
 |---|---|---|
-| Membrane | 3 points | `k_local`: `Bm` |
-| Bending | 3 points | `k_local`: `Bb` |
-| Transverse shear | 3 points | `k_local`: `Bs` |
-| Drilling | 6 points | `k_local`: `Bdrill` |
-| Consistent mass | 6 points | `m_local` |
-| Pressure | Rule delegated to `shell_pressure.pressure_global` in v2 | `f_pressure` |
-| Thermal vector | 3 points | `f_thermal` |
-| Geometric stiffness helper | 3 points | `k_geometric` (restricted implementation) |
+| Membrane | 3 triangle points | Conforming covariant membrane strain, $B_m$ |
+| Bending | 3 triangle points | Linearized director curvature, $B_b$ |
+| Transverse shear | 3 triangle points | Conforming director shear, $B_s$; no MITC tying |
+| Drilling stabilization | 6 triangle points | Penalty on relative normal rotation, $B_d$ |
+| Consistent mass | 6 triangle points | Quadratic shape-function products and thickness moments |
+| Pressure | Surface-load quadrature; order must match the load specification | Consistent traction integral over the actual surface |
+| Thermal load | 3 triangle points | Membrane and bending thermal resultants |
+| Initial-stress contribution | 3 triangle points in the restricted formulation | Translational geometric stiffness; scope qualified below |
 
-![Three-point Gauss quadrature](figures/simo_t6_gauss3.svg)
+![Three-point Gauss quadrature](<img width="1080" height="900" alt="simo_t6_gauss3" src="https://github.com/user-attachments/assets/ef9f4a2d-86af-4ac4-a529-db55a1d78bb0" />
+)
 
-![Six-point Gauss quadrature](figures/simo_t6_gauss6.svg)
+![Six-point Gauss quadrature](<img width="1080" height="900" alt="simo_t6_gauss6" src="https://github.com/user-attachments/assets/f3ea42d9-b78a-4d21-8051-e36fc26159ac" />
+)
 
 The 3-point coordinates are $(1/6,1/6),(2/3,1/6),(1/6,2/3)$ with weights $1/6$ each. Six-point quadrature uses two symmetric triplets: $(a,a),(1-2a,a),(a,1-2a)$ with $a=0.445948490144588$ (weight $0.11169079483905$); and $(b,b),(1-2b,b),(b,1-2b)$ with $b=0.091576213509771$ (weight $0.054975871827661$).
 
 ## 6. Supplementary operators and limitations
 
-**Mass:** v2 builds consistent translational and rotational mass blocks, $M_{ij}^{u}=\int\rho\bar hN_iN_j\,\mathrm dA$ and $M_{ij}^{\theta}=\int(\rho\bar h^3/12)N_iN_j\,\mathrm dA$. Its `consistent=False` path integrates $N_i$ directly, which for quadratic P2 corner functions can generate near-zero, cancellation-prone diagonal masses; **this is not a verified positive HRZ lumping scheme**. Validate independently before adopting it for eigen/SOL 103.
+**Mass:** v2 builds consistent translational and rotational mass blocks, $M_{ij}^{u}=\int\rho\bar hN_iN_j\,\mathrm dA$ and $M_{ij}^{\theta}=\int(\rho\bar h^3/12)N_iN_j\,\mathrm dA$. The direct shape-function lumping alternative integrates $N_i$, which for quadratic P2 corner functions can generate near-zero, cancellation-prone diagonal masses; **this is not a verified positive HRZ lumping scheme**. Validate independently before adopting it for eigen/SOL 103.
 
-**Pressure:** v2 calls `shell_pressure.pressure_global`; the dependency and default pressure orientation require verification on the same winding and load sign as Nastran.
+**Pressure:** use the consistent surface-traction integral. Pressure direction, winding, load sign and integration order must match the benchmark definition.
 
 **Thermal:** the element builds an equivalent thermal force from isotropic $\varepsilon_{th}=\alpha\Delta T_0[1,1,0]^T$ and curvature input $\kappa_{th}=\alpha\Delta T_1[1,1,0]^T$; this is a project implementation whose gradient/sign interpretation must match the solver convention.
 
-**Initial-stress geometric stiffness:** the `k_geometric` helper populates **only the global $U_z$ translational DOF rows/columns** with natural-gradient factors. It also defaults to an arbitrary negative membrane stress when `stress_m=None`. Consequently, it is **not a fully general, objective curved-shell $K_G$** and must not be treated as a verified Simo nonlinear tangent or production buckling formulation. Stress-based stability (SOL 105) is distinct from SOL 101 and geometrically nonlinear buckling.
+**Initial-stress geometric stiffness:** the restricted initial-stress approximation populates **only the global $U_z$ translational DOF rows/columns** with natural-gradient factors. A prescribed, physically justified membrane prestress is required; an arbitrary default compression is not a verified load basis. Consequently, it is **not a fully general, objective curved-shell $K_G$** and must not be treated as a verified Simo nonlinear tangent or production buckling formulation. Stress-based stability (SOL 105) is distinct from SOL 101 and geometrically nonlinear buckling.
 
-## 7. v1p8 → v2: code-proven revision log
+## 7. Formulation evolution: v1p8 to v2
 
 | Operator / control | v1p8 | v2 | Consequence / audit note |
 |---|---|---|---|
@@ -175,62 +182,53 @@ The 3-point coordinates are $(1/6,1/6),(2/3,1/6),(1/6,2/3)$ with weights $1/6$ e
 | Mass / thermal / baseline geometric helper | Present | Present | Presence does not establish numerical validation |
 | Pressure API | Local 6-point normal-force method | Delegates to shared pressure helper | Pressure conventions/availability depend on module |
 
-The files supplied are `v1p8` and `v2`. Earlier v1–v1p7 historical evolution is not directly audited here.
+The distinctions above describe v1p8 and v2; earlier revision history is outside this formulation summary.
 
-## 8. Validation evidence — Python, Nastran, and MYSTRAN must remain distinct
+## 8. Benchmark errors against independent references
 
-### 8.1 Source attribution of CSV evidence
+The following figures use existing CSV data filtered by `formulation=SIMOT6`. They compare Nastran CTRIA6 and MYSTRAN SIMOT6 separately with the same independent reference. No solver was rerun. The formulation version recorded in a CSV is not by itself a proof of implementation identity.
 
-Two Library CSVs were located: `latest_displacement_summary.csv` (specific **Python SimoT6v2** records), and `solver_comparison_summary.csv` (pooled Nastran/MYSTRAN comparison with **no formulation key**). The latter is **not assignable to SimoT6**. The user-requested matched **SIMOT6 v2 / CTRIA6** per-case CSV for 2-001, 2-005 and 2-007 has **not been reliably identified** among the available files. The following table deliberately leaves unsupported cells blank.
+For a nonzero target,
 
-### 8.2 SAP 2-001 — prescribed membrane and bending patch
+$$
+e_{solver}(\%)=100\frac{|u_{solver}-u_{reference}|}{|u_{reference}|}.
+$$
 
-The project history reports that SimoT6 v1p8 passed both membrane and bending patch with errors approximately 0.0000%. This is *historical Python patch-test evidence*, not a contemporaneous recovered **Nastran–SimoT6v2** matched-data table. Reproducible values per element/sample point, mesh ID, matching nodal output frame and GPSTRESS for this campaign remain to be attached.
+For a zero target, retain the absolute residual in physical units; never divide by zero. Bar heights show numerical error, not statistical confidence intervals.
 
-| Case | Python SimoT6 | Nastran CTRIA6 | MYSTRAN SIMOT6 | Independent reference | Evidentiary status |
-|---|---|---|---|---|---|
-| 2-001 LC1 membrane patch | Historical v1p8 ~0.0000% error | — | — | prescribed field in CSI verification | Historical only; matched CSV missing |
-| 2-001 LC2 bending patch | Historical v1p8 ~0.0000% error | — | — | constant plate bending field | Historical only; matched CSV missing |
+### 8.1 CSI2-001: membrane and bending patch
 
-### 8.3 SAP 2-005 — plate bending / pressure
+Reference-bearing, finite paired rows from the production T6 master are used. Native element stress/resultant output and recovered grid values remain separate. Fiber stresses retain their signed analytic targets. Bars show the maximum pointwise error for each component/load case. Native transverse shear recovery remains subject to its recorded output-frame/recovery qualifications; no unconditional patch PASS is inferred.
 
-The available **Python-only** CSV `latest_displacement_summary.csv` records `Simo1993_Tri6_ShellElement_v2`: plate $U_z=-13.230688877881176$, independent reference $U_z=-12.97$, relative magnitude error $+2.009937377649762\%$ (the supplied CSV uses this sign convention). The specific model's mesh, support variant and pressure convention must be verified before identifying it with a particular CSI 2-005 load case or a paired Nastran deck.
+![2-001 reference errors](<img width="2340" height="1620" alt="SIMOT6_2_001_reference_errors" src="https://github.com/user-attachments/assets/373a6970-1c55-4d17-aa0b-fac346b02a81" />
+)
 
-| Source | $U_z$ | Reference | Error (%) | Status |
-|---|---:|---:|---:|---|
-| Python SimoT6 v2, plate case | -13.23068888 | -12.97000000 | +2.00994 | Located in project CSV; exact CSI case mapping pending |
-| MSC Nastran CTRIA6, matched case | — | — | — | Per-case result not found |
-| MYSTRAN SIMOT6, matched case | — | — | — | Per-case result not found |
+![2-001 absolute residuals at zero references](<img width="2340" height="630" alt="SIMOT6_2_001_zero_residuals" src="https://github.com/user-attachments/assets/23b8357d-9dd2-4f48-8efb-c7c911c92571" />
+)
 
-Do not substitute general solver-aggregate `2-005` RMS numbers here. For a valid 2-005 convergence comparison, use identical **quarter plate** models with $4\times4$, $8\times8$, $16\times16$, $32\times32$ meshes, matching concentrated/uniform load and clamped/simply-supported conditions; generate **line convergence plots** of $U_z$ and relative error by mesh refinement, separately distinguishing Nastran, MYSTRAN and Python.
 
-### 8.4 SAP 2-007 — hemispherical shell benchmark
+### 8.2 CSI2-005: plate convergence
 
-No **SIMOT6-specific** 2-007 Nastran/MYSTRAN matched values were verified in the accessible CSVs. The generic `solver_comparison_summary.csv` has a `2-007 displacement` aggregate, but it mixes formulation identity; assigning its 99.04% L2 difference to SimoT6 would be **incorrect**.
+Corrected C/D quarter-plate CSV results are used at nx=4,8,16,32, with Nastran and SIMOT6 on matching T6 meshes. Independent center-displacement magnitudes are12.97in (simple/uniform),16.95in (simple/point),2.60in (fixed/uniform),7.25in (fixed/point). Errors use displacement magnitude because these targets are magnitudes. Historical invalid-model master rows are excluded. Existing BAILOUT/AUTOSPC warnings and point-load T6 discrepancies remain visible.
 
-| Test | Python SimoT6 v2 | Nastran CTRIA6 | MYSTRAN SIMOT6 | Status |
-|---|---|---|---|---|
-| SAP 2-007 reference/check-point displacement | — | — | — | Need matched solver CSV / OP2 and exact node mapping |
+![2-005 reference-error convergence](<img width="2160" height="1620" alt="SIMOT6_2_005_reference_convergence" src="https://github.com/user-attachments/assets/8c611db0-0666-4073-a5e1-6ade751e0416" />
+)
 
-For curved shells, distinguish common global XYZ displacements from frame-dependent membrane resultants, plate moments and fiber stress. Verify director/winding and nodal averaging separately; do not confuse contour-averaged GPSTRESS with per-element natural-coordinate recovery.
 
-### 8.5 Other CSV observations (not substituted for requested cases)
+### 8.3 CSI2-007: hemisphere convergence
 
-The same Python-only CSV reports SimoT6 v2 displacement values for `linear_geometry` and `cylinder`: respectively $U_z=-0.3043374677479359$ and $-0.301721620617218$ with an independent reference $-0.3086$. These labels are not sufficient to relabel the cases SAP 2-007. They are only auxiliary curved-shell evidence.
+The S2K-based thick hemisphere has an18-degree top opening. Independent loaded-point targets are $U_x=+0.0940$ft and $U_y=-0.0940$ft. Each curve uses the signed observation and target at the matching loaded location. The no-opening lower-bound0.0924ft value is not substituted. Meshes nx=4,8,16,32 belong to the same physical campaign.
 
-## 9. Codex handoff: add verified 2-001 / 2-005 / 2-007 comparison
+![2-007 reference-error convergence](<img width="2160" height="900" alt="SIMOT6_2_007_reference_convergence" src="https://github.com/user-attachments/assets/19b15d15-efe9-47ca-9e44-3de2408cf7c6" />
+)
 
-1. Resolve a precise mapping `formulation=SIMOT6` and `version=v2` (plus the actually ported Fortran selector/revision) and Nastran `CTRIA6` using matching mesh coordinates, connectivity, thickness, material, PLOAD4, constraints and analysis case.
-2. Extract paired data from OP2, not F06 for large campaigns. Record solver/OP2 provenance, load case, target node, coordinate system and result type. For 2-001 include membrane stress resultant, bending moment and signed surface stresses; for 2-005 use center displacement and reaction/pressure resultant; for 2-007 use prescribed hemisphere check points and both Cartesian and element-frame recovery.
-3. Recommended CSV schema: `benchmark,case,mesh,load_type,support,solver,element,version,subcase,quantity,component,probe_id,frame,reference,result,error_pct,source_op2,source_dat`.
-4. Use one signed-error convention $e=100(u-u_{ref})/\max(|u_{ref}|,\varepsilon)$ and additionally absolute error and force equilibrium. Do not compare magnitudes alone where physical sign matters.
-5. Complete the above tables with paired source rows, and produce line convergence figures for 2-005; no bar charts.
-6. Assert regression of `k_local()`, symmetry, six rigid-body modes for the unconstrained geometric formulation, CW/CCW invariance and curved rigid rotation. Audit whether drilling penalty alters expected zero-energy modes and whether the 3-point shear term locks for thin curved shells.
-7. Preserve independent CSV alongside Markdown in `update/Formulation/Shell/results/`; put SVG figures in `update/Formulation/Shell/figures/` and maintain relative paths.
+## 9. Numerical provenance and limitations
+
+Sources: `Shell_check_t6/production_20261018/exports/T6_comparison_master.csv`, `CSI_2005_quarter_20261019/release/paired.csv`, and `CSI_2007_s2k_comparison_20261020/convergence_Nastran_MYSTRAN_comparison.csv`. Source hashes are retained in `data_provenance.txt`. Missing results are not imputed. Grid-stress recovery is not substituted for native element output. Reference rounding, pressure conventions, support conditions and frame/fiber definitions remain part of interpreting errors. Agreement with Nastran alone is not a physical-accuracy criterion.
 
 ## 10. Conclusions
 
-The **Python v2 SimoT6** is a specific **linearized one-director P2 shell implementation** with conforming membrane/shear, director-based curvature and a drilling penalty. It is not a reproduction of the full Simo nonlinear or mixed shell finite element. Source-documented corrections since v1p8 are significant to winding, bending, shear and drilling; they deserve a distinct version identifier. A Python plate result near the CSI 2-005 reference is available, but the requested **solver-paired SIMOT6-vs-Nastran CSV** remains unconfirmed and is not manufactured here.
+SIMOT6 v2 is a quadratic, linearized one-director shell with directly evaluated conforming membrane/shear strains, director-based curvature, and drilling stabilization. It is not an MITC tying element or a reproduction of the complete nonlinear/mixed Simo shell formulation. The benchmark figures separately quantify each solver's error to independent targets, with single-patch bars and genuine multimesh convergence curves. Stability, mass lumping, curved rigid-body invariance and recovery correctness require their own evidence.
 
 ## References
 
@@ -242,4 +240,4 @@ The **Python v2 SimoT6** is a specific **linearized one-director P2 shell implem
 6. Computers and Structures, Inc. *Software Verification—Shells, Problem 2-005.* https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-005.pdf.
 7. Computers and Structures, Inc. *Software Verification—Shells, Problem 2-007.* https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/Problem%202-007.pdf.
 
-**Scientific attribution note:** The source’s year-based filename is a historical project designation. This documentation does **not** claim that a paper published in 1993 introduced the exact six-node Python operators presented here.
+**Scientific attribution note:** The source’s year-based filename is a historical project designation. This documentation does **not** claim that a paper published in 1993 introduced the exact six-node discrete operators presented here.
