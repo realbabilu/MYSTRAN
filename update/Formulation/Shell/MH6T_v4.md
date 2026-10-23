@@ -250,48 +250,19 @@ For each identical `(benchmark, model_pair_id, subcase, quantity, component, can
 
 $$d_g=100\,\frac{\max_i|u_i^{MH6T}-u_i^{Nastran}|}{\max_i|u_i^{Nastran}|}.$$
 
-The static chart shows the largest group value per case and quantity. Displacements, rotations and units are never pooled into a common denominator. If every Nastran value in a group is zero, the percentage is undefined: only the absolute residual is retained in the detailed metrics. Near-zero denominators can amplify percentages, so these are solver-difference diagnostics, not a global element ranking or an accuracy PASS. Modal frequencies use only recorded `PAIRED_MAC` rows; their ratios are not errors against an independent reference.
+<img width="1800" height="900" alt="reference_2_004_single_mesh" src="https://github.com/user-attachments/assets/787d5033-ceff-4dd7-abd5-fefe69e51c8c" />
+
+<img width="2160" height="1620" alt="reference_2_005_convergence" src="https://github.com/user-attachments/assets/e8b0129b-b70e-4991-9073-98f885f4d10d" />
+
+<img width="2160" height="900" alt="reference_2_007_convergence" src="https://github.com/user-attachments/assets/51d2eafa-b6bc-413f-8d70-05e70acb1a05" />
+
+<img width="1800" height="900" alt="reference_2_014_single_mesh" src="https://github.com/user-attachments/assets/e22ecb45-6ec7-4781-9a52-d2445677f941" />
+
+<img width="1800" height="900" alt="reference_2_012A_thick_single_mesh" src="https://github.com/user-attachments/assets/b31bb6f7-9f02-451b-aeb1-7ec480435046" />
 
 
-<img width="2040" height="1530" alt="MH6T_Nastran_static" src="https://github.com/user-attachments/assets/614d63a0-ab9a-45f2-b856-a45b855417df" />
 
 
-
-| Case | Max displacement group difference (%) | Max rotation group difference (%) | Recorded status |
-|---|---:|---:|---|
-| 2-001 | 0 | 0 | PAIRED_OP2 |
-| 2-002 | 25.2953 | 136.304 | PAIRED_OP2_BAILOUT_WARNING |
-| 2-003 | 568.375 | 29.1558 | PAIRED_OP2_PIVOT_WARNING |
-| 2-004 | 26.2398 | 118.206 | PAIRED_OP2 |
-| 2-006 | 1.02816 | 261.336 | PAIRED_OP2 |
-| 2-013 | 100 | missing | PAIRED_LATEST_OP2_PIVOT_WARNING, PAIRED_OP2 |
-| 2-014 | 0.0669496 | 0.188342 | MATCHED_DECLARED_NATIVE_RECOVERY, PAIRED_OP2 |
-| 2-016 | 834.291 | missing | PAIRED_OP2, PAIRED_OP2_PIVOT_WARNING |
-| 2-017 | 1.13183e-07 | missing | PAIRED_OP2 |
-
-
-<img width="2040" height="850" alt="MH6T_Nastran_modal" src="https://github.com/user-attachments/assets/c1977713-ec01-4ba2-80d6-8081ea437793" />
-
-
-| Model | Mode | Nastran frequency | MH6T frequency | MH6T/Nastran |
-|---|---|---:|---:|---:|
-| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_1 | 57.520384 | 57.393057 | 0.99778640 |
-| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_2 | 139.40221 | 139.09039 | 0.99776319 |
-| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_3 | 350.57998 | 347.14667 | 0.99020677 |
-| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_4 | 446.3947 | 443.33609 | 0.99314817 |
-| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_5 | 504.91381 | 500.60707 | 0.99147034 |
-| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_1 | 57.51988 | 57.48672 | 0.99942351 |
-| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_2 | 139.32848 | 139.3261 | 0.99998287 |
-| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_3 | 350.57452 | 349.72996 | 0.99759092 |
-| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_4 | 446.74501 | 446.08284 | 0.99851781 |
-| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_5 | 504.65488 | 503.78953 | 0.99828527 |
-| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_1 | 57.521521 | 57.513073 | 0.99985313 |
-| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_2 | 139.31212 | 139.33966 | 1.00019771 |
-| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_3 | 350.6323 | 350.42733 | 0.99941542 |
-| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_4 | 446.86233 | 446.74328 | 0.99973358 |
-| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_5 | 504.65438 | 504.5339 | 0.99976127 |
-
-Frequency units follow the source CSV (`1/source_time`); verify source time before assigning Hz.
 
 | Test group | Metric / check | v4 vs Nastran status |
 |---|---|---|
