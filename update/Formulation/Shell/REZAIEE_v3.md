@@ -211,13 +211,6 @@ Independent-reference errors for six source-mesh load cases.
 <table><thead><tr><th>LC</th><th>Quantity</th><th>Aggregation</th><th>Units</th><th>Nastran</th><th>REZAIEE</th><th>Reference</th><th>Nastran error (%)</th><th>REZAIEE error (%)</th><th>Status</th></tr></thead><tbody><tr><td>1</td><td>UX</td><td>signed_mean</td><td>in</td><td>3.03175711e-05</td><td>3.03170764e-05</td><td>3e-05</td><td>1.05857048</td><td>1.05692127</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>2</td><td>UZ</td><td>signed_mean</td><td>in</td><td>0.107494935</td><td>0.107494853</td><td>0.1081</td><td>0.559726741</td><td>0.559802556</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>3</td><td>UY</td><td>signed_mean</td><td>in</td><td>0.427932769</td><td>0.431028724</td><td>0.4321</td><td>0.964413548</td><td>0.247923231</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>4</td><td>abs_UY</td><td>mean_absolute</td><td>in</td><td>0.00334176095</td><td>0.00334879966</td><td>0.00341</td><td>2.0011451</td><td>1.79473152</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>5</td><td>abs_UX</td><td>mean_absolute</td><td>in</td><td>0.000899999985</td><td>0.000899999985</td><td>0.0009</td><td>1.71777275e-06</td><td>1.71777275e-06</td><td>PIVOT_WARNING_BAILOUT</td></tr><tr><td>6</td><td>RZ</td><td>signed_mean</td><td>rad</td><td>0.036247056</td><td>0.0362315588</td><td>0.036</td><td>0.686266604</td><td>0.643218805</td><td>PIVOT_WARNING_BAILOUT</td></tr></tbody></table>
 </details>
 
-#### Data provenance and scope
-
-Figures use only REZAIEE rows from the completed CSV comparison campaigns below. Nastran is a separate solver comparison; CSI / analytical targets are independent references. Errors are 100 × |result − reference| / |reference|. No missing result is replaced by zero. Values are embedded above; full CSV files remain in the local research archive.
-
-- `CSI_2005_quarter_20261019/release/paired.csv` — SHA-256: `bfc67ce43b0d51c684cd6bff5cec2085c4dd16c0f13c690430ffa6db1812b4ba`
-- `CSI_2007_s2k_comparison_20261020/convergence_Nastran_MYSTRAN_comparison.csv` — SHA-256: `85ef1c8746b17b853a00b12f196d123154e3472bf6695b0b19dd837af2b7525f`
-- `CSI_2002_S2K_A_E_20261020/release/midBC_2-002_A_E_comparison.csv` — SHA-256: `3cb802edf9212ad6ca06c782e383b05cef9aef3d65a7552ab9f6d8df54f7bc33`
 
 Plate reference values follow the corrected C/D publication dataset, not the blank reference columns in paired.csv. Other benchmark cases and qualifications remain available in the [full benchmark report](../../shell_benchmark/comparison_all.md).
 
