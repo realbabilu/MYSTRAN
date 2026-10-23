@@ -245,6 +245,54 @@ The v1/v2 source comments report historical 2-001 membrane/bending patch fixes a
 
 A previous project benchmark noted **ported MH6T v3** `T9` error approximately `+8.7818%`, while a separate 2-004 case showed material mesh sensitivity. These are contextual historical results, The previously prepared generic CTRIA6 comparison table has blank entries for MH6T v4; those must not be replaced by Rezaiee or aggregate T6 results.
 
+
+For each identical `(benchmark, model_pair_id, subcase, quantity, component, canonical_frame, units, match_status, result_position)` group, compute
+
+$$d_g=100\,\frac{\max_i|u_i^{MH6T}-u_i^{Nastran}|}{\max_i|u_i^{Nastran}|}.$$
+
+The static chart shows the largest group value per case and quantity. Displacements, rotations and units are never pooled into a common denominator. If every Nastran value in a group is zero, the percentage is undefined: only the absolute residual is retained in the detailed metrics. Near-zero denominators can amplify percentages, so these are solver-difference diagnostics, not a global element ranking or an accuracy PASS. Modal frequencies use only recorded `PAIRED_MAC` rows; their ratios are not errors against an independent reference.
+
+
+<img width="2040" height="1530" alt="MH6T_Nastran_static" src="https://github.com/user-attachments/assets/614d63a0-ab9a-45f2-b856-a45b855417df" />
+
+
+
+| Case | Max displacement group difference (%) | Max rotation group difference (%) | Recorded status |
+|---|---:|---:|---|
+| 2-001 | 0 | 0 | PAIRED_OP2 |
+| 2-002 | 25.2953 | 136.304 | PAIRED_OP2_BAILOUT_WARNING |
+| 2-003 | 568.375 | 29.1558 | PAIRED_OP2_PIVOT_WARNING |
+| 2-004 | 26.2398 | 118.206 | PAIRED_OP2 |
+| 2-006 | 1.02816 | 261.336 | PAIRED_OP2 |
+| 2-013 | 100 | missing | PAIRED_LATEST_OP2_PIVOT_WARNING, PAIRED_OP2 |
+| 2-014 | 0.0669496 | 0.188342 | MATCHED_DECLARED_NATIVE_RECOVERY, PAIRED_OP2 |
+| 2-016 | 834.291 | missing | PAIRED_OP2, PAIRED_OP2_PIVOT_WARNING |
+| 2-017 | 1.13183e-07 | missing | PAIRED_OP2 |
+
+
+<img width="2040" height="850" alt="MH6T_Nastran_modal" src="https://github.com/user-attachments/assets/c1977713-ec01-4ba2-80d6-8081ea437793" />
+
+
+| Model | Mode | Nastran frequency | MH6T frequency | MH6T/Nastran |
+|---|---|---:|---:|---:|
+| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_1 | 57.520384 | 57.393057 | 0.99778640 |
+| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_2 | 139.40221 | 139.09039 | 0.99776319 |
+| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_3 | 350.57998 | 347.14667 | 0.99020677 |
+| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_4 | 446.3947 | 443.33609 | 0.99314817 |
+| 2-008_prob_2_008_t6_N10_diagonal_thick | mode_5 | 504.91381 | 500.60707 | 0.99147034 |
+| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_1 | 57.51988 | 57.48672 | 0.99942351 |
+| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_2 | 139.32848 | 139.3261 | 0.99998287 |
+| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_3 | 350.57452 | 349.72996 | 0.99759092 |
+| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_4 | 446.74501 | 446.08284 | 0.99851781 |
+| 2-008_prob_2_008_t6_N20_diagonal_thick | mode_5 | 504.65488 | 503.78953 | 0.99828527 |
+| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_1 | 57.521521 | 57.513073 | 0.99985313 |
+| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_2 | 139.31212 | 139.33966 | 1.00019771 |
+| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_3 | 350.6323 | 350.42733 | 0.99941542 |
+| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_4 | 446.86233 | 446.74328 | 0.99973358 |
+| 2-008_prob_2_008_t6_N40_diagonal_thick | mode_5 | 504.65438 | 504.5339 | 0.99976127 |
+
+Frequency units follow the source CSV (`1/source_time`); verify source time before assigning Hz.
+
 | Test group | Metric / check | v4 vs Nastran status |
 |---|---|---|
 | SAP 2-001 | Membrane and bending analytical patch / winding | Historical patch evidence only; v4 per-solver CSV pending |
@@ -253,6 +301,8 @@ A previous project benchmark noted **ported MH6T v3** `T9` error approximately `
 | SAP 2-008 | Modes, mass consistency and MAC | Paired modal results needed |
 | SAP 2-013 | Thermal resultants and temperature gradient | Paired stress/resultant outputs needed |
 | SAP 2-016–2-017 | Signed buckling eigenvalues | Paired initial-stress and mode verification needed |
+
+Historical invalid2-005 model rows are excluded. Curved-frame-pending stress/resultant rows are excluded; their displacement rows may still be paired. Pivot/BAILOUT warnings are retained on admitted rows and do not become stability validation. Missing Nastran outputs and low/unmatched modes are not filled. Native corner stress is not substituted for absent grid-point stress. Buckling eigenvalue pairing does not establish critical stress/load without load normalization and physical mode verification.
 
 **Comparison protocol:** use physically identical coordinates, connectivity, shell thickness, director/winding sign, PSHELL `MID3`, constitutive/shear factor, SPCs, pressure orientation and mode/prestress conditions. Compare displacements in common global XYZ; for `GPSTRESS`, `GPSTRAIN`, membrane moments and transverse shear, convert element-local results to the same physical frame and fiber before computing percentages. Nastran stress/force data at absent sampling stations must remain missing, not interpolated and mislabeled as native OP2.
 
