@@ -28,15 +28,27 @@ $$
 \mathbf d_i=[u_i,v_i,w_i,\theta_{xi},\theta_{yi},\theta_{zi}]^T,\qquad \mathbf d_e\in\mathbb R^{48}.
 $$
 
-The element uses a **single local flat frame** constructed at its center. In the supplied base class, the local normal is derived from the standard Q8 surface tangents and then a global-Z sign preference is applied. The in-plane axes are obtained by orthonormalization. A block diagonal transform maps both translations and rotations from global to local axes:
+The element uses a **single local flat frame** constructed at its center. In the supplied base class, the local normal is derived from the standard Q8 surface tangents and then a global-Z sign preference is applied. The in-plane axes are obtained by orthonormalization. A block-diagonal transformation maps translations and rotations from global to local axes. Here, \(\mathbf I_8\) is the eight-node identity matrix and \(\otimes\) denotes the Kronecker product:
 
 $$
-\mathbf d_e^{\ell}=\mathbf T_e\mathbf d_e^g,\quad
-\mathbf T_e=\operatorname{diag}(\mathbf R,\mathbf R,\ldots,\mathbf R),\quad
-\mathbf R=\begin{bmatrix}\mathbf e_1^T\\\mathbf e_2^T\\\mathbf e_3^T\end{bmatrix}.
+\mathbf d_e^{\ell}=\mathbf T_e\mathbf d_e^g,\qquad
+\mathbf T_e=\mathbf I_8\otimes\mathbf T_n,
+$$
+
+$$
+\mathbf T_n=\begin{bmatrix}
+\mathbf R&\mathbf 0_{3\times3}\\
+\mathbf 0_{3\times3}&\mathbf R
+\end{bmatrix},\qquad
+\mathbf R=\begin{bmatrix}
+\mathbf e_1^T\\
+\mathbf e_2^T\\
+\mathbf e_3^T
+\end{bmatrix}.
 $$
 
 The z-offset of nodes from the flat reference plane is not included in the local in-plane metric, which is an important limitation for strongly warped geometry.
+
 
 ## 3. Standard geometry and modified displacement field
 
