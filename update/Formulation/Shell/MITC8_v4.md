@@ -1,4 +1,4 @@
-# An Enhanced Eight-Node Mixed-Interpolation Shell Element with Curvature-Adaptive Membrane Tying and Slenderness-Dependent Transverse-Shear Blending: Formulation and Verification of MITC8 v4
+# An Enhanced Eight-Node Mixed-Interpolation Shell Element with Curvature-Adaptive Membrane Tying and Slenderness-Dependent Transverse-Shear Blending: Formulation and Verification of MITC8 Mystran
 
 **Ary · Independent Researcher · Personal Research** · MYSTRAN v18.00.a · 19 October 2026
 **Technical formulation and verification report**  
