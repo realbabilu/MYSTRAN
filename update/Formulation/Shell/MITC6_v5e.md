@@ -25,7 +25,8 @@ $$
 0\le r,\quad 0\le s,\quad r+s\le1; \qquad L_1=1-r-s,\; L_2=r,\; L_3=s.
 $$
 
-![MITC6 nodal numbering](figures/mitc6_nodes.svg)
+<img width="1196" height="1148" alt="MITC6_fig01_topology" src="https://github.com/user-attachments/assets/001847ce-8602-4d2c-9ab0-d8ddd6ec93c9" />
+
 
 The six quadratic shape functions are
 
@@ -88,7 +89,7 @@ R_2=\tfrac12+\frac{1}{2\sqrt3}=0.7886751346,\quad
 C=(\tfrac13,\tfrac13).
 $$
 
-For the **uploaded** v5e, membrane samples remain inherited from v1/v4. Three affine row fields are fitted independently:
+For the v5e, membrane samples remain inherited from v1/v4. Three affine row fields are fitted independently:
 
 $$
 \widetilde{\mathbf B}_{rr}=\mathbf a_1+r\mathbf b_1+s\mathbf c_1,\qquad
@@ -129,8 +130,11 @@ The final row stores **engineering** membrane shear strain $\gamma_{xy}=2\vareps
 
 ## 4. Coupled transverse-shear tying in v5e
 
+<img width="1171" height="1192" alt="MITC6_fig02_membrane_tying" src="https://github.com/user-attachments/assets/69049bc7-7367-4ec7-9524-0a3bd7084f87" />
+
 <img width="1225" height="962" alt="v5_vs_v5e_shear_tying" src="https://github.com/user-attachments/assets/abd26cc1-beb2-4efe-8694-6e79980c372e" />
 
+<img width="2177" height="1186" alt="MITC6_fig04_shear_conditions" src="https://github.com/user-attachments/assets/a860f9b2-a1a9-4d76-a510-9d21c58ce001" />
 
 The two-component assumed covariant shear field is
 
@@ -169,6 +173,9 @@ $$
 \mathbf B_{s,x}=c_1^r\widetilde{\mathbf B}_{rt}+c_1^s\widetilde{\mathbf B}_{st},\qquad
 \mathbf B_{s,y}=c_2^r\widetilde{\mathbf B}_{rt}+c_2^s\widetilde{\mathbf B}_{st}.
 $$
+
+
+<img width="2258" height="1156" alt="MITC6_fig05_gauss_points" src="https://github.com/user-attachments/assets/b98117ce-e3fc-43f4-80ba-b43cdd45d286" />
 
 **Exactly what changed v5 → v5e:** the only mathematical change in the two supplied files is replacing $st$ observations $(R_1,R_1)$ and $(R_1,R_2)$ with $(0,R_1)$ and $(0,R_2)$. The coefficient matrix $\mathbf M$ must be regenerated at these new points: moving the observations without updating its polynomial rows is incorrect. All other class logic is identical except the class name.
 
@@ -292,6 +299,19 @@ The rotational geometric blocks are zero in this simplified linearized formulati
 | **`MITC6_Tri_v5e`** | **Moves `st` shear observations from $(R_1,R_1),(R_1,R_2)$ to $(0,R_1),(0,R_2)$** | **All other functions match v5 aside from the class name** |
 
 No changes in `MITC6_Tri_v5e` to the membrane interpolation are present in the uploaded source. Thus the phrase *“enhanced V5e”* is ambiguous unless accompanied by a source checksum and a definition of the active membrane operator.
+
+
+<img width="1740" height="1167" alt="MITC6_fig06_archived_displacement_errors" src="https://github.com/user-attachments/assets/a7dceb06-f2b2-4750-93c2-caccbc0007b8" />
+
+<img width="1739" height="1123" alt="MITC6_fig07_archived_buckling_errors" src="https://github.com/user-attachments/assets/5180964a-7de5-4211-8bab-77da8f91f4a5" />
+
+<img width="1520" height="1007" alt="MITC6_fig08_column_factors" src="https://github.com/user-attachments/assets/34d3bf1a-4ab6-4637-9472-25f3e5e525da" />
+
+<img width="2397" height="856" alt="MITC6_fig09_operator_flow" src="https://github.com/user-attachments/assets/77e13cbd-6ea7-48a4-90bb-9ea5386ecf6e" />
+
+<img width="1200" height="1082" alt="MITC6_fig10_directors" src="https://github.com/user-attachments/assets/2434de47-8f89-4162-8ae0-dff699cb75e6" />
+
+
 
 ## 11. Numerical validation: what the available evidence can and cannot establish
 
