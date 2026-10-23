@@ -1,4 +1,4 @@
-# MH6T: Published Formulation versus Project Python v4 — MYSTRAN Linear Shell Research
+# MH6T: Formulation and Numerical Assessment of the MH6T Six-Node Triangular Shell Element Based on the MacNeal–Harder Approach
 
 **Author:** Ary  
 **Date:** 23 October 2026  
