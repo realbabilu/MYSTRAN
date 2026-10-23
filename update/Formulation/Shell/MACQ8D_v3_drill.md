@@ -1,4 +1,4 @@
-<img width="2340" height="1620" alt="MACQ8D_2_001_reference_errors" src="https://github.com/user-attachments/assets/76b1b7f9-45c3-43cf-a237-7470ffba1985" /># MACQ8D: A Modified Eight-Node Flat-Shell Element with Independent Drilling Stabilization — formulation and Numerical Verification
+# MACQ8D: A Modified Eight-Node Flat-Shell Element with Independent Drilling Stabilization — formulation and Numerical Verification
 
 **Technical formulation and benchmark report — MYSTRAN CQUAD8 (`MACQ8D`, v3 drilling)**  
 **Author:** Ary  
