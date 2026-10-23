@@ -28,8 +28,8 @@ The relevant published lineage is the geometrically exact one-director/stress-re
 
 ### 1.1 Nodal ordering and kinematics
 
-![Nodal numbering for six-node triangle](<img width="1080" height="900" alt="simo_t6_nodes" src="https://github.com/user-attachments/assets/1142e1d2-7bc3-4188-9a7a-02d2bad62d51" />
-)
+<img width="1080" height="900" alt="simo_t6_nodes" src="https://github.com/user-attachments/assets/1142e1d2-7bc3-4188-9a7a-02d2bad62d51" />
+
 
 Reference domain $\hat\Omega=\{(r,s):r\geq0,s\geq0,r+s\leq1\}$, with area $1/2$. Coordinates are $(0,0),(1,0),(0,1),(1/2,0),(1/2,1/2),(0,1/2)$ for nodes 1 to 6. Each node carries $\mathbf q_i=[u_x,u_y,u_z,\theta_x,\theta_y,\theta_z]^T$, so $\mathbf q_e\in\mathbb R^{36}$ with global nodal coordinates and an identity element-level coordinate mapping.
 
@@ -149,11 +149,11 @@ The formulation uses **mean nodal thickness** $\bar h=(1/6)\sum_Ih_I$ rather tha
 | Thermal load | 3 triangle points | Membrane and bending thermal resultants |
 | Initial-stress contribution | 3 triangle points in the restricted formulation | Translational geometric stiffness; scope qualified below |
 
-![Three-point Gauss quadrature](<img width="1080" height="900" alt="simo_t6_gauss3" src="https://github.com/user-attachments/assets/ef9f4a2d-86af-4ac4-a529-db55a1d78bb0" />
-)
+<img width="1080" height="900" alt="simo_t6_gauss3" src="https://github.com/user-attachments/assets/ef9f4a2d-86af-4ac4-a529-db55a1d78bb0" />
 
-![Six-point Gauss quadrature](<img width="1080" height="900" alt="simo_t6_gauss6" src="https://github.com/user-attachments/assets/f3ea42d9-b78a-4d21-8051-e36fc26159ac" />
-)
+
+<img width="1080" height="900" alt="simo_t6_gauss6" src="https://github.com/user-attachments/assets/f3ea42d9-b78a-4d21-8051-e36fc26159ac" />
+
 
 The 3-point coordinates are $(1/6,1/6),(2/3,1/6),(1/6,2/3)$ with weights $1/6$ each. Six-point quadrature uses two symmetric triplets: $(a,a),(1-2a,a),(a,1-2a)$ with $a=0.445948490144588$ (weight $0.11169079483905$); and $(b,b),(1-2b,b),(b,1-2b)$ with $b=0.091576213509771$ (weight $0.054975871827661$).
 
