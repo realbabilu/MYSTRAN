@@ -1,13 +1,13 @@
-# MACQ8D: A Modified Eight-Node Flat-Shell Element with Independent Drilling Stabilization — Mathematical Formulation and Numerical Verification
+<img width="2340" height="1620" alt="MACQ8D_2_001_reference_errors" src="https://github.com/user-attachments/assets/76b1b7f9-45c3-43cf-a237-7470ffba1985" /># MACQ8D: A Modified Eight-Node Flat-Shell Element with Independent Drilling Stabilization — formulation and Numerical Verification
 
 **Technical formulation and benchmark report — MYSTRAN CQUAD8 (`MACQ8D`, v3 drilling)**  
 **Author:** Ary  
 **Revision:** 23 October 2026  
-**Evidence:** Examination of four supplied element sources; archived `Q8_comparison_master.csv` (2026-10-18). Numerical tables and plots here **reuse archived results, not fresh Nastran/MYSTRAN runs**. The project-specific element is not presented as a verbatim reproduction of the 1992 publication.
+**Evidence:** Existing formulation notes; archived `Q8_comparison_master.csv` and audited corrected-quarter `paired.csv`. Numerical tables and plots here **reuse archived results, not fresh Nastran/MYSTRAN runs**. The project-specific element is not presented as a verbatim reproduction of the 1992 publication.
 
 ## Abstract
 
-An eight-node flat-facet shell element with a MacNeal–Harder modified interpolation field and a weak, independent drilling-rotation stabilization is documented. The surface geometry is interpolated with standard Q8 serendipity functions while membrane, bending, and transverse shear strains employ modified field functions. Six nodal degrees of freedom yield 48 global degrees of freedom, and no internal degrees of freedom are condensed. The v3 drilling regularization penalizes only the independent normal rotation, in contrast to the alternative continuum-spin-coupled stabilization. Archived paired MYSTRAN MACQ8D–Nastran stress output shows low normalized discrepancies for the 2-001 patch and selected buckling cases but substantial differences for 2-005, 2-009, and 2-013. The latter prevent an unconditional stress-validation claim.
+An eight-node flat-facet shell element with a MacNeal–Harder modified interpolation field and a weak, independent drilling-rotation stabilization is documented. The surface geometry is interpolated with standard Q8 serendipity functions while membrane, bending, and transverse shear strains employ modified field functions. Six nodal degrees of freedom yield 48 global degrees of freedom, and no internal degrees of freedom are condensed. The v3 drilling regularization penalizes only the independent normal rotation, in contrast to the alternative continuum-spin-coupled stabilization. Numerical evidence is limited here to separate solver errors against analytic2-001 targets and independent2-005 plate targets, using existing CSV results. Recorded status and solver warnings prevent an unconditional validation claim.
 
 ## 1. Origin and evolution of the formulation
 
@@ -148,7 +148,7 @@ $$
 
 The source takes \(h\) as the nodal-thickness mean. The default drilling coefficient is \(\beta_d=9\times10^{-6}\). Numerical integration employs 3×3 Gauss–Legendre points at \(\{-\sqrt{3/5},0,+\sqrt{3/5}\}^2\), with one-dimensional weights \(\{5/9,8/9,5/9\}\). The local integration Jacobian is \(|\det\mathbf J_0|\).
 
-<img width="1045" height="1045" alt="fig03_nodes_gauss" src="https://github.com/user-attachments/assets/bd25db3a-2836-444e-99fa-e9f433675a52" />
+<img width="1045" height="1045" alt="image" src="https://github.com/user-attachments/assets/ba2e92fd-07ff-45bb-942c-9a89ad7fd1b6" />
 
 *Figure 1. Q8 ordering and the nine full-integration points. Geometry and displacement fields are not to be confused.*
 
@@ -177,43 +177,73 @@ $$
 
 Stress must be compared in **matching component bases**, thickness sides, and unaveraged Gauss/centroid/corner positions. Global output is obtained through the proper tensor rotation; the local result cannot be directly compared with a differently oriented Nastran element axis. The v3 penalty has no physical stress resultant and should not be included in reported membrane stress. Drilling rank, membrane patch, bending patch and rigid-body rotation tests must be checked separately.
 
-## 7. Solver comparison from the archived CSV
+## 7. Numerical verification against independent references
 
-The available archive is `Q8_CSV_delivery_20261018/Q8_comparison_master.csv`. The filtered formulation is `MACQ8D`, `v3_drill`; matching means both `nastran_result` and `mystran_result` are populated for a given row. It is **not** a post hoc nearest-point match. The master CSV marks these comparisons `PENDING`; hence charts describe differences in recorded output, **not certified validation passes**.
-
-<img width="1330" height="1140" alt="fig01_macq8_nastran_stress_scatter" src="https://github.com/user-attachments/assets/083d0490-bec6-484f-b1d2-98637c26b975" />
-
-
-*Figure 2. MYSTRAN MACQ8D versus Nastran element-center upper-fiber SXX, at paired recorded locations. Dashed line denotes equal values.*
-
-<img width="1710" height="760" alt="fig02_stress_discrepancy_by_case" src="https://github.com/user-attachments/assets/90591b7e-891f-48db-aa0f-be92c65ff52b" />
-
-*Figure 3. L2-normalized stress discrepancy across CSI benchmark cases. **The horizontal axis is case ID, not mesh refinement.** Differences may include recovery conventions and baseline formulation differences; they are not interpolation-order estimates.*
-
-The summary metric is computed on all available paired stress rows within a benchmark:
+**Scope:**2-001 patch and2-005 mesh convergence only. All numerical results come from existing CSV files; no solver was rerun. Nastran and MYSTRAN MACQ8D are evaluated separately against the same analytic/independent reference:
 
 $$
-\Delta_{2,\sigma}(\%)=100\frac{\lVert\boldsymbol\sigma^{MYSTRAN}-\boldsymbol\sigma^{NASTRAN}\rVert_2}{\lVert\boldsymbol\sigma^{NASTRAN}\rVert_2}.
+e_{solver}(\%)=100\frac{|u_{solver}-u_{reference}|}{|u_{reference}|}.
 $$
 
-| CSI case | Paired stress-component rows | \(\Delta_{2,\sigma}\) (%) | Interpretation |
-|---|---:|---:|---|
-| 2-001 | 600 | 0.04634 | Close numerical stress agreement; analytical patch still needs pointwise component check |
-| 2-005 | 3840 | 40.3397 | Significant disagreement; inspect pressure model, field and recovery |
-| 2-009 | 4320 | 53.1806 | Significant disagreement; model and tensor basis audit required |
-| 2-012 | 720 | 0.68483 | Moderately close; not independently certified |
-| 2-013 | 240 | 85.3724 | Major thermal-stress mismatch; check temperature and sign conventions |
-| 2-014 | 480 | 0.29360 | Close aggregate agreement |
-| 2-016 | 2520 | ~3.49×10⁻¹¹ | Almost identical recorded stress values; check potential shared/prestress output basis |
-| 2-017 | 1380 | ~5.74×10⁻¹¹ | Almost identical recorded stress values; not proof of correct buckling factor |
+For a zero reference, use an absolute residual in physical units. Bar heights represent errors, not statistical uncertainty intervals. A missing numeric pair remains missing.
+
+### 7.1 Single patch test2-001
+
+The source is `Q8_comparison_master.csv`, filtered to `MACQ8D`, `v3_drill`,2-001, and populated analytic targets. Only finite populated Nastran/MYSTRAN pairs are plotted. The source status remains **PENDING**, so this is measured evidence rather than a certified validation PASS. Stress and resultants retain their own physical units and native recovery locations. Upper/lower fibers use their respective signed targets; each bar is the largest pointwise error for that component and load case.
+
+<img width="2340" height="1620" alt="MACQ8D_2_001_reference_errors" src="https://github.com/user-attachments/assets/14632699-6327-44f0-a3fe-2d7fdbe5b0a5" />
 
 
-<img width="2023" height="1103" alt="fig03_2001_patch_test" src="https://github.com/user-attachments/assets/a5120bce-e26f-480a-86e2-30d7e787bd2a" />
+The archived LC2 Nastran stress/moment rows show large errors against their recorded analytic targets (hundreds of percent). These values are retained without correction; source status PENDING and frame/fiber/reference consistency require review before any patch PASS. Small MACQ8D errors do not resolve that provenance issue.
 
-![Uploading fig02_2005_2007_convergence.png…]()
+Zero-target components are kept separate and never divided by zero:
+
+<img width="2340" height="1890" alt="MACQ8D_2_001_zero_residuals" src="https://github.com/user-attachments/assets/28cb9e73-7cd1-4cef-a798-b7037279c732" />
 
 
-**Critical limitation.** Nastran is a solver comparison, not an analytical solution for MacNeal's modified field. Agreement can coexist with a failed independent patch or stress benchmark; disagreement can reflect legitimate element differences or non-equivalent load/output conventions. Consult `solver_comparison_summary.csv` and `matched_solver_output.csv` for audit trails. For cases with a populated independent reference in the source CSV, `patch2001_reference_errors.csv` contains additional comparisons, with denominators and zero-reference rows handled explicitly.
+Excluded **288** reference-bearing rows with absent/nonfinite solver pairs. Grid stress and fiber-derived grid resultants are recorded separately in [patch metrics](patch2001_reference_metrics.csv), not substituted for native element output.
+
+| LC | Quantity | Component | Reference metric | Nastran | MACQ8D | Points per solver |
+|---|---|---|---|---:|---:|---:|
+| 1 | resultant | MXX | absolute residual (source_force) | 0 | 0 | 25 |
+| 1 | resultant | MXY | absolute residual (source_force) | 0 | 0 | 25 |
+| 1 | resultant | MYY | absolute residual (source_force) | 0 | 0 | 25 |
+| 1 | resultant | NXX | max pointwise error (%) | 4.488917e-06 | 3.963558e-06 | 25 |
+| 1 | resultant | NXY | max pointwise error (%) | 7.274771e-06 | 4.510622e-06 | 25 |
+| 1 | resultant | NYY | max pointwise error (%) | 4.488917e-06 | 3.946794e-06 | 25 |
+| 1 | resultant | QX | absolute residual (source_force/source_length) | 0 | 0 | 25 |
+| 1 | resultant | QY | absolute residual (source_force/source_length) | 0 | 0 | 25 |
+| 1 | stress | SXX | max pointwise error (%) | 3.431909e-06 | 3.051758e-06 | 50 |
+| 1 | stress | SXY | max pointwise error (%) | 6.159678e-06 | 2.680598e-06 | 50 |
+| 1 | stress | SXZ | absolute residual (source_force/source_length^2) | 0 | 0 | 50 |
+| 1 | stress | SYY | max pointwise error (%) | 3.990957e-06 | 3.998855e-06 | 50 |
+| 1 | stress | SYZ | absolute residual (source_force/source_length^2) | 0 | 0 | 50 |
+| 1 | stress | SZZ | absolute residual (source_force/source_length^2) | 0 | 0 | 50 |
+| 2 | resultant | MXX | max pointwise error (%) | 304.662 | 4.084285e-06 | 25 |
+| 2 | resultant | MXY | max pointwise error (%) | 473.8092 | 5.885143e-06 | 25 |
+| 2 | resultant | MYY | max pointwise error (%) | 175.9318 | 5.854351e-06 | 25 |
+| 2 | resultant | NXX | absolute residual (source_force/source_length) | 0 | 0 | 25 |
+| 2 | resultant | NXY | absolute residual (source_force/source_length) | 0 | 0 | 25 |
+| 2 | resultant | NYY | absolute residual (source_force/source_length) | 0 | 0 | 25 |
+| 2 | resultant | QX | absolute residual (source_force/source_length) | 0.0004218897 | 6.334189e-16 | 25 |
+| 2 | resultant | QY | absolute residual (source_force/source_length) | 0.0001510312 | 1.277137e-15 | 25 |
+| 2 | stress | SXX | max pointwise error (%) | 304.662 | 3.963558e-06 | 50 |
+| 2 | stress | SXY | max pointwise error (%) | 473.8092 | 4.510622e-06 | 50 |
+| 2 | stress | SXZ | absolute residual (source_force/source_length^2) | 0 | 0 | 50 |
+| 2 | stress | SYY | max pointwise error (%) | 175.9318 | 3.946794e-06 | 50 |
+| 2 | stress | SYZ | absolute residual (source_force/source_length^2) | 0 | 0 | 50 |
+| 2 | stress | SZZ | absolute residual (source_force/source_length^2) | 0 | 0 | 50 |
+
+### 7.2 Convergence2-005: corrected C/D plate references
+
+The source is the audited quarter-model `CSI_2005_quarter_20261019/release/paired.csv`, filtered to Q8/MACQ8D. It supersedes historical invalid2-005 master-model comparisons. Four genuine mesh resolutions nx=4,8,16,32 are available. Independent center-displacement magnitudes: simply supported uniform12.97in, simply supported point16.95in, fixed uniform2.60in, fixed point7.25in. Each curve is a solver's absolute percentage error to its independent target, not its difference from the other solver. Native signed displacements are compared by magnitude because the listed targets are magnitudes.
+
+
+<img width="2160" height="1620" alt="MACQ8D_2_005_reference_convergence" src="https://github.com/user-attachments/assets/1fe9dff8-b342-41e5-ac9e-c283dfb5f5cd" />
+
+
+[All convergence values and warnings](convergence2005_reference_values.csv). Existing BAILOUT=-1/AUTOSPC qualifications remain; convergence does not erase mechanism or output-recovery qualifications. No unrelated benchmark results are inserted.
+
 
 ## 8. Verification hierarchy and trade-offs
 
@@ -221,12 +251,12 @@ $$
 - **Drilling stabilization:** compare rank against the free 6-RBM expectation, and test a pure rigid-body normal rotation for penalty-induced residual. A very small penalty can control singular modes while still violating exact normal-spin invariance.
 - **Distorted elements:** the field modification improves certain patches yet can be ill-conditioned when the \(8\times8\) polynomial interpolation matrix is nearly singular. Report its condition number.
 - **Twisted/warped geometry:** single flat frame cannot reproduce pointwise curved director kinematics; this is a structural limitation rather than a recoverable sign bug.
-- **Pressure and thermal stress:** archived 2-005 and 2-013 paired stress discrepancies are not acceptable grounds for a universal PASS claim. Independent deck and OP2 audits remain necessary.
-- **Mesh convergence:** the archived cross-case plot is **not** a convergence plot. A line convergence curve requires the same physical problem at multiple genuine mesh resolutions with identical stress probes and independent reference.
+- **Pressure:** use corrected C/D quarter-model convergence data in Section7; old invalid2-005 model comparisons are excluded.
+- **Mesh convergence:** Section7 uses the same corrected2-005 physical cases at four mesh resolutions; each solver is compared against the independent target.
 
 ## 9. Reproduction and provenance
 
-The accompanying `matched_solver_output.csv` is extracted solely from the user-supplied archived CSV. `solver_comparison_summary.csv` describes paired rows and L2 discrepancies; no missing Nastran values are imputed. The current source audit covers `MacNealQ8_1992_native.py`, `_v2.py`, `_v2_drill.py`, and `_v3_drill.py`. The current source tree confirms Python v3 inherits the original native element and adds independent drilling penalty; the precise *native MYSTRAN Fortran* implementation must be verified against its current selector and source before claiming exact implementation parity.
+Numerical sources are the existing Q8 production master and corrected quarter-model comparison CSV. Their SHA256 hashes are listed in `data_provenance.txt`. The accompanying metrics preserve missing-data exclusions, physical units and warnings. No implementation source is included. Exact implementation parity requires a separate kernel audit. The supplied `macneal1992.pdf` is a bibliographic reference only and supplies no numerical results here.
 
 ## References
 
@@ -236,3 +266,5 @@ The accompanying `matched_solver_output.csv` is extracted solely from the user-s
 4. R. H. MacNeal, C. T. Wilson, R. L. Harder, and C. C. Hoff (1998), “The treatment of shell normals in finite element analysis,” *Finite Elements in Analysis and Design*, **30**, 235–242. DOI: [10.1016/S0168-874X(98)00035-3](https://doi.org/10.1016/S0168-874X(98)00035-3).
 5. Computers and Structures, Inc., *SAP2000 Verification: Shell Analysis*, [Verification collection](https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Shells/).
 6. MYSTRAN development benchmarks, [`update/shell_benchmark`](https://github.com/realbabilu/MYSTRAN/tree/v18.00.a/update/shell_benchmark); supporting archived user dataset `Q8_CSV_delivery_20261018(1).zip`.
+
+**Supplied bibliographic copy:** `D:/Downloads/macneal1992.pdf` (reference only; numerical results exclusively from CSV).
