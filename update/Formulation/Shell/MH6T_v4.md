@@ -8,9 +8,9 @@
 **Source history:** `v1 → v2 → v3 (not supplied) → v4`  
 **Evidence:** inspected uploaded Python v1, v2 and v4. Numerical claims must be kept separate from source-code evidence.
 
-## Research scope: MYSTRAN linear SOL 101 first
+## Research scope: MYSTRAN linear first
 
-**Priority:** implement and validate small-displacement **linear-elastic MYSTRAN SOL 101** with MH6T v4 as the baseline. The paper by Li et al. (2015) distinguishes assumed **linear membrane strain** ($\widetilde{\varepsilon}^L_m=P\alpha$, Eqs. 26, 34–38) from assumed **higher-order membrane strain** ($\widetilde{\varepsilon}^H_m=P\phi$, Eqs. 27, 44–46). The latter comes from a **geometrically nonlinear** strain contribution and is projected through a mixed variational condition. It is not needed to construct the small-displacement SOL 101 stiffness.
+**Priority:** implement and validate small-displacement **linear-elastic** with MH6T v4 as the baseline. The paper by Li et al. (2015) distinguishes assumed **linear membrane strain** ($\widetilde{\varepsilon}^L_m=P\alpha$, Eqs. 26, 34–38) from assumed **higher-order membrane strain** ($\widetilde{\varepsilon}^H_m=P\phi$, Eqs. 27, 44–46). The latter comes from a **geometrically nonlinear** strain contribution and is projected through a mixed variational condition. It is not needed to construct the small-displacement SOL 101 stiffness.
 
 | Item in Li et al. (2015) | Current MYSTRAN SOL 101 decision |
 |---|---|
