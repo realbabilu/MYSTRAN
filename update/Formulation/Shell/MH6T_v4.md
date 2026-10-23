@@ -262,8 +262,6 @@ $$d_g=100\,\frac{\max_i|u_i^{MH6T}-u_i^{Nastran}|}{\max_i|u_i^{Nastran}|}.$$
 
 
 
-
-
 | Test group | Metric / check | v4 vs Nastran status |
 |---|---|---|
 | SAP 2-001 | Membrane and bending analytical patch / winding | Historical patch evidence only; v4 per-solver CSV pending |
@@ -272,8 +270,6 @@ $$d_g=100\,\frac{\max_i|u_i^{MH6T}-u_i^{Nastran}|}{\max_i|u_i^{Nastran}|}.$$
 | SAP 2-008 | Modes, mass consistency and MAC | Paired modal results needed |
 | SAP 2-013 | Thermal resultants and temperature gradient | Paired stress/resultant outputs needed |
 | SAP 2-016–2-017 | Signed buckling eigenvalues | Paired initial-stress and mode verification needed |
-
-Historical invalid2-005 model rows are excluded. Curved-frame-pending stress/resultant rows are excluded; their displacement rows may still be paired. Pivot/BAILOUT warnings are retained on admitted rows and do not become stability validation. Missing Nastran outputs and low/unmatched modes are not filled. Native corner stress is not substituted for absent grid-point stress. Buckling eigenvalue pairing does not establish critical stress/load without load normalization and physical mode verification.
 
 **Comparison protocol:** use physically identical coordinates, connectivity, shell thickness, director/winding sign, PSHELL `MID3`, constitutive/shear factor, SPCs, pressure orientation and mode/prestress conditions. Compare displacements in common global XYZ; for `GPSTRESS`, `GPSTRAIN`, membrane moments and transverse shear, convert element-local results to the same physical frame and fiber before computing percentages. Nastran stress/force data at absent sampling stations must remain missing, not interpolated and mislabeled as native OP2.
 
