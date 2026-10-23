@@ -200,27 +200,23 @@ For a zero target, retain the absolute residual in physical units; never divide 
 
 Reference-bearing, finite paired rows from the production T6 master are used. Native element stress/resultant output and recovered grid values remain separate. Fiber stresses retain their signed analytic targets. Bars show the maximum pointwise error for each component/load case. Native transverse shear recovery remains subject to its recorded output-frame/recovery qualifications; no unconditional patch PASS is inferred.
 
-![2-001 reference errors](<img width="2340" height="1620" alt="SIMOT6_2_001_reference_errors" src="https://github.com/user-attachments/assets/373a6970-1c55-4d17-aa0b-fac346b02a81" />
-)
+<img width="2340" height="1620" alt="SIMOT6_2_001_reference_errors" src="https://github.com/user-attachments/assets/373a6970-1c55-4d17-aa0b-fac346b02a81" />
 
-![2-001 absolute residuals at zero references](<img width="2340" height="630" alt="SIMOT6_2_001_zero_residuals" src="https://github.com/user-attachments/assets/23b8357d-9dd2-4f48-8efb-c7c911c92571" />
-)
+<img width="2340" height="630" alt="SIMOT6_2_001_zero_residuals" src="https://github.com/user-attachments/assets/23b8357d-9dd2-4f48-8efb-c7c911c92571" />
 
 
 ### 8.2 CSI2-005: plate convergence
 
 Corrected C/D quarter-plate CSV results are used at nx=4,8,16,32, with Nastran and SIMOT6 on matching T6 meshes. Independent center-displacement magnitudes are12.97in (simple/uniform),16.95in (simple/point),2.60in (fixed/uniform),7.25in (fixed/point). Errors use displacement magnitude because these targets are magnitudes. Historical invalid-model master rows are excluded. Existing BAILOUT/AUTOSPC warnings and point-load T6 discrepancies remain visible.
 
-![2-005 reference-error convergence](<img width="2160" height="1620" alt="SIMOT6_2_005_reference_convergence" src="https://github.com/user-attachments/assets/8c611db0-0666-4073-a5e1-6ade751e0416" />
-)
+<img width="2160" height="1620" alt="SIMOT6_2_005_reference_convergence" src="https://github.com/user-attachments/assets/8c611db0-0666-4073-a5e1-6ade751e0416" />
 
 
 ### 8.3 CSI2-007: hemisphere convergence
 
 The S2K-based thick hemisphere has an18-degree top opening. Independent loaded-point targets are $U_x=+0.0940$ft and $U_y=-0.0940$ft. Each curve uses the signed observation and target at the matching loaded location. The no-opening lower-bound0.0924ft value is not substituted. Meshes nx=4,8,16,32 belong to the same physical campaign.
 
-![2-007 reference-error convergence](<img width="2160" height="900" alt="SIMOT6_2_007_reference_convergence" src="https://github.com/user-attachments/assets/19b15d15-efe9-47ca-9e44-3de2408cf7c6" />
-)
+<img width="2160" height="900" alt="SIMOT6_2_007_reference_convergence" src="https://github.com/user-attachments/assets/19b15d15-efe9-47ca-9e44-3de2408cf7c6" />
 
 ## 9. Numerical provenance and limitations
 
