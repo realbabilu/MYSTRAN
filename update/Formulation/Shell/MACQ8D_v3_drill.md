@@ -201,7 +201,7 @@ For a zero reference, use an absolute residual in physical units. Bar heights re
 
 ### 7.1 Single patch test2-001
 
-The source is `Q8_comparison_master.csv`, filtered to `MACQ8D`, `v3_drill`,2-001, and populated analytic targets. Only finite populated Nastran/MYSTRAN pairs are plotted. The source status remains **PENDING**, so this is measured evidence rather than a certified validation PASS. Stress and resultants retain their own physical units and native recovery locations. Upper/lower fibers use their respective signed targets; each bar is the largest pointwise error for that component and load case.
+Stress and resultants retain their own physical units and native recovery locations. Upper/lower fibers use their respective signed targets; each bar is the largest pointwise error for that component and load case.
 
 <img width="2340" height="1620" alt="MACQ8D_2_001_reference_errors" src="https://github.com/user-attachments/assets/14632699-6327-44f0-a3fe-2d7fdbe5b0a5" />
 
@@ -253,6 +253,9 @@ The source is the audited quarter-model `CSI_2005_quarter_20261019/release/paire
 
 <img width="2160" height="1620" alt="MACQ8D_2_005_reference_convergence" src="https://github.com/user-attachments/assets/1fe9dff8-b342-41e5-ac9e-c283dfb5f5cd" />
 
+### 7.3 Convergence2-007: Clamped Uniform Load
+
+<img width="1623" height="1823" alt="fig02_2005_2007_convergence" src="https://github.com/user-attachments/assets/99503f18-0f5c-41db-99c7-611b5cd504c4" />
 
 [All convergence values and warnings](convergence2005_reference_values.csv). Existing BAILOUT=-1/AUTOSPC qualifications remain; convergence does not erase mechanism or output-recovery qualifications. No unrelated benchmark results are inserted.
 
