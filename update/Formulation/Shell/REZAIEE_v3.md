@@ -1,4 +1,4 @@
-# Rezaiee–Pajand T6: Mathematical Formulation, Paper Traceability, and Revision Audit
+# Rezaiee–Pajand T6: A Six-Node Triangular Shell Element with Assumed-Strain Tying — Formulation, Implementation, and Numerical Verification
 
 **Author:** Ary  
 **Project:** MYSTRAN — quadratic triangular shell (CTRIA6 / T6)  
