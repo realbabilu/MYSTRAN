@@ -54,7 +54,8 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  COUPMASS
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EM, EB, ET, EPROP, MASS_PER_UNIT_AREA, PRESS, PPE,&
-                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM
+                                         TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, BGRID, GRID_SNORM, &
+                                         PTE, ALPVEC, DT, TREF
 
       USE CQUADR_DKMQ24R_Interface
       USE ELMDIS_Interface
@@ -89,7 +90,8 @@
       REAL(DOUBLE)                    :: KGBASIC(24,24), KGLOCAL(24,24)
       REAL(DOUBLE)                    :: M1(4,4), MBASIC(24,24), MLOCAL(24,24), NVG(4), MDIAG(4), DENS_A
       REAL(DOUBLE)                    :: MASS_AREA_INT, MASS_ELEM_SUM
-      REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24)
+      REAL(DOUBLE)                    :: UNIT_PPE_B(24), UNIT_PPE_L(24), UNIT_PTE_B(24)
+      REAL(DOUBLE)                    :: CTE3(3), NTH(3), TBAR
       REAL(DOUBLE)                    :: GBE1(3,MELDOF,4), GBE2(3,MELDOF,4), GBE3(2,MELDOF,4)
       REAL(DOUBLE)                    :: REC_XI(5), REC_ETA(5)
 
@@ -267,6 +269,30 @@
          ENDDO
       ENDIF
 
+! Consistent membrane thermal load for the mean temperature change.
+! No through-thickness temperature-gradient bending term is assembled here.
+      IF (OPT(2) == 'Y') THEN
+         UNIT_PTE_B = ZERO
+         CTE3(1) = ALPVEC(1,1)
+         CTE3(2) = ALPVEC(2,1)
+         CTE3(3) = ALPVEC(4,1)
+         NTH = MATMUL(SHELL_A, CTE3)
+         DO I=1,2
+            DO J=1,2
+               XI  = SS(I)
+               ETA = SS(J)
+               WT  = HH(I)*HH(J)
+               CALL GEOMETRY_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, NVEC, JDET, CO, BCMAT)
+               BMB = BM_AT(XI, ETA, TV1, TV2, CO)
+               UNIT_PTE_B = UNIT_PTE_B + WT*JDET*MATMUL(TRANSPOSE(BMB), NTH)
+            ENDDO
+         ENDDO
+         DO JSUB=1,SIZE(PTE,2)
+            TBAR = (DT(1,JSUB) + DT(2,JSUB) + DT(3,JSUB) + DT(4,JSUB))/FOUR - TREF(1)
+            PTE(1:24,JSUB) = MATMUL(T24, UNIT_PTE_B) * TBAR
+         ENDDO
+      ENDIF
+
       IF (OPT(6) == 'Y') THEN
          CALL ELMDIS
 
@@ -338,18 +364,12 @@
                         KGVAL = KGVAL * 7.147442330726D-01
                      ENDIF
 
-! Buckling probe: use the scalar plate geometric stiffness only on local
-! transverse displacement w.  Python tests showed that copying the same KGVAL
-! directly into shell rotations RX/RY behaves like the bad sac_w_beta variant.
-! DEBUG(236) tests the MITC4/MITC4+ KGGD convention for column buckling:
-! copy the scalar stress stiffness to all translational DOFs, but not rotations.
-                     IF (DEBUG(236) > 0) THEN
-                        DO RR=1,3
-                           KGLOCAL(6*(IA-1)+RR,6*(IB-1)+RR) = KGLOCAL(6*(IA-1)+RR,6*(IB-1)+RR) + KGVAL
-                        ENDDO
-                     ELSE
-                        KGLOCAL(6*(IA-1)+3,6*(IB-1)+3) = KGLOCAL(6*(IA-1)+3,6*(IB-1)+3) + KGVAL
-                     ENDIF
+! Match the Python DKMQ24 initial-stress operator: the scalar kernel
+! multiplies the identity on translations. Rotations receive no direct term.
+! Retaining only transverse w suppresses in-plane shell buckling modes.
+                     DO RR=1,3
+                        KGLOCAL(6*(IA-1)+RR,6*(IB-1)+RR) = KGLOCAL(6*(IA-1)+RR,6*(IB-1)+RR) + KGVAL
+                     ENDDO
 ! --- shell_renovation end --- !
                   ENDDO
                ENDDO
@@ -771,9 +791,10 @@
                DO DD=1,3
                   BDR(6*(II-1)+DD) = 0.5D0*(NIX(II)*T2D(DD) - NIY(II)*T1D(DD))
                ENDDO
-               ! Match the Python reference: penalize only the local drilling
-               ! rotation (theta_z), not the full nodal rotation vector.
-               BDR(6*(II-1)+6) = BDR(6*(II-1)+6) - NVAL(II)
+               ! KBASIC is assembled in basic coordinates: project the nodal
+               ! rotation onto the shell normal to obtain local drilling.
+               ! A fixed basic RZ term spuriously stiffens rotated shells.
+               BDR(6*(II-1)+4:6*(II-1)+6) = -NVAL(II)*NORMS(II,:)
             ENDDO
             KD = KD + WT*JJ*CDRILL*MATMUL(RESHAPE(BDR,(/24,1/)),RESHAPE(BDR,(/1,24/)))
          ENDDO
