@@ -1,0 +1,275 @@
+[
+  {
+    "variant": "Lee",
+    "case": "model210",
+    "status": "completed",
+    "errors": [],
+    "modes": [],
+    "residual_lines": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Lee\\model210\\model.dat"
+  },
+  {
+    "variant": "Lee",
+    "case": "model217",
+    "status": "completed",
+    "errors": [],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 136.864,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 2,
+        "eigenvalue": 1136.646,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 3,
+        "eigenvalue": 2751.509,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 4,
+        "eigenvalue": 3493.05,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 5,
+        "eigenvalue": 3493.05,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 6,
+        "eigenvalue": 3493.05,
+        "frequency": null,
+        "subcase": 2
+      }
+    ],
+    "residual_lines": [
+      "Current DARPACK=           2 ; solver defaults and residual acceptance are unchanged.",
+      "BUCKLING EIGENPAIR RESIDUAL        1   1.5154806977301502E-11",
+      "BUCKLING EIGENPAIR RESIDUAL        2   2.8503557762736558E-12",
+      "BUCKLING EIGENPAIR RESIDUAL        3   5.6575214719175233E-13",
+      "BUCKLING EIGENPAIR RESIDUAL        4   2.0985883577467115E-10",
+      "BUCKLING EIGENPAIR RESIDUAL        5   1.3879280266412014E-07",
+      "BUCKLING EIGENPAIR RESIDUAL        6   8.2197855849524140E-10"
+    ],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Lee\\model217\\model.dat"
+  },
+  {
+    "variant": "Lee",
+    "case": "prob_2_007_thick_ctria3",
+    "status": "completed",
+    "errors": [],
+    "modes": [],
+    "residual_lines": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Lee\\prob_2_007_thick_ctria3\\model.dat"
+  },
+  {
+    "variant": "Nguyen",
+    "case": "model210",
+    "status": "completed",
+    "errors": [],
+    "modes": [],
+    "residual_lines": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Nguyen\\model210\\model.dat"
+  },
+  {
+    "variant": "Nguyen",
+    "case": "model217",
+    "status": "completed",
+    "errors": [],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 127.3982,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 2,
+        "eigenvalue": 1058.805,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 3,
+        "eigenvalue": 2352.962,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 4,
+        "eigenvalue": 2411.855,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 5,
+        "eigenvalue": 2434.968,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 6,
+        "eigenvalue": 2435.004,
+        "frequency": null,
+        "subcase": 2
+      }
+    ],
+    "residual_lines": [
+      "BUCKLING EIGENPAIR RESIDUAL        1   5.1089364423815605E-11",
+      "BUCKLING EIGENPAIR RESIDUAL        2   2.5603313427291859E-11",
+      "BUCKLING EIGENPAIR RESIDUAL        3   2.5532114720297921E-11",
+      "BUCKLING EIGENPAIR RESIDUAL        4   2.4374091011569418E-11",
+      "BUCKLING EIGENPAIR RESIDUAL        5   2.6714929575635381E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        6   6.1994308583183643E-07"
+    ],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Nguyen\\model217\\model.dat"
+  },
+  {
+    "variant": "Nguyen",
+    "case": "prob_2_007_thick_ctria3",
+    "status": "completed",
+    "errors": [],
+    "modes": [],
+    "residual_lines": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Nguyen\\prob_2_007_thick_ctria3\\model.dat"
+  },
+  {
+    "variant": "Lee",
+    "case": "shear_DARPACK2",
+    "status": "solver_error",
+    "errors": [
+      "*ERROR: buckling eigenpair residual exceeds 1E-6           6   4.8927350789982573E-006"
+    ],
+    "modes": [],
+    "residual_lines": [
+      "Current DARPACK=           2 ; solver defaults and residual acceptance are unchanged.",
+      "BUCKLING EIGENPAIR RESIDUAL        1   3.4216638624777023E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        2   4.2155008649919373E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        3   8.6523356265365461E-10",
+      "BUCKLING EIGENPAIR RESIDUAL        4   2.9520065658875585E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        5   4.9499126044547284E-10",
+      "BUCKLING EIGENPAIR RESIDUAL        6   4.8927350789982573E-06",
+      "*ERROR: buckling eigenpair residual exceeds 1E-6           6   4.8927350789982573E-006"
+    ],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\buckling_margin\\2\\model.dat"
+  },
+  {
+    "variant": "Lee",
+    "case": "shear_DARPACK4",
+    "status": "solver_error",
+    "errors": [
+      "*ERROR   903: ERROR ENCOUNTERED WITH IOSTAT =       13 CLOSING FILE:"
+    ],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 0.0004238845,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 2,
+        "eigenvalue": 0.0005255519,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 3,
+        "eigenvalue": 0.001130437,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 4,
+        "eigenvalue": 0.001221079,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 5,
+        "eigenvalue": 0.001396128,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 6,
+        "eigenvalue": 0.00147106,
+        "frequency": null,
+        "subcase": 2
+      }
+    ],
+    "residual_lines": [
+      "Current DARPACK=           4 ; solver defaults and residual acceptance are unchanged.",
+      "BUCKLING EIGENPAIR RESIDUAL        1   3.4246154942495946E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        2   4.2122512096601649E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        3   8.6587245235903803E-10",
+      "BUCKLING EIGENPAIR RESIDUAL        4   2.9519254794610413E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        5   4.9525368207325446E-10",
+      "BUCKLING EIGENPAIR RESIDUAL        6   1.3077452361049327E-10"
+    ],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\buckling_margin\\4\\model.dat"
+  },
+  {
+    "variant": "Lee",
+    "case": "shear_DARPACK6",
+    "status": "completed",
+    "errors": [],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 0.0004238845,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 2,
+        "eigenvalue": 0.0005255519,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 3,
+        "eigenvalue": 0.001130437,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 4,
+        "eigenvalue": 0.001221079,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 5,
+        "eigenvalue": 0.001396128,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 6,
+        "eigenvalue": 0.00147106,
+        "frequency": null,
+        "subcase": 2
+      }
+    ],
+    "residual_lines": [
+      "Current DARPACK=           6 ; solver defaults and residual acceptance are unchanged.",
+      "BUCKLING EIGENPAIR RESIDUAL        1   3.4222283943004427E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        2   4.2143675037853078E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        3   8.6531902780764969E-10",
+      "BUCKLING EIGENPAIR RESIDUAL        4   2.9520491105816845E-09",
+      "BUCKLING EIGENPAIR RESIDUAL        5   4.9605676753318790E-10",
+      "BUCKLING EIGENPAIR RESIDUAL        6   1.1875162789086909E-10"
+    ],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\buckling_margin\\6\\model.dat"
+  }
+]

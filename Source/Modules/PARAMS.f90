@@ -514,7 +514,7 @@
       CHARACTER(  8*BYTE)      :: TRIARTYP       = 'DKMT18  ' ! Which element to use in MYSTRAN as the CTRIAR element
 !                                                              'DKMT18  ': DKMT18/Maknun triangular shell branch
 !                                                              'T3FFD   ': Krysl T3FFD/T3FFA triangular shell branch (experimental)
-!                                                              'MITC3+HB': MITC3+ Hughes-Brezzi triangular shell branch (experimental)
+!                                                              'KMITC3+ ': Nguyen2024 Allman/composite-curvature reconstruction (experimental)
 
 ! ----------------------------------------------------------------------------------------------------------------------------------
       CHARACTER(  8*BYTE)      :: TRIA6TYP       = 'SIMOT6  ' ! Which element to use in MYSTRAN as the CTRIA6 element
@@ -672,7 +672,7 @@
 
 ! Returns true for CTRIAR formulations whose stiffness is built from generated nodal normals.
 
-      CTRIAR_NEEDS_GENERATED_SNORM = ((TTYPE == 'DKMT18  ') .OR. (TTYPE == 'T3FFD   ') .OR. (TTYPE == 'MITC3+HB'))
+      CTRIAR_NEEDS_GENERATED_SNORM = ((TTYPE == 'DKMT18  ') .OR. (TTYPE == 'T3FFD   '))
 
       END FUNCTION CTRIAR_NEEDS_GENERATED_SNORM
 

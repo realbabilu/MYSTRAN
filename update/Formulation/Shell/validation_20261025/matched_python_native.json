@@ -1,0 +1,122 @@
+[
+  {
+    "variant": "Lee",
+    "path": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\regression\\Lee\\prob_2_002_nx24_cquadr_simo\\model.dat",
+    "subcases": [
+      {
+        "subcase": 1,
+        "relative_displacement_error": 1.941585441300996e-11
+      },
+      {
+        "subcase": 2,
+        "relative_displacement_error": 1.2073090423874258e-07
+      },
+      {
+        "subcase": 3,
+        "relative_displacement_error": 1.166601339620615e-07
+      },
+      {
+        "subcase": 4,
+        "relative_displacement_error": 1.2323635433037206e-07
+      },
+      {
+        "subcase": 5,
+        "relative_displacement_error": 1.4524804324095067e-07
+      },
+      {
+        "subcase": 6,
+        "relative_displacement_error": 6.951527168218937e-08
+      }
+    ]
+  },
+  {
+    "variant": "Lee",
+    "path": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Lee\\model210\\model.dat",
+    "subcases": [
+      {
+        "subcase": 1,
+        "relative_displacement_error": 1.666453831816906e-07
+      }
+    ]
+  },
+  {
+    "variant": "Lee",
+    "path": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Lee\\model217\\model.dat",
+    "subcases": [
+      {
+        "subcase": 1,
+        "relative_displacement_error": 1.6578939993098346e-07
+      }
+    ]
+  },
+  {
+    "variant": "Lee",
+    "path": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Lee\\prob_2_007_thick_ctria3\\model.dat",
+    "subcases": [
+      {
+        "subcase": 1,
+        "relative_displacement_error": 8.543985992498806e-08
+      }
+    ]
+  },
+  {
+    "variant": "Nguyen",
+    "path": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\regression\\Nguyen\\prob_2_002_nx24_cquadr_simo\\model.dat",
+    "subcases": [
+      {
+        "subcase": 1,
+        "relative_displacement_error": 7.286469733818296e-08
+      },
+      {
+        "subcase": 2,
+        "relative_displacement_error": 8.26501662488114e-08
+      },
+      {
+        "subcase": 3,
+        "relative_displacement_error": 1.0732072154136567e-07
+      },
+      {
+        "subcase": 4,
+        "relative_displacement_error": 1.0974026007390004e-07
+      },
+      {
+        "subcase": 5,
+        "relative_displacement_error": 1.48753637018991e-07
+      },
+      {
+        "subcase": 6,
+        "relative_displacement_error": 6.951971267750287e-08
+      }
+    ]
+  },
+  {
+    "variant": "Nguyen",
+    "path": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Nguyen\\model210\\model.dat",
+    "subcases": [
+      {
+        "subcase": 1,
+        "relative_displacement_error": 1.3464699899808917e-07
+      }
+    ]
+  },
+  {
+    "variant": "Nguyen",
+    "path": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Nguyen\\model217\\model.dat",
+    "subcases": [
+      {
+        "subcase": 1,
+        "relative_displacement_error": 1.507218554601459e-07
+      }
+    ]
+  },
+  {
+    "variant": "Nguyen",
+    "path": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\supplied_native\\Nguyen\\prob_2_007_thick_ctria3\\model.dat",
+    "subcases": [
+      {
+        "subcase": 1,
+        "relative_displacement_error": 1.5964152953790852e-07
+      }
+    ]
+  }
+]

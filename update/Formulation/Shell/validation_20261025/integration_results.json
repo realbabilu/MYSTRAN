@@ -1,0 +1,36 @@
+[
+  {
+    "test": "mixed",
+    "status": "completed",
+    "errors": [],
+    "K_relative_error": 2.7250843807259424e-16,
+    "f06_stress_element_ids": [
+      1,
+      2
+    ],
+    "op2_tables": {
+      "ctria3_stress": {
+        "1": [
+          1,
+          2
+        ]
+      },
+      "ctriar_stress": {},
+      "ctria3_force": {
+        "1": [
+          1,
+          2
+        ]
+      },
+      "ctriar_force": {}
+    },
+    "op2_f06_max_stress_difference": 0.00015484619140693212
+  },
+  {
+    "test": "removed_HB",
+    "status": "solver_error",
+    "errors": [
+      "*ERROR: MITC3+HB has been removed. Select KMITC3+ explicitly for the Nguyen research formulation."
+    ]
+  }
+]

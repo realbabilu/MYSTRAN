@@ -182,6 +182,12 @@
          ENDIF
 
          IF (TYPE == 'TRIA3   ') THEN
+! Membrane routine initializes all PTE entries; assemble it before the plate gradient.
+            IF ((TRIA3TYP == 'MITC3+') .AND. (INTL_MID(1) /= 0) .AND. (OPT(2) == 'Y')) THEN
+               OPT_THERM = 'N'
+               OPT_THERM(2) = 'Y'
+               CALL TMEM1 ( OPT_THERM, AREA, X2E, X3E, Y3E, 'N', BIG_BM )
+            ENDIF
             IF (INTL_MID(2) /= 0) THEN
                IF (TRIA3TYP == 'MITC3+') THEN
                   CALL MITC_INITIALIZE ()
@@ -200,11 +206,6 @@
                CALL TMEM1 ( OPT_REC, AREA, X2E, X3E, Y3E, 'N', BIG_BM )
             ENDIF
 
-            IF ((TRIA3TYP == 'MITC3+') .AND. (INTL_MID(1) /= 0) .AND. (OPT(2) == 'Y')) THEN
-               OPT_THERM = 'N'
-               OPT_THERM(2) = 'Y'
-               CALL TMEM1 ( OPT_THERM, AREA, X2E, X3E, Y3E, 'N', BIG_BM )
-            ENDIF
          ENDIF
 
       ENDIF

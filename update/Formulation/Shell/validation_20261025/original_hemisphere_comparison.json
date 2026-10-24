@@ -1,0 +1,16 @@
+[
+  {
+    "variant": "Lee",
+    "original_grid1_UX": 0.09324123,
+    "original_grid9_UY": -0.09377621,
+    "grid1_ratio": 0.9919279787234042,
+    "grid9_ratio": 0.997619255319149
+  },
+  {
+    "variant": "Nguyen",
+    "original_grid1_UX": 0.02403265,
+    "original_grid9_UY": -0.02431911,
+    "grid1_ratio": 0.2556664893617021,
+    "grid9_ratio": 0.25871393617021277
+  }
+]

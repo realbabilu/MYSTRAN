@@ -1,0 +1,58 @@
+[
+  {
+    "formulation": "Lee",
+    "geometry": "skew",
+    "status": "completed",
+    "relative_K_error": 2.904467411304082e-16,
+    "nullity": 6
+  },
+  {
+    "formulation": "Lee",
+    "geometry": "rotated",
+    "status": "completed",
+    "relative_K_error": 2.9044674113040816e-16,
+    "nullity": 6
+  },
+  {
+    "formulation": "Lee",
+    "geometry": "cyclic",
+    "status": "completed",
+    "relative_K_error": 2.07548063113291e-16,
+    "nullity": 6
+  },
+  {
+    "formulation": "Lee",
+    "geometry": "reversed",
+    "status": "completed",
+    "relative_K_error": 1.7668249270093082e-16,
+    "nullity": 6
+  },
+  {
+    "formulation": "Nguyen",
+    "geometry": "skew",
+    "status": "completed",
+    "relative_K_error": 2.58899490652902e-16,
+    "nullity": 6
+  },
+  {
+    "formulation": "Nguyen",
+    "geometry": "rotated",
+    "status": "completed",
+    "relative_K_error": 2.5889949065290203e-16,
+    "nullity": 6
+  },
+  {
+    "formulation": "Nguyen",
+    "geometry": "cyclic",
+    "status": "completed",
+    "relative_K_error": 4.0854994170523764e-16,
+    "nullity": 6
+  },
+  {
+    "formulation": "Nguyen",
+    "geometry": "reversed",
+    "status": "completed",
+    "relative_K_error": 3.3789612747935554e-16,
+    "nullity": 6
+  }
+]

@@ -1,24 +1,22 @@
 ! --- shell_renovation begin --- !
       SUBROUTINE TPLT_MITC3P ( OPT, AREA, X2E, X3E, Y3E, BIG_BB )
 
-! Experimental MITC3+ triangular shell bending/shear kernel for PARAM,TRIA3TYP,MITC3+.
-! This is a first MYSTRAN port of the uploaded Python implementation in:
-!   D:\mystran2\mitc3+\mitc3plus.py
-!
-! Scope in this first port:
-!   - 18 shell DOF: u, v, w, rx, ry, rz at each of 3 CTRIA3 grids
-!   - adds only the plate/shell bending + transverse shear
-!   - uses 2 internal bubble rotational DOF condensed at element level
-!   - membrane remains supplied by TMEM1 in TREL1 for legacy CTRIA3
-!   - pressure/thermal are intentionally left to legacy paths for now
+! CTRIA3 MITC3+: Lee2014 six interior shear tying points, three Gauss points,
+! compatible two-rotation bubble with Schur condensation, CST membrane,
+! and consistent-spin drilling alpha=0.01. Owner-authorized default update.
+! DEBUG242=2 retains the old operators solely for historical diagnostics.
+! Pressure and condensed thermal-gradient loads are retained; no eigensolver
+! defaults or residual thresholds are changed. DARPACK=4 is an explicit deck
+! setting for the validated six-mode shear-buckling benchmark.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE IOUNT1, ONLY                :  BUG, BUGOUT, ERR, F06
-      USE SCONTR, ONLY                :  BLNK_SUB_NAM
+      USE SCONTR, ONLY                :  BLNK_SUB_NAM, SOL_NAME
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, THREE
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE PARAMS, ONLY                :  EPSIL
-      USE MODEL_STUF, ONLY            :  BE2, BE3, EID, ELDOF, EPROP, KE, PHI_SQ, SE2, SE3, SHELL_A, SHELL_D, SHELL_T, TYPE
+      USE PARAMS, ONLY                :  EPSIL, DARPACK
+      USE MODEL_STUF, ONLY            :  BE2, BE3, EID, ELDOF, EPROP, KE, PHI_SQ, SE2, SE3, SHELL_A, SHELL_D, SHELL_T, TYPE, PPE, PRESS
+      USE MODEL_STUF, ONLY : PTE, DT, ELGP, SHELL_DALP
       USE MITC_STUF, ONLY             :  DIRECTOR
       USE OUTA_HERE_Interface
       USE CROSS_Interface
@@ -45,10 +43,34 @@
       REAL(DOUBLE)                    :: BB(3,8), BS(2,11), BM(3,6), KEI, FACTOR, GVAL, CDRILL
       REAL(DOUBLE)                    :: BB_REC(3,18), BS_REC(2,18), DUM318(3,18), DUM218(2,18)
       REAL(DOUBLE)                    :: GAUSS_R(7), GAUSS_S(7), GAUSS_W(7)
+      REAL(DOUBLE) :: FTG(20), FTGC(18)
+      REAL(DOUBLE) :: BDR(18), DHSPIN(3,2), GSPIN(3,2), NSPIN(3)
+      LOGICAL, SAVE :: ANNOUNCED=.FALSE.
       REAL(DOUBLE)                    :: EPS1
 
+      IF (.NOT. ANNOUNCED) THEN
+         IF (DEBUG(242) /= 2) THEN
+            WRITE(F06,*) ' *INFORMATION: CTRIA3 MITC3+ uses Lee interior tying + consistent spin (alpha=0.01).'
+         ELSE
+            WRITE(F06,*) ' *INFORMATION: DEBUG242=2 selects historical MITC3+ diagnostic operators.'
+         ENDIF
+         IF (SOL_NAME(1:8) == 'BUCKLING') THEN
+            WRITE(F06,*) ' *INFORMATION: MITC3+ six-mode shear benchmark requires explicit PARAM,DARPACK,4.'
+            WRITE(F06,*) ' Current DARPACK=',DARPACK,'; solver defaults and residual acceptance are unchanged.'
+         ENDIF
+         ANNOUNCED=.TRUE.
+      ENDIF
       BIG_BB = ZERO
-      IF ((OPT(3) /= 'Y') .AND. (OPT(4) /= 'Y') .AND. (OPT(6) /= 'Y')) RETURN
+! Pressure-only calls do not enter the bending/shear stiffness branch below.
+! Bubble DOFs are rotations, so constant pressure has no bubble load term.
+      IF (OPT(5) == 'Y') THEN
+         DO J=1,SIZE(PPE,2)
+            PPE( 3,J) = AREA*PRESS(3,J)/THREE
+            PPE( 9,J) = AREA*PRESS(3,J)/THREE
+            PPE(15,J) = AREA*PRESS(3,J)/THREE
+         ENDDO
+      ENDIF
+      IF ((OPT(2) /= 'Y') .AND. (OPT(3) /= 'Y') .AND. (OPT(4) /= 'Y') .AND. (OPT(6) /= 'Y')) RETURN
 
       EPS1 = EPSIL(1)
       IF (AREA <= EPS1) THEN
@@ -92,12 +114,21 @@
 
       CALL MITC3P_GAUSS_3PT(GAUSS_R, GAUSS_S, GAUSS_W)
 
+      FTG = ZERO
       KFULL = ZERO
       DO GP=1,3
          CALL MITC3P_BM_AT(JINV, BM)
          CALL MITC3P_BB_AT(GAUSS_R(GP), GAUSS_S(GP), JINV, BB)
          CALL MITC3P_BS_AT(GAUSS_R(GP), GAUSS_S(GP), XY, JINV, JMAT, BS)
          FACTOR = GAUSS_W(GP)*DETJ
+         IF (OPT(2) == 'Y') THEN
+            DO I=1,20
+               DO K=1,3
+                  FTG(I) = FTG(I) + FACTOR*MITC3P_BB_TERM(BB,K,I)*SHELL_DALP(K)
+               ENDDO
+            ENDDO
+         ENDIF
+
 
          DO I=1,6
             DO J=1,6
@@ -141,10 +172,32 @@
 ! translational coupling used by CALC_K6ROT.
       GVAL = ZERO
       IF (DABS(SHELL_T(1,1)) > 1.0D-20) GVAL = SHELL_T(1,1)/(KAPPA*EPROP(1))
-      CDRILL = 1.0D-4 * GVAL * EPROP(1) * AREA
-      KFULL( 6, 6) = KFULL( 6, 6) + CDRILL
-      KFULL(12,12) = KFULL(12,12) + CDRILL
-      KFULL(18,18) = KFULL(18,18) + CDRILL
+! DEBUG 242=1: isolated Lee-style tying + consistent-spin research branch.
+! Flat-facet operator, alpha_spin=1e-2 and tying distance=1e-4 match Python.
+      IF (DEBUG(242) /= 2) THEN
+         CALL MITC3P_DH(DHSPIN)
+         GSPIN = MATMUL(DHSPIN,TRANSPOSE(JINV))
+         CDRILL = 1.0D-2*GVAL*EPROP(1)*AREA/THREE
+         DO GP=1,3
+            NSPIN = (/ ONE-GAUSS_R(GP)-GAUSS_S(GP),GAUSS_R(GP),GAUSS_S(GP) /)
+            BDR = ZERO
+            DO I=1,3
+               BDR(6*I-5) = -0.5D0*GSPIN(I,2)
+               BDR(6*I-4) =  0.5D0*GSPIN(I,1)
+               BDR(6*I) = -NSPIN(I)
+            ENDDO
+            DO I=1,18
+               DO J=1,18
+                  KFULL(I,J) = KFULL(I,J) + CDRILL*BDR(I)*BDR(J)
+               ENDDO
+            ENDDO
+         ENDDO
+      ELSE
+         CDRILL = 1.0D-4 * GVAL * EPROP(1) * AREA
+         KFULL( 6, 6) = KFULL( 6, 6) + CDRILL
+         KFULL(12,12) = KFULL(12,12) + CDRILL
+         KFULL(18,18) = KFULL(18,18) + CDRILL
+      ENDIF
 
       KAA = KFULL(1:18,1:18)
       KAB = KFULL(1:18,19:20)
@@ -152,6 +205,14 @@
       KBB = KFULL(19:20,19:20)
       CALL MITC3P_INV2(KBB, KBB_INV)
       KCOND = KAA - MATMUL(KAB, MATMUL(KBB_INV, KBA))
+! Condense the bubble thermal forces with the same partition as stiffness.
+      IF (OPT(2) == 'Y') THEN
+         FTGC = FTG(1:18) - MATMUL(KAB,MATMUL(KBB_INV,FTG(19:20)))
+         DO J=1,SIZE(PTE,2)
+            PTE(1:18,J) = PTE(1:18,J) + FTGC*DT(ELGP+1,J)
+         ENDDO
+      ENDIF
+
 
       CALL MITC3P_BB_AT(ONE/THREE, ONE/THREE, JINV, BB)
       CALL MITC3P_BS_AT(ONE/THREE, ONE/THREE, XY, JINV, JMAT, BS)
@@ -451,6 +512,8 @@
          DF4(1) = 27.0D0*S*(T - R)
          DF4(2) = 27.0D0*R*(T - S)
          DF4_XY = MATMUL(TRANSPOSE(JI), DF4)
+! Lee candidate uses the Python physical bubble gradient, not legacy transpose.
+         IF (DEBUG(242) /= 2) DF4_XY = MATMUL(JI, DF4)
          BBOUT = ZERO
          DO II=1,3
             BBOUT(1,2*II  ) =  DH_XY(II,1)
@@ -495,6 +558,11 @@
          REAL(DOUBLE) :: F4V
          REAL(DOUBLE) :: X21, Y21, X31, Y31, X32, Y32, AREA2
 
+         IF (DEBUG(242) /= 2) THEN
+            CALL MITC3P_BS_LEE(R,S,XYL,JI,BSOUT)
+            RETURN
+         ENDIF
+
          BMID = ZERO
          X21 = XYL(2,1) - XYL(1,1); Y21 = XYL(2,2) - XYL(1,2)
          X31 = XYL(3,1) - XYL(1,1); Y31 = XYL(3,2) - XYL(1,2)
@@ -524,6 +592,48 @@
       END SUBROUTINE MITC3P_BS_AT
 
 ! --- shell_renovation begin --- !
+! Exact algebraic port of the supplied Lee2014 Python candidate.
+      SUBROUTINE MITC3P_COV_LEE(R,S,XYL,JI,ER,ES)
+         REAL(DOUBLE), INTENT(IN) :: R,S,XYL(3,2),JI(2,2)
+         REAL(DOUBLE), INTENT(OUT) :: ER(11),ES(11)
+         REAL(DOUBLE) :: DH(3,2),GRAD(3,2),N(3),GX(11),GY(11),BUB
+         INTEGER(LONG) :: II
+         CALL MITC3P_DH(DH)
+         GRAD=MATMUL(DH,TRANSPOSE(JI))
+         N=(/ ONE-R-S,R,S /)
+         GX=ZERO
+         GY=ZERO
+         DO II=1,3
+            GX(3*II-2)=GRAD(II,1)
+            GY(3*II-2)=GRAD(II,2)
+            GX(3*II)=N(II)
+            GY(3*II-1)=-N(II)
+         ENDDO
+         BUB=27.0D0*R*S*(ONE-R-S)
+         GX(11)=BUB
+         GY(10)=-BUB
+         ER=XYL(2,1)*GX+XYL(2,2)*GY
+         ES=XYL(3,1)*GX+XYL(3,2)*GY
+      END SUBROUTINE MITC3P_COV_LEE
+
+      SUBROUTINE MITC3P_BS_LEE(R,S,XYL,JI,BSOUT)
+         REAL(DOUBLE), INTENT(IN) :: R,S,XYL(3,2),JI(2,2)
+         REAL(DOUBLE), INTENT(OUT) :: BSOUT(2,11)
+         REAL(DOUBLE), PARAMETER :: DIST=1.0D-4
+         REAL(DOUBLE) :: ERA(11),ESA(11),ERB(11),ESB(11),ERC(11),ESC(11)
+         REAL(DOUBLE) :: ERD(11),ESD(11),ERE(11),ESE(11),ERF(11),ESF(11),C(11),TMP(2,11)
+         CALL MITC3P_COV_LEE(ONE/6.0D0,TWO/THREE,XYL,JI,ERA,ESA)
+         CALL MITC3P_COV_LEE(TWO/THREE,ONE/6.0D0,XYL,JI,ERB,ESB)
+         CALL MITC3P_COV_LEE(ONE/6.0D0,ONE/6.0D0,XYL,JI,ERC,ESC)
+         CALL MITC3P_COV_LEE(ONE/THREE+DIST,ONE/THREE-TWO*DIST,XYL,JI,ERD,ESD)
+         CALL MITC3P_COV_LEE(ONE/THREE-TWO*DIST,ONE/THREE+DIST,XYL,JI,ERE,ESE)
+         CALL MITC3P_COV_LEE(ONE/THREE+DIST,ONE/THREE+DIST,XYL,JI,ERF,ESF)
+         C=(ERF-ERD)-(ESF-ESE)
+         TMP(1,:)=(TWO*ERB-ESB+ERC+ESC)/THREE+C*(THREE*S-ONE)/THREE
+         TMP(2,:)=(TWO*ESA-ERA+ERC+ESC)/THREE+C*(ONE-THREE*R)/THREE
+         BSOUT=MATMUL(JI,TMP)
+      END SUBROUTINE MITC3P_BS_LEE
+
       SUBROUTINE MITC3P_NODE_BASIS(INODE, REF1, REF2, V1, V2)
          INTEGER(LONG), INTENT(IN)  :: INODE
          REAL(DOUBLE), INTENT(IN)   :: REF1(3), REF2(3)

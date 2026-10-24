@@ -3151,18 +3151,23 @@
                TRIARTYP = 'DKMT18  '
             ELSE IF ((CHRPARM == 'T3FFD   ') .OR. (CHRPARM == 'T3FFA   ')) THEN
                TRIARTYP = 'T3FFD   '
-            ELSE IF ((CHRPARM == 'MITC3+HB') .OR. (CHRPARM == 'MITC3PHB') .OR. (CHRPARM == 'MITC3PHD') .OR.                    &
-                     (CHRPARM == 'MITC3DHB')) THEN
-               TRIARTYP = 'MITC3+HB'
+            ELSE IF (CHRPARM == 'KMITC3+ ') THEN
+               TRIARTYP = 'KMITC3+ '
+               WRITE(F06,*) ' *INFORMATION: TRIARTYP=KMITC3+; Nguyen2024 EXPERIMENTAL/HOLD.'
+            ELSE IF ((CHRPARM == 'MITC3+HB') .OR. (CHRPARM == 'MITC3PHB') .OR. &
+                     (CHRPARM == 'MITC3PHD') .OR. (CHRPARM == 'MITC3DHB')) THEN
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,*) ' *ERROR: MITC3+HB has been removed. Select KMITC3+ explicitly for the Nguyen research formulation.'
+               WRITE(F06,*) ' *ERROR: MITC3+HB has been removed. Select KMITC3+ explicitly for the Nguyen research formulation.'
             ELSE
                WARN_ERR = WARN_ERR + 1
                WRITE(ERR,101) CARD
-               WRITE(ERR,1189) PARNAM,'DKMT18, T3FFD, MITC3+HB or MITC3PHB',CHRPARM,TRIARTYP
+               WRITE(ERR,1189) PARNAM,'DKMT18, T3FFD or KMITC3+',CHRPARM,TRIARTYP
                IF (SUPWARN == 'N') THEN
                   IF (ECHO == 'NONE  ') THEN
                      WRITE(F06,101) CARD
                   ENDIF
-                  WRITE(F06,1189) PARNAM,'DKMT18, T3FFD, MITC3+HB or MITC3PHB',CHRPARM,TRIARTYP
+                  WRITE(F06,1189) PARNAM,'DKMT18, T3FFD or KMITC3+',CHRPARM,TRIARTYP
                ENDIF
             ENDIF
          ENDIF

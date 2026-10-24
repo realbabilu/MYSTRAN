@@ -1,0 +1,15 @@
+{
+  "source_matches_tested_candidate": true,
+  "source_sha256": {
+    "Source/Modules/PARAMS.f90": "bd7fb3edc7f71415cb6c6ffe86f0ee9cff3b357aca96ccf5474bb36c7b4fe1cf",
+    "Source/Interfaces/CTRIAR_KMITC3P_Interface.f90": "27161b01d5c9c1f6f60fa926ab0b7084d1adfe0e953b8811a14ed8a7a4ea20ab",
+    "Source/EMG/EMG4/CTRIAR_KMITC3P.f90": "fe01cfd053ca33a21a3842ff09d99dc6a39593f708ecdddb27151d2a395b8438",
+    "Source/USE_IFs/EMG_USE_IFs.f90": "9722d921044588ac58356996951ba1ea3754f82fe40206439198aa450d6d18ca",
+    "Source/LK1/L1A-BD/BD_PARAM.F90": "41d74880b54059e26c44bf91493b4e66f381c9ba4735e78989b13e2b2abcae2c",
+    "Source/EMG/EMG4/TPLT_MITC3P.f90": "b1af9407fd8775d862f2138758825aee7b52f42acb30695bf79f537550b7cc41",
+    "Source/EMG/EMG4/TREL1.f90": "d4c37b5c7f3182f6059a15b0b0401212dbb2902956fb5c9e6bd41a0c115761c3",
+    "Source/EMG/EMG1/EMG.f90": "ee13c5b8891098d04345298f9ed99d2ae03fd7c399204d2726a746da12e2c283"
+  },
+  "default_executable_sha256": "cff2b3446938340525c3e42a4c82ecefe0dfcb8aa4cd662b0aec5e01dc313d54",
+  "eigensolver_sha256": "722888792910ac080106d6d54208920b608a52cf302e5fb3e28b9a26fed8b0db"
+}

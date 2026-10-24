@@ -1,0 +1,12 @@
+{
+  "DARPACK4_vs_6_MAC": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "requested_modes": 6,
+  "solver_defaults_unchanged": true
+}

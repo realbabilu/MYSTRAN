@@ -1,0 +1,27 @@
+{
+  "status": "completed",
+  "elastic_relative_error": 1.3793211606656013e-16,
+  "geometric_relative_error": 4.485065063437018e-14,
+  "geometric_nonzeros_read": 1137,
+  "preload_printed_relative_difference": 1.373372998719068e-07,
+  "python_first_six": [
+    131.57331133012767,
+    1106.8927131518426,
+    2739.7882025518775,
+    3756.7243027559584,
+    3756.7243027559603,
+    3958.012587412528
+  ],
+  "native_first_six": [
+    131.5733,
+    685.5907,
+    686.1437,
+    686.2421,
+    713.3178,
+    1062.787
+  ],
+  "max_eigenvalue_relative_difference": 0.8173296615094783,
+  "higher_mode_status": "HOLD: modes 2-6 differ despite K/Kg/preload parity; no shared solver changes",
+  "STIFFNESS MATRIX KLL_relative_error": 6.742506788720641e-16,
+  "STIFFNESS MATRIX KLLD_relative_error": 4.443120068745983e-14
+}

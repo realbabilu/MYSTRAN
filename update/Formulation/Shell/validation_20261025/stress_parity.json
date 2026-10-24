@@ -1,0 +1,22 @@
+[
+  {
+    "variant": "Lee",
+    "shape": "skew",
+    "relative_stress_error": 4.7523547766504884e-08
+  },
+  {
+    "variant": "Lee",
+    "shape": "rotated",
+    "relative_stress_error": 1.7538055207920937e-16
+  },
+  {
+    "variant": "Nguyen",
+    "shape": "skew",
+    "relative_stress_error": 4.669876740109297e-07
+  },
+  {
+    "variant": "Nguyen",
+    "shape": "rotated",
+    "relative_stress_error": 6.226902386553683e-07
+  }
+]

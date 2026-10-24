@@ -52,7 +52,7 @@
       USE CTRIA6_REZAIEE_Interface
       USE CTRIA6_SIMO1993_Interface
       USE CTRIAR_DKMT18_Interface
-      USE CTRIAR_MITC3PHB_Interface
+      USE CTRIAR_KMITC3P_Interface
       USE CTRIAR_T3FFD_Interface
        USE QDEL1_Interface
        USE CQUAD4_DSQK_RHR_Interface

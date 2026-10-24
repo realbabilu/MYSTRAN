@@ -58,6 +58,7 @@
                                          PCOMP_PROPS, PLY_NUM, SKIP_K6ROT, TE_IDENT, THETAM, TYPE, XEL, TE
 
       USE EMG_USE_IFs
+      USE CTRIAR_KMITC3P_Interface
       USE MITC8_Interface
       USE CALC_K6ROT_Interface
 
@@ -384,8 +385,8 @@
                CALL CTRIAR_DKMT18 ( OPT, INT_ELEM_ID )
             ELSE IF (TRIARTYP == 'T3FFD   ') THEN
                CALL CTRIAR_T3FFD ( OPT, INT_ELEM_ID )
-            ELSE IF (TRIARTYP == 'MITC3+HB') THEN
-               CALL CTRIAR_MITC3PHB ( OPT, INT_ELEM_ID )
+            ELSE IF (TRIARTYP == 'KMITC3+ ') THEN
+               CALL CTRIAR_KMITC3P ( OPT, INT_ELEM_ID )
             ELSE
                NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
                FATAL_ERR = FATAL_ERR + 1
@@ -398,11 +399,7 @@
             CALL CTRIA3_DSG3 ( OPT, INT_ELEM_ID )
          ELSE
             CALL TREL1 ( OPT, WRITE_WARN )
-            IF ((TRIA3TYP == 'MITC3+') .AND. (OPT(3) == 'Y')) THEN
-               REC_OPT = 'N'
-               REC_OPT(3) = 'Y'
-               CALL CTRIAR_DKMT18 ( REC_OPT, INT_ELEM_ID )
-            ENDIF
+! MITC3+ uses its own condensed Lee recovery; no DKMT18 substitution.
          ENDIF
          IF (NUM_EMG_FATAL_ERRS > 0)   CALL EMG_QUIT
 
