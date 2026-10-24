@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="515" viewBox="0 0 780 515" role="img" aria-label="MITC3+ corner node numbering and internal rotational bubble">
+ <rect width="780" height="515" fill="#fff"/>
+ <text x="35" y="40" font-size="23" font-family="Arial" font-weight="bold" fill="#18283f">MITC3+ reference triangle: 18 external + 2 internal DOFs</text>
+ <path d="M110 407 L650 407 L320 94 Z" fill="#eaf3ff" stroke="#2865a0" stroke-width="3"/>
+ <path d="M110 407 L650 407" stroke="#2865a0" stroke-width="4"/>
+ <circle cx="110" cy="407" r="9" fill="#1b5a95"/><circle cx="650" cy="407" r="9" fill="#1b5a95"/><circle cx="320" cy="94" r="9" fill="#1b5a95"/>
+ <circle cx="360" cy="303" r="11" fill="#e08b22" stroke="#8a5006" stroke-width="2"/>
+ <g font-family="Arial" font-size="20" fill="#18283f">
+ <text x="80" y="448" font-weight="bold">1 (0, 0)</text><text x="592" y="448" font-weight="bold">2 (1, 0)</text><text x="288" y="78" font-weight="bold">3 (0, 1)</text>
+ <text x="385" y="301" font-weight="bold" fill="#925400">4: bubble β₄</text>
+ <text x="115" y="477" font-size="16">u, v, w, θx, θy, θz at each corner</text>
+ <text x="385" y="328" font-size="16" fill="#925400">βx₄, βy₄ (condensed)</text>
+ <text x="466" y="390" font-style="italic">r</text><text x="296" y="177" font-style="italic">s</text>
+ </g>
+ <path d="M116 385 L213 385" stroke="#1a7f59" stroke-width="2" marker-end="url(#arrow)"/>
+ <path d="M116 385 L161 318" stroke="#1a7f59" stroke-width="2" marker-end="url(#arrow)"/>
+ <text x="230" y="388" font-family="Arial" fill="#1a7f59">r</text><text x="160" y="307" font-family="Arial" fill="#1a7f59">s</text>
+ <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#1a7f59"/></marker></defs>
+ <text x="35" y="502" font-family="Arial" font-size="14" fill="#56677a">Reference coordinates are schematic; the physical local (x,y,z) frame is right-handed.</text>
+</svg>
