@@ -40,11 +40,21 @@ The external nodal vector is $\mathbf d_i=[u_i,v_i,w_i,\theta_{xi},\theta_{yi},\
 For isotropic plane stress,
 
 $$
-\mathbf C_0=\frac{E}{1-\nu^2}
-\begin{bmatrix}1&\nu&0\\\nu&1&0\\0&0&(1-\nu)/2\end{bmatrix},\quad
-\mathbf D_m=h\mathbf C_0,\quad
-\mathbf D_b=\frac{h^3}{12}\mathbf C_0,\quad
-\mathbf D_s=\kappa_s Gh\mathbf I_2,
+\mathbf{C}_0 =
+\frac{E}{1-\nu^2}
+\begin{bmatrix}
+1 & \nu & 0 \\
+\nu & 1 & 0 \\
+0 & 0 & \dfrac{1-\nu}{2}
+\end{bmatrix}
+$$
+
+$$
+\begin{aligned}
+\mathbf{D}_m &= h\mathbf{C}_0, \\
+\mathbf{D}_b &= \frac{h^3}{12}\mathbf{C}_0, \\
+\mathbf{D}_s &= \kappa_s Gh\mathbf{I}_2
+\end{aligned}
 $$
 
 where $G=E/[2(1+\nu)]$ and the adopted formulation uses $\kappa_s=5/6$. Membrane, bending and shear contributions are assembled independently before internal-mode condensation.
