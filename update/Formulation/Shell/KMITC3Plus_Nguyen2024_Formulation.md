@@ -224,3 +224,4 @@ A computed/reference value of 1.13408 for the constrained-displacement shear tes
 
 1. Lee, Y., Lee, P.-S., and Bathe, K.-J. (2014). *The MITC3+ shell element and its performance.* **Computers & Structures**, 138, 12–23. https://doi.org/10.1016/j.compstruc.2014.02.005.
 2. Nguyen, S. H. (2024). *Linear composite curvature MITC3+ flat shell elements.* **Computers & Structures**, 295, 107272. https://doi.org/10.1016/j.compstruc.2024.107272.
+3. Computers and Structures, Inc., SAP2000 Verification: Shell Analysis, Verification collection. https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Shells/
