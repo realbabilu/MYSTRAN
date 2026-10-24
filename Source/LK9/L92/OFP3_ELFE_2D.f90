@@ -880,12 +880,11 @@ elems_3: DO J = 1,NELE
       LOCAL_TENSOR(1,2) = FORCE_LOCAL(6)
       LOCAL_TENSOR(2,1) = FORCE_LOCAL(6)
       BASIC_TENSOR = MATMUL( TBL, MATMUL(LOCAL_TENSOR, TRANSPOSE(TBL)) )
-!     MYSTRAN's shell stress-to-engineering-force conversion stores bending
-!     moments with the opposite sign to the Python DSG3 reference recovery.
-!     Flip only DSG3 moment resultants after local-to-basic rotation.
-      OGEL(IROW,4) = -BASIC_TENSOR(1,1)
-      OGEL(IROW,5) = -BASIC_TENSOR(2,2)
-      OGEL(IROW,6) = -BASIC_TENSOR(1,2)
+!     Rotate the physical moment tensor without changing its sign.
+!     Preserve M = integral(z*sigma(z) dz), as for the other linear shells.
+      OGEL(IROW,4) = BASIC_TENSOR(1,1)
+      OGEL(IROW,5) = BASIC_TENSOR(2,2)
+      OGEL(IROW,6) = BASIC_TENSOR(1,2)
 
       LOCAL_VEC = ZERO
       LOCAL_VEC(1) = FORCE_LOCAL(7)

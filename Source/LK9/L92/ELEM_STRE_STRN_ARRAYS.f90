@@ -285,7 +285,12 @@
            ALPTM(2) = ALPVEC(2  ,1)*(TBAR - TREF(1))
            ALPTM(3) = ALPVEC(4  ,1)*(TBAR - TREF(1))
            DO I=1,3
-             ALPTB(I) = ALPVEC(I  ,2)*DT(5,JTSUB)
+! Linear triangles store the TEMPP1 gradient after three nodal temperatures.
+             IF (TYPE(1:5) == 'TRIA3') THEN
+                ALPTB(I) = ALPVEC(I,2)*DT(4,JTSUB)
+             ELSE
+                ALPTB(I) = ALPVEC(I,2)*DT(5,JTSUB)
+             ENDIF
              ALPTT(I) = ALPVEC(I+3,3)*(TBAR - TREF(1))
            ENDDO
 ! Quadratic TEMPP1 gradient follows all ELGP mean-temperature entries, not DT(5).
