@@ -1,8 +1,8 @@
-<img width="1425" height="873" alt="mitc3plus_allman_2003_convergence" src="https://github.com/user-attachments/assets/7ebce31e-7b7a-44ae-a7c6-9d366b141c58" /># κMITC3+: A Three-Node Triangular Shell with Allman Drilling Membrane, Mixed Shear, and Linear Composite Curvature
+# κMITC3+: A Three-Node Triangular Shell with Allman Drilling Membrane, Mixed Shear, and Linear Composite Curvature
 
 **Ary | 25 October 2026 | Mathematical Formulation and Numerical Assessment**
 
-> **Scope.** A formulation-oriented research note based on Lee et al. (2014) and Nguyen (2024). Numerical comparisons describe shell-element performance and limitations; model adaptations are identified where relevant.
+**Scope.** A formulation-oriented research note based on Lee et al. (2014) and Nguyen (2024). Numerical comparisons describe shell-element performance and limitations; model adaptations are identified where relevant.
 
 ## Abstract
 
