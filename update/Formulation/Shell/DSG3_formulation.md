@@ -43,7 +43,7 @@ $$
 
 The local-to-global orthogonal transformation acts on **both** translations and rotations. The positive drilling rotation is the component along $\mathbf e_3$. Consistent right-hand-rule signs are used in membrane spin and nodal rotations.
 
-![DSG3 nodal numbering and drilling direction](figures/dsg3_nodal_frame.svg)
+<img width="1611" height="819" alt="image" src="https://github.com/user-attachments/assets/9312a72f-e724-402d-aaed-bc47c6cf9289" />
 
 *Figure 1. Facet geometry, three-node numbering and local drilling rotation. The schematic is illustrative; all stiffness terms use the actual triangular geometry.*
 
@@ -260,7 +260,7 @@ Unless indicated otherwise, the values below are absolute displacement errors in
 | 2-010 radial response | **10.574%** | 10.580% | Negligible regression |
 | 2-010 axial response | 0.216% | 0.216% | Unchanged |
 
-![DSG3 original versus consistent-spin static error](figures/dsg3_static_tradeoff.png)
+<img width="1530" height="850" alt="dsg3_static_tradeoff" src="https://github.com/user-attachments/assets/4cc84dae-3802-4443-8148-7100cf309c70" />
 
 *Figure 2. Selected static benchmark trade-offs. The four plate-loading combinations and cylinder axial result are tabulated but omitted from the graph because their original/new differences are below the precision shown.*
 
@@ -303,7 +303,7 @@ To examine whether the LC1 n24 regression is attributable to insufficient drilli
 | 0.007 | 12.264% | 5.791% | 2.377% | **0.468%** | 4.461% | 12.264% |
 | 0.010 | 12.736% | 6.527% | 3.265% | 0.560% | **3.178%** | 12.736% |
 
-![DSG3 LC1 coefficient-convergence curves](figures/dsg3_2004_lc1_convergence.png)
+<img width="1360" height="850" alt="dsg3_2004_lc1_convergence" src="https://github.com/user-attachments/assets/55c33386-e8e0-4cd1-a803-b43971966a6f" />
 
 *Figure 3. Absolute-error curves versus mesh refinement for selected consistent-spin stiffness scales. A coefficient that improves n24 need not improve n8 or n12.*
 
