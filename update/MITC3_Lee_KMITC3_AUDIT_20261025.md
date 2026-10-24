@@ -19,7 +19,7 @@
 | Exact source static parity |2-002 n24 LC1-6,2-010 pressure,2-017 preload, original2-007, both variants; max relative displacement error1.67e-7 |
 | Mixed model |Lee+KMITC3+ K relative error2.73e-16; both IDs in F06/OP2 stress and force tables |
 | Retired selector |MITC3+HB rejected with explicit migration error |
-| Nguyen coarse2-017 matrices |K1.38e-16,Kg4.49e-14 relative difference; higher spectrum HOLD |
+| Nguyen coarse2-017 matrices |K1.38e-16,Kg4.49e-14 relative difference; spectrum parity resolved by corrected SPC1 cards (see correction) |
 | Lee shear defaultDARPACK2 |Mode6 residual4.89273508e-6; known fail retained |
 | Lee shear DARPACK4 |Six modes complete; mode6 residual1.30774524e-10 |
 | Lee DARPACK4 versus6 |All six MAC=1.0 to reported precision |
@@ -47,7 +47,7 @@ Full measurements: [CSV](validation_20261025/regression_comparison.csv). Hemisph
 
 ## Decisions
 
-Lee is the owner-selected default with its recorded shear-patch, membrane and roof trade-offs. KMITC3+ is selectable **experimental/HOLD**: the severe coarse hemisphere regression, torsion regression, restrained thermal-stress variation and higher2-017 eigen-spectrum discrepancy prevent general certification. Small native eigen residuals alone do not establish Python/native spectrum equivalence. No shared eigensolver change is attempted.
+Lee is the owner-selected default with its recorded shear-patch, membrane and roof trade-offs. KMITC3+ is selectable **experimental/HOLD**: coarse-mesh hemisphere accuracy, torsion regression and restrained thermal-stress variation remain research limitations; the earlier 2-017 spectrum discrepancy is resolved as an input-constraint issue. Small native eigen residuals alone do not establish Python/native spectrum equivalence. No shared eigensolver change is attempted.
 
 Detailed notes: [Lee](MITC3Plus_Lee_Spin_20261025.md), [Nguyen](KMITC3Plus_Nguyen_20261025.md).
 
@@ -56,3 +56,12 @@ Detailed notes: [Lee](MITC3Plus_Lee_Spin_20261025.md), [Nguyen](KMITC3Plus_Nguye
 Workspace `H:/Projects/MYSTRAN/codex_mod/mitc3_lee_nguyen_20261024` contains candidate_sources, build_candidate.py, check_matrix_parity.py, check_stress.py, check_integration.py, matched_dat.py, run_regression.py, run_supplied.py, check_geometric.py and check_buckling_mac.py, raw DAT/F06/OP2/run.json and source/executable hashes. Source text was checked identical to the tested candidate after promotion. Build is an incremental replacement of eight objects in the previously controlled thermal/DSG3 archive, not a clean rebuild of the dirty checkout. Default source/Binaries/mystran.exe is unchanged; use the named tested mystran_lee_nguyen.exe.
 
 Before/after user source snapshots are preserved under source_before. Other dirty formulations, benchmark outputs and solid-element work were not staged as part of this change.
+
+
+## 2-017 parity correction — 25 October 2026
+
+The original SPC1 cards listed eight GRID IDs per line; the native reader consumes six. Python therefore constrained DOFs left free in MYSTRAN. Correcting the cards resolves the six-mode diagnostic discrepancy for both Lee and Nguyen. With SAP active UX/UZ/RY enforced on every node, including centroids, one-mode default-eigensolver runs match Python within 3.62e-7 relative error. No production Fortran or eigensolver changes were required. This supersedes the earlier unresolved-spectrum interpretation, while preserving its historical evidence.
+
+The original hemisphere ratio 0.25566649 is a coarse-mesh result: supplied Python refinement gives approximately 0.81553, 0.98735 and 0.99820 at 512, 2048 and 8192 triangles. It is not evidence of a wrong convergence limit.
+
+See [corrected parity evidence and input decks](validation_20261025/parity_2_017/README.md).

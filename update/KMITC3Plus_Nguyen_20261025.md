@@ -25,8 +25,17 @@ All71 native benchmark cases complete in the qualified run, including2-002,2-004
 
 - Original128-triangle hemisphere node1 result/reference=0.25566649, versus Lee0.99192798. This severe coarse-mesh regression is retained openly. Four-child benchmark meshes have different results and are not interchangeable with the original DAT.
 - 2-002 torsion n24 ratio1.12966745 versus Lee0.98445718.
-- Higher buckling modes are not certified. Coarse2-017 native six reported factors are131.5733,685.5907,686.1437,686.2421,713.3178,1062.787. Direct independent generalized eigenanalysis of matched K/Kg gives131.5733113,1106.8927132,2739.7882026,3756.7243028,3756.7243028,3958.0125874. First agrees; modes2-6 do not, despite small native reported residuals. Reduced KLL/KLLD print audits also match the Python restriction. Cause remains open; no shared solver modification is made.
+- The earlier 2-017 higher-mode discrepancy was traced to overlong SPC1 input cards, not a formulation or eigensolver defect. After splitting cards, all six diagnostic factors agree on both meshes. First-Pcr SAP-active-DOF parity also agrees for both formulations; see the correction below.
 - Native2-013 restrained thermal stress extrema differ from Lee/control and require a separate Allman/drilling-boundary recovery audit. No blanket thermal-stress certification.
 - Laminates, arbitrary nodal thickness, exact curved-shell edge stress, and full paper quadrature equivalence are not certified.
 
 This branch is provided for explicit research use; successful solver termination does not remove these HOLD conditions. See [audit](MITC3_Lee_KMITC3_AUDIT_20261025.md).
+
+
+## 2-017 parity correction — 25 October 2026
+
+The original SPC1 cards listed eight GRID IDs per line; the native reader consumes six. Python therefore constrained DOFs left free in MYSTRAN. Correcting the cards resolves the six-mode diagnostic discrepancy for both Lee and Nguyen. With SAP active UX/UZ/RY enforced on every node, including centroids, one-mode default-eigensolver runs match Python within 3.62e-7 relative error. No production Fortran or eigensolver changes were required. This supersedes the earlier unresolved-spectrum interpretation, while preserving its historical evidence.
+
+The original hemisphere ratio 0.25566649 is a coarse-mesh result: supplied Python refinement gives approximately 0.81553, 0.98735 and 0.99820 at 512, 2048 and 8192 triangles. It is not evidence of a wrong convergence limit.
+
+See [corrected parity evidence and input decks](validation_20261025/parity_2_017/README.md).

@@ -1,0 +1,190 @@
+[
+  {
+    "formulation": "Lee",
+    "mesh": "nx2_ny12",
+    "status": "completed",
+    "SPC1_cards_split": 5,
+    "modes": [
+      {
+        "mode": 1,
+        "python": 167.96301951894452,
+        "mystran": 167.963,
+        "relative_difference": 1.162097739273594e-07
+      },
+      {
+        "mode": 2,
+        "python": 1403.7648641100207,
+        "mystran": 1403.765,
+        "relative_difference": 9.680394695799364e-08
+      },
+      {
+        "mode": 3,
+        "python": 3436.483197972063,
+        "mystran": 3436.483,
+        "relative_difference": 5.7608913349422053e-08
+      },
+      {
+        "mode": 4,
+        "python": 5779.041328552901,
+        "mystran": 5779.041,
+        "relative_difference": 5.685249201916367e-08
+      },
+      {
+        "mode": 5,
+        "python": 8122.259856855942,
+        "mystran": 8122.26,
+        "relative_difference": 1.7623673746520793e-08
+      },
+      {
+        "mode": 6,
+        "python": 9012.744510189747,
+        "mystran": 9012.745,
+        "relative_difference": 5.434640399936635e-08
+      }
+    ],
+    "max_residual": 1.7716619945708497e-10,
+    "max_relative_eigenvalue_difference": 1.162097739273594e-07,
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\parity_2017_both_20261025\\corrected_SPC1\\Lee\\nx2_ny12\\model.dat"
+  },
+  {
+    "formulation": "Lee",
+    "mesh": "nx4_ny24",
+    "status": "completed",
+    "SPC1_cards_split": 15,
+    "modes": [
+      {
+        "mode": 1,
+        "python": 136.86401410668873,
+        "mystran": 136.864,
+        "relative_difference": 1.0307083871453189e-07
+      },
+      {
+        "mode": 2,
+        "python": 1136.645835855475,
+        "mystran": 1136.646,
+        "relative_difference": 1.444113194364961e-07
+      },
+      {
+        "mode": 3,
+        "python": 2751.509463896772,
+        "mystran": 2751.509,
+        "relative_difference": 1.6859719298670746e-07
+      },
+      {
+        "mode": 4,
+        "python": 4561.821059610631,
+        "mystran": 4561.821,
+        "relative_difference": 1.3067288324239025e-08
+      },
+      {
+        "mode": 5,
+        "python": 6313.115062172795,
+        "mystran": 6313.115,
+        "relative_difference": 9.848196073877743e-09
+      },
+      {
+        "mode": 6,
+        "python": 7899.087726012467,
+        "mystran": 7899.088,
+        "relative_difference": 3.4685971613493785e-08
+      }
+    ],
+    "max_residual": 1.7547553555704995e-11,
+    "max_relative_eigenvalue_difference": 1.6859719298670746e-07,
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\parity_2017_both_20261025\\corrected_SPC1\\Lee\\nx4_ny24\\model.dat"
+  },
+  {
+    "formulation": "Nguyen",
+    "mesh": "nx2_ny12",
+    "status": "completed",
+    "SPC1_cards_split": 5,
+    "modes": [
+      {
+        "mode": 1,
+        "python": 131.5733113306986,
+        "mystran": 131.5733,
+        "relative_difference": 8.61169981788818e-08
+      },
+      {
+        "mode": 2,
+        "python": 1106.8927131518512,
+        "mystran": 1106.893,
+        "relative_difference": 2.5914720133321503e-07
+      },
+      {
+        "mode": 3,
+        "python": 2739.788202552237,
+        "mystran": 2739.788,
+        "relative_difference": 7.392988880706094e-08
+      },
+      {
+        "mode": 4,
+        "python": 3756.724302755909,
+        "mystran": 3756.724,
+        "relative_difference": 8.059039852452745e-08
+      },
+      {
+        "mode": 5,
+        "python": 3756.7243027559593,
+        "mystran": 3756.724,
+        "relative_difference": 8.059041196095446e-08
+      },
+      {
+        "mode": 6,
+        "python": 3958.0125874121063,
+        "mystran": 3958.013,
+        "relative_difference": 1.0424117773619992e-07
+      }
+    ],
+    "max_residual": 2.0618817959525507e-09,
+    "max_relative_eigenvalue_difference": 2.5914720133321503e-07,
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\parity_2017_both_20261025\\corrected_SPC1\\Nguyen\\nx2_ny12\\model.dat"
+  },
+  {
+    "formulation": "Nguyen",
+    "mesh": "nx4_ny24",
+    "status": "completed",
+    "SPC1_cards_split": 15,
+    "modes": [
+      {
+        "mode": 1,
+        "python": 127.39815388155677,
+        "mystran": 127.3982,
+        "relative_difference": 3.620024453387389e-07
+      },
+      {
+        "mode": 2,
+        "python": 1058.8049233476552,
+        "mystran": 1058.805,
+        "relative_difference": 7.239515343870218e-08
+      },
+      {
+        "mode": 3,
+        "python": 2565.5824714951177,
+        "mystran": 2565.582,
+        "relative_difference": 1.8377702649369962e-07
+      },
+      {
+        "mode": 4,
+        "python": 4257.725026704336,
+        "mystran": 4257.725,
+        "relative_difference": 6.271972915913772e-09
+      },
+      {
+        "mode": 5,
+        "python": 5898.980887755222,
+        "mystran": 5898.981,
+        "relative_difference": 1.9027825249658806e-08
+      },
+      {
+        "mode": 6,
+        "python": 7392.9006552362625,
+        "mystran": 7392.901,
+        "relative_difference": 4.663443394963862e-08
+      }
+    ],
+    "max_residual": 3.802355662727465e-11,
+    "max_relative_eigenvalue_difference": 3.620024453387389e-07,
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\parity_2017_both_20261025\\corrected_SPC1\\Nguyen\\nx4_ny24\\model.dat"
+  }
+]

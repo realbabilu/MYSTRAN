@@ -1,0 +1,58 @@
+[
+  {
+    "formulation": "Lee",
+    "mesh": "nx2_ny12",
+    "triangles": 96,
+    "node_count": 63,
+    "active_DOFs": "UX,UZ,RY on all nodes, including centroids",
+    "requested_modes": 1,
+    "status": "completed",
+    "python_Pcr": 167.9630195185159,
+    "MYSTRAN_Pcr": 167.963,
+    "relative_difference": 1.1620722200997105e-07,
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\parity_2017_both_20261025\\SAP_active_DOF_Pcr_only\\Lee\\nx2_ny12\\model.dat",
+    "deck_sha256": "1c86a3b06c5b463b822e7b6e28d3b4ed3c343bcb855b659270bc70ec9fff8b1b"
+  },
+  {
+    "formulation": "Lee",
+    "mesh": "nx4_ny24",
+    "triangles": 384,
+    "node_count": 221,
+    "active_DOFs": "UX,UZ,RY on all nodes, including centroids",
+    "requested_modes": 1,
+    "status": "completed",
+    "python_Pcr": 136.86401410637845,
+    "MYSTRAN_Pcr": 136.864,
+    "relative_difference": 1.0306857164840866e-07,
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\parity_2017_both_20261025\\SAP_active_DOF_Pcr_only\\Lee\\nx4_ny24\\model.dat",
+    "deck_sha256": "e170a461e0ea3fcf6250dfb95dc9c1ca25d35c52a9c29150f89e4a0d2aa1081f"
+  },
+  {
+    "formulation": "Nguyen",
+    "mesh": "nx2_ny12",
+    "triangles": 96,
+    "node_count": 63,
+    "active_DOFs": "UX,UZ,RY on all nodes, including centroids",
+    "requested_modes": 1,
+    "status": "completed",
+    "python_Pcr": 131.57331133014912,
+    "MYSTRAN_Pcr": 131.5733,
+    "relative_difference": 8.611282197585441e-08,
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\parity_2017_both_20261025\\SAP_active_DOF_Pcr_only\\Nguyen\\nx2_ny12\\model.dat",
+    "deck_sha256": "5835afcb2b05e2f2499ac04a216e9fb7e4a03308596fc769cc61478b9d79b02a"
+  },
+  {
+    "formulation": "Nguyen",
+    "mesh": "nx4_ny24",
+    "triangles": 384,
+    "node_count": 221,
+    "active_DOFs": "UX,UZ,RY on all nodes, including centroids",
+    "requested_modes": 1,
+    "status": "completed",
+    "python_Pcr": 127.39815388165947,
+    "MYSTRAN_Pcr": 127.3982,
+    "relative_difference": 3.620016391898186e-07,
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\mitc3_lee_nguyen_20261024\\parity_2017_both_20261025\\SAP_active_DOF_Pcr_only\\Nguyen\\nx4_ny24\\model.dat",
+    "deck_sha256": "1202974948258bfde727457365ee17649614ea419b6008325459d6a3e5931741"
+  }
+]
