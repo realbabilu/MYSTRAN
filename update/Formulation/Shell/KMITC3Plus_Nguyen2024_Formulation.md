@@ -1,4 +1,4 @@
-# κMITC3+: A Three-Node Triangular Shell with Allman Drilling Membrane, Mixed Shear, and Linear Composite Curvature
+<img width="1425" height="873" alt="mitc3plus_allman_2003_convergence" src="https://github.com/user-attachments/assets/7ebce31e-7b7a-44ae-a7c6-9d366b141c58" /># κMITC3+: A Three-Node Triangular Shell with Allman Drilling Membrane, Mixed Shear, and Linear Composite Curvature
 
 **Ary | 25 October 2026 | Mathematical Formulation and Numerical Assessment**
 
@@ -31,7 +31,7 @@ $$
 
 The external nodal vector is $\mathbf d_i=[u_i,v_i,w_i,\theta_{xi},\theta_{yi},\theta_{zi}]^T$, with $18$ element DOFs. Two relative internal rotation-bubble variables $\boldsymbol\beta\in\mathbb R^2$ are condensed locally. The polynomial bubble is $N_b=27rs(1-r-s)$; it does not create global nodes or DOFs.
 
-![Three corner nodes and rotational bubble](figures/kmitc3_nodal_bubble.svg)
+<img width="675" height="501" alt="image" src="https://github.com/user-attachments/assets/a8ff6533-573d-4082-b658-c2e842c8eac7" />
 
 *Figure 1. Three-node connectivity and the internal rotation-bubble convention, expressed in a right-handed local frame.*
 
@@ -78,11 +78,11 @@ $$
 \qquad \mathbf K_s=\sum_g A w_g\,\widetilde{\mathbf B}_s^T\mathbf D_s\widetilde{\mathbf B}_s.
 $$
 
-![Lee interior shear tying points](figures/kmitc3_shear_tying.svg)
+<img width="742" height="538" alt="image" src="https://github.com/user-attachments/assets/1ce97a86-62aa-4359-9a9f-25e48c32f13f" />
 
 *Figure 2. Lee-style interior shear samples; these are tying locations, not the integration rule.*
 
-![Three symmetric Gaussian integration points](figures/kmitc3_gauss_3point.svg)
+<img width="662" height="519" alt="image" src="https://github.com/user-attachments/assets/562e9058-cbae-4689-b397-c1894b00cf66" />
 
 *Figure 3. Symmetric three-point triangular integration used by the current parent operator.*
 
@@ -148,6 +148,8 @@ All values below are **calculated/reference ratios**, with target unity. Values 
 | **2-007 supplied original CTRIA3 DAT, n8** | **0.99193** | **0.25567** | **Serious coarse curved-shell failure** |
 | 2-009 Winkler k=800, n16 | 0.77304 | 0.93415 | Better, but n24 overshoots to 1.05373 |
 
+<img width="1425" height="873" alt="mitc3plus_allman_2003_convergence" src="https://github.com/user-attachments/assets/7fdfade2-50ad-4758-815f-10789ce29e99" />
+
 The membrane/curvature benefit is genuine within these benchmark setups, but **does not establish global superiority**: the coarsest hemisphere model is considerably worse than Lee + Spin.
 
 ### 5.1 Explicit distinction for hemisphere 2-007
@@ -161,7 +163,7 @@ The membrane/curvature benefit is genuine within these benchmark setups, but **d
 
 Although reconstructed fine meshes approach unity, their geometry, boundary discretization and loading have not been proven identical to original benchmark DATs. Thus **do not report the n64 result as a successful original-DAT convergence series**. The convergence graph explicitly distinguishes Allman-only and Allman plus composite curvature.
 
-![Hemisphere refinement response](figures/kmitc3_2007_convergence.png)
+<img width="1425" height="873" alt="mitc3plus_allman_2007_convergence" src="https://github.com/user-attachments/assets/8df4f4d8-c274-464b-9b31-5ff94c394049" />
 
 *Figure 4. Allman and Allman + composite refinement; n8 uses the reference input, while refined meshes are reconstructed.*
 
@@ -178,7 +180,7 @@ A 12 × 100 in cantilever column (thickness 1 in, $E=3600$ ksi, $\nu=0.2$) was d
 | 12 × 72 | 1,728 | 130.841 | 127.269 |
 | 16 × 96 | 3,072 | 129.097 | 127.086 |
 
-![Convergence of the first in-plane buckling eigenvalue](figures/kmitc3_2017_mode1_convergence.png)
+<img width="1462" height="884" alt="image" src="https://github.com/user-attachments/assets/d60b9a32-bd80-4188-9c51-7fd7a2514a2c" />
 
 *Figure 5. Convergence of the first critical load; the horizontal reference denotes $127.91$ kip.*
 
@@ -204,6 +206,8 @@ The added nodal rotation $\theta_z$ does not enter an ordinary CST membrane. In 
 ### 6.2 Why an enriched membrane can improve in-plane bending but harm a coarse hemisphere
 
 The approximately 0.50-to-0.80 improvement in 2-002 LC2/LC5 is consistent with additional membrane kinematics reducing CST overstiffness. The deterioration in the coarse 2-007 hemisphere is equally important: curved response depends on the variation of the local shell basis across facets, the geometry discretization, drilling–membrane coupling and possible membrane/bending contamination. The available tests do not uniquely isolate which mechanism dominates. Since the n8 original DAT and n16/n32/n64 reconstructed meshes are not an identical-origin mesh family, the observed refinement cannot be used to declare that a curved-shell limitation is resolved.
+
+
 
 ### 6.3 Interpretation of the remaining transverse-shear patch discrepancy
 
