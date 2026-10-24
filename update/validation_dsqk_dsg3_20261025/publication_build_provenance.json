@@ -1,0 +1,71 @@
+{
+  "method": "two publication kernels compiled and linked into the fresh full-build archive; remaining sources are the documented local snapshot",
+  "commands": [
+    [
+      "C:\\gcc\\bin\\gfortran.exe",
+      "-ffree-line-length-none",
+      "-ffixed-line-length-none",
+      "-fbounds-check",
+      "-fcheck=all",
+      "-DDMUMPS_Solver",
+      "-DMYSTRAN_HAVE_EXTERNAL_FEAST",
+      "@CMakeFiles/mystran.dir/includes_Fortran.rsp",
+      "-IH:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\bin\\mod",
+      "-JH:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication",
+      "-c",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\publish_parity_2017_20261025\\Source\\EMG\\EMG4\\CTRIA3_DSG3.f90",
+      "-o",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication\\CTRIA3_DSG3.f90.obj"
+    ],
+    [
+      "C:\\gcc\\bin\\ar.exe",
+      "r",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication\\objects.a",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication\\CTRIA3_DSG3.f90.obj"
+    ],
+    [
+      "C:\\gcc\\bin\\gfortran.exe",
+      "-ffree-line-length-none",
+      "-ffixed-line-length-none",
+      "-fbounds-check",
+      "-fcheck=all",
+      "-DDMUMPS_Solver",
+      "-DMYSTRAN_HAVE_EXTERNAL_FEAST",
+      "@CMakeFiles/mystran.dir/includes_Fortran.rsp",
+      "-IH:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\bin\\mod",
+      "-JH:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication",
+      "-c",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\publish_parity_2017_20261025\\Source\\EMG\\EMG4\\CQUAD4_DSQK_RHR.f90",
+      "-o",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication\\CQUAD4_DSQK_RHR.f90.obj"
+    ],
+    [
+      "C:\\gcc\\bin\\ar.exe",
+      "r",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication\\objects.a",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication\\CQUAD4_DSQK_RHR.f90.obj"
+    ],
+    [
+      "C:\\gcc\\bin\\gfortran.exe",
+      "-static",
+      "-static-libgcc",
+      "-static-libstdc++",
+      "-Wl,--whole-archive",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication\\objects.a",
+      "-Wl,--no-whole-archive",
+      "-o",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\publication\\mystran.exe",
+      "@CMakeFiles/mystran.dir/linkLibs.rsp"
+    ]
+  ],
+  "source_sha256": {
+    "CTRIA3_DSG3.f90": "53c87e90c3b8ba715e86e2f752670a7223bc7b159486ec82e9d92b0878ec897e",
+    "CQUAD4_DSQK_RHR.f90": "2c4424fe131a259b079d3b63c436c84b346f13aec9036f768fa76d141d6d36d4"
+  },
+  "exe_sha256": "39294b17cb224a4ae8e7c541a771b6539ddb05a422a24607f0a1a484caae19b0",
+  "published_source_sha256": {
+    "CTRIA3_DSG3.f90": "ff42526263dbee89340bbe24599ed1602b3dbf6825605bcea00704a9c0af7ee0",
+    "CQUAD4_DSQK_RHR.f90": "c154ea32b3d72526f2ea078158f71be86eaf2b7390dd5b17e71bd8e062ed2bfa"
+  },
+  "note": "Compiled files used CRLF; published source uses LF. Normalized text is identical."
+}

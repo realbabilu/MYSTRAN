@@ -26,12 +26,14 @@
       INTEGER(LONG), PARAMETER        :: NDOFN = 6
       INTEGER(LONG), PARAMETER        :: NDOF  = NNODE*NDOFN
 
-      INTEGER(LONG)                   :: I, J, K, JSUB, IA, IB
+      INTEGER(LONG)                   :: I, J, K, JSUB, IA, IB, GP
       REAL(DOUBLE)                    :: XYZ(NNODE,3), EG(3,3), ECOORDS(NNODE,2), GRADN(NNODE,2), AREA, AE, THICK
       REAL(DOUBLE)                    :: T18(NDOF,NDOF), BM(3,NDOF), BB(3,NDOF), BS(2,NDOF), BSREC(2,NDOF)
       REAL(DOUBLE)                    :: KLOCAL(NDOF,NDOF), KGLOBAL(NDOF,NDOF), MLOCAL(NDOF,NDOF), MGLOBAL(NDOF,NDOF), DRILL
       REAL(DOUBLE)                    :: MASS_NODE, UNIT_PPE(NDOF), UNIT_PTE(NDOF), CTE3(3), NTH(3), TBAR
       REAL(DOUBLE)                    :: EPSM(3), NRES(3), KGVAL
+
+      REAL(DOUBLE)                    :: BDR(NDOF), NDR(NNODE,NNODE)
 
       IF (INT_ELEM_ID < 0) THEN
          CONTINUE
@@ -81,8 +83,25 @@
          KLOCAL = KLOCAL + MATMUL(TRANSPOSE(BS), MATMUL(SHELL_T, BS)) * (AREA/THREE)
 
          DRILL = 1.0D-3 * (SIX/FIVE) * MAX(SHELL_T(1,1), SHELL_T(2,2)) * AREA
-         DO I=1,NNODE
-            KLOCAL(6*(I-1)+6,6*(I-1)+6) = KLOCAL(6*(I-1)+6,6*(I-1)+6) + DRILL
+!        Consistent-spin drilling: penalize continuum spin minus theta_z,
+!        not absolute nodal rotation. Retain the existing 1e-3 coefficient.
+!        Three-point triangle integration is exact for the quadratic Bdr'*Bdr.
+         NDR = ONE/SIX
+         DO GP=1,NNODE
+            NDR(GP,GP) = TWO/THREE
+         ENDDO
+         DO GP=1,NNODE
+            BDR = ZERO
+            DO I=1,NNODE
+               BDR(6*(I-1)+1) = -GRADN(I,2)/TWO
+               BDR(6*(I-1)+2) =  GRADN(I,1)/TWO
+               BDR(6*(I-1)+6) = -NDR(GP,I)
+            ENDDO
+            DO I=1,NDOF
+               DO J=1,NDOF
+                  KLOCAL(I,J) = KLOCAL(I,J) + (DRILL/THREE)*BDR(I)*BDR(J)
+               ENDDO
+            ENDDO
          ENDDO
 
          KLOCAL  = 0.5D0*(KLOCAL + TRANSPOSE(KLOCAL))

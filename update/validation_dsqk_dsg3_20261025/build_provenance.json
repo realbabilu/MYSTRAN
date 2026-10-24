@@ -1,0 +1,69 @@
+{
+  "candidate_build": "cmake --build clean_build --parallel 6 (fresh build directory)",
+  "baseline_commands": [
+    [
+      "C:\\gcc\\bin\\gfortran.exe",
+      "-ffree-line-length-none",
+      "-ffixed-line-length-none",
+      "-fbounds-check",
+      "-fcheck=all",
+      "-DDMUMPS_Solver",
+      "-DMYSTRAN_HAVE_EXTERNAL_FEAST",
+      "@CMakeFiles/mystran.dir/includes_Fortran.rsp",
+      "-IH:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\bin\\mod",
+      "-JH:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline",
+      "-c",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\CTRIA3_DSG3.f90",
+      "-o",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\CTRIA3_DSG3.f90.obj"
+    ],
+    [
+      "C:\\gcc\\bin\\ar.exe",
+      "r",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\objects.a",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\CTRIA3_DSG3.f90.obj"
+    ],
+    [
+      "C:\\gcc\\bin\\gfortran.exe",
+      "-ffree-line-length-none",
+      "-ffixed-line-length-none",
+      "-fbounds-check",
+      "-fcheck=all",
+      "-DDMUMPS_Solver",
+      "-DMYSTRAN_HAVE_EXTERNAL_FEAST",
+      "@CMakeFiles/mystran.dir/includes_Fortran.rsp",
+      "-IH:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\bin\\mod",
+      "-JH:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline",
+      "-c",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\CQUAD4_DSQK_RHR.f90",
+      "-o",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\CQUAD4_DSQK_RHR.f90.obj"
+    ],
+    [
+      "C:\\gcc\\bin\\ar.exe",
+      "r",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\objects.a",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\CQUAD4_DSQK_RHR.f90.obj"
+    ],
+    [
+      "C:\\gcc\\bin\\gfortran.exe",
+      "-static",
+      "-static-libgcc",
+      "-static-libstdc++",
+      "-Wl,--whole-archive",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\objects.a",
+      "-Wl,--no-whole-archive",
+      "-o",
+      "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_dsg3_handoff_20261025\\baseline\\mystran.exe",
+      "@CMakeFiles/mystran.dir/linkLibs.rsp"
+    ]
+  ],
+  "source_sha256": {
+    "CQUAD4_DSQK_RHR.f90": "2c4424fe131a259b079d3b63c436c84b346f13aec9036f768fa76d141d6d36d4",
+    "CTRIA3_DSG3.f90": "5c4a7725f4622d050482619844b5977c223314274b57a8a6390cddc72fda1f70"
+  },
+  "exe_sha256": {
+    "spin": "5a35405049ae10686a00cd424547bd468bdd30c7b0e42d939dae50c7ae21cdef",
+    "old": "ad88f84d9b2d218b1a220448e07b6e46f4a3a0f9753dcad69709fb72963faeab"
+  }
+}

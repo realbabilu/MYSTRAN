@@ -1,0 +1,54 @@
+--- old_drilling/CQUAD4_DSQK_RHR.f90
++++ consistent_spin/CQUAD4_DSQK_RHR.f90
+@@ -192,7 +192,7 @@
+ ! stabilizer. This helps separate a bad 5DOF->24DOF lift from drill-only
+ ! contamination in patch tests and simple bending checks.
+          IF (DEBUG(250) <= 0) THEN
+-            CALL BUILD_DSQK_DRILL ( T3, G12, AVERAGE_THICK, XLOCAL, KDRILL )
++            CALL BUILD_DSQK_DRILL ( T1, T2, T3, G12, AVERAGE_THICK, XLOCAL, KDRILL )
+             KBASIC = KBASIC + KDRILL
+          ENDIF
+          KLOCAL = MATMUL(T24, MATMUL(KBASIC, T24T))
+@@ -720,19 +720,31 @@
+       ENDDO
+       END SUBROUTINE BUILD_G_DSQK
+ 
+-      SUBROUTINE BUILD_DSQK_DRILL ( E3, GVAL, THK, XLOC, KOUT )
+-      REAL(DOUBLE), INTENT(IN)  :: E3(3), GVAL, THK, XLOC(4,2)
++      SUBROUTINE BUILD_DSQK_DRILL ( E1, E2, E3, GVAL, THK, XLOC, KOUT )
++      REAL(DOUBLE), INTENT(IN)  :: E1(3), E2(3), E3(3), GVAL, THK, XLOC(4,2)
+       REAL(DOUBLE), INTENT(OUT) :: KOUT(24,24)
+-      REAL(DOUBLE) :: AREA, DRK
+-      INTEGER(LONG) :: II, BASE, R1, C1
++      REAL(DOUBLE) :: NVAL(4), DNDX(4), DNDY(4), BDR(24), FACTOR
++      REAL(DOUBLE) :: SS2(MAX_ORDER_GAUSS), HH2(MAX_ORDER_GAUSS)
++      INTEGER(LONG) :: II, BASE, R1, C1, I1, J1
++!     Retain DRILL_SCALE; couple drilling rotation to the continuum spin.
++!     BDR acts on basic displacements, as does the surrounding KBASIC.
+       KOUT = ZERO
+-      AREA = AREA_DSQK ( XLOC )
+-      DRK = DRILL_SCALE * GVAL * THK * AREA
+-      DO II=1,4
+-         BASE = (II-1)*6
+-         DO R1=1,3
+-            DO C1=1,3
+-               KOUT(BASE+3+R1, BASE+3+C1) = KOUT(BASE+3+R1, BASE+3+C1) + DRK*E3(R1)*E3(C1)
++      CALL ORDER_GAUSS ( 2, SS2, HH2 )
++      DO I1=1,2
++         DO J1=1,2
++            CALL SHAPE_N ( SS2(I1), SS2(J1), NVAL )
++            CALL DNXY_DSQK ( XLOC, SS2(I1), SS2(J1), DNDX, DNDY )
++            FACTOR = DRILL_SCALE*GVAL*THK*HH2(I1)*HH2(J1)*DETJ_DSQK(XLOC, SS2(I1), SS2(J1))
++            BDR = ZERO
++            DO II=1,4
++               BASE = (II-1)*6
++               BDR(BASE+1:BASE+3) = -0.5D0*DNDY(II)*E1 + 0.5D0*DNDX(II)*E2
++               BDR(BASE+4:BASE+6) = -NVAL(II)*E3
++            ENDDO
++            DO R1=1,24
++               DO C1=1,24
++                  KOUT(R1,C1) = KOUT(R1,C1) + FACTOR*BDR(R1)*BDR(C1)
++               ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
