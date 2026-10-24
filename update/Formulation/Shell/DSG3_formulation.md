@@ -162,13 +162,13 @@ In the audited isolated-element test, a single-ordering DSG shear construction r
 | Bending + single-reference DSG shear | 5 / 9 | 4 (three rigid + one spurious) |
 | Bending + three-ordering DSG shear | **6 / 9** | **3 (rigid only)** |
 
-With compatible membrane, shear, bending and objective drilling assembled, the selected 18-DOF shell exhibits six rigid-body modes in the numerical rank check. The number of vanishing eigenvalues depends on the stiffness blocks present and must not be conflated with the rank of the isolated plate subblock.
+With compatible membrane, shear, bending and objective drilling assembled,  18-DOF shell exhibits six rigid-body modes in the numerical rank check. The number of vanishing eigenvalues depends on the stiffness blocks present and must not be conflated with the rank of the isolated plate subblock.
 
 ## 6. Objective consistent-spin drilling stabilization
 
 ### 6.1 Definition
 
-The historical diagonal drilling form penalized nodal $\theta_z$ independently. The selected formulation instead compares drilling rotation with the local continuum spin of the membrane displacement field. Define
+The historical diagonal drilling form penalized nodal $\theta_z$ independently.  formulation instead compares drilling rotation with the local continuum spin of the membrane displacement field. Define
 
 $$
 \omega_{xy}=\frac12(v_{,x}-u_{,y}),
@@ -207,11 +207,21 @@ $$
 The adopted integration points are
 
 $$
-(r_g,s_g)\in\left\{
-\left(\tfrac16,\tfrac16\right),
-\left(\tfrac23,\tfrac16\right),
-\left(\tfrac16,\tfrac23\right)
-\right\}.
+\mathbf{C}_0 =
+\frac{E}{1-\nu^2}
+\begin{bmatrix}
+1 & \nu & 0 \\
+\nu & 1 & 0 \\
+0 & 0 & \dfrac{1-\nu}{2}
+\end{bmatrix}
+$$
+
+$$
+\begin{aligned}
+\mathbf{D}_m &= h\mathbf{C}_0, \\
+\mathbf{D}_b &= \frac{h^3}{12}\mathbf{C}_0, \\
+\mathbf{D}_s &= \kappa_s Gh\mathbf{I}_2
+\end{aligned}
 $$
 
 The selected stabilized local stiffness is
