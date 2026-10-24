@@ -207,20 +207,14 @@ $$
 The adopted integration points are
 
 $$
-\mathbf{C}_0 =
-\frac{E}{1-\nu^2}
-\begin{bmatrix}
-1 & \nu & 0 \\
-\nu & 1 & 0 \\
-0 & 0 & \dfrac{1-\nu}{2}
-\end{bmatrix}
-$$
-
-$$
 \begin{aligned}
-\mathbf{D}_m &= h\mathbf{C}_0, \\
-\mathbf{D}_b &= \frac{h^3}{12}\mathbf{C}_0, \\
-\mathbf{D}_s &= \kappa_s Gh\mathbf{I}_2
+(r_g,s_g) \in \Bigg\{&
+\left(\frac{1}{6},\frac{1}{6}\right),\\
+&
+\left(\frac{2}{3},\frac{1}{6}\right),\\
+&
+\left(\frac{1}{6},\frac{2}{3}\right)
+\Bigg\}.
 \end{aligned}
 $$
 
