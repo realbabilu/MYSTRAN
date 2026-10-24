@@ -172,16 +172,6 @@
          ENDDO
       ENDIF
 
-      IF (OPT(5) == 'Y') THEN
-         DO JSUB=1,SIZE(PPE,2)
-            DO I=1,3
-               PPE(6*(I-1)+1,JSUB) = PPE(6*(I-1)+1,JSUB) + PRESS(3,JSUB) * AREA * NVEC(1) / THREE
-               PPE(6*(I-1)+2,JSUB) = PPE(6*(I-1)+2,JSUB) + PRESS(3,JSUB) * AREA * NVEC(2) / THREE
-               PPE(6*(I-1)+3,JSUB) = PPE(6*(I-1)+3,JSUB) + PRESS(3,JSUB) * AREA * NVEC(3) / THREE
-            ENDDO
-         ENDDO
-      ENDIF
-
 ! --- shell_renovation begin --- !
 ! Differential stiffness for linear buckling. Harahap 2021 Eq. (15)
 ! includes gradients of u, v, w and rotations beta_x, beta_y.  Since SIG0 is
@@ -461,7 +451,7 @@
       CALL PLATE_GP ( 1, XI, ETA, WT )
          CALL BUILD_STAGE_B_MAKNUN ( T1, T2, COO, BM )
          CALL BUILD_STAGE_BB_MAKNUN ( XI, ETA, T1, T2, NVO, COO, BCO, NORMSO, ADINV_AU, BB )
-         CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS )
+         CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS, XI, ETA )
          FAC = WT * JACO
          KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMO, BM))
          KTMP(1:3,1:18) = MATMUL(HBO, BB)
@@ -477,7 +467,7 @@
       CALL PLATE_GP ( 2, XI, ETA, WT )
       CALL BUILD_STAGE_B_MAKNUN ( T1, T2, COO, BM )
       CALL BUILD_STAGE_BB_MAKNUN ( XI, ETA, T1, T2, NVO, COO, BCO, NORMSO, ADINV_AU, BB )
-      CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS )
+      CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS, XI, ETA )
       FAC = WT * JACO
       KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMO, BM))
          KTMP(1:3,1:18) = MATMUL(HBO, BB)
@@ -493,7 +483,7 @@
       CALL PLATE_GP ( 3, XI, ETA, WT )
       CALL BUILD_STAGE_B_MAKNUN ( T1, T2, COO, BM )
       CALL BUILD_STAGE_BB_MAKNUN ( XI, ETA, T1, T2, NVO, COO, BCO, NORMSO, ADINV_AU, BB )
-      CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS )
+      CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS, XI, ETA )
       FAC = WT * JACO
       KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMO, BM))
          KTMP(1:3,1:18) = MATMUL(HBO, BB)
@@ -588,11 +578,14 @@
       BBO = BBETA + MATMUL(BBD, ADINV_AU)
       END SUBROUTINE BUILD_STAGE_BB_MAKNUN
 
-      SUBROUTINE BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BSO )
+      SUBROUTINE BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BSO, XI_SF, ETA_SF )
       REAL(DOUBLE), INTENT(IN)  :: T1(3), T2(3), ADINV_AU(3,18)
       REAL(DOUBLE), INTENT(OUT) :: BSO(2,18)
       REAL(DOUBLE)              :: COUT(3), SOUT(3), BSG(2,3), LOUT(3), PHIOUT(3), TSK(3), TMP(2,3)
-      INTEGER(LONG)             :: I
+      REAL(DOUBLE), OPTIONAL, INTENT(IN) :: XI_SF, ETA_SF
+      REAL(DOUBLE) :: N_SF(3), DET_SF, XI_USE, ETA_USE
+      INTEGER(LONG), PARAMETER :: SIDE_A(3) = (/ 1, 1, 2 /), SIDE_B(3) = (/ 3, 2, 3 /)
+      INTEGER(LONG)             :: I, A_SF, B_SF
 
       DO I=1,3
          IF (I == 1) THEN
@@ -608,7 +601,34 @@
       ENDDO
       CALL BUILD_SIDE_LENGTHS ( LOUT )
       CALL BUILD_SIDE_PHI ( EPROP(1), SHELL_A(1,2)/SHELL_A(1,1), LOUT, PHIOUT )
-      CALL BUILD_BSG_FROM_CS ( COUT, SOUT, BSG )
+!     Opt-in research branch: DEBUG,241,1 enables DKMT18SF.
+!     Keep the shipping reconstruction unchanged when the flag is zero.
+      IF (DEBUG(241) > 0) THEN
+         XI_USE = ONE/THREE
+         ETA_USE = ONE/THREE
+         IF (PRESENT(XI_SF)) XI_USE = XI_SF
+         IF (PRESENT(ETA_SF)) ETA_USE = ETA_SF
+         N_SF = (/ ONE-XI_USE-ETA_USE, XI_USE, ETA_USE /)
+         BSG = ZERO
+         DO I=1,3
+            A_SF = SIDE_A(I)
+            B_SF = SIDE_B(I)
+            DET_SF = COUT(A_SF)*SOUT(B_SF)-SOUT(A_SF)*COUT(B_SF)
+            IF (DABS(DET_SF) <= 1.0D-14) THEN
+               WRITE(ERR,*) ' *ERROR: DKMT18SF degenerate adjacent side tangents, element ', EID
+               WRITE(F06,*) ' *ERROR: DKMT18SF degenerate adjacent side tangents, element ', EID
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+            BSG(1,A_SF) = BSG(1,A_SF) + N_SF(I)*SOUT(B_SF)/DET_SF
+            BSG(2,A_SF) = BSG(2,A_SF) - N_SF(I)*COUT(B_SF)/DET_SF
+            BSG(1,B_SF) = BSG(1,B_SF) - N_SF(I)*SOUT(A_SF)/DET_SF
+            BSG(2,B_SF) = BSG(2,B_SF) + N_SF(I)*COUT(A_SF)/DET_SF
+         ENDDO
+!        ADINV_AU = Au / [-(2/3)*(1+phi)]; recover phi/(1+phi)*Au.
+         BSG = -(TWO/THREE)*BSG
+      ELSE
+         CALL BUILD_BSG_FROM_CS ( COUT, SOUT, BSG )
+      ENDIF
       TMP = BSG
       DO I=1,3
          TMP(1,I) = TMP(1,I) * PHIOUT(I)
