@@ -208,14 +208,14 @@ The adopted integration points are
 
 $$
 \begin{aligned}
-(r_g,s_g) \in \Bigg\{&
-\left(\frac{1}{6},\frac{1}{6}\right),\\
-&
-\left(\frac{2}{3},\frac{1}{6}\right),\\
-&
-\left(\frac{1}{6},\frac{2}{3}\right)
-\Bigg\}.
+(r_1,s_1) &= \left(\frac{1}{6},\frac{1}{6}\right),\\
+(r_2,s_2) &= \left(\frac{2}{3},\frac{1}{6}\right),\\
+(r_3,s_3) &= \left(\frac{1}{6},\frac{2}{3}\right).
 \end{aligned}
+$$
+
+$$
+w_1=w_2=w_3=\frac{1}{3}.
 $$
 
 The selected stabilized local stiffness is
