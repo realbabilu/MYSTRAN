@@ -121,7 +121,7 @@ The indices 5–8 denote side functions rather than additional connectivity node
 The membrane strain is enriched as
 
 $$
-\boldsymbol\varepsilon_m=\mathbf B_m\mathbf d_e+\mathbf G^*\boldsymbol\alpha,
+\boldsymbol\varepsilon_m=\mathbf B_m\mathbf d_e+\mathbf{G}^{\ast}\boldsymbol\alpha,
 \qquad \boldsymbol\alpha=[\alpha_1,\alpha_2,\alpha_3,\alpha_4]^{\mathsf T}.
 $$
 
@@ -131,7 +131,7 @@ $$
 H_1=1-\xi^2,\qquad H_2=1-\eta^2.
 $$
 
-Using in-plane physical derivatives evaluated with the  mapping,
+Using in-plane physical derivatives evaluated with the centroid mapping,
 
 $$
 \mathbf G=
@@ -142,53 +142,41 @@ H_{1,y}&H_{1,x}&H_{2,y}&H_{2,x}
 \end{bmatrix}.
 $$
 
-Define the centroid mapping by
+Define the centroid mapping by $\mathbf J_0=\partial(x,y)/\partial(\xi,\eta)|_{(0,0)}$. The bubble gradients follow from
 
 $$
-\mathbf{J}_0 =
-\left.
-\frac{\partial(x,y)}{\partial(\xi,\eta)}
-\right|_{(0,0)}.
-$$
-
-```
-The bubble gradients follow from
-
-$$
-\begin{bmatrix}
-H_{a,x} \\
-H_{a,y}
-\end{bmatrix}
-=
-\mathbf{J}_0^{-\mathrm{T}}
-\begin{bmatrix}
-H_{a,\xi} \\
-H_{a,\eta}
-\end{bmatrix},
+\begin{bmatrix}H_{a,x}\\H_{a,y}\end{bmatrix}
+=\mathbf{J}_0^{-\mathrm{T}}
+\begin{bmatrix}H_{a,\xi}\\H_{a,\eta}\end{bmatrix},
 \qquad a=1,2.
 $$
-```
+
 The determinant-ratio correction gives
 
 $$
-\mathbf G^*(\xi,\eta)=\frac{\det\mathbf J_0}{\det\mathbf J(\xi,\eta)}\mathbf G(\xi,\eta).
+\mathbf{G}^{\ast}(\xi,\eta)=\frac{\det\mathbf J_0}{\det\mathbf J(\xi,\eta)}\mathbf{G}(\xi,\eta).
 $$
 
 ### 4.2 Static condensation
 
-```
 The coupled element equations have the block form
 
 $$
 \begin{bmatrix}
-\mathbf K_{uu}&\mathbf K_{u\alpha}\\
-\mathbf K_{\alpha u}&\mathbf K_{\alpha\alpha}
+\mathbf{K}_{uu} & \mathbf{K}_{u\alpha} \\
+\mathbf{K}_{\alpha u} & \mathbf{K}_{\alpha\alpha}
 \end{bmatrix}
-\begin{bmatrix}\mathbf d_e\\\boldsymbol\alpha\end{bmatrix}
-=\begin{bmatrix}\mathbf f_e\\\mathbf 0\end{bmatrix}.
+\begin{bmatrix}
+\mathbf{d}_e \\
+\boldsymbol{\alpha}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{f}_e \\
+\mathbf{0}
+\end{bmatrix}.
 $$
-```
-```
+
 With the thickness-integrated membrane constitutive matrix $\mathbf{C}_m$ of Section 2,
 
 $$
@@ -210,7 +198,6 @@ $$
 \mathbf{G}^{\ast}
 \,\mathrm{d}A.
 $$
-```
 
 Elimination of the internal parameters yields
 
