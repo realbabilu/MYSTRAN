@@ -23,6 +23,10 @@ Original longitudinal meshes retain all six load cases. The separate two-axis se
 | MYSTRAN | MEASURED | 990 |
 | NASTRAN | MEASURED | 180 |
 
+## Mesh convergence
+
+LC1–LC6 use curves across the longitudinal mesh series. LC4 additionally includes the separate two-axis refinement series. The fixed SAP2000-source mesh remains a table comparison only; it is not shown as a bar chart.
+
 ## Figures
 
 ### prob_2_002 · LC 1 · tip_UX
@@ -52,30 +56,6 @@ Original longitudinal meshes retain all six load cases. The separate two-axis se
 ### prob_2_002_twoaxis · LC 4 · tip_abs_UY
 
 ![tip_abs_UY](figures/linear_002_06_tip_abs_UY.png)
-
-### s2k_2002a · LC 1 · tip_UX
-
-![tip_UX](figures/linear_002_07_tip_UX.png)
-
-### s2k_2002a · LC 2 · tip_UZ
-
-![tip_UZ](figures/linear_002_08_tip_UZ.png)
-
-### s2k_2002a · LC 3 · tip_UY
-
-![tip_UY](figures/linear_002_09_tip_UY.png)
-
-### s2k_2002a · LC 4 · tip_abs_UY
-
-![tip_abs_UY](figures/linear_002_10_tip_abs_UY.png)
-
-### s2k_2002a · LC 5 · tip_abs_UX
-
-![tip_abs_UX](figures/linear_002_11_tip_abs_UX.png)
-
-### s2k_2002a · LC 6 · tip_RZ
-
-![tip_RZ](figures/linear_002_12_tip_RZ.png)
 
 ## Finest available mesh per named series
 
