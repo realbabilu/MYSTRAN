@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 910 460" role="img" aria-label="DKMT18 flat and SNORM three-point triangle quadrature locations">
+<rect width="910" height="460" fill="white"/><text x="32" y="38" font-size="23" font-family="Arial" font-weight="bold" fill="#17324d">Three-point integration: source implementations differ</text>
+<g stroke="#225e87" stroke-width="3" fill="#e9f3fc"><path d="M70 350 L390 350 L70 90 Z"/><path d="M525 350 L845 350 L525 90 Z"/></g>
+<g fill="#1271a1" stroke="white" stroke-width="3"><circle cx="123.33" cy="306.67" r="9"/><circle cx="283.33" cy="306.67" r="9"/><circle cx="123.33" cy="176.67" r="9"/></g>
+<g fill="#dc781d" stroke="white" stroke-width="3"><circle cx="685" cy="350" r="9"/><circle cx="525" cy="220" r="9"/><circle cx="685" cy="220" r="9"/></g>
+<g font-family="Arial" fill="#17324d"><text x="62" y="78" font-size="18" font-weight="bold">Flat DKMT18: interior rule</text><text x="518" y="78" font-size="18" font-weight="bold">DKMT18MaknunSNORM: midpoint rule</text><text x="55" y="396" font-size="16">(1/6,1/6); (2/3,1/6); (1/6,2/3)</text><text x="522" y="396" font-size="16">(1/2,0); (0,1/2); (1/2,1/2)</text><text x="55" y="422" font-size="15">Physical weight: A / 3 per point</text><text x="522" y="422" font-size="15">Reference weight: 1/6; J = 2A</text></g>
+<g font-family="Arial" font-size="13" fill="#64748b"><text x="70" y="368">(0,0)</text><text x="360" y="368">(1,0)</text><text x="46" y="83">(0,1)</text><text x="525" y="368">(0,0)</text><text x="815" y="368">(1,0)</text><text x="502" y="83">(0,1)</text></g>
+</svg>
