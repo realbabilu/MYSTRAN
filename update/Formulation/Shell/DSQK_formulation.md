@@ -83,10 +83,10 @@ Here $h$ is thickness and $\kappa_s$ is the transverse-shear correction factor. 
 
 ## 4. Membrane interpolation — step by step
 
+
 **Step 1.** Differentiate the bilinear shape functions in the physical tangent plane:
 
-
-$$
+```math
 \begin{bmatrix}
 N_{i,x} \\
 N_{i,y}
@@ -97,12 +97,12 @@ N_{i,y}
 N_{i,\xi} \\
 N_{i,\eta}
 \end{bmatrix}
-$$
+```
 
 
-**Step 2.** Form the engineering membrane strain vector
+**Step 2.** Form the engineering membrane strain vector:
 
-$$
+```math
 \boldsymbol{\varepsilon}_m =
 \begin{bmatrix}
 u_{,x} \\
@@ -111,7 +111,7 @@ u_{,y}+v_{,x}
 \end{bmatrix}
 =
 \mathbf{B}_m\mathbf{q}^{(5)}
-$$
+```
 
 The columns for nodal membrane translations are
 
@@ -202,7 +202,7 @@ The geometry of the four midpoint tying locations is retained, while the **compo
 
 Using the bending-rotation convention of Section 5,
 
-$$
+```math
 \boldsymbol{\gamma}_{xy} =
 \begin{bmatrix}
 \gamma_x \\
@@ -213,7 +213,7 @@ $$
 w_{,x}+\beta_x \\
 w_{,y}+\beta_y
 \end{bmatrix}
-$$
+```
 
 ### 6.2 Step 2 — covariant projection at the tying locations
 
