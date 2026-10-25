@@ -85,18 +85,32 @@ Here $h$ is thickness and $\kappa_s$ is the transverse-shear correction factor. 
 
 **Step 1.** Differentiate the bilinear shape functions in the physical tangent plane:
 
+
 $$
-\begin{bmatrix}N_{i,x}\\N_{i,y}\end{bmatrix}
-=\mathbf J^{-T}
-\begin{bmatrix}N_{i,\xi}\\N_{i,\eta}\end{bmatrix}.
+\begin{bmatrix}
+N_{i,x} \\
+N_{i,y}
+\end{bmatrix}
+=
+\mathbf{J}^{-T}
+\begin{bmatrix}
+N_{i,\xi} \\
+N_{i,\eta}
+\end{bmatrix}
 $$
+
 
 **Step 2.** Form the engineering membrane strain vector
 
 $$
-\boldsymbol\varepsilon_m=
-\begin{bmatrix}u_{,x}\\v_{,y}\\u_{,y}+v_{,x}\end{bmatrix}
-=\mathbf B_m\mathbf q^{(5)}.
+\boldsymbol{\varepsilon}_m =
+\begin{bmatrix}
+u_{,x} \\
+v_{,y} \\
+u_{,y}+v_{,x}
+\end{bmatrix}
+=
+\mathbf{B}_m\mathbf{q}^{(5)}
 $$
 
 The columns for nodal membrane translations are
@@ -196,9 +210,9 @@ $$
 \end{bmatrix}
 =
 \begin{bmatrix}
- w_{,x}+\beta_x \\
- w_{,y}+\beta_y
-\end{bmatrix}.
+w_{,x}+\beta_x \\
+w_{,y}+\beta_y
+\end{bmatrix}
 $$
 
 ### 6.2 Step 2 — covariant projection at the tying locations
