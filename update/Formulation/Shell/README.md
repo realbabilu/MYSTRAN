@@ -31,9 +31,9 @@ J_A=\|\mathbf g_r\times\mathbf g_s\|,\quad
 
 Winding controls the oriented normal and, consequently, sign of oriented pressures and local bending/shear results. A CW element is not invalid merely because it is CW; an implementation may support both if mapping and sign conventions are consistent. The current DUEL3A CW deck is retained as a reference, while DUEL3B isolates quadratic elements. Use the oriented normal; **do not force +Z on general curved geometry**. For planar XY audit use $J_{xy}=x_{,r}y_{,s}-x_{,s}y_{,r}$: positive implies CCW relative to global +Z.
 
-![Q8 winding diagram](FIG_Q8_WINDING.svg)
+![Q8 winding diagram](figures/FIG_Q8_WINDING.svg)
 
-![T6 winding diagram](FIG_T6_WINDING.svg)
+![T6 winding diagram](figures/FIG_T6_WINDING.svg)
 
 ## 2.2 Displacements and rotations
 
@@ -313,7 +313,7 @@ The physical tensor is $\boldsymbol\varepsilon=\varepsilon_{\alpha\beta}\,\mathb
 
 ## 4. Gauss quadrature and tying diagrams
 
-![Gauss and tying schematic](FIG_GAUSS_TYING.svg)
+![Gauss and tying schematic](figures/FIG_GAUSS_TYING.svg)
 
 For Q8 standard 3×3 Gauss–Legendre quadrature in $[-1,1]^2$: abscissae $\{-b,0,+b\}$, $b=\sqrt{3/5}$, one-dimensional weights $\{5/9,8/9,5/9\}$. Integrate as
 
@@ -527,9 +527,9 @@ For the selected automatic shear treatment define slenderness $s_A=\sqrt A/h$, t
 
 The **operator is blended before the quadratic strain energy** $K_s=h\int\bar B_s^TC_s\bar B_s\,dA$. Consequently $K_s\ne(1-\omega)K_s^{(6)}+\omega K_s^{(4)}$ in general. For $s_A\le15$, tensor6 dominates; as $s_A\rightarrow\infty$, BDG4 dominates. The name “BDG6” denotes this research ANS8 family, not proof that every selected shear interpolation employs six samples.
 
-![Four- and six-point shear tying](FIG_SHEAR_TYING.svg)
+![Four- and six-point shear tying](figures/FIG_SHEAR_TYING.svg)
 
-![Pointwise mapping and tensor recovery](FIG_POINTWISE_RECOVERY.svg)
+![Pointwise mapping and tensor recovery](figures/FIG_POINTWISE_RECOVERY.svg)
 
 ## 9. Relation to the primary papers: adopted, modified and excluded
 
