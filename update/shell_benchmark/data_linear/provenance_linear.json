@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-25",
+  "source_base": "21540039",
+  "source_delta": "tested_source_candidate.patch",
+  "mystran_executable_sha256": "2e3aa3faf83c5b574327c6b856d2c63b79b391905f11296b36547bb1220f139b",
+  "source_sha256": {
+    "Source/EMG/EMG4/CTRIAR_DKMT18.f90": "970ed4720dff5b9474cd3b9d13611a10482f0efa084fce485ae6644c80eed087",
+    "Source/EMG/EMG4/CTRIA3_DSG3.f90": "546404c244c3a325d892342edf80f888f64ebf5db5c99af6b53661c218aee97a",
+    "Source/LK4/EIG_LANCZOS_ARPACK.f90": "722888792910ac080106d6d54208920b608a52cf302e5fb3e28b9a26fed8b0db",
+    "Source/Modules/ARPACK/ARPACK_LANCZOS_EIG.f": "054652f6c3c0e533354407f04dd4d3c37de62c170d93fa46ce2015bb12592d30"
+  },
+  "kernel_variants": {
+    "CTRIAR_DKMT18": "SF candidate; same non-shear operators",
+    "CTRIA3_DSG3": "consistent spin plus corrected local-z Kg",
+    "CTRIA3_MITC3plus": "Lee plus consistent spin",
+    "CTRIAR_KMITC3plus": "Nguyen KMITC3+ experimental successor; HB retired",
+    "CQUAD4_DSQK": "covariant shear plus consistent spin"
+  },
+  "MYSTRAN_runs": 1694,
+  "Nastran_runs": 308,
+  "Nastran_extra_rank_decks": 8,
+  "solver_controls": "MYSTRAN SOL105 explicit PARAM ARP_TOL=1e-10, default DARPACK, no iterative-refinement or Jacobi prototype; residual acceptance 1e-6 unchanged",
+  "scope": "CQUAD4 CQUADR CTRIA3 CTRIAR; quadratic reports and DAT remain separate"
+}

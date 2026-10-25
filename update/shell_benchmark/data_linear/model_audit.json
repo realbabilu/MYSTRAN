@@ -1,0 +1,4960 @@
+[
+  {
+    "case": "prob_2_001_mh_cquadr_simo",
+    "group": "2001",
+    "nodes": 8,
+    "parent_elements": 5,
+    "bounds": [
+      [
+        0.0,
+        0.24
+      ],
+      [
+        0.0,
+        0.12
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "1000000.",
+        "",
+        "0.25"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "MacNeal-Harder membrane/bending plus separate distorted bending/shear/twist patches. Analytical fields evaluated at the actual GRID coordinates; prescribed and free DOFs reported separately.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "prob_2_001_patchbending_cquadr_simo",
+    "group": "2001",
+    "nodes": 9,
+    "parent_elements": 4,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "1000000.",
+        "",
+        "0.25"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "MacNeal-Harder membrane/bending plus separate distorted bending/shear/twist patches. Analytical fields evaluated at the actual GRID coordinates; prescribed and free DOFs reported separately.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "prob_2_001_patchshear_cquadr_simo",
+    "group": "2001",
+    "nodes": 9,
+    "parent_elements": 4,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "1000000.",
+        "",
+        "0.25"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "MacNeal-Harder membrane/bending plus separate distorted bending/shear/twist patches. Analytical fields evaluated at the actual GRID coordinates; prescribed and free DOFs reported separately.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "prob_2_001_patchtwist_cquadr_simo",
+    "group": "2001",
+    "nodes": 9,
+    "parent_elements": 4,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "1000000.",
+        "",
+        "0.25"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "MacNeal-Harder membrane/bending plus separate distorted bending/shear/twist patches. Analytical fields evaluated at the actual GRID coordinates; prescribed and free DOFs reported separately.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "prob_2_002_nx12_cquadr_simo",
+    "group": "2002",
+    "nodes": 26,
+    "parent_elements": 12,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "S2K A rectangular geometry; 6 in x 0.2 in x 0.1 in. Preserve SPC1236 at lower root, SPC126 at upper root and the LC2 root counterforce. Refinement changes axial segmentation only.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 14,
+    "max_shared_coordinate_error": 4.5,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_002_nx16_cquadr_simo",
+    "group": "2002",
+    "nodes": 34,
+    "parent_elements": 16,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "S2K A rectangular geometry; 6 in x 0.2 in x 0.1 in. Preserve SPC1236 at lower root, SPC126 at upper root and the LC2 root counterforce. Refinement changes axial segmentation only.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 14,
+    "max_shared_coordinate_error": 4.875,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_002_nx24_cquadr_simo",
+    "group": "2002",
+    "nodes": 50,
+    "parent_elements": 24,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "S2K A rectangular geometry; 6 in x 0.2 in x 0.1 in. Preserve SPC1236 at lower root, SPC126 at upper root and the LC2 root counterforce. Refinement changes axial segmentation only.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 14,
+    "max_shared_coordinate_error": 5.25,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_002_nx2_cquadr_simo",
+    "group": "2002",
+    "nodes": 6,
+    "parent_elements": 2,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "S2K A rectangular geometry; 6 in x 0.2 in x 0.1 in. Preserve SPC1236 at lower root, SPC126 at upper root and the LC2 root counterforce. Refinement changes axial segmentation only.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 6,
+    "max_shared_coordinate_error": 2.0,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_002_nx4_cquadr_simo",
+    "group": "2002",
+    "nodes": 10,
+    "parent_elements": 4,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "S2K A rectangular geometry; 6 in x 0.2 in x 0.1 in. Preserve SPC1236 at lower root, SPC126 at upper root and the LC2 root counterforce. Refinement changes axial segmentation only.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 10,
+    "max_shared_coordinate_error": 5.0039984012787215,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_002_nx8_cquadr_simo",
+    "group": "2002",
+    "nodes": 18,
+    "parent_elements": 8,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "S2K A rectangular geometry; 6 in x 0.2 in x 0.1 in. Preserve SPC1236 at lower root, SPC126 at upper root and the LC2 root counterforce. Refinement changes axial segmentation only.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 14,
+    "max_shared_coordinate_error": 3.75,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_004_nx12_cquadr_simo",
+    "group": "2004",
+    "nodes": 39,
+    "parent_elements": 24,
+    "bounds": [
+      [
+        0.0,
+        12.0
+      ],
+      [
+        -0.55,
+        0.55
+      ],
+      [
+        -0.55,
+        0.55
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000000.",
+        "",
+        "0.22"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.32",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-004-thick.s2k",
+    "source_sha256": "34676e47284fd8118f7b2b0340b03865c49123246b7ce1c816d9e0a4dd41267b",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Twisted beam, same physical tip loads and root supports at each axial refinement. Independent UY=0.005429 in, UZ=0.001749 in. Parent width uses two elements.",
+    "s2k_joint_count": 39,
+    "s2k_area_count": 24,
+    "matching_joint_ids": 39,
+    "max_shared_coordinate_error": 8.056519099504166,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.32",
+        "BendThick": "0.32",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_004_nx16_cquadr_simo",
+    "group": "2004",
+    "nodes": 51,
+    "parent_elements": 32,
+    "bounds": [
+      [
+        0.0,
+        12.0
+      ],
+      [
+        -0.55,
+        0.55
+      ],
+      [
+        -0.55,
+        0.55
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000000.",
+        "",
+        "0.22"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.32",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-004-thick.s2k",
+    "source_sha256": "34676e47284fd8118f7b2b0340b03865c49123246b7ce1c816d9e0a4dd41267b",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Twisted beam, same physical tip loads and root supports at each axial refinement. Independent UY=0.005429 in, UZ=0.001749 in. Parent width uses two elements.",
+    "s2k_joint_count": 39,
+    "s2k_area_count": 24,
+    "matching_joint_ids": 39,
+    "max_shared_coordinate_error": 9.020724833348908,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.32",
+        "BendThick": "0.32",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_004_nx24_cquadr_simo",
+    "group": "2004",
+    "nodes": 75,
+    "parent_elements": 48,
+    "bounds": [
+      [
+        0.0,
+        12.0
+      ],
+      [
+        -0.55,
+        0.55
+      ],
+      [
+        -0.55,
+        0.55
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000000.",
+        "",
+        "0.22"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.32",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-004-thick.s2k",
+    "source_sha256": "34676e47284fd8118f7b2b0340b03865c49123246b7ce1c816d9e0a4dd41267b",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Twisted beam, same physical tip loads and root supports at each axial refinement. Independent UY=0.005429 in, UZ=0.001749 in. Parent width uses two elements.",
+    "s2k_joint_count": 39,
+    "s2k_area_count": 24,
+    "matching_joint_ids": 39,
+    "max_shared_coordinate_error": 10.022395645597607,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.32",
+        "BendThick": "0.32",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_004_nx2_cquadr_simo",
+    "group": "2004",
+    "nodes": 9,
+    "parent_elements": 4,
+    "bounds": [
+      [
+        0.0,
+        12.0
+      ],
+      [
+        -0.55,
+        0.55
+      ],
+      [
+        -0.55,
+        0.55
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000000.",
+        "",
+        "0.22"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.32",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-004-thick.s2k",
+    "source_sha256": "34676e47284fd8118f7b2b0340b03865c49123246b7ce1c816d9e0a4dd41267b",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Twisted beam, same physical tip loads and root supports at each axial refinement. Independent UY=0.005429 in, UZ=0.001749 in. Parent width uses two elements.",
+    "s2k_joint_count": 39,
+    "s2k_area_count": 24,
+    "matching_joint_ids": 9,
+    "max_shared_coordinate_error": 6.014748573094343,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.32",
+        "BendThick": "0.32",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_004_nx4_cquadr_simo",
+    "group": "2004",
+    "nodes": 15,
+    "parent_elements": 8,
+    "bounds": [
+      [
+        0.0,
+        12.0
+      ],
+      [
+        -0.55,
+        0.55
+      ],
+      [
+        -0.55,
+        0.55
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000000.",
+        "",
+        "0.22"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.32",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-004-thick.s2k",
+    "source_sha256": "34676e47284fd8118f7b2b0340b03865c49123246b7ce1c816d9e0a4dd41267b",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Twisted beam, same physical tip loads and root supports at each axial refinement. Independent UY=0.005429 in, UZ=0.001749 in. Parent width uses two elements.",
+    "s2k_joint_count": 39,
+    "s2k_area_count": 24,
+    "matching_joint_ids": 15,
+    "max_shared_coordinate_error": 12.0,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.32",
+        "BendThick": "0.32",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_004_nx8_cquadr_simo",
+    "group": "2004",
+    "nodes": 27,
+    "parent_elements": 16,
+    "bounds": [
+      [
+        0.0,
+        12.0
+      ],
+      [
+        -0.55,
+        0.55
+      ],
+      [
+        -0.55,
+        0.55
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000000.",
+        "",
+        "0.22"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.32",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-004-thick.s2k",
+    "source_sha256": "34676e47284fd8118f7b2b0340b03865c49123246b7ce1c816d9e0a4dd41267b",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Twisted beam, same physical tip loads and root supports at each axial refinement. Independent UY=0.005429 in, UZ=0.001749 in. Parent width uses two elements.",
+    "s2k_joint_count": 39,
+    "s2k_area_count": 24,
+    "matching_joint_ids": 27,
+    "max_shared_coordinate_error": 12.025181911305957,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.32",
+        "BendThick": "0.32",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_005_clamped_mesh_06_cquadr_simo",
+    "group": "2005",
+    "nodes": 49,
+    "parent_elements": 36,
+    "bounds": [
+      [
+        0.0,
+        5.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "17472000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.0001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-005c-thick.s2k",
+    "source_sha256": "f5fa71c964798b72ad67b92620993a07d91128bc39ead8d7ca794afd4142bae9",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform and point load remain separate. t=0.0001 in. Independent simple=12.97/16.95 in and fixed=2.60/7.25 in.",
+    "s2k_joint_count": 25,
+    "s2k_area_count": 16,
+    "matching_joint_ids": 25,
+    "max_shared_coordinate_error": 5.044248650581064,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.0001",
+        "BendThick": "0.0001",
+        "Color": "Cyan",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_005_clamped_mesh_12_cquadr_simo",
+    "group": "2005",
+    "nodes": 169,
+    "parent_elements": 144,
+    "bounds": [
+      [
+        0.0,
+        5.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "17472000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.0001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-005c-thick.s2k",
+    "source_sha256": "f5fa71c964798b72ad67b92620993a07d91128bc39ead8d7ca794afd4142bae9",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform and point load remain separate. t=0.0001 in. Independent simple=12.97/16.95 in and fixed=2.60/7.25 in.",
+    "s2k_joint_count": 25,
+    "s2k_area_count": 16,
+    "matching_joint_ids": 25,
+    "max_shared_coordinate_error": 4.602233753871894,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.0001",
+        "BendThick": "0.0001",
+        "Color": "Cyan",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_005_clamped_mesh_18_cquadr_simo",
+    "group": "2005",
+    "nodes": 361,
+    "parent_elements": 324,
+    "bounds": [
+      [
+        0.0,
+        5.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "17472000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.0001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-005c-thick.s2k",
+    "source_sha256": "f5fa71c964798b72ad67b92620993a07d91128bc39ead8d7ca794afd4142bae9",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform and point load remain separate. t=0.0001 in. Independent simple=12.97/16.95 in and fixed=2.60/7.25 in.",
+    "s2k_joint_count": 25,
+    "s2k_area_count": 16,
+    "matching_joint_ids": 25,
+    "max_shared_coordinate_error": 5.047994956990594,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.0001",
+        "BendThick": "0.0001",
+        "Color": "Cyan",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_005_clamped_mesh_24_cquadr_simo",
+    "group": "2005",
+    "nodes": 625,
+    "parent_elements": 576,
+    "bounds": [
+      [
+        0.0,
+        5.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "17472000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.0001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-005c-thick.s2k",
+    "source_sha256": "f5fa71c964798b72ad67b92620993a07d91128bc39ead8d7ca794afd4142bae9",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform and point load remain separate. t=0.0001 in. Independent simple=12.97/16.95 in and fixed=2.60/7.25 in.",
+    "s2k_joint_count": 25,
+    "s2k_area_count": 16,
+    "matching_joint_ids": 25,
+    "max_shared_coordinate_error": 4.284986743140391,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.0001",
+        "BendThick": "0.0001",
+        "Color": "Cyan",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_005_simple_mesh_06_cquadr_simo",
+    "group": "2005",
+    "nodes": 49,
+    "parent_elements": 36,
+    "bounds": [
+      [
+        0.0,
+        5.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "17472000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.0001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-005c-thick.s2k",
+    "source_sha256": "f5fa71c964798b72ad67b92620993a07d91128bc39ead8d7ca794afd4142bae9",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform and point load remain separate. t=0.0001 in. Independent simple=12.97/16.95 in and fixed=2.60/7.25 in.",
+    "s2k_joint_count": 25,
+    "s2k_area_count": 16,
+    "matching_joint_ids": 25,
+    "max_shared_coordinate_error": 5.044248650581064,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.0001",
+        "BendThick": "0.0001",
+        "Color": "Cyan",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_005_simple_mesh_12_cquadr_simo",
+    "group": "2005",
+    "nodes": 169,
+    "parent_elements": 144,
+    "bounds": [
+      [
+        0.0,
+        5.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "17472000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.0001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-005c-thick.s2k",
+    "source_sha256": "f5fa71c964798b72ad67b92620993a07d91128bc39ead8d7ca794afd4142bae9",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform and point load remain separate. t=0.0001 in. Independent simple=12.97/16.95 in and fixed=2.60/7.25 in.",
+    "s2k_joint_count": 25,
+    "s2k_area_count": 16,
+    "matching_joint_ids": 25,
+    "max_shared_coordinate_error": 4.602233753871894,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.0001",
+        "BendThick": "0.0001",
+        "Color": "Cyan",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_005_simple_mesh_18_cquadr_simo",
+    "group": "2005",
+    "nodes": 361,
+    "parent_elements": 324,
+    "bounds": [
+      [
+        0.0,
+        5.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "17472000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.0001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-005c-thick.s2k",
+    "source_sha256": "f5fa71c964798b72ad67b92620993a07d91128bc39ead8d7ca794afd4142bae9",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform and point load remain separate. t=0.0001 in. Independent simple=12.97/16.95 in and fixed=2.60/7.25 in.",
+    "s2k_joint_count": 25,
+    "s2k_area_count": 16,
+    "matching_joint_ids": 25,
+    "max_shared_coordinate_error": 5.047994956990594,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.0001",
+        "BendThick": "0.0001",
+        "Color": "Cyan",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_005_simple_mesh_24_cquadr_simo",
+    "group": "2005",
+    "nodes": 625,
+    "parent_elements": 576,
+    "bounds": [
+      [
+        0.0,
+        5.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "17472000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.0001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-005c-thick.s2k",
+    "source_sha256": "f5fa71c964798b72ad67b92620993a07d91128bc39ead8d7ca794afd4142bae9",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform and point load remain separate. t=0.0001 in. Independent simple=12.97/16.95 in and fixed=2.60/7.25 in.",
+    "s2k_joint_count": 25,
+    "s2k_area_count": 16,
+    "matching_joint_ids": 25,
+    "max_shared_coordinate_error": 4.284986743140391,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.0001",
+        "BendThick": "0.0001",
+        "Color": "Cyan",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_006_n12_cquadr_simo",
+    "group": "2006",
+    "nodes": 169,
+    "parent_elements": 144,
+    "bounds": [
+      [
+        0.0,
+        16.06969
+      ],
+      [
+        0.0,
+        25.0
+      ],
+      [
+        19.151111,
+        25.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "432000000.",
+        "",
+        "0."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.25",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-006-thick.s2k",
+    "source_sha256": "bf6d6ae06432711046967de3a36b65cc8ecd410ceb84befb63db86e683dc44c8",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Scordelis-Lo quarter roof. Primary CSI revision 8 independent free-edge midpoint UZ=-0.3086 ft; classical -0.3024 ft shown separately. Nodal forces represent 90 lb/ft^2 surface-area gravity loading; do not replace by projected area.",
+    "s2k_joint_count": 49,
+    "s2k_area_count": 36,
+    "matching_joint_ids": 49,
+    "max_shared_coordinate_error": 21.10082726956206,
+    "s2k_units": "lb, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.25",
+        "BendThick": "0.25",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_006_n16_cquadr_simo",
+    "group": "2006",
+    "nodes": 289,
+    "parent_elements": 256,
+    "bounds": [
+      [
+        0.0,
+        16.06969
+      ],
+      [
+        0.0,
+        25.0
+      ],
+      [
+        19.151111,
+        25.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "432000000.",
+        "",
+        "0."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.25",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-006-thick.s2k",
+    "source_sha256": "bf6d6ae06432711046967de3a36b65cc8ecd410ceb84befb63db86e683dc44c8",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Scordelis-Lo quarter roof. Primary CSI revision 8 independent free-edge midpoint UZ=-0.3086 ft; classical -0.3024 ft shown separately. Nodal forces represent 90 lb/ft^2 surface-area gravity loading; do not replace by projected area.",
+    "s2k_joint_count": 49,
+    "s2k_area_count": 36,
+    "matching_joint_ids": 49,
+    "max_shared_coordinate_error": 23.535076967315593,
+    "s2k_units": "lb, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.25",
+        "BendThick": "0.25",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_006_n2_cquadr_simo",
+    "group": "2006",
+    "nodes": 9,
+    "parent_elements": 4,
+    "bounds": [
+      [
+        0.0,
+        16.06969
+      ],
+      [
+        0.0,
+        25.0
+      ],
+      [
+        19.151111,
+        25.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "432000000.",
+        "",
+        "0."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.25",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-006-thick.s2k",
+    "source_sha256": "bf6d6ae06432711046967de3a36b65cc8ecd410ceb84befb63db86e683dc44c8",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Scordelis-Lo quarter roof. Primary CSI revision 8 independent free-edge midpoint UZ=-0.3086 ft; classical -0.3024 ft shown separately. Nodal forces represent 90 lb/ft^2 surface-area gravity loading; do not replace by projected area.",
+    "s2k_joint_count": 49,
+    "s2k_area_count": 36,
+    "matching_joint_ids": 9,
+    "max_shared_coordinate_error": 30.289352738214795,
+    "s2k_units": "lb, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.25",
+        "BendThick": "0.25",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_006_n4_cquadr_simo",
+    "group": "2006",
+    "nodes": 25,
+    "parent_elements": 16,
+    "bounds": [
+      [
+        0.0,
+        16.06969
+      ],
+      [
+        0.0,
+        25.0
+      ],
+      [
+        19.151111,
+        25.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "432000000.",
+        "",
+        "0."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.25",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-006-thick.s2k",
+    "source_sha256": "bf6d6ae06432711046967de3a36b65cc8ecd410ceb84befb63db86e683dc44c8",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Scordelis-Lo quarter roof. Primary CSI revision 8 independent free-edge midpoint UZ=-0.3086 ft; classical -0.3024 ft shown separately. Nodal forces represent 90 lb/ft^2 surface-area gravity loading; do not replace by projected area.",
+    "s2k_joint_count": 49,
+    "s2k_area_count": 36,
+    "matching_joint_ids": 25,
+    "max_shared_coordinate_error": 23.879358831216553,
+    "s2k_units": "lb, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.25",
+        "BendThick": "0.25",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_006_n6_cquadr_simo",
+    "group": "2006",
+    "nodes": 49,
+    "parent_elements": 36,
+    "bounds": [
+      [
+        0.0,
+        16.06969
+      ],
+      [
+        0.0,
+        25.0
+      ],
+      [
+        19.151111,
+        25.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "432000000.",
+        "",
+        "0."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.25",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-006-thick.s2k",
+    "source_sha256": "bf6d6ae06432711046967de3a36b65cc8ecd410ceb84befb63db86e683dc44c8",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Scordelis-Lo quarter roof. Primary CSI revision 8 independent free-edge midpoint UZ=-0.3086 ft; classical -0.3024 ft shown separately. Nodal forces represent 90 lb/ft^2 surface-area gravity loading; do not replace by projected area.",
+    "s2k_joint_count": 49,
+    "s2k_area_count": 36,
+    "matching_joint_ids": 49,
+    "max_shared_coordinate_error": 5.756995744293025e-05,
+    "s2k_units": "lb, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.25",
+        "BendThick": "0.25",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_006_n8_cquadr_simo",
+    "group": "2006",
+    "nodes": 81,
+    "parent_elements": 64,
+    "bounds": [
+      [
+        0.0,
+        16.06969
+      ],
+      [
+        0.0,
+        25.0
+      ],
+      [
+        19.151111,
+        25.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "432000000.",
+        "",
+        "0."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.25",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-006-thick.s2k",
+    "source_sha256": "bf6d6ae06432711046967de3a36b65cc8ecd410ceb84befb63db86e683dc44c8",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Scordelis-Lo quarter roof. Primary CSI revision 8 independent free-edge midpoint UZ=-0.3086 ft; classical -0.3024 ft shown separately. Nodal forces represent 90 lb/ft^2 surface-area gravity loading; do not replace by projected area.",
+    "s2k_joint_count": 49,
+    "s2k_area_count": 36,
+    "matching_joint_ids": 49,
+    "max_shared_coordinate_error": 20.584874984328202,
+    "s2k_units": "lb, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.25",
+        "BendThick": "0.25",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_007_thick_cquadr_simo",
+    "group": "2007",
+    "nodes": 81,
+    "parent_elements": 64,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        9.5105652
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "68250000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.04",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-007-thick.s2k",
+    "source_sha256": "5986d191661316e2e8005ba0dd639326a6f8cef16e976005cb94ac000bbd02fd",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "Source 8x8 hemispherical quarter model with 18-degree hole. Independent loaded radial U=0.0940 ft. No artificial refinement or different hole-angle reference.",
+    "s2k_joint_count": 81,
+    "s2k_area_count": 64,
+    "matching_joint_ids": 81,
+    "max_shared_coordinate_error": 7.265111570659187e-08,
+    "s2k_units": "Kip, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.04",
+        "BendThick": "0.04",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_008c_thick",
+    "group": "2008c",
+    "nodes": 1681,
+    "parent_elements": 1600,
+    "bounds": [
+      [
+        -12.0,
+        12.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        24.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1",
+        "1.",
+        "7.35e-07"
+      ]
+    ],
+    "source_s2k": "Example 2-008c-thick.s2k",
+    "source_sha256": "7a6c1c5e23e713b2120d9b0e7bc968c97642f3a2cfe5924dd012e82ee19e593a",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Model C only: source single area auto-meshed 40x40, compared with supplied explicit 40x40 DAT. Added area mass 7.35e-7; independent periods 0.01723,0.00704,0.00281,0.00219,0.00193 s. Mode order retained.",
+    "s2k_joint_count": 4,
+    "s2k_area_count": 1,
+    "matching_joint_ids": 4,
+    "max_shared_coordinate_error": 33.103474137920934,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "STEEL",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Gray8Dark",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_009a-thick",
+    "group": "2009",
+    "nodes": 2601,
+    "parent_elements": 2500,
+    "bounds": [
+      [
+        -150.0,
+        150.0
+      ],
+      [
+        -150.0,
+        150.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3",
+        "0.",
+        "6.5e-06"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1",
+        "1."
+      ]
+    ],
+    "source_s2k": "Example 2-009a-thick.s2k",
+    "source_sha256": "f3b10304d50910b1a0dc9f20314c59af75f62e507fbdcadc1c4bf8d117485997",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "A/B spring constants checked: 30 and 800 kip/ft^3, converted to 0.01736 and 0.462962962963 kip/in^3. Quad spring tributary areas 36/18/9 in^2; triangles redistribute to all vertices and centroids. Independent center UZ=-0.9205/-0.1782 in.",
+    "s2k_joint_count": 2601,
+    "s2k_area_count": 2500,
+    "matching_joint_ids": 2601,
+    "max_shared_coordinate_error": 0.0,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "STEEL",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Green",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_009b-thick",
+    "group": "2009",
+    "nodes": 2601,
+    "parent_elements": 2500,
+    "bounds": [
+      [
+        -150.0,
+        150.0
+      ],
+      [
+        -150.0,
+        150.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3",
+        "0.",
+        "6.5e-06"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1",
+        "1."
+      ]
+    ],
+    "source_s2k": "Example 2-009b-thick.s2k",
+    "source_sha256": "d69c868dc05f184cc5af447b6beb7dea2e6e59130a8587761c5951e6bcd7a776",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "A/B spring constants checked: 30 and 800 kip/ft^3, converted to 0.01736 and 0.462962962963 kip/in^3. Quad spring tributary areas 36/18/9 in^2; triangles redistribute to all vertices and centroids. Independent center UZ=-0.9205/-0.1782 in.",
+    "s2k_joint_count": 2601,
+    "s2k_area_count": 2500,
+    "matching_joint_ids": 2601,
+    "max_shared_coordinate_error": 0.0,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "STEEL",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Green",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_010_12x24_cquadr_simo",
+    "group": "2010",
+    "nodes": 312,
+    "parent_elements": 288,
+    "bounds": [
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        0.0,
+        200.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-010a-thick.s2k",
+    "source_sha256": "b4840401e7b79e20c317dd37972e2b07a2567e7c715af5c637c05fb60ca65b1a",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Supplied 6x12/12x24/24x48 geometry retained, but sparse original global supports replaced by PDF local U2 everywhere and U3 at base. Pressure=1 kip/in^2 outward. Exact source A/B meshes supplied as separate anchors. S2K exports omit pressure/restraints: PDF supplements explicitly recorded.",
+    "s2k_joint_count": 144,
+    "s2k_area_count": 128,
+    "matching_joint_ids": 144,
+    "max_shared_coordinate_error": 161.47604825251756,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "STEEL",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Gray8Dark",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_010_24x48_cquadr_simo",
+    "group": "2010",
+    "nodes": 1200,
+    "parent_elements": 1152,
+    "bounds": [
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        0.0,
+        200.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-010b-thick.s2k",
+    "source_sha256": "e2a1bef333cfd30e039549ba5c9ce980ddecf56a564802349d79b39e04cf09e7",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Supplied 6x12/12x24/24x48 geometry retained, but sparse original global supports replaced by PDF local U2 everywhere and U3 at base. Pressure=1 kip/in^2 outward. Exact source A/B meshes supplied as separate anchors. S2K exports omit pressure/restraints: PDF supplements explicitly recorded.",
+    "s2k_joint_count": 1200,
+    "s2k_area_count": 1152,
+    "matching_joint_ids": 1200,
+    "max_shared_coordinate_error": 0.0003333003975166323,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "STEEL",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Yellow",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_010_6x12_cquadr_simo",
+    "group": "2010",
+    "nodes": 84,
+    "parent_elements": 72,
+    "bounds": [
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        0.0,
+        200.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-010a-thick.s2k",
+    "source_sha256": "b4840401e7b79e20c317dd37972e2b07a2567e7c715af5c637c05fb60ca65b1a",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "Supplied 6x12/12x24/24x48 geometry retained, but sparse original global supports replaced by PDF local U2 everywhere and U3 at base. Pressure=1 kip/in^2 outward. Exact source A/B meshes supplied as separate anchors. S2K exports omit pressure/restraints: PDF supplements explicitly recorded.",
+    "s2k_joint_count": 144,
+    "s2k_area_count": 128,
+    "matching_joint_ids": 84,
+    "max_shared_coordinate_error": 156.20499351813308,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "STEEL",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Gray8Dark",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_012a-thick",
+    "group": "2012a",
+    "nodes": 672,
+    "parent_elements": 576,
+    "bounds": [
+      [
+        -2.0,
+        2.0
+      ],
+      [
+        -2.0,
+        2.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "18000000.",
+        "",
+        "0.3",
+        "0.",
+        "5.5e-06"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.5",
+        "1",
+        "",
+        "1",
+        "0.8333333333"
+      ]
+    ],
+    "source_s2k": "Example 2-012a-thick.s2k",
+    "source_sha256": "a589bebb8ec1ad956001c6004a4a54d2b8b1dafac0b82542d34b6ae2455778d2",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "Exact source 6x96 annulus. Consistent q=800 lb/in edge loads preserved. PSHELL TS/T corrected from 1 to 5/6 to match source shear multiplier 1. Independent UZ outer edge=-0.00534 in.",
+    "s2k_joint_count": 672,
+    "s2k_area_count": 576,
+    "matching_joint_ids": 672,
+    "max_shared_coordinate_error": 7.056710717841664e-08,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.5",
+        "BendThick": "0.5",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_012b-thick",
+    "group": "2012b",
+    "nodes": 672,
+    "parent_elements": 576,
+    "bounds": [
+      [
+        -2.0,
+        2.0
+      ],
+      [
+        -2.0,
+        2.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "18000000.",
+        "",
+        "0.3",
+        "0.",
+        "5.5e-06"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.5",
+        "1",
+        "",
+        "1",
+        "833.3333333"
+      ]
+    ],
+    "source_s2k": "Example 2-012b-thick.s2k",
+    "source_sha256": "eabddb753cbb70a6a796b38c2bc78f6be70c52b60b0a887a78ec30b3ecfa090a",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "Exact source 6x96 annulus. S2K V13Mod=V23Mod=1000 was missing from DAT; PSHELL TS/T set to 1000*(5/6). Independent bending-only UZ=-0.00521 in; residual shear flexibility retained.",
+    "s2k_joint_count": 672,
+    "s2k_area_count": 576,
+    "matching_joint_ids": 672,
+    "max_shared_coordinate_error": 7.056710717841664e-08,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.5",
+        "BendThick": "0.5",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1000",
+        "V23Mod": "1000",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_013a_temp_cquadr_simo",
+    "group": "2013",
+    "nodes": 8,
+    "parent_elements": 5,
+    "bounds": [
+      [
+        0.0,
+        0.24
+      ],
+      [
+        0.0,
+        0.12
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "1000000.",
+        "",
+        "0.25",
+        "0.",
+        "5.5e-06"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-013a-thick.s2k",
+    "source_sha256": "0f6081a1975f94e6c2619a1c119246defe42d366e1d71f44e893cf7ca61ce3c5",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "Uniform temperature increment 100 F, alpha=5.5e-6 /F. A free expansion UX8=0.000132 and UY8=0.000066 in. B restrained expansion sigmaXX=sigmaYY=-733.333333 psi; zero displacement uses absolute residual.",
+    "s2k_joint_count": 8,
+    "s2k_area_count": 5,
+    "matching_joint_ids": 8,
+    "max_shared_coordinate_error": 0.0,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.001",
+        "BendThick": "0.001",
+        "Color": "Gray8Dark",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_013b_temp_cquadr_simo",
+    "group": "2013",
+    "nodes": 8,
+    "parent_elements": 5,
+    "bounds": [
+      [
+        0.0,
+        0.24
+      ],
+      [
+        0.0,
+        0.12
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "1000000.",
+        "",
+        "0.25",
+        "0.",
+        "5.5e-06"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.001",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-013b-thick.s2k",
+    "source_sha256": "b65ddd78712a99da463d1279a18094bd688f60a58aeae0f53c86d0ddd7a44355",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "Uniform temperature increment 100 F, alpha=5.5e-6 /F. A free expansion UX8=0.000132 and UY8=0.000066 in. B restrained expansion sigmaXX=sigmaYY=-733.333333 psi; zero displacement uses absolute residual.",
+    "s2k_joint_count": 8,
+    "s2k_area_count": 5,
+    "matching_joint_ids": 8,
+    "max_shared_coordinate_error": 0.0,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.001",
+        "BendThick": "0.001",
+        "Color": "Gray8Dark",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "group": "2014",
+    "nodes": 928,
+    "parent_elements": 896,
+    "bounds": [
+      [
+        -30.0,
+        30.0
+      ],
+      [
+        -30.0,
+        30.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3",
+        "7.344552904e-07",
+        "6.5e-06",
+        "0."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-014b-thick.s2k",
+    "source_sha256": "ea85a6f7dd969413217b7c15319e5afd50f674bc385dc4d95b8bab38a92fcaa0",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "28x32 graded Model B, thick source. Uploaded alpha=0 with 6.5e-6 incorrectly in TREF; corrected alpha=6.5e-6 /F and TREF=0. MID3=1 restored from S2K thick section. TEMPP1 gradient=-100 F/in, not total temperature difference. Independent inner UZ=0.01931 in, tangential rotation=0.00352 rad.",
+    "s2k_joint_count": 928,
+    "s2k_area_count": 896,
+    "matching_joint_ids": 928,
+    "max_shared_coordinate_error": 6.336837563402734e-07,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "STEEL",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Green",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_016c_thick_beamseg_bend",
+    "group": "2016c",
+    "nodes": 4225,
+    "parent_elements": 4096,
+    "bounds": [
+      [
+        0.0,
+        24.0
+      ],
+      [
+        0.0,
+        24.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.01",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_PDF_AND_DAT_NO_S2K_SUPPLIED",
+    "notes": "Both original files contain both load cases. Split into shear and bending, each static-preload plus linked SOL105 buckling. Remove BAILOUT; convert dummy-beam global line tractions into exact linear-edge nodal forces. Source UX spring on y=0 cannot remove rigid rotation about node 1. Replace it by exact UY=0 at node 4, retain node-1 UX/UY pin and boundary UZ=0, and remove the artificial RZ anchor. These in-plane gauges are compatible with uniform shear and linear bending prestress. t=0.01 in despite filenames thick; compare critical stress to 0.0425/0.1165 ksi using sigma=lambda*qmax/t, qmax=1 kip/in.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "prob_2_016c_thick_beamseg_shear",
+    "group": "2016c",
+    "nodes": 4225,
+    "parent_elements": 4096,
+    "bounds": [
+      [
+        0.0,
+        24.0
+      ],
+      [
+        0.0,
+        24.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.01",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_PDF_AND_DAT_NO_S2K_SUPPLIED",
+    "notes": "Both original files contain both load cases. Split into shear and bending, each static-preload plus linked SOL105 buckling. Remove BAILOUT; convert dummy-beam global line tractions into exact linear-edge nodal forces. Source UX spring on y=0 cannot remove rigid rotation about node 1. Replace it by exact UY=0 at node 4, retain node-1 UX/UY pin and boundary UZ=0, and remove the artificial RZ anchor. These in-plane gauges are compatible with uniform shear and linear bending prestress. t=0.01 in despite filenames thick; compare critical stress to 0.0425/0.1165 ksi using sigma=lambda*qmax/t, qmax=1 kip/in.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "prob_2_017_nx2_ny12_cquadr_dkmq24",
+    "group": "2017",
+    "nodes": 39,
+    "parent_elements": 24,
+    "bounds": [
+      [
+        0.0,
+        12.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        100.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "3600.",
+        "",
+        "0.2"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-017-thick.s2k",
+    "source_sha256": "dc6b78ea8562ce5da1ebe00e5d154c8b99a41d125ea16d10205f87923b06f9a7",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "2x12 and 4x24 in-plane column buckling. Active UX,UZ,RY only; lower UX pin and UZ rollers; preserve unit total top force. Pcr=lambda*1 kip, independent=127.91 kip.",
+    "s2k_joint_count": 39,
+    "s2k_area_count": 24,
+    "matching_joint_ids": 39,
+    "max_shared_coordinate_error": 3.3333016347114608e-09,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Green",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_017_nx4_ny24_cquadr_dkmq24",
+    "group": "2017",
+    "nodes": 125,
+    "parent_elements": 96,
+    "bounds": [
+      [
+        0.0,
+        12.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        100.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "3600.",
+        "",
+        "0.2"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-017-thick.s2k",
+    "source_sha256": "dc6b78ea8562ce5da1ebe00e5d154c8b99a41d125ea16d10205f87923b06f9a7",
+    "status": "AUDITED_REFINED_OR_RENUMBERED",
+    "notes": "2x12 and 4x24 in-plane column buckling. Active UX,UZ,RY only; lower UX pin and UZ rollers; preserve unit total top force. Pcr=lambda*1 kip, independent=127.91 kip.",
+    "s2k_joint_count": 39,
+    "s2k_area_count": 24,
+    "matching_joint_ids": 39,
+    "max_shared_coordinate_error": 70.89683427797668,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Green",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_050_nx16_cquadr_simo",
+    "group": "2050",
+    "nodes": 289,
+    "parent_elements": 256,
+    "bounds": [
+      [
+        0.0,
+        300.0
+      ],
+      [
+        0.0,
+        300.0
+      ],
+      [
+        0.0,
+        300.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "3000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "3.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Classical pinched cylinder R=300,L=600,t=3,E=3e6,nu=.3; one-eighth symmetry with P/4=0.25 at the loaded node. Independent loaded UY=-1.8248e-5 in. Centroid split remains on parent facets.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "prob_2_050_nx4_cquadr_simo",
+    "group": "2050",
+    "nodes": 25,
+    "parent_elements": 16,
+    "bounds": [
+      [
+        0.0,
+        300.0
+      ],
+      [
+        0.0,
+        300.0
+      ],
+      [
+        0.0,
+        300.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "3000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "3.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Classical pinched cylinder R=300,L=600,t=3,E=3e6,nu=.3; one-eighth symmetry with P/4=0.25 at the loaded node. Independent loaded UY=-1.8248e-5 in. Centroid split remains on parent facets.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "prob_2_050_nx8_cquadr_simo",
+    "group": "2050",
+    "nodes": 81,
+    "parent_elements": 64,
+    "bounds": [
+      [
+        0.0,
+        300.0
+      ],
+      [
+        0.0,
+        300.0
+      ],
+      [
+        0.0,
+        300.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "3000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "3.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Classical pinched cylinder R=300,L=600,t=3,E=3e6,nu=.3; one-eighth symmetry with P/4=0.25 at the loaded node. Independent loaded UY=-1.8248e-5 in. Centroid split remains on parent facets.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "s2k_2003c",
+    "group": "2003c",
+    "nodes": 364,
+    "parent_elements": 270,
+    "bounds": [
+      [
+        2.522689089e-16,
+        4.32
+      ],
+      [
+        0.0,
+        4.32
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.25"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-003c-thick.s2k",
+    "source_sha256": "5f01a0df62f260f027d94d4fa8ca607f6e55ade28a19331e17300367d1f015c8",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "Only Model C is published: exact imported 90x3 circular-arc mesh. Source SPC1234 roots retained; not relabeled full-clamp. UY=0.0886 in independent; UZ=0.5004 in primary and 0.4546 in alternative shell-torsion estimate. SAP thick C=0.0884/0.4558 in.",
+    "s2k_joint_count": 364,
+    "s2k_area_count": 270,
+    "matching_joint_ids": 364,
+    "max_shared_coordinate_error": 6.909562406258202e-10,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Gray8Dark",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "s2k_2002a",
+    "group": "2002",
+    "nodes": 14,
+    "parent_elements": 6,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "S2K A rectangular geometry; 6 in x 0.2 in x 0.1 in. Preserve SPC1236 at lower root, SPC126 at upper root and the LC2 root counterforce. Refinement changes axial segmentation only.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 14,
+    "max_shared_coordinate_error": 0.0,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "s2k_2004",
+    "group": "2004",
+    "nodes": 39,
+    "parent_elements": 24,
+    "bounds": [
+      [
+        0.0,
+        12.0
+      ],
+      [
+        -0.55,
+        0.55
+      ],
+      [
+        -0.55,
+        0.55
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000000.",
+        "",
+        "0.22"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.32",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-004-thick.s2k",
+    "source_sha256": "34676e47284fd8118f7b2b0340b03865c49123246b7ce1c816d9e0a4dd41267b",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "Twisted beam, same physical tip loads and root supports at each axial refinement. Independent UY=0.005429 in, UZ=0.001749 in. Parent width uses two elements.",
+    "s2k_joint_count": 39,
+    "s2k_area_count": 24,
+    "matching_joint_ids": 39,
+    "max_shared_coordinate_error": 0.0,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "OTHER",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.32",
+        "BendThick": "0.32",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "s2k_2010a",
+    "group": "2010a",
+    "nodes": 144,
+    "parent_elements": 128,
+    "bounds": [
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        0.0,
+        200.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-010a-thick.s2k",
+    "source_sha256": "b4840401e7b79e20c317dd37972e2b07a2567e7c715af5c637c05fb60ca65b1a",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "Exact S2K A geometry (8x16). Pressure and local constraints reconstructed from PDF because these assignment tables are absent from the S2K export.",
+    "s2k_joint_count": 144,
+    "s2k_area_count": 128,
+    "matching_joint_ids": 144,
+    "max_shared_coordinate_error": 2.022162010062016e-09,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "STEEL",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Gray8Dark",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "s2k_2010b",
+    "group": "2010b",
+    "nodes": 1200,
+    "parent_elements": 1152,
+    "bounds": [
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        -60.0,
+        60.0
+      ],
+      [
+        0.0,
+        200.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "29000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "1.",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-010b-thick.s2k",
+    "source_sha256": "e2a1bef333cfd30e039549ba5c9ce980ddecf56a564802349d79b39e04cf09e7",
+    "status": "AUDITED_WITH_DOCUMENTED_MAPPING",
+    "notes": "Exact S2K B geometry (24x48). Pressure and local constraints reconstructed from PDF because these assignment tables are absent from the S2K export.",
+    "s2k_joint_count": 1200,
+    "s2k_area_count": 1152,
+    "matching_joint_ids": 1200,
+    "max_shared_coordinate_error": 4.676225053135252e-09,
+    "s2k_units": "Kip, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "STEEL",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "1",
+        "BendThick": "1",
+        "Color": "Yellow",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "T1_rank_unit",
+    "group": "T",
+    "nodes": 4,
+    "parent_elements": 1,
+    "bounds": [
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.3",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T1_rank_distorted",
+    "group": "T",
+    "nodes": 4,
+    "parent_elements": 1,
+    "bounds": [
+      [
+        -0.1,
+        1.2
+      ],
+      [
+        0.0,
+        1.1
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.3",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_moment_n1",
+    "group": "T",
+    "nodes": 4,
+    "parent_elements": 1,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.3",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_force_n1",
+    "group": "T",
+    "nodes": 4,
+    "parent_elements": 1,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_axial_n1",
+    "group": "T",
+    "nodes": 4,
+    "parent_elements": 1,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_moment_n2",
+    "group": "T",
+    "nodes": 6,
+    "parent_elements": 2,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.3",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_force_n2",
+    "group": "T",
+    "nodes": 6,
+    "parent_elements": 2,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_axial_n2",
+    "group": "T",
+    "nodes": 6,
+    "parent_elements": 2,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_moment_n4",
+    "group": "T",
+    "nodes": 10,
+    "parent_elements": 4,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.3",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_force_n4",
+    "group": "T",
+    "nodes": 10,
+    "parent_elements": 4,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_axial_n4",
+    "group": "T",
+    "nodes": 10,
+    "parent_elements": 4,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_moment_n8",
+    "group": "T",
+    "nodes": 18,
+    "parent_elements": 8,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.3",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_force_n8",
+    "group": "T",
+    "nodes": 18,
+    "parent_elements": 8,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_cantilever_axial_n8",
+    "group": "T",
+    "nodes": 18,
+    "parent_elements": 8,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_ss_plate_n4",
+    "group": "T",
+    "nodes": 25,
+    "parent_elements": 16,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_ss_plate_n8",
+    "group": "T",
+    "nodes": 81,
+    "parent_elements": 64,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "T_ss_plate_n16",
+    "group": "T",
+    "nodes": 289,
+    "parent_elements": 256,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "2100000.",
+        "",
+        "0.",
+        "1."
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "",
+    "source_sha256": "",
+    "status": "AUDITED_ANALYTICAL_FIELD_OR_REFERENCE_SCRIPT",
+    "notes": "Reference Python T-series parameters retained. Rank uses exported physical KGG, not a count of low dynamic frequencies. Cantilever moment/force/axial and simply supported plate provide additional analytical checks.",
+    "s2k_joint_count": "",
+    "s2k_area_count": "",
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": ""
+  },
+  {
+    "case": "prob_2_002_twoaxis_nx48_ny4",
+    "group": "2002",
+    "nodes": 245,
+    "parent_elements": 192,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_GENERATED_REFINEMENT",
+    "notes": "2-002 LC4 only; nx=48,ny=4, unchanged L=6,b=.2,t=.1, original mixed root supports and unit couple.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": null,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_002_twoaxis_nx96_ny8",
+    "group": "2002",
+    "nodes": 873,
+    "parent_elements": 768,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_GENERATED_REFINEMENT",
+    "notes": "2-002 LC4 only; nx=96,ny=8, unchanged L=6,b=.2,t=.1, original mixed root supports and unit couple.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": null,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_002_twoaxis_nx192_ny16",
+    "group": "2002",
+    "nodes": 3281,
+    "parent_elements": 3072,
+    "bounds": [
+      [
+        0.0,
+        6.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "10000000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.1",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-002a-thick.s2k",
+    "source_sha256": "9c1f691ed27a7062b343b614608c8895b7192ad9fe0cf8e9ba69f9f8bd255f77",
+    "status": "AUDITED_GENERATED_REFINEMENT",
+    "notes": "2-002 LC4 only; nx=192,ny=16, unchanged L=6,b=.2,t=.1, original mixed root supports and unit couple.",
+    "s2k_joint_count": 14,
+    "s2k_area_count": 6,
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": null,
+    "s2k_units": "lb, in, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.1",
+        "BendThick": "0.1",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_007_convergence_n8",
+    "group": "2007",
+    "nodes": 81,
+    "parent_elements": 64,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        9.5105652
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "68250000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.04",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-007-thick.s2k",
+    "source_sha256": "5986d191661316e2e8005ba0dd639326a6f8cef16e976005cb94ac000bbd02fd",
+    "status": "AUDITED_GENERATED_REFINEMENT",
+    "notes": "Retained 8x8 hemisphere convergence input; load-node observations transformed from GRID CD to basic.",
+    "s2k_joint_count": 81,
+    "s2k_area_count": 64,
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": null,
+    "s2k_units": "Kip, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.04",
+        "BendThick": "0.04",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_007_convergence_n16",
+    "group": "2007",
+    "nodes": 289,
+    "parent_elements": 256,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        9.5105652
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "68250000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.04",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-007-thick.s2k",
+    "source_sha256": "5986d191661316e2e8005ba0dd639326a6f8cef16e976005cb94ac000bbd02fd",
+    "status": "AUDITED_GENERATED_REFINEMENT",
+    "notes": "Retained 16x16 hemisphere convergence input; load-node observations transformed from GRID CD to basic.",
+    "s2k_joint_count": 81,
+    "s2k_area_count": 64,
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": null,
+    "s2k_units": "Kip, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.04",
+        "BendThick": "0.04",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  },
+  {
+    "case": "prob_2_007_convergence_n32",
+    "group": "2007",
+    "nodes": 1089,
+    "parent_elements": 1024,
+    "bounds": [
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        0.0,
+        9.5105652
+      ]
+    ],
+    "material": [
+      [
+        "MAT1",
+        "1",
+        "68250000.",
+        "",
+        "0.3"
+      ]
+    ],
+    "properties": [
+      [
+        "PSHELL",
+        "1",
+        "1",
+        "0.04",
+        "1",
+        "",
+        "1"
+      ]
+    ],
+    "source_s2k": "Example 2-007-thick.s2k",
+    "source_sha256": "5986d191661316e2e8005ba0dd639326a6f8cef16e976005cb94ac000bbd02fd",
+    "status": "AUDITED_GENERATED_REFINEMENT",
+    "notes": "Retained 32x32 hemisphere convergence input; load-node observations transformed from GRID CD to basic.",
+    "s2k_joint_count": 81,
+    "s2k_area_count": 64,
+    "matching_joint_ids": 0,
+    "max_shared_coordinate_error": null,
+    "s2k_units": "Kip, ft, F",
+    "s2k_sections": [
+      {
+        "Section": "ASEC1",
+        "Material": "CONC",
+        "MatAngle": "0",
+        "AreaType": "Shell",
+        "Type": "Shell-Thick",
+        "DrillDOF": "Yes",
+        "Thickness": "0.04",
+        "BendThick": "0.04",
+        "Color": "Blue",
+        "F11Mod": "1",
+        "F22Mod": "1",
+        "F12Mod": "1",
+        "M11Mod": "1",
+        "M22Mod": "1",
+        "M12Mod": "1",
+        "V13Mod": "1",
+        "V23Mod": "1",
+        "MMod": "1",
+        "WMod": "1"
+      }
+    ]
+  }
+]

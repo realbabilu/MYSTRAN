@@ -1,0 +1,14 @@
+{
+  "metric_rows": 5096,
+  "duplicate_keys": 0,
+  "markdown_files": 19,
+  "broken_links": [],
+  "figures": 99,
+  "MYSTRAN_decks": 1694,
+  "Nastran_decks": 308,
+  "Nastran_rank_decks": 8,
+  "archive_crc": "PASS",
+  "deck_hashes": "PASS",
+  "quadratic_preservation": "PASS",
+  "csv_bytes": 3277123
+}

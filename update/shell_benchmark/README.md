@@ -15,8 +15,13 @@
 - [2-012A: Fixed6×96 annulus, thick shear/bending](benchmark_2_012.md) — One source mesh; midpoint inner support and consistent line load; targetUZ−0.00534in. Nastran9137 failures and BAILOUT warnings retained.
 - [2-013: Thermal constant through thickness](benchmark_2_013.md) — 2-013A Ux=0.000132, Uy=0.000066 in at joint8; 2-013B sigma_xx=sigma_yy=-733.33 psi, with measured GPSTRESS.
 - [2-014: Annular thermal gradient](benchmark_2_014.md) — 9×16 CSI thick reference: Uz=0.01931 in, R2=0.00352 rad, M11=-2.181 and M22=-4.406 kip-in/in; Python-generated 28×32 Q8 / 1792 T6 triangles is not the CSI mesh.
-- [2-015: Shell benchmark](benchmark_2_015.md) — Pending independent-reference and run metadata verification.
 - [2-016: Out-of-plane buckling](benchmark_2_016.md) — CSI shear/bend references t=1: 425/1165 ksi; t=0.01: 0.0425/0.1165 ksi. Buckling lambda to critical stress requires load normalization, including t=1 provisional.
 - [2-017: In-plane buckling](benchmark_2_017.md) — CSI reference Pcr=127.91 kip; lambda requires load basis and physical buckling mode matching.
 
 [Publication and Solid privacy audit](PUBLICATION_QA.md) · [Actual tested DAT archive](DAT/quadratic_shell_benchmark_DAT.zip)
+
+## Linear shells
+
+[Linear comparisons](comparison_all_linear.md) · [Linear CSV](comparison_all_linear.csv) · [Linear publication QA](PUBLICATION_QA_linear.md) · [Linear DAT archive](DAT/linear_shell_benchmark_DAT.zip)
+
+CQUAD4, CQUADR, CTRIA3 and CTRIAR use separate `_linear.md` reports. NATIVE denotes Nastran for the corresponding element card.
