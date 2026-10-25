@@ -1,18 +1,18 @@
 # NEWSOLID continuum solid formulations
 
-**Ary · Technical manuscript · 18 October 2026**
+[Continuum formulation overview](NEWSOLID_CONTINUUM_FORMULATIONS.md) covers all eight solid topologies, including interpolation, integration, enhanced modes, smoothing, recovery and existing Nastran benchmark comparisons. CTETRA10, CPENTA15, CHEXA20 and CPYRAM5 are covered in that overview, including the applicable selective-integration choices.
 
-- [TETRA4 NEWSOLID: formulation and Nastran benchmarks](TETRA4_Formulation.md): nodal smoothing weight 0.9, mathematical operators, four figures and five existing verification cases.
-- [Solids Formulation — read on GitHub](NEWSOLID_CONTINUUM_FORMULATIONS.md).
-- Numerical tables and provenance (research data retained locally; see embedded tables).
-- [Existing solid benchmark reports and input decks](../../solid_benchmark/README.md).
+## Special element formulations
 
-Eight solid topologies, with CPENTA6 ABE and EAS9 treated separately. Includes shape functions, explicit enhanced modes, condensation, smoothing, selective integration, pyramid quadrature, existing patch results, mesh figures and Nastran comparisons. All text is in English. The supplied revision-2 archive is reconciled with the actual MYSTRAN source snapshot; no new solver results are claimed.
+The following reports provide detailed mathematical formulations, figures and existing benchmark comparisons with Nastran:
 
-Equations are provided directly in the Markdown reports.
+| Element | Detailed report | Main formulation |
+|---|---|---|
+| TETRA4 | [TETRA4 NEWSOLID](TETRA4_Formulation.md) | Blended nodal strain smoothing, weight 0.9 |
+| CPYRAM13 | [CPYRAM13 Bedrosian](CPYRAM13_Bedrosian_Formulation.md) | Rational quadratic pyramid interpolation |
+| CHEXA8 | [CHEXA8 EAS](CHEXA8_EAS_Formulation.md) | Covariant EAS9 and consistent transverse-shear tying |
+| CPENTA6 | [CPENTA6 ABE](CPENTA6_ABE_Formulation.md) | Edge-tied assumed shear and nine condensed enhanced strains |
 
-- [CPENTA6 ABE: formulation and Nastran benchmarks](CPENTA6_ABE_Formulation.md).
+## Benchmark collection
 
-- [CHEXA8 EAS: covariant enhancement, consistent shear tying and Nastran benchmarks](CHEXA8_EAS_Formulation.md).
-
-- [CPYRAM13 Bedrosian: rational quadratic pyramid and Nastran benchmarks](CPYRAM13_Bedrosian_Formulation.md).
+[Solid benchmark reports and input decks](../../solid_benchmark/README.md) provide the existing comparison results and model definitions. Equations and figures are included directly in the Markdown reports.

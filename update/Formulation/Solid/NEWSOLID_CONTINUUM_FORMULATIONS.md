@@ -12,6 +12,17 @@ This manuscript documents eight three-dimensional continuum solid elements in MY
 
 **Keywords:** continuum finite elements; nodal smoothing; enhanced assumed strain; quadratic solids; rational pyramid; patch test; mesh refinement; MYSTRAN; Nastran.
 
+## Special element formulations
+
+The following reports provide detailed mathematical formulations, figures and existing benchmark comparisons with Nastran:
+
+| Element | Detailed report | Main formulation |
+|---|---|---|
+| TETRA4 | [TETRA4 NEWSOLID](TETRA4_Formulation.md) | Blended nodal strain smoothing, weight 0.9 |
+| CPYRAM13 | [CPYRAM13 Bedrosian](CPYRAM13_Bedrosian_Formulation.md) | Rational quadratic pyramid interpolation |
+| CHEXA8 | [CHEXA8 EAS](CHEXA8_EAS_Formulation.md) | Covariant EAS9 and consistent transverse-shear tying |
+| CPENTA6 | [CPENTA6 ABE](CPENTA6_ABE_Formulation.md) | Edge-tied assumed shear and nine condensed enhanced strains |
+
 ## 1. Scope, evidence and formulation lineage
 
 The supplied `NEWSOLID_ARY_CONTINUUM_FORMULATIONS_REV2_20261017.zip` provides the editorial starting point and topology illustrations. Its proposed research selection is distinguished from the current executable. In particular, the archive selects CPENTA6 EAS9, whereas the implementation defaults to ABE and exposes EAS9 as an alternative. Both are documented here. These are continuum elements with translational unknowns; an enhanced strain parameter is an element-local algebraic variable, not an internal physical grid.
