@@ -196,11 +196,18 @@ $$
 
 ## 8. SAP benchmark comparisons
 
-The external comparisons are T3FF versus Nastran CTRIA3 and T3FFD versus Nastran CTRIAR. Results are matched by benchmark, load case, response and unit. A signed difference is defined by
+The external comparisons are T3FF versus Nastran CTRIA3 and T3FFD versus Nastran CTRIAR. Results are matched by benchmark, load case, response and unit. Accuracy is assessed separately for each solver against its independent reference.
 
-$$
-\Delta_q=100\frac{q_{\mathrm{T3FF\ family}}-q_{\mathrm{Nastran}}}{q_{\mathrm{Nastran}}}.
-$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
+
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
 
 The reference line in the plots is independent of the Nastran comparison; agreement between two elements does not establish agreement with that reference.
 
@@ -218,41 +225,56 @@ Beam results use longitudinal subdivision count 24; the roof uses 16 × 16 paren
 
 #### T3FF versus Nastran CTRIA3
 
-| SAP case | LC | Response | Unit | T3FF | Nastran CTRIA3 | Difference |
-|---|---|---|---|---:|---:|---:|
-| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | +0.000% |
-| 2-002 | 2 | tip UZ | in | 0.05457731 | 0.05456462 | +0.023% |
-| 2-002 | 3 | tip UY | in | 0.4320323 | 0.4321559 | -0.029% |
-| 2-002 | 4 | tip abs UY | in | 0.00294009 | 0.003678172 | -20.067% |
-| 2-002 | 5 | tip abs UX | in | 0.0004543581 | 0.0004542509 | +0.024% |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | +0.000% |
-| 2-003 | 1 | tip UY | in | 0.080838235 | 0.080835205 | +0.004% |
-| 2-003 | 2 | tip UZ | in | 0.48943995 | 0.4948982 | -1.103% |
-| 2-004 | 1 | tip UZ | in | 0.0015952413 | 0.0016856563 | -5.364% |
-| 2-004 | 2 | tip UY | in | 0.0051590657 | 0.0053938653 | -4.353% |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.2980717 | -0.3034232 | -1.764% |
-| 2-017 | 2 | critical load | kip | 136.843 | 137.259 | -0.303% |
+| SAP case | LC | Response | Unit | T3FF | Nastran CTRIA3 | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | 3e-05 | 0.0000 | 0.0000 |
+| 2-002 | 2 | tip UZ | in | 0.05457731 | 0.05456462 | 0.1081 | 49.5239 | 49.5122 |
+| 2-002 | 3 | tip UY | in | 0.4320323 | 0.4321559 | 0.4321 | 0.0129 | 0.0157 |
+| 2-002 | 4 | tip abs UY | in | 0.00294009 | 0.003678172 | 0.00341 | 7.8643 | 13.7804 |
+| 2-002 | 5 | tip abs UX | in | 0.0004543581 | 0.0004542509 | 0.0009 | 49.5277 | 49.5158 |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
+| 2-003 | 1 | tip UY | in | 0.080838235 | 0.080835205 | 0.0886 | 8.7639 | 8.7605 |
+| 2-003 | 2 | tip UZ | in | 0.48943995 | 0.4948982 | 0.5004 | 1.0995 | 2.1903 |
+| 2-004 | 1 | tip UZ | in | 0.0015952413 | 0.0016856563 | 0.001749 | 3.6217 | 8.7912 |
+| 2-004 | 2 | tip UY | in | 0.0051590657 | 0.0053938653 | 0.005429 | 0.6472 | 4.9721 |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.2980717 | -0.3034232 | -0.3086 | 1.6775 | 3.4116 |
+| 2-017 | 2 | critical load | kip | 136.843 | 137.259 | 127.91 | 7.3090 | 6.9838 |
 
 #### T3FFD versus Nastran CTRIAR
 
-| SAP case | LC | Response | Unit | T3FFD | Nastran CTRIAR | Difference |
-|---|---|---|---|---:|---:|---:|
-| 2-002 | 1 | tip UX | in | 3e-05 | 3.090472e-05 | -2.927% |
-| 2-002 | 2 | tip UZ | in | 0.05457731 | 0.09643454 | -43.405% |
-| 2-002 | 3 | tip UY | in | 0.4320323 | 0.4321313 | -0.023% |
-| 2-002 | 4 | tip abs UY | in | 0.00294009 | 0.003539409 | -16.933% |
-| 2-002 | 5 | tip abs UX | in | 0.0004543581 | 0.0008025134 | -43.383% |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | +0.000% |
-| 2-003 | 1 | tip UY | in | 0.080838235 | 0.087579825 | -7.698% |
-| 2-003 | 2 | tip UZ | in | 0.48943995 | 0.4939091 | -0.905% |
-| 2-004 | 1 | tip UZ | in | 0.0015952413 | 0.001736926 | -8.157% |
-| 2-004 | 2 | tip UY | in | 0.0051590657 | 0.005405563 | -4.560% |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.2980717 | -0.3045089 | -2.114% |
-| 2-017 | 2 | critical load | kip | 136.843 | 126.2154 | +8.420% |
+| SAP case | LC | Response | Unit | T3FFD | Nastran CTRIAR | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | 1 | tip UX | in | 3e-05 | 3.090472e-05 | 3e-05 | 3.0157 | 0.0000 |
+| 2-002 | 2 | tip UZ | in | 0.05457731 | 0.09643454 | 0.1081 | 10.7914 | 49.5122 |
+| 2-002 | 3 | tip UY | in | 0.4320323 | 0.4321313 | 0.4321 | 0.0072 | 0.0157 |
+| 2-002 | 4 | tip abs UY | in | 0.00294009 | 0.003539409 | 0.00341 | 3.7950 | 13.7804 |
+| 2-002 | 5 | tip abs UX | in | 0.0004543581 | 0.0008025134 | 0.0009 | 10.8318 | 49.5158 |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
+| 2-003 | 1 | tip UY | in | 0.080838235 | 0.087579825 | 0.0886 | 1.1514 | 8.7605 |
+| 2-003 | 2 | tip UZ | in | 0.48943995 | 0.4939091 | 0.5004 | 1.2971 | 2.1903 |
+| 2-004 | 1 | tip UZ | in | 0.0015952413 | 0.001736926 | 0.001749 | 0.6903 | 8.7912 |
+| 2-004 | 2 | tip UY | in | 0.0051590657 | 0.005405563 | 0.005429 | 0.4317 | 4.9721 |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.2980717 | -0.3045089 | -0.3086 | 1.3257 | 3.4116 |
+| 2-017 | 2 | critical load | kip | 136.843 | 126.2154 | 127.91 | 1.3248 | 6.9838 |
 
 ### 8.2 Discussion
 
-T3FF and T3FFD give identical responses for the reported setting. Their comparison percentages differ because Nastran CTRIA3 and CTRIAR do not give the same response on every benchmark. In the straight beam, LC2 and LC5 illustrate this clearly: close agreement with CTRIA3 coexists with a much larger difference from CTRIAR and from the independent bending reference. LC4 retains a substantial difference against both comparison elements.
+- **2-002, 2, tip UZ:** reference 0.1081 in; Nastran_error=49.5239%; T3FF Mystran_error=49.5122%.
+- **2-002, 4, tip abs UY:** reference 0.00341 in; Nastran_error=7.8643%; T3FF Mystran_error=13.7804%.
+- **2-002, 5, tip abs UX:** reference 0.0009 in; Nastran_error=49.5277%; T3FF Mystran_error=49.5158%.
+- **2-004, 1, tip UZ:** reference 0.001749 in; Nastran_error=3.6217%; T3FF Mystran_error=8.7912%.
+- **2-004, 2, tip UY:** reference 0.005429 in; Nastran_error=0.6472%; T3FF Mystran_error=4.9721%.
+- **2-006, 1, free edge midpoint UZ:** reference -0.3086 ft; Nastran_error=1.6775%; T3FF Mystran_error=3.4116%.
+- **2-017, 2, critical load:** reference 127.91 kip; Nastran_error=7.3090%; T3FF Mystran_error=6.9838%.
+- **2-002, 2, tip UZ:** reference 0.1081 in; Nastran_error=10.7914%; T3FFD Mystran_error=49.5122%.
+- **2-002, 4, tip abs UY:** reference 0.00341 in; Nastran_error=3.7950%; T3FFD Mystran_error=13.7804%.
+- **2-002, 5, tip abs UX:** reference 0.0009 in; Nastran_error=10.8318%; T3FFD Mystran_error=49.5158%.
+- **2-004, 1, tip UZ:** reference 0.001749 in; Nastran_error=0.6903%; T3FFD Mystran_error=8.7912%.
+- **2-004, 2, tip UY:** reference 0.005429 in; Nastran_error=0.4317%; T3FFD Mystran_error=4.9721%.
+- **2-006, 1, free edge midpoint UZ:** reference -0.3086 ft; Nastran_error=1.3257%; T3FFD Mystran_error=3.4116%.
+- **2-017, 2, critical load:** reference 127.91 kip; Nastran_error=1.3248%; T3FFD Mystran_error=6.9838%.
+
+T3FF and T3FFD give identical responses for the reported setting. Their Mystran_error values therefore coincide for the same reference; Nastran_error differs between CTRIA3 and CTRIAR because those elements do not give the same response. In the straight beam, LC2 and LC5 illustrate this clearly: close agreement with CTRIA3 coexists with a much larger difference from CTRIAR and from the independent bending reference. LC4 retains a substantial difference against both comparison elements.
 
 On the twisted beam, the family underpredicts the selected displacements relative to both Nastran triangles. The roof response is also lower in magnitude. For buckling, the selected family load is close to CTRIA3 but higher than CTRIAR. Only two buckling mesh levels are shown, so the limiting critical load is not established.
 

@@ -1,11 +1,11 @@
 # MH6T: Formulation and Numerical Assessment of the MH6T Six-Node Triangular Shell Element Based on the MacNeal–Harder Approach
 
-**Author:** Ary  
-**Date:** 23 October 2026  
+**Author:** Ary
+**Date:** 23 October 2026
 **Target:** Published Li et al. (2015) versus project Python `MacNeal_MH6T_Tri_v4`
-**Implementation baseline:** MH6T v3 is the project formulation previously ported to MYSTRAN; v4 is the latest supplied Python source for mathematical comparison. A v3 source/kernel was not supplied for direct auditing.  
-**Python research reference:** `MacNeal_MH6T_Tri_v4` **(not automatically evidence of MYSTRAN v4 port)**  
-**Source history:** `v1 → v2 → v3 (not supplied) → v4`  
+**Implementation baseline:** MH6T v3 is the project formulation previously ported to MYSTRAN; v4 is the latest supplied Python source for mathematical comparison. A v3 source/kernel was not supplied for direct auditing.
+**Python research reference:** `MacNeal_MH6T_Tri_v4` **(not automatically evidence of MYSTRAN v4 port)**
+**Source history:** `v1 → v2 → v3 (not supplied) → v4`
 **Evidence:** inspected uploaded Python v1, v2 and v4. Numerical claims must be kept separate from source-code evidence.
 
 ## Research scope: MYSTRAN linear first
@@ -243,12 +243,22 @@ Only the **three translational blocks** are populated; no rotational initial-str
 
 The v1/v2 source comments report historical 2-001 membrane/bending patch fixes and a twisted-beam warped-mesh discrepancy, but no full result provenance or corresponding OP2 data accompanies the three Python files. Therefore they are historical engineering notes.
 
-A previous project benchmark noted **ported MH6T v3** `T9` error approximately `+8.7818%`, while a separate 2-004 case showed material mesh sensitivity. These are contextual historical results, The previously prepared generic CTRIA6 comparison table has blank entries for MH6T v4; those must not be replaced by Rezaiee or aggregate T6 results.
+A previous project benchmark noted **ported MH6T v3** `T9` solver-comparison discrepancy approximately `+8.7818%` (not an independent-reference accuracy error), while a separate 2-004 case showed material mesh sensitivity. These are contextual historical results, The previously prepared generic CTRIA6 comparison table has blank entries for MH6T v4; those must not be replaced by Rezaiee or aggregate T6 results.
 
 
 For each identical `(benchmark, model_pair_id, subcase, quantity, component, canonical_frame, units, match_status, result_position)` group, compute
 
-$$d_g=100\,\frac{\max_i|u_i^{MH6T}-u_i^{Nastran}|}{\max_i|u_i^{Nastran}|}.$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
+
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
+For an independent reference field, the corresponding field errors use the reference-field norm for each solver separately. Matched MH6T v4 independent-reference observations are not supplied here, so no numerical Nastran_error or Mystran_error is inferred from a solver-to-solver discrepancy.
 
 <img width="1800" height="900" alt="reference_2_004_single_mesh" src="https://github.com/user-attachments/assets/787d5033-ceff-4dd7-abd5-fefe69e51c8c" />
 
@@ -287,6 +297,3 @@ $$d_g=100\,\frac{\max_i|u_i^{MH6T}-u_i^{Nastran}|}{\max_i|u_i^{Nastran}|}.$$
 3. **Simo, J. C., & Fox, D. D. (1989).** On a stress resultant geometrically exact shell model. Part I: Formulation and optimal parametrization. *Computer Methods in Applied Mechanics and Engineering*, 72, 267–304. Used only for broad director-shell context, not as a verbatim source of MH6T's assumed-strain operator.
 4. **Kim, D.-N., & Bathe, K.-J. (2009).** A triangular six-node shell element. *Computers & Structures*, 87, 1451–1460. Comparator for **MITC6**, not MH6T's line reconstruction. https://doi.org/10.1016/j.compstruc.2009.05.002.
 5. **Computers and Structures, Inc.** *SAP2000 Verification Examples: Shells*, particularly Problems 2-001, 2-002, 2-004, 2-005, 2-006, 2-007, 2-008, 2-013, 2-016 and 2-017. Reference documents: `https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Shells/Problem%202-001.pdf` (replace suffix by relevant ID; verify each published case and observable before claiming independent-reference correspondence). SAP2000 is developed by Computers and Structures, Inc. (CSI): https://www.csiamerica.com/products/sap2000.
-
-
-

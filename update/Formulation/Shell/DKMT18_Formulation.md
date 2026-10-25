@@ -1,7 +1,7 @@
 # DKMT18: Evolution from the Maknun–Katili Triangular Shell to Consistent Shear-Field Reconstruction and a Three-Edge Covariant Alternative
 
-**Ary**  
-**25 October 2026**  
+**Ary**
+**25 October 2026**
 *Mathematical formulation, shear-field consistency and comparative numerical assessment*
 
 ## Abstract
@@ -289,26 +289,41 @@ Nastran CTRIAR provides an external triangular-shell comparison for the Original
 
 #### 7.9.1 Selected numerical responses
 
-The beam comparisons use parent longitudinal subdivision count 24, the roof uses 16 × 16 parent panels, and the buckling plate uses 4 × 24 parent panels. Translational responses are in inches, rotation in radians, and critical load in kip. Differences are computed relative to Nastran CTRIAR:
+The beam comparisons use parent longitudinal subdivision count 24, the roof uses 16 × 16 parent panels, and the buckling plate uses 4 × 24 parent panels. Translational responses are in inches, rotation in radians, and critical load in kip. Accuracy is assessed separately for each solver against its independent reference.
 
-$$
-\Delta_q=100\frac{q-q_{\mathrm{CTRIAR}}}{q_{\mathrm{CTRIAR}}}.
-$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
 
-| SAP case | LC | Response | Unit | Original | DKMT18-SF | Nastran CTRIAR | Original difference | SF difference |
-|---|---|---|---|---:|---:|---:|---:|---:|
-| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | 3.090472e-05 | -2.927% | -2.927% |
-| 2-002 | 2 | tip UZ | in | 0.05457731 | 0.05457731 | 0.09643454 | -43.405% | -43.405% |
-| 2-002 | 3 | tip UY | in | 0.4319951 | 0.4321397 | 0.4321313 | -0.032% | +0.002% |
-| 2-002 | 4 | tip abs UY | in | 0.002352926 | 0.002475087 | 0.003539409 | -33.522% | -30.071% |
-| 2-002 | 5 | tip abs UX | in | 0.0004543581 | 0.0004543581 | 0.0008025134 | -43.383% | -43.383% |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | +0.000% | +0.000% |
-| 2-004 | 1 | tip UZ | in | 0.001681829 | 0.0016853257 | 0.001736926 | -3.172% | -2.971% |
-| 2-004 | 2 | tip UY | in | 0.005380313 | 0.0053946143 | 0.005405563 | -0.467% | -0.203% |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.3007388 | -0.3008229 | -0.3045089 | -1.238% | -1.210% |
-| 2-017 | 2 | critical load | kip | 136.843 | 136.843 | 126.2154 | +8.420% | +8.420% |
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
+
+| SAP case | LC | Response | Unit | Original | DKMT18-SF | Nastran CTRIAR | Reference | Nastran_error (%) | Mystran_error Original (%) | Mystran_error DKMT18-SF (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | 3.090472e-05 | 3e-05 | 3.0157 | 0.0000 | 0.0000 |
+| 2-002 | 2 | tip UZ | in | 0.05457731 | 0.05457731 | 0.09643454 | 0.1081 | 10.7914 | 49.5122 | 49.5122 |
+| 2-002 | 3 | tip UY | in | 0.4319951 | 0.4321397 | 0.4321313 | 0.4321 | 0.0072 | 0.0243 | 0.0092 |
+| 2-002 | 4 | tip abs UY | in | 0.002352926 | 0.002475087 | 0.003539409 | 0.00341 | 3.7950 | 30.9992 | 27.4168 |
+| 2-002 | 5 | tip abs UX | in | 0.0004543581 | 0.0004543581 | 0.0008025134 | 0.0009 | 10.8318 | 49.5158 | 49.5158 |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 | 0.0000 |
+| 2-004 | 1 | tip UZ | in | 0.001681829 | 0.0016853257 | 0.001736926 | 0.001749 | 0.6903 | 3.8405 | 3.6406 |
+| 2-004 | 2 | tip UY | in | 0.005380313 | 0.0053946143 | 0.005405563 | 0.005429 | 0.4317 | 0.8968 | 0.6334 |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.3007388 | -0.3008229 | -0.3045089 | -0.3086 | 1.3257 | 2.5474 | 2.5201 |
+| 2-017 | 2 | critical load | kip | 136.843 | 136.843 | 126.2154 | 127.91 | 1.3248 | 6.9838 | 6.9838 |
 
 #### 7.9.2 Interpretation
+
+- **2-002, 2, tip UZ:** reference 0.1081 in; Nastran_error=10.7914%; Original Mystran_error=49.5122%, DKMT18-SF Mystran_error=49.5122%.
+- **2-002, 4, tip abs UY:** reference 0.00341 in; Nastran_error=3.7950%; Original Mystran_error=30.9992%, DKMT18-SF Mystran_error=27.4168%.
+- **2-002, 5, tip abs UX:** reference 0.0009 in; Nastran_error=10.8318%; Original Mystran_error=49.5158%, DKMT18-SF Mystran_error=49.5158%.
+- **2-004, 1, tip UZ:** reference 0.001749 in; Nastran_error=0.6903%; Original Mystran_error=3.8405%, DKMT18-SF Mystran_error=3.6406%.
+- **2-004, 2, tip UY:** reference 0.005429 in; Nastran_error=0.4317%; Original Mystran_error=0.8968%, DKMT18-SF Mystran_error=0.6334%.
+- **2-006, 1, free edge midpoint UZ:** reference -0.3086 ft; Nastran_error=1.3257%; Original Mystran_error=2.5474%, DKMT18-SF Mystran_error=2.5201%.
+- **2-017, 2, critical load:** reference 127.91 kip; Nastran_error=1.3248%; Original Mystran_error=6.9838%, DKMT18-SF Mystran_error=6.9838%.
 
 The external comparison exposes limitations that are not removed by changing shear recovery alone. In straight-beam LC2 and LC5, Original and SF give the same response at the selected mesh and remain substantially below CTRIAR. SF changes LC4 and LC3, but the LC4 difference remains material on this mesh sequence. This does not conflict with the improved SF torsion response in Section 7.1, which uses refinement in both panel directions.
 

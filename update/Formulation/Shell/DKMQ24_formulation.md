@@ -195,28 +195,37 @@ The comparison is restricted to DKMQ24 and Nastran CQUADR. Results are presented
 
 ### 6.1 Results at the finest common mesh
 
-The signed difference is $100(q_{DKMQ24}-q_{CQUADR})/q_{CQUADR}$. It measures agreement with CQUADR, not error against an exact solution. Displacements are reported without unit conversion.
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
 
-| SAP case | Response | Mesh parameter | DKMQ24 | Nastran CQUADR | Difference vs CQUADR |
-|---|---|---:|---:|---:|---:|
-| 2-002 | LC2 UZ | 24 | 0.06358492 | 0.1080311 | -41.142% |
-| 2-002 | LC4 UY | 24 | 0.002587678 | 0.003039094 | -14.854% |
-| 2-003 | UZ | 16 | 0.4579961 | 0.4856408 | -5.692% |
-| 2-006 | UZ | 16 | -0.3034907 | -0.3055189 | -0.664% |
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
+Displacements retain the units of the stated benchmark.
+
+| SAP case | Response | Mesh parameter | DKMQ24 | Nastran CQUADR | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | LC2 UZ | 24 | 0.06358492 | 0.1080311 | 0.1081 | 0.0637 | 41.1795 |
+| 2-002 | LC4 UY | 24 | 0.002587678 | 0.003039094 | 0.00341 | 10.8770 | 24.1150 |
+| 2-003 | UZ | 16 | 0.4579961 | 0.4856408 | 0.5004 | 2.9495 | 8.4740 |
+| 2-006 | UZ | 16 | -0.3034907 | -0.3055189 | -0.3086 | 0.9984 | 1.6556 |
 
 ### 6.2 Discussion of results
 
-For SAP 2-002, the DKMQ24 displacement is lower than the Nastran CQUADR result by 41.142% for LC2 and 14.854% for LC4 at the finest common mesh. LC2 shows a pronounced increase with mesh refinement, indicating that further refinement is needed to assess the limiting response.
+- **2-002, LC2 UZ:** reference 0.1081 in; Nastran_error=0.0637%; Mystran_error=41.1795%.
+- **2-002, LC4 UY:** reference 0.00341 in; Nastran_error=10.8770%; Mystran_error=24.1150%.
+- **2-003, UZ:** reference 0.5004 in; Nastran_error=2.9495%; Mystran_error=8.4740%.
+- **2-006, UZ:** reference -0.3086 ft; Nastran_error=0.9984%; Mystran_error=1.6556%.
 
-For SAP 2-003, the DKMQ24 transverse displacement is 5.692% lower than the Nastran CQUADR result. Both responses remain below the benchmark reference over the mesh sequence shown.
-
-For SAP 2-006, the two responses approach one another with refinement. At the finest common mesh, the displacement magnitude differs by 0.664%, giving the closest agreement among the selected comparisons.
-
-These comparisons describe displacement accuracy and convergence for the selected cases. They do not establish performance for other geometries or loading conditions.
+The error columns assess each element independently against the benchmark reference. The straight-beam cases retain substantial error; the curved-beam and roof errors must be evaluated from their respective reference values. The response curves show refinement behavior, but the selected points do not establish a universal convergence order.
 
 ## 7. Conclusions
 
-The selected benchmarks show that DKMQ24 agreement with Nastran CQUADR depends on the deformation mode and mesh refinement. The straight-beam cases show the largest differences, the curved-beam case shows an intermediate difference, and the Scordelis–Lo roof shows close agreement at the finest common mesh. Further refinement is particularly relevant to the straight-beam LC2 response.
+The selected benchmarks show case-dependent independent-reference accuracy. DKMQ24 has substantial straight-beam error, while curved-beam and roof errors are smaller at the reported meshes. Both solver errors are listed explicitly; agreement between solvers is not substituted for accuracy against the reference. Further refinement is particularly relevant to straight-beam LC2.
 
 ## 8. References
 

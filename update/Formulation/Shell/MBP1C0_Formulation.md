@@ -249,11 +249,18 @@ Related reports: [Q4EASANS](Q4EASANS_Formulation.md) and [Simo 1993 Q4](Simo1993
 
 ## 9. Mystran Benchmark: MBP1C0 versus Nastran CQUADR
 
-The benchmark cases follow the SAP verification definitions [6]. Results are matched by benchmark case, load case, response component and unit. The signed difference is
+The benchmark cases follow the SAP verification definitions [6]. Results are matched by benchmark case, load case, response component and unit. Accuracy is assessed separately for each solver against its independent reference.
 
-$$
-\Delta_q=100\frac{q_{\mathrm{MBP1C0}}-q_{\mathrm{CQUADR}}}{q_{\mathrm{CQUADR}}}.
-$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
+
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
 
 The independent reference used in the plots is distinct from the Nastran comparison. Close agreement with CQUADR and closeness to the reference are separate observations.
 
@@ -265,32 +272,25 @@ The independent reference used in the plots is distinct from the Nastran compari
 
 The beam cases use longitudinal subdivision count 24, the roof uses 16 × 16 parent panels, and the buckling plate uses 4 × 24 parent panels. The curved beam and thick-plate cases use their benchmark meshes. Units are specified per row.
 
-| SAP case | LC / model | Response | Unit | MBP1C0 | Nastran CQUADR | Difference |
-|---|---|---|---|---:|---:|---:|
-| 2-002 | 1 | tip UX | in | 3e-05 | 3.438168e-05 | -12.744% |
-| 2-002 | 2 | tip UZ | in | 0.1080296 | 0.1080311 | -0.001% |
-| 2-002 | 3 | tip UY | in | 0.431884 | 0.432016 | -0.031% |
-| 2-002 | 4 | tip abs UY | in | 0.003040183 | 0.003046425 | -0.205% |
-| 2-002 | 5 | tip abs UX | in | 0.0008999868 | 0.0009 | -0.001% |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | +0.000% |
-| 2-003 | 1 | tip UY | in | 0.08851299 | 0.08892159 | -0.460% |
-| 2-003 | 2 | tip UZ | in | 0.49073815 | 0.4942291 | -0.706% |
-| 2-004 | 1 | tip UZ | in | 0.0017496633 | 0.001749793 | -0.007% |
-| 2-004 | 2 | tip UY | in | 0.0054160927 | 0.005407034 | +0.168% |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.3064674 | -0.3056915 | +0.254% |
-| 2-012 | A | outer edge mean UZ | in | -0.0053422448 | -0.0053445732 | -0.044% |
-| 2-012 | B | outer edge mean UZ | in | -0.005217023 | -0.0052193496 | -0.045% |
-| 2-017 | 2 | critical load | kip | 126.6229 | 123.9762 | +2.135% |
+| SAP case | LC / model | Response | Unit | MBP1C0 | Nastran CQUADR | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | 1 | tip UX | in | 3e-05 | 3.438168e-05 | 3e-05 | 14.6056 | 0.0000 |
+| 2-002 | 2 | tip UZ | in | 0.1080296 | 0.1080311 | 0.1081 | 0.0637 | 0.0651 |
+| 2-002 | 3 | tip UY | in | 0.431884 | 0.432016 | 0.4321 | 0.0194 | 0.0500 |
+| 2-002 | 4 | tip abs UY | in | 0.003040183 | 0.003046425 | 0.00341 | 10.6620 | 10.8451 |
+| 2-002 | 5 | tip abs UX | in | 0.0008999868 | 0.0009 | 0.0009 | 0.0000 | 0.0015 |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
+| 2-003 | 1 | tip UY | in | 0.08851299 | 0.08892159 | 0.0886 | 0.3630 | 0.0982 |
+| 2-003 | 2 | tip UZ | in | 0.49073815 | 0.4942291 | 0.5004 | 1.2332 | 1.9308 |
+| 2-004 | 1 | tip UZ | in | 0.0017496633 | 0.001749793 | 0.001749 | 0.0453 | 0.0379 |
+| 2-004 | 2 | tip UY | in | 0.0054160927 | 0.005407034 | 0.005429 | 0.4046 | 0.2377 |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.3064674 | -0.3056915 | -0.3086 | 0.9425 | 0.6911 |
+| 2-012 | A | outer edge mean UZ | in | -0.0053422448 | -0.0053445732 | -0.00534 | 0.0856 | 0.0420 |
+| 2-012 | B | outer edge mean UZ | in | -0.005217023 | -0.0052193496 | -0.00521 | 0.1795 | 0.1348 |
+| 2-017 | 2 | critical load | kip | 126.6229 | 123.9762 | 127.91 | 3.0754 | 1.0063 |
 
 ### 9.2 Interpretation of selected cases
 
-- **SAP 2-002, LC1, tip UX:** 3e-05 for MBP1C0 against 3.438168e-05 for CQUADR, a signed difference of -12.744%.
-- **SAP 2-002, LC2, tip UZ:** 0.1080296 for MBP1C0 against 0.1080311 for CQUADR, a signed difference of -0.001%.
-- **SAP 2-002, LC4, tip abs UY:** 0.003040183 for MBP1C0 against 0.003046425 for CQUADR, a signed difference of -0.205%.
-- **SAP 2-004, LC1, tip UZ:** 0.0017496633 for MBP1C0 against 0.001749793 for CQUADR, a signed difference of -0.007%.
-- **SAP 2-004, LC2, tip UY:** 0.0054160927 for MBP1C0 against 0.005407034 for CQUADR, a signed difference of +0.168%.
-- **SAP 2-006, LC1, free edge midpoint UZ:** -0.3064674 for MBP1C0 against -0.3056915 for CQUADR, a signed difference of +0.254%.
-- **SAP 2-017, LC2, critical load:** 126.6229 for MBP1C0 against 123.9762 for CQUADR, a signed difference of +2.135%.
 
 The twisted-beam responses are close to the independent references and to CQUADR at the selected refinement. Straight-beam LC2 and LC5 also show close agreement with CQUADR. LC4 is close to CQUADR but both remain below the independent displacement reference in the plotted sequence, illustrating why inter-element agreement is not an exactness test. The axial LC1 difference is retained explicitly in the table rather than hidden by the bending comparisons.
 

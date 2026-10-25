@@ -218,11 +218,18 @@ These differences prevent assigning the Q4EASANS response to Q4RS merely because
 
 ## 8. Mystran Benchmark: Q4RS versus Nastran CQUADR
 
-The selected cases follow the SAP verification definitions [5]. Results are matched by case, mesh sequence, load case, response component and unit. Signed differences relative to Nastran CQUADR are
+The selected cases follow the SAP verification definitions [5]. Results are matched by case, mesh sequence, load case, response component and unit. Accuracy is assessed separately for each solver against its independent reference.
 
-$$
-\Delta_q=100\frac{q_{\mathrm{Q4RS}}-q_{\mathrm{CQUADR}}}{q_{\mathrm{CQUADR}}}.
-$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
+
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
 
 An independent reference is used for normalisation in the convergence plots. Agreement with the comparison element and agreement with the independent reference are separate checks.
 
@@ -234,32 +241,33 @@ An independent reference is used for normalisation in the convergence plots. Agr
 
 Beam results use longitudinal subdivision count 24, the roof uses 16 × 16 parent panels and the buckling plate uses 4 × 24 panels. The curved beam and thick plates use their benchmark meshes. Units are stated per row.
 
-| SAP case | LC / model | Response | Unit | Q4RS | Nastran CQUADR | Difference |
-|---|---|---|---|---:|---:|---:|
-| 2-002 | 1 | tip UX | in | 3e-05 | 3.438168e-05 | -12.744% |
-| 2-002 | 2 | tip UZ | in | 0.06358497 | 0.1080311 | -41.142% |
-| 2-002 | 3 | tip UY | in | 0.4320759 | 0.432016 | +0.014% |
-| 2-002 | 4 | tip abs UY | in | 0.00451102 | 0.003046425 | +48.076% |
-| 2-002 | 5 | tip abs UX | in | 0.0005294545 | 0.0009 | -41.172% |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | +0.000% |
-| 2-003 | 1 | tip UY | in | 0.083373035 | 0.08892159 | -6.240% |
-| 2-003 | 2 | tip UZ | in | 0.49759685 | 0.4942291 | +0.681% |
-| 2-004 | 1 | tip UZ | in | 0.0015442997 | 0.001749793 | -11.744% |
-| 2-004 | 2 | tip UY | in | 0.0049898893 | 0.005407034 | -7.715% |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.3024264 | -0.3056915 | -1.068% |
-| 2-012 | A | outer edge mean UZ | in | -0.0053441705 | -0.0053445732 | -0.008% |
-| 2-012 | B | outer edge mean UZ | in | -0.0052170249 | -0.0052193496 | -0.045% |
-| 2-017 | 2 | critical load | kip | 133.2701 | 123.9762 | +7.497% |
+| SAP case | LC / model | Response | Unit | Q4RS | Nastran CQUADR | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | 1 | tip UX | in | 3e-05 | 3.438168e-05 | 3e-05 | 14.6056 | 0.0000 |
+| 2-002 | 2 | tip UZ | in | 0.06358497 | 0.1080311 | 0.1081 | 0.0637 | 41.1795 |
+| 2-002 | 3 | tip UY | in | 0.4320759 | 0.432016 | 0.4321 | 0.0194 | 0.0056 |
+| 2-002 | 4 | tip abs UY | in | 0.00451102 | 0.003046425 | 0.00341 | 10.6620 | 32.2880 |
+| 2-002 | 5 | tip abs UX | in | 0.0005294545 | 0.0009 | 0.0009 | 0.0000 | 41.1717 |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
+| 2-003 | 1 | tip UY | in | 0.083373035 | 0.08892159 | 0.0886 | 0.3630 | 5.8995 |
+| 2-003 | 2 | tip UZ | in | 0.49759685 | 0.4942291 | 0.5004 | 1.2332 | 0.5602 |
+| 2-004 | 1 | tip UZ | in | 0.0015442997 | 0.001749793 | 0.001749 | 0.0453 | 11.7038 |
+| 2-004 | 2 | tip UY | in | 0.0049898893 | 0.005407034 | 0.005429 | 0.4046 | 8.0882 |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.3024264 | -0.3056915 | -0.3086 | 0.9425 | 2.0005 |
+| 2-012 | A | outer edge mean UZ | in | -0.0053441705 | -0.0053445732 | -0.00534 | 0.0856 | 0.0781 |
+| 2-012 | B | outer edge mean UZ | in | -0.0052170249 | -0.0052193496 | -0.00521 | 0.1795 | 0.1348 |
+| 2-017 | 2 | critical load | kip | 133.2701 | 123.9762 | 127.91 | 3.0754 | 4.1905 |
 
 ### 8.2 Discussion
 
-- **SAP 2-002, LC2, tip UZ:** the signed difference from CQUADR is -41.142%.
-- **SAP 2-002, LC4, tip abs UY:** the signed difference from CQUADR is +48.076%.
-- **SAP 2-002, LC5, tip abs UX:** the signed difference from CQUADR is -41.172%.
-- **SAP 2-004, LC1, tip UZ:** the signed difference from CQUADR is -11.744%.
-- **SAP 2-004, LC2, tip UY:** the signed difference from CQUADR is -7.715%.
-- **SAP 2-006, LC1, free edge midpoint UZ:** the signed difference from CQUADR is -1.068%.
-- **SAP 2-017, LC2, critical load:** the signed difference from CQUADR is +7.497%.
+- **2-002, 2, tip UZ:** reference 0.1081 in; Nastran_error=0.0637%; Q4RS Mystran_error=41.1795%.
+- **2-002, 4, tip abs UY:** reference 0.00341 in; Nastran_error=10.6620%; Q4RS Mystran_error=32.2880%.
+- **2-002, 5, tip abs UX:** reference 0.0009 in; Nastran_error=0.0000%; Q4RS Mystran_error=41.1717%.
+- **2-004, 1, tip UZ:** reference 0.001749 in; Nastran_error=0.0453%; Q4RS Mystran_error=11.7038%.
+- **2-004, 2, tip UY:** reference 0.005429 in; Nastran_error=0.4046%; Q4RS Mystran_error=8.0882%.
+- **2-006, 1, free edge midpoint UZ:** reference -0.3086 ft; Nastran_error=0.9425%; Q4RS Mystran_error=2.0005%.
+- **2-017, 2, critical load:** reference 127.91 kip; Nastran_error=3.0754%; Q4RS Mystran_error=4.1905%.
+
 
 Straight-beam LC2 and LC5 remain substantially below CQUADR at the selected mesh; the compatible membrane field does not receive the EAS relaxation present in Q4EASANS. LC4 is higher than CQUADR, so a single blanket description of Q4RS as uniformly too stiff would be misleading. These components must be assessed independently.
 

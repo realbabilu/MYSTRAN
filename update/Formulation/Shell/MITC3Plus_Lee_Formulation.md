@@ -227,11 +227,18 @@ These alternatives are not blended into the benchmark rows. See the [separate KM
 
 ## 8. Mystran Benchmark: MITC3+ Lee versus Nastran CTRIA3
 
-The selected SAP verification cases [4] are paired by response component, case, load case, mesh sequence and unit. The signed difference is
+The selected SAP verification cases [4] are paired by response component, case, load case, mesh sequence and unit. Accuracy is assessed separately for each solver against its independent reference.
 
-$$
-\Delta_q=100\frac{q_{\mathrm{Lee}}-q_{\mathrm{CTRIA3}}}{q_{\mathrm{CTRIA3}}}.
-$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
+
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
 
 The independent reference in the plots is distinct from the Nastran comparison. Close agreement between two elements is not a proof that either gives the reference solution.
 
@@ -243,32 +250,33 @@ The independent reference in the plots is distinct from the Nastran comparison. 
 
 The beams use longitudinal subdivision count 24, the roof uses 16 × 16 parent panels, and the buckling plate uses 4 × 24 panels. The curved beam and thick plates use their benchmark meshes. Units are stated per row.
 
-| SAP case | LC / model | Response | Unit | MITC3+ Lee + Spin | Nastran CTRIA3 | Difference |
-|---|---|---|---|---:|---:|---:|
-| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | +0.000% |
-| 2-002 | 2 | tip UZ | in | 0.05452335 | 0.05456462 | -0.076% |
-| 2-002 | 3 | tip UY | in | 0.4321014 | 0.4321559 | -0.013% |
-| 2-002 | 4 | tip abs UY | in | 0.003356999 | 0.003678172 | -8.732% |
-| 2-002 | 5 | tip abs UX | in | 0.0004539053 | 0.0004542509 | -0.076% |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | +0.000% |
-| 2-003 | 1 | tip UY | in | 0.080824855 | 0.080835205 | -0.013% |
-| 2-003 | 2 | tip UZ | in | 0.4937396 | 0.4948982 | -0.234% |
-| 2-004 | 1 | tip UZ | in | 0.0017421893 | 0.0016856563 | +3.354% |
-| 2-004 | 2 | tip UY | in | 0.0056171453 | 0.0053938653 | +4.140% |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.3008579 | -0.3034232 | -0.845% |
-| 2-012 | A | outer edge mean UZ | in | -0.0053358049 | -0.0053357017 | +0.002% |
-| 2-012 | B | outer edge mean UZ | in | -0.0052078568 | -0.0052071391 | +0.014% |
-| 2-017 | 2 | critical load | kip | 136.864 | 137.259 | -0.288% |
+| SAP case | LC / model | Response | Unit | MITC3+ Lee + Spin | Nastran CTRIA3 | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | 3e-05 | 0.0000 | 0.0000 |
+| 2-002 | 2 | tip UZ | in | 0.05452335 | 0.05456462 | 0.1081 | 49.5239 | 49.5621 |
+| 2-002 | 3 | tip UY | in | 0.4321014 | 0.4321559 | 0.4321 | 0.0129 | 0.0003 |
+| 2-002 | 4 | tip abs UY | in | 0.003356999 | 0.003678172 | 0.00341 | 7.8643 | 1.5543 |
+| 2-002 | 5 | tip abs UX | in | 0.0004539053 | 0.0004542509 | 0.0009 | 49.5277 | 49.5661 |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
+| 2-003 | 1 | tip UY | in | 0.080824855 | 0.080835205 | 0.0886 | 8.7639 | 8.7756 |
+| 2-003 | 2 | tip UZ | in | 0.4937396 | 0.4948982 | 0.5004 | 1.0995 | 1.3310 |
+| 2-004 | 1 | tip UZ | in | 0.0017421893 | 0.0016856563 | 0.001749 | 3.6217 | 0.3894 |
+| 2-004 | 2 | tip UY | in | 0.0056171453 | 0.0053938653 | 0.005429 | 0.6472 | 3.4656 |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.3008579 | -0.3034232 | -0.3086 | 1.6775 | 2.5088 |
+| 2-012 | A | outer edge mean UZ | in | -0.0053358049 | -0.0053357017 | -0.00534 | 0.0805 | 0.0786 |
+| 2-012 | B | outer edge mean UZ | in | -0.0052078568 | -0.0052071391 | -0.00521 | 0.0549 | 0.0411 |
+| 2-017 | 2 | critical load | kip | 136.864 | 137.259 | 127.91 | 7.3090 | 7.0002 |
 
 ### 8.2 Interpretation
 
-- **SAP 2-002, LC2, tip UZ:** signed difference -0.076% relative to CTRIA3.
-- **SAP 2-002, LC4, tip abs UY:** signed difference -8.732% relative to CTRIA3.
-- **SAP 2-002, LC5, tip abs UX:** signed difference -0.076% relative to CTRIA3.
-- **SAP 2-004, LC1, tip UZ:** signed difference +3.354% relative to CTRIA3.
-- **SAP 2-004, LC2, tip UY:** signed difference +4.140% relative to CTRIA3.
-- **SAP 2-006, LC1, free edge midpoint UZ:** signed difference -0.845% relative to CTRIA3.
-- **SAP 2-017, LC2, critical load:** signed difference -0.288% relative to CTRIA3.
+- **2-002, 2, tip UZ:** reference 0.1081 in; Nastran_error=49.5239%; MITC3+ Lee + Spin Mystran_error=49.5621%.
+- **2-002, 4, tip abs UY:** reference 0.00341 in; Nastran_error=7.8643%; MITC3+ Lee + Spin Mystran_error=1.5543%.
+- **2-002, 5, tip abs UX:** reference 0.0009 in; Nastran_error=49.5277%; MITC3+ Lee + Spin Mystran_error=49.5661%.
+- **2-004, 1, tip UZ:** reference 0.001749 in; Nastran_error=3.6217%; MITC3+ Lee + Spin Mystran_error=0.3894%.
+- **2-004, 2, tip UY:** reference 0.005429 in; Nastran_error=0.6472%; MITC3+ Lee + Spin Mystran_error=3.4656%.
+- **2-006, 1, free edge midpoint UZ:** reference -0.3086 ft; Nastran_error=1.6775%; MITC3+ Lee + Spin Mystran_error=2.5088%.
+- **2-017, 2, critical load:** reference 127.91 kip; Nastran_error=7.3090%; MITC3+ Lee + Spin Mystran_error=7.0002%.
+
 
 The CST membrane remains relevant to the straight-beam LC2/LC5 under-response relative to the independent reference, even where a comparison displacement happens to be close to CTRIA3. LC4 torsion benefits from the enriched shear/bubble field but is not equivalent to the membrane-bending cases.
 

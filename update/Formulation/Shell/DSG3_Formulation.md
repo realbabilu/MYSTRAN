@@ -225,26 +225,33 @@ Nastran CTRIA3 is the external comparison element used here. The DSG3 response d
 
 #### Selected numerical results
 
-The straight and twisted beams use subdivision count 24, the roof uses 16 × 16 parent panels, and the hemisphere uses refinement parameter 32. The curved beam uses its benchmark mesh. Units are stated for each result: beam displacements are in inches, roof and hemisphere displacements in feet, and rotations in radians. Signed differences are defined relative to Nastran CTRIA3:
+The straight and twisted beams use subdivision count 24, the roof uses 16 × 16 parent panels, and the hemisphere uses refinement parameter 32. The curved beam uses its benchmark mesh. Units are stated for each result: beam displacements are in inches, roof and hemisphere displacements in feet, and rotations in radians. Accuracy is assessed separately for each solver against its independent reference.
 
-$$
-\Delta_q=100\frac{q_{\mathrm{DSG3}}-q_{\mathrm{CTRIA3}}}{q_{\mathrm{CTRIA3}}}.
-$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
 
-| SAP case | LC | Response | Unit | DSG3 | Nastran CTRIA3 | Difference |
-|---|---|---|---|---:|---:|---:|
-| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | +0.000% |
-| 2-002 | 2 | tip UZ | in | 0.05457191 | 0.05456462 | +0.013% |
-| 2-002 | 3 | tip UY | in | 0.4319362 | 0.4321559 | -0.051% |
-| 2-002 | 4 | tip abs UY | in | 0.002674404 | 0.003678172 | -27.290% |
-| 2-002 | 5 | tip abs UX | in | 0.0004543128 | 0.0004542509 | +0.014% |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | +0.000% |
-| 2-003 | 1 | tip UY | in | 0.080836895 | 0.080835205 | +0.002% |
-| 2-003 | 2 | tip UZ | in | 0.4872192 | 0.4948982 | -1.552% |
-| 2-004 | 1 | tip UZ | in | 0.001926716 | 0.0016856563 | +14.301% |
-| 2-004 | 2 | tip UY | in | 0.006318737 | 0.0053938653 | +17.147% |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.3022946 | -0.3034232 | -0.372% |
-| 2-007 | 1 | loaded UX | ft | 0.09301597 | 0.09390018 | -0.942% |
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
+
+| SAP case | LC | Response | Unit | DSG3 | Nastran CTRIA3 | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | 3e-05 | 0.0000 | 0.0000 |
+| 2-002 | 2 | tip UZ | in | 0.05457191 | 0.05456462 | 0.1081 | 49.5239 | 49.5172 |
+| 2-002 | 3 | tip UY | in | 0.4319362 | 0.4321559 | 0.4321 | 0.0129 | 0.0379 |
+| 2-002 | 4 | tip abs UY | in | 0.002674404 | 0.003678172 | 0.00341 | 7.8643 | 21.5717 |
+| 2-002 | 5 | tip abs UX | in | 0.0004543128 | 0.0004542509 | 0.0009 | 49.5277 | 49.5208 |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
+| 2-003 | 1 | tip UY | in | 0.080836895 | 0.080835205 | 0.0886 | 8.7639 | 8.7620 |
+| 2-003 | 2 | tip UZ | in | 0.4872192 | 0.4948982 | 0.5004 | 1.0995 | 2.6341 |
+| 2-004 | 1 | tip UZ | in | 0.001926716 | 0.0016856563 | 0.001749 | 3.6217 | 10.1610 |
+| 2-004 | 2 | tip UY | in | 0.006318737 | 0.0053938653 | 0.005429 | 0.6472 | 16.3886 |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.3022946 | -0.3034232 | -0.3086 | 1.6775 | 2.0432 |
+| 2-007 | 1 | loaded UX | ft | 0.09301597 | 0.09390018 | 0.094 | 0.1062 | 1.0468 |
 
 #### Interpretation
 

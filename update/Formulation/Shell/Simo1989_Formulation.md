@@ -180,35 +180,44 @@ Membrane, bending, shear, EAS and distributed drilling terms use 2 × 2 Gauss in
 
 ### 8.1 Selected numerical results
 
-Beam responses use longitudinal subdivision count 24, the roof uses 16 × 16 parent panels, and the buckling plate uses 4 × 24 parent panels. The curved beam uses its benchmark mesh. Signed differences are relative to Nastran CQUAD4; they are not error against an exact solution.
+Beam responses use longitudinal subdivision count 24, the roof uses 16 × 16 parent panels, and the buckling plate uses 4 × 24 parent panels. The curved beam uses its benchmark mesh. Accuracy is assessed separately for each solver against its independent reference.
 
-$$
-\Delta_q=100\frac{q_{\mathrm{Simo}}-q_{\mathrm{Nastran}}}{q_{\mathrm{Nastran}}}.
-$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
 
-| SAP case | LC | Response | Unit | Simo 1989 Q4 | Nastran CQUAD4 | Difference |
-|---|---|---|---|---:|---:|---:|
-| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | +0.000% |
-| 2-002 | 2 | tip UZ | in | 0.1080311 | 0.1080129 | +0.017% |
-| 2-002 | 3 | tip UY | in | 0.431884 | 0.4320603 | -0.041% |
-| 2-002 | 4 | tip abs UY | in | 0.003040183 | 0.003068753 | -0.931% |
-| 2-002 | 5 | tip abs UX | in | 0.0009 | 0.0008998445 | +0.017% |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | +0.000% |
-| 2-003 | 1 | tip UY | in | 0.088513105 | 0.088511855 | +0.001% |
-| 2-003 | 2 | tip UZ | in | 0.49073815 | 0.4954054 | -0.942% |
-| 2-004 | 1 | tip UZ | in | 0.0017481357 | 0.0017482317 | -0.005% |
-| 2-004 | 2 | tip UY | in | 0.0054126393 | 0.0054075113 | +0.095% |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.30977 | -0.3071547 | +0.851% |
-| 2-017 | 2 | critical load | kip | 126.6228 | 126.9939 | -0.292% |
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
+
+| SAP case | LC | Response | Unit | Simo 1989 Q4 | Nastran CQUAD4 | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | 3e-05 | 0.0000 | 0.0000 |
+| 2-002 | 2 | tip UZ | in | 0.1080311 | 0.1080129 | 0.1081 | 0.0806 | 0.0637 |
+| 2-002 | 3 | tip UY | in | 0.431884 | 0.4320603 | 0.4321 | 0.0092 | 0.0500 |
+| 2-002 | 4 | tip abs UY | in | 0.003040183 | 0.003068753 | 0.00341 | 10.0072 | 10.8451 |
+| 2-002 | 5 | tip abs UX | in | 0.0009 | 0.0008998445 | 0.0009 | 0.0173 | 0.0000 |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
+| 2-003 | 1 | tip UY | in | 0.088513105 | 0.088511855 | 0.0886 | 0.0995 | 0.0981 |
+| 2-003 | 2 | tip UZ | in | 0.49073815 | 0.4954054 | 0.5004 | 0.9981 | 1.9308 |
+| 2-004 | 1 | tip UZ | in | 0.0017481357 | 0.0017482317 | 0.001749 | 0.0439 | 0.0494 |
+| 2-004 | 2 | tip UY | in | 0.0054126393 | 0.0054075113 | 0.005429 | 0.3958 | 0.3014 |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.30977 | -0.3071547 | -0.3086 | 0.4683 | 0.3791 |
+| 2-017 | 2 | critical load | kip | 126.6228 | 126.9939 | 127.91 | 0.7162 | 1.0063 |
 
 ### 8.2 Interpretation
 
-- **2-002, LC2:** the signed difference for tip UZ is +0.017%.
-- **2-002, LC4:** the signed difference for tip abs UY is -0.931%.
-- **2-004, LC1:** the signed difference for tip UZ is -0.005%.
-- **2-004, LC2:** the signed difference for tip UY is +0.095%.
-- **2-006, LC1:** the signed difference for free edge midpoint UZ is +0.851%.
-- **2-017, LC2:** the signed difference for critical load is -0.292%.
+- **2-002, 2, tip UZ:** reference 0.1081 in; Nastran_error=0.0806%; Simo 1989 Q4 Mystran_error=0.0637%.
+- **2-002, 4, tip abs UY:** reference 0.00341 in; Nastran_error=10.0072%; Simo 1989 Q4 Mystran_error=10.8451%.
+- **2-002, 5, tip abs UX:** reference 0.0009 in; Nastran_error=0.0173%; Simo 1989 Q4 Mystran_error=0.0000%.
+- **2-004, 1, tip UZ:** reference 0.001749 in; Nastran_error=0.0439%; Simo 1989 Q4 Mystran_error=0.0494%.
+- **2-004, 2, tip UY:** reference 0.005429 in; Nastran_error=0.3958%; Simo 1989 Q4 Mystran_error=0.3014%.
+- **2-006, 1, free edge midpoint UZ:** reference -0.3086 ft; Nastran_error=0.4683%; Simo 1989 Q4 Mystran_error=0.3791%.
+- **2-017, 2, critical load:** reference 127.91 kip; Nastran_error=0.7162%; Simo 1989 Q4 Mystran_error=1.0063%.
+
 
 The full table retains the axial, flexural, torsional and buckling distinctions. A close twisted-beam response does not establish universal accuracy, and only two buckling mesh levels are shown. A year label cannot substitute for specifying the strain interpolation and drilling constraint. Benchmark differences from CQUAD4 and CQUADR must be interpreted against their respective reference responses.
 

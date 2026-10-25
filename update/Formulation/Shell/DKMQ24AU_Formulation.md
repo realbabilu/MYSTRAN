@@ -234,11 +234,18 @@ Related reports: [DKMQ20](DKMQ20_Formulation.md), [DKMQ24](DKMQ24_formulation.md
 
 ## 9. Mystran Benchmark: DKMQ24AU versus Nastran CQUADR
 
-The selected SAP verification cases [4] are compared using matching case, response component, load case, unit and mesh sequence. The signed difference is
+The selected SAP verification cases [4] are compared using matching case, response component, load case, unit and mesh sequence. Accuracy is assessed separately for each solver against its independent reference.
 
-$$
-\Delta_q=100\frac{q_{\mathrm{DKMQ24AU}}-q_{\mathrm{CQUADR}}}{q_{\mathrm{CQUADR}}}.
-$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
+
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
 
 The reference in the plots is independent of Nastran CQUADR. Agreement between elements and agreement with the reference are separate assessments.
 
@@ -250,32 +257,33 @@ The reference in the plots is independent of Nastran CQUADR. Agreement between e
 
 Beam results use longitudinal subdivision count 24, the roof uses 16 × 16 parent panels and the buckling plate uses 4 × 24 parent panels. The curved-beam and thick-plate cases use their benchmark meshes. Units are stated per row.
 
-| SAP case | LC / model | Response | Unit | DKMQ24AU | Nastran CQUADR | Difference |
-|---|---|---|---|---:|---:|---:|
-| 2-002 | 1 | tip UX | in | 3e-05 | 3.438168e-05 | -12.744% |
-| 2-002 | 2 | tip UZ | in | 0.06358443 | 0.1080311 | -41.142% |
-| 2-002 | 3 | tip UY | in | 0.4320889 | 0.432016 | +0.017% |
-| 2-002 | 4 | tip abs UY | in | 0.002587678 | 0.003046425 | -15.059% |
-| 2-002 | 5 | tip abs UX | in | 0.00052945 | 0.0009 | -41.172% |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | +0.000% |
-| 2-003 | 1 | tip UY | in | 0.083372925 | 0.08892159 | -6.240% |
-| 2-003 | 2 | tip UZ | in | 0.48628625 | 0.4942291 | -1.607% |
-| 2-004 | 1 | tip UZ | in | 0.00170717 | 0.001749793 | -2.436% |
-| 2-004 | 2 | tip UY | in | 0.0054036313 | 0.005407034 | -0.063% |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.3033576 | -0.3056915 | -0.763% |
-| 2-012 | A | outer edge mean UZ | in | -0.0053394348 | -0.0053445732 | -0.096% |
-| 2-012 | B | outer edge mean UZ | in | -0.0052170217 | -0.0052193496 | -0.045% |
-| 2-017 | 2 | critical load | kip | 133.2703 | 123.9762 | +7.497% |
+| SAP case | LC / model | Response | Unit | DKMQ24AU | Nastran CQUADR | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | 1 | tip UX | in | 3e-05 | 3.438168e-05 | 3e-05 | 14.6056 | 0.0000 |
+| 2-002 | 2 | tip UZ | in | 0.06358443 | 0.1080311 | 0.1081 | 0.0637 | 41.1800 |
+| 2-002 | 3 | tip UY | in | 0.4320889 | 0.432016 | 0.4321 | 0.0194 | 0.0026 |
+| 2-002 | 4 | tip abs UY | in | 0.002587678 | 0.003046425 | 0.00341 | 10.6620 | 24.1150 |
+| 2-002 | 5 | tip abs UX | in | 0.00052945 | 0.0009 | 0.0009 | 0.0000 | 41.1722 |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
+| 2-003 | 1 | tip UY | in | 0.083372925 | 0.08892159 | 0.0886 | 0.3630 | 5.8996 |
+| 2-003 | 2 | tip UZ | in | 0.48628625 | 0.4942291 | 0.5004 | 1.2332 | 2.8205 |
+| 2-004 | 1 | tip UZ | in | 0.00170717 | 0.001749793 | 0.001749 | 0.0453 | 2.3917 |
+| 2-004 | 2 | tip UY | in | 0.0054036313 | 0.005407034 | 0.005429 | 0.4046 | 0.4673 |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.3033576 | -0.3056915 | -0.3086 | 0.9425 | 1.6988 |
+| 2-012 | A | outer edge mean UZ | in | -0.0053394348 | -0.0053445732 | -0.00534 | 0.0856 | 0.0106 |
+| 2-012 | B | outer edge mean UZ | in | -0.0052170217 | -0.0052193496 | -0.00521 | 0.1795 | 0.1348 |
+| 2-017 | 2 | critical load | kip | 133.2703 | 123.9762 | 127.91 | 3.0754 | 4.1907 |
 
 ### 9.2 Discussion
 
-- **SAP 2-002, LC2, tip UZ:** signed difference -41.142% relative to CQUADR.
-- **SAP 2-002, LC4, tip abs UY:** signed difference -15.059% relative to CQUADR.
-- **SAP 2-002, LC5, tip abs UX:** signed difference -41.172% relative to CQUADR.
-- **SAP 2-004, LC1, tip UZ:** signed difference -2.436% relative to CQUADR.
-- **SAP 2-004, LC2, tip UY:** signed difference -0.063% relative to CQUADR.
-- **SAP 2-006, LC1, free edge midpoint UZ:** signed difference -0.763% relative to CQUADR.
-- **SAP 2-017, LC2, critical load:** signed difference +7.497% relative to CQUADR.
+- **2-002, 2, tip UZ:** reference 0.1081 in; Nastran_error=0.0637%; DKMQ24AU Mystran_error=41.1800%.
+- **2-002, 4, tip abs UY:** reference 0.00341 in; Nastran_error=10.6620%; DKMQ24AU Mystran_error=24.1150%.
+- **2-002, 5, tip abs UX:** reference 0.0009 in; Nastran_error=0.0000%; DKMQ24AU Mystran_error=41.1722%.
+- **2-004, 1, tip UZ:** reference 0.001749 in; Nastran_error=0.0453%; DKMQ24AU Mystran_error=2.3917%.
+- **2-004, 2, tip UY:** reference 0.005429 in; Nastran_error=0.4046%; DKMQ24AU Mystran_error=0.4673%.
+- **2-006, 1, free edge midpoint UZ:** reference -0.3086 ft; Nastran_error=0.9425%; DKMQ24AU Mystran_error=1.6988%.
+- **2-017, 2, critical load:** reference 127.91 kip; Nastran_error=3.0754%; DKMQ24AU Mystran_error=4.1907%.
+
 
 The selected straight-beam LC2 and LC5 responses remain substantially below CQUADR. The compatible membrane field has no EAS relaxation, which is relevant to membrane-bending-dominated coarse meshes, but a unique error mechanism cannot be established from displacement alone. LC4 remains a separate torsion-sensitive response and should not be assigned the LC2/LC5 error magnitude.
 

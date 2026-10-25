@@ -246,13 +246,20 @@ $$
 
 ## 6. Selected SAP Benchmark Results
 
-The signed difference relative to Nastran CQUADR is
+Accuracy is assessed separately for each solver against its independent reference.
 
-$$
-\Delta_q=100\frac{q_{\mathrm{DKMQ24EAS}}-q_{\mathrm{CQUADR}}}{q_{\mathrm{CQUADR}}}.
-$$
+For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
 
-It measures the difference between the two element responses. Agreement with the benchmark reference is assessed separately in the convergence plots.
+```math
+\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
+\qquad
+\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
+```
+
+For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
+
+
+The table and error chart use independent-reference accuracy for both solvers; the convergence plots show response/reference ratios.
 
 ### 6.1 Mesh-refinement comparisons
 
@@ -264,35 +271,37 @@ It measures the difference between the two element responses. Agreement with the
 
 The straight and twisted beams use longitudinal subdivision count 24; the roof uses subdivision count 16 in each direction. The curved beam and thick-plate cases use their benchmark meshes. The buckling plate uses a 4 × 24 mesh. Translational responses are in inches, rotations in radians, and critical load in kip.
 
-| SAP case | Load case / mesh | Response | Unit | DKMQ24EAS | Nastran CQUADR | Difference |
-|---|---|---|---|---:|---:|---:|
-| 2-002 | LC1 | tip UX | in | 3e-05 | 3.438168e-05 | -12.7442% |
-| 2-002 | LC2 | tip UZ | in | 0.1080296 | 0.1080311 | -0.0014% |
-| 2-002 | LC3 | tip UY | in | 0.4320889 | 0.432016 | +0.0169% |
-| 2-002 | LC4 | tip absolute UY | in | 0.002587678 | 0.003046425 | -15.0585% |
-| 2-002 | LC5 | tip absolute UX | in | 0.0008999868 | 0.0009 | -0.0015% |
-| 2-002 | LC6 | tip RZ | rad | 0.036 | 0.036 | +0.0000% |
-| 2-003 | LC1 | tip UY | in | 0.08851299 | 0.08892159 | -0.4595% |
-| 2-003 | LC2 | tip UZ | in | 0.48628625 | 0.4942291 | -1.6071% |
-| 2-004 | LC1 | tip UZ | in | 0.00170717 | 0.001749793 | -2.4359% |
-| 2-004 | LC2 | tip UY | in | 0.0054036313 | 0.005407034 | -0.0629% |
-| 2-006 | LC1 | free edge midpoint UZ | ft | -0.3061547 | -0.3056915 | +0.1515% |
-| 2-012 | A | outer edge mean UZ | in | -0.0053394348 | -0.0053445732 | -0.0961% |
-| 2-012 | B | outer edge mean UZ | in | -0.0052170217 | -0.0052193496 | -0.0446% |
-| 2-017 | 4 × 24 | critical load | kip | 126.6229 | 123.9762 | +2.1348% |
+| SAP case | Load case / mesh | Response | Unit | DKMQ24EAS | Nastran CQUADR | Reference | Nastran_error (%) | Mystran_error (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2-002 | LC1 | tip UX | in | 3e-05 | 3.438168e-05 | 3e-05 | 14.6056 | 0.0000 |
+| 2-002 | LC2 | tip UZ | in | 0.1080296 | 0.1080311 | 0.1081 | 0.0637 | 0.0651 |
+| 2-002 | LC3 | tip UY | in | 0.4320889 | 0.432016 | 0.4321 | 0.0194 | 0.0026 |
+| 2-002 | LC4 | tip absolute UY | in | 0.002587678 | 0.003046425 | 0.00341 | 10.6620 | 24.1150 |
+| 2-002 | LC5 | tip absolute UX | in | 0.0008999868 | 0.0009 | 0.0009 | 0.0000 | 0.0015 |
+| 2-002 | LC6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
+| 2-003 | LC1 | tip UY | in | 0.08851299 | 0.08892159 | 0.0886 | 0.3630 | 0.0982 |
+| 2-003 | LC2 | tip UZ | in | 0.48628625 | 0.4942291 | 0.5004 | 1.2332 | 2.8205 |
+| 2-004 | LC1 | tip UZ | in | 0.00170717 | 0.001749793 | 0.001749 | 0.0453 | 2.3917 |
+| 2-004 | LC2 | tip UY | in | 0.0054036313 | 0.005407034 | 0.005429 | 0.4046 | 0.4673 |
+| 2-006 | LC1 | free edge midpoint UZ | ft | -0.3061547 | -0.3056915 | -0.3086 | 0.9425 | 0.7924 |
+| 2-012 | A | outer edge mean UZ | in | -0.0053394348 | -0.0053445732 | -0.00534 | 0.0856 | 0.0106 |
+| 2-012 | B | outer edge mean UZ | in | -0.0052170217 | -0.0052193496 | -0.00521 | 0.1795 | 0.1348 |
+| 2-017 | 4 × 24 | critical load | kip | 126.6229 | 123.9762 | 127.91 | 3.0754 | 1.0063 |
 
-![Signed differences relative to Nastran CQUADR](figures/benchmark_differences.png)
+![Accuracy is assessed separately for each solver against its independent reference.
 
-*Figure 5. Signed differences for the results in Section 6.2. Large relative differences should be interpreted together with the response component and benchmark reference.*
+*Figure 5. Nastran_error and Mystran_error for the selected responses, each normalized by its corresponding independent reference.*
 
 ### 6.3 Discussion
 
-- **SAP 2-002, LC2, tip UZ:** DKMQ24EAS gives 0.1080296 against 0.1080311 for Nastran CQUADR, a signed difference of -0.0014%.
-- **SAP 2-002, LC4, tip abs UY:** DKMQ24EAS gives 0.002587678 against 0.003046425 for Nastran CQUADR, a signed difference of -15.0585%.
-- **SAP 2-004, LC1, tip UZ:** DKMQ24EAS gives 0.00170717 against 0.001749793 for Nastran CQUADR, a signed difference of -2.4359%.
-- **SAP 2-004, LC2, tip UY:** DKMQ24EAS gives 0.0054036313 against 0.005407034 for Nastran CQUADR, a signed difference of -0.0629%.
-- **SAP 2-006, LC1, free edge midpoint UZ:** DKMQ24EAS gives -0.3061547 against -0.3056915 for Nastran CQUADR, a signed difference of +0.1515%.
-- **SAP 2-017, 4 × 24, critical load:** DKMQ24EAS gives 126.6229 against 123.9762 for Nastran CQUADR, a signed difference of +2.1348%.
+- **2-002, LC2, tip UZ:** reference 0.1081 in; Nastran_error=0.0637%; DKMQ24EAS Mystran_error=0.0651%.
+- **2-002, LC4, tip absolute UY:** reference 0.00341 in; Nastran_error=10.6620%; DKMQ24EAS Mystran_error=24.1150%.
+- **2-002, LC5, tip absolute UX:** reference 0.0009 in; Nastran_error=0.0000%; DKMQ24EAS Mystran_error=0.0015%.
+- **2-004, LC1, tip UZ:** reference 0.001749 in; Nastran_error=0.0453%; DKMQ24EAS Mystran_error=2.3917%.
+- **2-004, LC2, tip UY:** reference 0.005429 in; Nastran_error=0.4046%; DKMQ24EAS Mystran_error=0.4673%.
+- **2-006, LC1, free edge midpoint UZ:** reference -0.3086 ft; Nastran_error=0.9425%; DKMQ24EAS Mystran_error=0.7924%.
+- **2-017, 4 × 24, critical load:** reference 127.91 kip; Nastran_error=3.0754%; DKMQ24EAS Mystran_error=1.0063%.
+
 
 The straight-beam results show close agreement for LC2 and LC5, while LC4 retains a larger difference over the mesh sequence. The axial LC1 difference also remains visible in the selected results and should be assessed independently of the bending cases. For the twisted beam, the UY responses approach one another more closely than the UZ responses at the finest common mesh. The roof and thick-plate cases show close agreement, while the buckling comparison remains sensitive to mesh refinement. These observations apply to the selected cases and do not establish universal accuracy.
 
