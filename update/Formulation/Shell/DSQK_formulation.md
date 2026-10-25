@@ -1,24 +1,24 @@
-# DSQK: A Four-Node Discrete-Shear Quadrilateral Shell with Assumed-Orthogonality Bending and Consistent-Spin Drilling
+# DSQK: A Four-Node Discrete-Shear Quadrilateral Shell with Assumed-Orthogonality Bending Covariant Transverse Shear, and Consistent-Spin Drilling
 
 **Ary | 25 October 2026 | Mathematical formulation and numerical assessment**
 
 ## Abstract
 
-This article presents the adopted DSQK four-node Reissner–Mindlin shell formulation and its recent consistent-spin refinement. The element combines a conventional bilinear quadrilateral membrane, an assumed-orthogonality discrete-Kirchhoff bending enhancement using four eliminated side-rotation parameters, and midpoint-tied transverse shear. Twenty physical tangent-space degrees of freedom are embedded in a six-degree-of-freedom-per-node shell description. The principal update is the replacement of a penalty on absolute normal rotation with a **consistent-spin constraint** penalizing the difference between the local continuum spin and interpolated drilling rotation. The adopted nondimensional coefficient is $\alpha_s=0.03$. Matched benchmark results demonstrate a marked improvement in the hemispherical shell response (absolute error 84.563% to 0.786% on the reported n32 mesh), negligible changes to plate cases, but residual limitations in twisted beams and coarse Scordelis–Lo shells. Differences between direct local stress recovery and stresses reconstructed into a common surface frame are distinguished rather than presented as an unconditional patch-test pass.
+This article presents a four-node Reissner–Mindlin shell element with a bilinear membrane, discrete-Kirchhoff side-rotation elimination, assumed-orthogonality bending, **covariant transverse-shear tying**, and consistent-spin drilling. The latest shear refinement transforms sampled engineering shear strains into parent-coordinate covariant components before interpolation, then maps the interpolated strains back into the physical tangent plane. Unlike direct Cartesian shear interpolation, the covariant construction preserves the zero-shear constant-curvature state on the four distorted quadrilateral geometries examined. For a thin simply supported plate ($h/a=0.001$) with 30% mesh distortion, the normalized center deflection at an $8\times8$ mesh increases from 0.0586 to 0.9984. The independently studied consistent-spin drilling treatment markedly improves hemispherical response (absolute error 84.563% to 0.786% at the reported $n=32$ resolution), but the twisted-beam and coarse-roof limitations remain. The element's reported improvements are specific to the validated numerical cases and do not imply unconditional exactness of all patch or stress-resultant recovery tests.
 
 **Keywords:** DSQK; quadrilateral shell; assumed orthogonality; transverse shear tying; consistent-spin drilling; Reissner–Mindlin; rank stability; curved shells.
 
 ## 1. Formulation lineage and main changes
 
-The DSQK formulation is distinct from the DKMQ family even though both employ quadrilateral shell kinematics and side-related rotational enrichment. In DSQK, the side increments are eliminated through a discrete-Kirchhoff relation and bending is assembled using an **assumed-orthogonality** split. The latest adopted formulation preserves this physical kernel while replacing the earlier absolute normal-rotation drilling penalty with a compatible continuum-spin constraint.
+The DSQK formulation is distinct from the DKMQ family even though both employ quadrilateral shell kinematics and side-related rotational enrichment. In DSQK, the side increments are eliminated through a discrete-Kirchhoff relation and bending is assembled using an **assumed-orthogonality** split. The successive refinements preserve this bending kernel while replacing the absolute normal-rotation penalty with a consistent-spin constraint and replacing Cartesian shear tying with covariant shear tying on distorted quadrilaterals.
 
-| Contribution | Earlier DSQK formulation | Adopted DSQK formulation |
+| Contribution | Earlier DSQK | Revised DSQK |
 |---|---|---|
 | Membrane | Bilinear Q4 | Unchanged |
 | Basic bending | Bilinear rotations | Unchanged |
 | Side rotations | Four increments eliminated by discrete-Kirchhoff relations | Unchanged |
 | Bending stiffness | Assumed-orthogonality split | Unchanged |
-| Transverse shear | Four midpoint tying locations | Unchanged |
+| Transverse shear | Four midpoint tying locations, **Cartesian strain components** | Same four tying locations, **covariant strain interpolation** |
 | External rotations | Tangential rotations plus artificial normal penalty | Tangential rotations plus consistent-spin constraint |
 | Drilling energy | Penalizes absolute normal rotation | Penalizes spin mismatch; vanishes in rigid-body motion |
 | Coefficient | $0.03$ in the earlier penalty convention | $\alpha_s=0.03$ in the new constraint; **not** an equivalent stiffness |
@@ -180,26 +180,112 @@ $$
 
 **Important distinction:** expanding the square of $\mathbf B_{bu}+\mathbf B_{b\Delta}\mathbf A_n$ would also create mixed terms. The stated DSQK stiffness is an *assumed-orthogonality energy*, not a claim that these coupling integrals necessarily vanish pointwise.
 
-## 6. Assumed transverse shear — four tying sides
+## 6. Covariant assumed transverse shear — four tying sides
 
-The Reissner–Mindlin transverse shear is expressed, with the same bending-rotation convention, as
+The geometry of the four midpoint tying locations is retained, while the **components that are interpolated are changed**. This distinction matters whenever the isoparametric Jacobian varies or the physical axes are not aligned with the parent edges.
 
-$$
-\boldsymbol\gamma=
-\begin{bmatrix}w_{,x}+\beta_x\\w_{,y}+\beta_y\end{bmatrix}.
-$$
+### 6.1 Step 1 — physical engineering shear
 
-Instead of integrating a fully compatible bilinear shear field, an assumed strain $\widetilde{\boldsymbol\gamma}=\widetilde{\mathbf B}_s\mathbf q^{(5)}$ is reconstructed from shear values tied at the four edge midpoints. The assumed shear energy is
+Using the bending-rotation convention of Section 5,
 
 $$
-\mathbf K_s=\int_{\Omega_e}\widetilde{\mathbf B}_s^T\mathbf D_s\widetilde{\mathbf B}_s\,dA.
+\boldsymbol{\gamma}_{xy} =
+\begin{bmatrix}
+\gamma_x \\
+\gamma_y
+\end{bmatrix}
+=
+\begin{bmatrix}
+ w_{,x}+\beta_x \\
+ w_{,y}+\beta_y
+\end{bmatrix}.
 $$
 
-This tying block controls transverse shear locking. Its role is distinct from the four side-rotation increments eliminated in Section 5, although both involve edge data.
+### 6.2 Step 2 — covariant projection at the tying locations
 
-![DSQK tying sides and Gauss positions](figures/dsqk_tying_gauss.svg)
+Let the Jacobian use rows indexed by physical coordinates:
 
-*Figure 2. Four edge-midpoint shear tying locations (circles) and four Gaussian integration locations (crosses). Tying and quadrature points are not interchangeable.*
+$$
+\mathbf J =
+\begin{bmatrix}
+ x_{,\xi} & x_{,\eta} \\
+ y_{,\xi} & y_{,\eta}
+\end{bmatrix}.
+$$
+
+The *covariant* shear values at each tying point are
+
+$$
+\begin{aligned}
+\gamma_{\xi} &= x_{,\xi}\gamma_x+y_{,\xi}\gamma_y,\\
+\gamma_{\eta} &= x_{,\eta}\gamma_x+y_{,\eta}\gamma_y.
+\end{aligned}
+$$
+
+The Jacobian in these equations is evaluated **at the corresponding tying point**. Equivalently,
+
+$$
+\boldsymbol\gamma_{\mathrm{cov}}=\mathbf J^T\boldsymbol\gamma_{xy}.
+$$
+
+### 6.3 Step 3 — independent edge-pair interpolation
+
+For parent edge-midpoints $A=(0,-1)$, $B=(0,1)$, $C=(-1,0)$, and $D=(1,0)$, define
+
+$$
+\widehat\gamma_{\xi}(\eta)
+=\frac{1-\eta}{2}\gamma_{\xi}^{A}
++\frac{1+\eta}{2}\gamma_{\xi}^{B}.
+$$
+
+$$
+\widehat\gamma_{\eta}(\xi)
+=\frac{1-\xi}{2}\gamma_{\eta}^{C}
++\frac{1+\xi}{2}\gamma_{\eta}^{D}.
+$$
+
+The two natural components are tied on **different pairs of opposite sides**. This is the key modification relative to interpolation of Cartesian $\gamma_x$ and $\gamma_y$ independently.
+
+### 6.4 Step 4 — transform back to physical shear
+
+At each integration point, use its own Jacobian to reconstruct
+
+$$
+\boxed{
+\widetilde{\boldsymbol\gamma}_{xy}
+=\mathbf J^{-T}
+\begin{bmatrix}
+\widehat\gamma_{\xi}\\
+\widehat\gamma_{\eta}
+\end{bmatrix}
+=\widetilde{\mathbf B}_{s}^{\mathrm{cov}}\mathbf q^{(5)}.
+}
+$$
+
+The discrete shear stiffness is then
+
+$$
+\boxed{
+\mathbf K_s^{\mathrm{cov}}
+=\int_{\Omega_e}
+\left(\widetilde{\mathbf B}_s^{\mathrm{cov}}\right)^T
+\mathbf D_s\widetilde{\mathbf B}_s^{\mathrm{cov}}\,dA.
+}
+$$
+
+The same $2\times2$ Gaussian quadrature is retained. For rectangles aligned with the facet axes, the covariant and Cartesian tying constructions coincide in the tested cases. On distorted quadrilaterals they are generally different.
+
+![Original four side tying locations and Gaussian points](figures/dsqk_tying_gauss.svg)
+
+*Figure 2. Four edge-midpoint shear tying locations and four Gaussian points. The point locations are unchanged by the covariant reformulation.*
+
+![Covariant shear tying transformation](figures/dsqk_covariant_tying.svg)
+
+*Figure 3. Stepwise map from physical engineering shear to covariant edge values, assumed natural shear interpolation, and back-transformation to physical strains.*
+
+### 6.5 Why the transformation matters
+
+A shear-free constant-curvature bending state requires the assumed shear energy to remain zero, including for distorted quadrilateral mappings. Direct interpolation of Cartesian components does not in general commute with the mapping of shear strains. The covariant construction respects the natural edge directions in the parent domain. On the tested distorted single-element geometries, its normalized bending energy returns to 1.000000 (Section 9). This numerical observation supports the correction but is not a proof of exactness for all distorted or warped shell geometries.
 
 ## 7. New formulation: consistent-spin drilling
 
@@ -305,7 +391,7 @@ The physical shell must admit **six rigid-body modes** without parasitic drillin
 
 The six external DOFs per node do **not** imply that independent physical membrane stiffness is supplied by drilling: it is a stabilization of the mismatch $\omega_n-\theta_n^h$. It is therefore not equivalent to an Allman membrane enrichment.
 
-## 9. Numerical assessment: former drilling versus consistent-spin
+## 9. Numerical assessment: drilling and covariant-shear refinements
 
 The comparison uses identical models within the DSQK family and reports **absolute percentage error relative to the stored benchmark reference**. Results are representative static benchmarks; they do not constitute a complete independent rerun of every test in the retained suite.
 
@@ -325,7 +411,7 @@ The comparison uses identical models within the DSQK family and reports **absolu
 
 ![DSQK selected static benchmark errors](figures/dsqk_tradeoff.png)
 
-*Figure 3. Static response trade-offs after introducing consistent-spin drilling. Smaller error indicates closer agreement with the retained reference.*
+*Figure 4. Static response trade-offs after introducing consistent-spin drilling. Smaller error indicates closer agreement with the retained reference.*
 
 ### 9.1 Hemisphere and coarse-shell behavior
 
@@ -338,6 +424,41 @@ For 2-004 at n24, LC1 still has 49.171% error and LC2 has 64.809% error. This is
 ### 9.3 Plate response and Scordelis–Lo roof
 
 All four reported plate loading/support combinations show essentially unchanged error after the drilling update, which is consistent with a correction whose primary effect is shell-orientation-related. In Scordelis–Lo, the revised formulation becomes substantially worse on the coarsest n2 mesh but improves on n16. This refinement-dependent trade-off must remain visible in any assessment of general curved-shell applicability.
+
+### 9.4 Distorted-element constant-curvature verification
+
+The following results compare the former Cartesian interpolation with the covariant assumed shear. Values are total element energy normalized by the exact constant-curvature, zero-transverse-shear result; the target is **1.000000**.
+
+| Element mapping | Cartesian tying | Covariant tying |
+|---|---:|---:|
+| Rectangle | 1.0000 | **1.000000** |
+| Parallelogram | 2.3117 | **1.000000** |
+| Trapezoid | 3.6245 | **1.000000** |
+| Skew quadrilateral | 2.6186 | **1.000000** |
+
+The Cartesian excess energy is a signature of parasitic shear on distorted mappings. The covariant interpolation removes it in this particular verification field.
+
+### 9.5 Thin-plate distortion and mesh convergence
+
+A simply supported plate with $h/a=0.001$ and controlled nodal distortion of 30% was evaluated with comparable mesh sequences. Deflection is normalized by the same independent reference solution; unity is the target.
+
+| Mesh | Cartesian tying | Covariant tying |
+|---|---:|---:|
+| $4\times4$ | 0.0212 | **0.9906** |
+| $8\times8$ | 0.0586 | **0.9984** |
+| $16\times16$ | 0.1774 | **0.9998** |
+
+![Distorted thin-plate convergence](figures/dsqk_distorted_plate_convergence.png)
+
+*Figure 5. Connected-line convergence for the 30% distorted thin plate. Covariant shear retains a nearly reference-consistent displacement as the mesh is refined.*
+
+For a thicker plate, $h/a=0.1$, at the same distortion magnitude, the covariant variant produces ratios 0.9584, 0.9546, and 0.9521 at the same three mesh sizes, versus 0.9454, 0.9467, and 0.9503 for the earlier tying rule. The greatest benefit therefore appears in the thin/distorted regime.
+
+### 9.6 Limits and separation of mechanisms
+
+Covariant shear tying and consistent-spin drilling remedy **different** deficiencies. On the examined rectangular twisted-beam mesh the shear correction produces essentially no response change; the 2-004 errors remain substantial. The drilling-free limit of the $n=24$ twisted-beam model gives about 0.710 and 0.621 times reference for LC1 and LC2, respectively, indicating that the penalty accounts for only part of the under-response. Coarse roof results also exhibit cancellation between excessive physical compliance and artificial drilling stiffness. No coefficient retuning or alteration of the bending orthogonality assumption is introduced as part of the covariant shear revision.
+
+The existing $2$-001 surface-reconstructed membrane results do not constitute an exact distorted-element force/shear-resultant patch validation. A separate equilibrated traction and resultant assessment remains necessary.
 
 ## 10. Stress/resultant interpretation in patch benchmarks
 
@@ -365,7 +486,7 @@ However, direct element-point recovery on selected distorted elements remained n
 |---|---|---|---|
 | Main bending principle | Assumed orthogonality; side increments eliminated by discrete-Kirchhoff constraint | DKMQ-type director/edge enrichment | DKMQ-type side rotation enrichment |
 | Membrane | Bilinear Q4 | Family-specific shell membrane operator | Bilinear membrane in baseline |
-| Shear | Midpoint assumed transverse shear | Edge-related DKMQ shear | DKMQ shear interpolation |
+| Shear | **Covariant** midpoint assumed transverse shear | Edge-related DKMQ shear | DKMQ shear interpolation |
 | Drilling | Consistent continuum-spin mismatch, $\alpha_s=0.03$ | Distinct family treatment | Distinct family treatment |
 | Special limitation here | Twisted beam 2-004 and coarse Scordelis | Not inferred from DSQK tests | Not inferred from DSQK tests |
 
@@ -373,12 +494,11 @@ The distinction is substantive: **DSQK is not DKMQ20 with a different drilling c
 
 ## 12. Discussion and conclusions
 
-1. The adopted DSQK combines a bilinear membrane, assumed-orthogonality bending and midpoint-tied shear, with 20 underlying physical tangent DOFs and 24 external shell DOFs.
-2. The principal latest change is a **consistent-spin drilling energy** based on $\omega_n-\theta_n^h$ rather than a penalty on the absolute drilling angle. Its coefficient $\alpha_s=0.03$ is retained from the studied variant; its stiffness is *not* algebraically equivalent to the old penalty at the same number.
-3. The revised drilling term is zero under an infinitesimal rigid-body rotation and produced marked improvement on the hemispherical benchmark without changing the main plate responses.
-4. The large residual errors in the twisted-beam cases remain known limitations; Scordelis–Lo on a very coarse mesh also deteriorates markedly.
-5. Membrane/stress patch consistency must be interpreted in a common output frame, with surface reconstruction distinguished from direct element-point recovery. The revised formulation should not be described as universally patch-exact on the available evidence.
-6. This evidence supports continued use of DSQK as a separate quadrilateral-shell formulation, without claiming superiority over DKMQ elements or over all geometric regimes.
+1. The element retains Q4 membrane interpolation, discrete-Kirchhoff elimination of four side rotations, and assumed-orthogonality bending. No new global nodes or additional physical DOFs are introduced.
+2. The **first refinement**, consistent-spin drilling with $\alpha_s=0.03$, replaces artificial energy attached to absolute normal rotation with an objective mismatch between continuum spin and nodal drilling. The hemisphere improvement is substantial, while the twisted-beam limitation remains.
+3. The **second refinement**, covariant edge-midpoint shear tying, changes the interpolated components from $\gamma_x,\gamma_y$ to $\gamma_\xi,\gamma_\eta$. It preserves the zero-shear constant-curvature response on the tested distorted element shapes and greatly improves thin-plate distortion robustness.
+4. The covariant shear correction does not resolve the known 2-004 twisted-beam under-response or establish patch-exact direct shear-resultant recovery. Such claims require dedicated evidence.
+5. The two refinements should be evaluated independently in future benchmark studies; improvements on selected meshes do not imply universal element superiority.
 
 ## References
 
@@ -387,3 +507,5 @@ The distinction is substantive: **DSQK is not DKMQ20 with a different drilling c
 3. Hughes, T. J. R., and Brezzi, F. (1989). On drilling degrees of freedom. *Computer Methods in Applied Mechanics and Engineering*, **72**, 105–121. https://doi.org/10.1016/0045-7825(89)90177-1
 4. Johan, P. B., and Maknun, I. J. (2025). Convergence Behavior of DSQ and DSQK Elements for Composite Plates. *Quality in Research Conference proceedings*. https://doi.org/10.2991/978-94-6239-717-0_7
 5. Computers and Structures, Inc. SAP2000 / CSiBridge verification examples, Shell Problems 2-001, 2-004, 2-005, 2-006, 2-007 and 2-010. https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Shells/
+
+
