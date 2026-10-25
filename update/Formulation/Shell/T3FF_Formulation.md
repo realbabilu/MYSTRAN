@@ -1,4 +1,4 @@
-# T3FF and T3FFD Triangular Shells: Director-Based Formulation, Drilling Stabilisation and SAP Benchmark Assessment
+# T3FF and T3FFD Triangular Shells: Director-Based Formulation, Drilling Stabilisation and Mystran Benchmark
 
 **Ary — 25 October 2026**
 
@@ -274,4 +274,3 @@ Hughes, T.J.R., & Brezzi, F. (1989). On drilling degrees of freedom. *Computer M
 Lyly, M., Stenberg, R., & Vihinen, T. (1993). A stable bilinear element for Reissner–Mindlin plates. *Computer Methods in Applied Mechanics and Engineering*, 110(3–4), 343–357.
 
 Computers & Structures, Inc. *SAP2000 Verification Examples*, Problems 2-002, 2-003, 2-004, 2-006 and 2-017.
-
