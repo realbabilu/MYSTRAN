@@ -1,4 +1,4 @@
-# DKMQ24 Shell Element: Formulation and Selected SAP Benchmark Results
+# DKMQ24 Shell Element: Formulation and Implementation in MYSTRAN
 
 **Ary — Personal — revised 25 October 2026**
 
