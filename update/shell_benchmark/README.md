@@ -1,5 +1,6 @@
 # Shell benchmark library
 
+## Quadratic shells
 [All comparisons](comparison_all.md)
 
 - [2-001: Membrane/bending patch; pointwise recovery](benchmark_2_001.md) — Joint and element stresses require correct frame; Q8 transverse shear recovery LC2 under review.
