@@ -1,0 +1,81 @@
+[
+  {
+    "path": "Source/EMG/EMG4/CQUADR_DKMQ24.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 6
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUADR_DKMQ24R.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUAD4_DKMQ20_RHR.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUADR_DKM24EA.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUAD4_SIMO1989.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUADR_SIMO1993.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUADR_MBP1C0.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUADR_Q4EASANS.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUADR_Q4RS.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CTRIAR_DKMT18.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 4
+  },
+  {
+    "path": "Source/EMG/EMG4/CTRIA3_DSG3.f90",
+    "status": "existing equivalent thermal load retained; local Kg-z edit preserved"
+  },
+  {
+    "path": "Source/EMG/EMG4/CTRIA3_T3FF.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 4
+  },
+  {
+    "path": "Source/EMG/EMG4/MITC4.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/EMG/EMG4/CQUADR_MITC4PHB.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 5
+  },
+  {
+    "path": "Source/LK9/L92/OFP3_STRE_NO_PCOMP.f90",
+    "status": "thermal/output-metadata-only hunks applied",
+    "hunks": 2
+  }
+]

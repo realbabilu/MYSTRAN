@@ -278,6 +278,9 @@ elems_5: DO J = 1,NELE
                          ((TYPE(1:5) == 'QUAD4') .AND. (QUAD4TYP == 'DSQK  '))) THEN
 ! Q4RS, original DKMQ24, DKMQ24EAS, and DSQK recovery rows are evaluated directly at the requested output points.
                         STRESS_OUT(:,:) = STRESS_RAW(:,:)
+! Direct recovery does not perform a polynomial fit; do not copy undefined fit diagnostics.
+                        STRESS_OUT_PCT_ERR(:) = ZERO
+                        STRESS_OUT_ERR_INDEX(:) = 0
 
                      ELSE IF ((TYPE(1:5) == 'QUAD4') .OR. (TYPE == 'QUADR   ')) THEN
                          CALL POLYNOM_FIT_STRE_STRN ( STRESS_RAW, 9, NUM_PTS_CUR, STRESS_OUT, STRESS_OUT_PCT_ERR,                  &

@@ -1,0 +1,62 @@
+[
+  {
+    "file": "CQUADR_DKMQ24.f90",
+    "hunks": 6
+  },
+  {
+    "file": "CQUADR_DKMQ24R.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CQUAD4_DKMQ20_RHR.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CQUADR_DKM24EA.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CQUAD4_SIMO1989.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CQUADR_SIMO1993.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CQUADR_MBP1C0.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CQUADR_Q4EASANS.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CQUADR_Q4RS.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CQUAD4_DSQK_RHR.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CTRIAR_DKMT18.f90",
+    "hunks": 4
+  },
+  {
+    "file": "CTRIA3_DSG3.f90",
+    "hunks": 4
+  },
+  {
+    "file": "CTRIA3_T3FF.f90",
+    "hunks": 4
+  },
+  {
+    "file": "MITC4.f90",
+    "hunks": 5
+  },
+  {
+    "file": "CQUADR_MITC4PHB.f90",
+    "hunks": 5
+  }
+]

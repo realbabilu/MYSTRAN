@@ -1,0 +1,98 @@
+[
+  {
+    "case": 1,
+    "formulation": "DKMQ24 / 2-002 LC3+LC6",
+    "status": "Closed",
+    "evidence": "n24 UY=0.4320889 vs 0.4321; RZ=0.036 exactly. Six meshes rerun."
+  },
+  {
+    "case": 2,
+    "formulation": "DKMT18 / 2-002 LC4",
+    "status": "Known fail",
+    "evidence": "n24 UYabs=0.002352926 vs 0.00341: 31.00% low. Baseline selector; opt-in SF does not close the baseline case."
+  },
+  {
+    "case": 3,
+    "formulation": "DKMT18 / 2-005 clamped LC1",
+    "status": "Closed",
+    "evidence": "n24 UZ=-2.614101 vs -2.60: 0.5423% error. Four meshes."
+  },
+  {
+    "case": 4,
+    "formulation": "MITC3+ Lee / 2-005 simple LC1",
+    "status": "Closed",
+    "evidence": "n24 UZ=-12.97491 vs -12.97: 0.0379% error. Four meshes; pressure response remains restored."
+  },
+  {
+    "case": 5,
+    "formulation": "DKMT18 / 2-005 simple LC1",
+    "status": "Closed",
+    "evidence": "n24 UZ=-12.97928 vs -12.97: 0.0715% error. Four meshes."
+  },
+  {
+    "case": 6,
+    "formulation": "DKMQ24 / 2-007 LC1",
+    "status": "Closed",
+    "evidence": "n32 UX=0.09342421 vs 0.094: 0.6125% error; n8/n16/n32 rerun."
+  },
+  {
+    "case": 7,
+    "formulation": "DSQK spin / 2-007 LC1",
+    "status": "Closed for hemisphere",
+    "evidence": "n32 UX=0.09326114: 0.7860% error. Twisted beam remains a separate known accuracy failure."
+  },
+  {
+    "case": 8,
+    "formulation": "DSG3 spin / 2-007 LC1",
+    "status": "Closed for hemisphere",
+    "evidence": "n32 UX=0.09301597: 1.0468% error. Separate twisted LC1 regression remains documented."
+  },
+  {
+    "case": 9,
+    "formulation": "MITC3+ Lee / 2-007 LC1",
+    "status": "Closed for hemisphere",
+    "evidence": "n32 UX=0.09367761: 0.3430% error. Shear-patch trade-off remains separate."
+  },
+  {
+    "case": 10,
+    "formulation": "DKMT18 / 2-010 LC1",
+    "status": "Closed for duplicate pressure",
+    "evidence": "24x48 axial UZ=-0.1239743 vs -0.12414: 0.1335% error. Radial Ur=0.1116052 remains 10.10% low on this mesh; no universal pipe-accuracy closure."
+  },
+  {
+    "case": 11,
+    "formulation": "DKMQ24 / 2-013a LC1",
+    "status": "Closed",
+    "evidence": "UX=0.000132 and UY=0.000066 exactly match the free-expansion targets."
+  },
+  {
+    "case": 12,
+    "formulation": "Multiple / 2-014b LC1",
+    "status": "Open in published source",
+    "evidence": "17/22 formulations still zero. Nonzero: MIN4, MIN4T, MIN3, MITC3+ Lee and KMITC3+. Earlier all-formulation load fixes remain isolated/unpublished; recovery is a distinct audit."
+  },
+  {
+    "case": 13,
+    "formulation": "DSG3 / 2-016c bending LC2",
+    "status": "Open in published source",
+    "evidence": "Critical edge stress=703.6821 ksi vs 0.1165, for both ND1 and ND6. Published DSG3 lacks the previously tested local-z Kg contribution. Solver completion does not make this an accuracy pass."
+  },
+  {
+    "case": 14,
+    "formulation": "MITC3+HB / 2-016c bending LC2",
+    "status": "Retired / replaced",
+    "evidence": "HB no longer exists. KMITC3+ successor first critical stress=0.1157315 ksi (0.6597% error); default ND1/ND6 complete. This is successor evidence, not a repair certification of HB."
+  },
+  {
+    "case": 15,
+    "formulation": "DKMQ24 / 2-017 LC2",
+    "status": "Closed for divergent Pcr defect",
+    "evidence": "First Pcr=153.6169 -> 133.2703 kip (2x12 -> 4x24), toward 127.91 kip; finest error 4.19%. First-Pcr acceptance only."
+  },
+  {
+    "case": 16,
+    "formulation": "MITC3+HB / 2-017 LC2",
+    "status": "Retired / replaced",
+    "evidence": "HB removed as requested. KMITC3+ successor Pcr=131.5733 -> 127.3982 kip. Fine result agrees with prior exact-mesh Python=127.3981539; default eigensolver, one requested Pcr."
+  }
+]

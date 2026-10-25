@@ -43,6 +43,7 @@
                                          NUM_PLIES, PCOMP_LAM, PLY_NUM, TPLY, STRESS, KED
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, FOUR
 
+      USE MITC_STUF, ONLY : DIR_THICKNESS
       USE MITC_INITIALIZE_Interface
       USE ORDER_GAUSS_Interface
       USE OUTA_HERE_Interface
@@ -109,6 +110,7 @@
       REAL(DOUBLE)                    :: CTE(6)            ! Coefficient of thermal expansion vector
       REAL(DOUBLE)                    :: THERMAL_STRAIN(6) ! Thermal strain vector
       REAL(DOUBLE)                    :: TBAR              ! Average elem temperature
+      REAL(DOUBLE) :: UNIT_PTG(6*ELGP), CTEG(6), ZTHERM
       REAL(DOUBLE)                    :: UNIT_PTE(6*ELGP)  ! Thermal load vector for unit temperature change.
       REAL(DOUBLE)                    :: UNIT_PPE(6*ELGP)  ! Pressure load vector for unit pressure.
       REAL(DOUBLE)                    :: PSH(ELGP)
@@ -276,6 +278,21 @@
             ENDDO
          ENDDO
 
+
+! Bending material and CTE for a unit through-thickness temperature gradient.
+         EB2 = ZERO
+         EB2(1,1) = EB(1,1)
+         EB2(1,2) = EB(1,2)
+         EB2(1,4) = EB(1,3)
+         EB2(2,2) = EB(2,2)
+         EB2(2,4) = EB(2,3)
+         EB2(4,4) = EB(3,3)
+         DO I=2,6
+            DO J=1,I-1
+               EB2(I,J) = EB2(J,I)
+            ENDDO
+         ENDDO
+         UNIT_PTG = ZERO
          UNIT_PTE(:) = ZERO
 
          CALL ORDER_GAUSS ( IORD_IJ, SS_IJ, HH_IJ )
@@ -323,6 +340,19 @@
 
                                                            ! PTE += DUM3 * unit_ε_thermal * det(J) * GaussWeight
                   UNIT_PTE = UNIT_PTE + MATMUL ( DUM3, CTE ) * INTFAC
+! Integrate B_b^T D alpha z through thickness; z follows the shell director.
+                  CALL MATMULT_FFF ( EB2, T66, 6, 6, 6, DUM66 )
+                  CALL MATMULT_FFF_T ( T66, DUM66, 6, 6, 6, EB3 )
+                  CTEG = ZERO
+                  CTEG(1:2) = ALPVEC(1:2,2)
+                  CTEG(4) = ALPVEC(3,2)/TWO
+                  CTEG = MATMUL(TRANSPOSE(T66), CTEG)
+                  CTEG(4:6) = TWO*CTEG(4:6)
+                  CALL MITC_SHAPE_FUNCTIONS ( R, S, PSH, DPSHG )
+                  ZTHERM = T*DOT_PRODUCT(DIR_THICKNESS(1:ELGP),PSH)/TWO
+                  CALL CQUADR_MITC4PHB_B ( R, S, T, .FALSE., .TRUE., .FALSE., BBI )
+                  UNIT_PTG = UNIT_PTG + MATMUL(TRANSPOSE(BBI),MATMUL(EB3,CTEG))*ZTHERM*INTFAC
+
 
                ENDDO
             ENDDO
@@ -335,7 +365,7 @@
                                                   ! linear elements.
             TBAR = (DT(1,J) + DT(2,J) + DT(3,J) + DT(4,J))/FOUR
 
-            PTE(1:6*ELGP,J) = UNIT_PTE(1:6*ELGP) * (TBAR - TREF(1))
+            PTE(1:6*ELGP,J) = UNIT_PTE(1:6*ELGP) * (TBAR - TREF(1)) + UNIT_PTG*DT(ELGP+1,J)
          ENDDO
 
 

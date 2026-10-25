@@ -1,0 +1,28 @@
+{
+  "base_commit": "1f0c8f8f51683a6b8fd933d9270fad677612e729",
+  "build": "cmake --build H:/Projects/MYSTRAN/codex_mod/discussion_retest_20261025/build --parallel 6; 15 objects rebuilt in the previous fresh full build",
+  "source_sha256": {
+    "Source/EMG/EMG4/CQUADR_DKMQ24.f90": "fae64329188aaaba0e16f50099ac67abfe7fdac589ccdc301d18fdd2e7eba0e5",
+    "Source/EMG/EMG4/CQUADR_DKMQ24R.f90": "06bd172d230c58d4ada3215500021ab71cc07aa54152d5a6583e03a09e856762",
+    "Source/EMG/EMG4/CQUAD4_DKMQ20_RHR.f90": "bfb68042f4b739bd9d4d4dbbd348d3d9ffde97889534f2f43cfbb769cf35a01e",
+    "Source/EMG/EMG4/CQUADR_DKM24EA.f90": "1f9ba013b71a7eb695ba9b25b5c7bfa3a3f30b745ffe0b38377cfe4f417eda02",
+    "Source/EMG/EMG4/CQUAD4_SIMO1989.f90": "dbd30f587d754e9b8f7483574f38ee803b22fc6df5e3962a2645296c8e780075",
+    "Source/EMG/EMG4/CQUADR_SIMO1993.f90": "dfb2db16301bb40f55dccdcf2beb3d65f6e017116a3330403dab6ba789d8a90d",
+    "Source/EMG/EMG4/CQUADR_MBP1C0.f90": "ff8cd340f9dcee3a938ea4b11acf8bf4a1a62d61f4cd1380f59bab948cfaa3d0",
+    "Source/EMG/EMG4/CQUADR_Q4EASANS.f90": "6420df0d856e57fcb72d8aa14851677da4555f396058847ee4918d15ca050c81",
+    "Source/EMG/EMG4/CQUADR_Q4RS.f90": "c12d7152a4f3195eca1887e5b6d633ab962b87adffac02f440d321528f70b0cd",
+    "Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90": "3937213b6d9f56e4ae630d0a66aad05db8c54b9ad0fad82b410c83f3bc8f7274",
+    "Source/EMG/EMG4/CTRIAR_DKMT18.f90": "a26a2f4afefdf355628612964cd50374291fd9793602028673bcbb921de7b951",
+    "Source/EMG/EMG4/CTRIA3_DSG3.f90": "507f84565c473bde2d9e35e13e58772ffd59c9c5e6e21b4680b839ed49017cc8",
+    "Source/EMG/EMG4/CTRIA3_T3FF.f90": "752dafb318149749e57330d8709bb8680b26e33cf6976526d153f712524038a7",
+    "Source/EMG/EMG4/MITC4.f90": "1c06da1cf3c58a021e2d9bcb1c2fdfc0e8a767cb27e26323d1d548271a448556",
+    "Source/EMG/EMG4/CQUADR_MITC4PHB.f90": "1246944e42c46fa13e1af504e36071248bcb372b6574d4ad37786d01a4bfe38a",
+    "Source/LK9/L92/OFP3_STRE_NO_PCOMP.f90": "9a24ea35963aa8b9771145e11cdad2813428e182c170a106c2f3259acb5759e8"
+  },
+  "executables": {
+    "baseline": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "bin": "f4bcc3b6463bc45a3da443bc5bae0244724e616439e6f3fa113de998748db68e"
+  },
+  "additional_rebuild": "Output-metadata branch rebuilt after bounded initialization; recovery_build.log. Candidate executable copied only after successful build.",
+  "standard_binary_sha256": "cff2b3446938340525c3e42a4c82ecefe0dfcb8aa4cd662b0aec5e01dc313d54"
+}

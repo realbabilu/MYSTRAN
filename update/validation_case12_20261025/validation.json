@@ -1,0 +1,3092 @@
+{
+  "summary": {
+    "runs": 396,
+    "completed": 396,
+    "checks": 440,
+    "passed": 440,
+    "all_passed": true,
+    "failures": []
+  },
+  "checks": [
+    {
+      "check": "reverse",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.006494044536509591,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0052792844140342465,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_DKMQ20",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 5.686735e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.686735e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 5.686735e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 5.686735e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.020069911962713682,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.010865939115906387,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_DSQK",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 5.718949000000001e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.718949000000001e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 5.718949000000001e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 5.718949000000001e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.014509062661833272,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0060757128480302125,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MIN4",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 5.6996440000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.6996440000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 5.6996440000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 5.6996440000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.017841532884515843,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.008219013925560348,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MIN4T",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0050926980838944536,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.005448843054840835,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MITC4",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0050926980838944536,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.005448843054840835,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_MITC4plus",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0050926980838944536,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.005448843054840835,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUAD4_SIMO",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.006494044536509591,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0052792844140342465,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_DKM24AU",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.006494044536509591,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0052792844140342465,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_DKM24EA",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 5.7653800000000004e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.006494044536509591,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0052792844140342465,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_DKMQ24",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0050926980838944536,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.005448843054840835,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_MBP1C0",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0050926980838944536,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.005448843054840835,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_MITC4PD",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0050926980838944536,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.005448843054840835,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_Q4EASANS",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0050926980838944536,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.005448843054840835,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_Q4RS",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 5.773498e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0050926980838944536,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.005448843054840835,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CQUADR_SIMO",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 5.677996000000001e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.677996000000001e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 5.677996000000001e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 5.677996000000001e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.021578456758156395,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.009974213851089098,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CTRIA3_DSG3",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 5.6997130000000006e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.6997130000000006e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 5.6997130000000006e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 5.6997130000000006e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.017829621957535013,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.008208701706248434,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CTRIA3_MIN3",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 5.6987890000000005e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.6987890000000005e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 5.6987890000000005e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 5.6987890000000005e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.01798912480580006,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.00796626568663461,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CTRIA3_MITC3plus",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 5.688643e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.688643e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 5.688643e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 5.688643e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.019740548938373847,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.009408905741854157,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CTRIA3_T3FF",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 5.670274e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.670274e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 5.670274e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 5.670274e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.022911444847229512,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.012576052871393184,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CTRIAR_DKMT18",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 5.6998330000000005e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.6998330000000005e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 5.6998330000000005e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 5.6998330000000005e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.017808907301916088,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.007845385603915456,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CTRIAR_KMITC3plus",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "reverse",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 5.688643e-08,
+      "passed": true
+    },
+    {
+      "check": "double",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 1.0000000001675335e-08,
+      "tolerance": 5.688643e-08,
+      "passed": true
+    },
+    {
+      "check": "zero",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 5.688643e-08,
+      "passed": true
+    },
+    {
+      "check": "combined_superposition",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 5.688643e-08,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_UZ",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.019740548938373847,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "annulus_inner_edge_mean_tangent_rotation",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.009408905741854157,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "check": "KGG_unchanged",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 1e-14,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_mean",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 2.857142856882433e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_mean",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_gradient",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_gradient",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_combined",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 4.285714285146014e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_combined",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 1.9999999998354667e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_reverse_gradient",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 1.4285714284412165e-05,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_reverse_gradient",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 2.000000000279556e-06,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "restrained_stress_zero",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "check": "fiber_moment_zero",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 2e-05,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_005_simple_mesh_06_cquadr_simo_displacements",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013a_temp_cquadr_simo_displacements",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "check": "regression_prob_2_013b_temp_cquadr_simo_displacements",
+      "formulation": "CTRIAR_T3FFD",
+      "max_error": 0.0,
+      "tolerance": 1e-10,
+      "passed": true
+    }
+  ]
+}

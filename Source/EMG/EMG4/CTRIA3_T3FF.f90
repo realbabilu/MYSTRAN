@@ -17,10 +17,13 @@
                                          TE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, BGRID, GRID_SNORM, XEB, UEL,           &
                                          ALPVEC, DT, TREF
       USE CTRIAR_DKMT18_Interface
+      USE MODEL_STUF, ONLY            : SHELL_DALP
       USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
       IMPLICIT NONE
+      REAL(DOUBLE) :: UNIT_PTG(18), XI_TG, ETA_TG, WT_TG
+      INTEGER(LONG) :: GP_TG
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CTRIA3_T3FF'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
@@ -160,9 +163,10 @@
          CTE3(3) = ALPVEC(4,1)
          NTH = MATMUL(SHELL_A, CTE3)
          UNIT_PTE = MATMUL(TRANSPOSE(BMG), NTH) * AREA
+         UNIT_PTG = MATMUL(TRANSPOSE(MATMUL(BBE,TALL)),SHELL_DALP)*AREA
          DO JSUB=1,NSUB
             TBAR = (DT(1,JSUB) + DT(2,JSUB) + DT(3,JSUB))/THREE - TREF(1)
-            PTE(1:NDOF,JSUB) = UNIT_PTE(1:NDOF) * TBAR
+            PTE(1:NDOF,JSUB) = UNIT_PTE(1:NDOF) * TBAR + UNIT_PTG*DT(ELGP+1,JSUB)
          ENDDO
       ENDIF
 

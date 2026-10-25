@@ -54,12 +54,14 @@
                                          PTE, TE, TYPE, NUM_EMG_FATAL_ERRS, SHELL_A, SHELL_D, SHELL_T, FCONV, STRESS, ALPVEC, DT, &
                                          TREF
 
+      USE MODEL_STUF, ONLY            : SHELL_DALP
       USE ELMDIS_Interface
       USE ELEM_STRE_STRN_ARRAYS_Interface
       USE ORDER_GAUSS_Interface
       USE OUTA_HERE_Interface
 
       IMPLICIT NONE
+      REAL(DOUBLE) :: UNIT_PTG_B(24)
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CQUADR_Q4EASANS'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
@@ -280,6 +282,7 @@
       ENDIF
 
       IF (OPT(2) == 'Y') THEN
+         UNIT_PTG_B = ZERO
          UNIT_PTE_B = ZERO
          CTE3(1) = ALPVEC(1,1)
          CTE3(2) = ALPVEC(2,1)
@@ -293,11 +296,13 @@
                CALL GEOMETRY_AT(XYZ, NORMALS, XI, ETA, TV1, TV2, NVEC, JDET, CO, BCMAT)
                BMB = BM_Q4EASANS_AT(XYZ, XI, ETA)
                UNIT_PTE_B = UNIT_PTE_B + WT*JDET*MATMUL(TRANSPOSE(BMB), NTH)
+               BBB = BB_Q4EASANS_AT(XYZ, NORMALS, XI, ETA)
+               UNIT_PTG_B = UNIT_PTG_B + WT*JDET*MATMUL(TRANSPOSE(BBB), SHELL_DALP)
             ENDDO
          ENDDO
          DO JSUB=1,SIZE(PTE,2)
             TBAR = (DT(1,JSUB) + DT(2,JSUB) + DT(3,JSUB) + DT(4,JSUB))/FOUR - TREF(1)
-            PTE(1:24,JSUB) = MATMUL(T24, UNIT_PTE_B) * TBAR
+            PTE(1:24,JSUB) = MATMUL(T24, UNIT_PTE_B) * TBAR + MATMUL(T24,UNIT_PTG_B)*DT(ELGP+1,JSUB)
          ENDDO
       ENDIF
 

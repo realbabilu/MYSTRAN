@@ -1,0 +1,14 @@
+{
+  "case": "DKMQ24_thermal_mean_center_corner",
+  "formulation": "CQUADR_DKMQ24",
+  "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\case12_completion_20261025\\corner_regression\\model.dat",
+  "status": "completed",
+  "returncode": 0,
+  "seconds": 0.063,
+  "solver": "H:\\Projects\\MYSTRAN\\codex_mod\\case12_completion_20261025\\bin\\mystran.exe",
+  "solver_sha256": "f4bcc3b6463bc45a3da443bc5bae0244724e616439e6f3fa113de998748db68e",
+  "deck_sha256": "24677e3536f87f21db64c086b2c23d420372eb28ae8a0887bb29d3e006e3a28e",
+  "errors": [],
+  "warnings": [],
+  "verification": "NOT_EVALUATED"
+}

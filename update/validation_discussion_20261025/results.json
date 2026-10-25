@@ -1,0 +1,2808 @@
+[
+  {
+    "discussion": 1,
+    "label": "",
+    "case": "prob_2_002_nx12_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_01\\prob_2_002_nx12_cquadr_simo\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "f1f39e70ba28aa0a5aad7e4e29a90f0853146cae9c0afdfa2af2ff912f2a0135",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.03085692,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4320887,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002423612,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 0.000256937,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 2,
+    "label": "",
+    "case": "prob_2_002_nx12_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_02\\prob_2_002_nx12_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "55da2c6918e7635a0bd137829ab413cac6bfc3ff4666c0418b068c4364213cd6",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.02354292,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4318718,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002309555,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 0.0001958811,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 1,
+    "label": "",
+    "case": "prob_2_002_nx16_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_01\\prob_2_002_nx16_cquadr_simo\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "0d0447d95e8754659996a700c7b069f83a262ad7b7fee4dbf7e507dbed77ee44",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.04409688,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4320887,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002476581,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 0.0003671825,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 2,
+    "label": "",
+    "case": "prob_2_002_nx16_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_02\\prob_2_002_nx16_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "b90af0872acf81584fc5c069f6cdd592e55d3d408ee13e20555e3b254ed68cc0",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.03553202,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4319494,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002326893,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 0.000295739,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 1,
+    "label": "",
+    "case": "prob_2_002_nx24_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_01\\prob_2_002_nx24_cquadr_simo\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "6ceaadf0663f48c22ae4c8d37ee195ae4ea32add42e9700bd32a3b6db5046b6e",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.06358443,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4320889,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002587678,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 0.00052945,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 2,
+    "label": "",
+    "case": "prob_2_002_nx24_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_02\\prob_2_002_nx24_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "b6ea6b6a036c776ef40d6635299fa36e5b02c8e83247e9fbe7d2db36e4e553c6",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.05457731,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4319951,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002352926,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 0.0004543581,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 1,
+    "label": "",
+    "case": "prob_2_002_nx2_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_01\\prob_2_002_nx2_cquadr_simo\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "2c03ee943c207e7fe58dc5b26ac5843501486af3170a4391ba13b281f3353e7c",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.001233312,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4320885,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002341756,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 1.02694e-05,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 2,
+    "label": "",
+    "case": "prob_2_002_nx2_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_02\\prob_2_002_nx2_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "068594919f67d1e2eab0df36822eeb2bd5c62c8df74057617e53530ecd63ca1c",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.0008523152,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4245481,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002220908,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 6.882802e-06,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 1,
+    "label": "",
+    "case": "prob_2_002_nx4_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_01\\prob_2_002_nx4_cquadr_simo\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "3f600ec0e8a32e32289139224cfcd0958cfd31f52c15b38c3130212fbc1d1263",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.004754377,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4320886,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002349256,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 3.958832e-05,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 2,
+    "label": "",
+    "case": "prob_2_002_nx4_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_02\\prob_2_002_nx4_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "72f6746e239b58975f69b8b8c27010bbe6d856ed0c5f377b8d4461100093af96",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.003260232,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4299651,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.0022585,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 2.693953e-05,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 1,
+    "label": "",
+    "case": "prob_2_002_nx8_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_01\\prob_2_002_nx8_cquadr_simo\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "32d7fc02323462b28bdab3ad4607dccea04f5ad31ee85448538a40c4e21c395f",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.01660896,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4320886,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.002379206,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 0.0001382981,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 2,
+    "label": "",
+    "case": "prob_2_002_nx8_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_02\\prob_2_002_nx8_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "93f8f2a746f6372156a72a3d8fa51f5966e0b5f5d59bd4afcfec34168bb9d139",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "tip_UX",
+        "value": 3e-05,
+        "reference": 3e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "tip_UZ",
+        "value": 0.01192344,
+        "reference": 0.1081,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 3,
+        "quantity": "tip_UY",
+        "value": 0.4315742,
+        "reference": 0.4321,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 4,
+        "quantity": "tip_abs_UY",
+        "value": 0.00228803,
+        "reference": 0.00341,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 5,
+        "quantity": "tip_abs_UX",
+        "value": 9.909912e-05,
+        "reference": 0.0009,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 6,
+        "quantity": "tip_RZ",
+        "value": 0.036,
+        "reference": 0.036,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 3,
+    "label": "",
+    "case": "prob_2_005_clamped_mesh_06_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_03\\prob_2_005_clamped_mesh_06_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "15ae05fd15372f277815a10c740d88f270cc5f15d920b1eca7f05d1b081c9360",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -2.762154,
+        "reference": -2.6,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -7.738573,
+        "reference": -7.25,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 3,
+    "label": "",
+    "case": "prob_2_005_clamped_mesh_12_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_03\\prob_2_005_clamped_mesh_12_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "839d796dfc44120d94022a65a76cd646b438e324c47b552d9a6f7cc7c2f14449",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -2.643724,
+        "reference": -2.6,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -7.450145,
+        "reference": -7.25,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 3,
+    "label": "",
+    "case": "prob_2_005_clamped_mesh_18_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_03\\prob_2_005_clamped_mesh_18_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "fd0cae2b79fc8684ba7ac299389b3d2a0eff62eb36edf17bc5f992cea3ae2032",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -2.621781,
+        "reference": -2.6,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -7.353332,
+        "reference": -7.25,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 3,
+    "label": "",
+    "case": "prob_2_005_clamped_mesh_24_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_03\\prob_2_005_clamped_mesh_24_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "ca3aeaefcd2ab45788775d26b0f2618ccb3054c2bf552a096db76f15821b3dca",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -2.614101,
+        "reference": -2.6,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -7.312043,
+        "reference": -7.25,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 4,
+    "label": "",
+    "case": "prob_2_005_simple_mesh_06_cquadr_simo",
+    "formulation": "CTRIA3_MITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_04\\prob_2_005_simple_mesh_06_cquadr_simo\\CTRIA3_MITC3plus\\model.dat",
+    "sha256": "b68556f24751789ff688dfc06103f8e98f6b0259d4525f6ab8e013b1c579f628",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -13.01764,
+        "reference": -12.97,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -14.12991,
+        "reference": -16.95,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 5,
+    "label": "",
+    "case": "prob_2_005_simple_mesh_06_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_05\\prob_2_005_simple_mesh_06_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "47e5c0ea42d9fe57f8e42e6d4bb302c4e725e339980fb9896939a7df9cac0cbd",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -13.10573,
+        "reference": -12.97,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -17.55029,
+        "reference": -16.95,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 4,
+    "label": "",
+    "case": "prob_2_005_simple_mesh_12_cquadr_simo",
+    "formulation": "CTRIA3_MITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_04\\prob_2_005_simple_mesh_12_cquadr_simo\\CTRIA3_MITC3plus\\model.dat",
+    "sha256": "25b62fc2a8c9c8cd5c9c8768040681b00a1cdb5e102e1a3173fc1ed38c5b166c",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -12.98381,
+        "reference": -12.97,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -15.81779,
+        "reference": -16.95,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 5,
+    "label": "",
+    "case": "prob_2_005_simple_mesh_12_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_05\\prob_2_005_simple_mesh_12_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "ac381757d80ffa66bddea8d5b66ae9b2bb52dae2e46526ca405d75a59f9bd80d",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -13.00463,
+        "reference": -12.97,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -17.17482,
+        "reference": -16.95,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 4,
+    "label": "",
+    "case": "prob_2_005_simple_mesh_18_cquadr_simo",
+    "formulation": "CTRIA3_MITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_04\\prob_2_005_simple_mesh_18_cquadr_simo\\CTRIA3_MITC3plus\\model.dat",
+    "sha256": "5145478126ddafffc0bde576ccecd8379934fe7005a79dc4c4b200dfe6638d1d",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -12.97742,
+        "reference": -12.97,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -16.35926,
+        "reference": -16.95,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 5,
+    "label": "",
+    "case": "prob_2_005_simple_mesh_18_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_05\\prob_2_005_simple_mesh_18_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "883b54478c0ed51fac23d055e317ad79261398a697309cc20e50b2e9b0e02aa4",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -12.98586,
+        "reference": -12.97,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -17.07348,
+        "reference": -16.95,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 4,
+    "label": "",
+    "case": "prob_2_005_simple_mesh_24_cquadr_simo",
+    "formulation": "CTRIA3_MITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_04\\prob_2_005_simple_mesh_24_cquadr_simo\\CTRIA3_MITC3plus\\model.dat",
+    "sha256": "3d4ce05bcf22d9df66fd1911f33dd7356ac0a4e08e8f2b0ed7dfc5f091cb97f6",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -12.97491,
+        "reference": -12.97,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -16.58876,
+        "reference": -16.95,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 5,
+    "label": "",
+    "case": "prob_2_005_simple_mesh_24_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_05\\prob_2_005_simple_mesh_24_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "954b32dbb57464935c4e4942f4dac97a0e669f1b3875b8a3ab79bb9cf309fb73",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "center_UZ_uniform",
+        "value": -12.97928,
+        "reference": -12.97,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 2,
+        "quantity": "center_UZ_point",
+        "value": -17.03126,
+        "reference": -16.95,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 6,
+    "label": "n8",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_06\\n8\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "b47586648ea003a5a00ceac6e4eb77b9214322e9235fb4e98dd7e84f95022197",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09513169,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09513169,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 6,
+    "label": "n16",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_06\\n16\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "38976cbbb031cd23633471fc5431317cd930dd5c35a8a839da68193247f12aa5",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09350477,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09350477,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 6,
+    "label": "n32",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_06\\n32\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "60c3eac8f2652ac933202f49b3b823931b5ccfe1bd88bd7009847cec10721cd6",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09342421,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09342421,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 7,
+    "label": "n8",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CQUAD4_DSQK",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_07\\n8\\CQUAD4_DSQK\\model.dat",
+    "sha256": "199c0eb3da6a4f603ed58c7f2ffc360eb745e7687bae79d793fb48f253b4e66e",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09085454,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09085454,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 7,
+    "label": "n16",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CQUAD4_DSQK",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_07\\n16\\CQUAD4_DSQK\\model.dat",
+    "sha256": "c7077426201030702eb2526f44a9f2df623e6f872e137ff05bafbf2802671a14",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09274418,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09274418,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 7,
+    "label": "n32",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CQUAD4_DSQK",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_07\\n32\\CQUAD4_DSQK\\model.dat",
+    "sha256": "030afbfd8e55dda5f4b21b4cb365c8fde39bdc8772faf483f8d460cb166ec026",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09326114,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09326114,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 9,
+    "label": "n8",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CTRIA3_MITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_09\\n8\\CTRIA3_MITC3plus\\model.dat",
+    "sha256": "025aa7009e27a3c77e0f3a20954e8eb2db68333c34569ad43f2a093abffaa62a",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09481228,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09481228,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 9,
+    "label": "n16",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CTRIA3_MITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_09\\n16\\CTRIA3_MITC3plus\\model.dat",
+    "sha256": "d1e92af3bc8dbddf0b3086760ac7d332a06f14dcffa3e9d80cb941e0f50ec999",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.0938095,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.0938095,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 9,
+    "label": "n32",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CTRIA3_MITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_09\\n32\\CTRIA3_MITC3plus\\model.dat",
+    "sha256": "db1107c1539d7effdbf28d484a078f29ad4ac999a5e42c965716ec27b92df122",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09367761,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09367761,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 8,
+    "label": "n8",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CTRIA3_DSG3",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_08\\n8\\CTRIA3_DSG3\\model.dat",
+    "sha256": "00bda8b93eda7681afb297b97721727db2cd46142367a5b5714de12d88c77d1c",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09006307,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09006307,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 8,
+    "label": "n16",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CTRIA3_DSG3",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_08\\n16\\CTRIA3_DSG3\\model.dat",
+    "sha256": "9883b462f863fd67206c5d021ace2f06936af96666a67a95ad810c741ef9d93b",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09202072,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09202072,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 8,
+    "label": "n32",
+    "case": "prob_2_007_thick_cquadr_simo",
+    "formulation": "CTRIA3_DSG3",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_08\\n32\\CTRIA3_DSG3\\model.dat",
+    "sha256": "6cd3895b3a4644ea9794dd4de8963943c0b6cd17b7a73baab13ec1e660125e11",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UX",
+        "value": 0.09301597,
+        "reference": 0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "loaded_UY",
+        "value": -0.09301597,
+        "reference": -0.094,
+        "units": "ft",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 10,
+    "label": "",
+    "case": "prob_2_010_12x24_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_10\\prob_2_010_12x24_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "56918a55224796def04aa289a4b7b4d63c9956e50223e279dbf2b47eb66ebb06",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "top_mean_Ur",
+        "value": 0.10431661666666665,
+        "reference": 0.12414,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "top_mean_UZ",
+        "value": -0.1235032,
+        "reference": -0.12414,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "native_fiber_principal_max_min",
+        "value": 22.393800000000127,
+        "reference": 60.0,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "Reported fiber samples, in-plane maximum principal stress; unreported corners are not inferred."
+      },
+      {
+        "loadcase": 1,
+        "quantity": "native_fiber_principal_max_max",
+        "value": 83.17390000000103,
+        "reference": 60.0,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "Reported fiber samples, in-plane maximum principal stress; unreported corners are not inferred."
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 10,
+    "label": "",
+    "case": "prob_2_010_24x48_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_10\\prob_2_010_24x48_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "e2f09357fd3655057dc752daf13e458200976fc93d5c4aebe1ab313812066e35",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "top_mean_Ur",
+        "value": 0.11160515833333333,
+        "reference": 0.12414,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "top_mean_UZ",
+        "value": -0.1239743,
+        "reference": -0.12414,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "native_fiber_principal_max_min",
+        "value": 47.68900000000001,
+        "reference": 60.0,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "Reported fiber samples, in-plane maximum principal stress; unreported corners are not inferred."
+      },
+      {
+        "loadcase": 1,
+        "quantity": "native_fiber_principal_max_max",
+        "value": 66.62230000000068,
+        "reference": 60.0,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "Reported fiber samples, in-plane maximum principal stress; unreported corners are not inferred."
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 10,
+    "label": "",
+    "case": "prob_2_010_6x12_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_10\\prob_2_010_6x12_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "fbe6ced9aef6f7633cb24be7438a591de6f795ff922816bcce3ba4bb1d228270",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "top_mean_Ur",
+        "value": 0.10138613333333335,
+        "reference": 0.12414,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "top_mean_UZ",
+        "value": -0.1218762,
+        "reference": -0.12414,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "native_fiber_principal_max_min",
+        "value": -72.08499999999998,
+        "reference": 60.0,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "Reported fiber samples, in-plane maximum principal stress; unreported corners are not inferred."
+      },
+      {
+        "loadcase": 1,
+        "quantity": "native_fiber_principal_max_max",
+        "value": 176.92295874898463,
+        "reference": 60.0,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "Reported fiber samples, in-plane maximum principal stress; unreported corners are not inferred."
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 11,
+    "label": "",
+    "case": "prob_2_013a_temp_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_11\\prob_2_013a_temp_cquadr_simo\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "24677e3536f87f21db64c086b2c23d420372eb28ae8a0887bb29d3e006e3a28e",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "joint8_UX",
+        "value": 0.000132,
+        "reference": 0.000132,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "joint8_UY",
+        "value": 6.6e-05,
+        "reference": 6.6e-05,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUADR_SIMO",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUADR_SIMO\\model.dat",
+    "sha256": "e0132f924dbd6dc14114713e662818a8c0c6a49f19ce746ab79f4415fe5ae876",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "521fe818f3d9c3acb2112f20b0b493f99bfe9fb8fe763f8c1891883cf8b10b3c",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUADR_DKM24EA",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUADR_DKM24EA\\model.dat",
+    "sha256": "545cfe942d6768ec4205dffda7f86fa65b7fd2b51ba826bb3d72373325552394",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUADR_DKM24AU",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUADR_DKM24AU\\model.dat",
+    "sha256": "db6160f97e5b657af6beb08f0948fe10fd52fdd3fbf80a7a112f0342f710d9f8",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUADR_Q4EASANS",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUADR_Q4EASANS\\model.dat",
+    "sha256": "b6d31c06d0fa619144c358e0ffaabfc9fa2c91216108be2691ccfac689eb95c7",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUADR_MBP1C0",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUADR_MBP1C0\\model.dat",
+    "sha256": "e1b4d703f4971d2e73b79362f6a3e380f92a600b4aa86567e2528ede12b4a8f1",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUADR_MITC4PD",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUADR_MITC4PD\\model.dat",
+    "sha256": "180f780447e603605cad005c271fc06b1f7a4805a0dac802a794800302c6ffc6",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUADR_Q4RS",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUADR_Q4RS\\model.dat",
+    "sha256": "181b96f6924b2b2fe960b77fd676c51456a41c64fa841b13265300821e76cc38",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUAD4_MIN4",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUAD4_MIN4\\model.dat",
+    "sha256": "01a8caa178b042d186ad89c9e1bb2d3af5164bf18833fc2c3a83b839780aec7d",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.01902983,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.003498613490774934,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUAD4_MIN4T",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUAD4_MIN4T\\model.dat",
+    "sha256": "797592713c05964f953e1c3a15cf98176673bc2e75e144e8a330e2b300292e8a",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.01896548,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.003491069070982028,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUAD4_MITC4",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUAD4_MITC4\\model.dat",
+    "sha256": "2cd522a1445b33153d69c01305b38d46e0fe08f50bf72054e16ba5b486f88908",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUAD4_MITC4plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUAD4_MITC4plus\\model.dat",
+    "sha256": "2827b13c41f0f80936d782d056bdbe8021f0658fe32f5370ba1654f8ec7820d9",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUAD4_DSQK",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUAD4_DSQK\\model.dat",
+    "sha256": "063f5b1decca04e6fb2fc8e1af6f83391478f4bdd078e212a36ca44e0ebca990",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUAD4_DKMQ20",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUAD4_DKMQ20\\model.dat",
+    "sha256": "2f94e15a0d0214a5de7c75b9a15ac80692009c1ea09a64658ef961887000254d",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CQUAD4_SIMO",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CQUAD4_SIMO\\model.dat",
+    "sha256": "77133de01dc9a10676cc1070886457dbc850e5cad7f5594c1f56af0c835b7ef4",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CTRIA3_MIN3",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CTRIA3_MIN3\\model.dat",
+    "sha256": "41be24d553c945470f670d2f10b47fb785efcbeb3be4aa58a9d0da9db2a3290c",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.01896571,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0034911053699940055,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CTRIA3_MITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CTRIA3_MITC3plus\\model.dat",
+    "sha256": "fe1c1775d75d5b7ceb6be6bc89dfcec72bf0f96e0806d0c07e372717caf54d06",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.01896263,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0034919587447830463,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CTRIA3_T3FF",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CTRIA3_T3FF\\model.dat",
+    "sha256": "a7024e9fdc79df858efca8c5cf5d682e3239f0c0dfcbd34b15b3f300a42fe235",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CTRIA3_DSG3",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CTRIA3_DSG3\\model.dat",
+    "sha256": "6e044c2f1324867ecc5077e22a116e221c53e17ec038a242a134b84d9011bf2c",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CTRIAR_DKMT18",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CTRIAR_DKMT18\\model.dat",
+    "sha256": "a24d6929a5a25b2a05681818d9c44395d36aa00b7b508bf0d2e136aae36b101e",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CTRIAR_T3FFD",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CTRIAR_T3FFD\\model.dat",
+    "sha256": "7cfddc11fd94fe769582e054f611d67c37cd940d4b98f56668475be6faef6299",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.0,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.0,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 12,
+    "label": "",
+    "case": "prob_2_014b_tempgrad_cquadr_simo",
+    "formulation": "CTRIAR_KMITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_12\\prob_2_014b_tempgrad_cquadr_simo\\CTRIAR_MITC3plusHB\\model.dat",
+    "sha256": "80142911b3806162bd861151908a573f69bd4b71cd77a7000d69f0b7562155b9",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_UZ",
+        "value": 0.01896611,
+        "reference": 0.01931,
+        "units": "in",
+        "reference_type": "independent",
+        "notes": ""
+      },
+      {
+        "loadcase": 1,
+        "quantity": "inner_edge_mean_tangent_rotation",
+        "value": 0.003492384242674218,
+        "reference": 0.00352,
+        "units": "rad",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": []
+  },
+  {
+    "discussion": 13,
+    "label": "ND1_default",
+    "case": "prob_2_016c_thick_beamseg_bend",
+    "formulation": "CTRIA3_DSG3",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_13\\ND1_default\\CTRIA3_DSG3\\model.dat",
+    "sha256": "5e8f4f28b67c4c1c57622a0575dd8a954030fc99631f9001dca457d4da96fcec",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 2,
+        "quantity": "critical_edge_stress",
+        "value": 703.6821,
+        "reference": 0.1165,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "First positive buckling mode; sigma=lambda*qmax/t; qmax=1 kip/in, t=0.01 in. Shape identification is required for anomalous modes."
+      },
+      {
+        "loadcase": 1,
+        "quantity": "preload_max_abs_fiber_principal_stress",
+        "value": 99.8876000000008,
+        "reference": 100.0,
+        "units": "ksi",
+        "reference_type": "analytical prestress",
+        "notes": "Nominal edge traction 1 kip/in divided by t=0.01 in. For bending, exact 100 ksi is at the boundary; center-only recovery is explicitly below that limit."
+      }
+    ],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 7.036821,
+        "frequency": null,
+        "subcase": 2
+      }
+    ]
+  },
+  {
+    "discussion": 13,
+    "label": "ND6_default",
+    "case": "prob_2_016c_thick_beamseg_bend",
+    "formulation": "CTRIA3_DSG3",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_13\\ND6_default\\CTRIA3_DSG3\\model.dat",
+    "sha256": "4b8c7217b7eb9430be626a437eb30c17b0cff32d3ac6610654dfe51aa53c71c0",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 2,
+        "quantity": "critical_edge_stress",
+        "value": 703.6821,
+        "reference": 0.1165,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "First positive buckling mode; sigma=lambda*qmax/t; qmax=1 kip/in, t=0.01 in. Shape identification is required for anomalous modes."
+      },
+      {
+        "loadcase": 1,
+        "quantity": "preload_max_abs_fiber_principal_stress",
+        "value": 99.8876000000008,
+        "reference": 100.0,
+        "units": "ksi",
+        "reference_type": "analytical prestress",
+        "notes": "Nominal edge traction 1 kip/in divided by t=0.01 in. For bending, exact 100 ksi is at the boundary; center-only recovery is explicitly below that limit."
+      }
+    ],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 7.036821,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 2,
+        "eigenvalue": 63.17651,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 3,
+        "eigenvalue": 83.83881,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 4,
+        "eigenvalue": 95.21612,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 5,
+        "eigenvalue": 96.79102,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 6,
+        "eigenvalue": 103.6217,
+        "frequency": null,
+        "subcase": 2
+      }
+    ]
+  },
+  {
+    "discussion": 14,
+    "label": "ND1_default",
+    "case": "prob_2_016c_thick_beamseg_bend",
+    "formulation": "CTRIAR_KMITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_14\\ND1_default\\CTRIAR_MITC3plusHB\\model.dat",
+    "sha256": "4b12d68c67903dbfab61b960b6d3fc522334a826e6bc8a1e9058a5511ee8d12e",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 2,
+        "quantity": "critical_edge_stress",
+        "value": 0.11573149999999999,
+        "reference": 0.1165,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "First positive buckling mode; sigma=lambda*qmax/t; qmax=1 kip/in, t=0.01 in. Shape identification is required for anomalous modes."
+      },
+      {
+        "loadcase": 1,
+        "quantity": "preload_max_abs_fiber_principal_stress",
+        "value": 147.1632946558157,
+        "reference": 100.0,
+        "units": "ksi",
+        "reference_type": "analytical prestress",
+        "notes": "Nominal edge traction 1 kip/in divided by t=0.01 in. For bending, exact 100 ksi is at the boundary; center-only recovery is explicitly below that limit."
+      }
+    ],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 0.001157315,
+        "frequency": null,
+        "subcase": 2
+      }
+    ]
+  },
+  {
+    "discussion": 14,
+    "label": "ND6_default",
+    "case": "prob_2_016c_thick_beamseg_bend",
+    "formulation": "CTRIAR_KMITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_14\\ND6_default\\CTRIAR_MITC3plusHB\\model.dat",
+    "sha256": "fc07a44eace55d716c1e806301304fdea3063fbda66232b60d9493e21aef8ad8",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 2,
+        "quantity": "critical_edge_stress",
+        "value": 0.11573149999999999,
+        "reference": 0.1165,
+        "units": "ksi",
+        "reference_type": "independent",
+        "notes": "First positive buckling mode; sigma=lambda*qmax/t; qmax=1 kip/in, t=0.01 in. Shape identification is required for anomalous modes."
+      },
+      {
+        "loadcase": 1,
+        "quantity": "preload_max_abs_fiber_principal_stress",
+        "value": 147.1632946558157,
+        "reference": 100.0,
+        "units": "ksi",
+        "reference_type": "analytical prestress",
+        "notes": "Nominal edge traction 1 kip/in divided by t=0.01 in. For bending, exact 100 ksi is at the boundary; center-only recovery is explicitly below that limit."
+      }
+    ],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 0.001157315,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 2,
+        "eigenvalue": 0.00122904,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 3,
+        "eigenvalue": 0.001534245,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 4,
+        "eigenvalue": 0.002075812,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 5,
+        "eigenvalue": 0.002741579,
+        "frequency": null,
+        "subcase": 2
+      },
+      {
+        "mode": 6,
+        "eigenvalue": 0.003520025,
+        "frequency": null,
+        "subcase": 2
+      }
+    ]
+  },
+  {
+    "discussion": 15,
+    "label": "",
+    "case": "prob_2_017_nx2_ny12_cquadr_dkmq24",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_15\\prob_2_017_nx2_ny12_cquadr_dkmq24\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "59c8e0aa3da3ebe9c87486c3b80ab4d445e3342f4425de08d27e993098a7dfb0",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 2,
+        "quantity": "critical_load",
+        "value": 153.6169,
+        "reference": 127.91,
+        "units": "kip",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 153.6169,
+        "frequency": null,
+        "subcase": 2
+      }
+    ]
+  },
+  {
+    "discussion": 16,
+    "label": "",
+    "case": "prob_2_017_nx2_ny12_cquadr_dkmq24",
+    "formulation": "CTRIAR_KMITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_16\\prob_2_017_nx2_ny12_cquadr_dkmq24\\CTRIAR_MITC3plusHB\\model.dat",
+    "sha256": "fdcab7b1f9cc87117a9dec07e3cb2f65d8164fd9f729ffd5bc319ed335f9aeca",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 2,
+        "quantity": "critical_load",
+        "value": 131.5733,
+        "reference": 127.91,
+        "units": "kip",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 131.5733,
+        "frequency": null,
+        "subcase": 2
+      }
+    ]
+  },
+  {
+    "discussion": 15,
+    "label": "",
+    "case": "prob_2_017_nx4_ny24_cquadr_dkmq24",
+    "formulation": "CQUADR_DKMQ24",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_15\\prob_2_017_nx4_ny24_cquadr_dkmq24\\CQUADR_DKMQ24\\model.dat",
+    "sha256": "9f69ff6e71fbe196c4d596bea21c3ce054ec8ac0bab083e4392230ed4e86261b",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 2,
+        "quantity": "critical_load",
+        "value": 133.2703,
+        "reference": 127.91,
+        "units": "kip",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 133.2703,
+        "frequency": null,
+        "subcase": 2
+      }
+    ]
+  },
+  {
+    "discussion": 16,
+    "label": "",
+    "case": "prob_2_017_nx4_ny24_cquadr_dkmq24",
+    "formulation": "CTRIAR_KMITC3plus",
+    "status": "completed",
+    "errors": [],
+    "deck": "H:\\Projects\\MYSTRAN\\codex_mod\\discussion_retest_20261025\\runs\\case_16\\prob_2_017_nx4_ny24_cquadr_dkmq24\\CTRIAR_MITC3plusHB\\model.dat",
+    "sha256": "d39ea97dfddfe6a350750e2298ffc7d1b7722ff2a78d8ab93763c56ba68fedb2",
+    "solver_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+    "observations": [
+      {
+        "loadcase": 2,
+        "quantity": "critical_load",
+        "value": 127.3982,
+        "reference": 127.91,
+        "units": "kip",
+        "reference_type": "independent",
+        "notes": ""
+      }
+    ],
+    "modes": [
+      {
+        "mode": 1,
+        "eigenvalue": 127.3982,
+        "frequency": null,
+        "subcase": 2
+      }
+    ]
+  }
+]

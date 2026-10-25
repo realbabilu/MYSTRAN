@@ -1,0 +1,14 @@
+{
+  "commit": "1f0c8f8f51683a6b8fd933d9270fad677612e729",
+  "build": "fresh CMake Fortran build from publication checkout; external previously built SuperLU library and bridge, external OpenBLAS/MUMPS/FEAST",
+  "source_sha256": {
+    "Source/EMG/EMG4/CQUADR_DKMQ24.f90": "d58d4c71e98b52ce81feed8841bad2810c87ec6d4256f5228d30fc076bb99fcf",
+    "Source/EMG/EMG4/CTRIAR_DKMT18.f90": "8f174a40b53012e8ec74c2bd7e1884c40d7418d4ce199b65e2d5d1e7175a34fa",
+    "Source/EMG/EMG4/TPLT_MITC3P.f90": "b1af9407fd8775d862f2138758825aee7b52f42acb30695bf79f537550b7cc41",
+    "Source/EMG/EMG4/CTRIAR_KMITC3P.f90": "fe01cfd053ca33a21a3842ff09d99dc6a39593f708ecdddb27151d2a395b8438",
+    "Source/EMG/EMG4/CTRIA3_DSG3.f90": "ff42526263dbee89340bbe24599ed1602b3dbf6825605bcea00704a9c0af7ee0",
+    "Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90": "c154ea32b3d72526f2ea078158f71be86eaf2b7390dd5b17e71bd8e062ed2bfa"
+  },
+  "exe_sha256": "e69893b49587769c93dcef63d95ab1d015e4937381887d96bca69c8b572d83da",
+  "changes": "No source fixes in this audit. SPDX/source contents unchanged. SPC1 cards split to six IDs per physical line. 2-017 requests one Pcr and applies SAP inactive DOFs to every node. No DARPACK override."
+}

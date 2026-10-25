@@ -39,10 +39,13 @@
       USE MODEL_STUF, ONLY            :  EID, ELGP, KE, KED, ME, BE1, BE2, BE3, EPROP, MASS_PER_UNIT_AREA,                       &
                                          NUM_EMG_FATAL_ERRS, SHELL_A, TE, XEB, BGRID, GRID_SNORM, PRESS, PPE,                     &
                                          PTE, ALPVEC, DT, TREF, UEL
+      USE MODEL_STUF, ONLY            : SHELL_DALP
       USE ELMDIS_Interface
       USE OUTA_HERE_Interface
 
       IMPLICIT NONE
+      REAL(DOUBLE) :: UNIT_PTG(18), XI_TG, ETA_TG, WT_TG
+      INTEGER(LONG) :: GP_TG
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'CTRIAR_DKMT18'
       CHARACTER(1*BYTE), INTENT(IN)   :: OPT(6)
@@ -166,9 +169,15 @@
          CTE3(3) = ALPVEC(4,1)
          NTH = MATMUL(SHELL_A, CTE3)
          UNIT_PTE = MATMUL(TRANSPOSE(BM), NTH) * AREA
+         UNIT_PTG = ZERO
+         DO GP_TG=1,3
+            CALL PLATE_GP(GP_TG,XI_TG,ETA_TG,WT_TG)
+            CALL BUILD_STAGE_BB_MAKNUN(XI_TG,ETA_TG,T1,T2,NVEC,CO,BC,NORMALS,ADINV_AU,BB)
+            UNIT_PTG = UNIT_PTG + WT_TG*JAC*MATMUL(TRANSPOSE(BB),SHELL_DALP)
+         ENDDO
          DO JSUB=1,SIZE(PTE,2)
             TBAR = (DT(1,JSUB) + DT(2,JSUB) + DT(3,JSUB))/THREE - TREF(1)
-            PTE(1:18,JSUB) = UNIT_PTE * TBAR
+            PTE(1:18,JSUB) = UNIT_PTE * TBAR + UNIT_PTG*DT(ELGP+1,JSUB)
          ENDDO
       ENDIF
 
