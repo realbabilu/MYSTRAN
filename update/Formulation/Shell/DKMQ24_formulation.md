@@ -140,7 +140,10 @@ $$
 \end{bmatrix}.
 $$
 
-With translations expressed in the global frame, the nodal transformation is $\operatorname{diag}(\mathbf I_3,\mathbf T_k^{\mathrm{rot}})$. The element stiffness in global coordinates follows from the congruence transformation $\mathbf K_e^{g}=\mathbf T^{\mathsf T}\mathbf K_e\mathbf T$.
+With translations expressed in the global frame, the nodal transformation is
+$\mathrm{diag}\left(\mathbf{I}_3,\mathbf{T}_k^{\mathrm{rot}}\right)$
+
+The element stiffness in global coordinates follows from the congruence transformation $\mathbf K_e^{g}=\mathbf T^{\mathsf T}\mathbf K_e\mathbf T$.
 
 ## 5. Nodal Numbering and Numerical Integration
 
