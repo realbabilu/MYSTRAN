@@ -12,3 +12,5 @@ Eight solid topologies, with CPENTA6 ABE and EAS9 treated separately. Includes s
 Equations are provided directly in the Markdown reports.
 
 - [CPENTA6 ABE: formulation and Nastran benchmarks](CPENTA6_ABE_Formulation.md).
+
+- [CHEXA8 EAS: covariant enhancement, consistent shear tying and Nastran benchmarks](CHEXA8_EAS_Formulation.md).
