@@ -94,7 +94,7 @@ Let $\mathbf{A}_u$ map the element degrees of freedom into the DKMT side kinemat
 ```math
 \boldsymbol\gamma_s=\mathbf{H}_{\phi}\mathbf{A}_u\mathbf{d}_e,
 \qquad
-\mathbf{H}_{\phi}=\operatorname{diag}\left(\frac{\phi_4}{1+\phi_4},\frac{\phi_5}{1+\phi_5},\frac{\phi_6}{1+\phi_6}\right).
+\mathbf{H}_{\phi}=\mathrm{diag}\left(\frac{\phi_4}{1+\phi_4},\frac{\phi_5}{1+\phi_5},\frac{\phi_6}{1+\phi_6}\right).
 ```
 
 Equivalently, with condensed side rotations $\Delta\boldsymbol\beta$,
@@ -174,7 +174,7 @@ The least-squares projection onto a constant physical shear field is
 
 ```math
 \widehat{\boldsymbol\gamma}_{\mathrm{EC}}
-=\underset{\boldsymbol\gamma\in\mathbb R^2}{\operatorname{argmin}}
+=\underset{\boldsymbol\gamma\in\mathbb R^2}{\mathrm{arg\,min}}
 \|\mathbf E\boldsymbol\gamma-\boldsymbol\gamma_s\|_2^2
 =(\mathbf E^T\mathbf E)^{-1}\mathbf E^T\boldsymbol\gamma_s.
 ```
@@ -187,7 +187,7 @@ Accordingly,
 \mathbf H_{\phi}\mathbf A_u.
 ```
 
-For $\operatorname{rank}(\mathbf E)=2$, this reconstruction reproduces any constant shear field. The trade-off is that it retains only the best-fit **constant** field within a triangle; SF retains linear variation through its nodal shear interpolation. The name *edge-covariant* describes projection from edge-tangential components; it does **not** imply a full covariant MITC3 or MITC3+ tying formulation [3].
+For $\mathrm{rank}(\mathbf E)=2$, this reconstruction reproduces any constant shear field. The trade-off is that it retains only the best-fit **constant** field within a triangle; SF retains linear variation through its nodal shear interpolation. The name *edge-covariant* describes projection from edge-tangential components; it does **not** imply a full covariant MITC3 or MITC3+ tying formulation [3].
 
 ## 7. Comparative numerical verification
 
