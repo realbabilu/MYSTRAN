@@ -35,11 +35,7 @@ $$
 Covariant tangent vectors are $\mathbf g_1 = \boldsymbol\phi_{,\xi}$ and $\mathbf g_2 = \boldsymbol\phi_{,\eta}$. The orthonormal physical frame follows:
 
 $$
-\mathbf e_3 = \frac{\mathbf g_1 \times \mathbf g_2}{\|\mathbf g_1 \times \mathbf g_2\|},
-\qquad
-\mathbf e_1 = \frac{\mathbf g_2 \times \mathbf e_3}{\|\mathbf g_2 \times \mathbf e_3\|},
-\qquad
-\mathbf e_2 = \mathbf e_3 \times \mathbf e_1 .
+\mathbf e_3 = \frac{\mathbf g_1 \times \mathbf g_2}{\|\mathbf g_1 \times \mathbf g_2\|}, \qquad \mathbf e_1 = \frac{\mathbf g_2 \times \mathbf e_3}{\|\mathbf g_2 \times \mathbf e_3\|}, \qquad \mathbf e_2 = \mathbf e_3 \times \mathbf e_1 .
 $$
 
 For a flat element, the physical frame at the centroid is retained for both compatible and enhanced membrane strains. For a warped element, the physical frame follows the surface at each integration point and the membrane enrichment is suppressed.
@@ -49,11 +45,7 @@ For a flat element, the physical frame at the centroid is retained for both comp
 Each node carries its own orthonormal director triad $\{\mathbf V_{1i}, \mathbf V_{2i}, \mathbf V_{ni}\}$, defined by the nodal geometry:
 
 $$
-\mathbf V_{ni} = \frac{(\mathbf X_{i+1}-\mathbf X_i) \times (\mathbf X_{i-1}-\mathbf X_i)}{\|\cdot\|},
-\qquad
-\mathbf V_{1i} = \frac{\mathbf e_Y \times \mathbf V_{ni}}{\|\mathbf e_Y \times \mathbf V_{ni}\|},
-\qquad
-\mathbf V_{2i} = \mathbf V_{ni} \times \mathbf V_{1i},
+\mathbf V_{ni} = \frac{(\mathbf X_{i+1}-\mathbf X_i) \times (\mathbf X_{i-1}-\mathbf X_i)}{\|\cdot\|}, \qquad \mathbf V_{1i} = \frac{\mathbf e_Y \times \mathbf V_{ni}}{\|\mathbf e_Y \times \mathbf V_{ni}\|}, \qquad \mathbf V_{2i} = \mathbf V_{ni} \times \mathbf V_{1i},
 $$
 
 with a fallback to $\mathbf e_X$ when $\mathbf V_{ni}$ is within $\sim6°$ of global $Y$.
@@ -61,9 +53,7 @@ with a fallback to $\mathbf e_X$ when $\mathbf V_{ni}$ is within $\sim6°$ of gl
 ### 2.3 Degrees of Freedom
 
 $$
-\mathbf d_I = [U_I,\ V_I,\ W_I,\ \theta_{X_I},\ \theta_{Y_I},\ \theta_{Z_I}]^{\mathrm T},
-\qquad
-\mathbf d_e \in \mathbb R^{24}.
+\mathbf d_I = [U_I,\ V_I,\ W_I,\ \theta_{X_I},\ \theta_{Y_I},\ \theta_{Z_I}]^{\mathrm T}, \qquad \mathbf d_e \in \mathbb R^{24}.
 $$
 
 The rotations follow the right-hand rule about the global axes. Their components in the nodal director frame are $\alpha = \boldsymbol\theta\cdot\mathbf V_1$, $\beta = \boldsymbol\theta\cdot\mathbf V_2$, and $\theta_z = \boldsymbol\theta\cdot\mathbf V_n$.
@@ -73,11 +63,7 @@ The rotations follow the right-hand rule about the global axes. Their components
 Membrane and bending (isotropic plane stress):
 
 $$
-\mathbf C_m = D_m\begin{bmatrix}1&\nu&0\\ \nu&1&0\\ 0&0&\frac{1-\nu}{2}\end{bmatrix},
-\quad D_m = \frac{Eh}{1-\nu^2};
-\qquad
-\mathbf C_b = D_b\begin{bmatrix}1&\nu&0\\ \nu&1&0\\ 0&0&\frac{1-\nu}{2}\end{bmatrix},
-\quad D_b = \frac{Eh^3}{12(1-\nu^2)}.
+\mathbf C_m = D_m\begin{bmatrix}1&\nu&0\\ \nu&1&0\\ 0&0&\frac{1-\nu}{2}\end{bmatrix}, \quad D_m = \frac{Eh}{1-\nu^2}; \qquad \mathbf C_b = D_b\begin{bmatrix}1&\nu&0\\ \nu&1&0\\ 0&0&\frac{1-\nu}{2}\end{bmatrix}, \quad D_b = \frac{Eh^3}{12(1-\nu^2)}.
 $$
 
 Transverse shear: $\mathbf C_s = D_s\mathbf I_2$, $D_s = \kappa G h$, $\kappa = 5/6$, $G = E/[2(1+\nu)]$.
@@ -91,8 +77,7 @@ Drilling: $C_{\mathrm{drill}} = \gamma_{\mathrm{drill}}\,h$ with $\gamma_{\mathr
 The side-based shear influence factor and tangential assumed shear are
 
 $$
-\phi_k=\frac{D_b}{D_s}\frac{12}{L_k^2},
-\qquad \bar\gamma_{s_k}=-\frac23\phi_k\Delta\beta_{s_k}.
+\phi_k=\frac{D_b}{D_s}\frac{12}{L_k^2}, \qquad \bar\gamma_{s_k}=-\frac23\phi_k\Delta\beta_{s_k}.
 $$
 
 Four side constraints express the side-rotation increments in terms of the element degrees of freedom:
@@ -104,12 +89,10 @@ $$
 The rotation field combines bilinear nodal functions with the side enrichment functions
 
 $$
-P_5=\tfrac12(1-\xi^2)(1-\eta),\quad
-P_6=\tfrac12(1+\xi)(1-\eta^2),
+P_5=\tfrac12(1-\xi^2)(1-\eta),\quad P_6=\tfrac12(1+\xi)(1-\eta^2),
 $$
 $$
-P_7=\tfrac12(1-\xi^2)(1+\eta),\quad
-P_8=\tfrac12(1-\xi)(1-\eta^2).
+P_7=\tfrac12(1-\xi^2)(1+\eta),\quad P_8=\tfrac12(1-\xi)(1-\eta^2).
 $$
 
 The indices 5–8 denote side functions rather than additional connectivity nodes. The bending operator combines the nodal rotation contribution and the side-rotation contribution; warping coupling relates changes in the shell director to the surface geometry.
@@ -121,8 +104,7 @@ The indices 5–8 denote side functions rather than additional connectivity node
 The membrane strain is enriched as
 
 $$
-\boldsymbol\varepsilon_m=\mathbf B_m\mathbf d_e+\mathbf{G}^{\ast}\boldsymbol\alpha,
-\qquad \boldsymbol\alpha=[\alpha_1,\alpha_2,\alpha_3,\alpha_4]^{\mathsf T}.
+\boldsymbol\varepsilon_m=\mathbf B_m\mathbf d_e+\mathbf{G}^{\ast}\boldsymbol\alpha, \qquad \boldsymbol\alpha=[\alpha_1,\alpha_2,\alpha_3,\alpha_4]^{\mathsf T}.
 $$
 
 Two bubble functions generate the four internal modes:
@@ -134,21 +116,13 @@ $$
 Using in-plane physical derivatives evaluated with the centroid mapping,
 
 $$
-\mathbf G=
-\begin{bmatrix}
-H_{1,x}&0&H_{2,x}&0\\
-0&H_{1,y}&0&H_{2,y}\\
-H_{1,y}&H_{1,x}&H_{2,y}&H_{2,x}
-\end{bmatrix}.
+\mathbf G= \begin{bmatrix} H_{1,x}&0&H_{2,x}&0\\ 0&H_{1,y}&0&H_{2,y}\\ H_{1,y}&H_{1,x}&H_{2,y}&H_{2,x} \end{bmatrix}.
 $$
 
 Define the centroid mapping by $\mathbf J_0=\partial(x,y)/\partial(\xi,\eta)|_{(0,0)}$. The bubble gradients follow from
 
 $$
-\begin{bmatrix}H_{a,x}\\H_{a,y}\end{bmatrix}
-=\mathbf{J}_0^{-\mathrm{T}}
-\begin{bmatrix}H_{a,\xi}\\H_{a,\eta}\end{bmatrix},
-\qquad a=1,2.
+\left[H_{a,x},\ H_{a,y}\right]^{\mathrm{T}}=\mathbf{J}_0^{-\mathrm{T}}\left[H_{a,\xi},\ H_{a,\eta}\right]^{\mathrm{T}},\qquad a=1,2.
 $$
 
 The determinant-ratio correction gives
@@ -159,44 +133,24 @@ $$
 
 ### 4.2 Static condensation
 
-The coupled element equations have the block form
+The coupled element equations are
 
 $$
-\begin{bmatrix}
-\mathbf{K}_{uu} & \mathbf{K}_{u\alpha} \\
-\mathbf{K}_{\alpha u} & \mathbf{K}_{\alpha\alpha}
-\end{bmatrix}
-\begin{bmatrix}
-\mathbf{d}_e \\
-\boldsymbol{\alpha}
-\end{bmatrix}
-=
-\begin{bmatrix}
-\mathbf{f}_e \\
-\mathbf{0}
-\end{bmatrix}.
+\mathbf{K}_{uu}\mathbf{d}_e+\mathbf{K}_{u\alpha}\boldsymbol{\alpha}=\mathbf{f}_e,
+$$
+
+$$
+\mathbf{K}_{\alpha u}\mathbf{d}_e+\mathbf{K}_{\alpha\alpha}\boldsymbol{\alpha}=\mathbf{0}.
 $$
 
 With the thickness-integrated membrane constitutive matrix $\mathbf{C}_m$ of Section 2,
 
 $$
-\mathbf{K}_{u\alpha}
-=
-\int_{\Omega_e}
-\mathbf{B}_m^{\mathrm{T}}
-\mathbf{C}_m
-\mathbf{G}^{\ast}
-\,\mathrm{d}A.
+\mathbf{K}_{u\alpha} = \int_{\Omega_e} \mathbf{B}_m^{\mathrm{T}} \mathbf{C}_m \mathbf{G}^{\ast} \,\mathrm{d}A.
 $$
 
 $$
-\mathbf{K}_{\alpha\alpha}
-=
-\int_{\Omega_e}
-\left(\mathbf{G}^{\ast}\right)^{\mathrm{T}}
-\mathbf{C}_m
-\mathbf{G}^{\ast}
-\,\mathrm{d}A.
+\mathbf{K}_{\alpha\alpha} = \int_{\Omega_e} \left(\mathbf{G}^{\ast}\right)^{\mathrm{T}} \mathbf{C}_m \mathbf{G}^{\ast} \,\mathrm{d}A.
 $$
 
 Elimination of the internal parameters yields
@@ -261,8 +215,7 @@ Thickness factors are already included in the constitutive matrices of Section 2
 The surface integration measure is
 
 $$
-\mathrm dA = J_s\,\mathrm d\xi\,\mathrm d\eta,
-\qquad J_s = \|\mathbf g_1\times\mathbf g_2\|.
+\mathrm dA = J_s\,\mathrm d\xi\,\mathrm d\eta, \qquad J_s = \|\mathbf g_1\times\mathbf g_2\|.
 $$
 
 ## 6. Selected SAP Benchmark Results
