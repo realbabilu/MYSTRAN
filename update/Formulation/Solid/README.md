@@ -2,6 +2,7 @@
 
 **Ary · Technical manuscript · 18 October 2026**
 
+- [TETRA4 NEWSOLID: formulation and Nastran benchmarks](TETRA4_Formulation.md): nodal smoothing weight 0.9, mathematical operators, four figures and five existing verification cases.
 - [Solids Formulation — read on GitHub](NEWSOLID_CONTINUUM_FORMULATIONS.md).
 - [Alternative HTML version](NEWSOLID_CONTINUUM_FORMULATIONS.html): download this folder to view it locally with its figures. Equations are pre-rendered as SVG, with navigation and print styling. No network connection or equation-rendering script is required.
 - Numerical tables and provenance (research data retained locally; see embedded tables).
