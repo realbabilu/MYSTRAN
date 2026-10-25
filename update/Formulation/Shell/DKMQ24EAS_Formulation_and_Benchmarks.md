@@ -1,4 +1,4 @@
-# DKMQ24EAS Shell Element: Formulation and Selected SAP Benchmark Results
+# DKMQ24EAS Shell Element: Enhanced Assumed Membrane Strains for Improved Bending Response and Shell Benchmark Assessment
 
 **Ary — Personal — 25 October 2026**
 
@@ -131,7 +131,7 @@ $$
 H_1=1-\xi^2,\qquad H_2=1-\eta^2.
 $$
 
-Using in-plane physical derivatives evaluated with the centroid mapping,
+Using in-plane physical derivatives evaluated with the  mapping,
 
 $$
 \mathbf G=
@@ -142,12 +142,28 @@ H_{1,y}&H_{1,x}&H_{2,y}&H_{2,x}
 \end{bmatrix}.
 $$
 
-Define the centroid mapping by $\mathbf J_0=\partial(x,y)/\partial(\xi,\eta)|_{(0,0)}$. The bubble gradients follow from
+Define the centroid mapping by
 
 $$
-\begin{bmatrix}H_{a,x}\\H_{a,y}\end{bmatrix}
-=\mathbf J_0^{-\mathsf T}
-\begin{bmatrix}H_{a,\xi}\\H_{a,\eta}\end{bmatrix},
+\mathbf{J}_0 =
+\left.
+\frac{\partial(x,y)}{\partial(\xi,\eta)}
+\right|_{(0,0)}.
+$$
+
+The bubble gradients follow from
+
+$$
+\begin{bmatrix}
+H_{a,x} \\
+H_{a,y}
+\end{bmatrix}
+=
+\mathbf{J}_0^{-\mathrm{T}}
+\begin{bmatrix}
+H_{a,\xi} \\
+H_{a,\eta}
+\end{bmatrix},
 \qquad a=1,2.
 $$
 
@@ -170,13 +186,28 @@ $$
 =\begin{bmatrix}\mathbf f_e\\\mathbf 0\end{bmatrix}.
 $$
 
-With the thickness-integrated membrane constitutive matrix $\mathbf C_m$ of Section 2,
+With the thickness-integrated membrane constitutive matrix $\mathbf{C}_m$ of Section 2,
+```
+$$
+\mathbf{K}_{u\alpha}
+=
+\int_{\Omega_e}
+\mathbf{B}_m^{\mathrm{T}}
+\mathbf{C}_m
+\mathbf{G}^{\ast}
+\,\mathrm{d}A.
+$$
 
 $$
-\mathbf K_{u\alpha}=\int_{\Omega_e}\mathbf B_m^{\mathsf T}\mathbf C_m\mathbf G^*\,\mathrm dA,
-\qquad
-\mathbf K_{\alpha\alpha}=\int_{\Omega_e}\mathbf G^{*\mathsf T}\mathbf C_m\mathbf G^*\,\mathrm dA.
+\mathbf{K}_{\alpha\alpha}
+=
+\int_{\Omega_e}
+\left(\mathbf{G}^{\ast}\right)^{\mathrm{T}}
+\mathbf{C}_m
+\mathbf{G}^{\ast}
+\,\mathrm{d}A.
 $$
+```
 
 Elimination of the internal parameters yields
 
