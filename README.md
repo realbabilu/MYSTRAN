@@ -1,4 +1,22 @@
 MYSTRAN 18.a
+
+## October 25 update: linear shell elements and benchmark suite
+
+The Windows packages now contain the executable used for the October 25 linear-shell benchmark: source `21540039` plus the supplied element-local patch, published with benchmark commit `86a28855`. The exact source delta, executable hash and numerical limits are included in the package; this is a tested snapshot with the candidate status stated below.
+
+- CTRIA3 MITC3+ uses Lee + consistent-spin drilling. CTRIAR KMITC3+ is the Nguyen-based successor to retired MITC3+HB; their benchmark results remain separate.
+- DSQK uses covariant shear and consistent spin. DSG3 includes consistent spin and the corrected transverse local-z geometric-stiffness block. DKMQ24 elastic, thermal and buckling work is represented by the tested source snapshot.
+- DKMT18 uses the SF shear adaptation in this executable. **SF remains a candidate:** pipe-stress trade-offs, inherited rigid-rotation stabilization and shear-patch/output gates remain open; the edge-covariant alternative is retained in research history.
+- The linear publication covers 22 selectors across CQUAD4, CQUADR, CTRIA3 and CTRIAR: 1,694 MYSTRAN configurations, 308 corresponding Nastran configurations and eight additional rank decks. It includes 5,096 metric rows, 17 reports, 99 figures and the tested DAT archive. NATIVE means Nastran for the corresponding element card. Quadratic reports remain separate.
+- 1,693 MYSTRAN configurations completed; corrected DSG3 2-016c BEND still fails six-mode residual acceptance. All 308 Nastran configurations completed. Completion is not accuracy acceptance. Buckling decks explicitly request ARP_TOL=1e-10; default DARPACK and the 1e-6 physical residual limit are unchanged. No shared iterative-refinement/Jacobi prototype is included.
+- Added 2-002 two-axis torsion and 2-007 hemisphere refinement series. Hemisphere GRID-CD results are transformed to basic coordinates; torsion uses the two physical tip corners. DKMT18 SF reaches a 0.99610044 torsion/reference ratio on 192x16.
+
+[Linear comparisons](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/shell_benchmark/comparison_all_linear.md) · [CSV](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/shell_benchmark/comparison_all_linear.csv) · [Publication QA](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/shell_benchmark/PUBLICATION_QA_linear.md)
+
+Extract the full Windows package, keeping its matching DLL beside the executable. Standalone users must update both mystran.exe.zip and libopenblas.dll.zip. Earlier dated package validation below is historical evidence and does not assert a fresh solid-element regression for this shell snapshot.
+
+---
+
 ============
 Active Branch is https://github.com/realbabilu/MYSTRAN/tree/v18.00.a
 
