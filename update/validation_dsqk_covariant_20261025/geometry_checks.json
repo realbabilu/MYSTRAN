@@ -1,0 +1,62 @@
+[
+  {
+    "case": "roof_distorted",
+    "version": "old",
+    "moved_nodes": 9,
+    "K_relative_error": 6.640169581136859e-16,
+    "u_relative_error": 1.1978432433463119e-07,
+    "note": "Parametric surface perturbation with original boundary nodes, output frames and discrete nodal loads retained; parity diagnostic, not a new continuum load-accuracy claim."
+  },
+  {
+    "case": "roof_distorted",
+    "version": "covariant",
+    "moved_nodes": 9,
+    "K_relative_error": 5.999916597454723e-16,
+    "u_relative_error": 1.8043688732539732e-07,
+    "note": "Parametric surface perturbation with original boundary nodes, output frames and discrete nodal loads retained; parity diagnostic, not a new continuum load-accuracy claim."
+  },
+  {
+    "case": "hemisphere_distorted",
+    "version": "old",
+    "moved_nodes": 49,
+    "K_relative_error": 5.659671515212901e-16,
+    "u_relative_error": 1.0570408194605186e-07,
+    "note": "Parametric surface perturbation with original boundary nodes, output frames and discrete nodal loads retained; parity diagnostic, not a new continuum load-accuracy claim."
+  },
+  {
+    "case": "hemisphere_distorted",
+    "version": "covariant",
+    "moved_nodes": 49,
+    "K_relative_error": 5.686538489394172e-16,
+    "u_relative_error": 8.645826501960172e-08,
+    "note": "Parametric surface perturbation with original boundary nodes, output frames and discrete nodal loads retained; parity diagnostic, not a new continuum load-accuracy claim."
+  },
+  {
+    "case": "concave",
+    "status": "solver_error",
+    "errors": [
+      "*ERROR: DSQK element        1 has inverted or near-singular projected mapping; detJ= -3.7500000E-01 tolerance=  9.4763463E-14"
+    ],
+    "expected_rejection": true
+  },
+  {
+    "case": "bowtie",
+    "status": "solver_error",
+    "errors": [
+      "*ERROR  1911: QUAD4    ELEMENT        1 HAS ITS 2 DIAGONALS PARALLEL."
+    ],
+    "expected_rejection": true
+  },
+  {
+    "case": "collapsed",
+    "status": "solver_error",
+    "errors": [
+      "*ERROR: DSQK element        1 has inverted or near-singular projected mapping; detJ=  5.0000000E-16 tolerance=  8.8817842E-14"
+    ],
+    "expected_rejection": true
+  },
+  {
+    "case": "mixed_DSQK_MIN3",
+    "MIN3_stress_and_forces_unchanged": true
+  }
+]

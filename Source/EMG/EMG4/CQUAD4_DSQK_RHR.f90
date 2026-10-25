@@ -99,6 +99,7 @@
       CALL LOAD_BASIC_COORDS ( XYZ )
       CALL CALC_NODAL_NORMALS ( XYZ, NORMS )
       CALL BUILD_DSQK_BASIS ( XYZ, NORMS, T1, T2, T3, XLOCAL, SIDE_C, SIDE_S, SIDE_L )
+      CALL VALIDATE_DSQK_MAPPING ( XLOCAL )
       CALL BUILD_T56 ( T1, T2, T3, T56 )
       CALL BUILD_T24 ( TE, T24 )
       T24T = TRANSPOSE(T24)
@@ -530,6 +531,32 @@
       DETJ = J11*J22 - J12*J21
       END SUBROUTINE JAC_DSQK
 
+      SUBROUTINE VALIDATE_DSQK_MAPPING ( XLOC )
+      REAL(DOUBLE), INTENT(IN) :: XLOC(4,2)
+      REAL(DOUBLE) :: JJ11, JJ12, JJ21, JJ22, DJ, SCALE, TOL, XI0, ETA0
+      INTEGER(LONG) :: II, JJ
+!     detJ is affine for a bilinear planar map; its corner minima bound the
+!     integration and tying points. Check before any inverse-Jacobian operation.
+      SCALE = MAX(MAXVAL(XLOC(:,1))-MINVAL(XLOC(:,1)), MAXVAL(XLOC(:,2))-MINVAL(XLOC(:,2)))
+      TOL = 100.0D0*EPSILON(ONE)*SCALE*SCALE
+      DO II=-1,1,2
+         DO JJ=-1,1,2
+            XI0 = REAL(II,DOUBLE)
+            ETA0 = REAL(JJ,DOUBLE)
+            CALL JAC_DSQK(XLOC,XI0,ETA0,JJ11,JJ12,JJ21,JJ22,DJ)
+            IF (.NOT.(DJ > TOL)) THEN
+               NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+               FATAL_ERR = FATAL_ERR + 1
+               WRITE(ERR,9003) EID, DJ, TOL
+               WRITE(F06,9003) EID, DJ, TOL
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
+         ENDDO
+      ENDDO
+ 9003 FORMAT(' *ERROR: DSQK element ',I8,' has inverted or near-singular projected mapping; detJ=',ES15.7, &
+             ' tolerance=',ES15.7)
+      END SUBROUTINE VALIDATE_DSQK_MAPPING
+
       SUBROUTINE DNXY_DSQK ( XLOC, XI, ETA, DNDX, DNDY )
       REAL(DOUBLE), INTENT(IN)  :: XLOC(4,2), XI, ETA
       REAL(DOUBLE), INTENT(OUT) :: DNDX(4), DNDY(4)
@@ -649,15 +676,31 @@
       END FUNCTION BS_TYING_DSQK
 
       FUNCTION BS_DSQK ( XLOC, XI, ETA ) RESULT(BSOUT)
+!     COVARIANT MITC4 EDGE-TYING: only shear operator modified.
+!     JAC_DSQK rows contain derivatives wrt XI and ETA respectively.
       REAL(DOUBLE), INTENT(IN) :: XLOC(4,2), XI, ETA
-      REAL(DOUBLE) :: BSOUT(2,20), BSA(2,20), BSB(2,20), BSC(2,20), BSD(2,20)
+      REAL(DOUBLE) :: BSOUT(2,20), BSA(2,20), BSB(2,20)
+      REAL(DOUBLE) :: BSC(2,20), BSD(2,20)
+      REAL(DOUBLE) :: GXA(20), GXB(20), GEC(20), GED(20)
+      REAL(DOUBLE) :: GX(20), GE(20)
+      REAL(DOUBLE) :: J11, J12, J21, J22, DJ
       BSA = BS_TYING_DSQK ( XLOC, ZERO, -ONE )
       BSB = BS_TYING_DSQK ( XLOC, ZERO,  ONE )
       BSC = BS_TYING_DSQK ( XLOC, -ONE, ZERO )
       BSD = BS_TYING_DSQK ( XLOC,  ONE, ZERO )
-      BSOUT = ZERO
-      BSOUT(1,:) = 0.5D0*(ONE - ETA)*BSA(1,:) + 0.5D0*(ONE + ETA)*BSB(1,:)
-      BSOUT(2,:) = 0.5D0*(ONE - XI )*BSC(2,:) + 0.5D0*(ONE + XI )*BSD(2,:)
+      CALL JAC_DSQK(XLOC,ZERO,-ONE,J11,J12,J21,J22,DJ)
+      GXA = J11*BSA(1,:) + J12*BSA(2,:)
+      CALL JAC_DSQK(XLOC,ZERO, ONE,J11,J12,J21,J22,DJ)
+      GXB = J11*BSB(1,:) + J12*BSB(2,:)
+      CALL JAC_DSQK(XLOC,-ONE,ZERO,J11,J12,J21,J22,DJ)
+      GEC = J21*BSC(1,:) + J22*BSC(2,:)
+      CALL JAC_DSQK(XLOC, ONE,ZERO,J11,J12,J21,J22,DJ)
+      GED = J21*BSD(1,:) + J22*BSD(2,:)
+      GX = 0.5D0*(ONE-ETA)*GXA + 0.5D0*(ONE+ETA)*GXB
+      GE = 0.5D0*(ONE-XI)*GEC  + 0.5D0*(ONE+XI)*GED
+      CALL JAC_DSQK(XLOC,XI,ETA,J11,J12,J21,J22,DJ)
+      BSOUT(1,:) = ( J22*GX - J12*GE)/DJ
+      BSOUT(2,:) = (-J21*GX + J11*GE)/DJ
       END FUNCTION BS_DSQK
 
       SUBROUTINE MASS_DSQK_AT ( XI, ETA, FACTOR, MPA, THK, MOUT )

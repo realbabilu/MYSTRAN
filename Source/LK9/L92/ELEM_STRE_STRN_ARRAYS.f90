@@ -330,9 +330,10 @@
          STRESS3_MECH = PHI_SQ*DUM33                       ! Need PHI_SQ on transv shear stress since this calc is from strains and
                                                            ! BE3, not SE3. If DEBUG(176) > 0 then stresses are calc'd from the SE3
                                                            ! below and SE3 has PHI_SQ incorporated in subrs QPLT1, QPLT3, TPLT2.
-! Direct native Q8/T6 operators already contain their shear interpolation.
+! Direct native DSQK/Q8/T6 operators already contain their shear interpolation.
 ! PHI_SQ belongs to legacy plate recovery and must not scale these operators.
-         IF (TYPE(1:5) == 'TRIA6' .OR. &
+         IF ((TYPE(1:5) == 'QUAD4' .AND. QUAD4TYP == 'DSQK  ') .OR. &
+             TYPE(1:5) == 'TRIA6' .OR. &
              (TYPE(1:5) == 'QUAD8' .AND. (QUAD8TYP == 'SIMOQ8 ' .OR. QUAD8TYP == 'MACQ8D ' .OR. &
               QUAD8TYP == 'ANS8BDG6' .OR. QUAD8TYP == 'MITC8   ' .OR. QUAD8TYP == 'HBQ8    '))) THEN
             STRESS3_MECH=DUM33

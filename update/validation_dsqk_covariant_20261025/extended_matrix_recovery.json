@@ -1,0 +1,245 @@
+[
+  {
+    "case": "rectangle",
+    "version": "old",
+    "K_relative_difference": 2.396992515952585e-16,
+    "rigid_max": 6.616229361277019e-17,
+    "status": "completed"
+  },
+  {
+    "case": "rectangle",
+    "version": "covariant",
+    "K_relative_difference": 2.396992515952585e-16,
+    "rigid_max": 6.616229361277019e-17,
+    "status": "completed"
+  },
+  {
+    "case": "rectangle_membrane",
+    "version": "old",
+    "stress_relative_error": 2.864447127281159e-06,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "rectangle_membrane",
+    "version": "covariant",
+    "stress_relative_error": 2.864447127281159e-06,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "rectangle_bending",
+    "version": "old",
+    "stress_relative_error": 9.692638839519737e-07,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "rectangle_bending",
+    "version": "covariant",
+    "stress_relative_error": 9.692638839519737e-07,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "rectangle_shear",
+    "version": "old",
+    "stress_relative_error": 0.0,
+    "shear_relative_error": 1.0,
+    "shear_norm": 128.20512820512823
+  },
+  {
+    "case": "rectangle_shear",
+    "version": "covariant",
+    "stress_relative_error": 0.0,
+    "shear_relative_error": 2.2000000031425765e-07,
+    "shear_norm": 128.20512820512823
+  },
+  {
+    "case": "parallelogram",
+    "version": "old",
+    "K_relative_difference": 3.9820059168190113e-16,
+    "rigid_max": 6.394435674896341e-17,
+    "status": "completed"
+  },
+  {
+    "case": "parallelogram",
+    "version": "covariant",
+    "K_relative_difference": 4.09555122225524e-16,
+    "rigid_max": 6.388609993517492e-17,
+    "status": "completed"
+  },
+  {
+    "case": "parallelogram_membrane",
+    "version": "old",
+    "stress_relative_error": 2.8644471274376653e-06,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "parallelogram_membrane",
+    "version": "covariant",
+    "stress_relative_error": 2.8644471274376653e-06,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "parallelogram_bending",
+    "version": "old",
+    "stress_relative_error": 9.692638839424874e-07,
+    "shear_relative_error": 3.2037981185652695e-14,
+    "shear_norm": 3.2037981185652695e-14
+  },
+  {
+    "case": "parallelogram_bending",
+    "version": "covariant",
+    "stress_relative_error": 9.692638839424874e-07,
+    "shear_relative_error": 1.1551070465199168e-14,
+    "shear_norm": 3.108140716705821e-14
+  },
+  {
+    "case": "parallelogram_shear",
+    "version": "old",
+    "stress_relative_error": 1.2713872291652537e-13,
+    "shear_relative_error": 1.0,
+    "shear_norm": 128.20512820512818
+  },
+  {
+    "case": "parallelogram_shear",
+    "version": "covariant",
+    "stress_relative_error": 1.2713872291652537e-13,
+    "shear_relative_error": 9.535826902497828e-08,
+    "shear_norm": 128.20512820512815
+  },
+  {
+    "case": "trapezoid",
+    "version": "old",
+    "K_relative_difference": 2.864522268869563e-16,
+    "rigid_max": 5.493087160119213e-17,
+    "status": "completed"
+  },
+  {
+    "case": "trapezoid",
+    "version": "covariant",
+    "K_relative_difference": 2.595344557162825e-16,
+    "rigid_max": 5.510411605845608e-17,
+    "status": "completed"
+  },
+  {
+    "case": "trapezoid_membrane",
+    "version": "old",
+    "stress_relative_error": 2.8644471272711785e-06,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "trapezoid_membrane",
+    "version": "covariant",
+    "stress_relative_error": 2.8644471272711785e-06,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "trapezoid_bending",
+    "version": "old",
+    "stress_relative_error": 9.692638840648904e-07,
+    "shear_relative_error": 1.0,
+    "shear_norm": 10.689804189622002
+  },
+  {
+    "case": "trapezoid_bending",
+    "version": "covariant",
+    "stress_relative_error": 9.692638840648904e-07,
+    "shear_relative_error": 7.432341061445319e-15,
+    "shear_norm": 2.09223125040325e-14
+  },
+  {
+    "case": "trapezoid_shear",
+    "version": "old",
+    "stress_relative_error": 6.181886513582592e-07,
+    "shear_relative_error": 1.0,
+    "shear_norm": 128.2051282051282
+  },
+  {
+    "case": "trapezoid_shear",
+    "version": "covariant",
+    "stress_relative_error": 6.181886513582592e-07,
+    "shear_relative_error": 1.576237106647775e-07,
+    "shear_norm": 128.20512820512823
+  },
+  {
+    "case": "skew",
+    "version": "old",
+    "K_relative_difference": 5.702905591200071e-16,
+    "rigid_max": 6.128092753938901e-17,
+    "status": "completed"
+  },
+  {
+    "case": "skew",
+    "version": "covariant",
+    "K_relative_difference": 5.499380535204446e-16,
+    "rigid_max": 6.120903987683926e-17,
+    "status": "completed"
+  },
+  {
+    "case": "skew_membrane",
+    "version": "old",
+    "stress_relative_error": 2.8644471272663872e-06,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "skew_membrane",
+    "version": "covariant",
+    "stress_relative_error": 2.8644471272663872e-06,
+    "shear_relative_error": 0.0,
+    "shear_norm": 0.0
+  },
+  {
+    "case": "skew_bending",
+    "version": "old",
+    "stress_relative_error": 9.69263884017459e-07,
+    "shear_relative_error": 3.8851758958822766e-14,
+    "shear_norm": 3.8851758958822766e-14
+  },
+  {
+    "case": "skew_bending",
+    "version": "covariant",
+    "stress_relative_error": 9.69263884017459e-07,
+    "shear_relative_error": 2.784778815323763e-14,
+    "shear_norm": 3.543825662937999e-14
+  },
+  {
+    "case": "skew_shear",
+    "version": "old",
+    "stress_relative_error": 6.980405704301937e-14,
+    "shear_relative_error": 1.0,
+    "shear_norm": 128.2051282051282
+  },
+  {
+    "case": "skew_shear",
+    "version": "covariant",
+    "stress_relative_error": 6.980405704301937e-14,
+    "shear_relative_error": 3.743270790209102e-07,
+    "shear_norm": 128.2051282051282
+  },
+  {
+    "case": "warped",
+    "version": "old",
+    "K_relative_difference": 9.324448767597015e-16,
+    "rigid_max": 0.00991655421113446,
+    "status": "completed"
+  },
+  {
+    "case": "warped",
+    "version": "covariant",
+    "K_relative_difference": 9.572024708845462e-16,
+    "rigid_max": 0.009930392692386061,
+    "status": "completed"
+  },
+  {
+    "case": "warped_inherited_limitation",
+    "delta_K_rigid_max": 2.396029626398817e-17,
+    "note": "Both kernels violate physical rigid rotation on this warped facet; this is not certified by nullity six."
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "element": "DSQK",
+    "stress_f06_op2_relative_difference": 4.684990533463819e-07,
+    "force_f06_op2_relative_difference": 2.996883391448435e-08,
+    "stress_rows": 2,
+    "force_rows": 1
+  }
+]

@@ -1,0 +1,134 @@
+[
+  {
+    "formulation": "CQUADR_SIMO",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUADR_DKMQ24",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUADR_DKM24EA",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUADR_DKM24AU",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUADR_Q4EASANS",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUADR_MBP1C0",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUADR_MITC4PD",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUADR_Q4RS",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUAD4_MIN4",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUAD4_MIN4T",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUAD4_MITC4",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUAD4_MITC4plus",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUAD4_DSQK",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUAD4_DKMQ20",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CQUAD4_SIMO",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CTRIA3_MIN3",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CTRIA3_MITC3plus",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CTRIA3_T3FF",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CTRIA3_DSG3",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CTRIAR_DKMT18",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CTRIAR_T3FFD",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  },
+  {
+    "formulation": "CTRIAR_KMITC3plus",
+    "stress_relative_error": 1.0508882821512585e-06,
+    "force_relative_error": 1.5964268564219912e-07,
+    "passed": true
+  }
+]

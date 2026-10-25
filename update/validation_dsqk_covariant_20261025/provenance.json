@@ -1,0 +1,14 @@
+{
+  "base_commit": "bad8cafb",
+  "build": "cmake --build H:/Projects/MYSTRAN/codex_mod/discussion_retest_20261025/build --parallel 6; changed objects rebuilt in the previously fresh full publication build",
+  "source_sha256": {
+    "Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90": "d3e61e6ea1939ea960361b10a13827fa510c813c457134e70883563e8a780816",
+    "Source/LK9/L92/ELEM_STRE_STRN_ARRAYS.f90": "5e6cb8ca3be4362a13b62ad8671b5d3ffbe96f73e6b590832fffa11141d469dc"
+  },
+  "executables": {
+    "baseline": "f4bcc3b6463bc45a3da443bc5bae0244724e616439e6f3fa113de998748db68e",
+    "bin": "066c45c20402b14270b8e7eabf9d616dd6be5d1e148c862916f5dcd5f38c296d"
+  },
+  "default_binary_sha256": "cff2b3446938340525c3e42a4c82ecefe0dfcb8aa4cd662b0aec5e01dc313d54",
+  "input_archive_sha256": "c2cd167c5faa8f05787ac53c9755df8643f21fe22355ba5e581c27129548a0a8"
+}
