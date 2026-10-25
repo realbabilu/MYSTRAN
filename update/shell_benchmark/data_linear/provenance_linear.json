@@ -16,9 +16,10 @@
     "CTRIAR_KMITC3plus": "Nguyen KMITC3+ experimental successor; HB retired",
     "CQUAD4_DSQK": "covariant shear plus consistent spin"
   },
-  "MYSTRAN_runs": 1694,
-  "Nastran_runs": 308,
+  "MYSTRAN_runs": 1826,
+  "Nastran_runs": 332,
   "Nastran_extra_rank_decks": 8,
   "solver_controls": "MYSTRAN SOL105 explicit PARAM ARP_TOL=1e-10, default DARPACK, no iterative-refinement or Jacobi prototype; residual acceptance 1e-6 unchanged",
-  "scope": "CQUAD4 CQUADR CTRIA3 CTRIAR; quadratic reports and DAT remain separate"
+  "scope": "CQUAD4 CQUADR CTRIA3 CTRIAR; quadratic reports and DAT remain separate",
+  "supplemental_static_preload_runs": 1
 }

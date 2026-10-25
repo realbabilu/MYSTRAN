@@ -1,6 +1,6 @@
 # Linear shell publication QA
 
-25 October 2026. 1694 MYSTRAN and 308 Nastran configurations, plus eight Nastran unit-displacement rank decks. All results are fresh native runs, not substituted Python values. All Nastran comparisons use the label Nastran.
+25 October 2026. 1826 MYSTRAN and 332 Nastran configurations, plus eight Nastran unit-displacement rank decks. All results are fresh native runs, not substituted Python values. All Nastran comparisons use the label Nastran.
 
 ## Recorded corrections
 
@@ -24,3 +24,7 @@ Quadratic Markdown, HTML, figures and DAT archives are preserved. New linear rep
 [Publication validation](data_linear/publication_validation.json) records CSV arithmetic, unique keys, links, archive CRC, deck hashes and quadratic preservation checks.
 
 [Matching benchmark binary](../binaries/mystran18a-linear-shell-win64.zip) and [binary hashes](../binaries/linear_shell_sha256.json) reproduce the tested candidate snapshot. ZIP archives are explicitly marked binary in Git attributes.
+
+## Additional convergence and preload verification
+
+2-003c now includes six meshes (6x1 through 180x6),132 additional MYSTRAN and24 Nastran completed runs. Totals:1826 MYSTRAN and332 Nastran configurations; the CSV contains5564 metrics. One additional SOL101 confirms DSG3 BEND LC1 preload (99.8876ksi/100ksi); the SOL105 LC2 six-mode residual failure remains open. Earlier counts above describe the original publication snapshot.

@@ -4956,5 +4956,59 @@
         "WMod": "1"
       }
     ]
+  },
+  {
+    "case": "prob_2_003c_nx6_ny1",
+    "status": "GENERATED_MODEL_C_REFINEMENT",
+    "nx": 6,
+    "ny": 1,
+    "BC": "root1234; RY/RZ free",
+    "load": "unit resultant each LC, tributary tip distribution",
+    "observation": "mean physical inner/outer tip corners"
+  },
+  {
+    "case": "prob_2_003c_nx12_ny1",
+    "status": "GENERATED_MODEL_C_REFINEMENT",
+    "nx": 12,
+    "ny": 1,
+    "BC": "root1234; RY/RZ free",
+    "load": "unit resultant each LC, tributary tip distribution",
+    "observation": "mean physical inner/outer tip corners"
+  },
+  {
+    "case": "prob_2_003c_nx30_ny1",
+    "status": "GENERATED_MODEL_C_REFINEMENT",
+    "nx": 30,
+    "ny": 1,
+    "BC": "root1234; RY/RZ free",
+    "load": "unit resultant each LC, tributary tip distribution",
+    "observation": "mean physical inner/outer tip corners"
+  },
+  {
+    "case": "prob_2_003c_nx60_ny2",
+    "status": "GENERATED_MODEL_C_REFINEMENT",
+    "nx": 60,
+    "ny": 2,
+    "BC": "root1234; RY/RZ free",
+    "load": "unit resultant each LC, tributary tip distribution",
+    "observation": "mean physical inner/outer tip corners"
+  },
+  {
+    "case": "prob_2_003c_nx90_ny3",
+    "status": "GENERATED_MODEL_C_REFINEMENT",
+    "nx": 90,
+    "ny": 3,
+    "BC": "root1234; RY/RZ free",
+    "load": "unit resultant each LC, tributary tip distribution",
+    "observation": "mean physical inner/outer tip corners"
+  },
+  {
+    "case": "prob_2_003c_nx180_ny6",
+    "status": "GENERATED_MODEL_C_REFINEMENT",
+    "nx": 180,
+    "ny": 6,
+    "BC": "root1234; RY/RZ free",
+    "load": "unit resultant each LC, tributary tip distribution",
+    "observation": "mean physical inner/outer tip corners"
   }
 ]

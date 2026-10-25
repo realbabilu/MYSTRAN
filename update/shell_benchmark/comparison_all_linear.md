@@ -45,37 +45,41 @@ DKMT18 is SF in this tested candidate. KMITC3+ replaces retired MITC3+HB. The cu
 
 | Solver | Element / formulation | Completed | Failed |
 |---|---|---:|---:|
-| MYSTRAN | CQUAD4_DKMQ20 | 77 | 0 |
-| MYSTRAN | CQUAD4_DSQK | 77 | 0 |
-| MYSTRAN | CQUAD4_MIN4 | 77 | 0 |
-| MYSTRAN | CQUAD4_MIN4T | 77 | 0 |
-| MYSTRAN | CQUAD4_MITC4 | 77 | 0 |
-| MYSTRAN | CQUAD4_MITC4plus | 77 | 0 |
-| MYSTRAN | CQUAD4_SIMO | 77 | 0 |
-| MYSTRAN | CQUADR_DKM24AU | 77 | 0 |
-| MYSTRAN | CQUADR_DKM24EA | 77 | 0 |
-| MYSTRAN | CQUADR_DKMQ24 | 77 | 0 |
-| MYSTRAN | CQUADR_MBP1C0 | 77 | 0 |
-| MYSTRAN | CQUADR_MITC4PD | 77 | 0 |
-| MYSTRAN | CQUADR_Q4EASANS | 77 | 0 |
-| MYSTRAN | CQUADR_Q4RS | 77 | 0 |
-| MYSTRAN | CQUADR_SIMO | 77 | 0 |
-| MYSTRAN | CTRIA3_DSG3 | 76 | 1 |
-| MYSTRAN | CTRIA3_MIN3 | 77 | 0 |
-| MYSTRAN | CTRIA3_MITC3plus | 77 | 0 |
-| MYSTRAN | CTRIA3_T3FF | 77 | 0 |
-| MYSTRAN | CTRIAR_DKMT18 | 77 | 0 |
-| MYSTRAN | CTRIAR_KMITC3plus | 77 | 0 |
-| MYSTRAN | CTRIAR_T3FFD | 77 | 0 |
-| NASTRAN | CQUAD4_NATIVE | 77 | 0 |
-| NASTRAN | CQUADR_NATIVE | 77 | 0 |
-| NASTRAN | CTRIA3_NATIVE | 77 | 0 |
-| NASTRAN | CTRIAR_NATIVE | 77 | 0 |
+| MYSTRAN | CQUAD4_DKMQ20 | 83 | 0 |
+| MYSTRAN | CQUAD4_DSQK | 83 | 0 |
+| MYSTRAN | CQUAD4_MIN4 | 83 | 0 |
+| MYSTRAN | CQUAD4_MIN4T | 83 | 0 |
+| MYSTRAN | CQUAD4_MITC4 | 83 | 0 |
+| MYSTRAN | CQUAD4_MITC4plus | 83 | 0 |
+| MYSTRAN | CQUAD4_SIMO | 83 | 0 |
+| MYSTRAN | CQUADR_DKM24AU | 83 | 0 |
+| MYSTRAN | CQUADR_DKM24EA | 83 | 0 |
+| MYSTRAN | CQUADR_DKMQ24 | 83 | 0 |
+| MYSTRAN | CQUADR_MBP1C0 | 83 | 0 |
+| MYSTRAN | CQUADR_MITC4PD | 83 | 0 |
+| MYSTRAN | CQUADR_Q4EASANS | 83 | 0 |
+| MYSTRAN | CQUADR_Q4RS | 83 | 0 |
+| MYSTRAN | CQUADR_SIMO | 83 | 0 |
+| MYSTRAN | CTRIA3_DSG3 | 82 | 1 |
+| MYSTRAN | CTRIA3_MIN3 | 83 | 0 |
+| MYSTRAN | CTRIA3_MITC3plus | 83 | 0 |
+| MYSTRAN | CTRIA3_T3FF | 83 | 0 |
+| MYSTRAN | CTRIAR_DKMT18 | 83 | 0 |
+| MYSTRAN | CTRIAR_KMITC3plus | 83 | 0 |
+| MYSTRAN | CTRIAR_T3FFD | 83 | 0 |
+| NASTRAN | CQUAD4_NATIVE | 83 | 0 |
+| NASTRAN | CQUADR_NATIVE | 83 | 0 |
+| NASTRAN | CTRIA3_NATIVE | 83 | 0 |
+| NASTRAN | CTRIAR_NATIVE | 83 | 0 |
 
 ## Data and reproduction
 
-The CSV contains 5,096 metric rows from 2,002 solver configurations and is 3.28 MB. It is suitable for direct analysis in Python or ChatGPT; preserve status, units, references and hashes when filtering.
+The CSV contains 5,564 metric rows from 2,158 solver configurations and is 3.28 MB. It is suitable for direct analysis in Python or ChatGPT; preserve status, units, references and hashes when filtering.
 
 [Run status](data_linear/run_status_linear.csv) · [Model audit](data_linear/model_audit.csv) · [Source snapshot](data_linear/provenance_linear.json) · [DAT archive](DAT/linear_shell_benchmark_DAT.zip)
 
 The DAT archive contains every tested input, including failed cases, with separate MYSTRAN and NASTRAN directories and portable run/extract scripts. Licensed executables, raw licensed reference files and full solver outputs are not redistributed.
+
+## Additional convergence and preload verification
+
+2-003c now includes six meshes (6x1 through 180x6),132 additional MYSTRAN and24 Nastran completed runs. Totals:1826 MYSTRAN and332 Nastran configurations; the CSV contains5564 metrics. One additional SOL101 confirms DSG3 BEND LC1 preload (99.8876ksi/100ksi); the SOL105 LC2 six-mode residual failure remains open. Earlier counts above describe the original publication snapshot.

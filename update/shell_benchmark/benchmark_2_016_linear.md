@@ -26,6 +26,8 @@ Model C is t=.01 in even if the deck name says thick. Critical applied edge stre
 | MYSTRAN | SOLVER_ERROR | 2 |
 | NASTRAN | MEASURED | 16 |
 
+DSG3 LC1 preload is independently verified by a separate SOL101 run: 99.8876 ksi versus 100 ksi. It is displayed despite the parent SOL105 LC2 residual failure, which remains open. See the CSV notes and supplemental DAT.
+
 ## Figures
 
 ### prob_2_016c_thick_beamseg_bend · LC 1 · preload_max_abs_fiber_principal_stress
@@ -89,7 +91,7 @@ Model C is t=.01 in even if the deck name says thick. Critical applied edge stre
 | prob_2_016c_thick_beamseg_bend / 4096 | MYSTRAN CQUADR_Q4EASANS | 1 | preload_max_abs_fiber_principal_stress | 100 | 100 | — | ksi | 5.684342e-14 | 5.684342e-14 | MEASURED |
 | prob_2_016c_thick_beamseg_bend / 4096 | MYSTRAN CQUADR_Q4RS | 1 | preload_max_abs_fiber_principal_stress | 99.41721 | 100 | — | ksi | 0.5827857 | 0.5827857 | MEASURED |
 | prob_2_016c_thick_beamseg_bend / 4096 | MYSTRAN CQUADR_SIMO | 1 | preload_max_abs_fiber_principal_stress | 99.9999 | 100 | — | ksi | 0.0001 | 0.0001 | MEASURED |
-| prob_2_016c_thick_beamseg_bend / 4096 | MYSTRAN CTRIA3_DSG3 | 1 | preload_max_abs_fiber_principal_stress | 99.8876 | 100 | — | ksi | 0.1124 | 0.1124 | SOLVER_ERROR |
+| prob_2_016c_thick_beamseg_bend / 4096 | MYSTRAN CTRIA3_DSG3 | 1 | preload_max_abs_fiber_principal_stress | 99.8876 | 100 | — | ksi | 0.1124 | 0.1124 | MEASURED |
 | prob_2_016c_thick_beamseg_bend / 4096 | MYSTRAN CTRIA3_MIN3 | 1 | preload_max_abs_fiber_principal_stress | 99.8875 | 100 | — | ksi | 0.1125 | 0.1125 | MEASURED |
 | prob_2_016c_thick_beamseg_bend / 4096 | MYSTRAN CTRIA3_MITC3plus | 1 | preload_max_abs_fiber_principal_stress | 99.8876 | 100 | — | ksi | 0.1124 | 0.1124 | MEASURED |
 | prob_2_016c_thick_beamseg_bend / 4096 | MYSTRAN CTRIA3_T3FF | 1 | preload_max_abs_fiber_principal_stress | 99.8872 | 100 | — | ksi | 0.1128 | 0.1128 | MEASURED |
