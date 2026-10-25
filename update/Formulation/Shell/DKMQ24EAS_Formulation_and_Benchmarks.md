@@ -153,7 +153,6 @@ $$
 
 The bubble gradients follow from
 ```
-$$
 \begin{bmatrix}
 H_{a,x} \\
 H_{a,y}
@@ -165,7 +164,6 @@ H_{a,\xi} \\
 H_{a,\eta}
 \end{bmatrix},
 \qquad a=1,2.
-$$
 ```
 The determinant-ratio correction gives
 
