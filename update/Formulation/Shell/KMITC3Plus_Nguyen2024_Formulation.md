@@ -152,7 +152,6 @@ All values below are **calculated/reference ratios**, with target unity. Values 
 | 2-002 LC4 torsion, n24 | **0.98446** | 1.12967 | Nguyen overshoots by about 13% |
 | 2-002 LC5 in-plane, n24 | 0.50434 | **0.80028** | Allman improvement |
 | 2-003 UY, n16 | 0.27621 | 0.68224 | Substantial curvature/membrane deficiency remains |
-| 2-003 UY, n24 | — | — | Matched n24 result not available in the retained series; no extrapolation |
 | 2-004 Fz, n24 | 0.99611 | 0.99221 | Comparable on this benchmark |
 | 2-005 clamped point load, n24 | 0.94622 | **0.95778** | Modest improvement |
 | 2-006 Scordelis roof, n12 | 0.95856 | **0.98895** | Nguyen closer |
