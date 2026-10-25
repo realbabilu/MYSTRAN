@@ -152,15 +152,19 @@ All values below are **calculated/reference ratios**, with target unity. Values 
 | 2-002 LC4 torsion, n24 | **0.98446** | 1.12967 | Nguyen overshoots by about 13% |
 | 2-002 LC5 in-plane, n24 | 0.50434 | **0.80028** | Allman improvement |
 | 2-003 UY, n16 | 0.27621 | 0.68224 | Substantial curvature/membrane deficiency remains |
+| 2-003 UY, n24 | — | — | Matched n24 result not available in the retained series; no extrapolation |
 | 2-004 Fz, n24 | 0.99611 | 0.99221 | Comparable on this benchmark |
 | 2-005 clamped point load, n24 | 0.94622 | **0.95778** | Modest improvement |
 | 2-006 Scordelis roof, n12 | 0.95856 | **0.98895** | Nguyen closer |
-| **2-007 supplied original CTRIA3 DAT, n8** | **0.99193** | **0.25567** | **Serious coarse curved-shell failure** |
+| **2-007 supplied original CTRIA3 DAT, n8** | **0.99193** | **0.25567** | Coarse-mesh underprediction; refinement results immediately below |
+| 2-007 reconstructed refinement, n16 (512 triangles) | — | **0.81553** | Reference error 18.447%; substantial recovery from coarse-mesh stiffness |
+| 2-007 reconstructed refinement, n32 (2,048 triangles) | — | **0.98735** | Reference error 1.265%; rapid approach to unity in the reconstructed refinement series |
+| 2-007 reconstructed refinement, n64 (8,192 triangles) | — | **0.99820** | Reference error 0.180%; rapid approach to unity in the reconstructed refinement series |
 | 2-009 Winkler k=800, n16 | 0.77304 | 0.93415 | Better, but n24 overshoots to 1.05373 |
 
 <img width="1425" height="873" alt="mitc3plus_allman_2003_convergence" src="https://github.com/user-attachments/assets/7fdfade2-50ad-4758-815f-10789ce29e99" />
 
-The membrane/curvature benefit is genuine within these benchmark setups, but **does not establish global superiority**: the coarsest hemisphere model is considerably worse than Lee + Spin.
+The 2-007 rows show the refinement trend directly in this summary: the Nguyen reference error falls from 74.433% at n8 to 18.447% at n16, 1.265% at n32 and 0.180% at n64. This is a rapid approach to the reference at the finer reconstructed resolutions, rather than evidence of a persistent incorrect limit. The n8 row uses the supplied original CTRIA3 DAT; n16/n32/n64 are geometrically reconstructed refinements and retain that distinction (Section 5.1). An em dash means the corresponding result is unavailable, not zero. No Lee + Spin refinement value or 2-003 UY n24 value is inferred. The membrane/curvature benefit remains benchmark-dependent; the original coarse hemisphere is considerably worse than Lee + Spin.
 
 ### 5.1 Explicit distinction for hemisphere 2-007
 
