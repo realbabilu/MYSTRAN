@@ -151,8 +151,10 @@ $$
 \right|_{(0,0)}.
 $$
 
-The bubble gradients follow from
 ```
+The bubble gradients follow from
+
+$$
 \begin{bmatrix}
 H_{a,x} \\
 H_{a,y}
@@ -164,6 +166,7 @@ H_{a,\xi} \\
 H_{a,\eta}
 \end{bmatrix},
 \qquad a=1,2.
+$$
 ```
 The determinant-ratio correction gives
 
@@ -173,8 +176,9 @@ $$
 
 ### 4.2 Static condensation
 
-The coupled element equations have the block form
 ```
+The coupled element equations have the block form
+
 $$
 \begin{bmatrix}
 \mathbf K_{uu}&\mathbf K_{u\alpha}\\
@@ -184,8 +188,9 @@ $$
 =\begin{bmatrix}\mathbf f_e\\\mathbf 0\end{bmatrix}.
 $$
 ```
-With the thickness-integrated membrane constitutive matrix $\mathbf{C}_m$ of Section 2,
 ```
+With the thickness-integrated membrane constitutive matrix $\mathbf{C}_m$ of Section 2,
+
 $$
 \mathbf{K}_{u\alpha}
 =
