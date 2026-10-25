@@ -87,7 +87,7 @@ Note: CSV/Python files are research-internal and not part of the public reposito
 
 ## Formulation
 
-- [Solids Formulation](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.md) — Mathematical formulations for the eight NEWSOLID solid topologies and existing benchmark comparisons. [Alternative HTML version](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.html): download the [formulation folder](update/Formulation/Solid) to view it with its figures locally.
+- [Solids Formulation](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.md) — Mathematical formulations for the eight NEWSOLID solid topologies and existing benchmark comparisons. [Alternative HTML version](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.md): download the [formulation folder](update/Formulation/Solid) to view it with its figures locally.
 
 # Build Instructions
 

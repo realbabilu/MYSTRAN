@@ -1,7 +1,7 @@
 # CPENTA6 ABE: edge-tied assumed shear and condensed enhanced-strain wedge
 
-**Technical formulation and numerical-validation note — MYSTRAN NEWSOLID (`PENTATYP,ABE`)**  
-**Revision:** 19 October 2026 (GitHub math syntax corrected) | **Origin:** Ary, [project formulation note](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/Formulation/Solid/CPENTA6_ABE_Formulation_Ary.md)  
+**Technical formulation and numerical-validation note — MYSTRAN NEWSOLID (`PENTATYP,ABE`)**
+**Revision:** 26 October 2026 (existing Nastran benchmark comparisons added) | **Origin:** Ary, [project formulation note](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/Formulation/Solid/CPENTA6_ABE_Formulation.md)
 
 ## Abstract
 
@@ -78,7 +78,7 @@ $$
 \qquad
 \mu = \frac{E}{2(1+\nu)}.
 $$
-  
+
 
 ## 2. Frozen centroid covariant transformation
 
@@ -192,7 +192,7 @@ The assumed transverse-shear strain operators are interpolated as follows.
 
 The other four strain rows remain compatible. Define $\overline{\mathbf{B}}$ as the resulting six-row natural-frame strain-displacement matrix.
 
-The edge-tied operator is evaluated only at the quadrature planes used in this implementation. No higher-order reconstruction through the thickness coordinate $\zeta$ is assumed.
+The edge-tied operator is evaluated at the stated quadrature planes. No higher-order reconstruction through the thickness coordinate $\zeta$ is assumed.
 
 The edge-tied construction follows the *isotropic MITC3-type* transverse-shear interpolation discussed by Lee and Bathe (2004), adapted here to the continuum wedge.
 
@@ -280,7 +280,7 @@ $$
 \mathbf K_{d\alpha}\mathbf K_{\alpha\alpha}^{-1}\mathbf K_{\alpha d}}.
 $$
 
-In code, **solve** $\mathbf K_{\alpha\alpha}\mathbf X=\mathbf K_{\alpha d}$ by a factorization rather than forming an inverse; verify its conditioning and reject/diagnose singular local enhanced systems. No new global DOFs are introduced.
+The condensation requires a nonsingular $\mathbf K_{\alpha\alpha}$. No new global DOFs are introduced.
 
 
 ## 5. Patch-consistency mean correction
@@ -416,7 +416,7 @@ $$
 \boldsymbol\sigma_V=\mathbf D\boldsymbol\varepsilon_V.
 $$
 
-The original Python study uses standard CPENTA6 operators for the consistent/lumped mass and initial-stress geometric stiffness. This **is not** a consistent nonlinear EAS tangent; 5-010 validation must be interpreted as an eigen-buckling benchmark with the reported prestress assumptions. For an initial Cauchy prestress $\boldsymbol\sigma_0$, the usual small-strain geometric operator has component blocks
+The reported comparisons use standard CPENTA6 operators for the consistent/lumped mass and initial-stress geometric stiffness. This **is not** a consistent nonlinear EAS tangent; 5-010 validation must be interpreted as an eigen-buckling benchmark with the reported prestress assumptions. For an initial Cauchy prestress $\boldsymbol\sigma_0$, the usual small-strain geometric operator has component blocks
 
 $$
 (K_G)_{ai,bj}=\delta_{ij}\int_{\Omega_e}
@@ -425,15 +425,14 @@ $$
 
 subject to the precise signs and conventions of the MYSTRAN buckling eigenproblem.
 
-## 7. Numerical verification and convergence (reported Python data)
+## 7. Mystran Benchmark and reported convergence
 
-The **mesh labels and ratios are reproduced from the original note**. Numerical data tables are retained below; convergence plots will be inserted after the illustrations are supplied. No new numerical solutions or Nastran runs are claimed.
+The mesh labels and ratios below retain the original reported studies. Section 7.6 adds the existing matched-model Nastran comparisons, with the benchmark definitions kept distinct. No new numerical solutions are included.
 
 ### 7.1 SAP2000 5-010: first buckling factor
 <img width="1639" height="1040" alt="sap5010_buckling_convergence" src="https://github.com/user-attachments/assets/0bb83067-7639-45b3-899e-adef8e4ff6c8" />
-> **Figure reserved:** 5-010 buckling-factor convergence. 
 
-**Planned Figure 1.** Connected-point convergence of the first buckling factor, using a logarithmic vertical axis.
+**Figure 1.** Connected-point convergence of the first buckling factor, using a logarithmic vertical axis.
 
 | Mesh | Standard | EAS9 v2 | ABE $f=1$ | ABE $f=0$ |
 |---|---:|---:|---:|---:|
@@ -444,9 +443,8 @@ The **mesh labels and ratios are reproduced from the original note**. Numerical 
 **Reference:** Euler buckling factor 0.8883; the original note also reports Nastran CPENTA6 factor 0.8910 for its audited mesh. These are **different kinds of reference**: Euler is a theoretical asymptote, while Nastran is a discrete FE result and should not be represented as a universal exact solution.
 
 <img width="1639" height="1040" alt="sap5010_relative_error" src="https://github.com/user-attachments/assets/095fc285-3084-4b0b-9a9f-43a182671329" />
-> **Figure reserved:** 5-010 relative buckling error. 
 
-**Planned Figure 2.** Absolute relative error $100|\lambda_h/0.8883-1|$ (%) against the Euler factor on the three reported mesh levels. The logarithmic ordinate highlights the ABE $f=0$ result. Its relative errors are approximately **0.326%, 0.079%, 0.023%**.
+**Figure 2.** Absolute relative error $100|\lambda_h/0.8883-1|$ (%) against the Euler factor on the three reported mesh levels. The logarithmic ordinate highlights the ABE $f=0$ result. Its relative errors are approximately **0.326%, 0.079%, 0.023%**.
 
 
 ### 7.2 SAP2000 5-001: Distorted constant-stress patch
@@ -480,22 +478,20 @@ This displacement field produces a constant strain state throughout the model.
 
 <img width="1600" height="1000" alt="sap5001_patch_tradeoff" src="https://github.com/user-attachments/assets/087cd2d4-83d5-4a3e-9721-c71cb79af8ed" />
 
-> **Figure reserved:** 5-001 patch-consistency trade-off. 
 
-**Planned Figure 3.** Observed patch-test accuracy versus mean-restoration parameter $f$. Values at $f=1$ are near machine precision; the graph uses a linear ordinate. **These data show that the high buckling accuracy at $f=0$ does not imply general patch consistency.**
+**Figure 3.** Observed patch-test accuracy versus mean-restoration parameter $f$. Values at $f=1$ are near machine precision; the graph uses a linear ordinate. **These data show that the high buckling accuracy at $f=0$ does not imply general patch consistency.**
 
 ### 7.3 Distorted patch refinement: nonzero consistency-error floor
 
 <img width="1600" height="1000" alt="distorted_patch_refinement" src="https://github.com/user-attachments/assets/ba8f3e68-fff7-42a5-b991-3baf45781dc5" />
-> **Figure reserved:** distorted patch mesh-refinement. 
 
-**Planned Figure 4.** Reported error under 10% relative interior-node distortion. The error changes with $n$, but does **not** tend to numerical zero over the tested mesh sequence. This is a consistency warning, not a definitive asymptotic-order estimate.
+**Figure 4.** Reported error under 10% relative interior-node distortion. The error changes with $n$, but does **not** tend to numerical zero over the tested mesh sequence. This is a consistency warning, not a definitive asymptotic-order estimate.
 
 | Cube grid $n\times n\times n$ | $n=2$ | $n=3$ | $n=4$ | $n=6$ |
 |---|---:|---:|---:|---:|
 | ABE $f=0$ patch error | 0.0008 | 0.0027 | 0.0034 | 0.0033 |
 
-At $n=6$, the reported errors under 10%, 20%, and 30% perturbations are 0.0033, 0.0072, and 0.012, respectively. Affine mapped/regular meshes passed near machine precision. The metric is reproduced as reported; its exact norm definition should be included in the benchmark driver before publication as an independent reproducible result.
+At $n=6$, the reported errors under 10%, 20%, and 30% perturbations are 0.0033, 0.0072, and 0.012, respectively. Affine mapped/regular meshes passed near machine precision. The metric is reproduced as reported; its exact norm definition should be included in the benchmark driver before assigning a quantitative convergence order.
 
 ### 7.4 Additional reported benchmarks
 
@@ -514,6 +510,76 @@ Values are ratios to the stated independent benchmark, and `IN / OUT` represent 
 
 For an unconstrained linear elastic three-dimensional element with 18 DOFs, the expected unconstrained stiffness rank is **12** (six rigid-body modes). The source reports ABE rank 12 for regular and distorted single-element cases, a rotation residual near $4\times10^{-16}$, and cyclic node-renumbering differences $\le10^{-13}$. Its EAS9 v2 comparator differed by roughly 3% under two cyclic permutations. For reproducibility, always test rotated coordinates **and** cyclic renumbering with matching DOF permutations, and report the eigenvalue threshold used to decide numerical rank.
 
+### 7.6 Mystran Benchmark: matched-model comparison with Nastran
+
+The existing solid benchmark collection [9] supplies **14 displacement comparisons** for CPENTA6 ABE and Nastran CPENTA6: six for the twisted beam and eight for the pinched dome. Each pair uses the same geometry, boundary conditions, loading and observation definition. No new solver analysis is included. These comparisons extend the verification cases above; they are not substituted for the earlier studies with explicitly varied mean-correction factor $f$.
+
+For a nonzero independent reference $q_{\mathrm{ref}}$, the reported ratio and absolute relative error are
+
+```math
+R=\frac{q}{q_{\mathrm{ref}}},
+\qquad
+e_q=100\frac{|q-q_{\mathrm{ref}}|}{|q_{\mathrm{ref}}|}.
+```
+
+Each formulation is assessed against the independent reference. A difference from Nastran is not itself an accuracy error. The archived ABE selection is reported as ABE; no unrecorded value of $f$ is inferred from its label.
+
+#### 7.6.1 Example 5-004: twisted beam
+
+The independent tip displacements are 0.005429 in for IN and 0.001749 in for OUT. The wedge prism axis follows the longitudinal beam X direction. The three parent meshes are $6\times1\times1$, $12\times2\times2$ and $24\times4\times2$; wedge subdivision and observed response follow the existing solid benchmark definitions [9]. The scalar displacement values below are in inches.
+
+| Parent mesh | Response | Independent | Nastran CPENTA6 | CPENTA6 ABE | Nastran error (%) | ABE error (%) |
+|---|---|---|---|---|---|---|
+| 6x1x1 | IN | 0.005429 | 0.00479564327 | 0.00507261744 | 11.666 | 6.564 |
+| 6x1x1 | OUT | 0.001749 | 0.00149701489 | 0.00164370373 | 14.407 | 6.020 |
+| 12x2x2 | IN | 0.005429 | 0.00510252045 | 0.00521202825 | 6.014 | 3.997 |
+| 12x2x2 | OUT | 0.001749 | 0.00163453702 | 0.00168458481 | 6.544 | 3.683 |
+| 24x4x2 | IN | 0.005429 | 0.00519550086 | 0.00522235651 | 4.301 | 3.806 |
+| 24x4x2 | OUT | 0.001749 | 0.001670758 | 0.00169441715 | 4.474 | 3.121 |
+
+
+![Twisted-beam comparison with Nastran](figures/CPENTA6_ABE_Nastran_twisted_beam.png)
+
+*Figure 5. Existing twisted-beam response ratios for CPENTA6 ABE and Nastran CPENTA6. Markers identify the available mesh levels; the horizontal reference is unity.*
+
+ABE is closer to the independent reference for all six reported responses. On the finest mesh, the ABE errors are 3.806% IN and 3.121% OUT, compared with 4.301% and 4.474% for Nastran. Both formulations remain below the independent displacement. The printed original SAP2000 values, 0.005322 and 0.001719 in, belong to its original benchmark discretization and are not new results on these refined wedge meshes.
+
+#### 7.6.2 Example 5-007: pinched dome
+
+The independent reference displacements at the two loaded observation locations are $q_A=+0.094$ and $q_B=-0.094$, in the consistent length unit of the benchmark. The paired models retain one layer through the thickness and refine the surface mesh from $4\times4$ to $24\times24$ [9]. The signed displacements are retained in the table; dividing by the correspondingly signed reference gives positive response ratios.
+
+| Parent mesh | Response | Independent | Nastran CPENTA6 | CPENTA6 ABE | Nastran error (%) | ABE error (%) |
+|---|---|---|---|---|---|---|
+| 4x4_L1 | A | 0.094 | 0.000769008213 | 0.000945648731 | 99.182 | 98.994 |
+| 4x4_L1 | B | -0.094 | -0.000745704107 | -0.00092883053 | 99.207 | 99.012 |
+| 8x8_L1 | A | 0.094 | 0.0131235151 | 0.0146426009 | 86.039 | 84.423 |
+| 8x8_L1 | B | -0.094 | -0.0132863545 | -0.0150070367 | 85.866 | 84.035 |
+| 16x16_L1 | A | 0.094 | 0.0674458295 | 0.0682209618 | 28.249 | 27.425 |
+| 16x16_L1 | B | -0.094 | -0.0689957589 | -0.0702637359 | 26.600 | 25.251 |
+| 24x24_L1 | A | 0.094 | 0.0856874436 | 0.0856176093 | 8.843 | 8.917 |
+| 24x24_L1 | B | -0.094 | -0.0866304785 | -0.0868746303 | 7.840 | 7.580 |
+
+
+![Pinched-dome comparison with Nastran](figures/CPENTA6_ABE_Nastran_pinched_dome.png)
+
+*Figure 6. Existing pinched-dome response ratios at A and B for one layer through the thickness.*
+
+Both formulations are extremely stiff on the $4\times4\times1$ mesh, with errors near 99%. Surface refinement reduces these errors substantially. On the $24\times24\times1$ mesh, ABE errors are 8.917% at A and 7.580% at B; Nastran errors are 8.843% and 7.840%. At A, Nastran is slightly closer to the reference on this finest mesh. These results demonstrate case-dependent improvement and do not establish that ABE is uniformly more accurate.
+
+#### 7.6.3 Uniform thermal comparison
+
+The existing 5-011 uniform-temperature comparison also gives the following relative differences between ABE and Nastran CPENTA6 over the corresponding result arrays:
+
+| Quantity | Relative difference |
+|---|---:|
+| Displacement | $9.03769\times10^{-15}$ |
+| Stress | $4.83804\times10^{-16}$ |
+| Strain | $1.48485\times10^{-15}$ |
+
+The benchmark uses $E=10^6$ psi, $\nu=0.25$, $\alpha_T=5.5\times10^{-6}/{}^{\circ}\mathrm{F}$ and a uniform $100{}^{\circ}\mathrm{F}$ temperature rise. The analytical restrained thermal stresses are $\sigma_{xx}=\sigma_{yy}=-733.333333$ psi. The agreement pertains to the equivalent uniform thermal state; it does not validate arbitrary temperature gradients or every non-affine recovery state. These relative differences measure agreement with Nastran, not error against an independent nonzero stress field.
+
+[Compressed benchmark results](CPENTA6_ABE_benchmark_results.zip) · [All-solid benchmark report](../../solid_benchmark/comparison_all.md)
+
 ## 8. Orientation and known limitations
 
 The original note's reported 2×1×12 buckling factors depend strongly on the prism-axis orientation:
@@ -524,11 +590,11 @@ The original note's reported 2×1×12 buckling factors depend strongly on the pr
 | $z$ (longitudinal axis) | 26.71 | 0.9456 | 0.9127 | 0.9127 |
 | $x$ (triangles in bending plane) | 79.84 | 79.79 | 79.79 | 79.79 |
 
-The $x$ orientation locks badly in all these wedge variants. ABE **cannot** reconstruct in-plane curvature that the one-layer linear triangle lacks. Strong warpage, highly distorted elements, nonlinear buckling tangents, complete stress-recovery validation, thermal benchmark 5-011, and broader reliability under arbitrary meshing remain open. The original note reports mass and $K_G$ inherited from standard CPENTA6 rather than fully re-derived from an enhanced nonlinear variational formulation.
+The $x$ orientation locks badly in all these wedge variants. ABE **cannot** reconstruct in-plane curvature that the one-layer linear triangle lacks. Strong warpage, highly distorted elements, nonlinear buckling tangents, complete stress-recovery validation, general thermal loading beyond the uniform 5-011 comparison, and broader reliability under arbitrary meshing remain open. The original note reports mass and $K_G$ inherited from standard CPENTA6 rather than fully re-derived from an enhanced nonlinear variational formulation.
 
-**Implementation caution:** `patch_consistency=0` is a research setting with excellent *reported* thin-column buckling but a demonstrable patch-test failure. Treat its use on general distorted meshes as experimental. `patch_consistency=1` passes the reported patch but significantly overpredicts thin-column buckling. A practical MYSTRAN release should expose this trade-off explicitly and should not silently substitute either option for standard CPENTA6 across all engineering use cases.
+**Formulation limitation:** `patch_consistency=0` is a research setting with excellent *reported* thin-column buckling but a demonstrable patch-test failure. Treat its use on general distorted meshes as experimental. `patch_consistency=1` passes the reported patch but significantly overpredicts thin-column buckling. The two settings must remain distinct when assessing general distorted meshes.
 
-## 9. Replication checklist
+## 9. Mathematical evaluation steps
 
 1. Rebuild $\mathbf T_0$ from the declared Jacobian row convention and test energy invariance.
 2. Check quadrature weights and $\det\mathbf J_g>0$, local $\mathbf K_{\alpha\alpha}$ conditioning and rigid-body rank.
@@ -537,7 +603,7 @@ The $x$ orientation locks badly in all these wedge variants. ABE **cannot** reco
 5. Verify regular/affine and distorted patch tests separately, with $f=0$ and $f=1$.
 6. Test 5-003 bending, 5-004 twisting, 5-008 near-incompressibility, and 5-010 buckling on a consistent mesh sequence.
 7. Compare against independent SAP2000 results and Nastran results at the **same physical locations, load cases, coordinate system, and units**.
-8. Archive mesh, displacements, stress extraction choices, eigenvalue/sign convention, solver version, and CSV results.
+8. Retain the mesh definition, displacement checkpoint, stress components and eigenvalue/sign convention with the reported results.
 
 ## References
 
@@ -548,4 +614,6 @@ The $x$ orientation locks badly in all these wedge variants. ABE **cannot** reco
 5. R. Hauptmann and K. Schweizerhof (1998), “A systematic development of solid-shell element formulations for linear and non-linear analyses employing only displacement degrees of freedom,” *International Journal for Numerical Methods in Engineering* **42**, 49–69.
 6. R. H. MacNeal and R. L. Harder (1985), “A proposed standard set of problems to test finite element accuracy,” *Finite Elements in Analysis and Design* **1**, 3–20.
 7. Computers and Structures, Inc. (CSI), *SAP2000 Verification: Analysis / Solids*, [5-001](https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Solids/Problem%205-001.pdf), [5-003](https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Solids/Problem%205-003.pdf), [5-004](https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Solids/Problem%205-004.pdf), [5-008](https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Solids/Problem%205-008.pdf), [5-010](https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Solids/Problem%205-010.pdf).
-8. Original project report: [CPENTA6_ABE_Formulation_Ary.md (v18.00.a)](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/Formulation/Solid/CPENTA6_ABE_Formulation_Ary.md). Also consult its further references to Taylor–Beresford–Wilson (1976), Wilson et al. (1973), Dvorkin–Bathe (1984), Bathe–Dvorkin (1986), and Büchter–Ramm (1992).
+8. Original project report: [CPENTA6_ABE_Formulation.md (v18.00.a)](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/Formulation/Solid/CPENTA6_ABE_Formulation.md). Also consult its further references to Taylor–Beresford–Wilson (1976), Wilson et al. (1973), Dvorkin–Bathe (1984), Bathe–Dvorkin (1986), and Büchter–Ramm (1992).
+
+9. Existing project benchmark observations: [all-solid comparison](../../solid_benchmark/comparison_all.md), [result archive](CPENTA6_ABE_benchmark_results.zip), and SAP2000 Example 5-007 pinched-dome reference as retained in the solid benchmark collection. No additional analyses were performed for this revision.
