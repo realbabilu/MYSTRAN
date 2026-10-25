@@ -8,7 +8,7 @@ MBP1C0 is a four-node bilinear shell combining projection-based finite element d
 
 ## 1. Scope and formulation identity
 
-The name refers to the Müller–Bischoff projection-based director construction at the lowest-order P1C0 setting. For the quadrilateral considered here, the geometric basis is bilinear Q1 with inter-element $C^0$ continuity. The physical director has two independent tangent components. The assessed 24-component shell representation additionally carries normal rotation, whose regularisation is specified separately.
+The name refers to the Müller–Bischoff projection-based director construction at the lowest-order P1C0 setting [1]. For the quadrilateral considered here, the geometric basis is bilinear Q1 with inter-element $C^0$ continuity. The physical director has two independent tangent components. The assessed 24-component shell representation additionally carries normal rotation, whose regularisation is specified separately.
 
 This report covers a small-strain, small-rotation isotropic assessment. Unit director interpolation is a geometric property; it does not by itself validate a full finite-rotation tangent, post-buckling path or nonlinear material model. The membrane EAS, ANS shear and drilling treatment described here are identified explicitly rather than attributed wholesale to the original geometrically nonlinear theory.
 
@@ -41,6 +41,8 @@ A small global nodal rotation changes the unit director through $\delta\mathbf{n
 *Figure 1. Corner numbering and oriented element sides. The geometry is bilinear and may be warped.*
 
 ## 3. Step 2: projection-based director interpolation
+
+The normalisation and tangent operators below follow the projection-based director construction [1].
 
 ### 3.1 Normalised director
 
@@ -128,6 +130,8 @@ Engineering shear uses twice the symmetric tensor off-diagonal component. On war
 
 ## 5. Step 4: PBFE-projected ANS transverse shear
 
+The edge-midpoint assumed-shear interpolation follows the classical four-node shell construction [4], evaluated with the PBFE director.
+
 The edge-midpoint tying points are $A=(0,-1)$, $B=(1,0)$, $C=(0,1)$ and $D=(-1,0)$. Interpolation must recover its own tying-point values:
 
 $$
@@ -152,7 +156,7 @@ $$
 \mathbf{D}_m=h\mathbf{C}_0,\qquad \mathbf{D}_b=\frac{h^3}{12}\mathbf{C}_0,\qquad \mathbf{D}_s=\frac56Gh\mathbf{I}_2.
 $$
 
-Four internal parameters enrich the membrane strain:
+Four internal parameters enrich the membrane strain using the EAS framework [2,3]:
 
 $$
 \boldsymbol\varepsilon_m=\mathbf{B}_m\mathbf{d}_e+\mathbf{M}\boldsymbol\alpha,\qquad \boldsymbol\alpha\in\mathbb{R}^{4}.
@@ -183,6 +187,8 @@ $$
 The total compatible stiffness includes membrane, bending and ANS shear. The EAS correction affects the membrane field; drilling is added as described separately below. Thickness factors are already contained in the integrated constitutive matrices.
 
 ## 7. Step 6: normal-rotation regularisation
+
+The assessed six-component representation uses a Hughes–Brezzi-type rotation–spin penalty [5], separate from the physical two-component director kinematics.
 
 The membrane continuum spin and interpolated normal rotation are
 
@@ -243,7 +249,7 @@ Related reports: [Q4EASANS](Q4EASANS_Formulation.md) and [Simo 1993 Q4](Simo1993
 
 ## 9. Mystran Benchmark: MBP1C0 versus Nastran CQUADR
 
-Results are matched by benchmark case, load case, response component and unit. The signed difference is
+The benchmark cases follow the SAP verification definitions [6]. Results are matched by benchmark case, load case, response component and unit. The signed difference is
 
 $$
 \Delta_q=100\frac{q_{\mathrm{MBP1C0}}-q_{\mathrm{CQUADR}}}{q_{\mathrm{CQUADR}}}.
@@ -300,14 +306,14 @@ The roof response changes with refinement and its magnitude is slightly higher t
 
 ## 11. References
 
-Müller, A., & Bischoff, M. (2022). A consistent finite element formulation of the geometrically non-linear Reissner–Mindlin shell model. *Archives of Computational Methods in Engineering*, 29, 3387–3434. [Publisher article](https://link.springer.com/article/10.1007/s11831-021-09702-7).
+[1] Müller, A., & Bischoff, M. (2022). A consistent finite element formulation of the geometrically non-linear Reissner–Mindlin shell model. *Archives of Computational Methods in Engineering*, 29, 3387–3434. [Publisher article](https://link.springer.com/article/10.1007/s11831-021-09702-7).
 
-Simo, J.C., & Rifai, M.S. (1990). A class of mixed assumed strain methods and the method of incompatible modes. *International Journal for Numerical Methods in Engineering*, 29, 1595–1638.
+[2] Simo, J.C., & Rifai, M.S. (1990). A class of mixed assumed strain methods and the method of incompatible modes. *International Journal for Numerical Methods in Engineering*, 29, 1595–1638.
 
-Andelfinger, U., & Ramm, E. (1993). EAS-elements for two-dimensional, three-dimensional, plate and shell structures and their equivalence to HR-elements. *International Journal for Numerical Methods in Engineering*, 36, 1311–1337.
+[3] Andelfinger, U., & Ramm, E. (1993). EAS-elements for two-dimensional, three-dimensional, plate and shell structures and their equivalence to HR-elements. *International Journal for Numerical Methods in Engineering*, 36, 1311–1337.
 
-Dvorkin, E.N., & Bathe, K.-J. (1984). A continuum mechanics based four-node shell element for general nonlinear analysis. *Engineering Computations*, 1, 77–88.
+[4] Dvorkin, E.N., & Bathe, K.-J. (1984). A continuum mechanics based four-node shell element for general nonlinear analysis. *Engineering Computations*, 1, 77–88.
 
-Hughes, T.J.R., & Brezzi, F. (1989). On drilling degrees of freedom. *Computer Methods in Applied Mechanics and Engineering*, 72, 105–121.
+[5] Hughes, T.J.R., & Brezzi, F. (1989). On drilling degrees of freedom. *Computer Methods in Applied Mechanics and Engineering*, 72, 105–121.
 
-Computers & Structures, Inc. *SAP2000 Verification Examples*, Problems 2-002, 2-003, 2-004, 2-006, 2-012 and 2-017.
+[6] Computers & Structures, Inc. *SAP2000 Verification Examples*, Problems 2-002, 2-003, 2-004, 2-006, 2-012 and 2-017.
