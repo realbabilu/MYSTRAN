@@ -8,9 +8,33 @@ All 132 MYSTRAN and 24 Nastran runs completed. Nastran needed a local scratch di
 
 References: IN=.0886 in; OUT primary=.5004 in; OUT shell-torsion alternative=.4546 in. The two OUT references are distinct. SAP Model C thick=.0884/.4558 in. A curve need not converge to1 against the primary OUT reference because shell torsion and end restraint differ from the hand calculation.
 
+## Reading the two OUT convergence plots
+
+**Both OUT plots use exactly the same computed tip UZ. Only the normalization denominator changes; they are not different solver runs.**
+
+| Plot | Vertical axis | Meaning of the reference |
+|---|---|---|
+| `tip_UZ` | UZ / 0.5004 in | Original independent beam calculation, using the rectangular-section torsion constant |
+| `tip_UZ_alternative_shell_torsion` | UZ / 0.4546 in | The same independent calculation corrected for the shell-theory torsion constant |
+
+The [CSI SAP2000 Problem 2-003 verification PDF](https://docs.csiamerica.com/manuals/sap2000/Verification/Analysis/Shells/Problem%202-003.pdf), in its out-of-plane discussion, explicitly explains this distinction. The beam calculation uses J=0.000045776 in^4, whereas the shell approximation uses J=b*t^3/3. Their ratio is 0.68664. Only the twisting contribution is corrected:
+
+- Original displacement: 0.35414 bending + 0.00010 shear + 0.14619 twisting = approximately **0.5004 in**.
+- Shell-torsion adjustment: 0.35414 + 0.00010 + 0.68664*0.14619 = approximately **0.4546 in**.
+
+For **DSQK at 180x6**, the computed UZ is **0.45393135 in** in both plots. Its ratios are **0.907137** against 0.5004 (signed error -9.2863%) and **0.998529** against 0.4546 (signed error -0.1471%). Thus DSQK is close to the shell-torsion reference; its position below one in the original-reference plot does not by itself establish a formulation defect.
+
+The corrected reference is still approximate: CSI also notes a mismatch between the modeled end restraints and the hand calculation. Conversely, closeness to 0.5004 alone does not establish better shell-theory accuracy. The different asymptotes of the other formulations warrant a separate torsional-response investigation; these plots do not establish its cause. Both references remain visible to avoid selecting a target after seeing the results.
+
+### IN displacement: reference 0.0886 in
+
 ![](figures/linear_003_convergence_2003_tip_UY.png)
 
+### OUT displacement: original beam reference 0.5004 in
+
 ![](figures/linear_003_convergence_2003_tip_UZ.png)
+
+### Same OUT displacement: shell-torsion reference 0.4546 in
 
 ![](figures/linear_003_convergence_2003_tip_UZ_alternative_shell_torsion.png)
 
