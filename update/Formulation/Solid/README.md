@@ -14,3 +14,5 @@ Equations are provided directly in the Markdown reports.
 - [CPENTA6 ABE: formulation and Nastran benchmarks](CPENTA6_ABE_Formulation.md).
 
 - [CHEXA8 EAS: covariant enhancement, consistent shear tying and Nastran benchmarks](CHEXA8_EAS_Formulation.md).
+
+- [CPYRAM13 Bedrosian: rational quadratic pyramid and Nastran benchmarks](CPYRAM13_Bedrosian_Formulation.md).
