@@ -141,3 +141,6 @@ Targets are independent references, not a blanket PASS. Cases2-009 and2-015 have
 ## Exclusions and open issues
 
 2-009 **EXCLUDED** (incorrect plate size/foundation); original 2-005 invalid A/B graphs **SUPERSEDED**; 2-002 **under review** for restraints/pivots; 2-016 t=.01 **FAILED NASTRAN7340**; native eigenvalue normalization remainsPENDING; 2-017 **reference conversion conditional**. No global ranking of elements is warranted by incomplete benchmarks.
+
+
+[Quadratic comparison tables (ZIP)](comparison_all.zip) — tables at published precision, with source reports and qualifications.

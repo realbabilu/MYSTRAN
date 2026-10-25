@@ -244,3 +244,6 @@ The `five_case` directory contains the inputs for the original MYSTRAN solid com
 Published numerical summaries are in [data](data); these CSVs are derived comparison data, not raw solver output files. Checksums and provenance for the distributed decks are in input_manifest.json (research data retained locally; see embedded tables).
 
 [Original five-case comparison](mystran_solid_comparison.md).
+
+
+[All-solid comparison data (ZIP)](comparison_all.zip) · [Five-case comparison data (ZIP)](mystran_solid_comparison.zip)

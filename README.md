@@ -9,7 +9,7 @@ This Mystran 18.a is fork of MYSTRANSOLVER https://github.com/MystranSolver/MYST
 The different is this MYSTRAN are using some decks that may not existed in Nastran, but useful in the Civil Engineering Purpose.
 For Example: PBEAMZ, PBeamZ is PBeamL but using more variables like auto-Tapered Cubic/Linear/Parabolic, and
 Stiffness Modifier that made Area Stiffness different, but real area can be used for grav selfweight density,
-More easier dimension parameter for section, etc. 
+More easier dimension parameter for section, etc.
 
 [Build Instructions](#Build-Instructions) |
 [Introduction](#Introduction) |
@@ -79,7 +79,7 @@ Research formulations for quadratic shell elements with 6 DOF per node: five **C
 - [Individual Q8/T6 formulations](update/Formulation/Shell/README.md)
 - [Shell benchmark overview](update/shell_benchmark/README.md)
 - [All-case reference-based comparison](update/shell_benchmark/comparison_all.md)
-- [Browser comparison](update/shell_benchmark/comparison_all.html)
+- [Browser comparison](update/shell_benchmark/comparison_all.md)
 - [Benchmark DAT archive](update/shell_benchmark/DAT/quadratic_shell_benchmark_DAT.zip)
 
 Note: CSV/Python files are research-internal and not part of the public repository.
@@ -98,7 +98,7 @@ create build folder and run it from there
 mkdir build
 cd build
 
-Minimum build : 
+Minimum build :
 
 cmake -G "MinGW Makefiles"  -DCMAKE_BUILD_TYPE=Release  -DCMAKE_C_COMPILER=gcc.exe  -DCMAKE_CXX_COMPILER=g++.exe  -DCMAKE_Fortran_COMPILER=gfortran.exe .. -DTPL_BLAS_LIBRARIES="..\libopenblas.dll.a"  -DMYSTRAN_USE_EXTERNAL_FEAST=OFF  -DMYSTRAN_USE_DMUMPS_SOLVER=OFF
 
@@ -112,7 +112,7 @@ cmake -G "MinGW Makefiles"  -DCMAKE_BUILD_TYPE=Release  -DCMAKE_C_COMPILER=gcc.e
 
 Use mumps with no-mpi, but using multi-thread optimized like OPENBLAS
 
-For Windows intel OneAPI use MKL LP64 and -DMYSTRAN_DISABLE_NDEBUG=ON for Release version, and edit slu_cnames.h SuperLU to UPCASE only. 
+For Windows intel OneAPI use MKL LP64 and -DMYSTRAN_DISABLE_NDEBUG=ON for Release version, and edit slu_cnames.h SuperLU to UPCASE only.
 
 # Introduction
 

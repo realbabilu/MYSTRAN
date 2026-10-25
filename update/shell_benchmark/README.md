@@ -23,6 +23,9 @@
 
 ## Linear shells
 
-[Linear comparisons](comparison_all_linear.md) · [Linear CSV](comparison_all_linear.csv) · [Linear publication QA](PUBLICATION_QA_linear.md) · [Linear DAT archive](DAT/linear_shell_benchmark_DAT.zip)
+[Linear comparisons](comparison_all_linear.md) · [Linear ZIP](comparison_all_linear.zip) · [Linear publication QA](PUBLICATION_QA_linear.md) · [Linear DAT archive](DAT/linear_shell_benchmark_DAT.zip)
 
 CQUAD4, CQUADR, CTRIA3 and CTRIAR use separate `_linear.md` reports. NATIVE denotes Nastran for the corresponding element card.
+
+
+[Quadratic comparison tables (ZIP)](comparison_all.zip) — tables at published precision, with source reports and qualifications.

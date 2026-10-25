@@ -32,7 +32,7 @@ DSQK twisted beam remains a known accuracy failure. DSG3 twisted LC1 regresses a
 
 ## Evidence and reproduction
 
-[Static CSV](static_comparison.csv), [Python/native parity CSV](python_native_parity.csv), [build provenance](build_provenance.json), [F06/OP2 checks](output_parity.json), and the two `*_drilling_only.patch` files are included. Python formulations are unchanged from the handoff. Raw DAT/F06/OP2 and per-run executable/input hashes are under `runs/`, `parity/`, and `output_check/` in the local investigation workspace.
+[Static ZIP](static_comparison.zip), [Python/native parity CSV](python_native_parity.csv), [build provenance](build_provenance.json), [F06/OP2 checks](output_parity.json), and the two `*_drilling_only.patch` files are included. Python formulations are unchanged from the handoff. Raw DAT/F06/OP2 and per-run executable/input hashes are under `runs/`, `parity/`, and `output_check/` in the local investigation workspace.
 
 Clean-build command: `cmake --build clean_build --parallel 6`, after configuration recorded in `clean_build/CMakeCache.txt` and `configure.log`. `GIT_SUBMODULE=OFF` avoids changing submodules. The build uses external OpenBLAS, sequential MUMPS and FEAST already configured for the project.
 
@@ -43,4 +43,4 @@ Candidate executable: `H:/Projects/MYSTRAN/codex_mod/dsqk_dsg3_handoff_20261025/
 
 The publication commit applies only the drilling operators and required local declarations to the latest remote kernels. The 264-run evidence above was generated from the explicitly hashed local source snapshot. That snapshot includes a separate uncommitted DSG3 thermal-gradient load correction; it is not included in this drilling commit. Consequently the recorded nonzero DSG3 2-014b response describes that local snapshot, not a thermal-support claim for the published kernel. Geometric stiffness and all other non-drilling paths are preserved from the remote version.
 
-Publication-kernel follow-up: **132/132 SOL 101 runs completed** after compiling the exact publication kernels into the fresh-build archive. [Publication CSV](publication_static_comparison.csv) and [publication build provenance](publication_build_provenance.json) are retained separately. This is a two-object publication verification relink, not a claim of a second full clean build from the remote checkout.
+Publication-kernel follow-up: **132/132 SOL 101 runs completed** after compiling the exact publication kernels into the fresh-build archive. [Publication ZIP](publication_static_comparison.zip) and [publication build provenance](publication_build_provenance.json) are retained separately. This is a two-object publication verification relink, not a claim of a second full clean build from the remote checkout.

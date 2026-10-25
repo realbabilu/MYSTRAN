@@ -62,7 +62,7 @@ Case 2 remains a DKMT18 baseline torsion known failure. Case 13 remains open in 
 
 ## Reproduction and artifacts
 
-[Annulus CSV](validation_case12_20261025/annulus_comparison.csv), [validation assertions](validation_case12_20261025/validation.json), [multi-gradient checks](validation_case12_20261025/multi_gradient_checks.json), [F06/OP2 checks](validation_case12_20261025/op2_checks.json), [build/source provenance](validation_case12_20261025/provenance.json).
+[Annulus ZIP](validation_case12_20261025/annulus_comparison.zip), [validation assertions](validation_case12_20261025/validation.json), [multi-gradient checks](validation_case12_20261025/multi_gradient_checks.json), [F06/OP2 checks](validation_case12_20261025/op2_checks.json), [build/source provenance](validation_case12_20261025/provenance.json).
 
 The local workspace `H:/Projects/MYSTRAN/codex_mod/case12_completion_20261025` contains `validate.py`, `evaluate.py`, `check_multi_gradient.py`, `check_op2.py`, `corner_regression.json`, raw DAT/F06/OP2, baseline snapshots and both build logs. Thermal patches were ported with exact-context checks instead of replacing outdated complete kernels.
 

@@ -69,4 +69,4 @@ The corrected reference is still approximate: CSI also notes a mismatch between 
 | CTRIAR_NATIVE | 0.08832367 | 0.996881 | 0.4976903 | 0.994585 | 1.094787 |
 | CTRIAR_T3FFD | 0.08647932 | 0.976065 | 0.4960001 | 0.991207 | 1.091069 |
 
-[All convergence data](comparison_all_linear.csv) · [Run statuses](data_linear/run_status_linear.csv) · [Model audit](data_linear/model_audit.json) · [Source-mesh parity](data_linear/convergence_2003_source_parity.json)
+[All convergence data](comparison_all_linear.zip) · [Run statuses](data_linear/run_status_linear.csv) · [Model audit](data_linear/model_audit.json) · [Source-mesh parity](data_linear/convergence_2003_source_parity.json)

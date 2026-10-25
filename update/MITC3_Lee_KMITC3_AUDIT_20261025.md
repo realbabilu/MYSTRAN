@@ -43,7 +43,7 @@ These completion counts are not accuracy-pass counts. The supplied model210/mode
 
 ![Native line convergence](validation_20261025/lee_nguyen_convergence.png)
 
-Full measurements: [CSV](validation_20261025/regression_comparison.csv). Hemisphere displacements are transformed from each GRID CD to basic axes before observation; the older raw T2=0 extraction is not used. Original two-triangle hemisphere and four-child benchmark results are kept separate.
+Full measurements: [ZIP](validation_20261025/regression_comparison.zip). Hemisphere displacements are transformed from each GRID CD to basic axes before observation; the older raw T2=0 extraction is not used. Original two-triangle hemisphere and four-child benchmark results are kept separate.
 
 ## Decisions
 

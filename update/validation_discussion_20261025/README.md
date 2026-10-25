@@ -35,6 +35,6 @@ The 22-formulation gradient test uses KMITC3+ instead of the removed HB selector
 
 SPC1 lists are split into at most six GRID IDs per physical line. 2-017 uses the source SAP active UX/UZ/RY on all nodes, including centroids, with original support restraints, and requests one Pcr. No DARPACK override or tolerance/backend change was introduced. Hemisphere displacements are transformed from each GRID output coordinate system to basic axes and evaluated at the actual force application nodes.
 
-Files: [comparison CSV](comparison.csv), [raw extracted results](results.json), [source/build provenance](provenance.json). Local workspace `H:/Projects/MYSTRAN/codex_mod/discussion_retest_20261025` retains the runner `retest.py`, DAT/F06/OP2, run.json input/executable hashes, CMake cache and logs. Source hash and executable hash are recorded separately from older isolated test binaries.
+Files: [comparison ZIP](comparison.zip), [raw extracted results](results.json), [source/build provenance](provenance.json). Local workspace `H:/Projects/MYSTRAN/codex_mod/discussion_retest_20261025` retains the runner `retest.py`, DAT/F06/OP2, run.json input/executable hashes, CMake cache and logs. Source hash and executable hash are recorded separately from older isolated test binaries.
 
 Counts: 11 cases closed for their documented defects (1,3,4,5,6,7,8,9,10,11,15); 3 unresolved (2,12,13); 2 retired (14,16). No automatic threshold was used to declare every completed solver run an accuracy pass.

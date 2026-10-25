@@ -1,4 +1,4 @@
-> **18 October CHEXA8 update:** [TIED vs EAS9v2](comparison_all.md#chexa8) uses the existing beam/dome benchmark meshes and previously published Nastran results. Comparison CSV (research data retained locally; see embedded tables).
+> **18 October CHEXA8 update:** [TIED vs EAS9v2](comparison_all.md#chexa8) uses the existing beam/dome benchmark meshes and previously published Nastran results. [Comparison data (ZIP)](comparison_all.zip).
 
 # Solid benchmarks: MYSTRAN vs Nastran
 
@@ -42,3 +42,6 @@ GitHub renders the Markdown reports and PNG figures directly. Download the HTML 
 ## Reference Hex Benchmarks
 https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Solids/Problem%205-001.pdf to https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Solids/Problem%205-013.pdf
 Computers & Structures, Inc. (2024). SAP2000 is a proven FEA well-known product for civil engineering by Computers & Structures, Inc.
+
+
+[All-solid comparison data (ZIP)](comparison_all.zip) · [Five-case comparison data (ZIP)](mystran_solid_comparison.zip)

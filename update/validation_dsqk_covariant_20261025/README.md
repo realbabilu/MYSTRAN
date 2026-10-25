@@ -47,6 +47,6 @@ The supplied constant-curvature shear-free test was rerun: rectangle energy rati
 
 ## Evidence / reproduction
 
-[Static comparison CSV](static_comparison.csv), [distorted plate CSV](distorted_plates.csv), [focused parity](parity_DSQK.json), [shape/recovery checks](extended_matrix_recovery.json), [curved/mapping/mixed tests](geometry_checks.json), [mechanical OP2](output_parity.json), [thermal OP2](op2_checks.json), [gradient/TREF](multi_gradient_checks.json), [provenance](provenance.json).
+[Static comparison ZIP](static_comparison.zip), [distorted plate CSV](distorted_plates.csv), [focused parity](parity_DSQK.json), [shape/recovery checks](extended_matrix_recovery.json), [curved/mapping/mixed tests](geometry_checks.json), [mechanical OP2](output_parity.json), [thermal OP2](op2_checks.json), [gradient/TREF](multi_gradient_checks.json), [provenance](provenance.json).
 
 Local workspace `H:/Projects/MYSTRAN/codex_mod/dsqk_covariant_20261025` retains source_before.f90, recovery_before.f90, the original handoff, Python logs, raw DAT/F06/OP2, run hashes and test drivers. The candidate build is an incremental rebuild of changed files in the preceding clean full publication build, not another full clean build of the dirty main tree. Tested executable: `bin/mystran.exe` in that workspace. Standard `source/Binaries/mystran.exe` is unchanged.
