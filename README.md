@@ -87,7 +87,58 @@ Note: CSV/Python files are research-internal and not part of the public reposito
 
 ## Formulation
 
-- [Solids Formulation](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.md) — Mathematical formulations for the eight NEWSOLID solid topologies and existing benchmark comparisons. [Alternative HTML version](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.md): download the [formulation folder](update/Formulation/Solid) to view it with its figures locally.
+Mathematical formulations, nodal numbering, integration rules, figures and existing benchmark comparisons are available in the reports below.
+
+### Solid elements
+
+[Solid formulation index](update/Formulation/Solid/README.md) · [Continuum overview: all eight solid topologies](update/Formulation/Solid/NEWSOLID_CONTINUUM_FORMULATIONS.md)
+
+The continuum overview also covers CTETRA10, CPENTA15, CHEXA20 and CPYRAM5, including the applicable selective-integration choices. Detailed reports for the special formulations are:
+
+- [TETRA4 NEWSOLID — nodal strain smoothing](update/Formulation/Solid/TETRA4_Formulation.md)
+- [CPYRAM13 Bedrosian — rational quadratic pyramid](update/Formulation/Solid/CPYRAM13_Bedrosian_Formulation.md)
+- [CHEXA8 EAS — covariant enhancement and consistent shear tying](update/Formulation/Solid/CHEXA8_EAS_Formulation.md)
+- [CPENTA6 ABE — assumed shear and condensed enhanced strains](update/Formulation/Solid/CPENTA6_ABE_Formulation.md)
+
+### Shell elements
+
+[Shell formulation directory](update/Formulation/Shell) · [Quadratic Q8/T6 overview](update/Formulation/Shell/CQUAD8_CTRIA6_QUADRATIC_SHELL_FORMULATIONS.md)
+
+#### Four-node quadrilateral shells
+
+- [DSQK](update/Formulation/Shell/DSQK_formulation.md)
+- [DKMQ20](update/Formulation/Shell/DKMQ20_Formulation.md)
+- [DKMQ24](update/Formulation/Shell/DKMQ24_formulation.md)
+- [DKMQ24 EAS](update/Formulation/Shell/DKMQ24EAS_Formulation_and_Benchmarks.md)
+- [DKMQ24 AU](update/Formulation/Shell/DKMQ24AU_Formulation.md)
+- [Simo 1989](update/Formulation/Shell/Simo1989_Formulation.md)
+- [Simo 1993 Q4](update/Formulation/Shell/Simo1993_Q4_Formulation.md)
+- [Q4EASANS](update/Formulation/Shell/Q4EASANS_Formulation.md)
+- [MBP1C0](update/Formulation/Shell/MBP1C0_Formulation.md)
+- [Q4RS](update/Formulation/Shell/Q4RS_Formulation.md)
+
+#### Three-node triangular shells
+
+- [DKMT18](update/Formulation/Shell/DKMT18_Formulation.md)
+- [DSG3](update/Formulation/Shell/DSG3_Formulation.md)
+- [MITC3+ Lee](update/Formulation/Shell/MITC3Plus_Lee_Formulation.md)
+- [kMITC3+ Nguyen 2024](update/Formulation/Shell/KMITC3Plus_Nguyen2024_Formulation.md)
+- [T3FF / T3FFD](update/Formulation/Shell/T3FF_Formulation.md)
+
+#### Quadratic quadrilateral shells — Q8
+
+- [SIMOQ8](update/Formulation/Shell/SIMOQ8_v13.md)
+- [MITC8 / MITC8D](update/Formulation/Shell/MITC8_v4.md)
+- [ANS8BDG6](update/Formulation/Shell/ANS8BDG6_v4.md)
+- [HBQ8](update/Formulation/Shell/HBQ8_v3.md)
+- [MacNeal Q8 with drilling](update/Formulation/Shell/MACQ8D_v3_drill.md)
+
+#### Quadratic triangular shells — T6
+
+- [SIMOT6](update/Formulation/Shell/SIMOT6_v2.md)
+- [MITC6](update/Formulation/Shell/MITC6_v5e.md)
+- [MacNeal MH6T](update/Formulation/Shell/MH6T_v4.md)
+- [Rezaiee 2017](update/Formulation/Shell/REZAIEE_v3.md)
 
 # Build Instructions
 
