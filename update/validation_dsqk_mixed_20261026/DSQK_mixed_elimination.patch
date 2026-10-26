@@ -1,0 +1,116 @@
+diff --git a/Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90 b/Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90
+index 046d2b6e..35e015c9 100644
+--- a/Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90
++++ b/Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90
+@@ -44,7 +44,7 @@
+                                          MASS_PER_UNIT_AREA, NUM_EMG_FATAL_ERRS, PCOMP_PROPS, PPE, PRESS, PTE, SHELL_A,         &
+                                          SHELL_D, SHELL_T, STRESS, TE, TREF, XEB
+ 
+-      USE MODEL_STUF, ONLY            : SHELL_DALP
++      USE MODEL_STUF, ONLY            : SHELL_DALP, SHELL_T_MOD
+       USE ELMDIS_Interface
+       USE ELEM_STRE_STRN_ARRAYS_Interface
+       USE ORDER_GAUSS_Interface
+@@ -133,7 +133,7 @@
+          CALL ORDER_GAUSS ( 2, SS, HH )
+       ENDIF
+ 
+-      AN4 = AN_DSQK ( SIDE_C, SIDE_S, SIDE_L )
++      AN4 = AN_MIXED_DSQK ( XLOCAL, SIDE_C, SIDE_S, SIDE_L )
+ 
+       IF ((OPT(3) == 'Y') .OR. (OPT(4) == 'Y')) THEN
+          DO I=1,2
+@@ -638,6 +638,93 @@
+       DPETA(4) = -ETA*(ONE - XI)
+       END SUBROUTINE PDERIV_DSQK
+ 
++!     Mixed-strain elimination: (A_gamma - A_delta) An = Au.
++!     Retains covariant nodal shear energy and consistent-spin drilling.
++!     This is the controlled hybrid tested against the 26-Oct Python reference;
++!     it is not a replacement of the complete assumed-shear energy formulation.
++      FUNCTION AN_MIXED_DSQK ( XLOC, CK, SK, LK ) RESULT(ANOUT)
++      REAL(DOUBLE), INTENT(IN) :: XLOC(4,2), CK(4), SK(4), LK(4)
++      REAL(DOUBLE) :: ANOUT(4,20), AMAT(4,4), AU(4,20), BSD(2,4)
++      REAL(DOUBLE), PARAMETER :: TXI(4) = (/0.0D0,1.0D0,0.0D0,-1.0D0/)
++      REAL(DOUBLE), PARAMETER :: TETA(4) = (/-1.0D0,0.0D0,1.0D0,0.0D0/)
++      INTEGER(LONG), PARAMETER :: EDGE_I(4) = (/1,2,3,4/), EDGE_J(4) = (/2,3,4,1/)
++      INTEGER(LONG) :: KK, CI, CJ, IPIV(4), INFO
++      EXTERNAL DGESV
++!     Preserve the historical thin/no-shear property path when the shared
++!     property routine substituted artificial shear rigidity (SHELL_T_MOD).
++!     Mixed elimination is defined here for the physical shear rigidity.
++      IF ((SHELL_T_MOD == 'Y') .OR. (SHELL_T(1,1) <= ZERO)) THEN
++         ANOUT = AN_DSQK(CK,SK,LK)
++         RETURN
++      ENDIF
++      AU = ZERO
++      AMAT = ZERO
++      DO KK=1,4
++         CI = (EDGE_I(KK)-1)*5
++         CJ = (EDGE_J(KK)-1)*5
++         AU(KK,CI+3) = -ONE/LK(KK)
++         AU(KK,CJ+3) =  ONE/LK(KK)
++         AU(KK,CI+5) =  0.5D0*CK(KK)
++         AU(KK,CJ+5) =  0.5D0*CK(KK)
++         AU(KK,CI+4) = -0.5D0*SK(KK)
++         AU(KK,CJ+4) = -0.5D0*SK(KK)
++         BSD = BS_DELTA_MIXED_DSQK(XLOC,CK,SK,TXI(KK),TETA(KK))
++         AMAT(KK,:) = CK(KK)*BSD(1,:) + SK(KK)*BSD(2,:)
++         AMAT(KK,KK) = AMAT(KK,KK) - TWO/3.0D0
++      ENDDO
++      ANOUT = AU
++      CALL DGESV(4,20,AMAT,4,IPIV,ANOUT,4,INFO)
++      IF (INFO /= 0) THEN
++         NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
++         FATAL_ERR = FATAL_ERR + 1
++         WRITE(ERR,'(A,I12,A,I6)') ' *ERROR: DSQK mixed elimination failed, EID=', EID, ' INFO=', INFO
++         WRITE(F06,'(A,I12,A,I6)') ' *ERROR: DSQK mixed elimination failed, EID=', EID, ' INFO=', INFO
++         CALL OUTA_HERE('Y')
++      ENDIF
++      END FUNCTION AN_MIXED_DSQK
++
++      FUNCTION BS_DELTA_MIXED_DSQK ( XLOC, CK, SK, XI, ETA ) RESULT(BSOUT)
++      REAL(DOUBLE), INTENT(IN) :: XLOC(4,2), CK(4), SK(4), XI, ETA
++      REAL(DOUBLE) :: BSOUT(2,4), HSM(2,6), TJ3(3,3), TJ6(6,6), TD(6,4)
++      REAL(DOUBLE) :: J11, J12, J21, J22, DJ, RATIO, NUVAL, I11, I12, I21, I22
++!     Isotropic scalar Db/Ds and Poisson ratio, including property modifiers.
++      RATIO = SHELL_D(1,1)/SHELL_T(1,1)
++      NUVAL = ZERO
++      IF (ABS(SHELL_D(1,1)) > 1.0D-30) NUVAL = SHELL_D(1,2)/SHELL_D(1,1)
++      HSM = ZERO
++      HSM(1,1) = RATIO
++      HSM(1,2) = RATIO*(ONE-NUVAL)/TWO
++      HSM(1,6) = RATIO*(ONE+NUVAL)/TWO
++      HSM(2,3) = RATIO*(ONE+NUVAL)/TWO
++      HSM(2,4) = RATIO*(ONE-NUVAL)/TWO
++      HSM(2,5) = RATIO
++      CALL JAC_DSQK(XLOC,XI,ETA,J11,J12,J21,J22,DJ)
++!     JAC_DSQK returns the mapping Jacobian; the Python j_ij in Tj are
++!     its inverse. Convert explicitly before constructing derivative products.
++      I11 = J22/DJ
++      I12 = -J12/DJ
++      I21 = -J21/DJ
++      I22 = J11/DJ
++      J11 = I11
++      J12 = I12
++      J21 = I21
++      J22 = I22
++      TJ3(1,:) = (/J11*J11, J12*J12, TWO*J11*J12/)
++      TJ3(2,:) = (/J21*J21, J22*J22, TWO*J21*J22/)
++      TJ3(3,:) = (/J11*J21, J12*J22, J11*J22+J12*J21/)
++      TJ6 = ZERO
++      TJ6(1:3,1:3) = TJ3
++      TJ6(4:6,4:6) = TJ3
++      TD = ZERO
++      TD(1,:) = (/-CK(1)*(ONE-ETA), ZERO, -CK(3)*(ONE+ETA), ZERO/)
++      TD(2,:) = (/ZERO, -CK(2)*(ONE+XI), ZERO, -CK(4)*(ONE-XI)/)
++      TD(3,:) = (/CK(1)*XI, -CK(2)*ETA, -CK(3)*XI, CK(4)*ETA/)
++      TD(4,:) = (/-SK(1)*(ONE-ETA), ZERO, -SK(3)*(ONE+ETA), ZERO/)
++      TD(5,:) = (/ZERO, -SK(2)*(ONE+XI), ZERO, -SK(4)*(ONE-XI)/)
++      TD(6,:) = (/SK(1)*XI, -SK(2)*ETA, -SK(3)*XI, SK(4)*ETA/)
++      BSOUT = MATMUL(HSM,MATMUL(TJ6,TD))
++      END FUNCTION BS_DELTA_MIXED_DSQK
++
+       FUNCTION AN_DSQK ( CK, SK, LK ) RESULT(ANOUT)
+       REAL(DOUBLE), INTENT(IN) :: CK(4), SK(4), LK(4)
+       REAL(DOUBLE) :: ANOUT(4,20)

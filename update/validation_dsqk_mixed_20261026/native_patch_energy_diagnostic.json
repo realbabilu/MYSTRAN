@@ -1,0 +1,38 @@
+[
+  {
+    "thickness": 0.001,
+    "case": "constant_curvature",
+    "native_energy_ratio": 0.9999999999881833,
+    "python_energy_ratio": 0.9999999999834946
+  },
+  {
+    "thickness": 0.001,
+    "case": "constant_shear",
+    "native_energy_ratio": 1.0003154950716433,
+    "python_energy_ratio": 1.000315495071643
+  },
+  {
+    "thickness": 0.1,
+    "case": "constant_curvature",
+    "native_energy_ratio": 1.0000000000000013,
+    "python_energy_ratio": 0.9999999999999994
+  },
+  {
+    "thickness": 0.1,
+    "case": "constant_shear",
+    "native_energy_ratio": 1.2047057553014768,
+    "python_energy_ratio": 1.2047057553014762
+  },
+  {
+    "thickness": 1.0,
+    "case": "constant_curvature",
+    "native_energy_ratio": 1.000000000000001,
+    "python_energy_ratio": 1.0
+  },
+  {
+    "thickness": 1.0,
+    "case": "constant_shear",
+    "native_energy_ratio": 1.0043663430595031,
+    "python_energy_ratio": 1.0043663430595042
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-26",
+  "source_base": "45ae92e02c141b99a45be8741f17f05d3312566a",
+  "source_deltas": [
+    "inherited_linear_snapshot.patch",
+    "DSQK_mixed_elimination.patch"
+  ],
+  "executable_sha256": "131bb8959464757f244ae9014bebcc8f7f165d1c09419ba9c3c47be040658635",
+  "source_sha256": {
+    "Source/EMG/EMG4/CQUAD4_DSQK_RHR.f90": "42f07c2f1445c7279401df6465f61019a7caf9552951fd1915c0adf512047dfa",
+    "Source/EMG/EMG4/CTRIAR_DKMT18.f90": "970ed4720dff5b9474cd3b9d13611a10482f0efa084fce485ae6644c80eed087",
+    "Source/EMG/EMG4/CTRIA3_DSG3.f90": "546404c244c3a325d892342edf80f888f64ebf5db5c99af6b53661c218aee97a"
+  },
+  "native_DSQK_configurations": 83,
+  "unchanged_kernel_controls": 4,
+  "native_matrix_checks": 12,
+  "response_parity_checks": 15,
+  "max_matrix_relative_difference": 8.407527401443682e-16,
+  "max_response_relative_difference": 1.7478878561544856e-07,
+  "controls_exactly_equal": true,
+  "shared_solver_defaults_changed": false,
+  "residual_acceptance_limit": "1e-6 unchanged",
+  "drilling_scale": 0.03
+}

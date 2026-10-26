@@ -1,0 +1,5 @@
+{
+  "blank_MID3_vs_explicit_MID3_1_relative_KGG_difference": 0.0,
+  "explicit_zero_MID3_probe": "rejected by existing property parser; no valid stiffness result and not used for acceptance",
+  "note": "Blank MID3 is defaulted in this input path; it is not a zero-shear test."
+}

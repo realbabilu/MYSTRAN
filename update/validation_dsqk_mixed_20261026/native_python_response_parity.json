@@ -1,0 +1,92 @@
+[
+  {
+    "case": "prob_2_002_nx24_cquadr_simo",
+    "loadcase": 1,
+    "relative_full_vector_difference": 3.0612021484347808e-12,
+    "python_free_residual": 2.5204630820902096e-14
+  },
+  {
+    "case": "prob_2_002_nx24_cquadr_simo",
+    "loadcase": 2,
+    "relative_full_vector_difference": 1.0436264606147954e-07,
+    "python_free_residual": 4.260031435291502e-11
+  },
+  {
+    "case": "prob_2_002_nx24_cquadr_simo",
+    "loadcase": 3,
+    "relative_full_vector_difference": 1.0270032213662888e-07,
+    "python_free_residual": 1.8197637043372653e-10
+  },
+  {
+    "case": "prob_2_002_nx24_cquadr_simo",
+    "loadcase": 4,
+    "relative_full_vector_difference": 1.480185859303305e-07,
+    "python_free_residual": 4.552693080057179e-13
+  },
+  {
+    "case": "prob_2_002_nx24_cquadr_simo",
+    "loadcase": 5,
+    "relative_full_vector_difference": 1.5119276969746626e-07,
+    "python_free_residual": 1.3369200949274471e-12
+  },
+  {
+    "case": "prob_2_002_nx24_cquadr_simo",
+    "loadcase": 6,
+    "relative_full_vector_difference": 2.478703789850755e-10,
+    "python_free_residual": 3.0659791777398514e-11
+  },
+  {
+    "case": "prob_2_004_nx24_cquadr_simo",
+    "loadcase": 1,
+    "relative_full_vector_difference": 7.622116759394857e-08,
+    "python_free_residual": 1.7734076068100026e-11
+  },
+  {
+    "case": "prob_2_004_nx24_cquadr_simo",
+    "loadcase": 2,
+    "relative_full_vector_difference": 1.7478878561544856e-07,
+    "python_free_residual": 6.810841278401945e-11
+  },
+  {
+    "case": "prob_2_006_n16_cquadr_simo",
+    "loadcase": 1,
+    "relative_full_vector_difference": 1.574911741536775e-07,
+    "python_free_residual": 5.2661150670110324e-11
+  },
+  {
+    "case": "prob_2_002_twoaxis_nx48_ny4",
+    "loadcase": 4,
+    "relative_full_vector_difference": 1.3377737862350504e-07,
+    "python_free_residual": 3.909142213817295e-12
+  },
+  {
+    "case": "prob_2_002_twoaxis_nx96_ny8",
+    "loadcase": 4,
+    "relative_full_vector_difference": 1.2528455077550772e-07,
+    "python_free_residual": 1.1092397453919964e-11
+  },
+  {
+    "case": "prob_2_002_twoaxis_nx192_ny16",
+    "loadcase": 4,
+    "relative_full_vector_difference": 1.2496861089888905e-07,
+    "python_free_residual": 4.6896503478385113e-11
+  },
+  {
+    "case": "prob_2_007_convergence_n32",
+    "loadcase": 1,
+    "relative_full_vector_difference": 9.194539344886018e-08,
+    "python_free_residual": 8.304976331327065e-09
+  },
+  {
+    "case": "prob_2_003c_nx180_ny6",
+    "loadcase": 1,
+    "relative_full_vector_difference": 7.798478143364222e-08,
+    "python_free_residual": 2.5532084334694117e-09
+  },
+  {
+    "case": "prob_2_003c_nx180_ny6",
+    "loadcase": 2,
+    "relative_full_vector_difference": 9.203173758961249e-08,
+    "python_free_residual": 5.006021587699539e-09
+  }
+]

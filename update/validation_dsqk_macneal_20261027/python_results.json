@@ -1,0 +1,396 @@
+{
+  "archive_url": "https://raw.githubusercontent.com/realbabilu/MYSTRAN/v18.00.a/update/shell_benchmark/DAT/linear_shell_benchmark_DAT.zip",
+  "archive_sha256": "ce004e92d5558345ca24322effb76030bd4ce31ad70ae6aed6a4aece389c3a7f",
+  "results": [
+    {
+      "deck": "prob_2_001_mh_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_ShellElement",
+      "case": 1,
+      "translation_max_abs": 1.4907779871675686e-19,
+      "rotation_max_abs": 1.1577218415313538e-18,
+      "membrane_strain_max_abs_error": 5.421010862427522e-18,
+      "curvature_max_abs_error": 0.0,
+      "shear_max_abs_error": 0.0,
+      "energies": [
+        4.4159999999999984e-05,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "energy_ratio": 0.9999999999999997,
+      "reaction_force_moment_balance_abs": [
+        2.498001805406602e-16,
+        -5.551115123125783e-17,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "free_residual_abs": 6.05557723012918e-16
+    },
+    {
+      "deck": "prob_2_001_mh_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_ShellElement",
+      "case": 2,
+      "translation_max_abs": 3.640547607298983e-18,
+      "rotation_max_abs": 2.573760432209027e-16,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 7.995882601863347e-15,
+      "shear_max_abs_error": 2.168404344971009e-19,
+      "energies": [
+        0.0,
+        3.68e-12,
+        4.2085961303647513e-41,
+        6.7139459118573e-38
+      ],
+      "energy_ratio": 0.9999999999999998,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -8.673617379884035e-19,
+        -1.0776509020340845e-20,
+        -7.337340187529121e-19,
+        0.0
+      ],
+      "free_residual_abs": 6.2125175200159116e-18
+    },
+    {
+      "deck": "prob_2_001_mh_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_MixedElimination",
+      "case": 1,
+      "translation_max_abs": 1.4907779871675686e-19,
+      "rotation_max_abs": 1.1577218415313538e-18,
+      "membrane_strain_max_abs_error": 5.421010862427522e-18,
+      "curvature_max_abs_error": 0.0,
+      "shear_max_abs_error": 0.0,
+      "energies": [
+        4.4159999999999984e-05,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "energy_ratio": 0.9999999999999997,
+      "reaction_force_moment_balance_abs": [
+        2.498001805406602e-16,
+        -5.551115123125783e-17,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "free_residual_abs": 6.05557723012918e-16
+    },
+    {
+      "deck": "prob_2_001_mh_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_MixedElimination",
+      "case": 2,
+      "translation_max_abs": 3.3406979439709605e-18,
+      "rotation_max_abs": 1.4038385254613872e-16,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 5.8516559653387645e-15,
+      "shear_max_abs_error": 2.168404344971009e-19,
+      "energies": [
+        0.0,
+        3.68e-12,
+        3.512915111798134e-41,
+        7.175371639107397e-38
+      ],
+      "energy_ratio": 0.9999999999999998,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -1.8431436932253575e-18,
+        1.802591990875558e-20,
+        4.227008735431729e-19,
+        0.0
+      ],
+      "free_residual_abs": 3.312679908335259e-18
+    },
+    {
+      "deck": "prob_2_001_mh_cquadr_simo.dat",
+      "variant": "MixedShearOnly",
+      "case": 1,
+      "translation_max_abs": 1.4907779871675686e-19,
+      "rotation_max_abs": 1.1577218415313538e-18,
+      "membrane_strain_max_abs_error": 5.421010862427522e-18,
+      "curvature_max_abs_error": 0.0,
+      "shear_max_abs_error": 0.0,
+      "energies": [
+        4.4159999999999984e-05,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "energy_ratio": 0.9999999999999997,
+      "reaction_force_moment_balance_abs": [
+        2.498001805406602e-16,
+        -5.551115123125783e-17,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "free_residual_abs": 6.05557723012918e-16
+    },
+    {
+      "deck": "prob_2_001_mh_cquadr_simo.dat",
+      "variant": "MixedShearOnly",
+      "case": 2,
+      "translation_max_abs": 1.0164395367051604e-20,
+      "rotation_max_abs": 3.2526065174565133e-19,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 9.75781955236954e-18,
+      "shear_max_abs_error": 1.0587911840678754e-22,
+      "energies": [
+        0.0,
+        3.679999999999999e-12,
+        1.643131233219654e-41,
+        1.764333478876662e-44
+      ],
+      "energy_ratio": 0.9999999999999996,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -2.6999175193730823e-21,
+        -4.632211430296955e-23,
+        5.790264287871194e-22,
+        0.0
+      ],
+      "free_residual_abs": 1.34030963090821e-21
+    },
+    {
+      "deck": "prob_2_001_patchbending_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_ShellElement",
+      "case": 4,
+      "translation_max_abs": 3.469446951953614e-18,
+      "rotation_max_abs": 1.2860077721688415e-18,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 1.1327912011053315e-18,
+      "shear_max_abs_error": 2.6020852139652106e-18,
+      "energies": [
+        0.0,
+        4.4444444444444434e-09,
+        2.5424712085723117e-39,
+        3.17760797809393e-32
+      ],
+      "energy_ratio": 0.9999999999999998,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -2.6645352591003757e-15,
+        -9.84975989659631e-15,
+        1.6764367671839864e-14,
+        0.0
+      ],
+      "free_residual_abs": 4.577566798522237e-16
+    },
+    {
+      "deck": "prob_2_001_patchbending_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_MixedElimination",
+      "case": 4,
+      "translation_max_abs": 5.204170427930421e-18,
+      "rotation_max_abs": 1.734723475976807e-18,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 2.216993373590836e-18,
+      "shear_max_abs_error": 1.734723475976807e-18,
+      "energies": [
+        0.0,
+        4.444444444444444e-09,
+        6.539623051284317e-39,
+        3.176587909757404e-32
+      ],
+      "energy_ratio": 1.0,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -2.220446049250313e-16,
+        -8.628514569508638e-15,
+        -1.7208456881689926e-14,
+        0.0
+      ],
+      "free_residual_abs": 3.052608629176561e-15
+    },
+    {
+      "deck": "prob_2_001_patchbending_cquadr_simo.dat",
+      "variant": "MixedShearOnly",
+      "case": 4,
+      "translation_max_abs": 5.204170427930421e-18,
+      "rotation_max_abs": 8.673617379884035e-19,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 1.754628750237283e-18,
+      "shear_max_abs_error": 5.169878828456423e-25,
+      "energies": [
+        0.0,
+        4.444444444444445e-09,
+        8.694422617984917e-39,
+        1.12334278859774e-45
+      ],
+      "energy_ratio": 1.0000000000000002,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -3.8381180422460484e-22,
+        -3.917527381051139e-21,
+        4.4998625322884706e-21,
+        0.0
+      ],
+      "free_residual_abs": 5.664780210479336e-22
+    },
+    {
+      "deck": "prob_2_001_patchshear_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_ShellElement",
+      "case": 3,
+      "translation_max_abs": 2.9070530704888853e-11,
+      "rotation_max_abs": 0.0,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 0.0007485916592546998,
+      "shear_max_abs_error": 5.444178311289627e-12,
+      "energies": [
+        0.0,
+        0.0,
+        2.1361562537991614e-09,
+        0.016666666666666666
+      ],
+      "energy_ratio": 1.0000001281693753,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -3.3306690738754696e-16,
+        0.0,
+        -4.440892098500626e-15,
+        0.0
+      ],
+      "free_residual_abs": 0.0
+    },
+    {
+      "deck": "prob_2_001_patchshear_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_MixedElimination",
+      "case": 3,
+      "translation_max_abs": 2.9070504684036713e-11,
+      "rotation_max_abs": 0.0,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 0.0007485915482318346,
+      "shear_max_abs_error": 5.444173540800068e-12,
+      "energies": [
+        0.0,
+        0.0,
+        2.1361556958680828e-09,
+        0.01666666666666667
+      ],
+      "energy_ratio": 1.000000128169342,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -6.661338147750939e-16,
+        3.552713678800501e-15,
+        8.881784197001252e-16,
+        0.0
+      ],
+      "free_residual_abs": 2.220446049250313e-16
+    },
+    {
+      "deck": "prob_2_001_patchshear_cquadr_simo.dat",
+      "variant": "MixedShearOnly",
+      "case": 3,
+      "translation_max_abs": 0.0001793131698621551,
+      "rotation_max_abs": 0.0,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 0.0007253807347353865,
+      "shear_max_abs_error": 0.0009999998870291217,
+      "energies": [
+        0.0,
+        0.0,
+        2.133817285579274e-09,
+        2.753668442736303e-16
+      ],
+      "energy_ratio": 1.280290536567671e-07,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        9.26442286059391e-23,
+        -2.117582368135751e-22,
+        -2.117582368135751e-22,
+        0.0
+      ],
+      "free_residual_abs": 1.5881867761018131e-22
+    },
+    {
+      "deck": "prob_2_001_patchtwist_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_ShellElement",
+      "case": 5,
+      "translation_max_abs": 1.0408340855860843e-17,
+      "rotation_max_abs": 2.6020852139652106e-18,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 3.279711571768651e-18,
+      "shear_max_abs_error": 3.469446951953614e-18,
+      "energies": [
+        0.0,
+        6.666666666666668e-09,
+        1.1061082759098347e-38,
+        7.098433071485377e-32
+      ],
+      "energy_ratio": 0.9999999999999998,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -2.831068712794149e-15,
+        8.014422459012849e-15,
+        1.659783421814609e-14,
+        0.0
+      ],
+      "free_residual_abs": 6.5653524581199634e-15
+    },
+    {
+      "deck": "prob_2_001_patchtwist_cquadr_simo.dat",
+      "variant": "DSQK_ConsistentSpin_CovShear_MixedElimination",
+      "case": 5,
+      "translation_max_abs": 6.938893903907228e-18,
+      "rotation_max_abs": 1.734723475976807e-18,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 2.433833808087937e-18,
+      "shear_max_abs_error": 3.469446951953614e-18,
+      "energies": [
+        0.0,
+        6.666666666666668e-09,
+        8.803148265994199e-39,
+        6.026182534274107e-32
+      ],
+      "energy_ratio": 0.9999999999999998,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        2.7755575615628914e-15,
+        2.9455604622086184e-14,
+        -3.774758283725532e-14,
+        0.0
+      ],
+      "free_residual_abs": 5.811463456374355e-15
+    },
+    {
+      "deck": "prob_2_001_patchtwist_cquadr_simo.dat",
+      "variant": "MixedShearOnly",
+      "case": 5,
+      "translation_max_abs": 3.469446951953614e-18,
+      "rotation_max_abs": 2.6020852139652106e-18,
+      "membrane_strain_max_abs_error": 0.0,
+      "curvature_max_abs_error": 2.15485181781494e-18,
+      "shear_max_abs_error": 6.203854594147708e-25,
+      "energies": [
+        0.0,
+        6.666666666666669e-09,
+        9.097207055009332e-39,
+        1.608076505124252e-45
+      ],
+      "energy_ratio": 1.0,
+      "reaction_force_moment_balance_abs": [
+        0.0,
+        0.0,
+        -1.2176098616780567e-21,
+        -1.4505439221729893e-20,
+        5.346895479542771e-21,
+        0.0
+      ],
+      "free_residual_abs": 9.75080000843207e-22
+    }
+  ]
+}

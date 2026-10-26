@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-27",
+  "source_zip_sha256": "82194067a9fada20f5d40aac768aa1ba268e4a556f7171c495006851ad77e2bb",
+  "local_dat_archive_sha256": "ce004e92d5558345ca24322effb76030bd4ce31ad70ae6aed6a4aece389c3a7f",
+  "input_files": {
+    "input\\audit_macneal_patch.py": "53a22c9b892b805c5943a806817fda418c61abce8126c3da8d5e5730fe9f70d9",
+    "input\\DSQK_MixedHybrid_CODEX_HANDOFF_20261027.md": "4202a5f56700b4900cb0546876ce29337c0740c064653ab9a426ede64f5d43f4",
+    "input\\macneal_patch_audit\\prob_2_001_mh_cquadr_simo.dat": "fbdf24d615ae66c5b64ee73daa4f0e18898f9f27fee856b600ba1c88cecea8d6",
+    "input\\macneal_patch_audit\\prob_2_001_patchbending_cquadr_simo.dat": "360e64cf2bd86838dc4c136f3528da9a2963ca5a1fb96fbf922778941d2d1449",
+    "input\\macneal_patch_audit\\prob_2_001_patchshear_cquadr_simo.dat": "9d6dda6682767285f92ad94535260adb41128d42c9dc21605bc185975ad82fce",
+    "input\\macneal_patch_audit\\prob_2_001_patchtwist_cquadr_simo.dat": "63b7f8e5f1e6c1dc8c16ad1aff46704432a26b2e9bc7634ef0990160e815f7ab",
+    "input\\macneal_patch_audit\\REPORT.md": "e53fb929f081c982536812646219c5c52ea351a638384b4814f704e19a5adc73",
+    "input\\macneal_patch_audit\\results.json": "0e31ba3f97a813107089ae0cf23ea66d99531a203bad2e301df510bc7e9256bd",
+    "input\\python_reference\\core.py": "e764392fa7ba5027abc5d5a91d970e70edc58c8e6900b165b1869283c9104d48",
+    "input\\python_reference\\DSQK_ConsistentSpin_CovShear_FullShearCandidates.py": "e266148c50e19c8e9673c28225553ad027efcced5d98e0aec42448942fd3fd11",
+    "input\\python_reference\\DSQK_ConsistentSpin_CovShear_MixedElimination.py": "0b0529d51be11308495d48c9931d536c879c7730886ee8a80615d2f195fe7614",
+    "input\\python_reference\\DSQK_ConsistentSpin_CovShear_ShellElement.py": "1ccdbd0231ab203c6027cbbab716d36b6c659a2ff9038359f0188de82958fab5",
+    "input\\python_reference\\DSQK_ConsistentSpin_ShellElement.py": "b4bc9adf4fbe766a7170f33fbad70f197aba88dc861b6291702401446c7ab1c4",
+    "input\\python_reference\\DSQK_ShellElement_RHR.py": "32da11fb8c6f81a72810b819dcb26643288cb1f217708c9d592f9261a8760c03",
+    "input\\support\\assemble_reference.py": "7413a8fc20d4502a5f7eb7f37702decc5810bcc438e8ba8bc9eced08dd672e80",
+    "input\\support\\build_suite.py": "32754a88f3a23370ec99d5265caabee5ef0bed7ebe95e35720787ef48fb1d43b",
+    "input\\support\\results.py": "0027a326b6878a0170b8301855debb3f97942292cff915d674e87c6dd8bd1b54"
+  },
+  "source_changed": false,
+  "binary_rebuilt": false
+}

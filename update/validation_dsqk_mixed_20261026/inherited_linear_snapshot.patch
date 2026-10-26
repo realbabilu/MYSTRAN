@@ -1,0 +1,146 @@
+diff --git a/Source/EMG/EMG4/CTRIA3_DSG3.f90 b/Source/EMG/EMG4/CTRIA3_DSG3.f90
+index dde16b86..859d2af0 100644
+--- a/Source/EMG/EMG4/CTRIA3_DSG3.f90
++++ b/Source/EMG/EMG4/CTRIA3_DSG3.f90
+@@ -200,6 +200,7 @@
+                KLOCAL = ZERO
+                KLOCAL(6*(IA-1)+1,6*(IB-1)+1) = KGVAL
+                KLOCAL(6*(IA-1)+2,6*(IB-1)+2) = KGVAL
++               KLOCAL(6*(IA-1)+3,6*(IB-1)+3) = KGVAL
+                KGLOBAL = MATMUL(TRANSPOSE(T18), MATMUL(KLOCAL, T18))
+                KED(1:NDOF,1:NDOF) = KED(1:NDOF,1:NDOF) + KGLOBAL
+             ENDDO
+diff --git a/Source/EMG/EMG4/CTRIAR_DKMT18.f90 b/Source/EMG/EMG4/CTRIAR_DKMT18.f90
+index 53f21532..c3249cc5 100644
+--- a/Source/EMG/EMG4/CTRIAR_DKMT18.f90
++++ b/Source/EMG/EMG4/CTRIAR_DKMT18.f90
+@@ -25,7 +25,7 @@
+       SUBROUTINE CTRIAR_DKMT18 ( OPT, INT_ELEM_ID )
+ 
+ ! --- shell_renovation begin --- !
+-! DKMT18 triangular shell now tracks the special SNORM-aware reference path.
++! DKMT18 SF shear reconstruction; membrane/bending/drilling remain Maknun-based.
+ ! The CTRIAR DKMT18 kernel keeps the existing flat-shell algebra, but the
+ ! local element frame is built from nodal SNORM data when that data exists.
+ ! --- shell_renovation end --- !
+@@ -57,6 +57,7 @@
+       REAL(DOUBLE), PARAMETER         :: HALF = 5.0D-1
+       REAL(DOUBLE), PARAMETER         :: KAPPA = 5.0D0/6.0D0
+ 
++      LOGICAL, SAVE :: SF_NOTICE_WRITTEN=.FALSE.
+       INTEGER(LONG)                   :: I, J, K, IA, IB, RR, CC, JSUB
+       REAL(DOUBLE)                    :: H, E, NU, AREA, XI0, ETA0
+       REAL(DOUBLE)                    :: KFAC, ROT_KG_FAC
+@@ -76,6 +77,12 @@
+          CALL OUTA_HERE ( 'Y' )
+       ENDIF
+ 
++      IF (.NOT.SF_NOTICE_WRITTEN) THEN
++         WRITE(F06,'(A)') ' DKMT18: SF shear reconstruction; geometric SNORM support retained.'
++         WRITE(F06,'(A)') ' DEBUG 241 is deprecated and no longer selects a DKMT18 shear variant.'
++         SF_NOTICE_WRITTEN=.TRUE.
++      ENDIF
++
+       H = EPROP(1)
+       IF (H <= 0.0D0) THEN
+          NUM_EMG_FATAL_ERRS = NUM_EMG_FATAL_ERRS + 1
+@@ -121,7 +128,7 @@
+          ETA0 = ONE/THREE
+          CALL BUILD_STAGE_B_MAKNUN ( T1, T2, CO, BM )
+          CALL BUILD_STAGE_BB_MAKNUN ( XI0, ETA0, T1, T2, NVEC, CO, BC, NORMALS, ADINV_AU, BB )
+-         CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS )
++         CALL BUILD_STAGE_BS_SF ( T1, T2, ADINV_AU, BS )
+          BE1(1:3,1:18,1) = BM
+          BE2(1:3,1:18,1) = BB
+          BE3(1:2,1:18,1) = BS
+@@ -245,7 +252,7 @@
+          CALL DEBUG_PRINT_MATRIX('CTRIAR Hb', Hb)
+          CALL DEBUG_PRINT_MATRIX('CTRIAR Hs', Hs)
+          CALL BUILD_STAGE_BB_MAKNUN ( XI0, ETA0, T1, T2, NVEC, CO, BC, NORMALS, ADINV_AU, BB )
+-         CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS )
++         CALL BUILD_STAGE_BS_SF ( T1, T2, ADINV_AU, BS )
+          CALL DEBUG_PRINT_MATRIX('CTRIAR BM POST', BM)
+          CALL DEBUG_PRINT_MATRIX('CTRIAR BB', BB)
+          CALL DEBUG_PRINT_MATRIX('CTRIAR BS', BS)
+@@ -460,7 +467,7 @@
+       CALL PLATE_GP ( 1, XI, ETA, WT )
+          CALL BUILD_STAGE_B_MAKNUN ( T1, T2, COO, BM )
+          CALL BUILD_STAGE_BB_MAKNUN ( XI, ETA, T1, T2, NVO, COO, BCO, NORMSO, ADINV_AU, BB )
+-         CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS, XI, ETA )
++         CALL BUILD_STAGE_BS_SF ( T1, T2, ADINV_AU, BS, XI, ETA )
+          FAC = WT * JACO
+          KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMO, BM))
+          KTMP(1:3,1:18) = MATMUL(HBO, BB)
+@@ -476,7 +483,7 @@
+       CALL PLATE_GP ( 2, XI, ETA, WT )
+       CALL BUILD_STAGE_B_MAKNUN ( T1, T2, COO, BM )
+       CALL BUILD_STAGE_BB_MAKNUN ( XI, ETA, T1, T2, NVO, COO, BCO, NORMSO, ADINV_AU, BB )
+-      CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS, XI, ETA )
++      CALL BUILD_STAGE_BS_SF ( T1, T2, ADINV_AU, BS, XI, ETA )
+       FAC = WT * JACO
+       KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMO, BM))
+          KTMP(1:3,1:18) = MATMUL(HBO, BB)
+@@ -492,7 +499,7 @@
+       CALL PLATE_GP ( 3, XI, ETA, WT )
+       CALL BUILD_STAGE_B_MAKNUN ( T1, T2, COO, BM )
+       CALL BUILD_STAGE_BB_MAKNUN ( XI, ETA, T1, T2, NVO, COO, BCO, NORMSO, ADINV_AU, BB )
+-      CALL BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BS, XI, ETA )
++      CALL BUILD_STAGE_BS_SF ( T1, T2, ADINV_AU, BS, XI, ETA )
+       FAC = WT * JACO
+       KMEMO = KMEMO + FAC * MATMUL(TRANSPOSE(BM), MATMUL(HMO, BM))
+          KTMP(1:3,1:18) = MATMUL(HBO, BB)
+@@ -587,7 +594,7 @@
+       BBO = BBETA + MATMUL(BBD, ADINV_AU)
+       END SUBROUTINE BUILD_STAGE_BB_MAKNUN
+ 
+-      SUBROUTINE BUILD_STAGE_BS_MAKNUN ( T1, T2, ADINV_AU, BSO, XI_SF, ETA_SF )
++      SUBROUTINE BUILD_STAGE_BS_SF ( T1, T2, ADINV_AU, BSO, XI_SF, ETA_SF )
+       REAL(DOUBLE), INTENT(IN)  :: T1(3), T2(3), ADINV_AU(3,18)
+       REAL(DOUBLE), INTENT(OUT) :: BSO(2,18)
+       REAL(DOUBLE)              :: COUT(3), SOUT(3), BSG(2,3), LOUT(3), PHIOUT(3), TSK(3), TMP(2,3)
+@@ -610,9 +617,7 @@
+       ENDDO
+       CALL BUILD_SIDE_LENGTHS ( LOUT )
+       CALL BUILD_SIDE_PHI ( EPROP(1), SHELL_A(1,2)/SHELL_A(1,1), LOUT, PHIOUT )
+-!     Opt-in research branch: DEBUG,241,1 enables DKMT18SF.
+-!     Keep the shipping reconstruction unchanged when the flag is zero.
+-      IF (DEBUG(241) > 0) THEN
++!     SF is the sole shear reconstruction in this promotion candidate.
+          XI_USE = ONE/THREE
+          ETA_USE = ONE/THREE
+          IF (PRESENT(XI_SF)) XI_USE = XI_SF
+@@ -635,32 +640,15 @@
+          ENDDO
+ !        ADINV_AU = Au / [-(2/3)*(1+phi)]; recover phi/(1+phi)*Au.
+          BSG = -(TWO/THREE)*BSG
+-      ELSE
+-         CALL BUILD_BSG_FROM_CS ( COUT, SOUT, BSG )
+-      ENDIF
+       TMP = BSG
+       DO I=1,3
+          TMP(1,I) = TMP(1,I) * PHIOUT(I)
+          TMP(2,I) = TMP(2,I) * PHIOUT(I)
+       ENDDO
+       BSO = MATMUL(TMP, ADINV_AU)
+-      END SUBROUTINE BUILD_STAGE_BS_MAKNUN
++      END SUBROUTINE BUILD_STAGE_BS_SF
++
+ 
+-      SUBROUTINE BUILD_BSG_FROM_CS ( COUT, SOUT, BSGO )
+-      REAL(DOUBLE), INTENT(IN)  :: COUT(3), SOUT(3)
+-      REAL(DOUBLE), INTENT(OUT) :: BSGO(2,3)
+-      REAL(DOUBLE)              :: A1, A2, A3
+-      A1 = COUT(1)*SOUT(3) - COUT(3)*SOUT(1)
+-      A2 = COUT(2)*SOUT(1) - COUT(1)*SOUT(2)
+-      A3 = COUT(3)*SOUT(2) - COUT(2)*SOUT(3)
+-      BSGO(1,1) = (SOUT(2)/A2 - SOUT(3)/A1)
+-      BSGO(1,2) = (SOUT(3)/A3 - SOUT(1)/A2)
+-      BSGO(1,3) = (SOUT(1)/A1 - SOUT(2)/A3)
+-      BSGO(2,1) = (COUT(3)/A1 - COUT(2)/A2)
+-      BSGO(2,2) = (COUT(1)/A2 - COUT(3)/A3)
+-      BSGO(2,3) = (COUT(2)/A3 - COUT(1)/A1)
+-      BSGO = (TWO/THREE) * BSGO
+-      END SUBROUTINE BUILD_BSG_FROM_CS
+ 
+       SUBROUTINE BUILD_FICTITIOUS_K_MAKNUN ( THICK, YOUNG, POIS, NORMSO, HMO, T1, T2, JACO, COO, BCO, KFO )
+       REAL(DOUBLE), INTENT(IN)  :: THICK, YOUNG, POIS, NORMSO(3,3), HMO(3,3), T1(3), T2(3), JACO, COO(2,2), BCO(2,2)

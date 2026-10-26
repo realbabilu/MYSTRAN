@@ -1,0 +1,61 @@
+{
+  "binary": "H:\\Projects\\MYSTRAN\\codex_mod\\dsqk_mixed_upgrade_20261026\\bin\\mystran.exe",
+  "binary_sha256": "131bb8959464757f244ae9014bebcc8f7f165d1c09419ba9c3c47be040658635",
+  "results": [
+    {
+      "deck": "prob_2_001_mh_cquadr_simo.dat",
+      "loadcase": 1,
+      "matrix_relative_difference": 2.4964710661061386e-16,
+      "translation_difference_in": 1.4907779871675686e-19,
+      "rotation_difference_rad": 3.080975841531354e-18,
+      "energy_native_matrix_F06": 4.416e-05,
+      "energy_python": 4.416e-05,
+      "energy_relative_difference": 0.0,
+      "reconstructed_reaction_relative_difference": 2.0480092273748903e-15
+    },
+    {
+      "deck": "prob_2_001_mh_cquadr_simo.dat",
+      "loadcase": 2,
+      "matrix_relative_difference": 2.4964710661061386e-16,
+      "translation_difference_in": 3.3373098121819433e-18,
+      "rotation_difference_rad": 1.4038385254613872e-16,
+      "energy_native_matrix_F06": 3.679999999890349e-12,
+      "energy_python": 3.6799999999792806e-12,
+      "energy_relative_difference": 2.4166224577015782e-11,
+      "reconstructed_reaction_relative_difference": 5.47281035119613e-10
+    },
+    {
+      "deck": "prob_2_001_patchbending_cquadr_simo.dat",
+      "loadcase": 4,
+      "matrix_relative_difference": 3.769119968841051e-16,
+      "translation_difference_in": 5.204170427930421e-18,
+      "rotation_difference_rad": 1.734723475976807e-18,
+      "energy_native_matrix_F06": 4.444444485773858e-09,
+      "energy_python": 4.4444444814023546e-09,
+      "energy_relative_difference": 9.835880998565472e-10,
+      "reconstructed_reaction_relative_difference": 2.3939732439825258e-08
+    },
+    {
+      "deck": "prob_2_001_patchshear_cquadr_simo.dat",
+      "loadcase": 3,
+      "matrix_relative_difference": 3.769119968841051e-16,
+      "translation_difference_in": 2.9070504684036713e-11,
+      "rotation_difference_rad": 0.0,
+      "energy_native_matrix_F06": 0.016666668802822363,
+      "energy_python": 0.016666668802822363,
+      "energy_relative_difference": 0.0,
+      "reconstructed_reaction_relative_difference": 3.4387840535352802e-09
+    },
+    {
+      "deck": "prob_2_001_patchtwist_cquadr_simo.dat",
+      "loadcase": 5,
+      "matrix_relative_difference": 3.769119968841051e-16,
+      "translation_difference_in": 3.469446951953614e-18,
+      "rotation_difference_rad": 1.734723475976807e-18,
+      "energy_native_matrix_F06": 6.666666645005481e-09,
+      "energy_python": 6.666666646681225e-09,
+      "energy_relative_difference": 2.5136159820249304e-10,
+      "reconstructed_reaction_relative_difference": 2.624041060243816e-08
+    }
+  ]
+}
