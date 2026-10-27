@@ -1,6 +1,9 @@
 # Linear shells — 2-013: Uniform temperature
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -268,4 +271,4 @@ Uniform temperature increment 100 F, alpha=5.5e-6 /F. A free expansion UX8=0.000
 | prob_2_013b_temp_cquadr_simo / 5 | NASTRAN CTRIA3_NATIVE | 1 | native_sigmaY_min | -733.3333 | -733.3333 | -733.33 | psi | 4.545409e-06 | 3.3333e-05 | MEASURED |
 | prob_2_013b_temp_cquadr_simo / 5 | NASTRAN CTRIAR_NATIVE | 1 | native_sigmaY_min | -831.8172 | -733.3333 | -733.33 | psi | 13.42962 | 98.48387 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

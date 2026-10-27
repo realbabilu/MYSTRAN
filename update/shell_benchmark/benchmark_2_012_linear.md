@@ -1,6 +1,9 @@
 # Linear shells — 2-012: Thick annular plate
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -38,7 +41,7 @@ Exact source 6x96 annulus. S2K V13Mod=V23Mod=1000 was missing from DAT; PSHELL T
 | Case / parent quads | Solver / formulation | LC | Quantity | Measured | Independent / analytical | CSI published | Unit | Error % primary | Absolute residual | Status |
 |---|---|---:|---|---:|---:|---:|---|---:|---:|---|
 | prob_2_012a-thick / 576 | MYSTRAN CQUAD4_DKMQ20 | 1 | outer_edge_mean_UZ | -0.005339435 | -0.00534 | -0.00534 | in | 0.01058521 | 5.6525e-07 | MEASURED |
-| prob_2_012a-thick / 576 | MYSTRAN CQUAD4_DSQK | 1 | outer_edge_mean_UZ | -0.005218344 | -0.00534 | -0.00534 | in | 2.278202 | 0.000121656 | MEASURED |
+| prob_2_012a-thick / 576 | MYSTRAN CQUAD4_DSQK | 1 | outer_edge_mean_UZ | -0.005340834 | -0.00534 | -0.00534 | in | 0.01561642 | 8.339167e-07 | MEASURED |
 | prob_2_012a-thick / 576 | MYSTRAN CQUAD4_MIN4 | 1 | outer_edge_mean_UZ | -0.00533838 | -0.00534 | -0.00534 | in | 0.03033864 | 1.620083e-06 | MEASURED |
 | prob_2_012a-thick / 576 | MYSTRAN CQUAD4_MIN4T | 1 | outer_edge_mean_UZ | -0.005336117 | -0.00534 | -0.00534 | in | 0.07272004 | 3.88325e-06 | MEASURED |
 | prob_2_012a-thick / 576 | MYSTRAN CQUAD4_MITC4 | 1 | outer_edge_mean_UZ | -0.005342245 | -0.00534 | -0.00534 | in | 0.04203808 | 2.244833e-06 | MEASURED |
@@ -64,7 +67,7 @@ Exact source 6x96 annulus. S2K V13Mod=V23Mod=1000 was missing from DAT; PSHELL T
 | prob_2_012a-thick / 576 | NASTRAN CTRIA3_NATIVE | 1 | outer_edge_mean_UZ | -0.005335702 | -0.00534 | -0.00534 | in | 0.08049313 | 4.298333e-06 | MEASURED |
 | prob_2_012a-thick / 576 | NASTRAN CTRIAR_NATIVE | 1 | outer_edge_mean_UZ | -0.00533543 | -0.00534 | -0.00534 | in | 0.08557623 | 4.569771e-06 | MEASURED |
 | prob_2_012b-thick / 576 | MYSTRAN CQUAD4_DKMQ20 | 1 | outer_edge_mean_UZ | -0.005217022 | -0.00521 | -0.00521 | in | 0.1347729 | 7.021667e-06 | MEASURED |
-| prob_2_012b-thick / 576 | MYSTRAN CQUAD4_DSQK | 1 | outer_edge_mean_UZ | -0.005217013 | -0.00521 | -0.00521 | in | 0.1346065 | 7.013e-06 | MEASURED |
+| prob_2_012b-thick / 576 | MYSTRAN CQUAD4_DSQK | 1 | outer_edge_mean_UZ | -0.005217015 | -0.00521 | -0.00521 | in | 0.1346361 | 7.014542e-06 | MEASURED |
 | prob_2_012b-thick / 576 | MYSTRAN CQUAD4_MIN4 | 1 | outer_edge_mean_UZ | -0.005212143 | -0.00521 | -0.00521 | in | 0.04113324 | 2.143042e-06 | MEASURED |
 | prob_2_012b-thick / 576 | MYSTRAN CQUAD4_MIN4T | 1 | outer_edge_mean_UZ | -0.005208273 | -0.00521 | -0.00521 | in | 0.03314939 | 1.727083e-06 | MEASURED |
 | prob_2_012b-thick / 576 | MYSTRAN CQUAD4_MITC4 | 1 | outer_edge_mean_UZ | -0.005217023 | -0.00521 | -0.00521 | in | 0.1347985 | 7.023e-06 | MEASURED |
@@ -90,4 +93,4 @@ Exact source 6x96 annulus. S2K V13Mod=V23Mod=1000 was missing from DAT; PSHELL T
 | prob_2_012b-thick / 576 | NASTRAN CTRIA3_NATIVE | 1 | outer_edge_mean_UZ | -0.005207139 | -0.00521 | -0.00521 | in | 0.05491123 | 2.860875e-06 | MEASURED |
 | prob_2_012b-thick / 576 | NASTRAN CTRIAR_NATIVE | 1 | outer_edge_mean_UZ | -0.005206853 | -0.00521 | -0.00521 | in | 0.06040067 | 3.146875e-06 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

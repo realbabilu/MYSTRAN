@@ -1,6 +1,6 @@
 # Linear shell benchmark — reference-anchored comparisons
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+Current MYSTRAN results: 27 October 2026 rebuild. Nastran results retained from prior unchanged-deck runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -83,3 +83,7 @@ The DAT archive contains every tested input, including failed cases, with separa
 ## Additional convergence and preload verification
 
 2-003c now includes six meshes (6x1 through 180x6),132 additional MYSTRAN and24 Nastran completed runs. Totals:1826 MYSTRAN and332 Nastran configurations; the CSV contains5564 metrics. One additional SOL101 confirms DSG3 BEND LC1 preload (99.8876ksi/100ksi); the SOL105 LC2 six-mode residual failure remains open. Earlier counts above describe the original publication snapshot.
+
+## Rebenchmark - 27 October 2026
+
+All 1,826 MYSTRAN configurations rerun using rebuilt DSQK mixed hybrid; 1,825 completed and one DSG3 BEND six-mode known failure remains. The 332 Nastran reference configurations retain prior unchanged-deck outputs. Default residual acceptance is 1e-6; BKRTOL is absent. See [current report](../Linear_Shell_Rebenchmark_20261027.md), [run status](data_linear/run_status_linear.csv), and [source/build provenance](data_linear/provenance_linear.json). Earlier sections describe historical snapshots.

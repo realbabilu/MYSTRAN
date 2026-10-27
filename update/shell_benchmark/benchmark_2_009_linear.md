@@ -1,6 +1,9 @@
 # Linear shells — 2-009: Plate on elastic foundation
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -36,7 +39,7 @@ A/B spring constants checked: 30 and 800 kip/ft^3, converted to 0.01736 and 0.46
 | Case / parent quads | Solver / formulation | LC | Quantity | Measured | Independent / analytical | CSI published | Unit | Error % primary | Absolute residual | Status |
 |---|---|---:|---|---:|---:|---:|---|---:|---:|---|
 | prob_2_009a-thick / 2500 | MYSTRAN CQUAD4_DKMQ20 | 1 | center_UZ | -0.9305877 | -0.9205 | -0.925 | in | 1.095894 | 0.0100877 | MEASURED |
-| prob_2_009a-thick / 2500 | MYSTRAN CQUAD4_DSQK | 1 | center_UZ | -0.9116014 | -0.9205 | -0.925 | in | 0.9667137 | 0.0088986 | MEASURED |
+| prob_2_009a-thick / 2500 | MYSTRAN CQUAD4_DSQK | 1 | center_UZ | -0.9116292 | -0.9205 | -0.925 | in | 0.9636936 | 0.0088708 | MEASURED |
 | prob_2_009a-thick / 2500 | MYSTRAN CQUAD4_MIN4 | 1 | center_UZ | -0.9206828 | -0.9205 | -0.925 | in | 0.01985877 | 0.0001828 | MEASURED |
 | prob_2_009a-thick / 2500 | MYSTRAN CQUAD4_MIN4T | 1 | center_UZ | -0.9216996 | -0.9205 | -0.925 | in | 0.1303205 | 0.0011996 | MEASURED |
 | prob_2_009a-thick / 2500 | MYSTRAN CQUAD4_MITC4 | 1 | center_UZ | -0.9117929 | -0.9205 | -0.925 | in | 0.9459098 | 0.0087071 | MEASURED |
@@ -62,7 +65,7 @@ A/B spring constants checked: 30 and 800 kip/ft^3, converted to 0.01736 and 0.46
 | prob_2_009a-thick / 2500 | NASTRAN CTRIA3_NATIVE | 1 | center_UZ | -0.9213151 | -0.9205 | -0.925 | in | 0.0885497 | 0.0008151 | MEASURED |
 | prob_2_009a-thick / 2500 | NASTRAN CTRIAR_NATIVE | 1 | center_UZ | -0.9167564 | -0.9205 | -0.925 | in | 0.406692 | 0.0037436 | MEASURED |
 | prob_2_009b-thick / 2500 | MYSTRAN CQUAD4_DKMQ20 | 1 | center_UZ | -0.1842089 | -0.1782 | -0.1783 | in | 3.371998 | 0.0060089 | MEASURED |
-| prob_2_009b-thick / 2500 | MYSTRAN CQUAD4_DSQK | 1 | center_UZ | -0.1701698 | -0.1782 | -0.1783 | in | 4.506285 | 0.0080302 | MEASURED |
+| prob_2_009b-thick / 2500 | MYSTRAN CQUAD4_DSQK | 1 | center_UZ | -0.1701915 | -0.1782 | -0.1783 | in | 4.494108 | 0.0080085 | MEASURED |
 | prob_2_009b-thick / 2500 | MYSTRAN CQUAD4_MIN4 | 1 | center_UZ | -0.17794 | -0.1782 | -0.1783 | in | 0.1459035 | 0.00026 | MEASURED |
 | prob_2_009b-thick / 2500 | MYSTRAN CQUAD4_MIN4T | 1 | center_UZ | -0.1785044 | -0.1782 | -0.1783 | in | 0.1708193 | 0.0003044 | MEASURED |
 | prob_2_009b-thick / 2500 | MYSTRAN CQUAD4_MITC4 | 1 | center_UZ | -0.1703154 | -0.1782 | -0.1783 | in | 4.424579 | 0.0078846 | MEASURED |
@@ -88,4 +91,4 @@ A/B spring constants checked: 30 and 800 kip/ft^3, converted to 0.01736 and 0.46
 | prob_2_009b-thick / 2500 | NASTRAN CTRIA3_NATIVE | 1 | center_UZ | -0.17878 | -0.1782 | -0.1783 | in | 0.325477 | 0.00058 | MEASURED |
 | prob_2_009b-thick / 2500 | NASTRAN CTRIAR_NATIVE | 1 | center_UZ | -0.1754165 | -0.1782 | -0.1783 | in | 1.562009 | 0.0027835 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

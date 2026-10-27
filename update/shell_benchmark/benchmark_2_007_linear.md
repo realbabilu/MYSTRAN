@@ -1,6 +1,9 @@
 # Linear shells — 2-007: Hemispherical shell with opening
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -46,7 +49,7 @@ The additional n8,n16,n32 convergence series uses retained hemisphere geometry, 
 | Case / parent quads | Solver / formulation | LC | Quantity | Measured | Independent / analytical | CSI published | Unit | Error % primary | Absolute residual | Status |
 |---|---|---:|---|---:|---:|---:|---|---:|---:|---|
 | prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_DKMQ20 | 1 | loaded_UX | 0.09342421 | 0.094 | 0.0927 | ft | 0.6125426 | 0.00057579 | MEASURED |
-| prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_DSQK | 1 | loaded_UX | 0.09326544 | 0.094 | 0.0927 | ft | 0.7814468 | 0.00073456 | MEASURED |
+| prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_DSQK | 1 | loaded_UX | 0.0932655 | 0.094 | 0.0927 | ft | 0.781383 | 0.0007345 | MEASURED |
 | prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_MIN4 | 1 | loaded_UX | 0.09444891 | 0.094 | 0.0927 | ft | 0.4775638 | 0.00044891 | MEASURED |
 | prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_MIN4T | 1 | loaded_UX | 0.09414022 | 0.094 | 0.0927 | ft | 0.1491702 | 0.00014022 | MEASURED |
 | prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_MITC4 | 1 | loaded_UX | 0.09335134 | 0.094 | 0.0927 | ft | 0.6900638 | 0.00064866 | MEASURED |
@@ -72,7 +75,7 @@ The additional n8,n16,n32 convergence series uses retained hemisphere geometry, 
 | prob_2_007_convergence_n32 / 1024 | NASTRAN CTRIA3_NATIVE | 1 | loaded_UX | 0.09390018 | 0.094 | 0.0927 | ft | 0.1061915 | 9.982e-05 | MEASURED |
 | prob_2_007_convergence_n32 / 1024 | NASTRAN CTRIAR_NATIVE | 1 | loaded_UX | 0.09298579 | 0.094 | 0.0927 | ft | 1.078947 | 0.00101421 | MEASURED |
 | prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_DKMQ20 | 1 | loaded_UY | -0.09342421 | -0.094 | -0.0927 | ft | 0.6125426 | 0.00057579 | MEASURED |
-| prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_DSQK | 1 | loaded_UY | -0.09326544 | -0.094 | -0.0927 | ft | 0.7814468 | 0.00073456 | MEASURED |
+| prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_DSQK | 1 | loaded_UY | -0.0932655 | -0.094 | -0.0927 | ft | 0.781383 | 0.0007345 | MEASURED |
 | prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_MIN4 | 1 | loaded_UY | -0.09444891 | -0.094 | -0.0927 | ft | 0.4775638 | 0.00044891 | MEASURED |
 | prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_MIN4T | 1 | loaded_UY | -0.09414022 | -0.094 | -0.0927 | ft | 0.1491702 | 0.00014022 | MEASURED |
 | prob_2_007_convergence_n32 / 1024 | MYSTRAN CQUAD4_MITC4 | 1 | loaded_UY | -0.09335134 | -0.094 | -0.0927 | ft | 0.6900638 | 0.00064866 | MEASURED |
@@ -150,4 +153,4 @@ The additional n8,n16,n32 convergence series uses retained hemisphere geometry, 
 | prob_2_007_thick_cquadr_simo / 64 | NASTRAN CTRIA3_NATIVE | 1 | loaded_UY | -0.09629644 | -0.094 | -0.0927 | ft | 2.443021 | 0.00229644 | MEASURED |
 | prob_2_007_thick_cquadr_simo / 64 | NASTRAN CTRIAR_NATIVE | 1 | loaded_UY | -0.04061543 | -0.094 | -0.0927 | ft | 56.7921 | 0.05338457 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

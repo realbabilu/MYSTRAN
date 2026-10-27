@@ -1,6 +1,9 @@
 # Linear shells — 2-006: Scordelis-Lo roof
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -36,7 +39,7 @@ Scordelis-Lo quarter roof. Primary CSI revision 8 independent free-edge midpoint
 | Case / parent quads | Solver / formulation | LC | Quantity | Measured | Independent / analytical | CSI published | Unit | Error % primary | Absolute residual | Status |
 |---|---|---:|---|---:|---:|---:|---|---:|---:|---|
 | prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_DKMQ20 | 1 | free_edge_midpoint_UZ | -0.3033576 | -0.3086 | — | ft | 1.698769 | 0.0052424 | MEASURED |
-| prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_DSQK | 1 | free_edge_midpoint_UZ | -0.2996889 | -0.3086 | — | ft | 2.887589 | 0.0089111 | MEASURED |
+| prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_DSQK | 1 | free_edge_midpoint_UZ | -0.2996938 | -0.3086 | — | ft | 2.886001 | 0.0089062 | MEASURED |
 | prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_MIN4 | 1 | free_edge_midpoint_UZ | -0.3416921 | -0.3086 | — | ft | 10.7233 | 0.0330921 | MEASURED |
 | prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_MIN4T | 1 | free_edge_midpoint_UZ | -0.3287904 | -0.3086 | — | ft | 6.542579 | 0.0201904 | MEASURED |
 | prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_MITC4 | 1 | free_edge_midpoint_UZ | -0.3069738 | -0.3086 | — | ft | 0.5269605 | 0.0016262 | MEASURED |
@@ -62,7 +65,7 @@ Scordelis-Lo quarter roof. Primary CSI revision 8 independent free-edge midpoint
 | prob_2_006_n16_cquadr_simo / 256 | NASTRAN CTRIA3_NATIVE | 1 | free_edge_midpoint_UZ | -0.3034232 | -0.3086 | — | ft | 1.677511 | 0.0051768 | MEASURED |
 | prob_2_006_n16_cquadr_simo / 256 | NASTRAN CTRIAR_NATIVE | 1 | free_edge_midpoint_UZ | -0.3045089 | -0.3086 | — | ft | 1.325697 | 0.0040911 | MEASURED |
 | prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_DKMQ20 | 1 | free_edge_midpoint_UZ_classical_alternative | -0.3033576 | -0.3024 | — | ft | 0.3166667 | 0.0009576 | MEASURED |
-| prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_DSQK | 1 | free_edge_midpoint_UZ_classical_alternative | -0.2996889 | -0.3024 | — | ft | 0.8965278 | 0.0027111 | MEASURED |
+| prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_DSQK | 1 | free_edge_midpoint_UZ_classical_alternative | -0.2996938 | -0.3024 | — | ft | 0.8949074 | 0.0027062 | MEASURED |
 | prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_MIN4 | 1 | free_edge_midpoint_UZ_classical_alternative | -0.3416921 | -0.3024 | — | ft | 12.99342 | 0.0392921 | MEASURED |
 | prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_MIN4T | 1 | free_edge_midpoint_UZ_classical_alternative | -0.3287904 | -0.3024 | — | ft | 8.726984 | 0.0263904 | MEASURED |
 | prob_2_006_n16_cquadr_simo / 256 | MYSTRAN CQUAD4_MITC4 | 1 | free_edge_midpoint_UZ_classical_alternative | -0.3069738 | -0.3024 | — | ft | 1.5125 | 0.0045738 | MEASURED |
@@ -88,4 +91,4 @@ Scordelis-Lo quarter roof. Primary CSI revision 8 independent free-edge midpoint
 | prob_2_006_n16_cquadr_simo / 256 | NASTRAN CTRIA3_NATIVE | 1 | free_edge_midpoint_UZ_classical_alternative | -0.3034232 | -0.3024 | — | ft | 0.3383598 | 0.0010232 | MEASURED |
 | prob_2_006_n16_cquadr_simo / 256 | NASTRAN CTRIAR_NATIVE | 1 | free_edge_midpoint_UZ_classical_alternative | -0.3045089 | -0.3024 | — | ft | 0.6973876 | 0.0021089 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

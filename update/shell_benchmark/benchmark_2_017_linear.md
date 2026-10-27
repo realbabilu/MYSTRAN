@@ -1,6 +1,9 @@
 # Linear shells — 2-017: Column in-plane buckling
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -62,4 +65,4 @@ Inactive UY,RX,RZ (246) are applied to every node, with SPC1 cards split to at m
 | prob_2_017_nx4_ny24_cquadr_dkmq24 / 96 | NASTRAN CTRIA3_NATIVE | 2 | critical_load | 137.259 | 127.91 | — | kip | 7.309045 | 9.349 | MEASURED |
 | prob_2_017_nx4_ny24_cquadr_dkmq24 / 96 | NASTRAN CTRIAR_NATIVE | 2 | critical_load | 126.2154 | 127.91 | — | kip | 1.324838 | 1.6946 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

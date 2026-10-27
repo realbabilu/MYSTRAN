@@ -1,14 +1,24 @@
 {
-  "metric_rows": 5096,
-  "duplicate_keys": 0,
-  "markdown_files": 19,
-  "broken_links": [],
-  "figures": 99,
-  "MYSTRAN_decks": 1694,
-  "Nastran_decks": 308,
-  "Nastran_rank_decks": 8,
-  "archive_crc": "PASS",
-  "deck_hashes": "PASS",
-  "quadratic_preservation": "PASS",
-  "csv_bytes": 3277123
+  "date": "2026-10-27",
+  "MYSTRAN_runs": 1826,
+  "Nastran_retained_runs": 332,
+  "metrics": 5564,
+  "CSV_bytes": 3668566,
+  "figures": 102,
+  "source_commit": "b1da4a6aa3683fd8b13c5f875b9689bb15b87920",
+  "binary_sha256": "c76a0c35f980c579d1de0e803f32163939eb493e50b5d527221788526a775d91",
+  "known_failures": [
+    {
+      "case": "prob_2_016c_thick_beamseg_bend",
+      "solver": "MYSTRAN",
+      "solver_version": "18.0.A OCT 19 2026",
+      "element": "CTRIA3",
+      "formulation": "CTRIA3_DSG3",
+      "status": "solver_error",
+      "errors": "*ERROR: buckling eigenpair residual exceeds 1E-6           2   1.9954529446686861E-006",
+      "f06": "decks\\prob_2_016c_thick_beamseg_bend\\CTRIA3_DSG3\\model.F06",
+      "sha256": "028a0418dba37b3e1f7134721e715636fc70e777c9c8bab7562bdbebda7527d6",
+      "native_output_sha256": "771a4017b88cdea3b71d6a34222250a79a31fadccc030c79134b0602215b62ef"
+    }
+  ]
 }

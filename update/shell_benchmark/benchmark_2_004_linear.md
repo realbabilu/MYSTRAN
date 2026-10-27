@@ -1,6 +1,9 @@
 # Linear shells — 2-004: Twisted cantilever beam
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -44,7 +47,7 @@ Twisted beam, same physical tip loads and root supports at each axial refinement
 | Case / parent quads | Solver / formulation | LC | Quantity | Measured | Independent / analytical | CSI published | Unit | Error % primary | Absolute residual | Status |
 |---|---|---:|---|---:|---:|---:|---|---:|---:|---|
 | prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_DKMQ20 | 2 | tip_UY | 0.005403631 | 0.005429 | — | in | 0.4672807 | 2.536867e-05 | MEASURED |
-| prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_DSQK | 2 | tip_UY | 0.001910535 | 0.005429 | — | in | 64.80871 | 0.003518465 | MEASURED |
+| prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_DSQK | 2 | tip_UY | 0.00191179 | 0.005429 | — | in | 64.7856 | 0.00351721 | MEASURED |
 | prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_MIN4 | 2 | tip_UY | 1.014533 | 0.005429 | — | in | 18587.29 | 1.009104 | MEASURED |
 | prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_MIN4T | 2 | tip_UY | 0.9122066 | 0.005429 | — | in | 16702.48 | 0.9067776 | MEASURED |
 | prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_MITC4 | 2 | tip_UY | 0.005406317 | 0.005429 | — | in | 0.4178056 | 2.268267e-05 | MEASURED |
@@ -70,7 +73,7 @@ Twisted beam, same physical tip loads and root supports at each axial refinement
 | prob_2_004_nx24_cquadr_simo / 48 | NASTRAN CTRIA3_NATIVE | 2 | tip_UY | 0.005393865 | 0.005429 | — | in | 0.6471665 | 3.513467e-05 | MEASURED |
 | prob_2_004_nx24_cquadr_simo / 48 | NASTRAN CTRIAR_NATIVE | 2 | tip_UY | 0.005405563 | 0.005429 | — | in | 0.4317001 | 2.3437e-05 | MEASURED |
 | prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_DKMQ20 | 1 | tip_UZ | 0.00170717 | 0.001749 | — | in | 2.391652 | 4.183e-05 | MEASURED |
-| prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_DSQK | 1 | tip_UZ | 0.0008889924 | 0.001749 | — | in | 49.17139 | 0.0008600076 | MEASURED |
+| prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_DSQK | 1 | tip_UZ | 0.0008891963 | 0.001749 | — | in | 49.15973 | 0.0008598037 | MEASURED |
 | prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_MIN4 | 1 | tip_UZ | 0.7156104 | 0.001749 | — | in | 40815.4 | 0.7138614 | MEASURED |
 | prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_MIN4T | 1 | tip_UZ | 0.6466104 | 0.001749 | — | in | 36870.29 | 0.6448614 | MEASURED |
 | prob_2_004_nx24_cquadr_simo / 48 | MYSTRAN CQUAD4_MITC4 | 1 | tip_UZ | 0.001706203 | 0.001749 | — | in | 2.44696 | 4.279733e-05 | MEASURED |
@@ -96,7 +99,7 @@ Twisted beam, same physical tip loads and root supports at each axial refinement
 | prob_2_004_nx24_cquadr_simo / 48 | NASTRAN CTRIA3_NATIVE | 1 | tip_UZ | 0.001685656 | 0.001749 | — | in | 3.621708 | 6.334367e-05 | MEASURED |
 | prob_2_004_nx24_cquadr_simo / 48 | NASTRAN CTRIAR_NATIVE | 1 | tip_UZ | 0.001736926 | 0.001749 | — | in | 0.6903373 | 1.2074e-05 | MEASURED |
 | s2k_2004 / 24 | MYSTRAN CQUAD4_DKMQ20 | 1 | tip_UY | 0.005377132 | 0.005429 | 0.005402 | in | 0.9553816 | 5.186767e-05 | MEASURED |
-| s2k_2004 / 24 | MYSTRAN CQUAD4_DSQK | 1 | tip_UY | 0.001376953 | 0.005429 | 0.005402 | in | 74.63708 | 0.004052047 | MEASURED |
+| s2k_2004 / 24 | MYSTRAN CQUAD4_DSQK | 1 | tip_UY | 0.001377165 | 0.005429 | 0.005402 | in | 74.63317 | 0.004051835 | MEASURED |
 | s2k_2004 / 24 | MYSTRAN CQUAD4_MIN4 | 1 | tip_UY | 1.11855 | 0.005429 | 0.005402 | in | 20503.24 | 1.113121 | MEASURED |
 | s2k_2004 / 24 | MYSTRAN CQUAD4_MIN4T | 1 | tip_UY | 0.9031248 | 0.005429 | 0.005402 | in | 16535.2 | 0.8976958 | MEASURED |
 | s2k_2004 / 24 | MYSTRAN CQUAD4_MITC4 | 1 | tip_UY | 0.005379466 | 0.005429 | 0.005402 | in | 0.9123964 | 4.9534e-05 | MEASURED |
@@ -122,7 +125,7 @@ Twisted beam, same physical tip loads and root supports at each axial refinement
 | s2k_2004 / 24 | NASTRAN CTRIA3_NATIVE | 1 | tip_UY | 0.005357193 | 0.005429 | 0.005402 | in | 1.32265 | 7.180667e-05 | MEASURED |
 | s2k_2004 / 24 | NASTRAN CTRIAR_NATIVE | 1 | tip_UY | 0.005383901 | 0.005429 | 0.005402 | in | 0.8306993 | 4.509867e-05 | MEASURED |
 | s2k_2004 / 24 | MYSTRAN CQUAD4_DKMQ20 | 2 | tip_UZ | 0.001619215 | 0.001749 | 0.00176 | in | 7.420526 | 0.000129785 | MEASURED |
-| s2k_2004 / 24 | MYSTRAN CQUAD4_DSQK | 2 | tip_UZ | 0.0007306292 | 0.001749 | 0.00176 | in | 58.22589 | 0.001018371 | MEASURED |
+| s2k_2004 / 24 | MYSTRAN CQUAD4_DSQK | 2 | tip_UZ | 0.0007306845 | 0.001749 | 0.00176 | in | 58.22273 | 0.001018316 | MEASURED |
 | s2k_2004 / 24 | MYSTRAN CQUAD4_MIN4 | 2 | tip_UZ | 0.7967081 | 0.001749 | 0.00176 | in | 45452.21 | 0.7949591 | MEASURED |
 | s2k_2004 / 24 | MYSTRAN CQUAD4_MIN4T | 2 | tip_UZ | 0.6478215 | 0.001749 | 0.00176 | in | 36939.54 | 0.6460725 | MEASURED |
 | s2k_2004 / 24 | MYSTRAN CQUAD4_MITC4 | 2 | tip_UZ | 0.00161436 | 0.001749 | 0.00176 | in | 7.698113 | 0.00013464 | MEASURED |
@@ -148,4 +151,4 @@ Twisted beam, same physical tip loads and root supports at each axial refinement
 | s2k_2004 / 24 | NASTRAN CTRIA3_NATIVE | 2 | tip_UZ | 0.001591199 | 0.001749 | 0.00176 | in | 9.022337 | 0.0001578007 | MEASURED |
 | s2k_2004 / 24 | NASTRAN CTRIAR_NATIVE | 2 | tip_UZ | 0.001723959 | 0.001749 | 0.00176 | in | 1.431732 | 2.5041e-05 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

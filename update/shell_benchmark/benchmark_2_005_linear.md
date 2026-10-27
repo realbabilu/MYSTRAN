@@ -1,6 +1,9 @@
 # Linear shells — 2-005: 2 x 10 plate: simple and clamped
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -44,7 +47,7 @@ Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform a
 | Case / parent quads | Solver / formulation | LC | Quantity | Measured | Independent / analytical | CSI published | Unit | Error % primary | Absolute residual | Status |
 |---|---|---:|---|---:|---:|---:|---|---:|---:|---|
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_DKMQ20 | 2 | center_UZ_point | -7.329099 | -7.25 | — | in | 1.091021 | 0.079099 | MEASURED |
-| prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_DSQK | 2 | center_UZ_point | -7.183722 | -7.25 | — | in | 0.9141793 | 0.066278 | MEASURED |
+| prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_DSQK | 2 | center_UZ_point | -7.183723 | -7.25 | — | in | 0.9141655 | 0.066277 | MEASURED |
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_MIN4 | 2 | center_UZ_point | -7.100244 | -7.25 | — | in | 2.0656 | 0.149756 | MEASURED |
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_MIN4T | 2 | center_UZ_point | -7.10981 | -7.25 | — | in | 1.933655 | 0.14019 | MEASURED |
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_MITC4 | 2 | center_UZ_point | -7.183721 | -7.25 | — | in | 0.9141931 | 0.066279 | MEASURED |
@@ -70,7 +73,7 @@ Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform a
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | NASTRAN CTRIA3_NATIVE | 2 | center_UZ_point | -6.990426 | -7.25 | — | in | 3.580331 | 0.259574 | MEASURED |
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | NASTRAN CTRIAR_NATIVE | 2 | center_UZ_point | -6.900092 | -7.25 | — | in | 4.826317 | 0.349908 | MEASURED |
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_DKMQ20 | 1 | center_UZ_uniform | -2.604186 | -2.6 | — | in | 0.161 | 0.004186 | MEASURED |
-| prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_DSQK | 1 | center_UZ_uniform | -2.599649 | -2.6 | — | in | 0.0135 | 0.000351 | MEASURED |
+| prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_DSQK | 1 | center_UZ_uniform | -2.59965 | -2.6 | — | in | 0.01346154 | 0.00035 | MEASURED |
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_MIN4 | 1 | center_UZ_uniform | -2.611777 | -2.6 | — | in | 0.4529615 | 0.011777 | MEASURED |
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_MIN4T | 1 | center_UZ_uniform | -2.616249 | -2.6 | — | in | 0.6249615 | 0.016249 | MEASURED |
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_MITC4 | 1 | center_UZ_uniform | -2.599649 | -2.6 | — | in | 0.0135 | 0.000351 | MEASURED |
@@ -96,7 +99,7 @@ Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform a
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | NASTRAN CTRIA3_NATIVE | 1 | center_UZ_uniform | -2.604443 | -2.6 | — | in | 0.1708846 | 0.004443 | MEASURED |
 | prob_2_005_clamped_mesh_24_cquadr_simo / 576 | NASTRAN CTRIAR_NATIVE | 1 | center_UZ_uniform | -2.603444 | -2.6 | — | in | 0.1324615 | 0.003444 | MEASURED |
 | prob_2_005_simple_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_DKMQ20 | 2 | center_UZ_point | -17.05872 | -16.95 | — | in | 0.6414159 | 0.10872 | MEASURED |
-| prob_2_005_simple_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_DSQK | 2 | center_UZ_point | -16.90368 | -16.95 | — | in | 0.2732743 | 0.04632 | MEASURED |
+| prob_2_005_simple_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_DSQK | 2 | center_UZ_point | -16.90369 | -16.95 | — | in | 0.2732153 | 0.04631 | MEASURED |
 | prob_2_005_simple_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_MIN4 | 2 | center_UZ_point | -16.82855 | -16.95 | — | in | 0.7165192 | 0.12145 | MEASURED |
 | prob_2_005_simple_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_MIN4T | 2 | center_UZ_point | -16.82577 | -16.95 | — | in | 0.7329204 | 0.12423 | MEASURED |
 | prob_2_005_simple_mesh_24_cquadr_simo / 576 | MYSTRAN CQUAD4_MITC4 | 2 | center_UZ_point | -16.90369 | -16.95 | — | in | 0.2732153 | 0.04631 | MEASURED |
@@ -148,4 +151,4 @@ Quarter of 2x10 in plate. Simple and clamped supports remain separate; uniform a
 | prob_2_005_simple_mesh_24_cquadr_simo / 576 | NASTRAN CTRIA3_NATIVE | 1 | center_UZ_uniform | -12.9825 | -12.97 | — | in | 0.09637625 | 0.0125 | MEASURED |
 | prob_2_005_simple_mesh_24_cquadr_simo / 576 | NASTRAN CTRIAR_NATIVE | 1 | center_UZ_uniform | -12.98251 | -12.97 | — | in | 0.09645335 | 0.01251 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

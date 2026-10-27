@@ -23,8 +23,12 @@ Quadratic Markdown, HTML, figures and DAT archives are preserved. New linear rep
 
 [Publication validation](data_linear/publication_validation.json) records CSV arithmetic, unique keys, links, archive CRC, deck hashes and quadratic preservation checks.
 
-[Matching benchmark binary](../binaries/mystran18a-linear-shell-win64.zip) and [binary hashes](../binaries/linear_shell_sha256.json) reproduce the tested candidate snapshot. ZIP archives are explicitly marked binary in Git attributes.
+The current rebuilt binary and checksums are distributed through the [October release](https://github.com/realbabilu/MYSTRAN/releases/tag/mystran18a-october2026). Use the 27 October executable hash in current provenance; earlier dated snapshot descriptions above are historical. ZIP archives are marked binary in Git attributes.
 
 ## Additional convergence and preload verification
 
 2-003c now includes six meshes (6x1 through 180x6),132 additional MYSTRAN and24 Nastran completed runs. Totals:1826 MYSTRAN and332 Nastran configurations; the CSV contains5564 metrics. One additional SOL101 confirms DSG3 BEND LC1 preload (99.8876ksi/100ksi); the SOL105 LC2 six-mode residual failure remains open. Earlier counts above describe the original publication snapshot.
+
+## Rebenchmark - 27 October 2026
+
+All 1,826 MYSTRAN configurations rerun using rebuilt DSQK mixed hybrid; 1,825 completed and one DSG3 BEND six-mode known failure remains. The 332 Nastran reference configurations retain prior unchanged-deck outputs. Default residual acceptance is 1e-6; BKRTOL is absent. See [current report](../Linear_Shell_Rebenchmark_20261027.md), [run status](data_linear/run_status_linear.csv), and [source/build provenance](data_linear/provenance_linear.json). Earlier sections describe historical snapshots.

@@ -1,6 +1,9 @@
 # Linear shells — 2-016: Plate out-of-plane buckling
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -155,4 +158,4 @@ DSG3 LC1 preload is independently verified by a separate SOL101 run: 99.8876 ksi
 | prob_2_016c_thick_beamseg_shear / 4096 | NASTRAN CTRIA3_NATIVE | 1 | preload_max_abs_fiber_principal_stress | 100 | 100 | — | ksi | 1.294317e-07 | 1.294317e-07 | MEASURED |
 | prob_2_016c_thick_beamseg_shear / 4096 | NASTRAN CTRIAR_NATIVE | 1 | preload_max_abs_fiber_principal_stress | 100 | 100 | — | ksi | 9.530626e-08 | 9.530626e-08 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

@@ -1,6 +1,9 @@
 # Linear shells — 2-002: Straight beam: six load cases
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -114,7 +117,7 @@ LC1–LC6 use curves across the longitudinal mesh series. LC4 additionally inclu
 | prob_2_002_nx24_cquadr_simo / 24 | NASTRAN CTRIA3_NATIVE | 1 | tip_UX | 3e-05 | 3e-05 | — | in | 0 | 0 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | NASTRAN CTRIAR_NATIVE | 1 | tip_UX | 3.090472e-05 | 3e-05 | — | in | 3.015733 | 9.0472e-07 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_DKMQ20 | 3 | tip_UY | 0.4320889 | 0.4321 | — | in | 0.00256885 | 1.11e-05 | MEASURED |
-| prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_DSQK | 3 | tip_UY | 0.4318509 | 0.4321 | — | in | 0.05764869 | 0.0002491 | MEASURED |
+| prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_DSQK | 3 | tip_UY | 0.4318666 | 0.4321 | — | in | 0.05401527 | 0.0002334 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_MIN4 | 3 | tip_UY | 0.4320454 | 0.4321 | — | in | 0.01263596 | 5.46e-05 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_MIN4T | 3 | tip_UY | 0.4320962 | 0.4321 | — | in | 0.0008794261 | 3.8e-06 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_MITC4 | 3 | tip_UY | 0.431884 | 0.4321 | — | in | 0.04998843 | 0.000216 | MEASURED |
@@ -192,7 +195,7 @@ LC1–LC6 use curves across the longitudinal mesh series. LC4 additionally inclu
 | prob_2_002_nx24_cquadr_simo / 24 | NASTRAN CTRIA3_NATIVE | 5 | tip_abs_UX | 0.0004542509 | 0.0009 | — | in | 49.52768 | 0.0004457491 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | NASTRAN CTRIAR_NATIVE | 5 | tip_abs_UX | 0.0008025134 | 0.0009 | — | in | 10.83184 | 9.74866e-05 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_DKMQ20 | 4 | tip_abs_UY | 0.002587678 | 0.00341 | — | in | 24.11501 | 0.000822322 | MEASURED |
-| prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_DSQK | 4 | tip_abs_UY | 0.00270621 | 0.00341 | — | in | 20.639 | 0.00070379 | MEASURED |
+| prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_DSQK | 4 | tip_abs_UY | 0.002859769 | 0.00341 | — | in | 16.13581 | 0.000550231 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_MIN4 | 4 | tip_abs_UY | 0.003739982 | 0.00341 | — | in | 9.676891 | 0.000329982 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_MIN4T | 4 | tip_abs_UY | 0.00328687 | 0.00341 | — | in | 3.61085 | 0.00012313 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | MYSTRAN CQUAD4_MITC4 | 4 | tip_abs_UY | 0.003040183 | 0.00341 | — | in | 10.84507 | 0.000369817 | MEASURED |
@@ -218,7 +221,7 @@ LC1–LC6 use curves across the longitudinal mesh series. LC4 additionally inclu
 | prob_2_002_nx24_cquadr_simo / 24 | NASTRAN CTRIA3_NATIVE | 4 | tip_abs_UY | 0.003678172 | 0.00341 | — | in | 7.864282 | 0.000268172 | MEASURED |
 | prob_2_002_nx24_cquadr_simo / 24 | NASTRAN CTRIAR_NATIVE | 4 | tip_abs_UY | 0.003539409 | 0.00341 | — | in | 3.794985 | 0.000129409 | MEASURED |
 | prob_2_002_twoaxis_nx192_ny16 / 3072 | MYSTRAN CQUAD4_DKMQ20 | 4 | tip_abs_UY | 0.00341004 | 0.00341 | — | in | 0.001173021 | 4e-08 | MEASURED |
-| prob_2_002_twoaxis_nx192_ny16 / 3072 | MYSTRAN CQUAD4_DSQK | 4 | tip_abs_UY | 0.002402014 | 0.00341 | — | in | 29.55971 | 0.001007986 | MEASURED |
+| prob_2_002_twoaxis_nx192_ny16 / 3072 | MYSTRAN CQUAD4_DSQK | 4 | tip_abs_UY | 0.00340825 | 0.00341 | — | in | 0.05131965 | 1.75e-06 | MEASURED |
 | prob_2_002_twoaxis_nx192_ny16 / 3072 | MYSTRAN CQUAD4_MIN4 | 4 | tip_abs_UY | 0.003436206 | 0.00341 | — | in | 0.7685044 | 2.6206e-05 | MEASURED |
 | prob_2_002_twoaxis_nx192_ny16 / 3072 | MYSTRAN CQUAD4_MIN4T | 4 | tip_abs_UY | 0.003429128 | 0.00341 | — | in | 0.5609384 | 1.9128e-05 | MEASURED |
 | prob_2_002_twoaxis_nx192_ny16 / 3072 | MYSTRAN CQUAD4_MITC4 | 4 | tip_abs_UY | 0.003430854 | 0.00341 | — | in | 0.6115543 | 2.0854e-05 | MEASURED |
@@ -296,7 +299,7 @@ LC1–LC6 use curves across the longitudinal mesh series. LC4 additionally inclu
 | s2k_2002a / 6 | NASTRAN CTRIA3_NATIVE | 1 | tip_UX | 3e-05 | 3e-05 | 3e-05 | in | 0 | 0 | MEASURED |
 | s2k_2002a / 6 | NASTRAN CTRIAR_NATIVE | 1 | tip_UX | 3.002778e-05 | 3e-05 | 3e-05 | in | 0.0926 | 2.778e-08 | MEASURED |
 | s2k_2002a / 6 | MYSTRAN CQUAD4_DKMQ20 | 3 | tip_UY | 0.4320886 | 0.4321 | 0.4321 | in | 0.002638278 | 1.14e-05 | MEASURED |
-| s2k_2002a / 6 | MYSTRAN CQUAD4_DSQK | 3 | tip_UY | 0.4288202 | 0.4321 | 0.4321 | in | 0.7590373 | 0.0032798 | MEASURED |
+| s2k_2002a / 6 | MYSTRAN CQUAD4_DSQK | 3 | tip_UY | 0.4288204 | 0.4321 | 0.4321 | in | 0.758991 | 0.0032796 | MEASURED |
 | s2k_2002a / 6 | MYSTRAN CQUAD4_MIN4 | 3 | tip_UY | 0.4291798 | 0.4321 | 0.4321 | in | 0.6758158 | 0.0029202 | MEASURED |
 | s2k_2002a / 6 | MYSTRAN CQUAD4_MIN4T | 3 | tip_UY | 0.4291826 | 0.4321 | 0.4321 | in | 0.6751678 | 0.0029174 | MEASURED |
 | s2k_2002a / 6 | MYSTRAN CQUAD4_MITC4 | 3 | tip_UY | 0.4288233 | 0.4321 | 0.4321 | in | 0.7583198 | 0.0032767 | MEASURED |
@@ -374,7 +377,7 @@ LC1–LC6 use curves across the longitudinal mesh series. LC4 additionally inclu
 | s2k_2002a / 6 | NASTRAN CTRIA3_NATIVE | 5 | tip_abs_UX | 5.847403e-05 | 0.0009 | 0.000899 | in | 93.50289 | 0.000841526 | MEASURED |
 | s2k_2002a / 6 | NASTRAN CTRIAR_NATIVE | 5 | tip_abs_UX | 0.0006693184 | 0.0009 | 0.000899 | in | 25.63129 | 0.0002306816 | MEASURED |
 | s2k_2002a / 6 | MYSTRAN CQUAD4_DKMQ20 | 4 | tip_abs_UY | 0.002362082 | 0.00341 | 0.00224 | in | 30.73073 | 0.001047918 | MEASURED |
-| s2k_2002a / 6 | MYSTRAN CQUAD4_DSQK | 4 | tip_abs_UY | 0.002834247 | 0.00341 | 0.00224 | in | 16.88425 | 0.000575753 | MEASURED |
+| s2k_2002a / 6 | MYSTRAN CQUAD4_DSQK | 4 | tip_abs_UY | 0.002846961 | 0.00341 | 0.00224 | in | 16.51141 | 0.000563039 | MEASURED |
 | s2k_2002a / 6 | MYSTRAN CQUAD4_MIN4 | 4 | tip_abs_UY | 0.005253481 | 0.00341 | 0.00224 | in | 54.06103 | 0.001843481 | MEASURED |
 | s2k_2002a / 6 | MYSTRAN CQUAD4_MIN4T | 4 | tip_abs_UY | 0.003100766 | 0.00341 | 0.00224 | in | 9.068446 | 0.000309234 | MEASURED |
 | s2k_2002a / 6 | MYSTRAN CQUAD4_MITC4 | 4 | tip_abs_UY | 0.003018745 | 0.00341 | 0.00224 | in | 11.47375 | 0.000391255 | MEASURED |
@@ -400,4 +403,4 @@ LC1–LC6 use curves across the longitudinal mesh series. LC4 additionally inclu
 | s2k_2002a / 6 | NASTRAN CTRIA3_NATIVE | 4 | tip_abs_UY | 0.005179209 | 0.00341 | 0.00224 | in | 51.88296 | 0.001769209 | MEASURED |
 | s2k_2002a / 6 | NASTRAN CTRIAR_NATIVE | 4 | tip_abs_UY | 0.005380898 | 0.00341 | 0.00224 | in | 57.7976 | 0.001970898 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

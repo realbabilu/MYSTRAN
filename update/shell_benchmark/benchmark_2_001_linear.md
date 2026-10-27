@@ -1,6 +1,9 @@
 # Linear shells — 2-001: Membrane, bending, shear and twist patches
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -388,7 +391,7 @@ MacNeal-Harder membrane/bending plus separate distorted bending/shear/twist patc
 | prob_2_001_mh_cquadr_simo / 5 | NASTRAN CTRIAR_NATIVE | 1 | native_max_abs_fiber_principal_stress | 1796.77 | 1733.333 | — | psi | 3.65983 | 63.43706 | MEASURED |
 | prob_2_001_mh_cquadr_simo / 5 | NASTRAN CTRIAR_NATIVE | 2 | native_max_abs_fiber_principal_stress | 0.8666667 | 0.8666667 | — | psi | 5.621263e-06 | 4.871762e-08 | MEASURED |
 | prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_DKMQ20 | 4 | all_original_nodes_rotation_max_abs_error | 8.230101e-19 | 0 | — | rad | — | 8.230101e-19 | MEASURED |
-| prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_DSQK | 4 | all_original_nodes_rotation_max_abs_error | 2.687035e-18 | 0 | — | rad | — | 2.687035e-18 | MEASURED |
+| prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_DSQK | 4 | all_original_nodes_rotation_max_abs_error | 1.343518e-18 | 0 | — | rad | — | 1.343518e-18 | MEASURED |
 | prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_MIN4 | 4 | all_original_nodes_rotation_max_abs_error | 3.6e-07 | 0 | — | rad | — | 3.6e-07 | MEASURED |
 | prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_MIN4T | 4 | all_original_nodes_rotation_max_abs_error | 8.765511e-19 | 0 | — | rad | — | 8.765511e-19 | MEASURED |
 | prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_MITC4 | 4 | all_original_nodes_rotation_max_abs_error | 1.919311e-19 | 0 | — | rad | — | 1.919311e-19 | MEASURED |
@@ -440,7 +443,7 @@ MacNeal-Harder membrane/bending plus separate distorted bending/shear/twist patc
 | prob_2_001_patchbending_cquadr_simo / 4 | NASTRAN CTRIA3_NATIVE | 4 | all_original_nodes_translation_max_abs_error | 0 | 0 | — | in | — | 0 | MEASURED |
 | prob_2_001_patchbending_cquadr_simo / 4 | NASTRAN CTRIAR_NATIVE | 4 | all_original_nodes_translation_max_abs_error | 0 | 0 | — | in | — | 0 | MEASURED |
 | prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_DKMQ20 | 4 | free_original_nodes_rotation_max_abs_error | 8.230101e-19 | 0 | — | rad | — | 8.230101e-19 | MEASURED |
-| prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_DSQK | 4 | free_original_nodes_rotation_max_abs_error | 2.687035e-18 | 0 | — | rad | — | 2.687035e-18 | MEASURED |
+| prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_DSQK | 4 | free_original_nodes_rotation_max_abs_error | 1.343518e-18 | 0 | — | rad | — | 1.343518e-18 | MEASURED |
 | prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_MIN4 | 4 | free_original_nodes_rotation_max_abs_error | 3.6e-07 | 0 | — | rad | — | 3.6e-07 | MEASURED |
 | prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_MIN4T | 4 | free_original_nodes_rotation_max_abs_error | 8.765511e-19 | 0 | — | rad | — | 8.765511e-19 | MEASURED |
 | prob_2_001_patchbending_cquadr_simo / 4 | MYSTRAN CQUAD4_MITC4 | 4 | free_original_nodes_rotation_max_abs_error | 1.919311e-19 | 0 | — | rad | — | 1.919311e-19 | MEASURED |
@@ -752,7 +755,7 @@ MacNeal-Harder membrane/bending plus separate distorted bending/shear/twist patc
 | prob_2_001_patchtwist_cquadr_simo / 4 | NASTRAN CTRIA3_NATIVE | 5 | free_original_nodes_translation_max_abs_error | 3.469447e-18 | 0 | — | in | — | 3.469447e-18 | MEASURED |
 | prob_2_001_patchtwist_cquadr_simo / 4 | NASTRAN CTRIAR_NATIVE | 5 | free_original_nodes_translation_max_abs_error | 3.469447e-18 | 0 | — | in | — | 3.469447e-18 | MEASURED |
 | prob_2_001_patchtwist_cquadr_simo / 4 | MYSTRAN CQUAD4_DKMQ20 | 5 | native_max_abs_fiber_principal_stress | 0.4000001 | 0.4 | — | psi | 3.113351e-05 | 1.24534e-07 | MEASURED |
-| prob_2_001_patchtwist_cquadr_simo / 4 | MYSTRAN CQUAD4_DSQK | 5 | native_max_abs_fiber_principal_stress | 0.4 | 0.4 | — | psi | 6.938894e-14 | 2.775558e-16 | MEASURED |
+| prob_2_001_patchtwist_cquadr_simo / 4 | MYSTRAN CQUAD4_DSQK | 5 | native_max_abs_fiber_principal_stress | 0.4 | 0.4 | — | psi | 9.714451e-14 | 3.885781e-16 | MEASURED |
 | prob_2_001_patchtwist_cquadr_simo / 4 | MYSTRAN CQUAD4_MIN4 | 5 | native_max_abs_fiber_principal_stress | 0.4000853 | 0.4 | — | psi | 0.02131795 | 8.52718e-05 | MEASURED |
 | prob_2_001_patchtwist_cquadr_simo / 4 | MYSTRAN CQUAD4_MIN4T | 5 | native_max_abs_fiber_principal_stress | 0.397931 | 0.4 | — | psi | 0.5172476 | 0.00206899 | MEASURED |
 | prob_2_001_patchtwist_cquadr_simo / 4 | MYSTRAN CQUAD4_MITC4 | 5 | native_max_abs_fiber_principal_stress | 0.4000001 | 0.4 | — | psi | 3.113351e-05 | 1.24534e-07 | MEASURED |
@@ -778,4 +781,4 @@ MacNeal-Harder membrane/bending plus separate distorted bending/shear/twist patc
 | prob_2_001_patchtwist_cquadr_simo / 4 | NASTRAN CTRIA3_NATIVE | 5 | native_max_abs_fiber_principal_stress | 0.4 | 0.4 | — | psi | 4.024558e-13 | 1.609823e-15 | MEASURED |
 | prob_2_001_patchtwist_cquadr_simo / 4 | NASTRAN CTRIAR_NATIVE | 5 | native_max_abs_fiber_principal_stress | 0.4 | 0.4 | — | psi | 4.57967e-13 | 1.831868e-15 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

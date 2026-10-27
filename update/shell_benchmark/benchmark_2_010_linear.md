@@ -1,6 +1,9 @@
 # Linear shells — 2-010: Cylinder under internal pressure
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -394,4 +397,4 @@ Reported principal-stress sample extrema remain explicitly labelled diagnostic e
 | s2k_2010b / 1152 | NASTRAN CTRIA3_NATIVE | 1 | top_mean_Ur | 0.1115924 | 0.12414 | 0.12387 | in | 10.10766 | 0.01254765 | MEASURED |
 | s2k_2010b / 1152 | NASTRAN CTRIAR_NATIVE | 1 | top_mean_Ur | 0.1128508 | 0.12414 | 0.12387 | in | 9.093953 | 0.01128923 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

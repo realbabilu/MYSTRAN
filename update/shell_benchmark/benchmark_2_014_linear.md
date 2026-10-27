@@ -1,6 +1,9 @@
 # Linear shells — 2-014: Through-thickness thermal gradient
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -88,4 +91,4 @@ The tested source snapshot includes DKMT18 SF as an explicitly labelled candidat
 | prob_2_014b_tempgrad_cquadr_simo / 896 | NASTRAN CTRIA3_NATIVE | 1 | inner_edge_mean_tangent_rotation | 0.003490153 | 0.00352 | 0.00347 | rad | 0.8479176 | 2.98467e-05 | MEASURED |
 | prob_2_014b_tempgrad_cquadr_simo / 896 | NASTRAN CTRIAR_NATIVE | 1 | inner_edge_mean_tangent_rotation | 0.003490246 | 0.00352 | 0.00347 | rad | 0.8452877 | 2.975413e-05 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

@@ -1,6 +1,9 @@
 # Linear shells — T: Rank and supplementary analytical tests
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -318,7 +321,7 @@ Rank nullity uses native double KGG for MYSTRAN and unit-displacement SPC-reacti
 | T_cantilever_moment_n8 / 8 | NASTRAN CTRIA3_NATIVE | 1 | tip_abs_UZ | 282.812 | 285.7143 | — | in | 1.0158 | 2.902286 | MEASURED |
 | T_cantilever_moment_n8 / 8 | NASTRAN CTRIAR_NATIVE | 1 | tip_abs_UZ | 282.85 | 285.7143 | — | in | 1.0025 | 2.864286 | MEASURED |
 | T_ss_plate_n16 / 256 | MYSTRAN CQUAD4_DKMQ20 | 1 | center_abs_UZ | 0.2321142 | 0.232 | — | in | 0.04922414 | 0.0001142 | MEASURED |
-| T_ss_plate_n16 / 256 | MYSTRAN CQUAD4_DSQK | 1 | center_abs_UZ | 0.2318648 | 0.232 | — | in | 0.05827586 | 0.0001352 | MEASURED |
+| T_ss_plate_n16 / 256 | MYSTRAN CQUAD4_DSQK | 1 | center_abs_UZ | 0.2318654 | 0.232 | — | in | 0.05801724 | 0.0001346 | MEASURED |
 | T_ss_plate_n16 / 256 | MYSTRAN CQUAD4_MIN4 | 1 | center_abs_UZ | 0.2311252 | 0.232 | — | in | 0.377069 | 0.0008748 | MEASURED |
 | T_ss_plate_n16 / 256 | MYSTRAN CQUAD4_MIN4T | 1 | center_abs_UZ | 0.2309861 | 0.232 | — | in | 0.4370259 | 0.0010139 | MEASURED |
 | T_ss_plate_n16 / 256 | MYSTRAN CQUAD4_MITC4 | 1 | center_abs_UZ | 0.2318697 | 0.232 | — | in | 0.05616379 | 0.0001303 | MEASURED |
@@ -344,4 +347,4 @@ Rank nullity uses native double KGG for MYSTRAN and unit-displacement SPC-reacti
 | T_ss_plate_n16 / 256 | NASTRAN CTRIA3_NATIVE | 1 | center_abs_UZ | 0.2307256 | 0.232 | — | in | 0.5493103 | 0.0012744 | MEASURED |
 | T_ss_plate_n16 / 256 | NASTRAN CTRIAR_NATIVE | 1 | center_abs_UZ | 0.2304833 | 0.232 | — | in | 0.65375 | 0.0015167 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

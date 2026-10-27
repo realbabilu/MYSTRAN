@@ -1,101 +1,410 @@
 [
-  "figures/linear_001_00_all_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_01_all_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_02_free_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_03_free_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_04_native_max_abs_fiber_principal_stress.png",
-  "figures/linear_001_05_all_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_06_all_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_07_free_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_08_free_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_09_native_max_abs_fiber_principal_stress.png",
-  "figures/linear_001_10_all_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_11_all_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_12_free_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_13_free_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_14_native_max_abs_fiber_principal_stress.png",
-  "figures/linear_001_15_all_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_16_all_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_17_free_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_18_free_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_19_native_max_transverse_shear_resultant.png",
-  "figures/linear_001_20_all_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_21_all_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_22_free_original_nodes_rotation_max_abs_error.png",
-  "figures/linear_001_23_free_original_nodes_translation_max_abs_error.png",
-  "figures/linear_001_24_native_max_abs_fiber_principal_stress.png",
-  "figures/linear_002_00_tip_UX.png",
-  "figures/linear_002_01_tip_UZ.png",
-  "figures/linear_002_02_tip_UY.png",
-  "figures/linear_002_03_tip_abs_UY.png",
-  "figures/linear_002_04_tip_abs_UX.png",
-  "figures/linear_002_05_tip_RZ.png",
-  "figures/linear_002_06_tip_abs_UY.png",
-  "figures/linear_002_07_tip_UX.png",
-  "figures/linear_002_08_tip_UZ.png",
-  "figures/linear_002_09_tip_UY.png",
-  "figures/linear_002_10_tip_abs_UY.png",
-  "figures/linear_002_11_tip_abs_UX.png",
-  "figures/linear_002_12_tip_RZ.png",
-  "figures/linear_003_00_tip_UY.png",
-  "figures/linear_003_01_tip_UZ.png",
-  "figures/linear_003_02_tip_UZ_alternative_shell_torsion.png",
-  "figures/linear_004_00_tip_UZ.png",
-  "figures/linear_004_01_tip_UY.png",
-  "figures/linear_004_02_tip_UY.png",
-  "figures/linear_004_03_tip_UZ.png",
-  "figures/linear_005_00_center_UZ_uniform.png",
-  "figures/linear_005_01_center_UZ_point.png",
-  "figures/linear_005_02_center_UZ_uniform.png",
-  "figures/linear_005_03_center_UZ_point.png",
-  "figures/linear_006_00_free_edge_midpoint_UZ.png",
-  "figures/linear_006_01_free_edge_midpoint_UZ_classical_alternative.png",
-  "figures/linear_007_00_loaded_UX.png",
-  "figures/linear_007_01_loaded_UY.png",
-  "figures/linear_007_02_loaded_UX.png",
-  "figures/linear_007_03_loaded_UY.png",
-  "figures/linear_008_00_frequency_mode_1.png",
-  "figures/linear_008_01_frequency_mode_2.png",
-  "figures/linear_008_02_frequency_mode_3.png",
-  "figures/linear_008_03_frequency_mode_4.png",
-  "figures/linear_008_04_frequency_mode_5.png",
-  "figures/linear_009_00_center_UZ.png",
-  "figures/linear_009_01_center_UZ.png",
-  "figures/linear_010_00_native_fiber_principal_max_max.png",
-  "figures/linear_010_01_native_fiber_principal_max_min.png",
-  "figures/linear_010_02_top_mean_UZ.png",
-  "figures/linear_010_03_top_mean_Ur.png",
-  "figures/linear_010_04_native_fiber_principal_max_max.png",
-  "figures/linear_010_05_native_fiber_principal_max_min.png",
-  "figures/linear_010_06_top_mean_UZ.png",
-  "figures/linear_010_07_top_mean_Ur.png",
-  "figures/linear_010_08_native_fiber_principal_max_max.png",
-  "figures/linear_010_09_native_fiber_principal_max_min.png",
-  "figures/linear_010_10_top_mean_UZ.png",
-  "figures/linear_010_11_top_mean_Ur.png",
-  "figures/linear_012_00_outer_edge_mean_UZ.png",
-  "figures/linear_012_01_outer_edge_mean_UZ.png",
-  "figures/linear_013_00_joint8_UX.png",
-  "figures/linear_013_01_joint8_UY.png",
-  "figures/linear_013_02_joint8_UX.png",
-  "figures/linear_013_03_joint8_UY.png",
-  "figures/linear_013_04_native_sigmaX_max.png",
-  "figures/linear_013_05_native_sigmaX_min.png",
-  "figures/linear_013_06_native_sigmaY_max.png",
-  "figures/linear_013_07_native_sigmaY_min.png",
-  "figures/linear_014_00_inner_edge_mean_UZ.png",
-  "figures/linear_014_01_inner_edge_mean_tangent_rotation.png",
-  "figures/linear_016_00_preload_max_abs_fiber_principal_stress.png",
-  "figures/linear_016_01_critical_edge_stress.png",
-  "figures/linear_016_02_preload_max_abs_fiber_principal_stress.png",
-  "figures/linear_016_03_critical_edge_stress.png",
-  "figures/linear_017_00_critical_load.png",
-  "figures/linear_050_00_loaded_UY.png",
-  "figures/linear_T_00_KGG_nullity.png",
-  "figures/linear_T_01_KGG_nullity.png",
-  "figures/linear_T_02_tip_UX.png",
-  "figures/linear_T_03_tip_UZ.png",
-  "figures/linear_T_04_tip_RY.png",
-  "figures/linear_T_05_tip_abs_UZ.png",
-  "figures/linear_T_06_center_abs_UZ.png"
+  {
+    "path": "figures/linear_001_00_all_original_nodes_rotation_max_abs_error.png",
+    "sha256": "99d355d2cdd4f9bd4f9609ece4cf150ce7b13121e5247d663577db58bc974967"
+  },
+  {
+    "path": "figures/linear_001_01_all_original_nodes_translation_max_abs_error.png",
+    "sha256": "3dc052ec38bd51f673b0b4670683de2dfae4e05abd1bd8fd6e19a46857bab7e0"
+  },
+  {
+    "path": "figures/linear_001_02_free_original_nodes_rotation_max_abs_error.png",
+    "sha256": "3fa8d0bae1baba971c5e9f71bb01c495d9bf9cbe5372f34b64001d26bf1a8a47"
+  },
+  {
+    "path": "figures/linear_001_03_free_original_nodes_translation_max_abs_error.png",
+    "sha256": "899a6f173da64772b0dc121d67f0ff097c34c5695a581771f7bf6b065d72df59"
+  },
+  {
+    "path": "figures/linear_001_04_native_max_abs_fiber_principal_stress.png",
+    "sha256": "72b544394c8dd09d5a26817837876c1ad41e361b10c55b1f61170f0a918fea01"
+  },
+  {
+    "path": "figures/linear_001_05_all_original_nodes_rotation_max_abs_error.png",
+    "sha256": "9c26eb0456a84a61eee9e29294587a968e0af21136fd2d2e17323dcf58350e04"
+  },
+  {
+    "path": "figures/linear_001_06_all_original_nodes_translation_max_abs_error.png",
+    "sha256": "1920c3c048cdf6f751a032cc5ead88a11dcf78a90dc1d520396be1b02c39eecc"
+  },
+  {
+    "path": "figures/linear_001_07_free_original_nodes_rotation_max_abs_error.png",
+    "sha256": "9b099d9f23c61f0f77c799f6fede8156e95e57006e82f0eeb257dd7f19cd5f0a"
+  },
+  {
+    "path": "figures/linear_001_08_free_original_nodes_translation_max_abs_error.png",
+    "sha256": "8297c68dbd9ef86512693e1d6984fa2ffa34512fbcf873435318208fde67813c"
+  },
+  {
+    "path": "figures/linear_001_09_native_max_abs_fiber_principal_stress.png",
+    "sha256": "fbf6f2553a154b01966f1054b2886b72ec3484c59adcb3c69bc38eaaf2fcbe77"
+  },
+  {
+    "path": "figures/linear_001_10_all_original_nodes_rotation_max_abs_error.png",
+    "sha256": "71b1a51355cbf188be4e71acf8ccfa39516dd428ccc203e20931d506f1ed027c"
+  },
+  {
+    "path": "figures/linear_001_11_all_original_nodes_translation_max_abs_error.png",
+    "sha256": "24452f28f861533c85d029a1f17cfeb6e675e49d0b596e04bf28f7e2f211b271"
+  },
+  {
+    "path": "figures/linear_001_12_free_original_nodes_rotation_max_abs_error.png",
+    "sha256": "93bc196daa9fc7b1eea236ed4679eb5c9c1603a8833389c363a1cc8385e32fa8"
+  },
+  {
+    "path": "figures/linear_001_13_free_original_nodes_translation_max_abs_error.png",
+    "sha256": "37fac98804631495ebd66638026be5a7cb11680eb2829bb0957c19b2d665f8c7"
+  },
+  {
+    "path": "figures/linear_001_14_native_max_abs_fiber_principal_stress.png",
+    "sha256": "b84faa6bb2b24872be2668b39fbf60d548133ca74284f3a4f1a088cc735673b1"
+  },
+  {
+    "path": "figures/linear_001_15_all_original_nodes_rotation_max_abs_error.png",
+    "sha256": "9dc0f0fc1cf46385f0298c8d7091ff077892c6d6f19e90a9db31c61179ba78b5"
+  },
+  {
+    "path": "figures/linear_001_16_all_original_nodes_translation_max_abs_error.png",
+    "sha256": "7cc454a0be927187b4d0c9614005d8b938f7a58b90c3a1fdfaa688578a3c0eb6"
+  },
+  {
+    "path": "figures/linear_001_17_free_original_nodes_rotation_max_abs_error.png",
+    "sha256": "39970d88735553bed2a80896c7228946a9b7c3e0756820a4c1a2e5aec27eeeae"
+  },
+  {
+    "path": "figures/linear_001_18_free_original_nodes_translation_max_abs_error.png",
+    "sha256": "92785bf2a0074a17ee5c71ab80fe71cf817bd369feed7ae8bb0b3909ea79d8e6"
+  },
+  {
+    "path": "figures/linear_001_19_native_max_transverse_shear_resultant.png",
+    "sha256": "1b67fe3531fe4596e5659ae7734b5baa45a42b06b22254774a6541f49800e14a"
+  },
+  {
+    "path": "figures/linear_001_20_all_original_nodes_rotation_max_abs_error.png",
+    "sha256": "92db7a8dbe45b8afe04f77a19925897bf0538e21306dd3bcb1710733ce7a4126"
+  },
+  {
+    "path": "figures/linear_001_21_all_original_nodes_translation_max_abs_error.png",
+    "sha256": "eb0aeef7032e7046360e2d04de9a6699f192bada01a8abd51dcc37846a8c04db"
+  },
+  {
+    "path": "figures/linear_001_22_free_original_nodes_rotation_max_abs_error.png",
+    "sha256": "058a39524f616c38f29e689ecd02b492dad5842206add34b8c26443ad19b06e6"
+  },
+  {
+    "path": "figures/linear_001_23_free_original_nodes_translation_max_abs_error.png",
+    "sha256": "aba2fed4f1375470ffdbd8ba4199f3c40df6cb78af28bd27190aea39a3a2b356"
+  },
+  {
+    "path": "figures/linear_001_24_native_max_abs_fiber_principal_stress.png",
+    "sha256": "1d8a236a1dc265d9c08007b99766803c03a0a44b713f2c3cdf09df336979925f"
+  },
+  {
+    "path": "figures/linear_002_00_tip_UX.png",
+    "sha256": "aeee096103e9e35050af8f55c192509c7521cd49748be817338851ba3562c685"
+  },
+  {
+    "path": "figures/linear_002_01_tip_UZ.png",
+    "sha256": "e1d0a44f59989016678b5d9c15dbc930f7fcfd340eee21d3eba7c91e4bd88a5b"
+  },
+  {
+    "path": "figures/linear_002_02_tip_UY.png",
+    "sha256": "4d414509611e12b615eea33d9dbf3366b557cf5368e22cd837f3c971946ac1b4"
+  },
+  {
+    "path": "figures/linear_002_03_tip_abs_UY.png",
+    "sha256": "50452360cd6442862fb4e0a23714e16b27bccaacf4529473ab942f71c92e6017"
+  },
+  {
+    "path": "figures/linear_002_04_tip_abs_UX.png",
+    "sha256": "54f2ad0f484800da570faad517beed47de3bc871b6528b9dc4f1615303b9e938"
+  },
+  {
+    "path": "figures/linear_002_05_tip_RZ.png",
+    "sha256": "3b57f2cd7822fe1c02eaea884276d3014be901498eed75157c1a65ce848ad5c6"
+  },
+  {
+    "path": "figures/linear_002_06_tip_abs_UY.png",
+    "sha256": "34318581fe580d799ca4fb7c0912842fedc39e8f0d3b0b19ed9bc0ea381cbaab"
+  },
+  {
+    "path": "figures/linear_002_07_tip_UX.png",
+    "sha256": "ff2b7cb3a832a1b3773f76e2973931182c419e6b8739c92471fe715121be4609"
+  },
+  {
+    "path": "figures/linear_002_08_tip_UZ.png",
+    "sha256": "8450c7b6f568aaf0b43a82eb140683ccdfeff4b2678ad3551a59a0dc7f8ea111"
+  },
+  {
+    "path": "figures/linear_002_09_tip_UY.png",
+    "sha256": "849d39a988ebd5dbdb2dd59618c8bc3421e82c4d159c28997774c9abad2ad63d"
+  },
+  {
+    "path": "figures/linear_002_10_tip_abs_UY.png",
+    "sha256": "f83ec7aa9a8489ff1cc121b60b6ddd0350de71ed6252a46daa80b0573c797b5a"
+  },
+  {
+    "path": "figures/linear_002_11_tip_abs_UX.png",
+    "sha256": "b44cbed570cabef2804aa7d9d5f7143b2cb04fc8797d23bb97518bf17a9c1cff"
+  },
+  {
+    "path": "figures/linear_002_12_tip_RZ.png",
+    "sha256": "7ecea245b6d6b9312c2729ec4f312fa05f73572c98a72785ca0ae82303795197"
+  },
+  {
+    "path": "figures/linear_003_00_tip_UY.png",
+    "sha256": "902bd914a827ff4575b84bec8d74f0f7acd9a92f30d0392339e0c990a739eefa"
+  },
+  {
+    "path": "figures/linear_003_01_tip_UZ.png",
+    "sha256": "85323f52e515330bb4ab5372015e53b9d4468ce89e5e5bb8ac8d9e6e7df59fe8"
+  },
+  {
+    "path": "figures/linear_003_02_tip_UZ_alternative_shell_torsion.png",
+    "sha256": "55b6204b46ede9bd103a29d360f47de74a63c4373bd6141c49f3ad4689292554"
+  },
+  {
+    "path": "figures/linear_003_convergence_2003_tip_UY.png",
+    "sha256": "7866dc6583124be23c50e9ccf904d4836b61abf1d8431a14223fe8d340fa3d17"
+  },
+  {
+    "path": "figures/linear_003_convergence_2003_tip_UZ.png",
+    "sha256": "a063b48ffaf943f553da1527b904aa61cc90e99ef2d3aed17e73eec4ac7bdabc"
+  },
+  {
+    "path": "figures/linear_003_convergence_2003_tip_UZ_alternative_shell_torsion.png",
+    "sha256": "10fd3fc505d0e38c3d87ab3aae99d34ed178fc3a21cb97ee4b34e36a53c5a99c"
+  },
+  {
+    "path": "figures/linear_004_00_tip_UZ.png",
+    "sha256": "0db68c1b46c6f5b61b779dc1730de53c7ad057259c5849fde02b3144430e9ee3"
+  },
+  {
+    "path": "figures/linear_004_01_tip_UY.png",
+    "sha256": "1696e67b0bdc4bde4ad60ff34943b6652a9ea84421613f1a4f3576b3a8adf9a1"
+  },
+  {
+    "path": "figures/linear_004_02_tip_UY.png",
+    "sha256": "f9ecbe0f1029b6fdb84e05e7b0983e2d1200b15ef54cfa60ba2e5f73c30658e2"
+  },
+  {
+    "path": "figures/linear_004_03_tip_UZ.png",
+    "sha256": "bcec98d141d31c298bb431da79a14e64cace028fa47ae55ec039ebc9bc2d1200"
+  },
+  {
+    "path": "figures/linear_005_00_center_UZ_uniform.png",
+    "sha256": "80b2f14b85312c46ce783c521d9faab6eec2775bb677e7c59cb92ee45c391681"
+  },
+  {
+    "path": "figures/linear_005_01_center_UZ_point.png",
+    "sha256": "db516eb7898bc389d4e9acdbb68e0dd51100fa90fbb137035707201dd366ef72"
+  },
+  {
+    "path": "figures/linear_005_02_center_UZ_uniform.png",
+    "sha256": "0f1661c3af69747fac61e86dee7d8c386be2c906a551d9efbc0c7d22a896ead4"
+  },
+  {
+    "path": "figures/linear_005_03_center_UZ_point.png",
+    "sha256": "9ab21f6dfa5bf550bb38f224310c81576851d0da3dcc631a992cff64a626d373"
+  },
+  {
+    "path": "figures/linear_006_00_free_edge_midpoint_UZ.png",
+    "sha256": "5f545fcabb88a57edb1d103a98c8f3da60999d2e861fec8e7d215207990e67ea"
+  },
+  {
+    "path": "figures/linear_006_01_free_edge_midpoint_UZ_classical_alternative.png",
+    "sha256": "d26e5c6320737da2a441053db98da51110f9a4c2e8caf77e20e64023b908ee06"
+  },
+  {
+    "path": "figures/linear_007_00_loaded_UX.png",
+    "sha256": "550e90a6284741dea3afa425793327c321f016a8046c077c27c30834597e8c0e"
+  },
+  {
+    "path": "figures/linear_007_01_loaded_UY.png",
+    "sha256": "c48d7706881f156bb3729798bd90e3f895f2bb5adf6cb03f67ddc94659f8943e"
+  },
+  {
+    "path": "figures/linear_007_02_loaded_UX.png",
+    "sha256": "466212278436517f87cf8c8ac0ab64b21736cb88822bec8a0fc7d13ba6a84d2c"
+  },
+  {
+    "path": "figures/linear_007_03_loaded_UY.png",
+    "sha256": "2145b2cbced1999e79392d1ffa291aa3449e2ff88d61fb318768cd1b46a57024"
+  },
+  {
+    "path": "figures/linear_008_00_frequency_mode_1.png",
+    "sha256": "c451d6377a3141f44114af6d76eae1d526d40eacba4cee89bd6a90c00a07dc73"
+  },
+  {
+    "path": "figures/linear_008_01_frequency_mode_2.png",
+    "sha256": "278096e2c7c73060baf820520cc23097a3badfd81e20ffd2815c8972f8569a2e"
+  },
+  {
+    "path": "figures/linear_008_02_frequency_mode_3.png",
+    "sha256": "24e19753bdcea1cf8a6ba7f290e11693558d57728cf865766c3162f97e349bb0"
+  },
+  {
+    "path": "figures/linear_008_03_frequency_mode_4.png",
+    "sha256": "34cf5311681dca72a91849fec7fa358b29060712de00591311df538351d83118"
+  },
+  {
+    "path": "figures/linear_008_04_frequency_mode_5.png",
+    "sha256": "742c0b4cf0dc64e734c2b51c9e9ded5f956e3f0ce73de74bbda6b29c84c2cad3"
+  },
+  {
+    "path": "figures/linear_009_00_center_UZ.png",
+    "sha256": "9c57a87299657f3a4b5db28ab4ccaa68f72604ae566147924e08f8c43dcdcef6"
+  },
+  {
+    "path": "figures/linear_009_01_center_UZ.png",
+    "sha256": "9cefadb3809ee8229f76da8d90270b89fc831344e490bc4b0f6d301a94d4d40a"
+  },
+  {
+    "path": "figures/linear_010_00_native_fiber_principal_max_max.png",
+    "sha256": "284cd1ea2f3db1a844dc44111120b33518fdb0e4b4df19a417f823e4b116c2ff"
+  },
+  {
+    "path": "figures/linear_010_01_native_fiber_principal_max_min.png",
+    "sha256": "21fe5d94326d968a171afae068a51a7481a15bb3de20d47a70445491ea2157fb"
+  },
+  {
+    "path": "figures/linear_010_02_top_mean_UZ.png",
+    "sha256": "02e0c06f673eb9d02ec73a70df82f40c83a5f486e8c59d7cd4b12aaf3cd105e4"
+  },
+  {
+    "path": "figures/linear_010_03_top_mean_Ur.png",
+    "sha256": "54fecaece714c3f7f5b60d2db420037ea992553fcd2be718aa3d91532f587990"
+  },
+  {
+    "path": "figures/linear_010_04_native_fiber_principal_max_max.png",
+    "sha256": "df94084861c44c0c5c4bb2fadeff0a9d301b9da02acbe9de3f8924752409ce0e"
+  },
+  {
+    "path": "figures/linear_010_05_native_fiber_principal_max_min.png",
+    "sha256": "4ecf76342170372a55a06c89ae4bcf1730d0584adea2393aef660c3843049eff"
+  },
+  {
+    "path": "figures/linear_010_06_top_mean_UZ.png",
+    "sha256": "055088d7da85929f9b4561811101770363993488c753c46f31e1f0833b020d61"
+  },
+  {
+    "path": "figures/linear_010_07_top_mean_Ur.png",
+    "sha256": "9138494a772c44a054cbca941cc6a3d175156900af7872e6e96d075c7e8be9ee"
+  },
+  {
+    "path": "figures/linear_010_08_native_fiber_principal_max_max.png",
+    "sha256": "3ce3538291013a07157750f7c6ae16f936998270672160215184c2faefdd4cf8"
+  },
+  {
+    "path": "figures/linear_010_09_native_fiber_principal_max_min.png",
+    "sha256": "dedd36315c2ea9ad340e1e2d93206d1b963e84f77a5a3d3c44d3a19061314222"
+  },
+  {
+    "path": "figures/linear_010_10_top_mean_UZ.png",
+    "sha256": "e7a8469f3e577963b00b1d63cb0bf3b979aaa5d5551c2dd464f5e36d37300eea"
+  },
+  {
+    "path": "figures/linear_010_11_top_mean_Ur.png",
+    "sha256": "5cdb056d23f677fe6795df02932b111261a56d8c33c77520a1ef904594abfa42"
+  },
+  {
+    "path": "figures/linear_012_00_outer_edge_mean_UZ.png",
+    "sha256": "8fb7d0b44e86fe95a8ab33ca0041ebfa9e19aa2bbd061b351215994a4462535c"
+  },
+  {
+    "path": "figures/linear_012_01_outer_edge_mean_UZ.png",
+    "sha256": "ebb7badbba36462198dd101ed4dd2802f1584e38c5f472cdb2355f377303aa2d"
+  },
+  {
+    "path": "figures/linear_013_00_joint8_UX.png",
+    "sha256": "7103afd4dc8d498d7ff5e7381938dfc7895ab0e6abc14e7d3a51946d527d0880"
+  },
+  {
+    "path": "figures/linear_013_01_joint8_UY.png",
+    "sha256": "a13404356e1f9359979757832738f11c5a43d3b348e120dab0f22cfcf1067b48"
+  },
+  {
+    "path": "figures/linear_013_02_joint8_UX.png",
+    "sha256": "ba02bbc0e0d5e8f552d1aa33c3ce0becedfbada6e5bdd2fa282bc0ef951d78e6"
+  },
+  {
+    "path": "figures/linear_013_03_joint8_UY.png",
+    "sha256": "59efe4c2d4fed6f6ff38efae7429b14bfd3f382ae36bc9e88f6bf925dffeb00a"
+  },
+  {
+    "path": "figures/linear_013_04_native_sigmaX_max.png",
+    "sha256": "2820af154f8d531dd02a5fa262bd95e0677cd561486d096d0488b9e97dfa8498"
+  },
+  {
+    "path": "figures/linear_013_05_native_sigmaX_min.png",
+    "sha256": "66e9a597e9155896df71839a2d8096aba3d6a284adcf75002bda826f90b93ba7"
+  },
+  {
+    "path": "figures/linear_013_06_native_sigmaY_max.png",
+    "sha256": "06df0d573ba429d602af60f06a1ef59068f7a381d5997f0253c5a1ba0994e882"
+  },
+  {
+    "path": "figures/linear_013_07_native_sigmaY_min.png",
+    "sha256": "7561c054908b097200052180d3b747b71968a95643e6a1507877a5363fd79323"
+  },
+  {
+    "path": "figures/linear_014_00_inner_edge_mean_UZ.png",
+    "sha256": "d66e5ca2b27e77e5b459e6432e11998a4df3d5444caeb66499e70ed652f49154"
+  },
+  {
+    "path": "figures/linear_014_01_inner_edge_mean_tangent_rotation.png",
+    "sha256": "380891e27d70ee88ec13bf271d268f402a3912b6e1547339ac30d96dfd5c9619"
+  },
+  {
+    "path": "figures/linear_016_00_preload_max_abs_fiber_principal_stress.png",
+    "sha256": "952402a64e4031e0ee6db6abcdffc5b3f91c95333941d3866726ab53017f4bda"
+  },
+  {
+    "path": "figures/linear_016_01_critical_edge_stress.png",
+    "sha256": "be2e5efe9e7a16d8846e137673c5e6e85d5bae8f98eb0c02f4570908630a30d9"
+  },
+  {
+    "path": "figures/linear_016_02_preload_max_abs_fiber_principal_stress.png",
+    "sha256": "c63a8abc0a294f74320c71d873dd4d5fb071889fdb0dd9b71ce0b14ed4b60d5b"
+  },
+  {
+    "path": "figures/linear_016_03_critical_edge_stress.png",
+    "sha256": "718b4ad3a7546cb1785695f7131177db5f092d64cc52d627915f60087b540534"
+  },
+  {
+    "path": "figures/linear_017_00_critical_load.png",
+    "sha256": "38b81b9b8e0e31aeb770da7f59c437379ae8d5a617d9f15f4b118bedc84af75c"
+  },
+  {
+    "path": "figures/linear_050_00_loaded_UY.png",
+    "sha256": "91a8ae2686d1ede2afd26dfbe6c0106d09dc58f5555cc28408f58cc64e62a7c5"
+  },
+  {
+    "path": "figures/linear_T_00_KGG_nullity.png",
+    "sha256": "f51abd048c1002c19098b04b3e91c4f96bf8a375a3a59a74a3fdb8dce11e2bae"
+  },
+  {
+    "path": "figures/linear_T_01_KGG_nullity.png",
+    "sha256": "914dede5294f6e1ba712851300af7cce342f95fc7b8880318276589327b20dcd"
+  },
+  {
+    "path": "figures/linear_T_02_tip_UX.png",
+    "sha256": "26798086f3a0f3408d723ef3cd7a57706c2305dea425e773951e7b6f20e4031e"
+  },
+  {
+    "path": "figures/linear_T_03_tip_UZ.png",
+    "sha256": "7e9b7e4a9262f421077dc9490e4895b8bf76e41cbf70ff5c613a9a14b0762e00"
+  },
+  {
+    "path": "figures/linear_T_04_tip_RY.png",
+    "sha256": "c0d03d723d952a475edbca322b2e736910937aea0a6ea3599519e5572fb732bd"
+  },
+  {
+    "path": "figures/linear_T_05_tip_abs_UZ.png",
+    "sha256": "5fb019da5d2ccdcf714e14915d39ffad426fffc110d4ab909aa3c1d6bf2b29a5"
+  },
+  {
+    "path": "figures/linear_T_06_center_abs_UZ.png",
+    "sha256": "7358e9fda45b6e8994138c1f11a6169a03a1e4c96a458a18eb75b7eaf8c2d619"
+  }
 ]

@@ -1,6 +1,9 @@
 # Linear shells — 2-008: Plate vibration: Model C
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -48,7 +51,7 @@ Model C only: source single area auto-meshed 40x40, compared with supplied expli
 | Case / parent quads | Solver / formulation | LC | Quantity | Measured | Independent / analytical | CSI published | Unit | Error % primary | Absolute residual | Status |
 |---|---|---:|---|---:|---:|---:|---|---:|---:|---|
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DKMQ20 | 1 | frequency_mode_1 | 57.52656 | 58.03831 | 57.50431 | Hz | 0.8817371 | 0.5117453 | MEASURED |
-| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_1 | 57.6068 | 58.03831 | 57.50431 | Hz | 0.7434836 | 0.4315053 | MEASURED |
+| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_1 | 57.51058 | 58.03831 | 57.50431 | Hz | 0.9092707 | 0.5277253 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4 | 1 | frequency_mode_1 | 57.51241 | 58.03831 | 57.50431 | Hz | 0.9061176 | 0.5258953 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4T | 1 | frequency_mode_1 | 57.51061 | 58.03831 | 57.50431 | Hz | 0.909219 | 0.5276953 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MITC4 | 1 | frequency_mode_1 | 57.53451 | 58.03831 | 57.50431 | Hz | 0.8680393 | 0.5037953 | MEASURED |
@@ -74,7 +77,7 @@ Model C only: source single area auto-meshed 40x40, compared with supplied expli
 | prob_2_008c_thick / 1600 | NASTRAN CTRIA3_NATIVE | 1 | frequency_mode_1 | 57.51802 | 58.03831 | 57.50431 | Hz | 0.8964515 | 0.5202853 | MEASURED |
 | prob_2_008c_thick / 1600 | NASTRAN CTRIAR_NATIVE | 1 | frequency_mode_1 | 57.52041 | 58.03831 | 57.50431 | Hz | 0.8923336 | 0.5178953 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DKMQ20 | 1 | frequency_mode_2 | 139.6051 | 142.0455 | 140.4494 | Hz | 1.71801 | 2.440355 | MEASURED |
-| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_2 | 140.7792 | 142.0455 | 140.4494 | Hz | 0.8914432 | 1.266255 | MEASURED |
+| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_2 | 139.4448 | 142.0455 | 140.4494 | Hz | 1.830861 | 2.600655 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4 | 1 | frequency_mode_2 | 139.3645 | 142.0455 | 140.4494 | Hz | 1.887392 | 2.680955 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4T | 1 | frequency_mode_2 | 139.373 | 142.0455 | 140.4494 | Hz | 1.881408 | 2.672455 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MITC4 | 1 | frequency_mode_2 | 139.5671 | 142.0455 | 140.4494 | Hz | 1.744762 | 2.478355 | MEASURED |
@@ -100,7 +103,7 @@ Model C only: source single area auto-meshed 40x40, compared with supplied expli
 | prob_2_008c_thick / 1600 | NASTRAN CTRIA3_NATIVE | 1 | frequency_mode_2 | 139.3996 | 142.0455 | 140.4494 | Hz | 1.862682 | 2.645855 | MEASURED |
 | prob_2_008c_thick / 1600 | NASTRAN CTRIAR_NATIVE | 1 | frequency_mode_2 | 139.4266 | 142.0455 | 140.4494 | Hz | 1.843674 | 2.618855 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DKMQ20 | 1 | frequency_mode_3 | 351.0174 | 355.8719 | 350.8772 | Hz | 1.364111 | 4.854486 | MEASURED |
-| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_3 | 352.1364 | 355.8719 | 350.8772 | Hz | 1.049672 | 3.735486 | MEASURED |
+| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_3 | 349.9863 | 355.8719 | 350.8772 | Hz | 1.65385 | 5.885586 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4 | 1 | frequency_mode_3 | 350.3685 | 355.8719 | 350.8772 | Hz | 1.546452 | 5.503386 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4T | 1 | frequency_mode_3 | 350.2663 | 355.8719 | 350.8772 | Hz | 1.57517 | 5.605586 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MITC4 | 1 | frequency_mode_3 | 351.2683 | 355.8719 | 350.8772 | Hz | 1.293608 | 4.603586 | MEASURED |
@@ -126,7 +129,7 @@ Model C only: source single area auto-meshed 40x40, compared with supplied expli
 | prob_2_008c_thick / 1600 | NASTRAN CTRIA3_NATIVE | 1 | frequency_mode_3 | 350.4744 | 355.8719 | 350.8772 | Hz | 1.516694 | 5.397486 | MEASURED |
 | prob_2_008c_thick / 1600 | NASTRAN CTRIAR_NATIVE | 1 | frequency_mode_3 | 350.5321 | 355.8719 | 350.8772 | Hz | 1.50048 | 5.339786 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DKMQ20 | 1 | frequency_mode_4 | 447.6958 | 456.621 | 448.4305 | Hz | 1.95462 | 8.925205 | MEASURED |
-| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_4 | 448.809 | 456.621 | 448.4305 | Hz | 1.710829 | 7.812005 | MEASURED |
+| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_4 | 445.3921 | 456.621 | 448.4305 | Hz | 2.45913 | 11.2289 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4 | 1 | frequency_mode_4 | 446.3748 | 456.621 | 448.4305 | Hz | 2.243919 | 10.2462 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4T | 1 | frequency_mode_4 | 446.3567 | 456.621 | 448.4305 | Hz | 2.247883 | 10.2643 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MITC4 | 1 | frequency_mode_4 | 447.7452 | 456.621 | 448.4305 | Hz | 1.943801 | 8.875805 | MEASURED |
@@ -152,7 +155,7 @@ Model C only: source single area auto-meshed 40x40, compared with supplied expli
 | prob_2_008c_thick / 1600 | NASTRAN CTRIA3_NATIVE | 1 | frequency_mode_4 | 446.724 | 456.621 | 448.4305 | Hz | 2.167444 | 9.897005 | MEASURED |
 | prob_2_008c_thick / 1600 | NASTRAN CTRIAR_NATIVE | 1 | frequency_mode_4 | 446.8035 | 456.621 | 448.4305 | Hz | 2.150034 | 9.817505 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DKMQ20 | 1 | frequency_mode_5 | 506.063 | 518.1347 | 507.6142 | Hz | 2.329841 | 12.07172 | MEASURED |
-| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_5 | 510.8811 | 518.1347 | 507.6142 | Hz | 1.399948 | 7.253615 | MEASURED |
+| prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_DSQK | 1 | frequency_mode_5 | 504.2355 | 518.1347 | 507.6142 | Hz | 2.682549 | 13.89922 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4 | 1 | frequency_mode_5 | 504.5299 | 518.1347 | 507.6142 | Hz | 2.625729 | 13.60482 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MIN4T | 1 | frequency_mode_5 | 504.4877 | 518.1347 | 507.6142 | Hz | 2.633874 | 13.64702 | MEASURED |
 | prob_2_008c_thick / 1600 | MYSTRAN CQUAD4_MITC4 | 1 | frequency_mode_5 | 506.1302 | 518.1347 | 507.6142 | Hz | 2.316871 | 12.00452 | MEASURED |
@@ -178,4 +181,4 @@ Model C only: source single area auto-meshed 40x40, compared with supplied expli
 | prob_2_008c_thick / 1600 | NASTRAN CTRIA3_NATIVE | 1 | frequency_mode_5 | 504.7711 | 518.1347 | 507.6142 | Hz | 2.579178 | 13.36362 | MEASURED |
 | prob_2_008c_thick / 1600 | NASTRAN CTRIAR_NATIVE | 1 | frequency_mode_5 | 504.922 | 518.1347 | 507.6142 | Hz | 2.550054 | 13.21272 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.

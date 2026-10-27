@@ -1,6 +1,9 @@
 # Linear shells — 2-050: Pinched cylinder
 
-25 October 2026. Fresh native MYSTRAN and Nastran runs. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
+27 October 2026 rebenchmark: all MYSTRAN entries were rerun using the rebuilt mixed-hybrid DSQK binary. Nastran entries retain previous outputs for unchanged decks. Default residual acceptance remains 1e-6. See [rebenchmark report](../Linear_Shell_Rebenchmark_20261027.md).
+
+
+Historical baseline: 25 October 2026; MYSTRAN refreshed 27 October, Nastran retained. CQUAD4, CQUADR, CTRIA3 and CTRIAR only.
 
 [All linear comparisons](comparison_all_linear.md) · [Full ZIP](comparison_all_linear.zip) · [Tested DAT](DAT/linear_shell_benchmark_DAT.zip) · [Linear publication QA](PUBLICATION_QA_linear.md)
 
@@ -32,7 +35,7 @@ Classical pinched cylinder R=300,L=600,t=3,E=3e6,nu=.3; one-eighth symmetry with
 | Case / parent quads | Solver / formulation | LC | Quantity | Measured | Independent / analytical | CSI published | Unit | Error % primary | Absolute residual | Status |
 |---|---|---:|---|---:|---:|---:|---|---:|---:|---|
 | prob_2_050_nx16_cquadr_simo / 256 | MYSTRAN CQUAD4_DKMQ20 | 1 | loaded_UY | -1.859915e-05 | -1.8248e-05 | — | in | 1.92432 | 3.5115e-07 | MEASURED |
-| prob_2_050_nx16_cquadr_simo / 256 | MYSTRAN CQUAD4_DSQK | 1 | loaded_UY | -1.693321e-05 | -1.8248e-05 | — | in | 7.205118 | 1.31479e-06 | MEASURED |
+| prob_2_050_nx16_cquadr_simo / 256 | MYSTRAN CQUAD4_DSQK | 1 | loaded_UY | -1.693411e-05 | -1.8248e-05 | — | in | 7.200186 | 1.31389e-06 | MEASURED |
 | prob_2_050_nx16_cquadr_simo / 256 | MYSTRAN CQUAD4_MIN4 | 1 | loaded_UY | -1.800442e-05 | -1.8248e-05 | — | in | 1.334831 | 2.4358e-07 | MEASURED |
 | prob_2_050_nx16_cquadr_simo / 256 | MYSTRAN CQUAD4_MIN4T | 1 | loaded_UY | -1.800644e-05 | -1.8248e-05 | — | in | 1.323762 | 2.4156e-07 | MEASURED |
 | prob_2_050_nx16_cquadr_simo / 256 | MYSTRAN CQUAD4_MITC4 | 1 | loaded_UY | -1.695651e-05 | -1.8248e-05 | — | in | 7.077433 | 1.29149e-06 | MEASURED |
@@ -58,4 +61,4 @@ Classical pinched cylinder R=300,L=600,t=3,E=3e6,nu=.3; one-eighth symmetry with
 | prob_2_050_nx16_cquadr_simo / 256 | NASTRAN CTRIA3_NATIVE | 1 | loaded_UY | -1.789867e-05 | -1.8248e-05 | — | in | 1.914347 | 3.4933e-07 | MEASURED |
 | prob_2_050_nx16_cquadr_simo / 256 | NASTRAN CTRIAR_NATIVE | 1 | loaded_UY | -1.831599e-05 | -1.8248e-05 | — | in | 0.3725888 | 6.799e-08 | MEASURED |
 
-All mesh rows, missing fields, hashes and run statuses remain in the CSV.
+All mesh rows and status/provenance remain in the CSV.
