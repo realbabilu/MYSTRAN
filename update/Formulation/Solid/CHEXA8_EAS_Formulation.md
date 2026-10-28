@@ -427,3 +427,18 @@ Nastran agreement is useful comparative evidence, but the independent analytical
 [6] R. H. MacNeal and R. L. Harder (1985). “A proposed standard set of problems to test finite element accuracy.” *Finite Elements in Analysis and Design*, 1, 3–20.
 
 [7] Computers and Structures, Inc. *SAP2000 Software Verification: Solids*, Examples 5-004 and 5-007. Original published benchmark definitions and reference values are retained in the [solid benchmark collection](../../solid_benchmark/README.md). The pinched-cylinder and perturbed affine-patch studies are additional examples described in this report; they are not relabelled as SAP2000 cases.
+## Geometric orientation and integration-point map
+
+The following figures use the CHEXA8 convention implemented for the reported EAS and tied-EAS9 variants. The node map, local orientation, 2×2×2 Gauss rule, and tied-shear sampling planes are shown explicitly. The diagrams are explanatory only; the formulation retains the eight corner nodes and 24 global translational degrees of freedom, while the EAS parameters are condensed locally.
+
+![CHEXA8 node numbering and orientation](figures/CHEXA8_orientation.png)
+
+*Figure. CHEXA8 corner-node numbering and natural-coordinate orientation.*
+
+![CHEXA8 Gauss points](figures/CHEXA8_gauss_points.png)
+
+*Figure. The eight points of the 2×2×2 Gauss rule.*
+
+![CHEXA8 tied-shear points](figures/CHEXA8_tying_points.png)
+
+*Figure. Tied-shear sampling planes on the reference face; EAS modes remain internal condensed parameters.*
