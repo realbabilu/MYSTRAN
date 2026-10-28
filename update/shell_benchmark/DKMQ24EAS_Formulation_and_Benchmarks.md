@@ -144,18 +144,28 @@ $$
 
 Define the centroid mapping by $\mathbf J_0=\partial(x,y)/\partial(\xi,\eta)|_{(0,0)}$. The bubble gradients follow from
 
-$$
-\begin{bmatrix}H_{a,x}\\H_{a,y}\end{bmatrix}
-=\mathbf J_0^{-\mathsf T}
-\begin{bmatrix}H_{a,\xi}\\H_{a,\eta}\end{bmatrix},
+
+```math
+\begin{bmatrix}
+H_{a,x} & H_{a,y}
+\end{bmatrix}
+=
+J_0^{-\mathrm{T}}
+\begin{bmatrix}
+H_{a,\xi} & H_{a,\eta}
+\end{bmatrix}^{\mathrm{T}},
 \qquad a=1,2.
-$$
+```
+
 
 The determinant-ratio correction gives
 
 $$
 \mathbf G^*(\xi,\eta)=\frac{\det\mathbf J_0}{\det\mathbf J(\xi,\eta)}\mathbf G(\xi,\eta).
 $$
+
+
+
 
 
 
