@@ -172,27 +172,15 @@ $$
 
 With the thickness-integrated membrane constitutive matrix $\mathbf C_m$ of Section 2,
 
-```
+
 $$
-\begin{aligned}
-\mathbf{K}_{u\alpha}
-&=
-\int_{\Omega_e}
-\mathbf{B}_m^{\mathsf{T}}
-\mathbf{C}_m
-\mathbf{G}^{*}
-\,\mathrm{d}A,
-\\[6pt]
-\mathbf{K}_{\alpha\alpha}
-&=
-\int_{\Omega_e}
-\left(\mathbf{G}^{*}\right)^{\mathsf{T}}
-\mathbf{C}_m
-\mathbf{G}^{*}
-\,\mathrm{d}A.
-\end{aligned}
+K_{u\alpha} = \int_{\Omega_e} B_m^\top C_m G^* \, dA
 $$
-```
+
+$$
+K_{\alpha\alpha} = \int_{\Omega_e} (G^*)^\top C_m G^* \, dA
+$$
+
 
 Elimination of the internal parameters yields
 
