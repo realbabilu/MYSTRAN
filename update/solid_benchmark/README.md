@@ -4,7 +4,7 @@
 
 Comparison reports for SAP2000-derived solid benchmarks, with independent reference values, published SAP2000 values, mesh counts and refinement curves. All text is in English.
 
-| Report | Coverage | Read on GitHub | Standalone HTML |
+| Report | Coverage | Read on GitHub |
 |---|---|---|---|
 | MYSTRAN solid comparison | Five cases: 5-001, 5-004, 5-007, 5-010 and 5-011; 71 response comparisons | [Report](mystran_solid_comparison.md) |
 | All solid elements - SAP2000 benchmarks | Eight solid types on 5-004 and 5-007; 56 matched meshes, 63 MYSTRAN selections and 126 responses | [Report](comparison_all.md) |
@@ -37,7 +37,7 @@ Nastran and MYSTRAN are compared on matched inputs. Independent values and publi
 
 Accuracy depends on the case, mesh and formulation. Agreement between solvers does not establish agreement with independent. The reports retain actual numerical differences and documented geometry-check settings. No production stiffness code or empirical scaling factor was changed for these comparison runs.
 
-GitHub renders the Markdown reports and PNG figures directly. Download the HTML reports to use the local element selector in a browser.
+GitHub renders the Markdown reports and PNG figures directly.
 
 ## Reference Hex Benchmarks
 https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Solids/Problem%205-001.pdf to https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Solids/Problem%205-013.pdf

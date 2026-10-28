@@ -1,14 +1,14 @@
 # Publication QA — 19 October 2026
 
-The supplied CQUAD8/CTRIA6 publication draft is reconciled with locally audited data. Nine individual theory pages, their combined manuscript, and16 benchmark case pages are retained in Markdown and HTML. The initial publication did not run solvers; subsequent 20 October additions and diagnostic runs are recorded below. No formulation kernel was changed.
+The supplied CQUAD8/CTRIA6 publication draft is reconciled with locally audited data. Nine individual theory pages, their combined manuscript, and16 benchmark case pages are retained in Markdown. The initial publication did not run solvers; subsequent 20 October additions and diagnostic runs are recorded below. No formulation kernel was changed.
 
 ## Gates
 
-- Current publication trees contain Markdown/HTML, SVG/PNG, license text and input archives; no tracked CSV/Python/notebook/raw solver outputs in Solid or Shell publication paths.
+- Current publication trees contain Markdown, SVG/PNG, license text and input archives; no tracked CSV/Python/notebook/raw solver outputs in Solid or Shell publication paths.
 - Research source files removed from Git tracking remain byte-identical on the local research computer. This is current-tree cleanup, not rewriting Git history.
 - Local file/image targets and Markdown anchors pass static verification. Regenerated numerical tables share the same private input records as their plots; private CSV is not copied into public folders.
 - Plot sample inspection confirms readable labels/markers; multimesh studies use distinct markers/dashes and independent ratio/error references; single-mesh thermal cases use bars.
-- HTML TeX is preserved and uses MathJax from its public CDN. Browser screenshot automation could not connect to the local preview server in this environment; interactive rendering is not represented as screenshot-verified. PNG numerical figures were inspected directly.
+- Mathematical notation is retained in the Markdown source. PNG numerical figures were inspected directly.
 - DAT archive CRC and every manifest SHA256 are verified. After the 20 October 2026 refresh, the archive contains480 actual input decks across14 verified-run cases plus Markdown README/hash manifest, with no results, Python, CSV or private filesystem paths.
 
 ## Reconciliation

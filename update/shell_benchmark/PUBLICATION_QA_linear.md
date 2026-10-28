@@ -19,7 +19,7 @@ Corrected DSG3 BEND six-mode acceptance still fails in this snapshot and remains
 
 ## Publication controls
 
-Quadratic Markdown, HTML, figures and DAT archives are preserved. New linear reports use `_linear.md` and new figures use `figures/linear_...png`; no linear HTML is generated. The existing README gains linear navigation and omits its unsupplied2-015 index entry. Each metric carries units, source/deck/output hashes, candidate tag, archive entry and native run status. CSV size is below10,000,000 bytes. Raw outputs and licensed binaries remain local.
+Quadratic Markdown, figures and DAT archives are preserved. New linear reports use `_linear.md` and new figures use `figures/linear_...png`;  The existing README gains linear navigation and omits its unsupplied2-015 index entry. Each metric carries units, source/deck/output hashes, candidate tag, archive entry and native run status. CSV size is below10,000,000 bytes. Raw outputs and licensed binaries remain local.
 
 [Publication validation](data_linear/publication_validation.json) records CSV arithmetic, unique keys, links, archive CRC, deck hashes and quadratic preservation checks.
 

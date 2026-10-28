@@ -617,7 +617,7 @@ For 2-001, all four T6 formulations pass analytical flat membrane, bending and z
 
 Report the **physical model and thickness** before reporting numerical agreement. For every measured observable provide problem ID, element family and formulation, thin/thick flag, winding, independent reference (if verified), solver, point and fiber, local/basic-coordinate convention, results, difference/error and source checksum. Preserve analytical zero targets using absolute error rather than division by zero. **No missing result shall be represented by numerical zero**. For public repository delivery, keep source and generated benchmark DAT traceable separately and store bulky OP2/F06 outside the documentation ZIP.
 
-The included with this document assigns **all DAT selection, thin/thick MID3 verification, Q8/T6 extraction, winding CCW normalization and DAT ZIP construction *. The Markdown/HTML package itself contains no benchmark DAT.
+The included with this document assigns **all DAT selection, thin/thick MID3 verification, Q8/T6 extraction, winding CCW normalization and DAT ZIP construction *. The Markdown package itself contains no benchmark DAT.
 
 ## References — primary journal literature (no citations to project Markdown)
 
