@@ -621,15 +621,15 @@ The $x$ orientation locks badly in all these wedge variants. ABE **cannot** reco
 
 The following figures make the CPENTA6 ABE convention explicit. The node map follows the six-node wedge ordering used by the solid formulation. The reference-plane diagram shows the triangular coordinates, edge-tying locations, and centroidal point used by the assumed-shear construction. The volume-integration diagram shows the triangular-plane points paired through the thickness direction. These figures describe the adopted reference convention and do not introduce additional global degrees of freedom.
 
-![CPENTA6 nodal numbering](CPENTA6_ABE_figures/figure_1.svg)
+![CPENTA6 nodal numbering](CPENTA6_ABE_figures/figure_1_reproduced.png)
 
 *Figure 1. CPENTA6 node numbering and lower/upper triangular faces.*
 
-![CPENTA6 orientation, tying points and reference point](CPENTA6_ABE_figures/figure_2.svg)
+![CPENTA6 orientation, tying points and reference point](CPENTA6_ABE_figures/figure_2_reproduced.png)
 
 *Figure 2. Reference-triangle orientation, edge-tying points, and centroidal reference point.*
 
-![CPENTA6 volume Gauss points](CPENTA6_ABE_figures/figure_3.svg)
+![CPENTA6 volume Gauss points](CPENTA6_ABE_figures/figure_3_reproduced.png)
 
 *Figure 3. Six volume Gauss points used by the triangular-plane and thickness-direction quadrature.*
 
