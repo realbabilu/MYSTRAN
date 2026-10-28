@@ -635,6 +635,6 @@ The following figures make the CPENTA6 ABE convention explicit. The node map fol
 
 The benchmark plot remains separate from the geometric diagrams:
 
-![CPENTA6 benchmark](CPENTA6_ABE_figures/figure_4.svg)
+![CPENTA6 benchmark](CPENTA6_ABE_figures/figure_4_reproduced.png)
 
 *Figure 4. CPENTA6 ABE buckling benchmark for SAP2000 case 5-010.*
