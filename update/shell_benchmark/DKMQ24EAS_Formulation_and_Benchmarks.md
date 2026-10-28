@@ -172,7 +172,7 @@ $$
 
 With the thickness-integrated membrane constitutive matrix $\mathbf C_m$ of Section 2,
 
-
+```
 $$
 \begin{aligned}
 \mathbf{K}_{u\alpha}
@@ -192,7 +192,7 @@ $$
 \,\mathrm{d}A.
 \end{aligned}
 $$
-
+```
 
 Elimination of the internal parameters yields
 
