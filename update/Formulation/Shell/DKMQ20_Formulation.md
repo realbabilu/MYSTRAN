@@ -192,18 +192,11 @@ The eigenproblem $(\mathbf{K}_e+\lambda\mathbf{K}_g)\boldsymbol\varphi=\mathbf{0
 
 ## 9. Mystran Benchmark: DKMQ20 versus Nastran CQUAD4
 
-The selected SAP verification cases [5] compare the assessed 24-component extension with Nastran CQUAD4. Responses are matched by case, load case, unit and mesh sequence. Accuracy is assessed separately for each solver against its independent reference.
+The selected SAP verification cases [5] compare the assessed 24-component extension with Nastran CQUAD4. Responses are matched by case, load case, unit and mesh sequence. Signed differences are
 
-For each matched physical response, the two accuracy measures use the independent reference for that case, load, component and unit:
-
-```math
-\mathrm{Nastran\_error}=100\frac{|q_{\mathrm{Nastran}}-q_{\mathrm{ref,Nastran}}|}{|q_{\mathrm{ref,Nastran}}|},
-\qquad
-\mathrm{Mystran\_error}=100\frac{|q_{\mathrm{Mystran}}-q_{\mathrm{ref,Mystran}}|}{|q_{\mathrm{ref,Mystran}}|}.
-```
-
-For matched responses with the same physical reference, $q_{\mathrm{ref,Nastran}}=q_{\mathrm{ref,Mystran}}=q_{\mathrm{ref}}$ as listed in the table. Both errors are nonnegative percentages. Nastran is not the error denominator. For a zero reference, report the absolute residual in the response unit; if no independent reference is available, report the percentage error as unavailable. Reference-normalized response plots retain unity as the target. The reported solver responses and existing meshes are unchanged.
-
+$$
+\Delta_q=100\frac{q_{\mathrm{DKMQ20}}-q_{\mathrm{CQUAD4}}}{q_{\mathrm{CQUAD4}}}.
+$$
 
 The plotted reference is independent of the Nastran comparison; element-to-element agreement and reference accuracy are different checks.
 
@@ -215,33 +208,32 @@ The plotted reference is independent of the Nastran comparison; element-to-eleme
 
 Beam results use longitudinal subdivision count 24, the roof uses 16 × 16 parent panels and the buckling plate uses 4 × 24 panels. The curved beam and thick-plate models use their benchmark meshes. Units are given per row.
 
-| SAP case | LC / model | Response | Unit | DKMQ20 | Nastran CQUAD4 | Reference | Nastran_error (%) | Mystran_error (%) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | 3e-05 | 0.0000 | 0.0000 |
-| 2-002 | 2 | tip UZ | in | 0.06358443 | 0.1080129 | 0.1081 | 0.0806 | 41.1800 |
-| 2-002 | 3 | tip UY | in | 0.4320889 | 0.4320603 | 0.4321 | 0.0092 | 0.0026 |
-| 2-002 | 4 | tip abs UY | in | 0.002587678 | 0.003068753 | 0.00341 | 10.0072 | 24.1150 |
-| 2-002 | 5 | tip abs UX | in | 0.00052945 | 0.0008998445 | 0.0009 | 0.0173 | 41.1722 |
-| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | 0.036 | 0.0000 | 0.0000 |
-| 2-003 | 1 | tip UY | in | 0.083372925 | 0.088511855 | 0.0886 | 0.0995 | 5.8996 |
-| 2-003 | 2 | tip UZ | in | 0.48628625 | 0.4954054 | 0.5004 | 0.9981 | 2.8205 |
-| 2-004 | 1 | tip UZ | in | 0.00170717 | 0.0017482317 | 0.001749 | 0.0439 | 2.3917 |
-| 2-004 | 2 | tip UY | in | 0.0054036313 | 0.0054075113 | 0.005429 | 0.3958 | 0.4673 |
-| 2-006 | 1 | free edge midpoint UZ | ft | -0.3033576 | -0.3071547 | -0.3086 | 0.4683 | 1.6988 |
-| 2-012 | A | outer edge mean UZ | in | -0.0053394348 | -0.0053452112 | -0.00534 | 0.0976 | 0.0106 |
-| 2-012 | B | outer edge mean UZ | in | -0.0052170217 | -0.0052199879 | -0.00521 | 0.1917 | 0.1348 |
-| 2-017 | 2 | critical load | kip | 133.2703 | 126.9939 | 127.91 | 0.7162 | 4.1907 |
+| SAP case | LC / model | Response | Unit | DKMQ20 | Nastran CQUAD4 | Difference |
+|---|---|---|---|---:|---:|---:|
+| 2-002 | 1 | tip UX | in | 3e-05 | 3e-05 | +0.000% |
+| 2-002 | 2 | tip UZ | in | 0.06358443 | 0.1080129 | -41.133% |
+| 2-002 | 3 | tip UY | in | 0.4320889 | 0.4320603 | +0.007% |
+| 2-002 | 4 | tip abs UY | in | 0.002587678 | 0.003068753 | -15.677% |
+| 2-002 | 5 | tip abs UX | in | 0.00052945 | 0.0008998445 | -41.162% |
+| 2-002 | 6 | tip RZ | rad | 0.036 | 0.036 | +0.000% |
+| 2-003 | 1 | tip UY | in | 0.083372925 | 0.088511855 | -5.806% |
+| 2-003 | 2 | tip UZ | in | 0.48628625 | 0.4954054 | -1.841% |
+| 2-004 | 1 | tip UZ | in | 0.00170717 | 0.0017482317 | -2.349% |
+| 2-004 | 2 | tip UY | in | 0.0054036313 | 0.0054075113 | -0.072% |
+| 2-006 | 1 | free edge midpoint UZ | ft | -0.3033576 | -0.3071547 | -1.236% |
+| 2-012 | A | outer edge mean UZ | in | -0.0053394348 | -0.0053452112 | -0.108% |
+| 2-012 | B | outer edge mean UZ | in | -0.0052170217 | -0.0052199879 | -0.057% |
+| 2-017 | 2 | critical load | kip | 133.2703 | 126.9939 | +4.942% |
 
 ### 9.2 Interpretation
 
-- **2-002, 2, tip UZ:** reference 0.1081 in; Nastran_error=0.0806%; DKMQ20 Mystran_error=41.1800%.
-- **2-002, 4, tip abs UY:** reference 0.00341 in; Nastran_error=10.0072%; DKMQ20 Mystran_error=24.1150%.
-- **2-002, 5, tip abs UX:** reference 0.0009 in; Nastran_error=0.0173%; DKMQ20 Mystran_error=41.1722%.
-- **2-004, 1, tip UZ:** reference 0.001749 in; Nastran_error=0.0439%; DKMQ20 Mystran_error=2.3917%.
-- **2-004, 2, tip UY:** reference 0.005429 in; Nastran_error=0.3958%; DKMQ20 Mystran_error=0.4673%.
-- **2-006, 1, free edge midpoint UZ:** reference -0.3086 ft; Nastran_error=0.4683%; DKMQ20 Mystran_error=1.6988%.
-- **2-017, 2, critical load:** reference 127.91 kip; Nastran_error=0.7162%; DKMQ20 Mystran_error=4.1907%.
-
+- **SAP 2-002, LC2, tip UZ:** signed difference -41.133% relative to CQUAD4.
+- **SAP 2-002, LC4, tip abs UY:** signed difference -15.677% relative to CQUAD4.
+- **SAP 2-002, LC5, tip abs UX:** signed difference -41.162% relative to CQUAD4.
+- **SAP 2-004, LC1, tip UZ:** signed difference -2.349% relative to CQUAD4.
+- **SAP 2-004, LC2, tip UY:** signed difference -0.072% relative to CQUAD4.
+- **SAP 2-006, LC1, free edge midpoint UZ:** signed difference -1.236% relative to CQUAD4.
+- **SAP 2-017, LC2, critical load:** signed difference +4.942% relative to CQUAD4.
 
 Straight-beam LC2 and LC5 retain substantial under-response at the selected mesh. The absence of EAS membrane relaxation is relevant to bending-dominated membrane deformation, but it does not establish a unique cause without a controlled strain-energy assessment. LC4 and the curved beam must be considered separately rather than assigned a common error magnitude.
 
@@ -257,7 +249,7 @@ The refined twisted-beam results are much closer to CQUAD4 than the historical w
 
 ## 11. References
 
-[1] Irpanni, H., Katili, I., & Maknun, I.J. (2017). Development DKMQ shell element with five degrees of freedom per nodal. *International Journal of Mechanical Engineering and Robotics Research*, 6(3), 248–252. [Publisher article](https://www.ijmerr.com/show-149-843-1.html).
+[1] Irpanni, H., Katili, I., & Maknun, I.J. (2017). Development DKMQ shell element with five degrees of freedom per nodal. *International Journal of Mechanical Engineering and Robotics Research*, 6(3), 248–252. [Publisher](https://www.ijmerr.com/).
 
 [2] Katili, I. (1993). A new discrete Kirchhoff–Mindlin element based on Mindlin–Reissner plate theory and assumed shear strain fields — Part II: An extended DKQ element for thick-plate bending analysis. *International Journal for Numerical Methods in Engineering*, 36, 1885–1908.
 

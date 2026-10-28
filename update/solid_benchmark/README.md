@@ -1,4 +1,4 @@
-> **18 October CHEXA8 update:** [TIED vs EAS9v2](comparison_all.md#chexa8) uses the existing beam/dome benchmark meshes and previously published Nastran results. [Comparison data (ZIP)](comparison_all.zip).
+> **18 October CHEXA8 update:** [TIED vs EAS9v2](comparison_all.md#chexa8) uses the existing beam/dome benchmark meshes and previously published Nastran results. Comparison CSV (research data retained locally; see embedded tables).
 
 # Solid benchmarks: MYSTRAN vs Nastran
 
@@ -6,8 +6,8 @@ Comparison reports for SAP2000-derived solid benchmarks, with independent refere
 
 | Report | Coverage | Read on GitHub | Standalone HTML |
 |---|---|---|---|
-| MYSTRAN solid comparison | Five cases: 5-001, 5-004, 5-007, 5-010 and 5-011; 71 response comparisons | [Report](mystran_solid_comparison.md) | [Download HTML](mystran_solid_comparison.html) |
-| All solid elements - SAP2000 benchmarks | Eight solid types on 5-004 and 5-007; 56 matched meshes, 63 MYSTRAN selections and 126 responses | [Report](comparison_all.md) | [Download HTML](comparison_all.html) |
+| MYSTRAN solid comparison | Five cases: 5-001, 5-004, 5-007, 5-010 and 5-011; 71 response comparisons | [Report](mystran_solid_comparison.md) |
+| All solid elements - SAP2000 benchmarks | Eight solid types on 5-004 and 5-007; 56 matched meshes, 63 MYSTRAN selections and 126 responses | [Report](comparison_all.md) |
 
 The all-solid report covers CTETRA4/10, CPENTA6/15, CHEXA8/20 and CPYRAM5/13. CPENTA6 ABE and EAS9 are shown separately. Beam curves use three mesh levels; dome curves use four. The bold ratio reference is 1.0; the percentage-error plot uses a separate 1% reference line.
 
@@ -42,6 +42,3 @@ GitHub renders the Markdown reports and PNG figures directly. Download the HTML 
 ## Reference Hex Benchmarks
 https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Solids/Problem%205-001.pdf to https://docs.csiamerica.com/manuals/csibridge/Verification/Analysis/Solids/Problem%205-013.pdf
 Computers & Structures, Inc. (2024). SAP2000 is a proven FEA well-known product for civil engineering by Computers & Structures, Inc.
-
-
-[All-solid comparison data (ZIP)](comparison_all.zip) · [Five-case comparison data (ZIP)](mystran_solid_comparison.zip)
