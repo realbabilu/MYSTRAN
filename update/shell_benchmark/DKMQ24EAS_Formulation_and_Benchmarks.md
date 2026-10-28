@@ -157,41 +157,78 @@ $$
 \mathbf G^*(\xi,\eta)=\frac{\det\mathbf J_0}{\det\mathbf J(\xi,\eta)}\mathbf G(\xi,\eta).
 $$
 
+
+
 ### 4.2 Static condensation
 
 The coupled element equations have the block form
 
-$$
+```math
 \begin{bmatrix}
-\mathbf K_{uu}&\mathbf K_{u\alpha}\\
-\mathbf K_{\alpha u}&\mathbf K_{\alpha\alpha}
+\mathbf{K}_{uu} & \mathbf{K}_{u\alpha} \\
+\mathbf{K}_{\alpha u} & \mathbf{K}_{\alpha\alpha}
 \end{bmatrix}
-\begin{bmatrix}\mathbf d_e\\\boldsymbol\alpha\end{bmatrix}
-=\begin{bmatrix}\mathbf f_e\\\mathbf 0\end{bmatrix}.
-$$
+\begin{bmatrix}
+\mathbf{d}_e \\
+\boldsymbol{\alpha}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{f}_e \\
+\mathbf{0}
+\end{bmatrix}
+```
 
-With the thickness-integrated membrane constitutive matrix $\mathbf C_m$ of Section 2,
+With the thickness-integrated membrane constitutive matrix
+$\mathbf{C}_m$ of Section 2,
 
+```math
+\mathbf{K}_{u\alpha}
+=
+\int_{\Omega_e}
+\mathbf{B}_m^{\mathrm{T}}
+\mathbf{C}_m
+\mathbf{G}^{\ast}
+\,\mathrm{d}A
+```
 
-$$
-K_{u\alpha} = \int_{\Omega_e} B_m^\top C_m G^* \, dA
-$$
-
-$$
-K_{\alpha\alpha} = \int_{\Omega_e} (G^*)^\top C_m G^* \, dA
-$$
-
+```math
+\mathbf{K}_{\alpha\alpha}
+=
+\int_{\Omega_e}
+(\mathbf{G}^{\ast})^{\mathrm{T}}
+\mathbf{C}_m
+\mathbf{G}^{\ast}
+\,\mathrm{d}A
+```
 
 Elimination of the internal parameters yields
 
-$$
-\boldsymbol\alpha=-\mathbf K_{\alpha\alpha}^{-1}\mathbf K_{\alpha u}\mathbf d_e,
-$$
-$$
-\mathbf K_e=\mathbf K_{uu}-\mathbf K_{u\alpha}\mathbf K_{\alpha\alpha}^{-1}\mathbf K_{\alpha u}.
-$$
+```math
+\boldsymbol{\alpha}
+=
+-\mathbf{K}_{\alpha\alpha}^{-1}
+\mathbf{K}_{\alpha u}
+\mathbf{d}_e
+```
 
-For a positive-definite internal block, the condensation correction is negative semidefinite and relaxes the compatible stiffness. This property alone does not establish element stability; the condensed stiffness must also retain the appropriate rigid-body modes and positive deformational energy.
+```math
+\mathbf{K}_e
+=
+\mathbf{K}_{uu}
+-
+\mathbf{K}_{u\alpha}
+\mathbf{K}_{\alpha\alpha}^{-1}
+\mathbf{K}_{\alpha u}
+```
+
+
+
+For a positive-definite internal block, the condensation correction
+is negative semidefinite and relaxes the compatible stiffness.
+This property alone does not establish element stability; the
+condensed stiffness must also retain the appropriate rigid-body
+modes and positive deformational energy.
 
 ![Enhanced membrane strain and static condensation](figures/eas_condensation.png)
 
