@@ -617,3 +617,24 @@ The $x$ orientation locks badly in all these wedge variants. ABE **cannot** reco
 8. Original project report: [CPENTA6_ABE_Formulation.md (v18.00.a)](https://github.com/realbabilu/MYSTRAN/blob/v18.00.a/update/Formulation/Solid/CPENTA6_ABE_Formulation.md). Also consult its further references to Taylor–Beresford–Wilson (1976), Wilson et al. (1973), Dvorkin–Bathe (1984), Bathe–Dvorkin (1986), and Büchter–Ramm (1992).
 
 9. Existing project benchmark observations: [all-solid comparison](../../solid_benchmark/comparison_all.md), [result archive](CPENTA6_ABE_benchmark_results.zip), and SAP2000 Example 5-007 pinched-dome reference as retained in the solid benchmark collection. No additional analyses were performed for this revision.
+## Geometric orientation and integration-point map
+
+The following figures make the CPENTA6 ABE convention explicit. The node map follows the six-node wedge ordering used by the solid formulation. The reference-plane diagram shows the triangular coordinates, edge-tying locations, and centroidal point used by the assumed-shear construction. The volume-integration diagram shows the triangular-plane points paired through the thickness direction. These figures describe the adopted reference convention and do not introduce additional global degrees of freedom.
+
+![CPENTA6 nodal numbering](CPENTA6_ABE_figures/figure_1.svg)
+
+*Figure 1. CPENTA6 node numbering and lower/upper triangular faces.*
+
+![CPENTA6 orientation, tying points and reference point](CPENTA6_ABE_figures/figure_2.svg)
+
+*Figure 2. Reference-triangle orientation, edge-tying points, and centroidal reference point.*
+
+![CPENTA6 volume Gauss points](CPENTA6_ABE_figures/figure_3.svg)
+
+*Figure 3. Six volume Gauss points used by the triangular-plane and thickness-direction quadrature.*
+
+The benchmark plot remains separate from the geometric diagrams:
+
+![CPENTA6 benchmark](CPENTA6_ABE_figures/figure_4.svg)
+
+*Figure 4. CPENTA6 ABE buckling benchmark for SAP2000 case 5-010.*
